@@ -1,0 +1,30 @@
+open import Level using (_⊔_)
+open import Data.Nat using (zero; suc; z≤n; s≤s; _≤_; _<_)
+open import Data.Bool using (true; false)
+open import Data.Maybe using (Maybe; just; nothing)
+open import Data.List using (List; []; _∷_; length; gfilter; filter; map; concat; _++_)
+open import Data.List.Any using (here; there; module Membership)
+open import Data.List.All using (All; []; _∷_) renaming (map to mapₐ)
+open import Data.List.All.Properties using (gmap)
+open import Data.Fin using (Fin) renaming (suc to fsuc)
+open import Data.Vec using (toList; tabulate; allFin)
+open import Function using (_∘_; id)
+open import Relation.Binary
+open import Relation.Binary.PropositionalEquality using (subst; _≡_; inspect; [_]) renaming (setoid to ≡-setoid)
+open import Relation.Nullary using (¬_)
+open import Relation.Nullary.Negation using (contradiction)
+
+open import RoutingLib.Data.List.All using (AllPairs; []; _∷_)
+open import RoutingLib.Data.List.All.Properties using (All¬→¬Any; ¬Any→All¬; ++-all)
+open import RoutingLib.Data.Vec.Properties using (∉⇒List-∉; ∉-tabulate)
+open import RoutingLib.Data.Nat.Properties using (≤-antisym)
+open import RoutingLib.Data.Fin.Properties using (suc≢zero; suc-injective₁)
+open import RoutingLib.Data.Maybe.Base using (predBoolToMaybe)
+open import RoutingLib.Data.Maybe.Properties using (just-injective)
+
+module RoutingLib.Data.List.All.Uniqueness {c ℓ} (S : Setoid c ℓ) where
+
+  open Setoid S renaming (Carrier to A)
+
+  Unique : List A → Set (c ⊔ ℓ)
+  Unique xs = AllPairs (λ x y → ¬ (x ≈ y)) xs

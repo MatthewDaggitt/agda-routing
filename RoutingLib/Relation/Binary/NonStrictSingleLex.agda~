@@ -1,0 +1,13 @@
+
+
+open import Data.Product using (_-×-_)
+open import Data.Sum using (_-⊎-_)
+open import Relation.Binary using (Rel)
+
+import Relation.Binary.Product.StrictLex as Strict
+import Relation.Binary.NonStrictToStrict as Conv
+
+module RoutingLib.Relation.Binary.StrictSingleLex {a ℓ₁ ℓ₂ ℓ₃} {A : Set a} where
+
+  ×-Lex : Rel A ℓ₁ → Rel A ℓ₂ → Rel A ℓ₃ → Rel A _
+  ×-Lex _≈_ _<_ _≤_ = _<_ -⊎- (_≈_ -×- _≤_)

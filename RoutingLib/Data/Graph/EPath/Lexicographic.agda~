@@ -1,0 +1,141 @@
+
+open import Data.Nat using (ℕ)
+open import Data.Fin using (_≤_)
+open import Data.Sum using (inj₁; inj₂)
+open import Data.Product using (∃; _,_)
+open import Data.List using (reverse)
+open import Level using () renaming (zero to lzero)
+open import Relation.Nullary using (¬_; yes; no)
+open import Relation.Binary using (Rel; Decidable; Reflexive; Antisymmetric; Transitive)
+open import Relation.Binary.PropositionalEquality using (_≡_; subst₂; [_]) renaming (refl to ≡-refl; sym to ≡-sym)
+open import Relation.Nullary.Negation using (contradiction)
+open import Relation.Binary.Consequences using (Total)
+open import Relation.Binary.List.Pointwise using () renaming (Rel to ListRel)
+open import Relation.Binary.List.StrictLex using (Lex-≤; this; next) renaming (antisymmetric to sl-antisym)
+open import Function using (_on_; _∘_)
+
+open import RoutingLib.Data.Graph using (Graph)
+open import RoutingLib.Data.Fin.Properties using (≤-refl; ≤-total; ≤-antisym; _≤?_) --renaming (_≤?_ to _≤ₙ?_; ≤-total to ≤ₙ-total; ≤-antisym to ≤ₙ-antisym)
+open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_)
+
+open Relation.Binary.DecTotalOrder Data.Nat.decTotalOrder using () renaming (refl to ≤ₙ-refl; trans to ≤ₙ-trans)
+
+
+module RoutingLib.Data.Graph.EPath.Lexicographic where
+
+  open import RoutingLib.Data.Graph.EPath
+  open import RoutingLib.Data.Graph.EPath.Properties renaming (refl to ≈ₚ-refl; sym to ≈ₚ-sym; trans to ≈ₚ-trans)
+
+  infix 4 _≤ₚ_ _≰ₚ_
+
+  _≤ₚ_ : ∀ {n} → Rel (EPath n) lzero
+  _≤ₚ_ = Lex-≤ _≡_ _≤_ on (reverse ∘ toList)
+
+  _≰ₚ_ : ∀ {n} → Rel (EPath n) lzero
+  p ≰ₚ q = ¬ (p ≤ₚ q)
+
+  ≤ₚ-refl : ∀ {n} → Reflexive (_≤ₚ_ {n})
+  ≤ₚ-refl {x = [ i ]} = this ≤-refl
+  ≤ₚ-refl {x = _ ∷ _ ∣ _} = {!!}
+
+  ≤ₚ-antisym : ∀ {n} → Antisymmetric _≈ₚ_ (_≤ₚ_ {n})
+  ≤ₚ-antisym x≤y y≤x = {!sl-antisym ? ? ? ? ?!}
+
+
+{-
+  data _≤_ {n : ℕ} : Rel (EPath n) lzero where
+    stop        : ∀ {i j} → i ≤ₙ j → [ i ] ≤ [ j ]
+    stopLeft    : ∀ {i j q j∉q} → [ i ] ≤ q → [ i ] ≤ j ∷ q ∣ j∉q
+    stopRight   : ∀ {i j p i∉p} → p ≉ₚ [ j ] → p ≤ [ j ] → i ∷ p ∣ i∉p ≤ [ j ]
+    stepEqual   : ∀ {i j p q i∉p j∉q} → p ≈ₚ q → i ≤ₙ j → i ∷ p ∣ i∉p ≤ j ∷ q ∣ j∉q
+    stepUnequal : ∀ {i j p q i∉p j∉q} → p ≉ₚ q → p ≤ q  → i ∷ p ∣ i∉p ≤ j ∷ q ∣ j∉q
+
+  _≰_ : ∀ {n} → Rel (EPath n) lzero
+  p ≰ q = ¬ (p ≤ q)
+
+  ≤-resp-≈ₚ : ∀ {n} → (_≤_ {n}) RespectedBy (_≈ₚ_ {n})
+  ≤-resp-≈ₚ (emptyEq ≡-refl)    (emptyEq ≡-refl)     p≤r                    = p≤r
+  ≤-resp-≈ₚ (emptyEq ≡-refl)    (consEq _ r≈s)      (stopLeft [i]≤r)        = stopLeft (≤-resp-≈ₚ (emptyEq ≡-refl) r≈s [i]≤r)
+  ≤-resp-≈ₚ (consEq i≡j p≈q)    (emptyEq ≡-refl)    (stopRight p≉[k] [k]≤p) = stopRight (λ q≈[l] → p≉[k] (≈ₚ-trans p≈q (≈ₚ-trans q≈[l] (emptyEq ≡-refl)))) (≤-resp-≈ₚ p≈q (emptyEq ≡-refl) [k]≤p)
+  ≤-resp-≈ₚ (consEq ≡-refl p≈q) (consEq ≡-refl r≈s) (stepEqual p≈r i≤k)     = stepEqual (≈ₚ-trans (≈ₚ-trans (≈ₚ-sym p≈q) p≈r) r≈s) i≤k
+  ≤-resp-≈ₚ (consEq ≡-refl p≈q) (consEq ≡-refl r≈s) (stepUnequal p≉r p≤r)   = stepUnequal (λ q≈s → p≉r (≈ₚ-trans p≈q (≈ₚ-trans q≈s (≈ₚ-sym r≈s)))) (≤-resp-≈ₚ p≈q r≈s p≤r)
+
+  -- Can we get away without ≈ₚ-decidability?
+  total : Total _≤_
+  total [ i ]         [ j ]         with ≤ₙ-total i j
+  ... | inj₁ i≤j = inj₁ (stop i≤j)
+  ... | inj₂ j≤i = inj₂ (stop j≤i)
+  total [ i ]         (j ∷ q ∣ _) with q ≟ₚ [ i ] | total [ i ] q
+  ... | _         | inj₁ [i]≤q = inj₁ (stopLeft [i]≤q)
+  ... | no  q≉[i] | inj₂ q≤[i] = inj₂ (stopRight q≉[i] q≤[i])
+  total [ i ] (j ∷ [ .i ] ∣ _) | yes (emptyEq ≡-refl) | inj₂ q≤[i] = inj₁ (stopLeft q≤[i])
+  total (i ∷ p ∣ _) [ j ]         with p ≟ₚ [ j ] | total p [ j ]  
+  ... | _         | inj₂ [j]≤p = inj₂ (stopLeft [j]≤p)
+  ... | no  p≉[j] | inj₁ p≤[j] = inj₁ (stopRight p≉[j] p≤[j])
+  total (i ∷ [ j ] ∣ _) [ .j ] | yes (emptyEq ≡-refl) | inj₁ p≤[j] = inj₂ (stopLeft p≤[j])
+  total (i ∷ p ∣ _) (j ∷ q ∣ _ ) with p ≟ₚ q | ≤ₙ-total i j | total p q
+  ... | yes p≈q | inj₁ i≤j | _        = inj₁ (stepEqual p≈q i≤j)
+  ... | yes p≈q | inj₂ j≤i | _        = inj₂ (stepEqual (≈ₚ-sym p≈q) j≤i)
+  ... | no  p≉q | _        | inj₁ p≤q = inj₁ (stepUnequal p≉q p≤q)
+  ... | no  p≉q | _        | inj₂ q≤p = inj₂ (stepUnequal (λ q≈p → p≉q (≈ₚ-sym q≈p)) q≤p)
+
+  refl : Reflexive _≤_
+  refl {[ _ ]} = stop ≤ₙ-refl
+  refl {_ ∷ _ ∣ _} = stepEqual ≈ₚ-refl ≤ₙ-refl
+
+  antisym : Antisymmetric _≈ₚ_ _≤_
+  antisym (stop i≤j)              (stop j≤i)              = emptyEq (≤ₙ-antisym i≤j j≤i)
+  antisym (stopRight p≉[j] p≤[j]) (stopLeft [j]≤p)        = contradiction (antisym p≤[j] [j]≤p) p≉[j]
+  antisym (stopLeft [i]≤q)        (stopRight q≉[i] q≤[i]) = contradiction (antisym q≤[i] [i]≤q) q≉[i]
+  antisym (stepEqual p≈q i≤j)     (stepEqual q≈p j≤i)     = consEq (≤ₙ-antisym i≤j j≤i) p≈q
+  antisym (stepEqual p≈q i≤j)     (stepUnequal q≉p q≤p)   = contradiction (≈ₚ-sym p≈q) q≉p
+  antisym (stepUnequal p≉q p≤q)   (stepEqual q≈p j≤i)     = contradiction (≈ₚ-sym q≈p) p≉q
+  antisym (stepUnequal p≉q p≤q)   (stepUnequal q≉p q≤p)   = contradiction (antisym p≤q q≤p) p≉q
+  
+
+  trans : Transitive _≤_ 
+  trans (stop i≤j)              (stop j≤k)              = stop (≤ₙ-trans i≤j j≤k)
+  trans (stop i≤j)              (stopLeft [j]≤r)        = stopLeft (trans (stop i≤j) [j]≤r)
+  trans (stopLeft [i]≤q)        (stopRight q≉[k] q≤[k]) = trans [i]≤q q≤[k]
+  trans (stopLeft [i]≤q)        (stepEqual q≈r j≤k)     = stopLeft (≤-resp-≈ₚ ≈ₚ-refl q≈r [i]≤q)
+  trans (stopLeft [i]≤q)        (stepUnequal q≉r q≤r)   = stopLeft (trans [i]≤q q≤r)
+  trans (stopRight p≉[j] p≤[j]) (stop j≤k)              = stopRight (λ p≈[k] → p≉[j] (antisym p≤[j] (≤-resp-≈ₚ ≈ₚ-refl (≈ₚ-sym p≈[k]) (stop j≤k)))) (trans p≤[j] (stop j≤k))
+  trans (stopRight p≉[j] p≤[j]) (stopLeft [j]≤r)        = stepUnequal (λ p≈r → p≉[j] (antisym p≤[j] (≤-resp-≈ₚ ≈ₚ-refl (≈ₚ-sym p≈r) [j]≤r))) (trans p≤[j] [j]≤r)
+  trans (stepEqual p≈q i≤j)     (stopRight q≉[k] q≤[k]) = stopRight (λ p≈[k] → q≉[k] (≈ₚ-trans (≈ₚ-sym p≈q) p≈[k])) (≤-resp-≈ₚ (≈ₚ-sym p≈q) ≈ₚ-refl q≤[k])
+  trans (stepEqual p≈q i≤j)     (stepEqual q≈r j≤k)     = stepEqual (≈ₚ-trans p≈q q≈r) (≤ₙ-trans i≤j j≤k)
+  trans (stepEqual p≈q i≤j)     (stepUnequal q≉r q≤r)   = stepUnequal (λ p≈r → q≉r (≈ₚ-trans (≈ₚ-sym p≈q) p≈r)) (≤-resp-≈ₚ (≈ₚ-sym p≈q) ≈ₚ-refl q≤r)
+  trans (stepUnequal p≉q p≤q)   (stopRight q≉[k] q≤[k]) = stopRight (λ p≈[k] → q≉[k] (antisym q≤[k] (≤-resp-≈ₚ p≈[k] ≈ₚ-refl p≤q))) (trans p≤q q≤[k])
+  trans (stepUnequal p≉q p≤q)   (stepEqual q≈r j≤k)     = stepUnequal (λ p≈r → p≉q (≈ₚ-trans p≈r (≈ₚ-sym q≈r))) (≤-resp-≈ₚ ≈ₚ-refl q≈r p≤q)
+  trans (stepUnequal p≉q p≤q)   (stepUnequal q≉r q≤r)   = stepUnequal (λ p≈r → q≉r (antisym q≤r (≤-resp-≈ₚ p≈r ≈ₚ-refl p≤q))) (trans p≤q q≤r)
+
+
+
+  _≤?_ : Decidable _≤_
+  [ i ]       ≤? [ j ]         with i ≤ₙ? j
+  ... | yes i≤j = yes (stop i≤j)
+  ... | no  i≰j = no (λ {(stop i≤j) → i≰j i≤j})
+  [ i ]       ≤? (j ∷ q ∣ _ )   with [ i ] ≤? q
+  ... | yes [i]≤q = yes (stopLeft [i]≤q)
+  ... | no  [i]≰q = no (λ {(stopLeft [i]≤q) → [i]≰q [i]≤q})
+  (i ∷ p ∣ _ ) ≤? [ j ]         with p ≟ₚ [ j ] | p ≤? [ j ]
+  ... | _ | no p≰[j] = no (λ {(stopRight _ p≤[j]) → p≰[j] p≤[j]})
+  ... | yes p≈[j] | _ = no (λ {(stopRight p≉[j] _) → p≉[j] p≈[j]})
+  ... | no p≉[j] | yes p≤[j] = yes (stopRight p≉[j] p≤[j])
+  (i ∷ p ∣ _ ) ≤? (j ∷ q ∣ _ ) with p ≟ₚ q | i ≤ₙ? j | p ≤? q
+  ... | yes p≈q | yes i≤j | _       = yes (stepEqual p≈q i≤j)
+  ... | yes p≈q | no  i≰j | _       = no (λ {(stepEqual _ i≤j) → i≰j i≤j ; (stepUnequal p≉q _) → p≉q p≈q })
+  ... | no  p≉q | _       | yes p≤q = yes (stepUnequal p≉q p≤q)
+  ... | no  p≉q | _       | no  p≰q = no (λ {(stepEqual p≈q _) → p≉q p≈q ; (stepUnequal _ p≤q) → p≰q p≤q})
+
+  
+
+
+  p≤i∷p : ∀ {p i i∉p} → p ≤ i ∷ p ∣ i∉p
+  p≤i∷p {[ j ]} = stopLeft (stop ≤ₙ-refl)
+  p≤i∷p {j ∷ q ∣ _} = stepUnequal p≉i∷p p≤i∷p
+
+  i∷p≰p : ∀ {p i i∉p} → i ∷ p ∣ i∉p ≰ p
+  i∷p≰p (stopRight [j]≉[j] _) = contradiction (emptyEq ≡-refl) [j]≉[j] 
+  i∷p≰p (stepEqual i∷p≈p _) = p≉i∷p (≈ₚ-sym i∷p≈p)
+  i∷p≰p (stepUnequal i∷p≉p rec) = i∷p≰p rec
+-}

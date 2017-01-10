@@ -1,0 +1,16 @@
+open import Data.Nat using (_≤_)
+open import Data.List using (List; length; filter)
+open import Data.Bool using (Bool; if_then_else_)
+open import Data.Maybe using (just; nothing)
+open import Data.List.Properties using (length-gfilter)
+
+module RoutingLib.Data.List.Properties where
+
+  ----------------------
+  -- Pushed to stdlib --
+  ----------------------
+
+  length-filter : ∀ {a} {A : Set a} (p : A → Bool) xs → length (filter p xs) ≤ length xs
+  length-filter p xs = length-gfilter (λ x → if p x then just x else nothing) xs
+
+

@@ -1,0 +1,26 @@
+
+
+open import Data.List
+open import Data.List.All
+open import Data.List.Any
+open import Level
+open import Relation.Binary
+
+open import RoutingLib.Data.List.Any.Uniqueness
+
+module RoutingLib.Relation.Binary.WellFounded {a ℓ} (S : Setoid a ℓ) where
+
+  open Setoid S renaming (Carrier to A)
+
+  record ↓ (_<_ : Rel A ℓ) (x : A) : Set (a ⊔ ℓ) where
+
+    open Membership {a} {ℓ} S
+
+    field
+      xs : List A
+      xs-all : All (_< x) xs  
+      xs-complete : ∀ {y} → y < x → y ∈ xs
+      xs-unique : Unique S xs
+
+  WellFounded : Rel A ℓ → Set (a ⊔ ℓ)
+  WellFounded _<_ = ∀ x → ↓ _<_ x 

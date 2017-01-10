@@ -1,0 +1,67 @@
+open import Data.Nat using (ℕ; suc)
+open import Relation.Nullary using (¬_)
+open import Data.Product using (_,_)
+open import Data.List using (List; []; _∷_; map)
+open import Data.List.Any using (here; there; module Membership)
+open import Data.Maybe using (just)
+
+open import RoutingLib.Algebra.FunctionProperties using (Selective)
+open import RoutingLib.Routing.Definitions
+open import RoutingLib.Data.Graph using (Graph)
+open import RoutingLib.Data.Graph.EGPath using (EGPath; _≈ₚ_; _≉ₚ_; allPaths)
+open import RoutingLib.Data.Graph.EGPath.Properties using (weight-resp-≈ₚ; ≈ₚ-refl; ≈ₚ-setoid; allPaths-unique; allPaths-complete)
+open import RoutingLib.Data.List.All using (_∷_)
+open import RoutingLib.Data.List.All.Properties using (forced-map)
+open import RoutingLib.Data.List.All.Uniqueness using (Unique)
+open import RoutingLib.Data.List.All.Uniqueness.Properties using (map!)
+open import RoutingLib.Data.List.Any.GenericMembership using (∈-map; ∈-resp-≈)
+open import RoutingLib.Data.List.Enumeration
+
+-----
+-- Proof that the consistent routes in a graph can be enumerated
+-----
+
+module RoutingLib.Routing.AddingPaths.Consistent.Enumeration
+  {a b ℓ} (ra : RoutingAlgebra a b ℓ) 
+  (⊕-sel : Selective (RoutingAlgebra._≈_ ra) (RoutingAlgebra._⊕_ ra))
+  (one : (RoutingAlgebra.Route ra))
+  {n-1 : ℕ}
+  (G : Graph (RoutingAlgebra.Step ra) (suc n-1))
+  where
+
+  open RoutingAlgebra ra
+  open import RoutingLib.Routing.AddingPaths.Consistent ra ⊕-sel one G
+  open Membership ≈ᶜ-setoid using () renaming (_∈_ to _∈ᶜ_; ∈-resp-≈ to ∈ᶜ-resp-≈ₚ)
+
+  abstract
+
+    pathToCRoute : EGPath G → CRoute
+    pathToCRoute p = croute (weight p) p refl
+ 
+    allCRoutes : List CRoute
+    allCRoutes = cnull ∷ map pathToCRoute (allPaths G)
+
+    pathToCRoute-¬cong : ∀ {p q} → p ≉ₚ q → ¬ (pathToCRoute p ≈ᶜ pathToCRoute q)
+    pathToCRoute-¬cong p≉q (crouteEq _ p≈q) = p≉q p≈q
+
+    pathToCRoute-cong : ∀ {p q} → p ≈ₚ q → pathToCRoute p ≈ᶜ pathToCRoute q
+    pathToCRoute-cong p≈q = crouteEq (reflexive (weight-resp-≈ₚ _▷_ one p≈q)) p≈q
+
+    allCRoutes-unique : Unique ≈ᶜ-setoid allCRoutes
+    allCRoutes-unique = forced-map (λ _ ()) (allPaths G) ∷ (map! ≈ₚ-setoid ≈ᶜ-setoid pathToCRoute-¬cong allPaths-unique)
+
+    allCRoutes-complete : ∀ r → r ∈ᶜ allCRoutes
+    allCRoutes-complete cnull               = here cnullEq
+    allCRoutes-complete (croute x p x≈w[p]) = ∈-resp-≈ ≈ᶜ-setoid (there (∈-map ≈ₚ-setoid ≈ᶜ-setoid pathToCRoute-cong (allPaths-complete p))) (crouteEq (sym x≈w[p]) ≈ₚ-refl)
+
+    allCRoutes-isEnumeration : IsEnumeration ≈ᶜ-setoid allCRoutes
+    allCRoutes-isEnumeration = record { 
+        unique = allCRoutes-unique; 
+        complete = allCRoutes-complete
+      }
+  
+  ≈ᶜ-Enumeration : Enumeration ≈ᶜ-setoid
+  ≈ᶜ-Enumeration = record { 
+      list = allCRoutes; 
+      isEnumeration = allCRoutes-isEnumeration
+    }

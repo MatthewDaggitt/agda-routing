@@ -1,0 +1,28 @@
+open import Level using () renaming (zero to lzero)
+open import Relation.Binary
+open import Relation.Binary.List.Pointwise using () renaming (Rel to ListRel)
+open import Relation.Binary.List.StrictLex using (Lex-≤; antisymmetric; ≤-isPreorder)
+
+module RoutingLib.Relation.Binary.List.StrictLex {A : Set} where
+
+  ≤-isPartialOrder : ∀ {_≈_ _<_ : Rel A lzero} →
+                     IsPartialOrder _≈_ _<_ →
+                     IsPartialOrder (ListRel _≈_) (Lex-≤ _≈_ _<_)
+  ≤-isPartialOrder {_≈_} {_<_} po = record { 
+      isPreorder = ≤-isPreorder isEquivalence {!!} {!!}; 
+      antisym    = antisymmetric {!!} {!!} {!!}
+                     --(trans∧irr⟶asym {_≈_ = _≈_} {_<_ = _<_} Eq.refl trans irrefl)
+    }
+    where open IsPartialOrder po
+
+
+{-
+  ≤-isDecTotalOrder : ∀ {_≈_ _<_} →
+                      IsDecTotalOrder _≈_ _<_ →
+                      IsDecTotalOrder (Pointwise.Rel _≈_) (Lex-≤ _≈_ _<_)
+  ≤-isDecTotalOrder sto = record
+    { isTotalOrder = ≤-isTotalOrder ?
+    ; _≟_          = Pointwise.decidable _≟_
+    ; _≤?_         = ≤-decidable _≟_ (tri⟶dec< compare)
+    } where open IsStrictTotalOrder sto
+-}

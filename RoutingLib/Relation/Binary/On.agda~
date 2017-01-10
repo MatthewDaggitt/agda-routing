@@ -1,0 +1,6 @@
+
+open import Relation.Binary.On
+
+module RoutingLib.Relation.Binary.On {a b} {A : Set a} {B : Set b} (f : B → A) where
+
+  isDecTotalPreorder : IsDecTotalPreorder 

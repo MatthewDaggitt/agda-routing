@@ -1,0 +1,22 @@
+
+open import Data.Product using (_,_)
+open import Data.Nat using (ℕ)
+open import Data.Fin using (Fin)
+open import Data.Product using (_×_)
+open import Data.Vec using (allFin)
+open import Data.Vec.Properties using (∈-allFin)
+open import Relation.Binary.PropositionalEquality using () renaming (setoid to ≡-setoid)
+
+open import Data.List.Any as Any using ()
+open Any.Membership-≡ using () renaming (_∈_ to _∈ₗ_)
+
+open import RoutingLib.Data.Vec.Pairs using (allPairs; allPairs-∈)
+
+module RoutingLib.Data.Graph.Properties {a} (A : Set a) (n : ℕ) where
+
+  open import RoutingLib.Data.Graph A n
+  open import RoutingLib.Data.List.Any.GenericMembership using (toList-preserves-∈)
+
+  possibleEdges-completeness : ∀ e → e ∈ₗ possibleEdges
+  possibleEdges-completeness (i , j) = toList-preserves-∈ (≡-setoid Edge) (allPairs-∈ (allFin n) (allFin n) (∈-allFin i) (∈-allFin j))
+

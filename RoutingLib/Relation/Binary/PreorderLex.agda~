@@ -1,0 +1,61 @@
+
+
+open import Data.Product using (_×_; _-×-_; _,_)
+open import Data.Sum using (_⊎_; _-⊎-_; inj₁; inj₂)
+open import Relation.Binary using (Rel; Total; _⇒_; _Respects_; _Respects₂_; Decidable; Symmetric; Antisymmetric; Transitive)
+open import Relation.Nullary using (¬_; yes; no)
+open import Relation.Nullary.Negation using (contradiction)
+open import Function using (flip)
+
+module RoutingLib.Relation.Binary.PreorderLex {a ℓ₁ ℓ₂} {A : Set a} (_≤₁_ : Rel A ℓ₁) (_≤₂_ : Rel A ℓ₂) where
+
+  private
+    _≰₁_ : Rel A ℓ₁
+    x ≰₁ y = ¬ (x ≤₁ y) 
+    
+    _≰₂_ : Rel A ℓ₂
+    x ≰₂ y = ¬ (x ≤₂ y)
+
+  ×-Lex : Rel A _
+  ×-Lex x y = x ≤₁ y × (y ≰₁ x ⊎ (y ≤₁ x × x ≤₂ y))
+
+
+  ×-reflexive : ∀ {ℓ₃} {_≈_ : Rel A ℓ₃} → Symmetric _≈_ → _≈_ ⇒ _≤₁_ → _≈_ ⇒ _≤₂_ → _≈_ ⇒ ×-Lex
+  ×-reflexive sym refl₁ refl₂ i≈j = refl₁ i≈j , inj₂ (refl₁ (sym i≈j) , refl₂ i≈j)
+
+  ×-trans : Transitive _≤₁_ → Transitive _≤₂_ → Transitive ×-Lex
+  ×-trans trans₁ trans₂ (x≤y , inj₁ _)            (y≤z , inj₁ z≰y)          = trans₁ x≤y y≤z , inj₁ (λ z≤x → z≰y (trans₁ z≤x x≤y))
+  ×-trans trans₁ trans₂ (x≤y , inj₁ y≰x)          (y≤z , inj₂ (z≤y , _))    = trans₁ x≤y y≤z , inj₁ (λ z≤x → y≰x (trans₁ y≤z z≤x))
+  ×-trans trans₁ trans₂ (x≤y , inj₂ (y≤x , _))    (y≤z , inj₁ z≰y)          = trans₁ x≤y y≤z , inj₁ (λ z≤x → z≰y (trans₁ z≤x x≤y))
+  ×-trans trans₁ trans₂ (x≤y , inj₂ (y≤x , x≤₂y)) (y≤z , inj₂ (z≤y , y≤₂z)) = trans₁ x≤y y≤z , inj₂ (trans₁ z≤y y≤x , trans₂ x≤₂y y≤₂z)
+
+  ×-antisym : ∀ {ℓ₃} {_≈_ : Rel A ℓ₃} → Antisymmetric _≈_ _≤₂_ → Antisymmetric _≈_ ×-Lex
+  ×-antisym antisym (x≤y , inj₁ _)          (_   , inj₁ x≰y)        = contradiction x≤y x≰y
+  ×-antisym antisym (_   , inj₁ y≰x)        (y≤x , inj₂ (_ , _))    = contradiction y≤x y≰x
+  ×-antisym antisym (x≤y , inj₂ (_ , _))    (_   , inj₁ x≰y)        = contradiction x≤y x≰y
+  ×-antisym antisym (_   , inj₂ (_ , x≤₂y)) (_   , inj₂ (_ , y≤₂x)) = antisym x≤₂y y≤₂x
+
+  ×-total : Total _≤₁_ → Decidable _≤₁_ → Total _≤₂_ → Total ×-Lex
+  ×-total total₁ _≤?_ total₂ x y with total₁ x y
+  ×-total total₁ _≤?_ total₂ x y | inj₁ x≤y with y ≤? x
+  ... | no  y≰x = inj₁ (x≤y , inj₁ y≰x)
+  ... | yes y≤x with total₂ x y
+  ...   | inj₁ x≤₂y = inj₁ (x≤y , inj₂ (y≤x , x≤₂y))
+  ...   | inj₂ y≤₂x = inj₂ (y≤x , inj₂ (x≤y , y≤₂x))
+  ×-total total₁ _≤?_ total₂ x y | inj₂ y≤x with x ≤? y
+  ... | no x≰y = inj₂ (y≤x , inj₁ x≰y)
+  ... | yes x≤y with total₂ x y
+  ...   | inj₁ x≤₂y = inj₁ (x≤y , inj₂ (y≤x , x≤₂y))
+  ...   | inj₂ y≤₂x = inj₂ (y≤x , inj₂ (x≤y , y≤₂x))
+
+  ×-resp : ∀ {ℓ₃} {_≈_ : Rel A ℓ₃} → Symmetric _≈_ → _≤₁_ Respects₂ _≈_ → _≤₂_ Respects₂ _≈_ → ×-Lex Respects₂ _≈_
+  ×-resp {_} {_≈_} ≈-sym (r₁₁ , r₁₂) (r₂₁ , r₂₂) = resp₁ , resp₂
+    where
+
+    resp₁ : ∀ {x} → (×-Lex x) Respects _≈_
+    resp₁ x≈y (z≤x , inj₁ x≰z) = r₁₁ x≈y z≤x , (inj₁ (λ y≤z → x≰z (r₁₂ (≈-sym x≈y) y≤z)))
+    resp₁ x≈y (z≤x , inj₂ (x≤z , z≤₂x)) = r₁₁ x≈y z≤x , inj₂ (r₁₂ x≈y x≤z , r₂₁ x≈y z≤₂x)
+
+    resp₂ : ∀ {y} → (flip ×-Lex y) Respects _≈_
+    resp₂ y≈x (y≤z , inj₁ z≰y)          = r₁₂ y≈x y≤z , (inj₁ (λ z≤x → z≰y (r₁₁ (≈-sym y≈x) z≤x)))
+    resp₂ y≈x (y≤z , inj₂ (z≤y , y≤₂z)) = r₁₂ y≈x y≤z , inj₂ (r₁₁ y≈x z≤y , r₂₂ y≈x y≤₂z)

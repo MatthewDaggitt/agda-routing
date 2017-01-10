@@ -1,0 +1,25 @@
+open import Relation.Binary
+open import Data.List
+open import Data.List.Any as Any using (here; there)
+open import Data.Product using (∃; _×_; _,_)
+
+module RoutingLib.Data.List.Any.DoubleGenericMembership {f₁ f₂ t₁ t₂} (From : Setoid f₁ f₂) (To : Setoid t₁ t₂) where
+    
+    open Setoid From using () renaming (Carrier to A; _≈_ to _≈₁_; refl to refl₁)
+    open Setoid To   using () renaming (Carrier to B; _≈_ to _≈₂_; refl to refl₂)
+
+    open Any.Membership From using () renaming (_∈_ to _∈₁_)
+    open Any.Membership To   using () renaming (_∈_ to _∈₂_)
+
+    map-∈ : ∀ {v xs f} → f Preserves _≈₁_ ⟶ _≈₂_ → v ∈₁ xs → f v ∈₂ map f xs
+    map-∈ {_} {x ∷ xs} pe (here v≈x)   = here (pe v≈x)
+    map-∈ {_} {x ∷ xs} pe (there v∈xs) = there (map-∈ pe v∈xs)
+
+    map-∃-∈ : ∀ {v xs f} → v ∈₂ map f xs → ∃ λ y → y ∈₁ xs × v ≈₂ f y
+    map-∃-∈ {xs = []} ()
+    map-∃-∈ {xs = x ∷ xs} (here v≈fx) = x , here refl₁ , v≈fx
+    map-∃-∈ {xs = x ∷ xs} (there v∈mapfxs) with map-∃-∈ v∈mapfxs
+    ... | y , y∈xs , v≈fy = y , there y∈xs , v≈fy
+
+
+    ∈-gfilter

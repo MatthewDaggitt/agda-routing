@@ -27,27 +27,3 @@ module RoutingLib.Data.List.Properties where
 
   length-filter : ∀ {a} {A : Set a} (p : A → Bool) xs → length (filter p xs) ≤ length xs
   length-filter p xs = length-gfilter (λ x → if p x then just x else nothing) xs
-
-
-  ------------
-  -- allFin --
-  ------------
-
-  Sᶠ : ∀ {n} → Setoid lzero lzero
-  Sᶠ {n} = setoid (Fin n)
-
-  private
-    i≡j⇒i+1≡j+1 : ∀ {m} {i j : Fin m} → i ≡ j → fsuc i ≡ fsuc j
-    i≡j⇒i+1≡j+1 refl = refl
-
-    i≢j⇒i+1≢j+1 : ∀ {m} {i j : Fin m} → i ≢ j → fsuc i ≢ fsuc j
-    i≢j⇒i+1≢j+1 {_} {i} {.i} i≢i refl = i≢i refl
-
-  ∈-allFin : ∀ m n → n ∈ allFin m 
-  ∈-allFin zero ()
-  ∈-allFin (suc m) fzero = here refl
-  ∈-allFin (suc m) (fsuc n) = there (∈-map Sᶠ Sᶠ i≡j⇒i+1≡j+1 (∈-allFin m n))    
-
-  allFin! : ∀ n → Unique Sᶠ (allFin n)
-  allFin! zero = []
-  allFin! (suc n) = forced-map (λ _ → λ {()}) (allFin n) ∷ map! Sᶠ Sᶠ i≢j⇒i+1≢j+1 (allFin! n)

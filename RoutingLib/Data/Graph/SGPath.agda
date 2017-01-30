@@ -1,16 +1,20 @@
 open import Level using () renaming (zero to lzero)
 open import Data.Fin using (Fin; _≤_; _<_; toℕ) renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties using (_≟_)
-open import Data.Nat using (ℕ; zero; suc) renaming (_<_ to _<ℕ_)
+open import Data.Nat using (ℕ; zero; suc) renaming (_<_ to _<ℕ_; _≤?_ to _≤ℕ?_)
 open import Data.List using (List; []; _∷_; map; concat; gfilter)
 open import Data.Product using (_×_; _,_)
 open import Relation.Nullary using (¬_; yes; no)
+open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary using (Decidable; Rel)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; cong)
 open import Function using (_∘_)
 
 open import RoutingLib.Data.Graph
 open import RoutingLib.Data.List using (allFin; combine)
+open import RoutingLib.Data.Fin.Pigeonhole using (pigeonhole)
+open import RoutingLib.Data.Fin.Properties using (suc-injective)
+open import RoutingLib.Data.Nat.Properties using (m≰n⇨n<m)
 
 module RoutingLib.Data.Graph.SGPath {a n} {A : Set a} where
 
@@ -18,7 +22,7 @@ module RoutingLib.Data.Graph.SGPath {a n} {A : Set a} where
   -- Non-empty paths --
   ---------------------
 
-  infix 4 _∉ₙₑₚ_ _≈ₙₑₚ_ _≤ₙₑₚ_
+  infix 4 _∉ₙₑₚ_ _∈ₙₑₚ_ _≈ₙₑₚ_ _≉ₙₑₚ_ _≤ₙₑₚ_
 
   data NonEmptySGPath (G : Graph A n) : Set a
   data _∉ₙₑₚ_ {G} : Fin n → NonEmptySGPath G → Set a
@@ -35,7 +39,6 @@ module RoutingLib.Data.Graph.SGPath {a n} {A : Set a} where
   source (i ∺ _ ∣ _ ∣ _) = i
   source (i ∷ _ ∣ _ ∣ _) = i
 
-
   _∉ₙₑₚ?_ : ∀ {G} → Decidable (_∉ₙₑₚ_ {G})
   k ∉ₙₑₚ? (i ∺ j ∣ _ ∣ _) with k ≟ i | k ≟ j 
   ... | yes k≡i | _       = no λ{(notThere k≢i _) → k≢i k≡i}
@@ -46,6 +49,9 @@ module RoutingLib.Data.Graph.SGPath {a n} {A : Set a} where
   ... | _       | no  i∈p = no λ{(notHere _ i∉p) → i∈p i∉p}
   ... | no  i≢j | yes i∉p = yes (notHere i≢j i∉p)
 
+  _∈ₙₑₚ_ : ∀ {G} → Fin n → NonEmptySGPath G → Set a
+  i ∈ₙₑₚ p = ¬ (i ∉ₙₑₚ p)
+
 
   -- Equality
 
@@ -53,14 +59,17 @@ module RoutingLib.Data.Graph.SGPath {a n} {A : Set a} where
     _∺_ : ∀ {i j k l i≢j k≢l ij∈G kl∈G} → i ≡ k → j ≡ l   → i ∺ j ∣ i≢j ∣ ij∈G ≈ₙₑₚ k ∺ l ∣ k≢l ∣ kl∈G
     _∷_ : ∀ {i k p q i∉p k∉q ip∈G kq∈G} → i ≡ k → p ≈ₙₑₚ q → i ∷ p ∣ i∉p ∣ ip∈G ≈ₙₑₚ k ∷ q ∣ k∉q ∣ kq∈G
 
+  _≉ₙₑₚ_ : ∀ {n} → Rel (NonEmptySGPath n) a
+  xs ≉ₙₑₚ ys = ¬ (xs ≈ₙₑₚ ys)
 
+
+  -- Ordering
 
   data _≤ₙₑₚ_ {G} : Rel (NonEmptySGPath G) a where
     stopFirst   : ∀ {i j k l i≢j k≢l ij∈G kl∈G} → i ≡ k → j ≤ l → i ∺ j ∣ i≢j ∣ ij∈G ≤ₙₑₚ k ∺ l ∣ k≢l ∣ kl∈G
     stopSecond  : ∀ {i j k l i≢j k≢l ij∈G kl∈G} → i < k → i ∺ j ∣ i≢j ∣ ij∈G ≤ₙₑₚ k ∺ l ∣ k≢l ∣ kl∈G
     stepUnequal : ∀ {i j p q i∉p j∉q ip∈G jq∈G} → i < j → i ∷ p ∣ i∉p ∣ ip∈G ≤ₙₑₚ j ∷ q ∣ j∉q ∣ jq∈G
     stepEqual   : ∀ {i j p q i∉p j∉q ip∈G jq∈G} → i ≡ j → p ≤ₙₑₚ q → i ∷ p ∣ i∉p ∣ ip∈G ≤ₙₑₚ j ∷ q ∣ j∉q ∣ jq∈G
-
 
 
   -- Operations
@@ -73,30 +82,65 @@ module RoutingLib.Data.Graph.SGPath {a n} {A : Set a} where
   length (_ ∺ _ ∣ _ ∣ _) = 1
   length (_ ∷ p ∣ _ ∣ _) = suc (length p)
 
+  
 
 
+  private
 
+    lookup : ∀ {G} → (p : NonEmptySGPath G) → Fin (suc (length p)) → Fin n
+    lookup (i ∺ j ∣ _ ∣ _) fzero            = i
+    lookup (i ∺ j ∣ _ ∣ _) (fsuc fzero)     = j
+    lookup (i ∺ j ∣ _ ∣ _) (fsuc (fsuc ()))
+    lookup (i ∷ p ∣ _ ∣ _) fzero            = i
+    lookup (i ∷ p ∣ _ ∣ _) (fsuc k)         = lookup p k 
+    
+    lookup-∈ : ∀ {G} → (p : NonEmptySGPath G) → ∀ i {k} → lookup p i ≡ k → k ∈ₙₑₚ p
+    lookup-∈ (i ∺ j ∣ _ ∣ _) fzero            refl (notThere i≢i _) = i≢i refl
+    lookup-∈ (i ∺ j ∣ _ ∣ _) (fsuc fzero)     refl (notThere _ j≢j) = j≢j refl
+    lookup-∈ (i ∺ j ∣ _ ∣ _) (fsuc (fsuc ()))
+    lookup-∈ (i ∷ p ∣ _ ∣ _) fzero            refl (notHere i≢i _)  = i≢i refl
+    lookup-∈ (i ∷ p ∣ _ ∣ _) (fsuc k)         pᵢ≡k  (notHere _ i∉p)  = lookup-∈ p k pᵢ≡k i∉p
+
+    lookup! : ∀ {G} (p : NonEmptySGPath G) {k l} → k ≢ l → lookup p k ≢ lookup p l
+    lookup! _                  {fzero}         {fzero}          0≢0 _ = 0≢0 refl
+    lookup! (i ∺ j ∣ i≢j ∣ _) {fzero}          {fsuc fzero}     _     = i≢j
+    lookup! (i ∺ j ∣ i≢j ∣ _) {fsuc fzero}     {fzero}          _     = i≢j ∘ sym
+    lookup! (i ∺ j ∣ x   ∣ _) {_}              {fsuc (fsuc ())} _
+    lookup! (i ∺ j ∣ x   ∣ _) {fsuc (fsuc ())} {_}
+    lookup! (i ∺ j ∣ x   ∣ _) {fsuc fzero}     {fsuc fzero}     1≢1 _ = 1≢1 refl
+    lookup! (i ∷ p ∣ i∉p ∣ _) {fzero}          {fsuc j}         i≢j i≡pⱼ = contradiction i∉p (lookup-∈ p j (sym i≡pⱼ))
+    lookup! (i ∷ p ∣ i∉p ∣ _) {fsuc k}         {fzero}          i≢j pₖ≡i = contradiction i∉p (lookup-∈ p k pₖ≡i)
+    lookup! (i ∷ p ∣ x   ∣ _) {fsuc k}         {fsuc l}         k+1≢l+1 pₖ≡pₗ = lookup! p (k+1≢l+1 ∘ cong fsuc) pₖ≡pₗ
+
+  |p|<n : ∀ {G : Graph A n} (p : NonEmptySGPath G) → length p <ℕ n
+  |p|<n p with suc (length p) ≤ℕ? n
+  ... | yes |p|<n = |p|<n
+  ... | no  |p|≮n with pigeonhole (m≰n⇨n<m |p|≮n) (lookup p)
+  ...   | i , j , i≢j , pᵢ≡pⱼ = contradiction pᵢ≡pⱼ (lookup! p i≢j)
+
+
+  
 
   ---------------
   -- All paths --
   ---------------
 
-  infix 4 _∉_ _≈ₚ_ _≉ₚ_
+  infix 4 _∉ₚ_ _∈ₚ_ _≈ₚ_ _≉ₚ_
 
   data SGPath G : Set a where
     [] : SGPath G
     [_] : NonEmptySGPath G → SGPath G
 
-  data _∉_ {G} : Fin n → SGPath G → Set a where
-    notHere : ∀ {i} → i ∉ []
-    notThere : ∀ {i p} → i ∉ₙₑₚ p → i ∉ [ p ]
+  data _∉ₚ_ {G} : Fin n → SGPath G → Set a where
+    notHere : ∀ {i} → i ∉ₚ []
+    notThere : ∀ {i p} → i ∉ₙₑₚ p → i ∉ₚ [ p ]
 
-  _∈_ : ∀ {G} → Fin n → SGPath G → Set a
-  i ∈ p = ¬ (i ∉ p)
+  _∈ₚ_ : ∀ {G} → Fin n → SGPath G → Set a
+  i ∈ₚ p = ¬ (i ∉ₚ p)
 
-  _∉?_ : ∀ {n} → Decidable (_∉_ {n})
-  k ∉? []    = yes notHere
-  k ∉? [ p ] with k ∉ₙₑₚ? p
+  _∉ₚ?_ : ∀ {n} → Decidable (_∉ₚ_ {n})
+  k ∉ₚ? []    = yes notHere
+  k ∉ₚ? [ p ] with k ∉ₙₑₚ? p
   ... | yes k∉p = yes (notThere k∉p)
   ... | no  k∈p = no λ{(notThere k∉p) → k∈p k∉p}
 
@@ -114,7 +158,7 @@ module RoutingLib.Data.Graph.SGPath {a n} {A : Set a} where
   infix 4 _≤ₚ_ _≰ₚ_
 
   data _≤ₚ_ {G} : Rel (SGPath G) a where
-    stop : ∀ {p} → [] ≤ₚ p
+    stop : ∀ {p}     → [] ≤ₚ p
     len  : ∀ {p} {q} → length p <ℕ length q → [ p ] ≤ₚ [ q ]
     lex  : ∀ {p} {q} → length p ≡ length q → p ≤ₙₑₚ q → [ p ] ≤ₚ [ q ]
 
@@ -128,31 +172,3 @@ module RoutingLib.Data.Graph.SGPath {a n} {A : Set a} where
   weight _▷_ 1# [ _ ∷ p ∣ _ ∣ (v , _) ] = v ▷ weight _▷_ 1# [ p ]
 
 
-  ---------------
-  -- All paths --
-  ---------------
-
-  tryLength2 : ∀ G → List (Fin n × Fin n) → List (NonEmptySGPath G)
-  tryLength2 G [] = []
-  tryLength2 G ((i , j) ∷ xs) with i ≟ j | (i , j) ᵉ∈ᵍ? G
-  ... | yes _  | _        = tryLength2 G xs
-  ... | _      | no  _    = tryLength2 G xs
-  ... | no i≢j | yes ij∈G = i ∺ j ∣ i≢j ∣ ij∈G ∷ tryLength2 G xs
-
-  extendAll : ∀ {G} → List (NonEmptySGPath G) → Fin n → List (NonEmptySGPath G)
-  extendAll {_} []       _ = []
-  extendAll {G} (p ∷ ps) i with i ∉ₙₑₚ? p | (i , source p) ᵉ∈ᵍ? G
-  ... | no  _   | _        = extendAll ps i
-  ... | _       | no  _    = extendAll ps i
-  ... | yes i∉p | yes ip∈G = i ∷ p ∣ i∉p ∣ ip∈G ∷ extendAll ps i
-
-  allPathsOfLength : ∀ G → ℕ → List (NonEmptySGPath G)
-  allPathsOfLength G 0       = []
-  allPathsOfLength G 1       = tryLength2 G (combine _,_ (allFin n) (allFin n))
-  allPathsOfLength G (suc l) = concat (map (extendAll (allPathsOfLength G l)) (allFin n))
-
-  allNEPaths : ∀ G → List (NonEmptySGPath G)
-  allNEPaths G = concat (map (allPathsOfLength G ∘ toℕ)(allFin n))
-
-  allSGPaths : ∀ G → List (SGPath G)
-  allSGPaths G = [] ∷ map [_] (allNEPaths G)

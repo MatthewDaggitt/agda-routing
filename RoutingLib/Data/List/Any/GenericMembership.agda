@@ -13,12 +13,13 @@ open import Data.Empty using (⊥-elim)
 open import Algebra.FunctionProperties using (Op₂; RightIdentity)
 open import Data.List
 open import Data.Vec using (Vec; toList; fromList) renaming (_∈_ to _∈ᵥ_; here to hereᵥ; there to thereᵥ)
-open import Data.Product using (∃; _×_; _,_; swap)
+open import Data.Product using (∃; ∃₂; _×_; _,_; swap)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Bool using (true; false; if_then_else_)
 open import Relation.Unary using () renaming (_⊆_ to _⋐_)
 
 open import RoutingLib.Algebra.FunctionProperties using (Selective)
+open import RoutingLib.Data.List using (combine)
 open import RoutingLib.Data.List.Any.Properties
 open import RoutingLib.Data.Maybe.Base using (predBoolToMaybe)
 open import RoutingLib.Data.Maybe.Properties using (just-injective) renaming (reflexive to eq-reflexive; sym to eq-sym; trans to eq-trans)
@@ -28,58 +29,29 @@ module RoutingLib.Data.List.Any.GenericMembership {c ℓ} (setoid : Setoid c ℓ
   open Setoid setoid renaming (Carrier to A; refl to ≈-refl)
   open Setoid (list-setoid setoid) using () renaming (_≈_ to _≈ₗ_; sym to symₗ; refl to reflₗ) 
 
-  open Any.Membership setoid using (_∈_; _∉_; _⊆_)
+  open Any.Membership setoid public hiding (∈-resp-≈)
   open Any.Membership (list-setoid setoid) using () renaming (_∈_ to _∈ₗ_)
-
-
-
-  module Double {c₂ ℓ₂} (setoid₂ : Setoid c₂ ℓ₂) where
-    
-    open Setoid setoid₂ using () renaming (Carrier to B; _≈_ to _≈₂_; refl to refl₂; sym to sym₂; trans to trans₂)
-    open Any.Membership setoid₂  using () renaming (_∈_ to _∈₂_)
-
-    ∈-map : ∀ {v xs f} → f Preserves _≈_ ⟶ _≈₂_ → v ∈ xs → f v ∈₂ map f xs
-    ∈-map {_} {x ∷ xs} pe (here v≈x)   = here (pe v≈x)
-    ∈-map {_} {x ∷ xs} pe (there v∈xs) = there (∈-map pe v∈xs)
-
-    map-∃-∈ : ∀ {v xs f} → v ∈₂ map f xs → ∃ λ y → y ∈ xs × v ≈₂ f y
-    map-∃-∈ {xs = []} ()
-    map-∃-∈ {xs = x ∷ xs} (here v≈fx) = x , here ≈-refl , v≈fx
-    map-∃-∈ {xs = x ∷ xs} (there v∈mapfxs) with map-∃-∈ v∈mapfxs
-    ... | y , y∈xs , v≈fy = y , there y∈xs , v≈fy
-
-    ∈-gfilter : ∀ P {v xs a} → v ∈ xs → Eq _≈₂_ (P v) (just a) → (∀ {x y} → x ≈ y → Eq _≈₂_ (P x) (P y)) → a ∈₂ gfilter P xs
-    ∈-gfilter _ {_} {[]}     ()
-    ∈-gfilter P {v} {x ∷ xs} v∈xs Pᵥ≈justₐ P-resp-≈ with P x | inspect P x | v∈xs
-    ... | nothing | [ Px≡nothing ] | here v≈x    = contradiction (eq-trans trans₂ (eq-trans trans₂ (eq-reflexive refl₂ (≡-sym Px≡nothing)) (P-resp-≈ (sym v≈x))) Pᵥ≈justₐ) λ()
-    ... | nothing | [ _ ]          | there v∈xs₂ = ∈-gfilter P v∈xs₂ Pᵥ≈justₐ P-resp-≈
-    ... | just b  | [ Px≡justb ]   | here v≈x    = here (drop-just (eq-trans trans₂ (eq-trans trans₂ (eq-sym sym₂ Pᵥ≈justₐ) (P-resp-≈ v≈x)) (eq-reflexive refl₂ Px≡justb)))
-    ... | just b  | _              | there v∈xs₂ = there (∈-gfilter P v∈xs₂ Pᵥ≈justₐ P-resp-≈)
-
-  open Double public
-
 
   ----------------------
   -- Pushed to stdlib --
   ----------------------
 
-  ++-∈ₗ : ∀ {v ys} xs → v ∈ ys → v ∈ xs ++ ys
-  ++-∈ₗ {_} {[]}     _        ()
-  ++-∈ₗ {_} {y ∷ ys} []       v∈y∷ys   = v∈y∷ys
-  ++-∈ₗ {_} {y ∷ ys} (x ∷ xs) v∈y∷ys   = there (++-∈ₗ xs v∈y∷ys)
+  ∈-++ᵣ : ∀ {v ys} xs → v ∈ ys → v ∈ xs ++ ys
+  ∈-++ᵣ []       v∈y∷ys   = v∈y∷ys
+  ∈-++ᵣ (x ∷ xs) v∈y∷ys   = there (∈-++ᵣ xs v∈y∷ys)
 
-  ++-∈ᵣ : ∀ {v ys} xs → v ∈ xs → v ∈ xs ++ ys
-  ++-∈ᵣ []       ()
-  ++-∈ᵣ (x ∷ xs) (here v≈x)   = here v≈x
-  ++-∈ᵣ (x ∷ xs) (there v∈xs) = there (++-∈ᵣ _ v∈xs)
+  ∈-++ₗ : ∀ {v xs} ys → v ∈ xs → v ∈ xs ++ ys
+  ∈-++ₗ _ (here  v≈x)  = here v≈x
+  ∈-++ₗ _ (there v∈xs) = there (∈-++ₗ _ v∈xs)
 
-  concat-∈ : ∀ {v xs xss} → v ∈ xs → xs ∈ₗ xss → v ∈ concat xss
-  concat-∈ {_} {_ ∷ _} {[] ∷ _}         (here _)     (here ())
-  concat-∈ {_} {_ ∷ _} {[] ∷ _}         (there _)    (here ())
-  concat-∈ {_} {_ ∷ _} {(_ ∷ _) ∷ _}    (here v≈x)   (here (x≈y ∷ _))   = here (trans v≈x x≈y)
-  concat-∈ {_} {_ ∷ _} {(y ∷ ys) ∷ xss} (there v∈xs) (here (_ ∷ xs≈ys)) = there (concat-∈ {xss = ys ∷ xss} v∈xs (here xs≈ys))
-  concat-∈ {_} {_ ∷ _} {ys ∷ xss}       v∈xs         (there s)          = ++-∈ₗ ys (concat-∈ v∈xs (s))
+  ∈-concat : ∀ {v xs xss} → v ∈ xs → xs ∈ₗ xss → v ∈ concat xss
+  ∈-concat {_} {_ ∷ _} {[] ∷ _}         (here _)     (here ())
+  ∈-concat {_} {_ ∷ _} {[] ∷ _}         (there _)    (here ())
+  ∈-concat {_} {_ ∷ _} {(_ ∷ _) ∷ _}    (here v≈x)   (here (x≈y ∷ _))   = here (trans v≈x x≈y)
+  ∈-concat {_} {_ ∷ _} {(y ∷ ys) ∷ xss} (there v∈xs) (here (_ ∷ xs≈ys)) = there (∈-concat {xss = ys ∷ xss} v∈xs (here xs≈ys))
+  ∈-concat {_} {_ ∷ _} {ys ∷ xss}       v∈xs         (there s)          = ∈-++ᵣ ys (∈-concat v∈xs (s))
 
+ 
 
   -----------------------
   -- To push to stdlib --
@@ -99,18 +71,6 @@ module RoutingLib.Data.List.Any.GenericMembership {c ℓ} (setoid : Setoid c ℓ
   -- Other --
   -----------
 
-
-  gfilter-∈ : ∀ P {v} xs → v ∈ gfilter P xs → ∃ λ w → w ∈ xs × Eq _≈_ (P w) (just v) 
-  gfilter-∈ P [] ()
-  gfilter-∈ P (x ∷ xs) _ with P x | inspect P x
-  gfilter-∈ P (x ∷ xs) v∈fₚxs         | nothing | _ with gfilter-∈ P xs v∈fₚxs
-  ... | (w , w∈xs , Pw≈justᵥ) = w , there w∈xs , Pw≈justᵥ
-  gfilter-∈ P (x ∷ xs) (here v≈w)     | just w  | [ Px≡justw ] = x , (here ≈-refl) , eq-trans trans (eq-reflexive ≈-refl Px≡justw) (just (sym v≈w))
-  gfilter-∈ P (x ∷ xs) (there v∈fₚxs) | just _  | _ with gfilter-∈ P xs v∈fₚxs
-  ... | (w , w∈xs , Pw≈justᵥ) = w , there w∈xs , Pw≈justᵥ
-
-
-
   ∈-resp-≈ : ∀ {v w xs} → v ∈ xs → v ≈ w → w ∈ xs
   ∈-resp-≈ (here v≈x) v≈w = here (trans (sym v≈w) v≈x)
   ∈-resp-≈ (there v∈xs) v≈w = there (∈-resp-≈ v∈xs v≈w)
@@ -124,6 +84,65 @@ module RoutingLib.Data.List.Any.GenericMembership {c ℓ} (setoid : Setoid c ℓ
 
   ∉-resp-≈ₗ : ∀ {v xs ys} → v ∉ xs → xs ≈ₗ ys → v ∉ ys
   ∉-resp-≈ₗ v∉xs xs≈ys v∈ys = v∉xs (∈-resp-≈ₗ v∈ys (symₗ xs≈ys))
+
+  ++-∈ : ∀ {v} xs ys → v ∈ xs ++ ys → v ∈ xs ⊎ v ∈ ys
+  ++-∈ [] ys v∈ys = inj₂ v∈ys
+  ++-∈ (x ∷ xs) ys (here v≈x) = inj₁ (here v≈x)
+  ++-∈ (x ∷ xs) ys (there v∈xs∷ys) with ++-∈ xs ys v∈xs∷ys
+  ... | inj₁ v∈xs = inj₁ (there v∈xs)
+  ... | inj₂ v∈ys = inj₂ v∈ys
+
+  module Double {c₂ ℓ₂} (setoid₂ : Setoid c₂ ℓ₂) where
+    
+    open Setoid setoid₂ using () renaming (Carrier to B; _≈_ to _≈₂_; refl to refl₂; sym to sym₂; trans to trans₂)
+    open Any.Membership setoid₂  using () renaming (_∈_ to _∈₂_)
+
+    ∈-map : ∀ {v xs f} → f Preserves _≈₂_ ⟶ _≈_ → v ∈₂ xs → f v ∈ map f xs
+    ∈-map {_} {x ∷ xs} pe (here v≈x)   = here (pe v≈x)
+    ∈-map {_} {x ∷ xs} pe (there v∈xs) = there (∈-map pe v∈xs)
+
+    map-∈ : ∀ {xs v f} → v ∈ map f xs → ∃ λ a → a ∈₂ xs × v ≈ f a
+    map-∈ {[]} ()
+    map-∈ {x ∷ xs} (here v≈fx) = x , here refl₂ , v≈fx
+    map-∈ {x ∷ xs} (there v∈mapfxs) with map-∈ v∈mapfxs
+    ... | a , a∈xs , v≈fa = a , there a∈xs , v≈fa
+
+    ∈-gfilter : ∀ P {v xs a} → v ∈ xs → Eq _≈₂_ (P v) (just a) → (∀ {x y} → x ≈ y → Eq _≈₂_ (P x) (P y)) → a ∈₂ gfilter P xs
+    ∈-gfilter _ {_} {[]}     ()
+    ∈-gfilter P {v} {x ∷ xs} v∈xs Pᵥ≈justₐ P-resp-≈ with P x | inspect P x | v∈xs
+    ... | nothing | [ Px≡nothing ] | here v≈x    = contradiction (eq-trans trans₂ (eq-trans trans₂ (eq-reflexive refl₂ (≡-sym Px≡nothing)) (P-resp-≈ (sym v≈x))) Pᵥ≈justₐ) λ()
+    ... | nothing | [ _ ]          | there v∈xs₂ = ∈-gfilter P v∈xs₂ Pᵥ≈justₐ P-resp-≈
+    ... | just b  | [ Px≡justb ]   | here v≈x    = here (drop-just (eq-trans trans₂ (eq-trans trans₂ (eq-sym sym₂ Pᵥ≈justₐ) (P-resp-≈ v≈x)) (eq-reflexive refl₂ Px≡justb)))
+    ... | just b  | _              | there v∈xs₂ = there (∈-gfilter P v∈xs₂ Pᵥ≈justₐ P-resp-≈)
+
+    ∈-combine : ∀ {f} → f Preserves₂ _≈₂_ ⟶ _≈₂_ ⟶ _≈_ → ∀ {xs ys a b} → a ∈₂ xs → b ∈₂ ys → f a b ∈ combine f xs ys
+    ∈-combine {f} pres {x ∷ xs} {ys} (here  a≈x)  b∈ys = ∈-resp-≈ (∈-++ₗ (combine f xs ys) (∈-map (pres refl₂) b∈ys)) (pres (sym₂ a≈x) refl₂)
+    ∈-combine {f} pres {x ∷ xs} {ys} (there a∈xs) b∈ys = ∈-++ᵣ (map (f x) ys) (∈-combine pres a∈xs b∈ys)
+
+    combine-∈ : ∀ f (xs ys : List B) {v} → v ∈ combine f xs ys → ∃₂ λ a b → a ∈₂ xs × b ∈₂ ys × v ≈ f a b
+    combine-∈ f [] ys ()
+    combine-∈ f (x ∷ xs) ys v∈map++com with ++-∈ (map (f x) ys) (combine f xs ys) v∈map++com
+    combine-∈ f (x ∷ xs) ys v∈map++com | inj₁ v∈map with map-∈ v∈map
+    ... | (b , b∈ys , v≈fxb) = x , b , here refl₂ , b∈ys , v≈fxb
+    combine-∈ f (x ∷ xs) ys v∈map++com | inj₂ v∈com with combine-∈ f xs ys v∈com
+    ... | (a , b , a∈xs , b∈ys , v≈fab) = a , b , there a∈xs , b∈ys , v≈fab
+
+  open Double public
+
+
+
+  gfilter-∈ : ∀ P {v} xs → v ∈ gfilter P xs → ∃ λ w → w ∈ xs × Eq _≈_ (P w) (just v) 
+  gfilter-∈ P [] ()
+  gfilter-∈ P (x ∷ xs) _ with P x | inspect P x
+  gfilter-∈ P (x ∷ xs) v∈fₚxs         | nothing | _ with gfilter-∈ P xs v∈fₚxs
+  ... | (w , w∈xs , Pw≈justᵥ) = w , there w∈xs , Pw≈justᵥ
+  gfilter-∈ P (x ∷ xs) (here v≈w)     | just w  | [ Px≡justw ] = x , (here ≈-refl) , eq-trans trans (eq-reflexive ≈-refl Px≡justw) (just (sym v≈w))
+  gfilter-∈ P (x ∷ xs) (there v∈fₚxs) | just _  | _ with gfilter-∈ P xs v∈fₚxs
+  ... | (w , w∈xs , Pw≈justᵥ) = w , there w∈xs , Pw≈justᵥ
+
+
+
+  
 
 
 

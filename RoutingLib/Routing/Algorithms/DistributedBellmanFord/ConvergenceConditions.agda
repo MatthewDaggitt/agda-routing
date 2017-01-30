@@ -1,5 +1,6 @@
 open import Level using (_⊔_)
-open import Data.Product using (_×_)
+open import Data.Product using (∃; _×_)
+open import Data.Sum using (_⊎_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
 open import Algebra.FunctionProperties using (Associative; Commutative; LeftIdentity; RightIdentity; RightZero; Idempotent)
@@ -31,9 +32,8 @@ module RoutingLib.Routing.Algorithms.DistributedBellmanFord.ConvergenceCondition
       ⊕-comm : Commutative _≈_ _⊕_
       ⊕-absorbs-▷ : ∀ s r → (s ▷ r) ⊕ r ≈ r
 
-      -- Annihilator
-      one : Route
-      one-anᵣ-⊕ : RightZero _≈_ one _⊕_
+      -- Element properties
+      1#-anᵣ-⊕ : RightZero _≈_ 1# _⊕_
 
 
 
@@ -46,40 +46,35 @@ module RoutingLib.Routing.Algorithms.DistributedBellmanFord.ConvergenceCondition
   -- is not lexed with paths
 
   record ConvergenceConditions 
-    {a b ℓ n} (rp : RoutingProblem a b ℓ n) : Set (a ⊔ b ⊔ ℓ) where
+    {a b ℓ} (ra : RoutingAlgebra a b ℓ) : Set (a ⊔ b ⊔ ℓ) where
     
-    open RoutingProblem rp
-    
-    field
-      -- Special routes
-      0# : Route
+    open RoutingAlgebra ra
 
+    field
       -- Operator properties
       ⊕-assoc : Associative _≈_ _⊕_
       ⊕-sel   : Selective _≈_ _⊕_
       ⊕-comm  : Commutative _≈_ _⊕_
       ⊕-almost-strictly-absorbs-▷ : ∀ s {r} → r ≉ 0# → ((s ▷ r) ⊕ r ≈ r) × (r ≉ s ▷ r)
 
+      -- Special element properties
       0#-idᵣ-⊕ : RightIdentity _≈_ 0# _⊕_
       0#-anᵣ-▷ : ∀ s → s ▷ 0# ≈ 0#
-
-      Iᵢᵢ-almost-anᵣ-⊕ : ∀ i s r → (s ▷ r) ⊕ I i i ≈ I i i
-      Iᵢⱼ≈0# : ∀ {i j} → j ≢ i → I i j ≈ 0#
+      1#-anᵣ-⊕ : RightZero _≈_ 1# _⊕_
 
       -- Other properties
       routes-enumerable : Enumeration S
 
 
-  
-    -- Immediate properties
+
+    -- Immediate properties about the algebra
 
     ⊕-idem : Idempotent _≈_ _⊕_
     ⊕-idem = idem _≈_ _⊕_ ⊕-sel
 
-    -- Natural orders
-
     open import RoutingLib.Algebra.Selectivity.NaturalOrders S _⊕_ ⊕-pres-≈ using () renaming (_≤ᵣ_ to _≤_; ≤ᵣ-respᵣ-≈ to ≤-respᵣ-≈; ≤ᵣ-respₗ-≈ to ≤-respₗ-≈) public
     open import RoutingLib.Algebra.Selectivity.NaturalOrders S _⊕_ ⊕-pres-≈ using () renaming (≤ᵣ-total to ass⇨≤-total; ≤ᵣ-poset to ass⇨≤-poset)
+    open import Relation.Binary.NonStrictToStrict _≈_ _≤_ using (_<_) public
 
     _≤?_ : Decidable _≤_
     x ≤? y = y ⊕ x ≟ x  
@@ -92,19 +87,29 @@ module RoutingLib.Routing.Algorithms.DistributedBellmanFord.ConvergenceCondition
 
     open Poset ≤-poset using () renaming (refl to ≤-refl; trans to ≤-trans; antisym to ≤-antisym) public
 
-    -- Identity matrix properties
-
     0#-idₗ-⊕ : LeftIdentity _≈_ 0# _⊕_
     0#-idₗ-⊕ x = trans (⊕-comm 0# x) (0#-idᵣ-⊕ x)
 
-    Iᵢⱼ-idᵣ-⊕ : ∀ {i j} → j ≢ i → RightIdentity _≈_ (I i j) _⊕_
-    Iᵢⱼ-idᵣ-⊕ {i} {j} j≢i x = trans (⊕-pres-≈ refl (Iᵢⱼ≈0# j≢i)) (0#-idᵣ-⊕ x)
 
-    Iᵢⱼ-idₗ-⊕ : ∀ {i j} → j ≢ i → LeftIdentity _≈_ (I i j) _⊕_
-    Iᵢⱼ-idₗ-⊕ {i} {j} j≢i x = trans (⊕-comm (I i j) x) (Iᵢⱼ-idᵣ-⊕ j≢i x)
 
-    Iᵢⱼ-anᵣ-▷ : ∀ {i j} → j ≢ i → ∀ s → s ▷ I i j ≈ I i j
-    Iᵢⱼ-anᵣ-▷ j≢i s = trans (trans (▷-pres-≈ s (Iᵢⱼ≈0# j≢i)) (0#-anᵣ-▷ s)) (sym (Iᵢⱼ≈0# j≢i))
+{-
+    -- Condensed properties for algorithm
 
-    Iᵢⱼ≈Iₖₗ : ∀ {i j k l} → j ≢ i → l ≢ k → I i j ≈ I k l
-    Iᵢⱼ≈Iₖₗ j≢i l≢k = trans (Iᵢⱼ≈0# j≢i) (sym (Iᵢⱼ≈0# l≢k))
+    open import RoutingLib.Routing.Algorithms.DistributedBellmanFord rp using (σ; I)
+    open import RoutingLib.Routing.Algorithms.DistributedBellmanFord.Properties rp
+
+    σXᵢⱼ≤Aᵢₖ▷Xₖⱼ' : ∀ X i j k → σ X i j ≤ A i k ▷ X k j
+    σXᵢⱼ≤Aᵢₖ▷Xₖⱼ' = σXᵢⱼ≤Aᵢₖ▷Xₖⱼ ⊕-sel ⊕-comm ⊕-assoc
+
+    σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ' : ∀ X i j → (∃ λ k → σ X i j ≈ A i k ▷ X k j) ⊎ (σ X i j ≈ I i j)
+    σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ' = σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ ⊕-sel
+
+    σXᵢᵢ≈Iᵢᵢ' : ∀ X i → σ X i i ≈ I i i
+    σXᵢᵢ≈Iᵢᵢ' = σXᵢᵢ≈Iᵢᵢ ⊕-sel ⊕-assoc ⊕-comm 1#-anᵣ-⊕
+
+    σXᵢᵢ≈σYᵢᵢ' : ∀ X Y i → σ X i i ≈ σ Y i i
+    σXᵢᵢ≈σYᵢᵢ' = σXᵢᵢ≈σYᵢᵢ ⊕-sel ⊕-assoc ⊕-comm 1#-anᵣ-⊕
+
+    σXᵢⱼ≈σYᵢⱼ' : ∀ X Y i j → (∀ k → (A i k ▷ X k j ≈ A i k ▷ Y k j) ⊎ ((∃ λ l → (A i l ▷ X l j) < (A i k ▷ X k j)) × (∃ λ m → (A i m ▷ Y m j) < (A i k ▷ Y k j)))) → σ X i j ≈ σ Y i j
+    σXᵢⱼ≈σYᵢⱼ' = σXᵢⱼ≈σYᵢⱼ ⊕-sel ⊕-assoc ⊕-comm
+-}

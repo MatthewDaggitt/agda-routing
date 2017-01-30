@@ -8,6 +8,11 @@ module RoutingLib.Data.List where
   allFin zero    = []
   allFin (suc n) = fzero ∷ map fsuc (allFin n)
 
+  descending : ∀ n → List ℕ
+  descending zero    = []
+  descending (suc n) = n ∷ descending n
+
+
   combine : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c} 
          → (A → B → C) → List A → List B → List C
   combine f [] _ = []

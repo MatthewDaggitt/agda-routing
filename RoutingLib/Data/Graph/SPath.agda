@@ -1,11 +1,19 @@
 open import Level using () renaming (zero to lzero)
 open import Data.Fin using (Fin; _<_; _≤_) renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties using (_≟_)
-open import Data.Nat using (ℕ; zero; suc) renaming (_<_ to _<ℕ_)
+open import Data.Nat using (ℕ; zero; suc; _≤?_; z≤n; s≤s) renaming (_<_ to _<ℕ_)
+open import Data.Nat.Properties using ()
+open import Data.Product using (_,_)
 open import Data.List using (List; []; _∷_; map)
 open import Relation.Nullary using (¬_; yes; no)
+open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary using (Decidable; Rel)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; cong)
+open import Function using (_∘_)
+
+open import RoutingLib.Data.Graph
+open import RoutingLib.Data.Fin.Pigeonhole using (pigeonhole)
+open import RoutingLib.Data.Nat.Properties using (m≰n⇨n<m)
 
 module RoutingLib.Data.Graph.SPath where
 
@@ -63,7 +71,38 @@ module RoutingLib.Data.Graph.SPath where
   length (_ ∺ _ ∣ _) = 1
   length (_ ∷ p ∣ _) = suc (length p)
 
+  private
 
+    lookup : ∀ {n} → (p : NonEmptySPath n) → Fin (suc (length p)) → Fin n
+    lookup (i ∺ j ∣ _) fzero            = i
+    lookup (i ∺ j ∣ _) (fsuc fzero)     = j
+    lookup (i ∺ j ∣ _) (fsuc (fsuc ()))
+    lookup (i ∷ p ∣ _) fzero            = i
+    lookup (i ∷ p ∣ _) (fsuc k)         = lookup p k 
+    
+    lookup-∈ : ∀ {n} → (p : NonEmptySPath n) → ∀ i {k} → lookup p i ≡ k → ¬ (k ∉ₙₑₚ p)
+    lookup-∈ (i ∺ j ∣ _) fzero            refl (notThere i≢i _) = i≢i refl
+    lookup-∈ (i ∺ j ∣ _) (fsuc fzero)     refl (notThere _ j≢j) = j≢j refl
+    lookup-∈ (i ∺ j ∣ _) (fsuc (fsuc ()))
+    lookup-∈ (i ∷ p ∣ _) fzero            refl (notHere i≢i _)  = i≢i refl
+    lookup-∈ (i ∷ p ∣ _) (fsuc k)         pᵢ≡k  (notHere _ i∉p)  = lookup-∈ p k pᵢ≡k i∉p
+
+    lookup! : ∀ {n} (p : NonEmptySPath n) {k l} → k ≢ l → lookup p k ≢ lookup p l
+    lookup! _             {fzero}          {fzero}          0≢0 _ = 0≢0 refl
+    lookup! (i ∺ j ∣ i≢j) {fzero}          {fsuc fzero}     _     = i≢j
+    lookup! (i ∺ j ∣ i≢j) {fsuc fzero}     {fzero}          _     = i≢j ∘ sym
+    lookup! (i ∺ j ∣ x)   {_}              {fsuc (fsuc ())} _
+    lookup! (i ∺ j ∣ x)   {fsuc (fsuc ())} {_}
+    lookup! (i ∺ j ∣ x)   {fsuc fzero}     {fsuc fzero}     1≢1 _ = 1≢1 refl
+    lookup! (i ∷ p ∣ i∉p) {fzero}          {fsuc j}         i≢j i≡pⱼ = contradiction i∉p (lookup-∈ p j (sym i≡pⱼ))
+    lookup! (i ∷ p ∣ i∉p) {fsuc k}         {fzero}          i≢j pₖ≡i = contradiction i∉p (lookup-∈ p k pₖ≡i)
+    lookup! (i ∷ p ∣ x)   {fsuc k}         {fsuc l}         k+1≢l+1 pₖ≡pₗ = lookup! p (k+1≢l+1 ∘ cong fsuc) pₖ≡pₗ
+
+  |p|ₙₑₚ<n : ∀ {n} (p : NonEmptySPath n) → length p <ℕ n
+  |p|ₙₑₚ<n {n} p with suc (length p) ≤? n
+  ... | yes |p|<n = |p|<n
+  ... | no  |p|≮n with pigeonhole (m≰n⇨n<m |p|≮n) (lookup p)
+  ...   | i , j , i≢j , pᵢ≡pⱼ = contradiction pᵢ≡pⱼ (lookup! p i≢j)
 
 
 
@@ -71,20 +110,20 @@ module RoutingLib.Data.Graph.SPath where
   -- All paths --
   ---------------
 
-  infix 4 _∉_ _≈ₚ_ _≉ₚ_
+  infix 4 _∉ₚ_ _≈ₚ_ _≉ₚ_
 
   data SPath (n : ℕ) : Set lzero where
     [] : SPath n
     [_] : NonEmptySPath n → SPath n
 
-  data _∉_ {n : ℕ} : Fin n → SPath n → Set lzero where
-    notHere : ∀ {i} → i ∉ []
-    notThere : ∀ {i p} → i ∉ₙₑₚ p → i ∉ [ p ]
+  data _∉ₚ_ {n : ℕ} : Fin n → SPath n → Set lzero where
+    notHere : ∀ {i} → i ∉ₚ []
+    notThere : ∀ {i p} → i ∉ₙₑₚ p → i ∉ₚ [ p ]
 
   _∈_ : ∀ {n} → Fin n → SPath n → Set lzero
-  i ∈ p = ¬ (i ∉ p)
+  i ∈ p = ¬ (i ∉ₚ p)
 
-  _∉?_ : ∀ {n} → Decidable (_∉_ {n})
+  _∉?_ : ∀ {n} → Decidable (_∉ₚ_ {n})
   k ∉? []    = yes notHere
   k ∉? [ p ] with k ∉ₙₑₚ? p
   ... | yes k∉p = yes (notThere k∉p)
@@ -118,33 +157,10 @@ module RoutingLib.Data.Graph.SPath where
   ----------------
 
 
-{-
-  toList : ∀ {n} → SPath n → List (Fin n)
-  toList [ i ]       = i ∷ []
-  toList (i ∷ p ∣ _) = i ∷ toList p
+  lengthₚ : ∀ {n} → SPath n → ℕ
+  lengthₚ [] = 0
+  lengthₚ [ p ] = length p
 
-  toVec : ∀ {n} → (p : EPath n) → Vec (Fin n) (suc (length p))
-  toVec [ i ]        = i ∷ []
-  toVec (i ∷ p ∣ _ ) = i ∷ toVec p
--}
-{-  
-  lookup : ∀ {n} → (p : EPath n) → Fin (suc (length p)) → (Fin n)
-  lookup p fzero = source p
-  lookup [ _ ] (fsuc ())
-  lookup (i ∷ p ∣ _ ) (fsuc j) = lookup p j
--}
-
-  extendAll : ∀ {n} → List (NonEmptySPath n) → Fin n → List (NonEmptySPath n)
-  extendAll []       _ = []
-  extendAll (p ∷ ps) i with i ∉ₙₑₚ? p
-  ... | no  _   = extendAll ps i
-  ... | yes i∉p = i ∷ p ∣ i∉p ∷ extendAll ps i
-
-{-
-  allPathsOfLength : ∀ {n} → ℕ → List (NonEmptySPath n)
-  allPathsOfLength {n} zero = ? --map [_] (toListᵥ (allFin n))
-  allPathsOfLength {n} (suc l) = ? --concat (map (extendAll (allPathsOfLength l)) (toListᵥ (allFin n)))
-
-  allPaths : ∀ {n} → List (NonEmptySPath n)
-  allPaths {n} = concat (map allPathsOfLength (map toℕ (toListᵥ (allFin n)))) 
--}
+  lengthₚ<n : ∀ {n} (p : SPath (suc n)) → lengthₚ p <ℕ (suc n)
+  lengthₚ<n []    = s≤s z≤n
+  lengthₚ<n [ p ] = |p|ₙₑₚ<n p

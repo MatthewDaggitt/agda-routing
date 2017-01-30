@@ -5,13 +5,12 @@ open import Data.Nat.Properties.Simple using (+-comm)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (∃; _,_; proj₁)
 open import Relation.Binary using (Irreflexive; Trichotomous; tri<; tri≈; tri>; _Preserves₂_⟶_⟶_; _⇒_)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; subst; cong) renaming (sym to ≡-sym; trans to ≡-trans)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; trans; subst; cong)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Nullary using (yes; no)
 open import Function using (_∘_)
 open import Algebra 
 open import Algebra.FunctionProperties using (Idempotent; RightIdentity)
-open DistributiveLattice Data.Nat.Properties.distributiveLattice using () renaming (∨-comm to ⊓-comm; ∧-comm to ⊔-comm)
 
 open import RoutingLib.Algebra.FunctionProperties using (Selective; _×-Preserves_; _⊎-Preserves_; _Forces-×_; _Forces-⊎_; ⊎Preserves⇨×Preserves; Forces×⇨Forces⊎)
 
@@ -33,6 +32,8 @@ module RoutingLib.Data.Nat.Properties where
   -- Pushed to stdlib --
   ----------------------
 
+  open DistributiveLattice Data.Nat.Properties.distributiveLattice using () renaming (∨-comm to ⊓-comm; ∧-comm to ⊔-comm) public
+
   ⊓-sel : Selective _≡_ _⊓_
   ⊓-sel zero    _       = inj₁ refl
   ⊓-sel (suc a) zero    = inj₂ refl
@@ -51,7 +52,7 @@ module RoutingLib.Data.Nat.Properties where
   0-idᵣ-⊔ zero = refl
   0-idᵣ-⊔ (suc x) = refl
 
-  open Relation.Binary.DecTotalOrder Data.Nat.decTotalOrder using () renaming (refl to ≤-refl; trans to ≤-trans; total to ≤-total; antisym to ≤-antisym) public
+  open Relation.Binary.DecTotalOrder Data.Nat.decTotalOrder using () renaming (refl to ≤-refl; reflexive to ≤-reflexive; trans to ≤-trans; total to ≤-total; antisym to ≤-antisym) public
 
   cmp : Trichotomous _≡_ _<_
   cmp zero    zero    = tri≈ (λ())     refl  (λ())
@@ -111,22 +112,33 @@ module RoutingLib.Data.Nat.Properties where
   -- Arithmetic
 
   s[x+y]≡x+s[y] : ∀ (x y : ℕ) → suc (x + y) ≡ x + suc y
-  s[x+y]≡x+s[y] x y = ≡-sym (subst (λ v → v ≡ suc (x + y)) (+-comm (suc y) x) (subst (λ v → suc y + x ≡ suc v) (+-comm y x) refl))
+  s[x+y]≡x+s[y] x y = sym (subst (λ v → v ≡ suc (x + y)) (+-comm (suc y) x) (subst (λ v → suc y + x ≡ suc v) (+-comm y x) refl))
 
   n≤m⇨s[m]∸n≡s[n∸m] : ∀ {m n} → n ≤ m → suc m ∸ n ≡ suc (m ∸ n)
   n≤m⇨s[m]∸n≡s[n∸m] z≤n = refl
   n≤m⇨s[m]∸n≡s[n∸m] (s≤s n≤m) = n≤m⇨s[m]∸n≡s[n∸m] n≤m
+
+  ∀x≤m:n≢x⇒m<n : ∀ m n → (∀ {x} → x ≤ m → n ≢ x) → m < n
+  ∀x≤m:n≢x⇒m<n _ zero    x≤m⇒n≢x = contradiction refl (x≤m⇒n≢x z≤n)
+  ∀x≤m:n≢x⇒m<n zero (suc n) x≤0⇒n≢x = s≤s z≤n
+  ∀x≤m:n≢x⇒m<n (suc m) (suc n) x≤m+1⇒n≢x = s≤s (∀x≤m:n≢x⇒m<n m n (λ x≤m n≡x → x≤m+1⇒n≢x (s≤s x≤m) (cong suc n≡x)))
 
   m<n⇨0<n∸m : ∀ {m n} → m < n → 0 < n ∸ m
   m<n⇨0<n∸m {_}     {zero}  ()
   m<n⇨0<n∸m {zero}  {suc n} _         = s≤s z≤n
   m<n⇨0<n∸m {suc m} {suc n} (s≤s m<n) = m<n⇨0<n∸m m<n
 
+  m<n⇨n≡o+1 : ∀ {m n} → m < n → ∃ λ o → n ≡ suc o
+  m<n⇨n≡o+1 {_} {zero} ()
+  m<n⇨n≡o+1 {_} {suc o} m<n = o , refl
 
   -- Orders
 
   <⇒≤ : _<_ ⇒ _≤_
   <⇒≤ (s≤s m≤n) = ≤-trans m≤n (≤-step ≤-refl)
+
+  <⇒≱ : _<_ ⇒ _≱_
+  <⇒≱ (s≤s m+1≤n) (s≤s n≤m) = <⇒≱ m+1≤n n≤m
 
   <⇒≢ : _<_ ⇒ _≢_
   <⇒≢ (s≤s z≤n)   ()
@@ -137,6 +149,12 @@ module RoutingLib.Data.Nat.Properties where
   <⇒≯ {_} {zero} () _
   <⇒≯ (s≤s p<q) (s≤s q<p) = <⇒≯ p<q q<p
 
+  ≮⇒≥ : _≮_ ⇒ _≥_
+  ≮⇒≥ {_}     {zero}  _       = z≤n
+  ≮⇒≥ {zero}  {suc j} 1≮j+1   = contradiction (s≤s z≤n) 1≮j+1
+  ≮⇒≥ {suc i} {suc j} i+1≮j+1 = s≤s (≮⇒≥ (i+1≮j+1 ∘ s≤s))
+
+
   m+n≮n : ∀ m n → m + n ≮ n
   m+n≮n _ zero ()
   m+n≮n zero (suc n) (s≤s n<n) = m+n≮n zero n n<n
@@ -145,7 +163,7 @@ module RoutingLib.Data.Nat.Properties where
   m+1+n≢n : ∀ m n → suc m + n ≢ n
   m+1+n≢n zero _ ()
   m+1+n≢n (suc m) zero ()
-  m+1+n≢n (suc m) (suc n) x = m+1+n≢n (suc m) n (≡-trans (cong suc (s[x+y]≡x+s[y] m n)) (suc-injective x))
+  m+1+n≢n (suc m) (suc n) x = m+1+n≢n (suc m) n (trans (cong suc (s[x+y]≡x+s[y] m n)) (suc-injective x))
 
   m<n⇨m≤n : ∀ {m n} → m < n → m ≤ n
   m<n⇨m≤n {m} m<n = ≤-trans (n≤1+n m) m<n
@@ -168,11 +186,11 @@ module RoutingLib.Data.Nat.Properties where
   m<n⇨n≰m ()         z≤n
   m<n⇨n≰m (s≤s m<n) (s≤s n≤m) = (m<n⇨n≰m m<n) n≤m
 
-  m≤n∧m≢n⇨m<n : ∀ {m n} → m ≤ n → m ≢ n → m < n
-  m≤n∧m≢n⇨m<n {zero} {zero} m≤n m≢n = contradiction refl m≢n
-  m≤n∧m≢n⇨m<n {zero} {suc n} m≤n m≢n = s≤s z≤n
-  m≤n∧m≢n⇨m<n {suc m} {zero} ()
-  m≤n∧m≢n⇨m<n {suc m} {suc n} (s≤s m≤n) s[m]≢s[n] = s≤s (m≤n∧m≢n⇨m<n m≤n (λ m≡n → s[m]≢s[n] (cong suc m≡n)))
+  ≤+≢⇒< : ∀ {m n} → m ≤ n → m ≢ n → m < n
+  ≤+≢⇒< {zero} {zero} m≤n m≢n = contradiction refl m≢n
+  ≤+≢⇒< {zero} {suc n} m≤n m≢n = s≤s z≤n
+  ≤+≢⇒< {suc m} {zero} ()
+  ≤+≢⇒< {suc m} {suc n} (s≤s m≤n) s[m]≢s[n] = s≤s (≤+≢⇒< m≤n (λ m≡n → s[m]≢s[n] (cong suc m≡n)))
 
   m≤n⇨m+o≡n : ∀ {m n} → m ≤ n → ∃ λ o → m + o ≡ n
   m≤n⇨m+o≡n {_} {n} z≤n = n , refl
@@ -212,10 +230,18 @@ module RoutingLib.Data.Nat.Properties where
   m≤n⇨m⊓n≡m (s≤s m≤n) = cong suc (m≤n⇨m⊓n≡m m≤n)
 
   m⊔n≡m⇨n≤m : ∀ {m n} → m ⊔ n ≡ m → n ≤ m
-  m⊔n≡m⇨n≤m {m} {n} m⊔n≡m rewrite ≡-sym m⊔n≡m = n≤m⊔n m n 
+  m⊔n≡m⇨n≤m {m} {n} m⊔n≡m rewrite sym m⊔n≡m = n≤m⊔n m n 
+
+  n⊔m≡m⇨n≤m : ∀ {m n} → n ⊔ m ≡ m → n ≤ m
+  n⊔m≡m⇨n≤m {m} {n} m⊔n≡m = m⊔n≡m⇨n≤m (trans (⊔-comm m n) m⊔n≡m)
 
 
+  n≢0⇒0<n : ∀ {n} → n ≢ 0 → 0 < n
+  n≢0⇒0<n {zero} 0≢0 = contradiction refl 0≢0
+  n≢0⇒0<n {suc n} n+1≢0 = s≤s z≤n
 
+  n≤0⇒n≡0 : ∀ {n} → n ≤ 0 → n ≡ 0
+  n≤0⇒n≡0 z≤n = refl
 
 
   ⊓-⊎preserves-≤x : ∀ {x} → _⊓_ ⊎-Preserves (_≤ x)
@@ -252,10 +278,10 @@ module RoutingLib.Data.Nat.Properties where
   ⊔-preserves-≡x refl refl = ⊔-idem _
 
   ⊔-preserves-x≡ : ∀ {x} → _⊔_ ×-Preserves (x ≡_)
-  ⊔-preserves-x≡ refl refl = ≡-sym (⊔-idem _)
+  ⊔-preserves-x≡ refl refl = sym (⊔-idem _)
 
   ⊓-preserves-≡x : ∀ {x} → _⊓_ ×-Preserves (_≡ x)
   ⊓-preserves-≡x refl refl = ⊓-idem _
 
   ⊓-preserves-x≡ : ∀ {x} → _⊓_ ×-Preserves (x ≡_)
-  ⊓-preserves-x≡ refl refl = ≡-sym (⊓-idem _)
+  ⊓-preserves-x≡ refl refl = sym (⊓-idem _)

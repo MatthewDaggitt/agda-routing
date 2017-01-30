@@ -44,6 +44,8 @@ module RoutingLib.Data.Fin.Properties where
   _<?_ : ∀ {n} → Decidable (_<_ {n = n})
   x <? y = suc (toℕ x) ≤ℕ? toℕ y
 
+
+
   -------------------------
   -- Ordering properties --
   -------------------------
@@ -122,7 +124,6 @@ module RoutingLib.Data.Fin.Properties where
   m≰n⇨n<m : ∀ {n₁} {m n : Fin n₁} → ¬ (m ≤ n) → n < m
   m≰n⇨n<m m≰n = m≰ℕn⇨n<m m≰n
 
-  
 
 
 

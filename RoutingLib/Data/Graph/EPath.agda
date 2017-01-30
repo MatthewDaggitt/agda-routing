@@ -78,6 +78,41 @@ module RoutingLib.Data.Graph.EPath where
 
   allPaths : ∀ {n} → List (EPath n)
   allPaths {n} = concat (map allPathsOfLength (map toℕ (toListᵥ (allFin n)))) 
+  
+  private
+
+    lookup : ∀ {n} → (p : NonEmptySPath n) → Fin (suc (length p)) → Fin n
+    lookup (i ∺ j ∣ _ ∣ _) fzero            = i
+    lookup (i ∺ j ∣ _ ∣ _) (fsuc fzero)     = j
+    lookup (i ∺ j ∣ _ ∣ _) (fsuc (fsuc ()))
+    lookup (i ∷ p ∣ _ ∣ _) fzero            = i
+    lookup (i ∷ p ∣ _ ∣ _) (fsuc k)         = lookup p k 
+    
+    lookup-∈ : ∀ {n} → (p : NonEmptySPath n) → ∀ i {k} → lookup p i ≡ k → k ∈ₙₑₚ p
+    lookup-∈ (i ∺ j ∣ _ ∣ _) fzero            refl (notThere i≢i _) = i≢i refl
+    lookup-∈ (i ∺ j ∣ _ ∣ _) (fsuc fzero)     refl (notThere _ j≢j) = j≢j refl
+    lookup-∈ (i ∺ j ∣ _ ∣ _) (fsuc (fsuc ()))
+    lookup-∈ (i ∷ p ∣ _ ∣ _) fzero            refl (notHere i≢i _)  = i≢i refl
+    lookup-∈ (i ∷ p ∣ _ ∣ _) (fsuc k)         pᵢ≡k  (notHere _ i∉p)  = lookup-∈ p k pᵢ≡k i∉p
+
+    lookup! : ∀ {n} (p : NonEmptySPath n) {k l} → k ≢ l → lookup p k ≢ lookup p l
+    lookup! _                  {fzero}         {fzero}          0≢0 _ = 0≢0 refl
+    lookup! (i ∺ j ∣ i≢j ∣ _) {fzero}          {fsuc fzero}     _     = i≢j
+    lookup! (i ∺ j ∣ i≢j ∣ _) {fsuc fzero}     {fzero}          _     = i≢j ∘ sym
+    lookup! (i ∺ j ∣ x   ∣ _) {_}              {fsuc (fsuc ())} _
+    lookup! (i ∺ j ∣ x   ∣ _) {fsuc (fsuc ())} {_}
+    lookup! (i ∺ j ∣ x   ∣ _) {fsuc fzero}     {fsuc fzero}     1≢1 _ = 1≢1 refl
+    lookup! (i ∷ p ∣ i∉p ∣ _) {fzero}          {fsuc j}         i≢j i≡pⱼ = contradiction i∉p (lookup-∈ p j (sym i≡pⱼ))
+    lookup! (i ∷ p ∣ i∉p ∣ _) {fsuc k}         {fzero}          i≢j pₖ≡i = contradiction i∉p (lookup-∈ p k pₖ≡i)
+    lookup! (i ∷ p ∣ x   ∣ _) {fsuc k}         {fsuc l}         k+1≢l+1 pₖ≡pₗ = lookup! p (k+1≢l+1 ∘ cong fsuc) pₖ≡pₗ
+
+  |p|<n : ∀ {n} (p : NonEmptySPath n) → length p <ℕ n
+  |p|<n p with suc (length p) ≤ℕ? n
+  ... | yes |p|<n = |p|<n
+  ... | no  |p|≮n with pigeonhole (m≰n⇨n<m |p|≮n) (lookup p)
+  ...   | i , j , i≢j , pᵢ≡pⱼ = contradiction pᵢ≡pⱼ (lookup! p i≢j)
+
+
 
 
 

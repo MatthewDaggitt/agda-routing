@@ -169,6 +169,3 @@ module RoutingLib.Data.Vec.Properties where
 
   allPairs-∃-∈ : ∀ {a} {A : Set a} {m n : ℕ} {xs : Vec A m} {ys : Vec A n} {v} → v ∈ allPairs xs ys → ∃₂ λ x y → v ≡ (x , y)
   allPairs-∃-∈ {v = (x , y)} xy∈allPairs = x , y , refl
-
-
-  

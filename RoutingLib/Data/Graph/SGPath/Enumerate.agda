@@ -32,7 +32,7 @@ open import RoutingLib.Data.List.Enumeration
 
 module RoutingLib.Data.Graph.SGPath.Enumerate {a n} {A : Set a} (G : Graph A n) where
 
-  
+
   -- Enumeration
 
   filterValidEdges : List (Fin n × Fin n) → List (NonEmptySGPath G)
@@ -77,7 +77,7 @@ module RoutingLib.Data.Graph.SGPath.Enumerate {a n} {A : Set a} (G : Graph A n) 
 
     Pₛ' : Setoid _ _
     Pₛ' = Pₛ G
-      
+
     NEPₛ' : Setoid _ _
     NEPₛ' = NEPₛ G
 
@@ -88,7 +88,7 @@ module RoutingLib.Data.Graph.SGPath.Enumerate {a n} {A : Set a} (G : Graph A n) 
     open Any.Membership Pₛ' using () renaming (_∈_ to _∈ₗₚ_)
     open Any.Membership F×Fₛ using () renaming (_∈_ to _∈ᶠ_)
     open Any.Membership NEPₛ' using () renaming (_∈_ to _∈ₗₙₑₚ_; _∉_ to _∉ₗₙₑₚ_; ∈-resp-≈ to ∈ₗₚ-resp-≈ₗₙₑₚ)
-    open Setoid LNEPₛ using () renaming (reflexive to ≈ₗₙₑₚ-reflexive) 
+    open Setoid LNEPₛ using () renaming (reflexive to ≈ₗₙₑₚ-reflexive)
 
     w≢y⊎x≢z⇒wx≢yz : ∀ {w x y z : Fin n} → w ≢ y ⊎ x ≢ z → (w , x) ≢ (y , z)
     w≢y⊎x≢z⇒wx≢yz (inj₁ w≢w) refl = w≢w refl
@@ -105,11 +105,11 @@ module RoutingLib.Data.Graph.SGPath.Enumerate {a n} {A : Set a} (G : Graph A n) 
     -- filterValidEdges
 
     ∈-filterValidEdges : ∀ {i j} i≢j ij∈G {xs} → (i , j) ∈ᶠ xs → i ∺ j ∣ i≢j ∣ ij∈G ∈ₗₙₑₚ filterValidEdges xs
-    ∈-filterValidEdges {i} {j} i≢j ij∈G (here refl) with i ≟ j | (i , j) ᵉ∈ᵍ? G 
+    ∈-filterValidEdges {i} {j} i≢j ij∈G (here refl) with i ≟ j | (i , j) ᵉ∈ᵍ? G
     ... | yes i≡j | _       = contradiction i≡j i≢j
     ... | no  _   | no ij∉G = contradiction ij∈G ij∉G
     ... | no  _   | yes _   = here (refl ∺ refl)
-    ∈-filterValidEdges i≢j ij∈G {(k , l) ∷ _} (there ij∈xs) with k ≟ l | (k , l) ᵉ∈ᵍ? G 
+    ∈-filterValidEdges i≢j ij∈G {(k , l) ∷ _} (there ij∈xs) with k ≟ l | (k , l) ᵉ∈ᵍ? G
     ... | yes _ | _     = ∈-filterValidEdges i≢j ij∈G ij∈xs
     ... | no  _ | no  _ = ∈-filterValidEdges i≢j ij∈G ij∈xs
     ... | no  _ | yes _ = there (∈-filterValidEdges i≢j ij∈G ij∈xs)
@@ -162,7 +162,7 @@ module RoutingLib.Data.Graph.SGPath.Enumerate {a n} {A : Set a} (G : Graph A n) 
     ... | no  _ | _     = extendAll-∉ q≉ps
     ... | yes _ | no  _ = extendAll-∉ q≉ps
     ... | yes _ | yes _ = (λ {(_ ∷ p≈q) → q≉p p≈q}) ∷ (extendAll-∉ q≉ps)
-    
+
     extendAll! : ∀ {ps} → Unique NEPₛ' ps → ∀ i → Unique NEPₛ' (extendAll ps i)
     extendAll! [] _ = []
     extendAll! {p ∷ ps} (p∉ps ∷ ps!) i with i ∉ₙₑₚ? p | (i , source p) ᵉ∈ᵍ? G
@@ -182,21 +182,21 @@ module RoutingLib.Data.Graph.SGPath.Enumerate {a n} {A : Set a} (G : Graph A n) 
     ... | _ , _ , _ , refl ∷ _ | _ , _ , _ , refl ∷ _ = i≢j refl
 
 
-    -- All paths of length l 
+    -- All paths of length l
 
     ∈-allNEPathsOfLength : ∀ p → p ∈ₗₙₑₚ allNEPathsOfLength (length p)
     ∈-allNEPathsOfLength (i ∺ j ∣ i≢j ∣ ij∈G)               = ∈-filterValidEdges i≢j ij∈G (∈-combine _,_ (∈-allFin i) (∈-allFin j))
-    ∈-allNEPathsOfLength (i ∷ (j ∺ k ∣ j≢k ∣ jk∈G) ∣ _ ∣ _) = ∈-concat NEPₛ' 
-                                                                (∈-extendAll (∈-allNEPathsOfLength (j ∺ k ∣ j≢k ∣ jk∈G))) 
+    ∈-allNEPathsOfLength (i ∷ (j ∺ k ∣ j≢k ∣ jk∈G) ∣ _ ∣ _) = ∈-concat NEPₛ'
+                                                                (∈-extendAll (∈-allNEPathsOfLength (j ∺ k ∣ j≢k ∣ jk∈G)))
                                                                 (∈-map LNEPₛ Fₛ (≈ₗₙₑₚ-reflexive ∘ (cong (extendAll (allNEPathsOfLength 1)))) (∈-allFin i))
-    ∈-allNEPathsOfLength (i ∷ (j ∷ p ∣ j∉p ∣ jp∈G) ∣ _ ∣ _) = ∈-concat NEPₛ' 
-                                                                (∈-extendAll (∈-allNEPathsOfLength (j ∷ p ∣ j∉p ∣ jp∈G))) 
+    ∈-allNEPathsOfLength (i ∷ (j ∷ p ∣ j∉p ∣ jp∈G) ∣ _ ∣ _) = ∈-concat NEPₛ'
+                                                                (∈-extendAll (∈-allNEPathsOfLength (j ∷ p ∣ j∉p ∣ jp∈G)))
                                                                 (∈-map LNEPₛ Fₛ (≈ₗₙₑₚ-reflexive ∘ (cong (extendAll (allNEPathsOfLength (suc (length p)))))) (∈-allFin i))
 
     allNEPathsOfLength! : ∀ l → Unique NEPₛ' (allNEPathsOfLength l)
     allNEPathsOfLength! 0             = []
     allNEPathsOfLength! 1             = filterValidEdges! (combine! F×Fₛ Fₛ _,_ w≢y⊎x≢z⇒wx≢yz (allFin! n) (allFin! n))
-    allNEPathsOfLength! (suc (suc l)) = concat! NEPₛ' 
+    allNEPathsOfLength! (suc (suc l)) = concat! NEPₛ'
                                           (forced-map (extendAll! (allNEPathsOfLength! (suc l))) (allFin n))
                                           (map-pairs (extendAll-disjoint (allNEPathsOfLength (suc l)) (allNEPathsOfLength (suc l))) (allFin! n))
 
@@ -217,13 +217,13 @@ module RoutingLib.Data.Graph.SGPath.Enumerate {a n} {A : Set a} (G : Graph A n) 
   -- All non-empty paths
 
     allNEPaths! : Unique NEPₛ' allNEPaths
-    allNEPaths! = concat! NEPₛ' 
-                    (forced-map allNEPathsOfLength! (map toℕ (allFin n))) 
+    allNEPaths! = concat! NEPₛ'
+                    (forced-map allNEPathsOfLength! (map toℕ (allFin n)))
                     (map-pairs (λ {l} {k} → allNEPathsOfLength-disjoint {l} {k}) (map-pairs (λ x≢y → x≢y ∘ toℕ-injective) (allFin! n)))
 
     ∈-allNEPaths : ∀ p → p ∈ₗₙₑₚ allNEPaths
-    ∈-allNEPaths p = ∈-concat NEPₛ' 
-                       (∈-allNEPathsOfLength p) 
+    ∈-allNEPaths p = ∈-concat NEPₛ'
+                       (∈-allNEPathsOfLength p)
                        (∈-map LNEPₛ ℕₛ (≈ₗₙₑₚ-reflexive ∘ (cong allNEPathsOfLength)) (|p|∈allFin p))
 
 
@@ -237,15 +237,14 @@ module RoutingLib.Data.Graph.SGPath.Enumerate {a n} {A : Set a} (G : Graph A n) 
     ∈-allPaths [ p ] = there (∈-map Pₛ' NEPₛ' [_] (∈-allNEPaths p))
 
     isEnumeration : IsEnumeration Pₛ' allPaths
-    isEnumeration = record { 
-        unique = allPaths!; 
+    isEnumeration = record {
+        unique = allPaths!;
         complete = ∈-allPaths
       }
 
     enumeration : Enumeration Pₛ'
-    enumeration = record { 
-        list = allPaths; 
+    enumeration = record {
+        list = allPaths;
         isEnumeration = isEnumeration
       }
 
-  

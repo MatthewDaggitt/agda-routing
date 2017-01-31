@@ -18,7 +18,7 @@ open import RoutingLib.Data.Graph.SPath
 open import RoutingLib.Data.Graph.SPath.Properties
 
 module RoutingLib.Routing.AlgebraicPaths.Inconsistent.Properties
-  {a b ℓ} (ra : RoutingAlgebra a b ℓ) 
+  {a b ℓ} (ra : RoutingAlgebra a b ℓ)
   (⊕-sel : Selective (RoutingAlgebra._≈_ ra) (RoutingAlgebra._⊕_ ra))
   {n : ℕ}
   (G : Graph (RoutingAlgebra.Step ra) n)
@@ -28,7 +28,7 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent.Properties
   open import RoutingLib.Routing.AlgebraicPaths.Inconsistent ra ⊕-sel G
   open import RoutingLib.Algebra.Selectivity.Properties _≈_ _⊕_ ⊕-sel using () renaming (idem to ⊕-idem)
   open import RoutingLib.Algebra.Selectivity.NaturalOrders S _⊕_ ⊕-pres-≈ using (_≤ᵣ_; ≤ᵣ-trans; ≤ᵣ⇨≤ₗ; ≤ₗ⇨≤ᵣ)
-  
+
 
   abstract
 
@@ -87,7 +87,7 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent.Properties
 
       res : (iroute x p ⊕ⁱ iroute y q) ⊕ⁱ iroute z r ≈ⁱ iroute x p ⊕ⁱ (iroute y q ⊕ⁱ iroute z r)
       res with select x y | select y z
-      res | sel₁ _   _   | sel₁ _   _   with select x y | select x z 
+      res | sel₁ _   _   | sel₁ _   _   with select x y | select x z
       res | sel₁ _   _   | sel₁ _   _   | sel₁ _   _   | sel₁ _   _   = ≈ⁱ-refl
       res | sel₁ x≤y _   | sel₁ _   z≰y | sel₁ _   _   | sel₂ _   z≤x = contradiction (≤ᵣ-trans assoc z≤x (≤ₗ⇨≤ᵣ comm x≤y)) z≰y
       res | sel₁ x≤y _   | sel₁ _   z≰y | sel₁ _   _   | sel≈ _   z≤x = contradiction (≤ᵣ-trans assoc z≤x (≤ₗ⇨≤ᵣ comm x≤y)) z≰y
@@ -133,13 +133,13 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent.Properties
       res | sel₂ x≰y _   | sel≈ _   z≤y | no  _        | sel≈ x≤z _   | sel≈ _   _   = contradiction (≤ᵣ⇨≤ₗ comm (≤ᵣ-trans assoc (≤ₗ⇨≤ᵣ comm x≤z) z≤y)) x≰y
       res | sel≈ _   _   | sel₁ _   _   with p ≤ₚ? q
       res | sel≈ _   _   | sel₁ _   _   | yes _        with select x y | select x z
-      res | sel≈ _   y≤x | sel₁ _   _   | yes _        | sel₁ _   y≰x | _            = contradiction y≤x y≰x  
+      res | sel≈ _   y≤x | sel₁ _   _   | yes _        | sel₁ _   y≰x | _            = contradiction y≤x y≰x
       res | sel≈ x≤y _   | sel₁ _   _   | yes _        | sel₂ x≰y _   | _            = contradiction x≤y x≰y
-      res | sel≈ _   _   | sel₁ _   _   | yes _        | sel≈ _   _   | sel₁ _   _   with p ≤ₚ? q 
+      res | sel≈ _   _   | sel₁ _   _   | yes _        | sel≈ _   _   | sel₁ _   _   with p ≤ₚ? q
       res | sel≈ _   _   | sel₁ _   _   | yes _        | sel≈ _   _   | sel₁ _   _   | yes _         = ≈ⁱ-refl
       res | sel≈ _   _   | sel₁ _   _   | yes p≤q      | sel≈ _   _   | sel₁ _   _   | no  p≰q       = contradiction p≤q p≰q
-      res | sel≈ x≤y _   | sel₁ _   z≰y | yes _        | sel≈ _   _   | sel₂ _   z≤x = contradiction (≤ᵣ-trans assoc z≤x (≤ₗ⇨≤ᵣ comm x≤y)) z≰y 
-      res | sel≈ x≤y _   | sel₁ _   z≰y | yes _        | sel≈ _   _   | sel≈ _   z≤x = contradiction (≤ᵣ-trans assoc z≤x (≤ₗ⇨≤ᵣ comm x≤y)) z≰y  
+      res | sel≈ x≤y _   | sel₁ _   z≰y | yes _        | sel≈ _   _   | sel₂ _   z≤x = contradiction (≤ᵣ-trans assoc z≤x (≤ₗ⇨≤ᵣ comm x≤y)) z≰y
+      res | sel≈ x≤y _   | sel₁ _   z≰y | yes _        | sel≈ _   _   | sel≈ _   z≤x = contradiction (≤ᵣ-trans assoc z≤x (≤ₗ⇨≤ᵣ comm x≤y)) z≰y
       res | sel≈ _   _   | sel₁ _   _   | no  _        with select x y | select y z
       res | sel≈ _   y≤x | sel₁ _   _   | no  _        | sel₁ _   y≰x | _            = contradiction y≤x y≰x
       res | sel≈ x≤y _   | sel₁ _   _   | no  _        | sel₂ x≰y _   | _            = contradiction x≤y x≰y
@@ -150,14 +150,14 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent.Properties
       res | sel≈ _   _   | sel₁ _   y≰x | no  _        | _            | sel≈ _   y≤x = contradiction y≤x y≰x
       res | sel≈ _   _   | sel₂ _   _   with p ≤ₚ? q
       res | sel≈ _   _   | sel₂ _   _   | yes _        = ≈ⁱ-refl
-      res | sel≈ _   _   | sel₂ _   _   | no  _        with select x z | select y z 
+      res | sel≈ _   _   | sel₂ _   _   | no  _        with select x z | select y z
       res | sel≈ _   _   | sel₂ _   z≤y | no  _        | _            | sel₁ _   z≰y = contradiction z≤y z≰y
       res | sel≈ _   y≤x | sel₂ y≰z _   | no  _        | sel₁ x≤z _   | sel₂ _   _   = contradiction (≤ᵣ⇨≤ₗ comm (≤ᵣ-trans assoc y≤x (≤ₗ⇨≤ᵣ comm x≤z))) y≰z
       res | sel≈ _   _   | sel₂ _   _   | no  _        | sel₂ _   _   | sel₂ _   _   = ≈ⁱ-refl
       res | sel≈ _   y≤x | sel₂ y≰z _   | no  _        | sel≈ x≤z _   | sel₂ _   _   = contradiction (≤ᵣ⇨≤ₗ comm (≤ᵣ-trans assoc y≤x (≤ₗ⇨≤ᵣ comm x≤z))) y≰z
       res | sel≈ _   _   | sel₂ y≰z _   | no  _        | _            | sel≈ y≤z _   = contradiction y≤z y≰z
       res | sel≈ _   _   | sel≈ _   _   with p ≤ₚ? q | q ≤ₚ? r
-      res | sel≈ _   _   | sel≈ _   _   | yes _        | yes _        with select x y | select x z 
+      res | sel≈ _   _   | sel≈ _   _   | yes _        | yes _        with select x y | select x z
       res | sel≈ _   y≤x | sel≈ _   _   | yes _        | yes _        | sel₁ _   y≰x | _            = contradiction y≤x y≰x
       res | sel≈ x≤y _   | sel≈ _   _   | yes _        | yes _        | sel₂ x≰y _   | _            = contradiction x≤y x≰y
       res | sel≈ _   y≤x | sel≈ _   z≤y | yes _        | yes _        | sel≈ _   _   | sel₁ _   z≰x = contradiction (≤ᵣ-trans assoc z≤y y≤x) z≰x
@@ -172,7 +172,7 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent.Properties
       res | sel≈ x≤y _   | sel≈ _   _   | no  _        | yes _        | sel₂ x≰y _   | _            = contradiction x≤y x≰y
       res | sel≈ _   _   | sel≈ _   z≤y | no  _        | yes _        | _            | sel₁ _   z≰y = contradiction z≤y z≰y
       res | sel≈ _   _   | sel≈ y≤z _   | no  _        | yes _        | _            | sel₂ y≰z _   = contradiction y≤z y≰z
-      res | sel≈ _   _   | sel≈ _   _   | no  _        | yes _        | sel≈ _   _   | sel≈ _   _   with p ≤ₚ? q | q ≤ₚ? r 
+      res | sel≈ _   _   | sel≈ _   _   | no  _        | yes _        | sel≈ _   _   | sel≈ _   _   with p ≤ₚ? q | q ≤ₚ? r
       res | sel≈ _   _   | sel≈ _   _   | no  p≰q      | yes _        | sel≈ _   _   | sel≈ _   _   | yes p≤q     | _          = contradiction p≤q p≰q
       res | sel≈ _   _   | sel≈ _   _   | no  _        | yes q≤r      | sel≈ _   _   | sel≈ _   _   | _           | no  q≰r    = contradiction q≤r q≰r
       res | sel≈ _   _   | sel≈ _   _   | no  _        | yes _        | sel≈ _   _   | sel≈ _   _   | no  _       | yes _      = ≈ⁱ-refl
@@ -187,7 +187,7 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent.Properties
       res | sel≈ _   _   | sel≈ _   _   | no  _        | no  _        | sel≈ _   _   | sel≈ _   _   | yes _       | no  _      with ≤ₚ-total p q
       res | sel≈ _   _   | sel≈ _   _   | no  p≰q      | no  _        | sel≈ _   _   | sel≈ _   _   | yes _       | no  _      | inj₁ p≤q = contradiction p≤q p≰q
       res | sel≈ _   _   | sel≈ _   _   | no  p≰q      | no  q≰r      | sel≈ _   _   | sel≈ _   _   | yes p≤r     | no  _      | inj₂ q≤p = contradiction (≤ₚ-trans q≤p p≤r) q≰r
-      
+
     ----------------------
     -- Properties of ▷ⁱ --
     ----------------------
@@ -232,7 +232,7 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent.Properties
     ... | no  _   = ≡-refl
 
     Iⁱᵢᵢ≡one[] : ∀ i → Iⁱ i i ≡ iroute one []
-    Iⁱᵢᵢ≡one[] i with i ≟ᶠ i 
+    Iⁱᵢᵢ≡one[] i with i ≟ᶠ i
     ... | no  i≢i = contradiction ≡-refl i≢i
     ... | yes i≡i = ≡-refl
 -}
@@ -263,5 +263,3 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent.Properties
     ... | just _  = ≡-refl
 -}
 
-
-  

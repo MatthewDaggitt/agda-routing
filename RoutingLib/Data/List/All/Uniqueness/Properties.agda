@@ -7,6 +7,7 @@ open import Data.List.Any using (here; there; module Membership)
 open import Data.List.All using (All; []; _∷_; lookup) renaming (map to mapₐ)
 open import Data.List.All.Properties using (gmap)
 open import Data.Fin using (Fin) renaming (suc to fsuc)
+open import Data.Fin.Properties using (suc-injective)
 open import Data.Vec using (toList; tabulate)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_×_; _,_)
@@ -21,8 +22,8 @@ open import RoutingLib.Data.List.All using (AllPairs; []; _∷_)
 open import RoutingLib.Data.List.All.Properties using (All¬→¬Any; ¬Any→All¬; ++-all; All-∈; forced-map)
 open import RoutingLib.Data.Vec.Properties using (∉⇒List-∉; ∉-tabulate)
 open import RoutingLib.Data.Nat.Properties using (≤-antisym)
-open import RoutingLib.Data.Fin.Properties using (suc≢zero; suc-injective)
-open import RoutingLib.Data.Maybe.Base using (predBoolToMaybe)
+open import RoutingLib.Data.Fin.Properties using (suc≢zero)
+open import RoutingLib.Data.Maybe.Base
 open import RoutingLib.Data.Maybe.Properties using (just-injective)
 open import RoutingLib.Data.List.All.Uniqueness using (Unique)
 open import RoutingLib.Data.List.Any.GenericMembership using (filter-pres-∉; ∉-resp-≈; Disjoint; ∈xs⇨∉ys; disjoint-contract₁; disjoint-concat; length-remove; ⊆-remove; ∈-remove; ∈-resp-≈; map-∈; combine-∈)
@@ -69,15 +70,15 @@ module RoutingLib.Data.List.All.Uniqueness.Properties where
 
     -- Other
 
-    length-⊆ : ∀ {xs ys} → Unique S xs → xs ⊆ ys → length xs ≤ length ys 
+    length-⊆ : ∀ {xs ys} → Unique S xs → xs ⊆ ys → length xs ≤ length ys
     length-⊆                    []          _     = z≤n
     length-⊆ {_}      {[]}      (_ ∷ _)     xs⊆ys = contradiction (xs⊆ys (here refl)) λ()
     length-⊆ {x ∷ xs} {y ∷ ys} (x∉xs ∷ xs!) xs⊆ys = subst (λ v → length (x ∷ xs) ≤ v) (length-remove S (xs⊆ys (here refl))) (s≤s (length-⊆ xs! (⊆-remove S (xs⊆ys ∘ there) (xs⊆ys (here refl)) (All¬→¬Any x∉xs))))
 
     length-⊂ : ∀ {v xs ys} → Unique S xs → xs ⊆ ys → v ∉ xs → v ∈ ys → length xs < length ys
-    length-⊂               {ys = []}     _              _        _      ()    
+    length-⊂               {ys = []}     _              _        _      ()
     length-⊂ {xs = []}     {ys = y ∷ ys} _              _        _      _    = s≤s z≤n
-    length-⊂ {xs = x ∷ xs}               (x∉xs ∷ xs!)   x∷xs⊆ys v∉x∷xs v∈ys = subst (length (x ∷ xs) <_) (length-remove S (x∷xs⊆ys (here refl))) (s≤s (length-⊂ xs! (⊆-remove S (x∷xs⊆ys ∘ there) (x∷xs⊆ys (here refl)) (All¬→¬Any x∉xs)) (λ v∈xs → v∉x∷xs (there v∈xs)) (∈-remove S (x∷xs⊆ys (here refl)) v∈ys (λ x≈v → v∉x∷xs (∈-resp-≈ S (here refl) x≈v))) )) 
+    length-⊂ {xs = x ∷ xs}               (x∉xs ∷ xs!)   x∷xs⊆ys v∉x∷xs v∈ys = subst (length (x ∷ xs) <_) (length-remove S (x∷xs⊆ys (here refl))) (s≤s (length-⊂ xs! (⊆-remove S (x∷xs⊆ys ∘ there) (x∷xs⊆ys (here refl)) (All¬→¬Any x∉xs)) (λ v∈xs → v∉x∷xs (there v∈xs)) (∈-remove S (x∷xs⊆ys (here refl)) v∈ys (λ x≈v → v∉x∷xs (∈-resp-≈ S (here refl) x≈v))) ))
 
     length-⊆-⊇ : ∀ {xs ys} → Unique S xs → Unique S ys → xs ⊆ ys → ys ⊆ xs → length xs ≡ length ys
     length-⊆-⊇ xs! ys! xs⊆ys ys⊆xs = ≤-antisym (length-⊆ xs! xs⊆ys) (length-⊆ ys! ys⊆xs)
@@ -103,16 +104,16 @@ module RoutingLib.Data.List.All.Uniqueness.Properties where
         dis : ∀ {v : A} → ¬ (v ∈ (map (f x) ys) × v ∈ (combine f xs ys))
         dis {v} (v∈map , v∈com) with map-∈ S T v∈map | combine-∈ S T f xs ys v∈com
         ... | (c , c∈ys , v≈fxc) | (a , b , a∈xs , b∈ys , v≈fab) = contradiction (trans (sym v≈fxc) v≈fab) (f-inj (inj₁ (All-∈ T pres x∉xs a∈xs)))
- 
+
     open DoubleSetoid public
 
 
-    
+
 
   open SingleSetoid public
 
 
-  --allFin! : ∀ n → Unique (≡-setoid (Fin n)) (toList (allFin n)) 
+  --allFin! : ∀ n → Unique (≡-setoid (Fin n)) (toList (allFin n))
   --allFin! n = tabulate! (≡-setoid (Fin n)) id id
 
   Fₛ : ∀ {n} → Setoid _ _

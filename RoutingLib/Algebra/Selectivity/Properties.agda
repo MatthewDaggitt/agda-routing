@@ -1,12 +1,10 @@
-open import Algebra.FunctionProperties using (Op₂; Idempotent)
+open import Algebra.FunctionProperties using (Op₂; Idempotent; Selective)
 open import Data.Product using (_,_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Level using (_⊔_)
 open import Relation.Binary using (Rel; Transitive; Symmetric; Decidable)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
-
-open import RoutingLib.Algebra.FunctionProperties using (Selective)
 
 module RoutingLib.Algebra.Selectivity.Properties {a ℓ} {A : Set a} (_≈_ : Rel A ℓ) (_•_ : Op₂ A) (sel : Selective _≈_ _•_) where
 
@@ -36,7 +34,7 @@ module RoutingLib.Algebra.Selectivity.Properties {a ℓ} {A : Set a} (_≈_ : Re
   selective-equality trans {x} {y} {v} v≈x•y with sel x y
   ... | inj₁ x•y≈x = inj₁ (trans v≈x•y x•y≈x)
   ... | inj₂ x•y≈y = inj₂ (trans v≈x•y x•y≈y)
-  
+
   selective-inequality : Transitive _≈_ → ∀ {x y v} → v ≉ x → v ≉ y → v ≉ x • y
   selective-inequality trans {x} {y} {v} v≉x v≉y v≈x•y with sel x y
   ... | inj₁ x•y≈x = v≉x (trans v≈x•y x•y≈x)

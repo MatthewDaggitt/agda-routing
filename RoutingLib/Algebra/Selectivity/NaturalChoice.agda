@@ -75,29 +75,29 @@ module RoutingLib.Algebra.Selectivity.NaturalChoice {a ℓ} {A : Set a} {_≤_ :
     ... | inj₂ z≤y₂ | inj₂ z≤x₂ = refl
 
     absorbs : Antisymmetric _≈_ _≤_ → ∀ {_◦_} → _IncreasingOver_ _≈_ _◦_ _≤_ → _Absorbs_ _≈_ _•_ _◦_
-    absorbs antisym {_◦_} ◦-inc-≤ x y with total x (x ◦ y) 
+    absorbs antisym {_◦_} ◦-inc-≤ x y with total x (x ◦ y)
     ... | inj₁ x≤x◦y = refl
     ... | inj₂ x◦y≤x = antisym x◦y≤x ◦-inc-≤
 
     -- Identities and annihilators
 
-    idₗ : Antisymmetric _≈_ _≤_ → ∀ {⊥} → Top _≤_ ⊥ → LeftIdentity _≈_ ⊥ _•_ 
-    idₗ antisym {⊥} ⊥-top x with total ⊥ x 
+    idₗ : Antisymmetric _≈_ _≤_ → ∀ {⊥} → Top _≤_ ⊥ → LeftIdentity _≈_ ⊥ _•_
+    idₗ antisym {⊥} ⊥-top x with total ⊥ x
     ... | inj₁ ⊥≤x = antisym ⊥≤x ⊥-top
     ... | inj₂ x≤⊥ = refl
 
-    idᵣ : Antisymmetric _≈_ _≤_ → ∀ {⊥} → Top _≤_ ⊥ → RightIdentity _≈_ ⊥ _•_ 
-    idᵣ antisym {⊥} ⊥-top x with total x ⊥ 
+    idᵣ : Antisymmetric _≈_ _≤_ → ∀ {⊥} → Top _≤_ ⊥ → RightIdentity _≈_ ⊥ _•_
+    idᵣ antisym {⊥} ⊥-top x with total x ⊥
     ... | inj₁ x≤⊥ = refl
     ... | inj₂ ⊥≤x = antisym ⊥≤x ⊥-top
 
-    anₗ : Antisymmetric _≈_ _≤_ → ∀ {⊥} → Bottom _≤_ ⊥ → LeftZero _≈_ ⊥ _•_ 
-    anₗ antisym {⊥} ⊥-bottom x with total ⊥ x 
+    anₗ : Antisymmetric _≈_ _≤_ → ∀ {⊥} → Bottom _≤_ ⊥ → LeftZero _≈_ ⊥ _•_
+    anₗ antisym {⊥} ⊥-bottom x with total ⊥ x
     ... | inj₁ ⊥≤x = refl
     ... | inj₂ x≤⊥ = antisym x≤⊥ ⊥-bottom
 
-    anᵣ : Antisymmetric _≈_ _≤_ → ∀ {⊥} → Bottom _≤_ ⊥ → RightZero _≈_ ⊥ _•_ 
-    anᵣ antisym {⊥} ⊥-bottom x with total x ⊥ 
+    anᵣ : Antisymmetric _≈_ _≤_ → ∀ {⊥} → Bottom _≤_ ⊥ → RightZero _≈_ ⊥ _•_
+    anᵣ antisym {⊥} ⊥-bottom x with total x ⊥
     ... | inj₁ x≤⊥ = antisym x≤⊥ ⊥-bottom
     ... | inj₂ ⊥≤x = refl
 

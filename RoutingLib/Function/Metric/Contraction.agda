@@ -11,10 +11,10 @@ open import Induction.Nat using (<-well-founded)
 open import RoutingLib.Function using (_^_; ff^≡f^f)
 open import RoutingLib.Function.Metric
 
-module RoutingLib.Function.Metric.Contraction 
-    {a} {ℓ} {S : Setoid a ℓ} 
-    (M : Metric S) 
-    (f : Setoid.Carrier S → Setoid.Carrier S) 
+module RoutingLib.Function.Metric.Contraction
+    {a} {ℓ} {S : Setoid a ℓ}
+    (M : Metric S)
+    (f : Setoid.Carrier S → Setoid.Carrier S)
     where
 
     open Setoid S

@@ -13,12 +13,12 @@ open import Relation.Nullary using (¬_; yes; no)
 open import RoutingLib.Data.Graph using (Graph; nodes)
 
 module RoutingLib.Data.Graph.EPath where
- 
+
   -- Data types
 
   data EPath (n : ℕ) : Set lzero
   data _∉_ {n : ℕ} : Fin n → EPath n → Set lzero
-  
+
   data EPath (n : ℕ) where
     [_]   : Fin n → EPath n
     _∷_∣_ : ∀ i (p : EPath n) → i ∉ p → EPath n
@@ -28,7 +28,7 @@ module RoutingLib.Data.Graph.EPath where
     notHere  : ∀ {i j p j∉p} → i ≢ j → i ∉ p → i ∉ (j ∷ p ∣ j∉p)
 
   _∉?_ : ∀ {n} → Decidable (_∉_ {n})
-  i ∉? [ j ] with i ≟ j 
+  i ∉? [ j ] with i ≟ j
   ... | yes i≡j           = no λ{(notThere i≢j) → i≢j i≡j}
   ... | no  i≢j           = yes (notThere i≢j)
   i ∉? (j ∷ p ∣ _) with i ≟ j | i ∉? p
@@ -60,7 +60,7 @@ module RoutingLib.Data.Graph.EPath where
   toVec : ∀ {n} → (p : EPath n) → Vec (Fin n) (suc (length p))
   toVec [ i ]        = i ∷ []
   toVec (i ∷ p ∣ _ ) = i ∷ toVec p
-  
+
   lookup : ∀ {n} → (p : EPath n) → Fin (suc (length p)) → (Fin n)
   lookup p fzero = source p
   lookup [ _ ] (fsuc ())
@@ -77,8 +77,8 @@ module RoutingLib.Data.Graph.EPath where
   allPathsOfLength {n} (suc l) = concat (map (extendAll (allPathsOfLength l)) (toListᵥ (allFin n)))
 
   allPaths : ∀ {n} → List (EPath n)
-  allPaths {n} = concat (map allPathsOfLength (map toℕ (toListᵥ (allFin n)))) 
-  
+  allPaths {n} = concat (map allPathsOfLength (map toℕ (toListᵥ (allFin n))))
+
   private
 
     lookup : ∀ {n} → (p : NonEmptySPath n) → Fin (suc (length p)) → Fin n
@@ -86,8 +86,8 @@ module RoutingLib.Data.Graph.EPath where
     lookup (i ∺ j ∣ _ ∣ _) (fsuc fzero)     = j
     lookup (i ∺ j ∣ _ ∣ _) (fsuc (fsuc ()))
     lookup (i ∷ p ∣ _ ∣ _) fzero            = i
-    lookup (i ∷ p ∣ _ ∣ _) (fsuc k)         = lookup p k 
-    
+    lookup (i ∷ p ∣ _ ∣ _) (fsuc k)         = lookup p k
+
     lookup-∈ : ∀ {n} → (p : NonEmptySPath n) → ∀ i {k} → lookup p i ≡ k → k ∈ₙₑₚ p
     lookup-∈ (i ∺ j ∣ _ ∣ _) fzero            refl (notThere i≢i _) = i≢i refl
     lookup-∈ (i ∺ j ∣ _ ∣ _) (fsuc fzero)     refl (notThere _ j≢j) = j≢j refl
@@ -118,7 +118,7 @@ module RoutingLib.Data.Graph.EPath where
 
 
   -- Equality over paths
- 
+
   infix 4 _≈ₚ_ _≉ₚ_
 
   data _≈ₚ_ {n : ℕ} : Rel (EPath n) lzero where
@@ -148,7 +148,7 @@ module RoutingLib.Data.Graph.EPath where
   -- Length ordering over pathsd
 
   infix 4 _≤ₗ_ _≰ₗ_
-  
+
   _≤ₗ_ : ∀ {n} → Rel (EPath n) lzero
   p ≤ₗ q = length p ≤ℕ length q
 

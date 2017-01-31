@@ -26,7 +26,7 @@ module RoutingLib.Data.Graph.SGPath.Properties {a n} {A : Set a} where
     -------------------
 
     -- Equality
-  
+
     ≈ₙₑₚ-refl : ∀ {G : Graph A n} → Reflexive (_≈ₙₑₚ_ {G = G})
     ≈ₙₑₚ-refl {_} {_ ∺ _ ∣ _ ∣ _} = refl ∺ refl
     ≈ₙₑₚ-refl {_} {_ ∷ _ ∣ _ ∣ _} = refl ∷ ≈ₙₑₚ-refl
@@ -52,14 +52,14 @@ module RoutingLib.Data.Graph.SGPath.Properties {a n} {A : Set a} where
     ... | yes i≡k | yes p≡q = yes (i≡k ∷ p≡q)
 
     ≈ₙₑₚ-isEquivalence : ∀ (G : Graph A n) → IsEquivalence (_≈ₙₑₚ_ {G = G})
-    ≈ₙₑₚ-isEquivalence G = record { 
-        refl  = ≈ₙₑₚ-refl ; 
-        sym   = ≈ₙₑₚ-sym ; 
-        trans = ≈ₙₑₚ-trans 
+    ≈ₙₑₚ-isEquivalence G = record {
+        refl  = ≈ₙₑₚ-refl ;
+        sym   = ≈ₙₑₚ-sym ;
+        trans = ≈ₙₑₚ-trans
       }
 
     -- Orderings
- 
+
     ≤ₙₑₚ-refl : ∀ {G : Graph A n} → Reflexive (_≤ₙₑₚ_ {G = G})
     ≤ₙₑₚ-refl {_} {i ∺ j ∣ _ ∣ _} = stopFirst refl ≤-refl
     ≤ₙₑₚ-refl {_} {i ∷ p ∣ _ ∣ _} = stepEqual refl ≤ₙₑₚ-refl
@@ -104,7 +104,7 @@ module RoutingLib.Data.Graph.SGPath.Properties {a n} {A : Set a} where
     ≤ₙₑₚ-resp-≈ₙₑₚ (refl ∺ _)    (refl ∺ _)    (stopSecond i<k)     = stopSecond i<k
     ≤ₙₑₚ-resp-≈ₙₑₚ (refl ∷ _)    (refl ∷ _)    (stepUnequal i<k)    = stepUnequal i<k
     ≤ₙₑₚ-resp-≈ₙₑₚ (refl ∷ p≈q)  (refl ∷ r≈s)  (stepEqual refl p≤r) = stepEqual refl (≤ₙₑₚ-resp-≈ₙₑₚ p≈q r≈s p≤r)
-  
+
 
     -- Operations
 
@@ -115,8 +115,8 @@ module RoutingLib.Data.Graph.SGPath.Properties {a n} {A : Set a} where
     p≈q⇒p₀≡q₀ : ∀ {G : Graph A n} {p q : NonEmptySGPath G} → p ≈ₙₑₚ q → source p ≡ source q
     p≈q⇒p₀≡q₀ (refl ∺ _) = refl
     p≈q⇒p₀≡q₀ (refl ∷ _) = refl
-  
-    p≉i∷p : ∀ {G : Graph A n} {p : NonEmptySGPath G} {i i∉p ip∈G} → ¬ (p ≈ₙₑₚ i ∷ p ∣ i∉p ∣ ip∈G) 
+
+    p≉i∷p : ∀ {G : Graph A n} {p : NonEmptySGPath G} {i i∉p ip∈G} → ¬ (p ≈ₙₑₚ i ∷ p ∣ i∉p ∣ ip∈G)
     p≉i∷p {p = _ ∺ _ ∣ _ ∣ _} ()
     p≉i∷p {p = _ ∷ _ ∣ _ ∣ _} (_ ∷ p≈i∷p) = p≉i∷p p≈i∷p
 
@@ -130,7 +130,7 @@ module RoutingLib.Data.Graph.SGPath.Properties {a n} {A : Set a} where
     ------------
 
     -- Equality
-  
+
     ≈ₚ-refl : ∀ {G : Graph A n} → Reflexive (_≈ₚ_ {G = G})
     ≈ₚ-refl {_} {[]}    = []
     ≈ₚ-refl {_} {[ _ ]} = [ ≈ₙₑₚ-refl ]
@@ -152,10 +152,10 @@ module RoutingLib.Data.Graph.SGPath.Properties {a n} {A : Set a} where
     ... | yes p≈q = yes [ p≈q ]
 
     ≈ₚ-isEquivalence : ∀ (G : Graph A n) → IsEquivalence (_≈ₚ_ {G = G})
-    ≈ₚ-isEquivalence G = record { 
-        refl  = ≈ₚ-refl ; 
-        sym   = ≈ₚ-sym ; 
-        trans = ≈ₚ-trans 
+    ≈ₚ-isEquivalence G = record {
+        refl  = ≈ₚ-refl ;
+        sym   = ≈ₚ-sym ;
+        trans = ≈ₚ-trans
       }
 
     p≉q⇒[p]≉[q] : ∀ {G : Graph A n} {p q : NonEmptySGPath G} → ¬ (p ≈ₙₑₚ q) → [ p ] ≉ₚ [ q ]
@@ -228,17 +228,17 @@ module RoutingLib.Data.Graph.SGPath.Properties {a n} {A : Set a} where
   -- Non-abstract proofs
 
   NEPₛ : ∀ (G : Graph A n) → Setoid a a
-  NEPₛ G = record { 
-      Carrier = NonEmptySGPath G ; 
-      _≈_ = _≈ₙₑₚ_ ; 
-      isEquivalence = ≈ₙₑₚ-isEquivalence G 
+  NEPₛ G = record {
+      Carrier = NonEmptySGPath G ;
+      _≈_ = _≈ₙₑₚ_ ;
+      isEquivalence = ≈ₙₑₚ-isEquivalence G
     }
 
   Pₛ : ∀ (G : Graph A n) → Setoid a a
-  Pₛ G = record { 
-      Carrier = SGPath G ; 
-      _≈_ = _≈ₚ_; 
-      isEquivalence = ≈ₚ-isEquivalence G 
+  Pₛ G = record {
+      Carrier = SGPath G ;
+      _≈_ = _≈ₚ_;
+      isEquivalence = ≈ₚ-isEquivalence G
     }
 
 
@@ -248,9 +248,9 @@ module RoutingLib.Data.Graph.SGPath.Properties {a n} {A : Set a} where
   weight-resp-≈ₚ _▷_ 1# {[ _ ]} {[]} ()
   weight-resp-≈ₚ _▷_ 1# {[ _ ∺ _ ∣ _ ∣ _ ]} {[ _ ∷ _ ∣ _ ∣ _ ]} [ () ]
   weight-resp-≈ₚ _▷_ 1# {[ _ ∷ _ ∣ _ ∣ _ ]} {[ _ ∺ _ ∣ _ ∣ _ ]} [ () ]
-  weight-resp-≈ₚ _▷_ 1# {[ i ∺ j ∣ _ ∣ (v , Gᵢⱼ≡v) ]} {[ .i ∺ .j ∣ _ ∣ (w , Gᵢⱼ≡w) ]} [ refl ∺ refl ] = 
+  weight-resp-≈ₚ _▷_ 1# {[ i ∺ j ∣ _ ∣ (v , Gᵢⱼ≡v) ]} {[ .i ∺ .j ∣ _ ∣ (w , Gᵢⱼ≡w) ]} [ refl ∺ refl ] =
     cong (_▷ 1#) (just-injective (trans (sym Gᵢⱼ≡v) Gᵢⱼ≡w))
-  weight-resp-≈ₚ {G} _▷_ 1# {[ i ∷ p ∣ _ ∣ (v , e≡v) ]} {[ .i ∷ q ∣ _ ∣ (w , e≡w) ]} [ refl ∷ p≈q ] = 
-    cong₂ _▷_ 
+  weight-resp-≈ₚ {G} _▷_ 1# {[ i ∷ p ∣ _ ∣ (v , e≡v) ]} {[ .i ∷ q ∣ _ ∣ (w , e≡w) ]} [ refl ∷ p≈q ] =
+    cong₂ _▷_
       (just-injective (trans (trans (sym e≡v) (cong (G i) (p≈q⇒p₀≡q₀ p≈q))) e≡w))
       (weight-resp-≈ₚ _▷_ 1# [ p≈q ])

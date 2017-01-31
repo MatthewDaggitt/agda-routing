@@ -19,7 +19,7 @@ open import RoutingLib.Data.List.All using (Chain; _∷_; [])
 open import RoutingLib.Data.Maybe.Properties using (just-injective)
 
 module RoutingLib.Data.Graph.EGPath {a n} {A : Set a} where
- 
+
   --------------------
   -- Path structure --
   --------------------
@@ -58,7 +58,7 @@ module RoutingLib.Data.Graph.EGPath {a n} {A : Set a} where
   to∉′ (notThere i≢j) = notThere i≢j
   to∉′ (notHere i≢j i∉p) = notHere i≢j (to∉′ i∉p)
 
-  
+
   to∉′′ : ∀ {G i} {p : EGPath G} → i ∉′ (toEPath p) → i ∉ p
   to∉′′ {p = [ _ ]}         (notThere i≢j)    = notThere i≢j
   to∉′′ {p = _ ∷ _ ∣ _ ∣ _} (notHere i≢j i∉p) = notHere i≢j (to∉′′ i∉p)
@@ -85,7 +85,7 @@ module RoutingLib.Data.Graph.EGPath {a n} {A : Set a} where
 
 
   -- Equality over paths
-  
+
   infix 4 _≈ₚ_ _≉ₚ_
 
   open import RoutingLib.Data.Graph.EPath using ([_]; _∷_) public
@@ -99,7 +99,7 @@ module RoutingLib.Data.Graph.EGPath {a n} {A : Set a} where
 
 
   -- Lexicographic omparison between paths
-  
+
   infix 4 _≤ₚ_ _≰ₚ_
 
   open import RoutingLib.Data.Graph.EPath using (stop; stopLeft; stopRight; stepEqual; stepUnequal) public
@@ -130,7 +130,7 @@ module RoutingLib.Data.Graph.EGPath {a n} {A : Set a} where
 
   toList : ∀ {G} → EGPath G → List (Fin n)
   toList = toList′ ∘ toEPath
-  
+
   toVec : ∀ {G} → (p : EGPath G) → Vec (Fin n) (suc (length p))
   toVec = toVec′ ∘ toEPath
 

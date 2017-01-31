@@ -15,15 +15,12 @@ module RoutingLib.Data.Vec where
   v ∉ xs = ¬ (v ∈ xs)
 
   ∉-extend : ∀ {a n} {A : Set a} {v x : A} {xs : Vec A n} → ¬ (v ≡ x) → v ∉ xs → v ∉ (x ∷ xs)
-  ∉-extend {v = v} {x = .v} v≢x v∉xs here         = v≢x refl 
-  ∉-extend                  _   v∉xs (there v∈xs) = v∉xs v∈xs 
+  ∉-extend {v = v} {x = .v} v≢x v∉xs here         = v≢x refl
+  ∉-extend                  _   v∉xs (there v∈xs) = v∉xs v∈xs
 
   ---------------------------
   -- Additional operations --
   ---------------------------
-
-  allPairs : ∀ {a b} {A : Set a} {B : Set b} {m n} → Vec A m → Vec B n → Vec (A × B) (m * n)
-  allPairs xs ys = map _,_ xs ⊛* ys
 
   find : ∀ {a n} {A : Set a} → Decidable (_≡_ {A = A}) → (v : A) (xs : Vec A n) → v ∈ xs ⊎ v ∉ xs
   find _   v [] = inj₂ λ()

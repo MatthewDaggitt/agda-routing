@@ -13,19 +13,17 @@ open import Relation.Binary using (_⇒_; Setoid; Rel; Reflexive; Symmetric; Tra
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; cong; subst; subst₂) renaming (setoid to ≡-setoid; refl to ≡-refl; trans to ≡-trans; sym to ≡-sym)
-open import Algebra.FunctionProperties using (RightIdentity; RightZero; Commutative; Associative)
+open import Algebra.FunctionProperties using (RightIdentity; RightZero; Commutative; Associative; Selective)
 
 open import RoutingLib.Algebra.FunctionProperties
-open import RoutingLib.Data.Vec using (allPairs)
-open import RoutingLib.Data.Vec.Properties using (lookup-map; ∈-allPairs)
+open import RoutingLib.Data.Vec.Properties using (lookup-map)
 open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_)
 open import RoutingLib.Routing.Definitions
 
-module RoutingLib.Routing.Algorithms.DistributedBellmanFord.Synchronous.Properties 
-  {a b ℓ n} 
-  (rp : RoutingProblem a b ℓ n)
+module RoutingLib.Routing.Algorithms.DistributedBellmanFord.Synchronous.Properties
+  {a b ℓ n} (rp : RoutingProblem a b ℓ n)
   where
-  
+
   -----------
   -- Setup --
   -----------
@@ -108,7 +106,7 @@ module RoutingLib.Routing.Algorithms.DistributedBellmanFord.Synchronous.Properti
     σXᵢᵢ≈σYᵢᵢ ⊕-sel ⊕-assoc ⊕-comm 1#-anᵣ-⊕ X Y i = trans (σXᵢᵢ≈Iᵢᵢ ⊕-sel ⊕-assoc ⊕-comm 1#-anᵣ-⊕ X i) (sym (σXᵢᵢ≈Iᵢᵢ ⊕-sel ⊕-assoc ⊕-comm 1#-anᵣ-⊕ Y i))
 
     -- A sufficient (but not necessary condition) for σXᵢⱼ ≈ σYᵢⱼ
-    σXᵢⱼ≈σYᵢⱼ : Selective _≈_ _⊕_ → Associative _≈_ _⊕_ → Commutative _≈_ _⊕_ → ∀ X Y i j 
+    σXᵢⱼ≈σYᵢⱼ : Selective _≈_ _⊕_ → Associative _≈_ _⊕_ → Commutative _≈_ _⊕_ → ∀ X Y i j
               → (∀ k → (A i k ▷ X k j ≈ A i k ▷ Y k j) ⊎ ((∃ λ l → (A i l ▷ X l j) <ᵣ (A i k ▷ X k j)) × (∃ λ m → (A i m ▷ Y m j) <ᵣ (A i k ▷ Y k j)))) → σ X i j ≈ σ Y i j
     σXᵢⱼ≈σYᵢⱼ ⊕-sel ⊕-assoc ⊕-comm X Y i j eqCon = foldrₓₛ≈foldrᵥₛ ⊕-sel ⊕-comm ⊕-assoc (I i j) (extensions X i j) (extensions Y i j) adjust
       where

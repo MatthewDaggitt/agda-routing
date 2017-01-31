@@ -1,8 +1,9 @@
 open import Data.Nat using (ℕ; zero; suc; _≤_; _<_; _⊔_; _∸_; z≤n; s≤s; _≟_; _≤?_; module ≤-Reasoning)
-open import Data.Nat.Properties using (m≤m⊔n; n≤1+n)
+open import Data.Nat.Properties using (m≤m⊔n; n≤1+n; ⊔-sel)
 open import Data.Fin using (Fin; toℕ)
 open import Data.Fin.Properties using ()
 open import Data.Fin.Subset using (_∈_)
+open import Data.Fin.Dec using (_∈?_)
 open import Data.Product using (∃; _,_; _×_; proj₁; proj₂)
 open import Data.Sum using (inj₁; inj₂; _⊎_)
 open import Data.List.Any using (Any) renaming (map to anyMap)
@@ -14,10 +15,8 @@ open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary using (tri<; tri≈; tri>)
 open import Relation.Binary.PropositionalEquality using (refl; sym; cong; subst; _≢_; _≡_)
 
-
 open import RoutingLib.Asynchronous.Core
-open import RoutingLib.Data.Fin.Subset using (_∈?_)
-open import RoutingLib.Data.Nat.Properties using (cmp; ≤+≢⇒<; m<n≤o⇨o∸n<o∸m; ≤-refl; <⇒≤; ⊔-⊎preserves-x≤; ⊔-sel; ∀x≤m:n≢x⇒m<n; 0-idᵣ-⊔; <-irrefl; ≤-trans; ≤-reflexive; ≮⇒≥; m⊔n≡m⇨n≤m; n⊔m≡m⇨n≤m; n≤m⊔n; m+1≤n+1⇨m≤n)
+open import RoutingLib.Data.Nat.Properties using (cmp; ≤+≢⇒<; m<n≤o⇨o∸n<o∸m; ≤-refl; <⇒≤; ⊔-⊎preserves-x≤; ∀x≤m:n≢x⇒m<n; 0-idᵣ-⊔; <-irrefl; ≤-trans; ≤-reflexive; ≮⇒≥; m⊔n≡m⇨n≤m; n⊔m≡m⇨n≤m; n≤m⊔n; m+1≤n+1⇨m≤n)
 open import RoutingLib.Induction.Nat using () renaming (<-well-founded to <-wf)
 open import RoutingLib.Data.List.Folds using (foldr-⊎preserves)
 open import RoutingLib.Data.List using (allFin; descending)
@@ -25,17 +24,17 @@ open import RoutingLib.Data.List.Any.Properties using (map⁺)
 open import RoutingLib.Data.List.Any.PropositionalMembership using (∈-allFin; ∈-map)
 
 module RoutingLib.Asynchronous.Properties {p : ℕ} (sch : AdmissableSchedule p) where
-  
+
   open AdmissableSchedule sch
 
-  
+
   -- The next activation time
   private
 
     nextActivation' : ∀ {t t' i} → Acc _<_ (t' ∸ t) → t < t' → i ∈ α t' → ∃ λ tₐ → (t < tₐ) × (i ∈ α tₐ) × (∀ {t''} → t < t'' → i ∈ α t'' → tₐ ≤ t'')
     nextActivation' {t} {t'} {i} (acc t'∸t-acc) t<t' i∈αₜ' with i ∈? α (suc t) | (suc t) ≟ t'
     ... | yes i∈αₜ₊₁ | _          = suc t , ≤-refl , i∈αₜ₊₁ , (λ t<t'' _ → t<t'')
-    ... | no  i∉αₜ₊₁ | yes t+1≡t' = contradiction (subst (λ t → i ∈ α t) (sym t+1≡t') i∈αₜ') i∉αₜ₊₁ 
+    ... | no  i∉αₜ₊₁ | yes t+1≡t' = contradiction (subst (λ t → i ∈ α t) (sym t+1≡t') i∈αₜ') i∉αₜ₊₁
     ... | no  i∉αₜ₊₁ | no  t+1≢t' with nextActivation' (t'∸t-acc (t' ∸ suc t) (m<n≤o⇨o∸n<o∸m ≤-refl t<t')) (≤+≢⇒< t<t' t+1≢t') i∈αₜ'
     ...   | tₐ , t+1<tₐ , i∈αₜₐ , earliest = tₐ , <⇒≤ t+1<tₐ , i∈αₜₐ , (λ {t''} t<t'' i∈αₜ'' → earliest (≤+≢⇒< t<t'' (λ t+1≡t'' → i∉αₜ₊₁ (subst (λ t → i ∈ α t) (sym t+1≡t'') i∈αₜ''))) i∈αₜ'')
 
@@ -55,7 +54,7 @@ module RoutingLib.Asynchronous.Properties {p : ℕ} (sch : AdmissableSchedule p)
   nextActivation-next : ∀ {t i t''} → t < t'' → i ∈ α t'' → nextActivation t i ≤ t''
   nextActivation-next {t} {i} = proj₂ (proj₂ (proj₂ (nextActivation-all t i)))
 
-  
+
 
   -- Time after t at which all nodes have activated
 
@@ -92,8 +91,8 @@ module RoutingLib.Asynchronous.Properties {p : ℕ} (sch : AdmissableSchedule p)
 
 
 
-  -- The first time before time t' that information generated at j at time t is not used again by i before time t' 
-  
+  -- The first time before time t' that information generated at j at time t is not used again by i before time t'
+
   boundedExpiration : ℕ → ℕ → Fin p → Fin p → ℕ
   boundedExpiration zero t i j = zero
   boundedExpiration (suc t') t i j with β t' i j ≟ t
@@ -123,7 +122,7 @@ module RoutingLib.Asynchronous.Properties {p : ℕ} (sch : AdmissableSchedule p)
 
 
 
-  --- The first time that information generated at j before or at time t is not used again by i 
+  --- The first time that information generated at j before or at time t is not used again by i
   newerDataFrom : ℕ → Fin p → Fin p → ℕ
   newerDataFrom t i j = foldr _⊔_ 0 (map (λ t → dataNotFrom t i j) (descending (suc t)))
 
@@ -142,12 +141,12 @@ module RoutingLib.Asynchronous.Properties {p : ℕ} (sch : AdmissableSchedule p)
   ... | inj₁ eₜ⊔e≤ₜ≡eₜ  | no  x≢t+1 rewrite eₜ⊔e≤ₜ≡eₜ          = dataNotFrom-expiry x       i j (≤-trans (≤-trans (x≤t⇒eₓ≤teₜ i j (m+1≤n+1⇨m≤n (≤+≢⇒< x≤t+1 x≢t+1))) (m⊔n≡m⇨n≤m eₜ⊔e≤ₜ≡eₜ)) ndfₜ≤t')
   ... | inj₂ eₜ⊔e≤ₜ≡e≤ₜ | yes x≡t+1 rewrite eₜ⊔e≤ₜ≡e≤ₜ | x≡t+1 = dataNotFrom-expiry (suc t) i j (≤-trans (n⊔m≡m⇨n≤m eₜ⊔e≤ₜ≡e≤ₜ) ndfₜ≤t')
   ... | inj₂ eₜ⊔e≤ₜ≡e≤ₜ | no  x≢t+1 rewrite eₜ⊔e≤ₜ≡e≤ₜ         = newerDataFrom-lemma        i j ndfₜ≤t' (m+1≤n+1⇨m≤n (≤+≢⇒< x≤t+1 x≢t+1))
-    
+
   newerDataFrom-expiry : ∀ t t' i j → newerDataFrom t i j ≤ t' → t < β t' i j
   newerDataFrom-expiry t t' i j ndfₜ≤t' = ∀x≤m:n≢x⇒m<n t (β t' i j) (newerDataFrom-lemma i j ndfₜ≤t')
 
 
-  
+
 
 
   -- The time at which node i only uses data generated after time t
@@ -156,7 +155,7 @@ module RoutingLib.Asynchronous.Properties {p : ℕ} (sch : AdmissableSchedule p)
   freshDataFor t i = foldr _⊔_ t (map (newerDataFrom t i) (allFin p))
 
   freshDataFor-expiry : ∀ t t' i j → freshDataFor t i ≤ t' → t < β t' i j
-  freshDataFor-expiry t t' i j fdfₜ≤t' = newerDataFrom-expiry t t' i j (≤-trans (foldr-⊎preserves (newerDataFrom t i j ≤_) ⊔-⊎preserves-x≤ t (map (newerDataFrom t i) (allFin p)) 
+  freshDataFor-expiry t t' i j fdfₜ≤t' = newerDataFrom-expiry t t' i j (≤-trans (foldr-⊎preserves (newerDataFrom t i j ≤_) ⊔-⊎preserves-x≤ t (map (newerDataFrom t i) (allFin p))
     (inj₂ (anyMap ≤-reflexive (∈-map (newerDataFrom t i) (∈-allFin j))))) fdfₜ≤t')
 
 
@@ -170,8 +169,8 @@ module RoutingLib.Asynchronous.Properties {p : ℕ} (sch : AdmissableSchedule p)
   t≤freshData t = foldr-⊎preserves (t ≤_) ⊔-⊎preserves-x≤ t (map (freshDataFor t) (allFin p)) (inj₁ ≤-refl)
 
   freshData-expiry : ∀ t t' i j → freshData t ≤ t' → t < β t' i j
-  freshData-expiry t t' i j fdₜ≤t' = freshDataFor-expiry t t' i j (≤-trans (foldr-⊎preserves (freshDataFor t i ≤_) ⊔-⊎preserves-x≤ t (map (freshDataFor t) (allFin p)) 
-    (inj₂ (anyMap ≤-reflexive (∈-map (freshDataFor t) (∈-allFin i))))) fdₜ≤t') 
+  freshData-expiry t t' i j fdₜ≤t' = freshDataFor-expiry t t' i j (≤-trans (foldr-⊎preserves (freshDataFor t i ≤_) ⊔-⊎preserves-x≤ t (map (freshDataFor t) (allFin p))
+    (inj₂ (anyMap ≤-reflexive (∈-map (freshDataFor t) (∈-allFin i))))) fdₜ≤t')
 
 
 
@@ -185,16 +184,16 @@ module RoutingLib.Asynchronous.Properties {p : ℕ} (sch : AdmissableSchedule p)
 
     syncIter-activated : ∀ t i → ∃ λ t' → syncIter t < t' × t' ≤ syncIter (suc t) × i ∈ α t' × (∀ i j {t''} → t' ≤ t'' → syncIter t < β t'' i j)
     syncIter-activated t i with allActivations-activated (freshData (syncIter t)) i
-    ... | (t' , fd[si]ₜ<t' , t'≤siₜ₊₁ , i∈αₜ') = 
-      t' , 
-      ≤-trans (s≤s (t≤freshData (syncIter t))) fd[si]ₜ<t' , 
-      t'≤siₜ₊₁ , 
-      i∈αₜ' , 
+    ... | (t' , fd[si]ₜ<t' , t'≤siₜ₊₁ , i∈αₜ') =
+      t' ,
+      ≤-trans (s≤s (t≤freshData (syncIter t))) fd[si]ₜ<t' ,
+      t'≤siₜ₊₁ ,
+      i∈αₜ' ,
       (λ i j {t''} t'≤t'' → freshData-expiry (syncIter t) t'' i j (≤-trans (<⇒≤ fd[si]ₜ<t') t'≤t''))
 
     syncIter-lowerBound : ∀ n → n ≤ syncIter n
     syncIter-lowerBound zero    = z≤n
-    syncIter-lowerBound (suc n) = 
+    syncIter-lowerBound (suc n) =
       begin
         suc n
       ≤⟨ s≤s (syncIter-lowerBound n) ⟩

@@ -7,22 +7,22 @@ open import RoutingLib.Data.List.All.Uniqueness
 
 
 module RoutingLib.Data.List.Enumeration {c} {ℓ} (S : Setoid c ℓ) where
-  
+
   open Setoid S using () renaming (Carrier to A)
 
 
   record IsEnumeration (values : List A) : Set (c ⊔ ℓ) where
 
     open Membership S using (_∈_)
-    
+
     field
       unique : Unique S values
       complete : ∀ x → x ∈ values
 
 
   record Enumeration : Set (c ⊔ ℓ) where
-    
-    field 
+
+    field
       list : List A
       isEnumeration : IsEnumeration list
 

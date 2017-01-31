@@ -5,12 +5,12 @@ open import Relation.Nullary.Negation using (contradiction)
 open import Data.Nat using (suc) renaming (_≟_ to _≟ℕ_; _≤?_ to _≤ℕ?_; _<_ to _<ℕ_)
 open import Data.Nat.Properties using (<-trans)
 open import Data.Fin using (Fin; _<_) renaming (suc to fsuc)
-open import Data.Fin.Properties using (_≟_)
+open import Data.Fin.Properties using (_≟_;  cmp)
 open import Data.Sum using (inj₁; inj₂)
 
 open import RoutingLib.Data.Graph.SPath
 open import RoutingLib.Data.Nat.Properties using (<⇒≢; <⇒≯; ≤-refl; m+n≮n; m+1+n≢n; suc-injective) renaming (cmp to ≤ℕ-cmp)
-open import RoutingLib.Data.Fin.Properties using (≤-trans; ≤-antisym; ≤-total; _≤?_; _<?_; cmp)
+open import RoutingLib.Data.Fin.Properties using (≤-trans; ≤-antisym; ≤-total; _<?_; _≤?_)
 open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_)
 
 module RoutingLib.Data.Graph.SPath.Properties {n} where
@@ -20,7 +20,7 @@ module RoutingLib.Data.Graph.SPath.Properties {n} where
   -------------------
 
   -- Equality
-  
+
   ≈ₙₑₚ-refl : Reflexive (_≈ₙₑₚ_ {n})
   ≈ₙₑₚ-refl {_ ∺ _ ∣ _} = refl ∺ refl
   ≈ₙₑₚ-refl {_ ∷ _ ∣ _} = refl ∷ ≈ₙₑₚ-refl
@@ -47,7 +47,7 @@ module RoutingLib.Data.Graph.SPath.Properties {n} where
 
 
   -- Orderings
- 
+
   ≤ₙₑₚ-refl : Reflexive (_≤ₙₑₚ_ {n})
   ≤ₙₑₚ-refl {i ∺ j ∣ _} = stopFirst refl ≤-refl
   ≤ₙₑₚ-refl {i ∷ p ∣ _} = stepEqual refl ≤ₙₑₚ-refl
@@ -92,7 +92,7 @@ module RoutingLib.Data.Graph.SPath.Properties {n} where
   ≤ₙₑₚ-resp-≈ₙₑₚ (refl ∺ _)    (refl ∺ _)    (stopSecond i<k)     = stopSecond i<k
   ≤ₙₑₚ-resp-≈ₙₑₚ (refl ∷ _)    (refl ∷ _)    (stepUnequal i<k)    = stepUnequal i<k
   ≤ₙₑₚ-resp-≈ₙₑₚ (refl ∷ p≈q)  (refl ∷ r≈s)  (stepEqual refl p≤r) = stepEqual refl (≤ₙₑₚ-resp-≈ₙₑₚ p≈q r≈s p≤r)
-  
+
 
   -- Operations
 
@@ -104,7 +104,7 @@ module RoutingLib.Data.Graph.SPath.Properties {n} where
   p≈q⇒p₀≡q₀ (refl ∺ _) = refl
   p≈q⇒p₀≡q₀ (refl ∷ _) = refl
 
-  p≉i∷p : ∀ {i : Fin n} {p i∉p} → ¬ (p ≈ₙₑₚ i ∷ p ∣ i∉p) 
+  p≉i∷p : ∀ {i : Fin n} {p i∉p} → ¬ (p ≈ₙₑₚ i ∷ p ∣ i∉p)
   p≉i∷p {p = _ ∺ _ ∣ _} ()
   p≉i∷p {p = _ ∷ _ ∣ _} (_ ∷ p≈i∷p) = p≉i∷p p≈i∷p
 
@@ -117,7 +117,7 @@ module RoutingLib.Data.Graph.SPath.Properties {n} where
   ------------
 
   -- Equality
-  
+
   ≈ₚ-refl : Reflexive (_≈ₚ_ {n})
   ≈ₚ-refl {[]}    = []
   ≈ₚ-refl {[ _ ]} = [ ≈ₙₑₚ-refl ]

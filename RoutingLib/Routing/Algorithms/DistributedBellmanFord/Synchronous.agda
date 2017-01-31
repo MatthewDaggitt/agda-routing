@@ -20,7 +20,7 @@ module RoutingLib.Routing.Algorithms.DistributedBellmanFord.Synchronous
   I i j with j ≟ᶠ i
   ... | yes _ = 1#
   ... | no  _ = 0#
-  
+
   -- All the possible ways of forming paths from i to j
   -- by extending the paths held in the current RMatrix
   extensions : RMatrix → Fin n → Fin n → Vec Route n

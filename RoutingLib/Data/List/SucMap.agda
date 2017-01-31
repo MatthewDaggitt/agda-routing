@@ -7,7 +7,7 @@ open Any.Membership-≡ using (_∈_; _∉_)
 
 
 module RoutingLib.Data.List.SucMap where
-  
+
   0∉mapₛ : ∀ {n} {xs : List (Fin n)} → fzero ∉ map fsuc xs
   0∉mapₛ {xs = []} = λ()
   0∉mapₛ {xs = x ∷ xs} (here ())

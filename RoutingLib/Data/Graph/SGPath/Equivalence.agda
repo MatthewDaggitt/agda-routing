@@ -24,11 +24,11 @@ module RoutingLib.Data.Graph.SGPath.Equivalence {a n} {A : Set a} where
 
     ≃ₙₑₚ-source : ∀ {G : Graph A n} {p} {q : NonEmptySGPath G} → p ≃ₙₑₚ q → sourceˢ p ≡ sourceˢᵍ q
     ≃ₙₑₚ-source (refl ∺ _) = refl
-    ≃ₙₑₚ-source (refl ∷ _) = refl 
+    ≃ₙₑₚ-source (refl ∷ _) = refl
 
     ≃ₙₑₚ-destination : ∀ {G : Graph A n} {p} {q : NonEmptySGPath G} → p ≃ₙₑₚ q → destinationˢ p ≡ destinationˢᵍ q
     ≃ₙₑₚ-destination (_ ∺ refl) = refl
-    ≃ₙₑₚ-destination (_ ∷ p≃q)  = ≃ₙₑₚ-destination p≃q 
+    ≃ₙₑₚ-destination (_ ∷ p≃q)  = ≃ₙₑₚ-destination p≃q
 
     ≃ₙₑₚ-length : ∀ {G : Graph A n} {p} {q : NonEmptySGPath G} → p ≃ₙₑₚ q → lengthˢ p ≡ lengthˢᵍ q
     ≃ₙₑₚ-length (_ ∺ _)   = refl
@@ -49,7 +49,7 @@ module RoutingLib.Data.Graph.SGPath.Equivalence {a n} {A : Set a} where
     ≃ₚ-∉ˢ : ∀ {G : Graph A n} {i p} → {q : SGPath G} → p ≃ₚ q → i ∉ₚˢᵍ q → i ∉ₚˢ p
     ≃ₚ-∉ˢ []      _               = notHere
     ≃ₚ-∉ˢ [ p≃q ] (notThere i∉p)  = notThere (≃ₙₑₚ-∉ˢ p≃q i∉p)
- 
+
     ≃ₙₑₚ-≤ˢᵍ : ∀ {G : Graph A n} {p r} {q s : NonEmptySGPath G} → p ≃ₙₑₚ q → r ≃ₙₑₚ s → p ≤ₙₑₚˢ r → q ≤ₙₑₚˢᵍ s
     ≃ₙₑₚ-≤ˢᵍ (refl ∺ refl) (refl ∺ refl) (stopFirst refl k<l) = stopFirst refl k<l
     ≃ₙₑₚ-≤ˢᵍ (refl ∺ refl) (refl ∺ refl) (stopSecond  i<j)    = stopSecond i<j
@@ -83,7 +83,7 @@ module RoutingLib.Data.Graph.SGPath.Equivalence {a n} {A : Set a} where
     ≃ₙₑₚ+≈ˢᵍ⇒≃ : ∀ {G : Graph A n} {p q} {r : NonEmptySGPath G} → p ≃ₙₑₚ q → r ≈ₙₑₚˢᵍ q → p ≃ₙₑₚ r
     ≃ₙₑₚ+≈ˢᵍ⇒≃ (refl ∺ refl) (refl ∺ refl) = (refl ∺ refl)
     ≃ₙₑₚ+≈ˢᵍ⇒≃ (refl ∷ p≃q)  (refl ∷ p≃r)  = refl ∷ ≃ₙₑₚ+≈ˢᵍ⇒≃ p≃q p≃r
-  
+
     ≃ₙₑₚ+≈ˢ⇒≃ : ∀ {G : Graph A n} {p} {q : NonEmptySGPath G} {r} → p ≃ₙₑₚ q → p ≈ₙₑₚˢ r → r ≃ₙₑₚ q
     ≃ₙₑₚ+≈ˢ⇒≃ (refl ∺ refl) (refl ∺ refl) = (refl ∺ refl)
     ≃ₙₑₚ+≈ˢ⇒≃ (refl ∷ p≃q)  (refl ∷ p≃r)  = refl ∷ ≃ₙₑₚ+≈ˢ⇒≃ p≃q p≃r
@@ -101,7 +101,7 @@ module RoutingLib.Data.Graph.SGPath.Equivalence {a n} {A : Set a} where
     ≃ₚ+≈ˢᵍ⇒≃ : ∀ {G : Graph A n} {p q} {r : SGPath G} → p ≃ₚ q → r ≈ₚˢᵍ q → p ≃ₚ r
     ≃ₚ+≈ˢᵍ⇒≃ []      []      = []
     ≃ₚ+≈ˢᵍ⇒≃ [ p≃q ] [ p≃r ] = [ ≃ₙₑₚ+≈ˢᵍ⇒≃ p≃q p≃r ]
-  
+
     ≃ₚ+≈ˢ⇒≃ : ∀ {G : Graph A n} {p} {q : SGPath G} {r} → p ≃ₚ q → p ≈ₚˢ r → r ≃ₚ q
     ≃ₚ+≈ˢ⇒≃ []      []      = []
     ≃ₚ+≈ˢ⇒≃ [ p≃q ] [ p≃r ] = [ ≃ₙₑₚ+≈ˢ⇒≃ p≃q p≃r ]

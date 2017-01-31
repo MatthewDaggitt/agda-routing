@@ -30,9 +30,9 @@ module RoutingLib.Relation.Binary where
 
 
   record DecPreorder c ℓ₁ ℓ₂ : Set (suc (c ⊔ ℓ₁ ⊔ ℓ₂)) where
-    
+
     infix 4 _≈_ _≤_
-    
+
     field
       Carrier       : Set c
       _≈_           : Rel Carrier ℓ₁
@@ -51,7 +51,7 @@ module RoutingLib.Relation.Binary where
       decSetoid : DecSetoid c ℓ₁
       decSetoid = record { isDecEquivalence = DPO.Eq.isDecEquivalence }
 
-      open DecSetoid decSetoid public  
+      open DecSetoid decSetoid public
 
 
 
@@ -70,9 +70,9 @@ module RoutingLib.Relation.Binary where
 
 
   record TotalPreorder c ℓ₁ ℓ₂ : Set (suc (c ⊔ ℓ₁ ⊔ ℓ₂)) where
-    
+
     infix 4 _≈_ _≤_
-    
+
     field
       Carrier         : Set c
       _≈_             : Rel Carrier ℓ₁
@@ -113,11 +113,11 @@ module RoutingLib.Relation.Binary where
         }
 
       open IsDecEquivalence isDecEquivalence public
-  
+
   record DecTotalPreorder c ℓ₁ ℓ₂ : Set (suc (c ⊔ ℓ₁ ⊔ ℓ₂)) where
-    
+
     infix 4 _≈_ _≤_
-    
+
     field
       Carrier            : Set c
       _≈_                : Rel Carrier ℓ₁

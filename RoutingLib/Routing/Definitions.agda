@@ -1,4 +1,4 @@
-open import Algebra.FunctionProperties using (Op₂)
+open import Algebra.FunctionProperties using (Op₂; Congruent₂)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Nat using (ℕ; suc)
 open import Data.List using (List)
@@ -11,21 +11,20 @@ open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary using (Rel; IsDecEquivalence; Setoid; Reflexive; Symmetric; Transitive; Decidable; IsEquivalence; _⇒_)
 open import Relation.Binary.PropositionalEquality using (_≡_) renaming (refl to ≡-refl; setoid to ≡-setoid)
 
-open import RoutingLib.Algebra.FunctionProperties using (_Preserves_; _Preservesₗ_)
+open import RoutingLib.Algebra.FunctionProperties using (_Preservesₗ_)
 open import RoutingLib.Data.List using (allFin; combine)
-open import RoutingLib.Data.List.Properties using ()
 open import RoutingLib.Data.List.Any.PropositionalMembership using (_∈_; ∈-combine; ∈-allFin)
 open import RoutingLib.Data.List.All.Properties as AllProperties using (¬All→Any¬; combine-all)
 
 module RoutingLib.Routing.Definitions where
-  
+
   ---------------------
   -- Routing algebra --
   ---------------------
   -- A routing algebra represents the underlying algebra for a set of routing problems.
 
   record RoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
-  
+
     infix 7 _⊕_
     infix 6 _▷_
     infix 4 _≈_ _≉_
@@ -40,18 +39,18 @@ module RoutingLib.Routing.Definitions where
 
       _≈_ : Rel Route ℓ
       ≈-isDecEquivalence : IsDecEquivalence _≈_
-      ⊕-pres-≈ : _⊕_ Preserves _≈_
+      ⊕-pres-≈ : Congruent₂ _≈_ _⊕_
       ▷-pres-≈ : _▷_ Preservesₗ _≈_
 
     -- A few useful consequences of equality to export
     _≉_ : Rel Route ℓ
-    x ≉ y = ¬ (x ≈ y) 
+    x ≉ y = ¬ (x ≈ y)
 
     open IsDecEquivalence ≈-isDecEquivalence public
-  
+
     S : Setoid b ℓ
     S = record {
-        _≈_ = _≈_; 
+        _≈_ = _≈_;
         isEquivalence = isEquivalence
       }
 
@@ -101,7 +100,7 @@ module RoutingLib.Routing.Definitions where
 
 
     abstract
-      
+
       ∈-srcDstPairs : ∀ (p : Fin n × Fin n) → p ∈ srcDstPairs
       ∈-srcDstPairs (i , j) = ∈-combine _,_ (∈-allFin i) (∈-allFin j)
 
@@ -123,10 +122,10 @@ module RoutingLib.Routing.Definitions where
       ... | no  ¬all = no (λ X≈Y → ¬all (combine-all Fₛ Fₛ _,_ (allFin n) (allFin n) (λ {x} {y} _ _ → X≈Y x y)))
 
       ≈ₘ-isEquivalence : IsEquivalence _≈ₘ_
-      ≈ₘ-isEquivalence = record { 
-          refl = ≈ₘ-refl ; 
-          sym = ≈ₘ-sym ; 
-          trans = ≈ₘ-trans 
+      ≈ₘ-isEquivalence = record {
+          refl = ≈ₘ-refl ;
+          sym = ≈ₘ-sym ;
+          trans = ≈ₘ-trans
         }
 
       ≉ₘ-witness : ∀ {X Y} → X ≉ₘ Y → ∃₂ λ i j → ¬ (X i j ≈ Y i j)
@@ -135,11 +134,11 @@ module RoutingLib.Routing.Definitions where
       ... | no  ¬all with satisfied (¬All→Any¬ (λ {(i , j) → X i j ≟ Y i j}) ¬all)
       ...   | (i , j) , y = i , j , y
 
-      
+
 
     Sₘ : Setoid b ℓ
-    Sₘ = record { 
-        Carrier = RMatrix ; 
-       _≈_ = _≈ₘ_ ; 
-       isEquivalence = ≈ₘ-isEquivalence 
+    Sₘ = record {
+        Carrier = RMatrix ;
+       _≈_ = _≈ₘ_ ;
+       isEquivalence = ≈ₘ-isEquivalence
       }

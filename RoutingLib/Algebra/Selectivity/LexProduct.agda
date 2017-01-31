@@ -12,8 +12,8 @@ open import Algebra.FunctionProperties using (Commutative; Associative; Idempote
 open import RoutingLib.Algebra.FunctionProperties using (Selective; _Preserves_)
 
 
-module RoutingLib.Algebra.Selectivity.LexProduct 
-  {a₁ a₂ ℓ₁} {A₁ : Set a₁} {A₂ : Set a₂} 
+module RoutingLib.Algebra.Selectivity.LexProduct
+  {a₁ a₂ ℓ₁} {A₁ : Set a₁} {A₂ : Set a₂}
   (_≈₁_ : Rel A₁ ℓ₁) (≈₁-isDecEquivalence : IsDecEquivalence _≈₁_)
   (_•_ : Op₂ A₁) (•-sel : Selective _≈₁_ _•_)
   (_◦_ : Op₂ A₂)
@@ -30,7 +30,7 @@ module RoutingLib.Algebra.Selectivity.LexProduct
   ... | sel₁ _ _ = (a₁ , b₁)
   ... | sel₂ _ _ = (a₂ , b₂)
   ... | sel≈ _ _ = (a₁ , b₁ ◦ b₂)
-  
+
   ----------------
   -- Properties --
   ----------------
@@ -86,25 +86,25 @@ module RoutingLib.Algebra.Selectivity.LexProduct
 
       associative : Associative (_≈₁_ ×-Rel _≈₂_) _⊕_
       associative (a , x) (b , y) (c , z) with select a b | select b c
-      associative (a , x) (b , y) (c , z) | sel₁ a•b≈a a•b≉b | sel₁ b•c≈b b•c≉c with select a b | select a c 
+      associative (a , x) (b , y) (c , z) | sel₁ a•b≈a a•b≉b | sel₁ b•c≈b b•c≉c with select a b | select a c
       ... | sel₁ _     _     | sel₁ _     _     = refl , refl₂
       ... | sel₁ _     _     | sel₂ a•c≉a _     = contradiction (lemma a•b≈a b•c≈b) a•c≉a
       ... | sel₁ _     _     | sel≈ _     a•c≈c = contradiction (lemma (≈-switch a•c≈c) a•b≈a) (≉-switch b•c≉c)
-      ... | sel₂ _     a•b≈b | _                = contradiction a•b≈b a•b≉b 
-      ... | sel≈ _     a•b≈b | _                = contradiction a•b≈b a•b≉b 
+      ... | sel₂ _     a•b≈b | _                = contradiction a•b≈b a•b≉b
+      ... | sel≈ _     a•b≈b | _                = contradiction a•b≈b a•b≉b
       associative (a , x) (b , y) (c , z) | sel₁ _     _     | sel₂ _     _ = refl , refl₂
       associative (a , x) (b , y) (c , z) | sel₁ a•b≈a a•b≉b | sel≈ b•c≈b b•c≈c with select a b | select a c
       ... | sel₁ _     _     | sel₁ _     _     = refl , refl₂
       ... | sel₁ _     _     | sel₂ _     a•c≈c = contradiction (lemma b•c≈b (≈-switch a•c≈c)) (≉-switch a•b≉b)
-      ... | sel₁ _     _     | sel≈ _     a•c≈c = contradiction (lemma b•c≈b (≈-switch a•c≈c)) (≉-switch a•b≉b) 
+      ... | sel₁ _     _     | sel≈ _     a•c≈c = contradiction (lemma b•c≈b (≈-switch a•c≈c)) (≉-switch a•b≉b)
       ... | sel₂ _     a•b≈b | _                = contradiction a•b≈b a•b≉b
-      ... | sel≈ _     a•b≈b | _                = contradiction a•b≈b a•b≉b 
+      ... | sel≈ _     a•b≈b | _                = contradiction a•b≈b a•b≉b
       associative (a , x) (b , y) (c , z) | sel₂ a•b≉a a•b≈b | sel₁ b•c≈b b•c≉c with select a b | select b c
       ... | sel₁ a•b≈a _     | _                = contradiction a•b≈a a•b≉a
       ... | sel₂ _     _     | sel₁ _     _     = refl , refl₂
       ... | sel₂ _     _     | sel₂ a•c≉a _     = contradiction (lemma (•-idem b) b•c≈b) a•c≉a
       ... | sel₂ _     _     | sel≈ _     a•c≈c = contradiction (lemma (≈-switch a•c≈c) (•-idem b)) (≉-switch b•c≉c)
-      ... | sel≈ a•b≈a _     | _                = contradiction a•b≈a a•b≉a 
+      ... | sel≈ a•b≈a _     | _                = contradiction a•b≈a a•b≉a
       associative (a , x) (b , y) (c , z) | sel₂ a•b≉a a•b≈b | sel₂ b•c≉b b•c≈c with select a c | select b c
       ... | _                | sel₁ b•c≈b _     = contradiction b•c≈b b•c≉b
       ... | sel₁ a•c≈a _     | sel₂ _     _     = contradiction (lemma (≈-switch a•b≈b) a•c≈a) b•c≉b
@@ -134,7 +134,7 @@ module RoutingLib.Algebra.Selectivity.LexProduct
       ... | sel≈ _     _     | sel₂ a•c≉a _     = contradiction (lemma a•b≈a b•c≈b) a•c≉a
       ... | sel≈ _     _     | sel≈ _     _     = refl , ◦-assoc x y z
 
-    
+
     preserves : _•_ Preserves _≈₁_ → _◦_ Preserves _≈₂_ → _⊕_ Preserves (_≈₁_ ×-Rel _≈₂_)
     preserves •-pres ◦-pres {a , _} {b , _} {c , _} {d , _} (a≈b , w≈x) (c≈d , y≈z) with select a c | select b d
     ... | sel₁ a•c≈a a•c≉c | sel₁ b•d≈b b•d≉d = a≈b , w≈x

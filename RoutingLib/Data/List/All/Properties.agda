@@ -76,8 +76,8 @@ module RoutingLib.Data.List.All.Properties where
   -----------------------
   -- To push to stdlib --
   -----------------------
-  
-  concat-all : ∀ {a p} {A : Set a} {P : A → Set p} {xss : List (List A)} 
+
+  concat-all : ∀ {a p} {A : Set a} {P : A → Set p} {xss : List (List A)}
                → All (All P) xss → All P (concat xss)
   concat-all []           = []
   concat-all (pxs ∷ pxss) = ++-all pxs (concat-all pxss)
@@ -91,7 +91,7 @@ module RoutingLib.Data.List.All.Properties where
   -- All pairs
 
   module SetoidProperties {a ℓ} (S : Setoid a ℓ) where
-    
+
     open Setoid S renaming (Carrier to A)
     open Data.List.Any.Membership S using (_∈_)
 
@@ -109,10 +109,10 @@ module RoutingLib.Data.List.All.Properties where
 
   open SetoidProperties public
 
-      
 
-  module DoubleSetoidProperties 
-    {a₁ ℓ₁} (S₁ : Setoid a₁ ℓ₁) 
+
+  module DoubleSetoidProperties
+    {a₁ ℓ₁} (S₁ : Setoid a₁ ℓ₁)
     {a₂ ℓ₂} (S₂ : Setoid a₂ ℓ₂) where
 
     open Setoid S₁ renaming (Carrier to A₁; refl to refl₁)
@@ -139,8 +139,8 @@ module RoutingLib.Data.List.All.Properties where
                   (f : A → Maybe B) → (∀ {x y} → x ~₁ y → (f x ≡ nothing) ⊎ (f y ≡ nothing) ⊎ (Eq _~₂_ (f x) (f y)))
                   → AllPairs _~₁_ ⋐ AllPairs _~₂_ ∘ gfilter f
   gfilter-pairs _ _ [] = []
-  gfilter-pairs {_~₁_ = _~₁_} {_~₂_} f f-inj {x ∷ xs} (px ∷ pxs) with f x | inspect f x 
-  ... | nothing | _            = gfilter-pairs f f-inj pxs 
+  gfilter-pairs {_~₁_ = _~₁_} {_~₂_} f f-inj {x ∷ xs} (px ∷ pxs) with f x | inspect f x
+  ... | nothing | _            = gfilter-pairs f f-inj pxs
   ... | just v  | [ fx≡justv ] = gfilter-all convert px ∷ gfilter-pairs f f-inj pxs
     where
     convert : ∀ {a} → x ~₁ a → ∀ {b} → f a ≡ just b → v ~₂ b
@@ -164,11 +164,4 @@ module RoutingLib.Data.List.All.Properties where
     ... | nothing = filter-all P xs
     ... | just t = {!!} ∷ filter-all P xs
 -}
-
-
-
-  
-
-  
-
 

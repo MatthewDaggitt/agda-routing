@@ -40,7 +40,7 @@ module RoutingLib.Data.Graph.SGPath {a n} {A : Set a} where
   source (i ∷ _ ∣ _ ∣ _) = i
 
   _∉ₙₑₚ?_ : ∀ {G} → Decidable (_∉ₙₑₚ_ {G})
-  k ∉ₙₑₚ? (i ∺ j ∣ _ ∣ _) with k ≟ i | k ≟ j 
+  k ∉ₙₑₚ? (i ∺ j ∣ _ ∣ _) with k ≟ i | k ≟ j
   ... | yes k≡i | _       = no λ{(notThere k≢i _) → k≢i k≡i}
   ... | _       | yes k≡j = no λ{(notThere _ k≢j) → k≢j k≡j}
   ... | no  k≢i | no  k≢j = yes (notThere k≢i k≢j)
@@ -82,7 +82,7 @@ module RoutingLib.Data.Graph.SGPath {a n} {A : Set a} where
   length (_ ∺ _ ∣ _ ∣ _) = 1
   length (_ ∷ p ∣ _ ∣ _) = suc (length p)
 
-  
+
 
 
   private
@@ -92,8 +92,8 @@ module RoutingLib.Data.Graph.SGPath {a n} {A : Set a} where
     lookup (i ∺ j ∣ _ ∣ _) (fsuc fzero)     = j
     lookup (i ∺ j ∣ _ ∣ _) (fsuc (fsuc ()))
     lookup (i ∷ p ∣ _ ∣ _) fzero            = i
-    lookup (i ∷ p ∣ _ ∣ _) (fsuc k)         = lookup p k 
-    
+    lookup (i ∷ p ∣ _ ∣ _) (fsuc k)         = lookup p k
+
     lookup-∈ : ∀ {G} → (p : NonEmptySGPath G) → ∀ i {k} → lookup p i ≡ k → k ∈ₙₑₚ p
     lookup-∈ (i ∺ j ∣ _ ∣ _) fzero            refl (notThere i≢i _) = i≢i refl
     lookup-∈ (i ∺ j ∣ _ ∣ _) (fsuc fzero)     refl (notThere _ j≢j) = j≢j refl
@@ -119,7 +119,7 @@ module RoutingLib.Data.Graph.SGPath {a n} {A : Set a} where
   ...   | i , j , i≢j , pᵢ≡pⱼ = contradiction pᵢ≡pⱼ (lookup! p i≢j)
 
 
-  
+
 
   ---------------
   -- All paths --
@@ -170,5 +170,4 @@ module RoutingLib.Data.Graph.SGPath {a n} {A : Set a} where
   weight _▷_ 1# [] = 1#
   weight _▷_ 1# [ _ ∺ _ ∣ _ ∣ (v , _) ] = v ▷ 1#
   weight _▷_ 1# [ _ ∷ p ∣ _ ∣ (v , _) ] = v ▷ weight _▷_ 1# [ p ]
-
 

@@ -14,16 +14,16 @@ module RoutingLib.Algebra.AddingElements {a} (A : Set a) where
 
   Aₑ : Set a
   Aₑ = Maybe A
-  
+
   open import Data.Maybe using () renaming (nothing to e; just to val) public
   open import Data.Maybe using () renaming (nothing to eEq; just to valEq) public
 
   module BiIdentity (_⊕_ : Op₂ A) where
-  
+
     infix 6 _⊕ₑ_
 
     _⊕ₑ_ : Op₂ Aₑ
-    e      ⊕ₑ v     = v 
+    e      ⊕ₑ v     = v
     v      ⊕ₑ e     = v
     val v  ⊕ₑ val w = val (v ⊕ w)
 
@@ -50,7 +50,7 @@ module RoutingLib.Algebra.AddingElements {a} (A : Set a) where
     ⊕ₑ-assoc refl assoc (val u) e       (val w) = Eq.just refl
     ⊕ₑ-assoc refl assoc (val u) (val v) e       = Eq.just refl
     ⊕ₑ-assoc refl assoc (val u) (val v) (val w) = Eq.just (assoc u v w)
-  
+
     e-idₗ-⊕ₑ : ∀ {ℓ} {_≈_ : Rel A ℓ} → Reflexive _≈_ → LeftIdentity (Eq _≈_) e _⊕ₑ_
     e-idₗ-⊕ₑ refl e       = Eq.nothing
     e-idₗ-⊕ₑ refl (val v) = Eq.just refl
@@ -66,16 +66,16 @@ module RoutingLib.Algebra.AddingElements {a} (A : Set a) where
     ⊕ₑ-pres-≈ₑ resp Eq.nothing    Eq.nothing    = Eq.nothing
     ⊕ₑ-pres-≈ₑ pres Eq.nothing    (Eq.just w≈x) = Eq.just w≈x
     ⊕ₑ-pres-≈ₑ pres (Eq.just u≈v) Eq.nothing    = Eq.just u≈v
-    ⊕ₑ-pres-≈ₑ pres (Eq.just u≈v) (Eq.just w≈x) = Eq.just (pres u≈v w≈x) 
+    ⊕ₑ-pres-≈ₑ pres (Eq.just u≈v) (Eq.just w≈x) = Eq.just (pres u≈v w≈x)
 
 
 
   module BiZero  (_⊕_ : Op₂ A) where
-  
+
     infix 6 _⊕ₑ_
 
     _⊕ₑ_ : Op₂ Aₑ
-    e ⊕ₑ v       = e 
+    e ⊕ₑ v       = e
     v       ⊕ₑ e = e
     val v  ⊕ₑ val w  = val (v ⊕ w)
 
@@ -102,7 +102,7 @@ module RoutingLib.Algebra.AddingElements {a} (A : Set a) where
     ⊕ₑ-assoc assoc (val u) e    (val w)    = Eq.nothing
     ⊕ₑ-assoc assoc (val u) (val v) e       = Eq.nothing
     ⊕ₑ-assoc assoc (val u) (val v) (val w) = Eq.just (assoc u v w)
-  
+
     e-zeₗ-⊕ₑ : ∀ {ℓ} {_≈_ : Rel A ℓ} → LeftZero (Eq _≈_) e _⊕ₑ_
     e-zeₗ-⊕ₑ e       = Eq.nothing
     e-zeₗ-⊕ₑ (val v) = Eq.nothing
@@ -118,7 +118,7 @@ module RoutingLib.Algebra.AddingElements {a} (A : Set a) where
     ⊕ₑ-pres-≈ₑ _    Eq.nothing    Eq.nothing    = Eq.nothing
     ⊕ₑ-pres-≈ₑ _    Eq.nothing    (Eq.just w≈x) = Eq.nothing
     ⊕ₑ-pres-≈ₑ _    (Eq.just u≈v) e             = Eq.nothing
-    ⊕ₑ-pres-≈ₑ pres (Eq.just u≈v) (Eq.just w≈x) = Eq.just (pres u≈v w≈x) 
+    ⊕ₑ-pres-≈ₑ pres (Eq.just u≈v) (Eq.just w≈x) = Eq.just (pres u≈v w≈x)
 
 
 
@@ -133,10 +133,10 @@ module RoutingLib.Algebra.AddingElements {a} (A : Set a) where
     ▷ₑ-pres-≈ₑ : ∀ {ℓ} {_≈_ : Rel A ℓ} → _▷_ Preservesₗ _≈_ → _▷ₑ_ Preservesₗ (Eq _≈_)
     ▷ₑ-pres-≈ₑ _    b Eq.nothing = Eq.nothing
     ▷ₑ-pres-≈ₑ pres b (Eq.just x≈y) = Eq.just (pres b x≈y)
-  
+
 
   module LeftZero {b} {B : Set b} (_▷_ : B → A → A) where
-    
+
     infix 7 _▷ₑ_
 
     _▷ₑ_ : B → Aₑ → Aₑ

@@ -28,8 +28,4 @@ module RoutingLib.Asynchronous.Core (n : ℕ) where
       infiniteActivation : ∀ t i → ∃ λ t' → t < t' × i ∈ α t'
       causality :          ∀ t i j → β (suc t) i j < suc t
       eventualExpiry :     ∀ t i j → ∃ λ tᶠ → ∀ {t'} → tᶠ < t' → β t' i j ≢ t
-      
-
-
-
 

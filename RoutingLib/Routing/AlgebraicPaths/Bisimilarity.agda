@@ -29,7 +29,7 @@ open import RoutingLib.Routing.Definitions
 
 
 module RoutingLib.Routing.AlgebraicPaths.Bisimilarity
-  {a b ℓ} (ra : RoutingAlgebra a b ℓ) 
+  {a b ℓ} (ra : RoutingAlgebra a b ℓ)
   (⊕-sel : Selective (RoutingAlgebra._≈_ ra) (RoutingAlgebra._⊕_ ra))
   {n : ℕ}
   (G : Graph (RoutingAlgebra.Step ra) n)
@@ -42,16 +42,16 @@ module RoutingLib.Routing.AlgebraicPaths.Bisimilarity
 
   private
     module I = RoutingProblem irp
-    module C = RoutingProblem crp 
+    module C = RoutingProblem crp
 
   ------------------
   -- Bisimilarity --
   ------------------
-  
+
   infix 4 _≃_ _≃ₘ_
 
   data _≃_ : IRoute → CRoute → Set (a ⊔ b ⊔ ℓ) where
-    nullEq  : inull ≃ cnull 
+    nullEq  : inull ≃ cnull
     routeEq : ∀ {x p y q y≈w[q]} → x ≈ y → p ≃ₚ q → iroute x p ≃ croute y q y≈w[q]
 
   _≃ₘ_ : I.RMatrix → C.RMatrix → Set (a ⊔ b ⊔ ℓ)
@@ -129,7 +129,7 @@ module RoutingLib.Routing.AlgebraicPaths.Bisimilarity
     ic+ii⇒ii nullEq            nullEq             = inullEq
     ic+ii⇒ii (routeEq x≈y p≃q) (routeEq z≈y r≃q)  = irouteEq (trans x≈y (sym z≈y)) (≃ₚ+≃⇒≈ˢ p≃q r≃q)
 
-    
+
 
     module InconsistentReasoning where
 
@@ -142,7 +142,7 @@ module RoutingLib.Routing.AlgebraicPaths.Bisimilarity
         begin_ : ∀{x y} → x ≈ⁱ y → x ≈ⁱ y
         begin_ x≈y = x≈y
 
-        _≈ⁱ⟨_⟩_ : ∀ x {y z} → x ≈ⁱ y → y ≈ⁱ z → x ≈ⁱ z 
+        _≈ⁱ⟨_⟩_ : ∀ x {y z} → x ≈ⁱ y → y ≈ⁱ z → x ≈ⁱ z
         _ ≈ⁱ⟨ x≈y ⟩ y≈z = ≈ⁱ-trans x≈y y≈z
 
         _≈ᶜ⟨_⟩_ : ∀ x {y z} → z ≈ᶜ y → x ≃ y → x ≃ z

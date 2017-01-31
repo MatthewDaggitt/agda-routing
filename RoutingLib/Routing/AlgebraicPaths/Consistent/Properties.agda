@@ -29,19 +29,19 @@ open import RoutingLib.Data.List.Enumeration
 open import RoutingLib.Routing.Algorithms.DistributedBellmanFord.ConvergenceConditions
 
 module RoutingLib.Routing.AlgebraicPaths.Consistent.Properties
-  {a b ℓ} (ra : RoutingAlgebra a b ℓ) 
+  {a b ℓ} (ra : RoutingAlgebra a b ℓ)
   (⊕-sel : Selective (RoutingAlgebra._≈_ ra) (RoutingAlgebra._⊕_ ra))
   {n : ℕ}
   (G : Graph (RoutingAlgebra.Step ra) n)
   where
 
   open RoutingAlgebra ra
-  open import RoutingLib.Routing.AddingSPaths.Consistent ra ⊕-sel G
+  open import RoutingLib.Routing.AlgebraicPaths.Consistent ra ⊕-sel G
   open import RoutingLib.Algebra.Selectivity.Properties using () renaming (idem to sel⇨idem)
   open import RoutingLib.Algebra.Selectivity.NaturalOrders S _⊕_ ⊕-pres-≈ using (_≤ᵣ_; ≤ᵣ-trans; ≤ᵣ⇨≤ₗ; ≤ₗ⇨≤ᵣ)
 
   open Membership Cₛ using () renaming (_∈_ to _∈ᶜ_; ∈-resp-≈ to ∈ᶜ-resp-≈ₚ)
-  
+
 
   abstract
 
@@ -100,7 +100,7 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent.Properties
       where
       res : (croute x p x≈w[p] ⊕ᶜ croute y q y≈w[q]) ⊕ᶜ croute z r z≈w[r] ≈ᶜ croute x p x≈w[p] ⊕ᶜ (croute y q y≈w[q] ⊕ᶜ croute z r z≈w[r])
       res with select x y | select y z
-      res | sel₁ _   _   | sel₁ _   _   with select x y | select x z 
+      res | sel₁ _   _   | sel₁ _   _   with select x y | select x z
       res | sel₁ _   _   | sel₁ _   _   | sel₁ _   _   | sel₁ _   _   = ≈ᶜ-refl
       res | sel₁ x≤y _   | sel₁ _   z≰y | sel₁ _   _   | sel₂ _   z≤x = contradiction (≤ᵣ-trans assoc z≤x (≤ₗ⇨≤ᵣ comm x≤y)) z≰y
       res | sel₁ x≤y _   | sel₁ _   z≰y | sel₁ _   _   | sel≈ _   z≤x = contradiction (≤ᵣ-trans assoc z≤x (≤ₗ⇨≤ᵣ comm x≤y)) z≰y
@@ -146,13 +146,13 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent.Properties
       res | sel₂ x≰y _   | sel≈ _   z≤y | no  _        | sel≈ x≤z _   | sel≈ _   _   = contradiction (≤ᵣ⇨≤ₗ comm (≤ᵣ-trans assoc (≤ₗ⇨≤ᵣ comm x≤z) z≤y)) x≰y
       res | sel≈ _   _   | sel₁ _   _   with p ≤ₚ? q
       res | sel≈ _   _   | sel₁ _   _   | yes _        with select x y | select x z
-      res | sel≈ _   y≤x | sel₁ _   _   | yes _        | sel₁ _   y≰x | _            = contradiction y≤x y≰x  
+      res | sel≈ _   y≤x | sel₁ _   _   | yes _        | sel₁ _   y≰x | _            = contradiction y≤x y≰x
       res | sel≈ x≤y _   | sel₁ _   _   | yes _        | sel₂ x≰y _   | _            = contradiction x≤y x≰y
-      res | sel≈ _   _   | sel₁ _   _   | yes _        | sel≈ _   _   | sel₁ _   _   with p ≤ₚ? q 
+      res | sel≈ _   _   | sel₁ _   _   | yes _        | sel≈ _   _   | sel₁ _   _   with p ≤ₚ? q
       res | sel≈ _   _   | sel₁ _   _   | yes _        | sel≈ _   _   | sel₁ _   _   | yes _         = ≈ᶜ-refl
       res | sel≈ _   _   | sel₁ _   _   | yes p≤q      | sel≈ _   _   | sel₁ _   _   | no  p≰q       = contradiction p≤q p≰q
-      res | sel≈ x≤y _   | sel₁ _   z≰y | yes _        | sel≈ _   _   | sel₂ _   z≤x = contradiction (≤ᵣ-trans assoc z≤x (≤ₗ⇨≤ᵣ comm x≤y)) z≰y 
-      res | sel≈ x≤y _   | sel₁ _   z≰y | yes _        | sel≈ _   _   | sel≈ _   z≤x = contradiction (≤ᵣ-trans assoc z≤x (≤ₗ⇨≤ᵣ comm x≤y)) z≰y  
+      res | sel≈ x≤y _   | sel₁ _   z≰y | yes _        | sel≈ _   _   | sel₂ _   z≤x = contradiction (≤ᵣ-trans assoc z≤x (≤ₗ⇨≤ᵣ comm x≤y)) z≰y
+      res | sel≈ x≤y _   | sel₁ _   z≰y | yes _        | sel≈ _   _   | sel≈ _   z≤x = contradiction (≤ᵣ-trans assoc z≤x (≤ₗ⇨≤ᵣ comm x≤y)) z≰y
       res | sel≈ _   _   | sel₁ _   _   | no  _        with select x y | select y z
       res | sel≈ _   y≤x | sel₁ _   _   | no  _        | sel₁ _   y≰x | _            = contradiction y≤x y≰x
       res | sel≈ x≤y _   | sel₁ _   _   | no  _        | sel₂ x≰y _   | _            = contradiction x≤y x≰y
@@ -163,14 +163,14 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent.Properties
       res | sel≈ _   _   | sel₁ _   y≰x | no  _        | _            | sel≈ _   y≤x = contradiction y≤x y≰x
       res | sel≈ _   _   | sel₂ _   _   with p ≤ₚ? q
       res | sel≈ _   _   | sel₂ _   _   | yes _        = ≈ᶜ-refl
-      res | sel≈ _   _   | sel₂ _   _   | no  _        with select x z | select y z 
+      res | sel≈ _   _   | sel₂ _   _   | no  _        with select x z | select y z
       res | sel≈ _   _   | sel₂ _   z≤y | no  _        | _            | sel₁ _   z≰y = contradiction z≤y z≰y
       res | sel≈ _   y≤x | sel₂ y≰z _   | no  _        | sel₁ x≤z _   | sel₂ _   _   = contradiction (≤ᵣ⇨≤ₗ comm (≤ᵣ-trans assoc y≤x (≤ₗ⇨≤ᵣ comm x≤z))) y≰z
       res | sel≈ _   _   | sel₂ _   _   | no  _        | sel₂ _   _   | sel₂ _   _   = ≈ᶜ-refl
       res | sel≈ _   y≤x | sel₂ y≰z _   | no  _        | sel≈ x≤z _   | sel₂ _   _   = contradiction (≤ᵣ⇨≤ₗ comm (≤ᵣ-trans assoc y≤x (≤ₗ⇨≤ᵣ comm x≤z))) y≰z
       res | sel≈ _   _   | sel₂ y≰z _   | no  _        | _            | sel≈ y≤z _   = contradiction y≤z y≰z
       res | sel≈ _   _   | sel≈ _   _   with p ≤ₚ? q | q ≤ₚ? r
-      res | sel≈ _   _   | sel≈ _   _   | yes _        | yes _        with select x y | select x z 
+      res | sel≈ _   _   | sel≈ _   _   | yes _        | yes _        with select x y | select x z
       res | sel≈ _   y≤x | sel≈ _   _   | yes _        | yes _        | sel₁ _   y≰x | _            = contradiction y≤x y≰x
       res | sel≈ x≤y _   | sel≈ _   _   | yes _        | yes _        | sel₂ x≰y _   | _            = contradiction x≤y x≰y
       res | sel≈ _   y≤x | sel≈ _   z≤y | yes _        | yes _        | sel≈ _   _   | sel₁ _   z≰x = contradiction (≤ᵣ-trans assoc z≤y y≤x) z≰x
@@ -185,7 +185,7 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent.Properties
       res | sel≈ x≤y _   | sel≈ _   _   | no  _        | yes _        | sel₂ x≰y _   | _            = contradiction x≤y x≰y
       res | sel≈ _   _   | sel≈ _   z≤y | no  _        | yes _        | _            | sel₁ _   z≰y = contradiction z≤y z≰y
       res | sel≈ _   _   | sel≈ y≤z _   | no  _        | yes _        | _            | sel₂ y≰z _   = contradiction y≤z y≰z
-      res | sel≈ _   _   | sel≈ _   _   | no  _        | yes _        | sel≈ _   _   | sel≈ _   _   with p ≤ₚ? q | q ≤ₚ? r 
+      res | sel≈ _   _   | sel≈ _   _   | no  _        | yes _        | sel≈ _   _   | sel≈ _   _   with p ≤ₚ? q | q ≤ₚ? r
       res | sel≈ _   _   | sel≈ _   _   | no  p≰q      | yes _        | sel≈ _   _   | sel≈ _   _   | yes p≤q     | _          = contradiction p≤q p≰q
       res | sel≈ _   _   | sel≈ _   _   | no  _        | yes q≤r      | sel≈ _   _   | sel≈ _   _   | _           | no  q≰r    = contradiction q≤r q≰r
       res | sel≈ _   _   | sel≈ _   _   | no  _        | yes _        | sel≈ _   _   | sel≈ _   _   | no  _       | yes _      = ≈ᶜ-refl
@@ -200,7 +200,7 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent.Properties
       res | sel≈ _   _   | sel≈ _   _   | no  _        | no  _        | sel≈ _   _   | sel≈ _   _   | yes _       | no  _      with ≤ₚ-total p q
       res | sel≈ _   _   | sel≈ _   _   | no  p≰q      | no  _        | sel≈ _   _   | sel≈ _   _   | yes _       | no  _      | inj₁ p≤q = contradiction p≤q p≰q
       res | sel≈ _   _   | sel≈ _   _   | no  p≰q      | no  q≰r      | sel≈ _   _   | sel≈ _   _   | yes p≤r     | no  _      | inj₂ q≤p = contradiction (≤ₚ-trans q≤p p≤r) q≰r
-     
+
 
     ----------------------
     -- Properties of ▷ᶜ --
@@ -217,7 +217,7 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent.Properties
     ...     | sel₁ _ vx⊕x≉x = contradiction (abs v x) vx⊕x≉x
     ...     | sel₂ _ _      = ≈ᶜ-refl , λ{(crouteEq x≈vx ())}
     ...     | sel≈ _ _      with [ i ∺ j ∣ i≢j ∣ (v , b) ] ≤ₚ? ([] {G = G})
-    ...       | yes () 
+    ...       | yes ()
     ...       | no  _ = ≈ᶜ-refl , λ{(crouteEq x≈vx ())}
     ⊕ᶜ-almost-strictly-absorbs-▷ᶜ abs (i , j) {croute x [ p ] x≈w[p]} _    with j ≟ᶠ source p | i ∉ₙₑₚ? p | (i , j) ᵉ∈ᵍ? G
     ... | no  _    | _       | _              = ≈ᶜ-refl , λ()
@@ -264,7 +264,7 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent.Properties
 
     pathToCRoute : SGPath G → CRoute
     pathToCRoute p = croute (weight p) p refl
- 
+
     allCRoutes : List CRoute
     allCRoutes = cnull ∷ map pathToCRoute (allPaths G)
 
@@ -282,16 +282,16 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent.Properties
     ∈-allCRoutes (croute x p x≈w[p]) = there (∈-resp-≈ Cₛ (∈-map Cₛ (Pₛ G) pathToCRoute-cong (∈-allPaths G p)) (crouteEq (sym x≈w[p]) ≈ₚ-refl))
 
     allCRoutes-isEnumeration : IsEnumeration Cₛ allCRoutes
-    allCRoutes-isEnumeration = record { 
-        unique = allCRoutes!; 
+    allCRoutes-isEnumeration = record {
+        unique = allCRoutes!;
         complete = ∈-allCRoutes
       }
 
 
   ≈ᶜ-enumerable : Enumeration Cₛ
-  ≈ᶜ-enumerable = record { 
-      list = allCRoutes ; 
-      isEnumeration = allCRoutes-isEnumeration 
+  ≈ᶜ-enumerable = record {
+      list = allCRoutes ;
+      isEnumeration = allCRoutes-isEnumeration
     }
 
 
@@ -299,13 +299,13 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent.Properties
   -- Other --
   -----------
 
-  convergenceConditions : ConvergenceConditionsWithPaths ra → ConvergenceConditions cra 
-  convergenceConditions ccwp = record { 
-       ⊕-assoc = ⊕ᶜ-assoc ⊕-comm ⊕-assoc; 
-       ⊕-sel = ⊕ᶜ-sel; 
+  convergenceConditions : ConvergenceConditionsWithPaths ra → ConvergenceConditions cra
+  convergenceConditions ccwp = record {
+       ⊕-assoc = ⊕ᶜ-assoc ⊕-comm ⊕-assoc;
+       ⊕-sel = ⊕ᶜ-sel;
        ⊕-comm = ⊕ᶜ-comm ⊕-comm;
        ⊕-almost-strictly-absorbs-▷ = ⊕ᶜ-almost-strictly-absorbs-▷ᶜ ⊕-absorbs-▷;
-       
+
        0#-idᵣ-⊕ = cnull-idᵣ-⊕ᶜ;
        0#-anᵣ-▷ = cnull-anᵣ-▷ᶜ;
        1#-anᵣ-⊕ = 1[]-anᵣ-⊕ᶜ 1#-anᵣ-⊕;

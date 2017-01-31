@@ -13,7 +13,7 @@ module RoutingLib.Data.List where
   descending (suc n) = n ∷ descending n
 
 
-  combine : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c} 
+  combine : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c}
          → (A → B → C) → List A → List B → List C
   combine f [] _ = []
   combine f (x ∷ xs) ys = map (f x) ys ++ combine f xs ys

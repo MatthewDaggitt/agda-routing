@@ -19,12 +19,12 @@ open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_; Respect
 
 
 module RoutingLib.Routing.AlgebraicPaths.Inconsistent
-  {a b ℓ} (ra : RoutingAlgebra a b ℓ) 
+  {a b ℓ} (ra : RoutingAlgebra a b ℓ)
   (⊕-sel : Selective (RoutingAlgebra._≈_ ra) (RoutingAlgebra._⊕_ ra))
   {n : ℕ}
   (G : Graph (RoutingAlgebra.Step ra) n)
   where
-  
+
   -----------
   -- Setup --
   -----------
@@ -33,7 +33,7 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent
 
   open import RoutingLib.Algebra.Selectivity.Properties _≈_ _⊕_ ⊕-sel using (selection; SelCase)
   open import RoutingLib.Algebra.Selectivity.Properties _≈_ _⊕_ ⊕-sel using (sel₁; sel₂; sel≈) public
-  
+
   select : ∀ x y → SelCase x y
   select = selection sym trans _≟_
 
@@ -41,16 +41,16 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent
   --------------------------------
   -- Consistent routing algebra --
   --------------------------------
-    
+
   -- Routes are formed by the product R × EPath along with a zero added (the null path)
- 
+
   data IRoute : Set (a ⊔ b ⊔ ℓ) where
     inull  : IRoute
     iroute : Route → SPath n → IRoute
 
 
   -- Steps
-  
+
   IStep : Set lzero
   IStep = Fin n × Fin n
 
@@ -72,7 +72,7 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent
 
 
   -- Extension operator
-  
+
   infix 6 _▷ⁱ_
 
   _▷ⁱ_ : IStep → IRoute → IRoute
@@ -90,7 +90,7 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent
   ... | yes j≡s[p] | yes i∉p | yes (v , _) with v ▷ x ≟ 0#
   ...   | yes _ = inull
   ...   | no  _ = iroute (v ▷ x) [ i ∷ p ∣ i∉p ]
-  
+
 
 
   -- Equality
@@ -102,7 +102,7 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent
     irouteEq : ∀ {x y p q} → x ≈ y → p ≈ₚ q → iroute x p ≈ⁱ iroute y q
 
   _≉ⁱ_ : Rel IRoute (a ⊔ b ⊔ ℓ)
-  x ≉ⁱ y = ¬ (x ≈ⁱ y) 
+  x ≉ⁱ y = ¬ (x ≈ⁱ y)
 
   abstract
 
@@ -133,21 +133,21 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent
     ... | yes x≈y | yes p≈q = yes (irouteEq x≈y p≈q)
 
     ≈ⁱ-isEquivalence : IsEquivalence _≈ⁱ_
-    ≈ⁱ-isEquivalence = record { 
-        refl = ≈ⁱ-refl ; 
-        sym = ≈ⁱ-sym ; 
-        trans = ≈ⁱ-trans 
+    ≈ⁱ-isEquivalence = record {
+        refl = ≈ⁱ-refl ;
+        sym = ≈ⁱ-sym ;
+        trans = ≈ⁱ-trans
       }
 
     ≈ⁱ-isDecEquivalence : IsDecEquivalence _≈ⁱ_
-    ≈ⁱ-isDecEquivalence = record { 
-        isEquivalence = ≈ⁱ-isEquivalence ; 
-        _≟_ = _≟ⁱ_ 
+    ≈ⁱ-isDecEquivalence = record {
+        isEquivalence = ≈ⁱ-isEquivalence ;
+        _≟_ = _≟ⁱ_
       }
- 
+
   ≈ⁱ-setoid : Setoid (a ⊔ b ⊔ ℓ) (a ⊔ b ⊔ ℓ)
   ≈ⁱ-setoid = record {
-      _≈_ = _≈ⁱ_; 
+      _≈_ = _≈ⁱ_;
       isEquivalence = ≈ⁱ-isEquivalence
     }
 

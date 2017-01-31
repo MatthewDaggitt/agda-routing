@@ -19,23 +19,23 @@ open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_; Respect
 
 
 module RoutingLib.Routing.AlgebraicPaths.Consistent
-  {a b ℓ} (ra : RoutingAlgebra a b ℓ) 
+  {a b ℓ} (ra : RoutingAlgebra a b ℓ)
   (⊕-sel : Selective (RoutingAlgebra._≈_ ra) (RoutingAlgebra._⊕_ ra))
   {n : ℕ}
   (G : Graph (RoutingAlgebra.Step ra) n)
   where
-  
-  
+
+
   -----------
   -- Setup --
   -----------
 
   open RoutingAlgebra ra
 
-  
+
   open import RoutingLib.Algebra.Selectivity.Properties _≈_ _⊕_ ⊕-sel using (selection; SelCase)
   open import RoutingLib.Algebra.Selectivity.Properties _≈_ _⊕_ ⊕-sel using (sel₁; sel₂; sel≈) public
-  
+
   select : ∀ x y → SelCase x y
   select = selection sym trans _≟_
 
@@ -43,9 +43,9 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent
   --------------------------------
   -- Consistent routing algebra --
   --------------------------------
-    
+
   -- Routes are formed by the product R × EPath along with a zero added (the null path)
- 
+
   weight : SGPath G → Route
   weight = weight′ _▷_ 1#
 
@@ -55,7 +55,7 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent
 
 
   -- Step
-  
+
   CStep : Set lzero
   CStep = Fin n × Fin n
 
@@ -69,7 +69,7 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent
     crouteEq : ∀ {x y p q x≈w[p] y≈w[q]} → x ≈ y → p ≈ₚ q → (croute x p x≈w[p]) ≈ᶜ (croute y q y≈w[q])
 
   _≉ᶜ_ : Rel CRoute (a ⊔ b ⊔ ℓ)
-  x ≉ᶜ y = ¬ (x ≈ᶜ y) 
+  x ≉ᶜ y = ¬ (x ≈ᶜ y)
 
 
 
@@ -91,7 +91,7 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent
 
 
   -- Extension operator
-  
+
   infix 6 _▷ᶜ_
 
   _▷ᶜ_ : CStep → CRoute → CRoute
@@ -183,23 +183,23 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent
     ...   | no  v▷x≉0 | yes v▷y≈0 = contradiction (trans (▷-pres-≈ v x≈y) v▷y≈0) v▷x≉0
     ...   | no  _     | no  _     = crouteEq (▷-pres-≈ v x≈y) [ ≡-refl ∷ p≈q ]
 
-  
+
   ≈ᶜ-isEquivalence : IsEquivalence _≈ᶜ_
-  ≈ᶜ-isEquivalence = record { 
-      refl = ≈ᶜ-refl ; 
-      sym = ≈ᶜ-sym ; 
-      trans = ≈ᶜ-trans 
+  ≈ᶜ-isEquivalence = record {
+      refl = ≈ᶜ-refl ;
+      sym = ≈ᶜ-sym ;
+      trans = ≈ᶜ-trans
     }
 
   ≈ᶜ-isDecEquivalence : IsDecEquivalence _≈ᶜ_
-  ≈ᶜ-isDecEquivalence = record { 
-      isEquivalence = ≈ᶜ-isEquivalence ; 
-      _≟_ = _≟ᶜ_ 
+  ≈ᶜ-isDecEquivalence = record {
+      isEquivalence = ≈ᶜ-isEquivalence ;
+      _≟_ = _≟ᶜ_
     }
-    
+
   Cₛ : Setoid (a ⊔ b ⊔ ℓ) (a ⊔ b ⊔ ℓ)
   Cₛ = record {
-      _≈_ = _≈ᶜ_; 
+      _≈_ = _≈ᶜ_;
       isEquivalence = ≈ᶜ-isEquivalence
     }
 

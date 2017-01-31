@@ -45,8 +45,8 @@ module RoutingLib.Routing.Algorithms.DistributedBellmanFord.Asynchronous.AddingP
 
 
   --open RoutingProblem rp
-  
-  abstract 
+
+  abstract
 
 
     Iⁱ≃Iᶜ : I.I ≃ₘ C.I
@@ -69,7 +69,7 @@ module RoutingLib.Routing.Algorithms.DistributedBellmanFord.Asynchronous.AddingP
 
     -- Flushing
 
-    
+
     open import RoutingLib.Asynchronous.Properties sch
 
     flushing-lemma : ∀ {n X i j t x p} → syncIter n ≤ t → I.δ t X i j ≈ⁱ iroute x p → lengthₚ p < n → ∃ λ cr → iroute x p ≃ cr
@@ -89,7 +89,7 @@ module RoutingLib.Routing.Algorithms.DistributedBellmanFord.Asynchronous.AddingP
       ≃⟨ Iⁱ≃Iᶜ i j ⟩
         C.I i j
       ∎)
-      where 
+      where
     ...       | inj₁ (k , δᵗ'Xᵢⱼ≈Aᵢₖ▷δβₖⱼ) | xp≈δᵗ'Xᵢⱼ with ▷ⁱ-extensionWitness i k (I.δ (β (suc t'-1) i k) X k j) x p (≈ⁱ-sym (≈ⁱ-trans xp≈δᵗ'Xᵢⱼ δᵗ'Xᵢⱼ≈Aᵢₖ▷δβₖⱼ))
     ...         | (y , q , δβₖⱼ≈yq , |p|≡|q|+1) with flushing-lemma (<⇒≤ (aₜᵢ≤s⇒tₙ≤βsij i k aₜᵢ≤t')) (subst (λ v → I.δ (β v i k) X k j ≈ⁱ iroute y q) (≡-sym 1+t'-1≡t') δβₖⱼ≈yq) (m+1≤n+1⇨m≤n (subst (_< suc n) |p|≡|q|+1 |p|<n))
     ...           | (cr , yq≃cr) = (i , k) ▷ᶜ cr , (
@@ -101,7 +101,7 @@ module RoutingLib.Routing.Algorithms.DistributedBellmanFord.Asynchronous.AddingP
         (i , k) ▷ⁱ (I.δ (β (suc t'-1) i k) X k j)
       ≈ⁱ⟨ ▷ⁱ-pres-≈ⁱ (i , k) δβₖⱼ≈yq ⟩
         (i , k) ▷ⁱ (iroute y q)
-      ≃⟨ ▷-≃ i k yq≃cr ⟩ 
+      ≃⟨ ▷-≃ i k yq≃cr ⟩
         (i , k) ▷ᶜ cr
       ∎)
 
@@ -109,7 +109,7 @@ module RoutingLib.Routing.Algorithms.DistributedBellmanFord.Asynchronous.AddingP
     flushingInconsistentEntry : ∀ X i j → ∃ λ cr → I.δ (syncIter (suc n)) X i j ≃ cr
     flushingInconsistentEntry X i j with I.δ (syncIter (suc n)) X i j | inspect (I.δ (syncIter (suc n)) X i) j
     ... | inull      | _            = cnull , nullEq
-    ... | iroute x p | [ δˢⁱⁿXᵢⱼ≡xp ] = flushing-lemma ≤-refl (≈ⁱ-reflexive δˢⁱⁿXᵢⱼ≡xp) (lengthₚ<n p) 
+    ... | iroute x p | [ δˢⁱⁿXᵢⱼ≡xp ] = flushing-lemma ≤-refl (≈ⁱ-reflexive δˢⁱⁿXᵢⱼ≡xp) (lengthₚ<n p)
 
     flushInconsistencies : ∀ X → ∃ λ Y → I.δ (syncIter (suc n)) X ≃ₘ Y
     flushInconsistencies X = (λ i j → proj₁ (flushingInconsistentEntry X i j)) , (λ i j → proj₂ (flushingInconsistentEntry X i j))

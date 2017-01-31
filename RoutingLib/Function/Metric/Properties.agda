@@ -9,4 +9,3 @@ module RoutingLib.Function.Metric.Properties {a ℓ} {S : Setoid a ℓ} (M : Met
   open Setoid S renaming (Carrier to A)
   open Metric M
 
-  

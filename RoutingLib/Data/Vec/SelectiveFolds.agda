@@ -4,7 +4,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; cong; sub
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Nullary using (yes; no)
 open import Algebra.FunctionProperties.Core using (Op₂)
-open import Algebra.FunctionProperties using (Associative; Idempotent; Commutative)
+open import Algebra.FunctionProperties using (Associative; Idempotent; Commutative; Selective; Congruent₂)
 open import Data.Fin using (Fin) renaming (_≤_ to _≤Fin_; zero to fzero; suc to fsuc)
 open import Data.Fin.Properties using (_≟_)
 open import Data.Nat using (ℕ; suc)
@@ -13,12 +13,10 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (∃; ∃₂; _×_; _,_; proj₁; proj₂)
 open import Function using (_∘_)
 
-open import RoutingLib.Algebra.FunctionProperties using (Selective; _Preserves_)
-
 module RoutingLib.Data.Vec.SelectiveFolds
-  {a ℓ} (S : Setoid a ℓ) (_•_ : Op₂ (Setoid.Carrier S)) (pres : _•_ Preserves (Setoid._≈_ S)) (sel : Selective (Setoid._≈_ S) _•_)
+  {a ℓ} (S : Setoid a ℓ) (_•_ : Op₂ (Setoid.Carrier S)) (pres : Congruent₂ (Setoid._≈_ S) _•_) (sel : Selective (Setoid._≈_ S) _•_)
   where
-  
+
   open Setoid S renaming (Carrier to A)
   open import RoutingLib.Algebra.Selectivity.Properties _≈_ _•_ sel using (idem)
   open import RoutingLib.Algebra.Selectivity.NaturalOrders S _•_ pres using (_≤ᵣ_; _≤ₗ_; ≤ᵣ-resp-≈) renaming (≤ᵣ-antisym to ≤ᵣ-antisym'; ≤ᵣ-absᵣ to ≤ᵣ-absᵣ'; ≤ᵣ-absₗ to ≤ᵣ-absₗ; ≤ᵣ-trans to ≤ᵣ-trans'; ≤ᵣ-isPartialOrder to ≤ᵣ-isPartialOrder'; ≤ᵣ-total to ≤ᵣ-total')
@@ -35,7 +33,7 @@ module RoutingLib.Data.Vec.SelectiveFolds
   ∃-foldr e [] = inj₂ refl
   ∃-foldr e (x ∷ xs) with sel x (foldr (λ _ → A) _•_ e xs)
   ... | inj₁ x≤fxs = inj₁ (fzero , x≤fxs)
-  ... | inj₂ fxs≤x with ∃-foldr e xs 
+  ... | inj₂ fxs≤x with ∃-foldr e xs
   ...   | inj₁ (i , fxs≈xsᵢ) = inj₁ (fsuc i , trans fxs≤x fxs≈xsᵢ)
   ...   | inj₂ fxs≈e = inj₂ (trans fxs≤x fxs≈e)
 
@@ -67,12 +65,12 @@ module RoutingLib.Data.Vec.SelectiveFolds
     -- foldr₁ --
     ------------
 
-    foldr₁≤xs : ∀ {n} → (xs : Vec A (suc n)) → ∀ i → foldr₁ _•_ xs ≤ᵣ lookup i xs 
+    foldr₁≤xs : ∀ {n} → (xs : Vec A (suc n)) → ∀ i → foldr₁ _•_ xs ≤ᵣ lookup i xs
     foldr₁≤xs (x ∷ [])     fzero     = idem x
     foldr₁≤xs (x ∷ [])     (fsuc ())
     foldr₁≤xs (x ∷ y ∷ xs) fzero     = ≤ᵣ-absₗ assoc idem x (foldr₁ _•_ (y ∷ xs))
     foldr₁≤xs (x ∷ y ∷ xs) (fsuc l)  = ≤ᵣ-trans (≤ᵣ-absᵣ' comm assoc idem (foldr₁ _•_ (y ∷ xs)) x) (foldr₁≤xs (y ∷ xs) l)
-    
+
 
 
 
@@ -94,8 +92,8 @@ module RoutingLib.Data.Vec.SelectiveFolds
       res2 : x₁ • (foldr₁ _•_ (x₂ ∷ xs)) ≈ y₁ • (foldr₁ _•_ (y₂ ∷ ys))
       res2 with ∃-foldr (y₂ ∷ ys)
       ... | (j , f≈ysⱼ) with eqCon (fsuc j)
-      ...   | inj₁ xsⱼ≈ysⱼ = pres x≈y (≤ᵣ-antisym 
-        (≤ᵣ-resp-≈ refl (trans xsⱼ≈ysⱼ (sym f≈ysⱼ)) (foldr₁≤xs (x₂ ∷ xs) j)) 
+      ...   | inj₁ xsⱼ≈ysⱼ = pres x≈y (≤ᵣ-antisym
+        (≤ᵣ-resp-≈ refl (trans xsⱼ≈ysⱼ (sym f≈ysⱼ)) (foldr₁≤xs (x₂ ∷ xs) j))
         (≤ᵣ-trans (≤ᵣ-resp-≈ refl (sym x≈y) y•f≈f) (trans (comm (foldr₁ _•_ (x₂ ∷ xs)) x₁) x•f≈x)))
       ...   | inj₂ (_ , (fzero , y≤ysⱼ , y≉ysⱼ))     = contradiction (≤ᵣ-antisym y≤ysⱼ (≤ᵣ-resp-≈ f≈ysⱼ refl y•f≈f)) y≉ysⱼ
       ...   | inj₂ (_ , (fsuc l , ysₗ≤ysⱼ , ysₗ≉ysⱼ)) = contradiction (≤ᵣ-antisym ysₗ≤ysⱼ (≤ᵣ-resp-≈ f≈ysⱼ refl (foldr₁≤xs (y₂ ∷ ys) l))) ysₗ≉ysⱼ
@@ -107,19 +105,19 @@ module RoutingLib.Data.Vec.SelectiveFolds
       res2 : x₁ • (foldr₁ _•_ (x₂ ∷ xs)) ≈ y₁ • (foldr₁ _•_ (y₂ ∷ ys))
       res2 with ∃-foldr (x₂ ∷ xs)
       ... | (j , f≈xsⱼ) with eqCon (fsuc j)
-      ...   | inj₁ xsⱼ≈ysⱼ = pres x≈y (≤ᵣ-antisym 
-        (≤ᵣ-trans x•f≈f (≤ᵣ-resp-≈ (sym x≈y) refl (trans (comm (foldr₁ _•_ (y₂ ∷ ys)) y₁) y•f≈y))) 
+      ...   | inj₁ xsⱼ≈ysⱼ = pres x≈y (≤ᵣ-antisym
+        (≤ᵣ-trans x•f≈f (≤ᵣ-resp-≈ (sym x≈y) refl (trans (comm (foldr₁ _•_ (y₂ ∷ ys)) y₁) y•f≈y)))
         (≤ᵣ-resp-≈ refl (trans (sym xsⱼ≈ysⱼ) (sym f≈xsⱼ)) (foldr₁≤xs (y₂ ∷ ys) j)))
       ...   | inj₂ ((fzero , x≤xsⱼ , x≉xsⱼ) , _)     = contradiction (≤ᵣ-antisym x≤xsⱼ (≤ᵣ-resp-≈ f≈xsⱼ refl x•f≈f)) x≉xsⱼ
       ...   | inj₂ ((fsuc l , xsₗ≤xsⱼ , xsₗ≉xsⱼ) , _) = contradiction (≤ᵣ-antisym xsₗ≤xsⱼ (≤ᵣ-resp-≈ f≈xsⱼ refl (foldr₁≤xs (x₂ ∷ xs) l))) xsₗ≉xsⱼ
-  
+
     ... | inj₁ x≈y                       | inj₂ x•f≈f | inj₂ y•f≈f = pres x≈y (foldr₁[xs]≈foldr₁[ys] (x₂ ∷ xs) (y₂ ∷ ys) res)
 
       where
 
       lemma : ∀ {s t u v} → t ≈ s → t ≤ᵣ u → u <ᵣ v → s <ᵣ v
       lemma t≈s t≤u (u≤v , u≉v) = (≤ᵣ-resp-≈ t≈s refl (≤ᵣ-trans t≤u u≤v)) , (λ s≈v → u≉v (≤ᵣ-antisym u≤v (≤ᵣ-resp-≈ (trans t≈s s≈v) refl t≤u)))
- 
+
       res : ∀ k →
         lookup k (x₂ ∷ xs) ≈ lookup k (y₂ ∷ ys) ⊎
         ∃ (λ l → lookup l (x₂ ∷ xs) <ᵣ lookup k (x₂ ∷ xs)) ×
@@ -155,7 +153,7 @@ module RoutingLib.Data.Vec.SelectiveFolds
     -- foldr --
     -----------
 
-    foldrₓₛ≤xsᵢ : ∀ {n} e (xs : Vec A n) → ∀ i → foldr (λ _ → A) _•_ e xs ≤ᵣ lookup i xs 
+    foldrₓₛ≤xsᵢ : ∀ {n} e (xs : Vec A n) → ∀ i → foldr (λ _ → A) _•_ e xs ≤ᵣ lookup i xs
     foldrₓₛ≤xsᵢ e []       ()
     foldrₓₛ≤xsᵢ e (x ∷ xs) fzero     = ≤ᵣ-absₗ assoc idem x (foldr (λ _ → A) _•_ e xs)
     foldrₓₛ≤xsᵢ e (x ∷ xs) (fsuc i)  = ≤ᵣ-trans (≤ᵣ-absᵣ' comm assoc idem (foldr (λ _ → A) _•_ e xs) x) (foldrₓₛ≤xsᵢ e xs i)
@@ -174,7 +172,7 @@ module RoutingLib.Data.Vec.SelectiveFolds
     ... | inj₂ ((fzero , _ , x≉x) ,       _)                        = contradiction refl x≉x
     ... | inj₂ (_ ,                       (fzero , _ , y≉y))        = contradiction refl y≉y
     ... | inj₂ ((fsuc l , xsₗ≤x , xsₗ≉x) , (fsuc m , ysₘ≤y , ysₘ≉y)) = trans (trans (≤ᵣ-trans (foldrₓₛ≤xsᵢ e xs l) xsₗ≤x) (foldrₓₛ≈foldrᵥₛ e xs ys res)) (sym (≤ᵣ-trans (foldrₓₛ≤xsᵢ e ys m) ysₘ≤y))
-      
+
       where
       res : ∀ k → lookup k xs ≈ lookup k ys ⊎ (∃ λ i → lookup i xs <ᵣ lookup k xs) × (∃ λ j → lookup j ys <ᵣ lookup k ys)
       res k with eqCon (fsuc k)
@@ -198,7 +196,7 @@ module RoutingLib.Data.Vec.SelectiveFolds
       res : ∀ k → (lookup k xs ≈ lookup k ys ⊎
           (∃ λ l → lookup l xs <ᵣ lookup k xs) ×
           (∃ λ m → lookup m ys <ᵣ lookup k ys))
-      res k with eqCon (fsuc k) 
+      res k with eqCon (fsuc k)
       ... | inj₁ xsₖ≈ysₖ = inj₁ xsₖ≈ysₖ
       ... | inj₂ ((fzero  , x<xsₖ)  , (fzero , y<ysₖ))   = inj₂ ((i , {!!}) , (j , {!!}))
       ... | inj₂ ((fzero  , x<xsₖ)  , (fsuc m , ysₘ<ysₖ)) = inj₂ ((i , {!!}) , (m , ysₘ<ysₖ))

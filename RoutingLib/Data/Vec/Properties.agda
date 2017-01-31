@@ -11,13 +11,13 @@ open import Function using (_∘_)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary using (Decidable)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym) renaming (setoid to ≡-setoid)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym)
 
+open import RoutingLib.Data.Vec
 open import RoutingLib.Data.List.SucMap using (0∉mapₛ; ∈-mapₛ; mapₛ-∈)
 open import RoutingLib.Data.List.Any.GenericMembership using (∈-resp-≈)
 open import RoutingLib.Data.List.All using ([]) renaming (_∷_ to _∷ₚ_)
 open import RoutingLib.Data.List.All.Properties using (forced-map)
-open import RoutingLib.Data.Vec 
 open import RoutingLib.Algebra.FunctionProperties using (_×-Preserves_)
 
 module RoutingLib.Data.Vec.Properties where
@@ -25,14 +25,6 @@ module RoutingLib.Data.Vec.Properties where
   -----------------------
   -- To push to stdlib --
   -----------------------
-
-  ∈-++ₗ : ∀ {a m n} {A : Set a} {x : A} {xs : Vec A m} {ys : Vec A n} → x ∈ xs → x ∈ xs ++ ys
-  ∈-++ₗ here         = here
-  ∈-++ₗ (there x∈xs) = there (∈-++ₗ x∈xs)
-
-  ∈-++ᵣ : ∀ {a m n} {A : Set a} {x : A} (xs : Vec A m) {ys : Vec A n} → x ∈ ys → x ∈ xs ++ ys
-  ∈-++ᵣ []       x∈ys = x∈ys
-  ∈-++ᵣ (x ∷ xs) x∈ys = there (∈-++ᵣ xs x∈ys)
 
   ∈-map : ∀ {a b m} {A : Set a} {B : Set b} {x : A} {xs : Vec A m} (f : A → B) → x ∈ xs → f x ∈ map f xs
   ∈-map f here       = here
@@ -53,7 +45,7 @@ module RoutingLib.Data.Vec.Properties where
   lookup-map fzero (x ∷ xs) = refl
   lookup-map (fsuc i) (x ∷ xs) = lookup-map i xs
 
-  lookup-zipWith : ∀ {a n} {A : Set a} (_•_ : Op₂ A) (i : Fin n) (xs ys : Vec A n) → lookup i (zipWith _•_ xs ys) ≡ (lookup i xs) • (lookup i ys) 
+  lookup-zipWith : ∀ {a n} {A : Set a} (_•_ : Op₂ A) (i : Fin n) (xs ys : Vec A n) → lookup i (zipWith _•_ xs ys) ≡ (lookup i xs) • (lookup i ys)
   lookup-zipWith _ fzero  (x ∷ _)  (y ∷ _)    = refl
   lookup-zipWith _•_ (fsuc i) (_ ∷ xs) (_ ∷ ys)  = lookup-zipWith _•_ i xs ys
 
@@ -102,9 +94,9 @@ module RoutingLib.Data.Vec.Properties where
   ∉-tabulate {n = suc n} f v∉f (there v∈tabᶠ) = ∉-tabulate (f ∘ fsuc) (v∉f ∘ fsuc) v∈tabᶠ
 
   {-
-  postulate map-∃-∈ : ∀ {a b n} {A : Set a} {B : Set b} {f : A → B} {v} {xs : Vec A n} → v ∈ map f xs → ∃ λ y → (y ∈ xs × v ≡ f y)  
+  postulate map-∃-∈ : ∀ {a b n} {A : Set a} {B : Set b} {f : A → B} {v} {xs : Vec A n} → v ∈ map f xs → ∃ λ y → (y ∈ xs × v ≡ f y)
 
-  postulate concat-∃-∈ : ∀ {a m n} {A : Set a} {v} {xss : Vec (Vec A m) n} → v ∈ concat xss → ∃ λ ys → (v ∈ ys × ys ∈ xss) 
+  postulate concat-∃-∈ : ∀ {a m n} {A : Set a} {v} {xss : Vec (Vec A m) n} → v ∈ concat xss → ∃ λ ys → (v ∈ ys × ys ∈ xss)
 
   concat-∃-∈ {xss = []} ()
   concat-∃-∈ {xss = [] ∷ []} ()
@@ -134,19 +126,19 @@ module RoutingLib.Data.Vec.Properties where
   ... | yes v≡x = sym v≡x
   ... | no  v≢x = contradiction i∈find 0∉mapₛ
   findAll-hit {_≟_ = _≟_} {xs = x ∷ xs} {v = v} (fsuc i) i∈find with v ≟ x
-  ... | no  v≢x = findAll-hit i (∈-mapₛ i∈find) 
-  ... | yes v≡x with i∈find 
+  ... | no  v≢x = findAll-hit i (∈-mapₛ i∈find)
+  ... | yes v≡x with i∈find
   ...   | here ()
-  ...   | there i∈findAll = findAll-hit i (∈-mapₛ i∈findAll) 
+  ...   | there i∈findAll = findAll-hit i (∈-mapₛ i∈findAll)
 
   findAll-hit₂ : ∀ {a n} {A : Set a} (_≟_ : Decidable _≡_) (xs : Vec A n) v i → lookup i xs ≡ v → i ∈ₗ findAll _≟_ v xs
   findAll-hit₂ _≟_ (x ∷ xs) v fzero v≡xs₀ with v ≟ x
   ... | yes v≡x = here refl
   ... | no  v≢x = contradiction (sym (v≡xs₀)) v≢x
   findAll-hit₂ _≟_ (x ∷ xs) v (fsuc i) v≡xsᵢ with v ≟ x
-  ... | yes v≡x = there (mapₛ-∈ (findAll-hit₂ _≟_ xs v i v≡xsᵢ)) 
+  ... | yes v≡x = there (mapₛ-∈ (findAll-hit₂ _≟_ xs v i v≡xsᵢ))
   ... | no  v≢x = mapₛ-∈ (findAll-hit₂ _≟_ xs v i v≡xsᵢ)
-  
+
   findAll-miss : ∀ {a n} {A : Set a} (_≟_ : Decidable _≡_) (xs : Vec A n) v i → i ∉ₗ findAll _≟_ v xs → lookup i xs ≢ v
   findAll-miss _≟_ (x ∷ xs) v fzero i∉find with v ≟ x
   ... | no  v≢x = λ x≡v → v≢x (sym x≡v)
@@ -160,12 +152,8 @@ module RoutingLib.Data.Vec.Properties where
   findAll! _   []       _          = []
   findAll! {n = suc n} _≟_ (x ∷ xs) v with v ≟ x
   ... | no  v≢x = mapₛ! (findAll! _≟_ xs v)
-  ... | yes v≡x = forced-map (λ _ ()) (findAll _≟_ v xs) ∷ₚ mapₛ! (findAll! _≟_ xs v) 
+  ... | yes v≡x = forced-map (λ _ ()) (findAll _≟_ v xs) ∷ₚ mapₛ! (findAll! _≟_ xs v)
 -}
-  
-  ∈-allPairs : ∀ {a} {A : Set a} {m n : ℕ} (xs : Vec A m) (ys : Vec A n) {x y : A} → x ∈ xs → y ∈ ys → (x , y) ∈ allPairs xs ys
-  ∈-allPairs (x ∷ xs) ys here         y∈ys = ∈-++ₗ (∈-map (λ y → (x , y)) y∈ys)
-  ∈-allPairs (x ∷ xs) ys (there x∈xs) y∈ys = ∈-++ᵣ (map (λ y → (x , y)) ys) (∈-allPairs xs ys x∈xs y∈ys)
 
   allPairs-∃-∈ : ∀ {a} {A : Set a} {m n : ℕ} {xs : Vec A m} {ys : Vec A n} {v} → v ∈ allPairs xs ys → ∃₂ λ x y → v ≡ (x , y)
   allPairs-∃-∈ {v = (x , y)} xy∈allPairs = x , y , refl

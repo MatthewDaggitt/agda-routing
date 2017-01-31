@@ -17,7 +17,7 @@ module RoutingLib.Data.List.Any.PropositionalMembership where
           (f : A → B) → v ∈ xs → f v ∈ map f xs
   ∈-map {A = A} {B} f = GM.∈-map (setoid B) (setoid A) (cong f)
 
-  ∈-combine : ∀ {a b} {A : Set a} {B : Set b} {u v xs ys} 
+  ∈-combine : ∀ {a b} {A : Set a} {B : Set b} {u v xs ys}
               (f : A → A → B) → u ∈ xs → v ∈ ys → f u v ∈ combine f xs ys
   ∈-combine {A = A} {B} f = GM.∈-combine (setoid B) (setoid A) (cong₂ f)
 

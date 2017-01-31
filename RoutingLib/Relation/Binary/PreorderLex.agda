@@ -13,8 +13,8 @@ module RoutingLib.Relation.Binary.PreorderLex {a ℓ₁ ℓ₂} {A : Set a} (_�
 
   private
     _≰₁_ : Rel A ℓ₁
-    x ≰₁ y = ¬ (x ≤₁ y) 
-    
+    x ≰₁ y = ¬ (x ≤₁ y)
+
     _≰₂_ : Rel A ℓ₂
     x ≰₂ y = ¬ (x ≤₂ y)
 
@@ -80,27 +80,27 @@ module RoutingLib.Relation.Binary.PreorderLex {a ℓ₁ ℓ₂} {A : Set a} (_�
   -- Records
 
   ×-isPreorder : ∀ {ℓ₃} {_≈_ : Rel A ℓ₃} → IsPreorder _≈_ _≤₁_ → IsPreorder _≈_ _≤₂_ → IsPreorder _≈_ ×-Lex
-  ×-isPreorder pre₁ pre₂ = record { 
-      isEquivalence = IsPreorder.isEquivalence pre₁; 
-      reflexive = ×-reflexive (IsEquivalence.sym (IsPreorder.isEquivalence pre₁)) (IsPreorder.reflexive pre₁) (IsPreorder.reflexive pre₂) ; 
-      trans = ×-trans (IsPreorder.trans pre₁) (IsPreorder.trans pre₂) 
+  ×-isPreorder pre₁ pre₂ = record {
+      isEquivalence = IsPreorder.isEquivalence pre₁;
+      reflexive = ×-reflexive (IsEquivalence.sym (IsPreorder.isEquivalence pre₁)) (IsPreorder.reflexive pre₁) (IsPreorder.reflexive pre₂) ;
+      trans = ×-trans (IsPreorder.trans pre₁) (IsPreorder.trans pre₂)
     }
 
   ×-isPartialOrder : ∀ {ℓ₃} {_≈_ : Rel A ℓ₃} → IsPreorder _≈_ _≤₁_ → IsPartialOrder _≈_ _≤₂_ → IsPartialOrder _≈_ ×-Lex
-  ×-isPartialOrder pre par = record { 
-      isPreorder = ×-isPreorder pre (IsPartialOrder.isPreorder par) ; 
-      antisym = ×-antisym (IsPartialOrder.antisym par) 
+  ×-isPartialOrder pre par = record {
+      isPreorder = ×-isPreorder pre (IsPartialOrder.isPreorder par) ;
+      antisym = ×-antisym (IsPartialOrder.antisym par)
     }
 
   ×-isTotalOrder : ∀ {ℓ₃} {_≈_ : Rel A ℓ₃} → IsDecTotalPreorder _≈_ _≤₁_ → IsTotalOrder _≈_ _≤₂_ → IsTotalOrder _≈_ ×-Lex
-  ×-isTotalOrder decTotPre tot = record { 
-      isPartialOrder = ×-isPartialOrder (IsDecTotalPreorder.isPreorder decTotPre) (IsTotalOrder.isPartialOrder tot) ; 
-      total = ×-total (IsDecTotalPreorder.total decTotPre) (IsDecTotalPreorder._≤?_ decTotPre) (IsTotalOrder.total tot) 
+  ×-isTotalOrder decTotPre tot = record {
+      isPartialOrder = ×-isPartialOrder (IsDecTotalPreorder.isPreorder decTotPre) (IsTotalOrder.isPartialOrder tot) ;
+      total = ×-total (IsDecTotalPreorder.total decTotPre) (IsDecTotalPreorder._≤?_ decTotPre) (IsTotalOrder.total tot)
     }
 
   ×-isDecTotalOrder : ∀ {ℓ₃} {_≈_ : Rel A ℓ₃} → IsDecTotalPreorder _≈_ _≤₁_ → IsDecTotalOrder _≈_ _≤₂_ → IsDecTotalOrder _≈_ ×-Lex
-  ×-isDecTotalOrder decTotPre decTot = record { 
-      isTotalOrder = ×-isTotalOrder decTotPre (IsDecTotalOrder.isTotalOrder decTot) ; 
-      _≟_ = IsDecTotalOrder._≟_ decTot; 
-      _≤?_ = ×-decidable (IsDecTotalPreorder._≤?_ decTotPre) (IsDecTotalOrder._≤?_ decTot) 
+  ×-isDecTotalOrder decTotPre decTot = record {
+      isTotalOrder = ×-isTotalOrder decTotPre (IsDecTotalOrder.isTotalOrder decTot) ;
+      _≟_ = IsDecTotalOrder._≟_ decTot;
+      _≤?_ = ×-decidable (IsDecTotalPreorder._≤?_ decTotPre) (IsDecTotalOrder._≤?_ decTot)
     }

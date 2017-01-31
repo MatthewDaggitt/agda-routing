@@ -33,9 +33,9 @@ module RoutingLib.Data.Graph.SPath where
   data _∉ₙₑₚ_ {n : ℕ} where
     notThere : ∀ {i j k i≢j} → k ≢ i → k ≢ j   → k ∉ₙₑₚ i ∺ j ∣ i≢j
     notHere  : ∀ {i p k i∉p} → k ≢ i → k ∉ₙₑₚ p → k ∉ₙₑₚ i ∷ p ∣ i∉p
-  
+
   _∉ₙₑₚ?_ : ∀ {n} → Decidable (_∉ₙₑₚ_ {n})
-  k ∉ₙₑₚ? (i ∺ j ∣ _) with k ≟ i | k ≟ j 
+  k ∉ₙₑₚ? (i ∺ j ∣ _) with k ≟ i | k ≟ j
   ... | yes k≡i | _       = no λ{(notThere k≢i _) → k≢i k≡i}
   ... | _       | yes k≡j = no λ{(notThere _ k≢j) → k≢j k≡j}
   ... | no  k≢i | no  k≢j = yes (notThere k≢i k≢j)
@@ -58,7 +58,7 @@ module RoutingLib.Data.Graph.SPath where
 
 
   -- Operations
-  
+
   source : ∀ {n} → NonEmptySPath n → Fin n
   source (i ∺ _ ∣ _) = i
   source (i ∷ _ ∣ _) = i
@@ -78,8 +78,8 @@ module RoutingLib.Data.Graph.SPath where
     lookup (i ∺ j ∣ _) (fsuc fzero)     = j
     lookup (i ∺ j ∣ _) (fsuc (fsuc ()))
     lookup (i ∷ p ∣ _) fzero            = i
-    lookup (i ∷ p ∣ _) (fsuc k)         = lookup p k 
-    
+    lookup (i ∷ p ∣ _) (fsuc k)         = lookup p k
+
     lookup-∈ : ∀ {n} → (p : NonEmptySPath n) → ∀ i {k} → lookup p i ≡ k → ¬ (k ∉ₙₑₚ p)
     lookup-∈ (i ∺ j ∣ _) fzero            refl (notThere i≢i _) = i≢i refl
     lookup-∈ (i ∺ j ∣ _) (fsuc fzero)     refl (notThere _ j≢j) = j≢j refl

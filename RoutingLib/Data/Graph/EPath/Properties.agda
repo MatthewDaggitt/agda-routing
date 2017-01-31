@@ -56,26 +56,26 @@ module RoutingLib.Data.Graph.EPath.Properties {n : ℕ} where
   ≈ₚ-trans (x≈y ∷ xs≈ys) (y≈z ∷ ys≈zs) = (≡-trans x≈y y≈z) ∷ (≈ₚ-trans xs≈ys ys≈zs)
 
   _≟ₚ_ : Decidable (_≈ₚ_ {n})
-  [ i ]        ≟ₚ [ j ] with i ≟ j 
+  [ i ]        ≟ₚ [ j ] with i ≟ j
   ... | no  i≢j = no (λ {([ i≡j ]) → i≢j i≡j})
   ... | yes i≡j = yes ([ i≡j ])
   [ _ ]        ≟ₚ (_ ∷ _ ∣ _)  = no λ()
   (_ ∷ _  ∣ _) ≟ₚ [ _ ]        = no λ()
   (x ∷ xs ∣ _) ≟ₚ (y ∷ ys ∣ _) with x ≟ y | xs ≟ₚ ys
   ... | no  x≉y | _         = no λ{(x≈y ∷ _) → x≉y x≈y}
-  ... | _       | no  xs≉ys = no λ{(_ ∷ xs≈ys) → xs≉ys xs≈ys} 
+  ... | _       | no  xs≉ys = no λ{(_ ∷ xs≈ys) → xs≉ys xs≈ys}
   ... | yes x≈y | yes xs≈ys = yes (x≈y ∷ xs≈ys)
 
   ≈ₚ-isEquivalence : IsEquivalence (_≈ₚ_ {n})
-  ≈ₚ-isEquivalence = record { 
-      refl = ≈ₚ-refl; 
-      sym = ≈ₚ-sym; 
+  ≈ₚ-isEquivalence = record {
+      refl = ≈ₚ-refl;
+      sym = ≈ₚ-sym;
       trans = ≈ₚ-trans
     }
 
   ≈ₚ-setoid : Setoid _ _
   ≈ₚ-setoid = record {
-      Carrier = EPath n; 
+      Carrier = EPath n;
       _≈_ = _≈ₚ_;
       isEquivalence = ≈ₚ-isEquivalence
     }
@@ -87,12 +87,12 @@ module RoutingLib.Data.Graph.EPath.Properties {n : ℕ} where
     }
 
   ≈ₚ-decSetoid : DecSetoid _ _
-  ≈ₚ-decSetoid = record { 
-      Carrier = EPath n ; 
-      _≈_ = _≈ₚ_ ; 
-      isDecEquivalence = ≈ₚ-isDecEquivalence 
+  ≈ₚ-decSetoid = record {
+      Carrier = EPath n ;
+      _≈_ = _≈ₚ_ ;
+      isDecEquivalence = ≈ₚ-isDecEquivalence
     }
-  
+
   -- Other properties
 
   p≉i∷p : ∀ {i} {p : EPath n} {i∉p} → p ≉ₚ i ∷ p ∣ i∉p
@@ -106,7 +106,7 @@ module RoutingLib.Data.Graph.EPath.Properties {n : ℕ} where
   p₀≢q₀⇨p≉q p₀≢q₀ p≈q = p₀≢q₀ (p≈q⇨p₀≡q₀ p≈q)
 
   pₜ≉qₜ⇨p≉q : ∀ {i j : Fin n} {p q i∉p j∉q} → p ≉ₚ q → (i ∷ p ∣ i∉p) ≉ₚ (j ∷ q ∣ j∉q)
-  pₜ≉qₜ⇨p≉q p≉q (_ ∷ p≈q) = p≉q p≈q 
+  pₜ≉qₜ⇨p≉q p≉q (_ ∷ p≈q) = p≉q p≈q
 
   i≢j⇨[i]≉[j] : ∀ {i j : Fin n} → i ≢ j → [ i ] ≉ₚ [ j ]
   i≢j⇨[i]≉[j] i≢j = p₀≢q₀⇨p≉q i≢j
@@ -114,7 +114,7 @@ module RoutingLib.Data.Graph.EPath.Properties {n : ℕ} where
 
   p≈q∧ip₀∈G⇨iq₀∈G : ∀ {a} {A : Set a} (G : Graph A n) {p q : EPath n} → p ≈ₚ q → ∀ {i} → (i , source p) ᵉ∈ᵍ G → (i , source q) ᵉ∈ᵍ G
   p≈q∧ip₀∈G⇨iq₀∈G G p≈q {i} ip₀∈G = subst (λ v → (i , v) ᵉ∈ᵍ G) (p≈q⇨p₀≡q₀ p≈q) ip₀∈G
-  
+
 
 
 
@@ -140,7 +140,7 @@ module RoutingLib.Data.Graph.EPath.Properties {n : ℕ} where
   ... | _         | inj₁ [i]≤q = inj₁ (stopLeft [i]≤q)
   ... | no  q≉[i] | inj₂ q≤[i] = inj₂ (stopRight q≉[i] q≤[i])
   ≤ₚ-total [ i ] (j ∷ [ .i ] ∣ _) | yes [ ≡-refl ] | inj₂ q≤[i] = inj₁ (stopLeft q≤[i])
-  ≤ₚ-total (i ∷ p ∣ _) [ j ]         with p ≟ₚ [ j ] | ≤ₚ-total p [ j ]  
+  ≤ₚ-total (i ∷ p ∣ _) [ j ]         with p ≟ₚ [ j ] | ≤ₚ-total p [ j ]
   ... | _         | inj₂ [j]≤p = inj₂ (stopLeft [j]≤p)
   ... | no  p≉[j] | inj₁ p≤[j] = inj₁ (stopRight p≉[j] p≤[j])
   ≤ₚ-total (i ∷ [ j ] ∣ _) [ .j ] | yes [ ≡-refl ] | inj₁ p≤[j] = inj₂ (stopLeft p≤[j])
@@ -166,8 +166,8 @@ module RoutingLib.Data.Graph.EPath.Properties {n : ℕ} where
   ≤ₚ-antisym (stepEqual p≈q i≤j)     (stepUnequal q≉p q≤p)   = contradiction (≈ₚ-sym p≈q) q≉p
   ≤ₚ-antisym (stepUnequal p≉q p≤q)   (stepEqual q≈p j≤i)     = contradiction (≈ₚ-sym q≈p) p≉q
   ≤ₚ-antisym (stepUnequal p≉q p≤q)   (stepUnequal q≉p q≤p)   = contradiction (≤ₚ-antisym p≤q q≤p) p≉q
-  
-  ≤ₚ-trans : Transitive (_≤ₚ_ {n}) 
+
+  ≤ₚ-trans : Transitive (_≤ₚ_ {n})
   ≤ₚ-trans (stop i≤j)              (stop j≤k)              = stop (≤-trans i≤j j≤k)
   ≤ₚ-trans (stop i≤j)              (stopLeft [j]≤r)        = stopLeft (≤ₚ-trans (stop i≤j) [j]≤r)
   ≤ₚ-trans (stopLeft [i]≤q)        (stopRight q≉[k] q≤[k]) = ≤ₚ-trans [i]≤q q≤[k]
@@ -201,29 +201,29 @@ module RoutingLib.Data.Graph.EPath.Properties {n : ℕ} where
 
 
   ≤ₚ-isPreorder : IsPreorder (_≈ₚ_ {n}) _≤ₚ_
-  ≤ₚ-isPreorder = record { 
-      isEquivalence = ≈ₚ-isEquivalence ; 
-      reflexive = ≤ₚ-reflexive ; 
-      trans = ≤ₚ-trans 
+  ≤ₚ-isPreorder = record {
+      isEquivalence = ≈ₚ-isEquivalence ;
+      reflexive = ≤ₚ-reflexive ;
+      trans = ≤ₚ-trans
     }
 
   ≤ₚ-isPartialOrder : IsPartialOrder (_≈ₚ_ {n}) _≤ₚ_
-  ≤ₚ-isPartialOrder = record { 
-      isPreorder = ≤ₚ-isPreorder ; 
-      antisym = ≤ₚ-antisym 
+  ≤ₚ-isPartialOrder = record {
+      isPreorder = ≤ₚ-isPreorder ;
+      antisym = ≤ₚ-antisym
     }
 
   ≤ₚ-isTotalOrder : IsTotalOrder (_≈ₚ_ {n}) _≤ₚ_
-  ≤ₚ-isTotalOrder = record { 
+  ≤ₚ-isTotalOrder = record {
       isPartialOrder = ≤ₚ-isPartialOrder ;
-      total = ≤ₚ-total 
+      total = ≤ₚ-total
     }
 
   ≤ₚ-isDecTotalOrder : IsDecTotalOrder (_≈ₚ_ {n}) _≤ₚ_
-  ≤ₚ-isDecTotalOrder = record { 
-      isTotalOrder = ≤ₚ-isTotalOrder ; 
-      _≟_ = _≟ₚ_ ; 
-      _≤?_ = _≤ₚ?_ 
+  ≤ₚ-isDecTotalOrder = record {
+      isTotalOrder = ≤ₚ-isTotalOrder ;
+      _≟_ = _≟ₚ_ ;
+      _≤?_ = _≤ₚ?_
     }
 
 
@@ -234,7 +234,7 @@ module RoutingLib.Data.Graph.EPath.Properties {n : ℕ} where
   p≤ₚi∷p {p = j ∷ q ∣ _} = stepUnequal p≉i∷p p≤ₚi∷p
 
   i∷p≰ₚp : ∀ {i} {p : EPath n} {i∉p} → i ∷ p ∣ i∉p ≰ₚ p
-  i∷p≰ₚp (stopRight [j]≉[j] _)   = contradiction ([ ≡-refl ]) [j]≉[j] 
+  i∷p≰ₚp (stopRight [j]≉[j] _)   = contradiction ([ ≡-refl ]) [j]≉[j]
   i∷p≰ₚp (stepEqual i∷p≈p _)     = p≉i∷p (≈ₚ-sym i∷p≈p)
   i∷p≰ₚp (stepUnequal i∷p≉p rec) = i∷p≰ₚp rec
 
@@ -251,7 +251,7 @@ module RoutingLib.Data.Graph.EPath.Properties {n : ℕ} where
   ≤ₗ-refl {[ _ ]}     = z≤n
   ≤ₗ-refl {_ ∷ _ ∣ _} = s≤s ≤ₗ-refl
 
-  ≤ₗ-trans : Transitive (_≤ₗ_ {n}) 
+  ≤ₗ-trans : Transitive (_≤ₗ_ {n})
   ≤ₗ-trans {[ _ ]}     {_}          {_}         _          _        = z≤n
   ≤ₗ-trans {_ ∷ _ ∣ _} {[ _ ]}      {_}         ()
   ≤ₗ-trans {_ ∷ _ ∣ _} {_ ∷ _ ∣ _}  {[ _ ]}     _         ()
@@ -283,23 +283,23 @@ module RoutingLib.Data.Graph.EPath.Properties {n : ℕ} where
   ≤ₗ-resp₂-≈ₚ = RespectedBy⇨Respects₂ ≈ₚ-refl ≤ₗ-resp-≈ₚ
 
   ≤ₗ-isPreorder : IsPreorder (_≈ₚ_ {n}) _≤ₗ_
-  ≤ₗ-isPreorder = record { 
-      isEquivalence = ≈ₚ-isEquivalence ; 
-      reflexive = ≤ₗ-reflexive ; 
-      trans = ≤ₗ-trans 
+  ≤ₗ-isPreorder = record {
+      isEquivalence = ≈ₚ-isEquivalence ;
+      reflexive = ≤ₗ-reflexive ;
+      trans = ≤ₗ-trans
     }
 
   ≤ₗ-isTotalPreorder : IsTotalPreorder (_≈ₚ_ {n}) _≤ₗ_
-  ≤ₗ-isTotalPreorder = record { 
-      isPreorder = ≤ₗ-isPreorder ; 
-      total = ≤ₗ-total 
+  ≤ₗ-isTotalPreorder = record {
+      isPreorder = ≤ₗ-isPreorder ;
+      total = ≤ₗ-total
     }
 
   ≤ₗ-isDecTotalPreorder : IsDecTotalPreorder (_≈ₚ_ {n}) _≤ₗ_
-  ≤ₗ-isDecTotalPreorder = record { 
-      isTotalPreorder = ≤ₗ-isTotalPreorder ; 
-      _≟_ = _≟ₚ_ ; 
-      _≤?_ = _≤ₗ?_ 
+  ≤ₗ-isDecTotalPreorder = record {
+      isTotalPreorder = ≤ₗ-isTotalPreorder ;
+      _≟_ = _≟ₚ_ ;
+      _≤?_ = _≤ₗ?_
     }
 
   -- Other
@@ -309,7 +309,7 @@ module RoutingLib.Data.Graph.EPath.Properties {n : ℕ} where
 
   i∷p≰ₗp : ∀ {i} {p : EPath n} {i∉p} → i ∷ p ∣ i∉p ≰ₗ p
   i∷p≰ₗp = 1+n≰n
-  
+
   ------------
   -- Lookup --
   ------------
@@ -325,7 +325,7 @@ module RoutingLib.Data.Graph.EPath.Properties {n : ℕ} where
   lookup-∉ {p = _ ∷ _ ∣ _} fzero     (notHere  i≢v _)    = i≢v ∘ ≡-sym
   lookup-∉ {p = [ _ ]}     (fsuc ())
   lookup-∉ {p = _ ∷ _ ∣ _} (fsuc l)  (notHere  i≢v v∉ps) = lookup-∉ l v∉ps
- 
+
   lookup! : ∀ (p : EPath n) {i j} → i ≢ j → lookup p i ≢ lookup p j
   lookup!  _            {i = fzero}   {j = fzero}   i≢j = contradiction ≡-refl i≢j
   lookup! [ _ ]         {i = fsuc ()}
@@ -334,7 +334,7 @@ module RoutingLib.Data.Graph.EPath.Properties {n : ℕ} where
   lookup! (k ∷ p ∣ k∉p) {i = fsuc i}  {j = fzero}   i≢j = lookup-∉ i k∉p
   lookup! (k ∷ p ∣ _ )  {i = fsuc i}  {j = fsuc j}  i≢j = lookup! p (i≢j ∘ cong fsuc)
 
-  
+
   -- Length
 
   |i∷p|≡l+1⇨|p|≡l : ∀ {p : EPath n} {l i i∉p} → length (i ∷ p ∣ i∉p) ≡ suc l → length p ≡ l
@@ -344,9 +344,9 @@ module RoutingLib.Data.Graph.EPath.Properties {n : ℕ} where
   |p|<n p with suc (length p) ≤ℕ? n
   ... | yes |p|<n = |p|<n
   ... | no  |p|≮n with pigeonhole (m≰n⇨n<m |p|≮n) (λ z → lookupᵥ z (toVec p))
-  ...   | i , j , i≢j , pᵢ≡pⱼ = 
-    contradiction 
-      (subst₂ _≡_ (lookup-toVec p i) (lookup-toVec p j) pᵢ≡pⱼ) 
+  ...   | i , j , i≢j , pᵢ≡pⱼ =
+    contradiction
+      (subst₂ _≡_ (lookup-toVec p i) (lookup-toVec p j) pᵢ≡pⱼ)
       (lookup! p i≢j)
 
   length-resp-≈ₚ : ∀ {p q : EPath n} → p ≈ₚ q → length p ≡ length q
@@ -378,7 +378,7 @@ module RoutingLib.Data.Graph.EPath.Properties {n : ℕ} where
 
   open Any.Membership ℕₛ using () renaming (_∈_ to _∈ℕ_)
   open Any.Membership Pₛ using () renaming (_∈_ to _∈ₚ_; _∉_ to _∉ₚ_; ∈-resp-≈ to ∈ₚ-resp-≈ₚ)
-  open Setoid LPₛ using () renaming (reflexive to ≈ₗₚ-reflexive)  
+  open Setoid LPₛ using () renaming (reflexive to ≈ₗₚ-reflexive)
 
 
 
@@ -403,7 +403,7 @@ module RoutingLib.Data.Graph.EPath.Properties {n : ℕ} where
 
   extendAll-∉ : ∀ {i} {q : EPath n} {i∉q ps} → All (q ≉ₚ_) ps → All (i ∷ q ∣ i∉q ≉ₚ_) (extendAll ps i)
   extendAll-∉ {_} [] = []
-  extendAll-∉ {i} {ps = p ∷ ps} (q≉p ∷ q≉ps) with i ∉? p 
+  extendAll-∉ {i} {ps = p ∷ ps} (q≉p ∷ q≉ps) with i ∉? p
   ... | no  i∈p = extendAll-∉ q≉ps
   ... | yes i∉p = (λ {(_ ∷ p≈q) → q≉p p≈q}) ∷ (extendAll-∉ q≉ps)
 
@@ -425,7 +425,7 @@ module RoutingLib.Data.Graph.EPath.Properties {n : ℕ} where
 
 
 
-  -- All paths of length l 
+  -- All paths of length l
 
   allPathsOfLength-completeness : ∀ p → p ∈ₚ (allPathsOfLength (length p))
   allPathsOfLength-completeness [ i ]       = ∈-map Fₛ Pₛ [_] (toList-preserves-∈ Fₛ (∈-allFin i))
@@ -456,13 +456,13 @@ module RoutingLib.Data.Graph.EPath.Properties {n : ℕ} where
 
 
   isEnumeration : IsEnumeration Pₛ allPaths
-  isEnumeration = record { 
-      unique = allPaths!; 
+  isEnumeration = record {
+      unique = allPaths!;
       complete = allPaths-completeness
     }
 
   enumeration : Enumeration Pₛ
-  enumeration = record { 
-      list = allPaths; 
+  enumeration = record {
+      list = allPaths;
       isEnumeration = isEnumeration
     }

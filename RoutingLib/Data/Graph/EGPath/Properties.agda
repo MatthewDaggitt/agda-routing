@@ -40,19 +40,19 @@ module RoutingLib.Data.Graph.EGPath.Properties {a n} {A : Set a} {G : Graph A n}
   ≈ₚ-isDecEquivalence = on-isDecEquivalence toEPath EPathP.≈ₚ-isDecEquivalence
 
   open IsDecEquivalence ≈ₚ-isDecEquivalence using () renaming (
-      refl to ≈ₚ-refl; 
-      sym to ≈ₚ-sym; 
-      trans to ≈ₚ-trans; 
-      _≟_ to _≟ₚ_; 
+      refl to ≈ₚ-refl;
+      sym to ≈ₚ-sym;
+      trans to ≈ₚ-trans;
+      _≟_ to _≟ₚ_;
       isEquivalence to ≈ₚ-isEquivalence;
       reflexive to ≈ₚ-reflexive
     ) public
 
   ≈ₚ-setoid : Setoid _ _
   ≈ₚ-setoid = record {
-      Carrier = EGPath G ; 
-      _≈_ = _≈ₚ_ ; 
-      isEquivalence = ≈ₚ-isEquivalence 
+      Carrier = EGPath G ;
+      _≈_ = _≈ₚ_ ;
+      isEquivalence = ≈ₚ-isEquivalence
     }
 
   p≉i∷p : ∀ {p : EGPath G} {i i∉p} e∈G → p ≉ₚ i ∷ p ∣ i∉p ∣ e∈G
@@ -93,12 +93,12 @@ module RoutingLib.Data.Graph.EGPath.Properties {a n} {A : Set a} {G : Graph A n}
 
   ≤ₚ-isDecTotalOrder : IsDecTotalOrder (_≈ₚ_ {G = G}) _≤ₚ_
   ≤ₚ-isDecTotalOrder = on-isDecTotalOrder toEPath EPathP.≤ₚ-isDecTotalOrder
-  
+
   open IsDecTotalOrder ≤ₚ-isDecTotalOrder using () renaming (
-      refl to ≤ₚ-refl; 
-      trans to ≤ₚ-trans; 
-      antisym to ≤ₚ-antisym; 
-      total to ≤ₚ-total; 
+      refl to ≤ₚ-refl;
+      trans to ≤ₚ-trans;
+      antisym to ≤ₚ-antisym;
+      total to ≤ₚ-total;
       _≤?_ to _≤ₚ?_
     ) public
 
@@ -124,13 +124,13 @@ module RoutingLib.Data.Graph.EGPath.Properties {a n} {A : Set a} {G : Graph A n}
   ≤ₗ-isDecTotalPreorder = on-isDecTotalPreorder toEPath EPathP.≤ₗ-isDecTotalPreorder
 
   open IsDecTotalPreorder ≤ₗ-isDecTotalPreorder using () renaming (
-      refl to ≤ₗ-refl; 
+      refl to ≤ₗ-refl;
       trans to ≤ₗ-trans;
       total to ≤ₗ-total;
       _≤?_ to _≤ₗ?_;
       ∼-resp-≈ to ≤ₗ-resp₂-≈ₚ;
       isPreorder to ≤ₗ-isPreorder;
-      isTotalPreorder to ≤ₗ-isTotalPreorder) 
+      isTotalPreorder to ≤ₗ-isTotalPreorder)
     public
 
   ≤ₗ-resp-≈ₚ : (_≤ₗ_ {G = G}) RespectedBy _≈ₚ_
@@ -146,7 +146,7 @@ module RoutingLib.Data.Graph.EGPath.Properties {a n} {A : Set a} {G : Graph A n}
   -- Other
 
   _∉?_ : Decidable (_∉_ {G = G})
-  i ∉? [ j ] with i ≟ j 
+  i ∉? [ j ] with i ≟ j
   ... | yes i≡j           = no λ{(notThere i≢j) → i≢j i≡j}
   ... | no  i≢j           = yes (notThere i≢j)
   i ∉? (j ∷ p ∣ _ ∣ _) with i ≟ j | i ∉? p
@@ -156,7 +156,7 @@ module RoutingLib.Data.Graph.EGPath.Properties {a n} {A : Set a} {G : Graph A n}
 
   ∉-resp-≈ₚ : ∀ {k} {p q : EGPath G} → p ≈ₚ q → k ∉ p → k ∉ q
   ∉-resp-≈ₚ {p = [ _ ]}         {[ _ ]}          [ ≡-refl ]     (notThere i≢j)    = notThere i≢j
-  ∉-resp-≈ₚ {p = [ _ ]}         {_ ∷ _ ∣ _ ∣ _}  () 
+  ∉-resp-≈ₚ {p = [ _ ]}         {_ ∷ _ ∣ _ ∣ _}  ()
   ∉-resp-≈ₚ {p = _ ∷ _ ∣ _ ∣ _} {[ _ ]}          ()
   ∉-resp-≈ₚ {p = _ ∷ _ ∣ _ ∣ _} {_ ∷ _ ∣ _ ∣ _}  (≡-refl ∷ p≈q) (notHere k≉x k∉p) = notHere k≉x (∉-resp-≈ₚ p≈q k∉p)
 
@@ -165,9 +165,9 @@ module RoutingLib.Data.Graph.EGPath.Properties {a n} {A : Set a} {G : Graph A n}
   weight-resp-≈ₚ _▷_ 1# {p = [ _ ]} {[ _ ]} _ = ≡-refl
   weight-resp-≈ₚ _▷_ 1# {p = [ _ ]} {_ ∷ p ∣ _ ∣ _} ()
   weight-resp-≈ₚ _▷_ 1# {p = _ ∷ _ ∣ _ ∣ _} {[ _ ]} ()
-  weight-resp-≈ₚ _▷_ 1# {p = i ∷ p ∣ _ ∣ (v , e≡v) } {.i ∷ q ∣ _ ∣ (w , e≡w)} (≡-refl ∷ p≈q) = 
-    cong₂ _▷_ 
-      (just-injective (≡-trans (≡-trans (≡-sym e≡v) (cong (G i) (p≈q⇨p₀≡q₀ p≈q))) e≡w)) 
+  weight-resp-≈ₚ _▷_ 1# {p = i ∷ p ∣ _ ∣ (v , e≡v) } {.i ∷ q ∣ _ ∣ (w , e≡w)} (≡-refl ∷ p≈q) =
+    cong₂ _▷_
+      (just-injective (≡-trans (≡-trans (≡-sym e≡v) (cong (G i) (p≈q⇨p₀≡q₀ p≈q))) e≡w))
       (weight-resp-≈ₚ _▷_ 1# p≈q)
 
 
@@ -217,7 +217,7 @@ module RoutingLib.Data.Graph.EGPath.Properties {a n} {A : Set a} {G : Graph A n}
   fromEPath-pres-≈ {_ ∷ _ ∣ _} {[ _ ]} ()
   fromEPath-pres-≈ {i ∷ p ∣ _} {.i ∷ q ∣ _} (≡-refl ∷ p≈q) with fromEPath p G | inspect (fromEPath p) G | fromEPath q G | inspect (fromEPath q) G
   ... | nothing | _                 | nothing | _                 = nothing
-  ... | nothing | [ fromp≡nothing ] | just y  | [ fromq≡justy ]   = contradiction (subst₂ (Eq _≈ₚ_) fromp≡nothing fromq≡justy (fromEPath-pres-≈ p≈q)) λ() 
+  ... | nothing | [ fromp≡nothing ] | just y  | [ fromq≡justy ]   = contradiction (subst₂ (Eq _≈ₚ_) fromp≡nothing fromq≡justy (fromEPath-pres-≈ p≈q)) λ()
   ... | just x  | [ fromp≡justx ]   | nothing | [ fromq≡nothing ] = contradiction (subst₂ (Eq _≈ₚ_) fromp≡justx fromq≡nothing (fromEPath-pres-≈ p≈q)) λ()
   ... | just x  | [ fromp≡justx ]   | just y  | [ fromq≡justy ] with (i , source x) ᵉ∈ᵍ? G | (i , source y) ᵉ∈ᵍ? G
   ...   | no _      | no _      = nothing
@@ -251,7 +251,7 @@ module RoutingLib.Data.Graph.EGPath.Properties {a n} {A : Set a} {G : Graph A n}
   ...       | inj₂ (inj₁ fromq≡nothing) = contradiction (≡-trans (≡-sym fromq≡nothing) fromq≡justy) λ()
   ...       | inj₂ (inj₂ fromp≉fromq)   = inj₂ (inj₂ (just (EPathP.pₜ≉qₜ⇨p≉q (drop-just (subst₂ (Eq _≉ₚ_) fromp≡justx fromq≡justy fromp≉fromq)))))
 
-    
+
 
   ----------------
   -- Enumeraton --
@@ -263,7 +263,7 @@ module RoutingLib.Data.Graph.EGPath.Properties {a n} {A : Set a} {G : Graph A n}
   allPaths-complete p = ∈-gfilter EPathP.≈ₚ-setoid ≈ₚ-setoid (λ p → fromEPath p G) (EPathP.allPaths-completeness (toEPath p)) (p≈fromtop p) fromEPath-pres-≈
 
   allPaths-unique : Unique ≈ₚ-setoid (allPaths G)
-  allPaths-unique = gfilter-pairs (λ p → fromEPath p G) fromEPath-pres-≉ EPathP.allPaths! 
+  allPaths-unique = gfilter-pairs (λ p → fromEPath p G) fromEPath-pres-≉ EPathP.allPaths!
 
 
 
@@ -278,7 +278,7 @@ module RoutingLib.Data.Graph.EGPath.Properties {a n} {A : Set a} {G : Graph A n}
   ... | no  p₀≢src | yes q₀≡src | _          | _          = contradiction (≡-trans (p≈q⇨p₀≡q₀ p≈q)          q₀≡src) p₀≢src
   ... | yes p₀≡src | no  q₀≢src | _          | _          = contradiction (≡-trans (p≈q⇨p₀≡q₀ (≈ₚ-sym p≈q)) p₀≡src) q₀≢src
   ... | _          | _          | yes pₙ≡dst | no  qₙ≢dst = contradiction (≡-trans (p≈q⇨pₙ≡qₙ  (≈ₚ-sym p≈q)) pₙ≡dst) qₙ≢dst
-  ... | _          | _          | no  pₙ≢dst | yes qₙ≡dst = contradiction (≡-trans (p≈q⇨pₙ≡qₙ  p≈q)          qₙ≡dst) pₙ≢dst 
+  ... | _          | _          | no  pₙ≢dst | yes qₙ≡dst = contradiction (≡-trans (p≈q⇨pₙ≡qₙ  p≈q)          qₙ≡dst) pₙ≢dst
   ... | no  _      | no  _      | _          | _          = nothing
   ... | yes _      | yes _      | no  _      | no  _      = nothing
   ... | yes _      | yes _      | yes _      | yes _      = just p≈q

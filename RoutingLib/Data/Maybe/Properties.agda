@@ -5,8 +5,6 @@ open import Relation.Binary.PropositionalEquality using (_≡_) renaming (refl t
 open import Relation.Nullary using (¬_; yes; no)
 open import Function using (_∘_)
 
-open import RoutingLib.Data.Maybe.Base
-
 module RoutingLib.Data.Maybe.Properties where
 
   just-injective : ∀ {a} {A : Set a} {x y : A} → (_≡_ {A = Maybe A}) (just x) (just y) → x ≡ y
@@ -47,7 +45,7 @@ module RoutingLib.Data.Maybe.Properties where
   dec dec nothing (just y)  = no λ()
   dec dec nothing nothing = yes nothing
 
-  isEquivalence : ∀ {a ℓ} {A : Set a} {_≈_ : Rel A ℓ} 
+  isEquivalence : ∀ {a ℓ} {A : Set a} {_≈_ : Rel A ℓ}
                   → IsEquivalence _≈_ → IsEquivalence (Eq _≈_)
   isEquivalence isEq = record
     { refl  = refl (IsEquivalence.refl isEq)
@@ -55,10 +53,10 @@ module RoutingLib.Data.Maybe.Properties where
     ; trans = trans (IsEquivalence.trans isEq)
     }
 
-  isDecEquivalence : ∀ {a ℓ} {A : Set a} {_≈_ : Rel A ℓ} 
+  isDecEquivalence : ∀ {a ℓ} {A : Set a} {_≈_ : Rel A ℓ}
                    → IsDecEquivalence _≈_ → IsDecEquivalence (Eq _≈_)
   isDecEquivalence isDecEq = record
-    { isEquivalence = isEquivalence 
+    { isEquivalence = isEquivalence
                         (IsDecEquivalence.isEquivalence isDecEq)
     ; _≟_           = dec (IsDecEquivalence._≟_ isDecEq)
     }

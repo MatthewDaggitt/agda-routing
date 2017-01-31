@@ -1,18 +1,16 @@
 open import Data.Product using (_,_)
 open import Data.Sum using (inj₁; inj₂)
 open import Relation.Binary
-open import Algebra.FunctionProperties.Core using (Op₂)
+open import Algebra.FunctionProperties using (Congruent₂; Op₂)
 
-open import RoutingLib.Algebra.FunctionProperties using (_Preserves_)
 open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_; Respects₂⇨RespectedBy)
 
-module RoutingLib.Algebra.Selectivity.NaturalOrders 
-  {a ℓ} (S : Setoid a ℓ) (_•_ : Op₂ (Setoid.Carrier S)) (pres : _•_ Preserves (Setoid._≈_ S))
+module RoutingLib.Algebra.Selectivity.NaturalOrders
+  {a ℓ} (S : Setoid a ℓ) (_•_ : Op₂ (Setoid.Carrier S)) (pres : Congruent₂ (Setoid._≈_ S) _•_)
   where
 
   open Setoid S renaming (Carrier to A)
-  open import Algebra.FunctionProperties _≈_ using (Commutative; Associative; Idempotent)
-  open import RoutingLib.Algebra.FunctionProperties _≈_ using (Selective)
+  open import Algebra.FunctionProperties _≈_ using (Commutative; Associative; Idempotent; Selective)
   open import RoutingLib.Algebra.Selectivity.Properties _≈_ _•_ using () renaming (idem to sel⇨idem)
 
   ------------------------
@@ -26,10 +24,10 @@ module RoutingLib.Algebra.Selectivity.NaturalOrders
 
   -- Properties
 
-  ≤ₗ-reflexive : Idempotent _•_ → _≈_ ⇒ _≤ₗ_ 
+  ≤ₗ-reflexive : Idempotent _•_ → _≈_ ⇒ _≤ₗ_
   ≤ₗ-reflexive idem {x} x≈y = trans (sym (pres refl x≈y)) (idem x)
 
-  ≤ₗ-refl : Idempotent _•_ → Reflexive _≤ₗ_ 
+  ≤ₗ-refl : Idempotent _•_ → Reflexive _≤ₗ_
   ≤ₗ-refl idem {x} = idem x
 
   ≤ₗ-antisym : Commutative _•_ → Antisymmetric _≈_ _≤ₗ_
@@ -88,12 +86,12 @@ module RoutingLib.Algebra.Selectivity.NaturalOrders
   _≤ᵣ_ : Rel A ℓ
   x ≤ᵣ y = (y • x) ≈ x
 
-  -- Properties 
+  -- Properties
 
-  ≤ᵣ-reflexive : Idempotent _•_ → _≈_ ⇒ _≤ᵣ_ 
+  ≤ᵣ-reflexive : Idempotent _•_ → _≈_ ⇒ _≤ᵣ_
   ≤ᵣ-reflexive idem {x} x≈y = trans (pres (sym x≈y) refl) (idem x)
 
-  ≤ᵣ-refl : Idempotent _•_ → Reflexive _≤ᵣ_ 
+  ≤ᵣ-refl : Idempotent _•_ → Reflexive _≤ᵣ_
   ≤ᵣ-refl idem {x} = idem x
 
   ≤ᵣ-antisym : Commutative _•_ → Antisymmetric _≈_ _≤ᵣ_
@@ -144,46 +142,46 @@ module RoutingLib.Algebra.Selectivity.NaturalOrders
     }
 
   ≤ᵣ-isPartialOrder : Commutative _•_ → Associative _•_ → Idempotent _•_ → IsPartialOrder _≈_ _≤ᵣ_
-  ≤ᵣ-isPartialOrder comm assoc idem = record { 
-      isPreorder = ≤ᵣ-isPreorder assoc idem; 
-      antisym = ≤ᵣ-antisym comm 
+  ≤ᵣ-isPartialOrder comm assoc idem = record {
+      isPreorder = ≤ᵣ-isPreorder assoc idem;
+      antisym = ≤ᵣ-antisym comm
     }
 
   ≤ᵣ-poset : Commutative _•_ → Associative _•_ → Idempotent _•_ →  Poset a ℓ ℓ
-  ≤ᵣ-poset comm assoc idem = record { 
-      Carrier = A ; 
-      _≈_ = _≈_ ; 
-      _≤_ = _≤ᵣ_ ; 
+  ≤ᵣ-poset comm assoc idem = record {
+      Carrier = A ;
+      _≈_ = _≈_ ;
+      _≤_ = _≤ᵣ_ ;
       isPartialOrder = ≤ᵣ-isPartialOrder comm assoc idem
     }
 
   ≤ᵣ-isDecPartialOrder : Decidable _≈_ → Commutative _•_ → Associative _•_ → Idempotent _•_ → IsDecPartialOrder _≈_ _≤ᵣ_
-  ≤ᵣ-isDecPartialOrder dec comm assoc idem = record { 
-      isPartialOrder = ≤ᵣ-isPartialOrder comm assoc idem ; 
-      _≟_ = dec; 
-      _≤?_ = ≤ᵣ-dec dec 
+  ≤ᵣ-isDecPartialOrder dec comm assoc idem = record {
+      isPartialOrder = ≤ᵣ-isPartialOrder comm assoc idem ;
+      _≟_ = dec;
+      _≤?_ = ≤ᵣ-dec dec
     }
 
   ≤ᵣ-decPoset : Decidable _≈_ → Commutative _•_ → Associative _•_ → Idempotent _•_ → DecPoset a ℓ ℓ
-  ≤ᵣ-decPoset dec comm assoc idem = record { 
-      Carrier = A ; 
-      _≈_ = _≈_ ; 
-      _≤_ = _≤ᵣ_ ; 
+  ≤ᵣ-decPoset dec comm assoc idem = record {
+      Carrier = A ;
+      _≈_ = _≈_ ;
+      _≤_ = _≤ᵣ_ ;
       isDecPartialOrder = ≤ᵣ-isDecPartialOrder dec comm assoc idem
     }
 
   ≤ᵣ-isTotalOrder : Commutative _•_ → Associative _•_ → Selective _•_ → IsTotalOrder _≈_ _≤ᵣ_
-  ≤ᵣ-isTotalOrder comm assoc sel  = record { 
-      isPartialOrder = ≤ᵣ-isPartialOrder comm assoc (sel⇨idem sel) ; 
-      total = ≤ᵣ-total sel comm 
+  ≤ᵣ-isTotalOrder comm assoc sel  = record {
+      isPartialOrder = ≤ᵣ-isPartialOrder comm assoc (sel⇨idem sel) ;
+      total = ≤ᵣ-total sel comm
     }
 
   ≤ᵣ-totalOrder : Commutative _•_ → Associative _•_ → Selective _•_ → TotalOrder a ℓ ℓ
-  ≤ᵣ-totalOrder comm assoc sel = record { 
-      Carrier = A ; 
-      _≈_ = _≈_ ; 
-      _≤_ = _≤ᵣ_ ; 
-      isTotalOrder = ≤ᵣ-isTotalOrder comm assoc sel 
+  ≤ᵣ-totalOrder comm assoc sel = record {
+      Carrier = A ;
+      _≈_ = _≈_ ;
+      _≤_ = _≤ᵣ_ ;
+      isTotalOrder = ≤ᵣ-isTotalOrder comm assoc sel
     }
 
 
@@ -193,6 +191,6 @@ module RoutingLib.Algebra.Selectivity.NaturalOrders
 
   ≤ᵣ⇨≤ₗ : Commutative _•_ → ∀ {x y} → x ≤ᵣ y → x ≤ₗ y
   ≤ᵣ⇨≤ₗ comm {x} {y} y⊕x≈x = trans (comm x y) y⊕x≈x
-  
+
   ≤ₗ⇨≤ᵣ : Commutative _•_ → ∀ {x y} → x ≤ₗ y → x ≤ᵣ y
   ≤ₗ⇨≤ᵣ comm {x} {y} x⊕y≈x = trans (comm y x) x⊕y≈x

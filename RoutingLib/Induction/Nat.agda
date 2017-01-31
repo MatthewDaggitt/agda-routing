@@ -5,6 +5,8 @@ open import Induction.Nat renaming (<-well-founded to <'-well-founded)
 
 module RoutingLib.Induction.Nat where
 
+  -- Pushed to stdlib
+
   <'-acc⇒<-acc : ∀ n → Acc _<′_ n → Acc _<_ n
   <'-acc⇒<-acc zero    _        = acc (λ _ ())
   <'-acc⇒<-acc (suc n) (acc rs) = acc (λ y y≤n → <'-acc⇒<-acc y (rs y (≤⇒≤′ y≤n)))

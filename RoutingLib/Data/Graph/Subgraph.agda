@@ -43,7 +43,7 @@ module RoutingLib.Data.Graph.Subgraph {a n} {A : Set a}  where
 
 
   -- ↑ conversion
-  
+
   ↑convert : ∀ (G : Graph A (suc n)) k (p : EGPath (G / k)) → EGPath G
   ↑convert∉ : ∀ {G : Graph A (suc n)} k (p : EGPath (G / k)) → ∀ {i} → i ∉ p → punchup k i ∉ ↑convert G k p
   ↑convertSource : ∀ (G : Graph A (suc n)) k (p : EGPath (G / k)) → source (↑convert G k p) ≡ punchup k (source p)
@@ -57,8 +57,8 @@ module RoutingLib.Data.Graph.Subgraph {a n} {A : Set a}  where
   ↑convertSource _ _ [ _ ] = refl
   ↑convertSource _ _ (_ ∷ _ ∣ _ ∣ _) = refl
 
-  k∉↑convertₖ : ∀ {G : Graph A (suc n)} k p → k ∉ ↑convert G k p 
-  k∉↑convertₖ k [ i ] = notThere (punchupₖ≢k k ∘ sym) 
+  k∉↑convertₖ : ∀ {G : Graph A (suc n)} k p → k ∉ ↑convert G k p
+  k∉↑convertₖ k [ i ] = notThere (punchupₖ≢k k ∘ sym)
   k∉↑convertₖ k (_ ∷ p ∣ _ ∣ _) = notHere (punchupₖ≢k k ∘ sym) (k∉↑convertₖ k p)
 
   ↑convert-length : ∀ {G : Graph A (suc n)} k p → length (↑convert G k p) ≡ length p

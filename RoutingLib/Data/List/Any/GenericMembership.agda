@@ -10,7 +10,7 @@ open import Data.List.All using (All; _∷_; [])
 open import Data.Nat using (_≤_; suc; s≤s; z≤n)
 open import Data.Maybe using (nothing; just; Maybe; Eq; drop-just)
 open import Data.Empty using (⊥-elim)
-open import Algebra.FunctionProperties using (Op₂; RightIdentity)
+open import Algebra.FunctionProperties using (Op₂; RightIdentity; Selective)
 open import Data.List
 open import Data.Vec using (Vec; toList; fromList) renaming (_∈_ to _∈ᵥ_; here to hereᵥ; there to thereᵥ)
 open import Data.Product using (∃; ∃₂; _×_; _,_; swap)
@@ -18,16 +18,15 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Bool using (true; false; if_then_else_)
 open import Relation.Unary using () renaming (_⊆_ to _⋐_)
 
-open import RoutingLib.Algebra.FunctionProperties using (Selective)
 open import RoutingLib.Data.List using (combine)
 open import RoutingLib.Data.List.Any.Properties
-open import RoutingLib.Data.Maybe.Base using (predBoolToMaybe)
+open import RoutingLib.Data.Maybe.Base
 open import RoutingLib.Data.Maybe.Properties using (just-injective) renaming (reflexive to eq-reflexive; sym to eq-sym; trans to eq-trans)
 
 module RoutingLib.Data.List.Any.GenericMembership {c ℓ} (setoid : Setoid c ℓ) where
 
   open Setoid setoid renaming (Carrier to A; refl to ≈-refl)
-  open Setoid (list-setoid setoid) using () renaming (_≈_ to _≈ₗ_; sym to symₗ; refl to reflₗ) 
+  open Setoid (list-setoid setoid) using () renaming (_≈_ to _≈ₗ_; sym to symₗ; refl to reflₗ)
 
   open Any.Membership setoid public hiding (∈-resp-≈)
   open Any.Membership (list-setoid setoid) using () renaming (_∈_ to _∈ₗ_)
@@ -51,13 +50,13 @@ module RoutingLib.Data.List.Any.GenericMembership {c ℓ} (setoid : Setoid c ℓ
   ∈-concat {_} {_ ∷ _} {(y ∷ ys) ∷ xss} (there v∈xs) (here (_ ∷ xs≈ys)) = there (∈-concat {xss = ys ∷ xss} v∈xs (here xs≈ys))
   ∈-concat {_} {_ ∷ _} {ys ∷ xss}       v∈xs         (there s)          = ∈-++ᵣ ys (∈-concat v∈xs (s))
 
- 
+
 
   -----------------------
   -- To push to stdlib --
   -----------------------
 
-  
+
   filter-pres-∉ : ∀ P {v xs} → v ∉ xs → v ∉ filter P xs
   filter-pres-∉ P {v} {[]} _ ()
   filter-pres-∉ P {v} {x ∷ xs} v∉x∷xs with predBoolToMaybe P x | inspect (predBoolToMaybe P) x
@@ -65,7 +64,6 @@ module RoutingLib.Data.List.Any.GenericMembership {c ℓ} (setoid : Setoid c ℓ
   ... | just y  | [ t ] with P x
   ...   | true  = λ {(here v≈y) → (v∉x∷xs ∘ here) (trans v≈y (sym (reflexive (just-injective t)))); (there v∈fxs) → (filter-pres-∉ P (v∉x∷xs ∘ there)) v∈fxs}
   ...   | false = contradiction t λ()
-
 
   -----------
   -- Other --
@@ -80,7 +78,7 @@ module RoutingLib.Data.List.Any.GenericMembership {c ℓ} (setoid : Setoid c ℓ
 
   ∈-resp-≈ₗ : ∀ {v xs ys} → v ∈ xs → xs ≈ₗ ys → v ∈ ys
   ∈-resp-≈ₗ (here v≈x) (x≈y ∷ _) = here (trans v≈x x≈y)
-  ∈-resp-≈ₗ (there v∈xs) (_ ∷ xs≈ys) = there (∈-resp-≈ₗ v∈xs xs≈ys) 
+  ∈-resp-≈ₗ (there v∈xs) (_ ∷ xs≈ys) = there (∈-resp-≈ₗ v∈xs xs≈ys)
 
   ∉-resp-≈ₗ : ∀ {v xs ys} → v ∉ xs → xs ≈ₗ ys → v ∉ ys
   ∉-resp-≈ₗ v∉xs xs≈ys v∈ys = v∉xs (∈-resp-≈ₗ v∈ys (symₗ xs≈ys))
@@ -93,7 +91,7 @@ module RoutingLib.Data.List.Any.GenericMembership {c ℓ} (setoid : Setoid c ℓ
   ... | inj₂ v∈ys = inj₂ v∈ys
 
   module Double {c₂ ℓ₂} (setoid₂ : Setoid c₂ ℓ₂) where
-    
+
     open Setoid setoid₂ using () renaming (Carrier to B; _≈_ to _≈₂_; refl to refl₂; sym to sym₂; trans to trans₂)
     open Any.Membership setoid₂  using () renaming (_∈_ to _∈₂_)
 
@@ -131,7 +129,7 @@ module RoutingLib.Data.List.Any.GenericMembership {c ℓ} (setoid : Setoid c ℓ
 
 
 
-  gfilter-∈ : ∀ P {v} xs → v ∈ gfilter P xs → ∃ λ w → w ∈ xs × Eq _≈_ (P w) (just v) 
+  gfilter-∈ : ∀ P {v} xs → v ∈ gfilter P xs → ∃ λ w → w ∈ xs × Eq _≈_ (P w) (just v)
   gfilter-∈ P [] ()
   gfilter-∈ P (x ∷ xs) _ with P x | inspect P x
   gfilter-∈ P (x ∷ xs) v∈fₚxs         | nothing | _ with gfilter-∈ P xs v∈fₚxs
@@ -142,11 +140,11 @@ module RoutingLib.Data.List.Any.GenericMembership {c ℓ} (setoid : Setoid c ℓ
 
 
 
-  
 
 
 
-  -- Types 
+
+  -- Types
 
   -- Disjoint sets
   Disjoint : Rel (List A) (ℓ ⊔ c)
@@ -175,7 +173,7 @@ module RoutingLib.Data.List.Any.GenericMembership {c ℓ} (setoid : Setoid c ℓ
   disjoint-concat [] (_ , ())
   disjoint-concat {xss = xs ∷ xss} (vs∩xs=∅ ∷ vs∩xss=∅) (v∈vs , v∈xs++concatxss) with ++⁻ xs v∈xs++concatxss
   ... | inj₁ v∈xs  = vs∩xs=∅ (v∈vs , v∈xs)
-  ... | inj₂ v∈xss = disjoint-concat vs∩xss=∅ (v∈vs , v∈xss) 
+  ... | inj₂ v∈xss = disjoint-concat vs∩xss=∅ (v∈vs , v∈xss)
 
 
 
@@ -183,8 +181,8 @@ module RoutingLib.Data.List.Any.GenericMembership {c ℓ} (setoid : Setoid c ℓ
   toList-preserves-∈ : ∀ {n v} {xs : Vec A n} → v ∈ᵥ xs → v ∈ toList xs
   toList-preserves-∈ hereᵥ = here (reflexive refl)
   toList-preserves-∈ (thereᵥ v∈xs) = there (toList-preserves-∈ v∈xs)
-  
-  concat-∃-∈ : ∀ {v xss} → v ∈ concat xss → ∃ λ ys → (v ∈ ys × ys ∈ₗ xss) 
+
+  concat-∃-∈ : ∀ {v xss} → v ∈ concat xss → ∃ λ ys → (v ∈ ys × ys ∈ₗ xss)
   concat-∃-∈ {_} {[]} ()
   concat-∃-∈ {_} {[] ∷ []} ()
   concat-∃-∈ {_} {[] ∷ (xs ∷ xss)} v∈concat[xs∷xss] with concat-∃-∈ v∈concat[xs∷xss]
@@ -201,7 +199,7 @@ module RoutingLib.Data.List.Any.GenericMembership {c ℓ} (setoid : Setoid c ℓ
   ⊆-contractᵣ : ∀ {y xs ys} → xs ⊆ y ∷ ys → y ∉ xs → xs ⊆ ys
   ⊆-contractᵣ xs⊆y∷ys y∉xs v∈xs with xs⊆y∷ys v∈xs
   ... | here  v≈y  = contradiction (∈-resp-≈ v∈xs v≈y) y∉xs
-  ... | there v∈ys = v∈ys 
+  ... | there v∈ys = v∈ys
 
 
 
@@ -265,11 +263,11 @@ module RoutingLib.Data.List.Any.GenericMembership {c ℓ} (setoid : Setoid c ℓ
     resp {x} {y} x≈y rewrite (P-resp-≈ x≈y) with P y
     ... | false = nothing
     ... | true  = just x≈y
-  
+
   ∉-filter : ∀ {P} → (∀ {x y} → x ≈ y → P x ≡ P y) → ∀ {v} → P v ≡ false → ∀ xs → v ∉ filter P xs
   ∉-filter {_} P-resp-≈ ¬Pv [] ()
   ∉-filter {P} P-resp-≈ ¬Pv (x ∷ xs) v∈fₚx∷xs with P x | inspect P x
-  ... | false | _ = ∉-filter P-resp-≈ ¬Pv xs v∈fₚx∷xs 
+  ... | false | _ = ∉-filter P-resp-≈ ¬Pv xs v∈fₚx∷xs
   ... | true  | [ Px ] with v∈fₚx∷xs
   ...   | here v≈x = contradiction (≡-trans (≡-trans (≡-sym Px) (P-resp-≈ (sym v≈x))) ¬Pv) λ()
   ...   | there v∈fₚxs = ∉-filter P-resp-≈ ¬Pv xs v∈fₚxs
@@ -287,7 +285,7 @@ module RoutingLib.Data.List.Any.GenericMembership {c ℓ} (setoid : Setoid c ℓ
   filter-⊆ : ∀ {P Q} → (xs : List A) → (∀ {x} → P x ≡ true → Q x ≡ true) → filter P xs ⊆ filter Q xs
   filter-⊆ {P} {Q} xs P⇨Q = gfilter-⊆ xs P⇨Q'
 
-    where 
+    where
 
     P⇨Q' : ∀ {x a : A} → Eq _≈_ (if P x then just x else nothing) (just a) → Eq _≈_ (if P x then just x else nothing) (if Q x then just x else nothing)
     P⇨Q' {x} t with P x | inspect P x
@@ -305,21 +303,21 @@ module RoutingLib.Data.List.Any.GenericMembership {c ℓ} (setoid : Setoid c ℓ
 
   {-
   postulate filter-∈ : ∀ {v P xs} → v ∈ filter P xs → v ∈ xs
-  
+
 
   postulate filter-reject : ∀ {v} xs P → P v ≡ false → v ∉ filter P xs
 
-  
 
-  gfilter-⊆ {_} {_} []       _   () 
+
+  gfilter-⊆ {_} {_} []       _   ()
   gfilter-⊆ {P} {Q} (x ∷ xs) P⇨Q v∈fₚx∷xs with P x | inspect P x | Q x | inspect Q x | v∈fₚx∷xs
   ... | nothing  | _            | nothing | _              | _ = (gfilter-⊆ xs P⇨Q) v∈fₚx∷xs
   ... | nothing  | _            | just b  | _              | _ = (⊆-extendᵣ b (gfilter-⊆ xs P⇨Q)) v∈fₚx∷xs
-  ... | just a   | [ Px≡justa ] | nothing | [ Qx≡nothing ] | _ = contradiction (P⇨Q Px≡justa) (λ Qx≡justa → contradiction (≡-trans (≡-sym Qx≡justa) Qx≡nothing) (λ())) 
+  ... | just a   | [ Px≡justa ] | nothing | [ Qx≡nothing ] | _ = contradiction (P⇨Q Px≡justa) (λ Qx≡justa → contradiction (≡-trans (≡-sym Qx≡justa) Qx≡nothing) (λ()))
   ... | just a   | [ Px≡justa ] | just b  | [ Qx≡justb ]   | here v≈a     = here (trans v≈a (reflexive (lemma (≡-trans (≡-sym (P⇨Q Px≡justa)) Qx≡justb))))
   ... | just a   | _            | just b  | _              | there v∈fₚxs = there ((gfilter-⊆ xs P⇨Q) v∈fₚxs)
 
-  
+
   --filter-implication xs P⇨Q = gfilter-implication xs (λ Px≡true → {!!})
 
 -}

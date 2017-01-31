@@ -1,6 +1,6 @@
 open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _<_)
 open import Data.Fin using (Fin; zero; suc)
-open import Data.Fin.Properties using (_≟_)
+open import Data.Fin.Properties using (_≟_; suc-injective)
 open import Data.Fin.Dec using (any?)
 open import Data.Product using (_×_; ∃₂; _,_)
 open import Data.Vec using (tabulate; toList; allFin)
@@ -8,8 +8,6 @@ open import Relation.Binary.PropositionalEquality using (cong; _≡_; _≢_; ref
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Function using (_∘_)
-
-open import RoutingLib.Data.Fin.Properties using (suc-injective)
 
 ------------------------------------------------------------------------
 
@@ -19,7 +17,7 @@ module RoutingLib.Data.Fin.Pigeonhole where
   punchout : ∀ {m} {i j : Fin (suc m)} → i ≢ j → Fin m
   punchout {_}     {zero}   {zero}  i≢j = contradiction refl i≢j
   punchout {_}     {zero}   {suc j} _   = j
-  punchout {zero}  {suc ()} 
+  punchout {zero}  {suc ()}
   punchout {suc n} {suc i}  {zero}  _   = zero
   punchout {suc n} {suc i}  {suc j} i≢j = suc (punchout (i≢j ∘ cong suc))
 

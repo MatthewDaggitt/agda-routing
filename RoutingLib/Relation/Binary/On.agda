@@ -10,17 +10,17 @@ module RoutingLib.Relation.Binary.On {a b} {A : Set a} {B : Set b} (f : B → A)
   isTotalPreorder : ∀ {ℓ₁ ℓ₂} {≈ : Rel A ℓ₁} {≤ : Rel A ℓ₂} →
                       IsTotalPreorder ≈ ≤ →
                       IsTotalPreorder (≈ on f) (≤ on f)
-  isTotalPreorder {≈ = ≈} {≤} tp = record { 
-      isPreorder = isPreorder f (IsTotalPreorder.isPreorder tp) ; 
-      total = total f ≤ (IsTotalPreorder.total tp) 
+  isTotalPreorder {≈ = ≈} {≤} tp = record {
+      isPreorder = isPreorder f (IsTotalPreorder.isPreorder tp) ;
+      total = total f ≤ (IsTotalPreorder.total tp)
     }
 
   isDecTotalPreorder : ∀ {ℓ₁ ℓ₂} {≈ : Rel A ℓ₁} {≤ : Rel A ℓ₂} →
                       IsDecTotalPreorder ≈ ≤ →
                       IsDecTotalPreorder (≈ on f) (≤ on f)
-  isDecTotalPreorder {≈ = ≈} {≤} dtp = record { 
-      isTotalPreorder = isTotalPreorder (IsDecTotalPreorder.isTotalPreorder dtp) ; 
-      _≟_ = decidable f ≈ (IsDecTotalPreorder._≟_ dtp); 
-      _≤?_ = decidable f ≤ (IsDecTotalPreorder._≤?_ dtp) 
+  isDecTotalPreorder {≈ = ≈} {≤} dtp = record {
+      isTotalPreorder = isTotalPreorder (IsDecTotalPreorder.isTotalPreorder dtp) ;
+      _≟_ = decidable f ≈ (IsDecTotalPreorder._≟_ dtp);
+      _≤?_ = decidable f ≤ (IsDecTotalPreorder._≤?_ dtp)
     }
 

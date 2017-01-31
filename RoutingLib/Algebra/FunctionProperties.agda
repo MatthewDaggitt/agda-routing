@@ -27,20 +27,8 @@ module RoutingLib.Algebra.FunctionProperties {a ℓ} {A : Set a} (_≈_ : Rel A 
   StrictlyRightAbsorptive : Op₂ A → Op₂ A → Set _
   StrictlyRightAbsorptive _•_ _◦_ = ∀ a b → (((b ◦ a) • a) ≈ a) × ¬ ((a • (b ◦ a)) ≈ (b ◦ a))
 
-  -- Denotes that the operator _•_ is selective (i.e. returns one of its two inputs)
-  Selective : Op₂ A → Set _
-  Selective _•_ = ∀ a b → (a • b) ≈ a ⊎ (a • b) ≈ b
-
-
   Unreachable : A → Op₂ A → Set _
   Unreachable a _•_ = ∀ {b c} → ¬ (b ≈ a × c ≈ a) → ¬ ((b • c) ≈ a)
-
-  
-  Congruent₁ : Op₁ A → Set _
-  Congruent₁ f = f Preserves _≈_ ⟶ _≈_
-
-  Congruent₂ : Op₂ A → Set _
-  Congruent₂ ∙ = ∙ Preserves₂ _≈_ ⟶ _≈_ ⟶ _≈_
 
   ---------------
   -- Orderings --

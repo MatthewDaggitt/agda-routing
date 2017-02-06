@@ -1,9 +1,7 @@
-
-
 open import Data.Nat using (ℕ; zero; suc; s≤s; _+_)
 open import Data.Fin using (Fin; _<_; _≤_; inject₁) renaming (zero to fzero; suc to fsuc)
 open import Algebra.FunctionProperties using (Op₂)
-open import Data.Vec
+open import Data.Vec hiding (map)
 open import Data.Product using (∃; ∃₂; _,_; _×_)
 open import Data.List.Any as Any using (here; there)
 open Any.Membership-≡ using () renaming (_∈_ to _∈ₗ_; _∉_ to _∉ₗ_)
@@ -27,7 +25,7 @@ module RoutingLib.Data.Vec.Properties where
   -----------------------
 
   ∈-map : ∀ {a b m} {A : Set a} {B : Set b} {x : A} {xs : Vec A m} (f : A → B) → x ∈ xs → f x ∈ map f xs
-  ∈-map f here       = here
+  ∈-map f here          = here
   ∈-map f (there x∈xs) = there (∈-map f x∈xs)
 
   ∈-lookup : ∀ {a n} {A : Set a} {v : A} {xs : Vec A n} → v ∈ xs → ∃ λ i → lookup i xs ≡ v
@@ -74,6 +72,9 @@ module RoutingLib.Data.Vec.Properties where
   map-∃-∈ (x ∷ xs) (there v∈mapfxs) with map-∃-∈ xs v∈mapfxs
   ... | y , y∈xs , v≈fy = y , there y∈xs , v≈fy
 
+  foldr-pres-P : ∀ {a p} {A : Set a} (P : A → Set p) (_⊕_ : Op₂ A) → _⊕_ ×-Preserves P → ∀ {n e} (xs : Vec A n) → (∀ i → P (lookup i xs)) → P e → P (foldr (λ _ → A) _⊕_ e xs)
+  foldr-pres-P P _⊕_ ⊕-pres-p []       Pxs Pe = Pe
+  foldr-pres-P P _⊕_ ⊕-pres-p (x ∷ xs) Pxs Pe = ⊕-pres-p (Pxs fzero) (foldr-pres-P P _⊕_ ⊕-pres-p xs (Pxs ∘ fsuc) Pe)
 
   foldr₁-pres-P : ∀ {a p} {A : Set a} (P : A → Set p) (_⊕_ : Op₂ A) → _⊕_ ×-Preserves P → ∀ {n} (xs : Vec A (suc n)) → (∀ i → P (lookup i xs)) → P (foldr₁ _⊕_ xs)
   foldr₁-pres-P _ _   _        (x ∷ [])     P-holds  = P-holds fzero
@@ -147,13 +148,6 @@ module RoutingLib.Data.Vec.Properties where
   ... | no  v≢x = findAll-miss _≟_ xs v i (λ i∈f → i∉find (mapₛ-∈ i∈f))
   ... | yes v≡x = findAll-miss _≟_ xs v i (λ i∈f → i∉find (there (mapₛ-∈ i∈f)))
 
-{-
-  findAll! : ∀ {a n} {A : Set a} (_≟_ : Decidable (_≡_ {A = A})) (xs : Vec A n) (v : A) → Unique (≡-setoid (Fin n)) (findAll _≟_ v xs)
-  findAll! _   []       _          = []
-  findAll! {n = suc n} _≟_ (x ∷ xs) v with v ≟ x
-  ... | no  v≢x = mapₛ! (findAll! _≟_ xs v)
-  ... | yes v≡x = forced-map (λ _ ()) (findAll _≟_ v xs) ∷ₚ mapₛ! (findAll! _≟_ xs v)
--}
 
   allPairs-∃-∈ : ∀ {a} {A : Set a} {m n : ℕ} {xs : Vec A m} {ys : Vec A n} {v} → v ∈ allPairs xs ys → ∃₂ λ x y → v ≡ (x , y)
   allPairs-∃-∈ {v = (x , y)} xy∈allPairs = x , y , refl

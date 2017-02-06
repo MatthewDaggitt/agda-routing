@@ -27,9 +27,6 @@ module RoutingLib.Algebra.FunctionProperties {a ℓ} {A : Set a} (_≈_ : Rel A 
   StrictlyRightAbsorptive : Op₂ A → Op₂ A → Set _
   StrictlyRightAbsorptive _•_ _◦_ = ∀ a b → (((b ◦ a) • a) ≈ a) × ¬ ((a • (b ◦ a)) ≈ (b ◦ a))
 
-  Unreachable : A → Op₂ A → Set _
-  Unreachable a _•_ = ∀ {b c} → ¬ (b ≈ a × c ≈ a) → ¬ ((b • c) ≈ a)
-
   ---------------
   -- Orderings --
   ---------------
@@ -39,10 +36,3 @@ module RoutingLib.Algebra.FunctionProperties {a ℓ} {A : Set a} (_≈_ : Rel A 
 
   _IncreasingOver_ : ∀ {ℓ₂} → Op₂ A → Rel A ℓ₂ → Set _
   _•_ IncreasingOver _≤_ = ∀ {a b} → a ≤ (a • b)
-
-{-
-
-  StrictlyLeftIncreasing : Rel A ℓ → Op₂ A → Set _
-  StrictlyLeftIncreasing _≤_ _•_ = ∀ {a b} → a  ≤ (a • b) → ¬ ((a • b) ≤ a)
--}
-

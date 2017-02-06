@@ -8,8 +8,6 @@ open import Relation.Binary.PropositionalEquality using (refl)
 
 open Any.Membership-≡ using (_∈_)
 
-open import RoutingLib.Data.List using (allFin)
-
 module RoutingLib.Data.List.Any.Properties where
 
   ++⁻ : ∀ {a p} {A : Set a} {P : A → Set p} xs {ys} → Any P (xs ++ ys) → Any P xs ⊎ Any P ys

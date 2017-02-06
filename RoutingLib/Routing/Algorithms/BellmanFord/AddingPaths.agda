@@ -1,6 +1,7 @@
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟ᶠ_)
 open import Data.Fin.Subset using (_∈_)
+open import Data.Fin.Dec using (_∈?_)
 open import Data.Nat using (ℕ; zero; suc; _<_; _≤_)
 open import Data.Nat.Properties using (≤⇒pred≤)
 open import Data.Vec using (Vec; _∷_; []; lookup; foldr; map; allFin)
@@ -11,20 +12,19 @@ open import Induction.WellFounded using (Acc; acc)
 open import Relation.Binary.PropositionalEquality using (subst; subst₂; cong; inspect; [_]) renaming (sym to ≡-sym)
 open import Relation.Nullary using (yes; no)
 open import Function using (_∘_)
+open import Algebra.FunctionProperties using (Selective)
 
 open import RoutingLib.Data.Graph using (Graph)
 open import RoutingLib.Data.Graph.SPath using ([]; [_]; lengthₚ; lengthₚ<n)
 open import RoutingLib.Data.Graph.SGPath.Equivalence using ([]; _∷_; _∺_; _≃ₚ_)
-open import RoutingLib.Data.Fin.Subset using (_∈?_)
 open import RoutingLib.Data.Nat.Properties using (≤-refl; m<n⇨n≡o+1; m+1≤n+1⇨m≤n; ≤-trans; <⇒≤)
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Asynchronous.Core
-open import RoutingLib.Algebra.FunctionProperties using (Selective)
 open import RoutingLib.Induction.Nat using () renaming (<-well-founded to <-wf)
-import RoutingLib.Routing.Algorithms.DistributedBellmanFord.Asynchronous as Asynchronous
-import RoutingLib.Routing.Algorithms.DistributedBellmanFord.Asynchronous.Properties as AsynchronousProperties
+import RoutingLib.Routing.Algorithms.BellmanFord
+import RoutingLib.Routing.Algorithms.BellmanFord.Properties
 
-module RoutingLib.Routing.Algorithms.DistributedBellmanFord.Asynchronous.AddingPaths
+module RoutingLib.Routing.Algorithms.BellmanFord.AddingPaths
   {a b ℓ n} (ra : RoutingAlgebra a b ℓ)
   (⊕-sel : Selective (RoutingAlgebra._≈_ ra) (RoutingAlgebra._⊕_ ra))
   (G : Graph (RoutingAlgebra.Step ra) (suc n)) (sch : AdmissableSchedule (suc n))

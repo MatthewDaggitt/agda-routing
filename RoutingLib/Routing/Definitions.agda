@@ -1,5 +1,6 @@
 open import Algebra.FunctionProperties using (Op₂; Congruent₂)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
+open import Data.Fin.Dec using (all?)
 open import Data.Nat using (ℕ; suc)
 open import Data.List using (List)
 open import Data.List.All using (All; []; _∷_; all) renaming (lookup to all-lookup)
@@ -8,7 +9,7 @@ open import Data.Product using (∃₂; _×_; _,_)
 open import Level using (_⊔_) renaming (zero to lzero; suc to lsuc)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Binary using (Rel; IsDecEquivalence; Setoid; Reflexive; Symmetric; Transitive; Decidable; IsEquivalence; _⇒_)
+open import Relation.Binary using (Rel; IsDecEquivalence; Setoid; Reflexive; Symmetric; Transitive; Decidable; DecSetoid; IsEquivalence; _⇒_)
 open import Relation.Binary.PropositionalEquality using (_≡_) renaming (refl to ≡-refl; setoid to ≡-setoid)
 
 open import RoutingLib.Algebra.FunctionProperties using (_Preservesₗ_)
@@ -54,6 +55,12 @@ module RoutingLib.Routing.Definitions where
         isEquivalence = isEquivalence
       }
 
+    DS : DecSetoid b ℓ
+    DS = record { 
+      Carrier = Route ; 
+      _≈_ = _≈_ ; 
+      isDecEquivalence = ≈-isDecEquivalence }
+
 
 
 
@@ -75,8 +82,9 @@ module RoutingLib.Routing.Definitions where
     open RoutingAlgebra ra public
 
 
-    ---------
-    -- Some useful definitions to accompany a routing problem
+    -------------------------------------------
+    -- Setoids over nodes and pairs of nodes --
+    -------------------------------------------
 
     Fₛ : Setoid lzero lzero
     Fₛ = ≡-setoid (Fin n)
@@ -84,9 +92,53 @@ module RoutingLib.Routing.Definitions where
     F×Fₛ : Setoid lzero lzero
     F×Fₛ = ≡-setoid (Fin n × Fin n)
 
+    --------------------
+    -- Routing tables --
+    --------------------
+  
+    RTable : Set b
+    RTable = Fin n → Route
+
+    _≈ₜ_ : Rel RTable ℓ
+    A ≈ₜ B = ∀ i → A i ≈ B i
+
+    abstract
+
+      ≈ₜ-reflexive : _≡_ ⇒ _≈ₜ_
+      ≈ₜ-reflexive ≡-refl i = reflexive ≡-refl
+
+      ≈ₜ-refl : Reflexive _≈ₜ_
+      ≈ₜ-refl i = refl
+
+      ≈ₜ-sym : Symmetric _≈ₜ_
+      ≈ₜ-sym A≈B i = sym (A≈B i)
+
+      ≈ₜ-trans : Transitive _≈ₜ_
+      ≈ₜ-trans A≈B B≈C i = trans (A≈B i) (B≈C i)
+
+      _≟ₜ_ : Decidable _≈ₜ_
+      X ≟ₜ Y = all? (λ i → X i ≟ Y i)
+      
+      ≈ₜ-isEquivalence : IsEquivalence _≈ₜ_
+      ≈ₜ-isEquivalence = record { refl = ≈ₜ-refl ; sym = ≈ₜ-sym ; trans = ≈ₜ-trans }
+
+      ≈ₜ-isDecEquivalence : IsDecEquivalence _≈ₜ_
+      ≈ₜ-isDecEquivalence = record { isEquivalence = ≈ₜ-isEquivalence ; _≟_ = _≟ₜ_ }
+
+    Sₜ : Setoid b ℓ
+    Sₜ = record { Carrier = RTable ; _≈_ = _≈ₜ_ ; isEquivalence = ≈ₜ-isEquivalence }
+
+    DSₜ : DecSetoid b ℓ
+    DSₜ = record { Carrier = RTable ; _≈_ = _≈ₜ_ ; isDecEquivalence = ≈ₜ-isDecEquivalence }
+
+
+    ----------------------
+    -- Routing matrices --
+    ----------------------
+
     -- A routing matrix
     RMatrix : Set b
-    RMatrix = Fin n → Fin n → Route
+    RMatrix = Fin n → RTable
 
     -- Equality between routing matrices
     _≈ₘ_ : Rel RMatrix ℓ
@@ -95,14 +147,7 @@ module RoutingLib.Routing.Definitions where
     _≉ₘ_ : Rel RMatrix ℓ
     A ≉ₘ B = ¬ (A ≈ₘ B)
 
-    srcDstPairs : List (Fin n × Fin n)
-    srcDstPairs = combine _,_ (allFin n) (allFin n)
-
-
     abstract
-
-      ∈-srcDstPairs : ∀ (p : Fin n × Fin n) → p ∈ srcDstPairs
-      ∈-srcDstPairs (i , j) = ∈-combine _,_ (∈-allFin i) (∈-allFin j)
 
       ≈ₘ-reflexive : _≡_ ⇒ _≈ₘ_
       ≈ₘ-reflexive ≡-refl i j = reflexive ≡-refl
@@ -117,9 +162,7 @@ module RoutingLib.Routing.Definitions where
       ≈ₘ-trans A≈B B≈C i j = trans (A≈B i j) (B≈C i j)
 
       _≟ₘ_ : Decidable _≈ₘ_
-      X ≟ₘ Y with (all (λ {(i , j) → X i j ≟ Y i j})) srcDstPairs
-      ... | yes all  = yes (λ i j → all-lookup all (∈-srcDstPairs (i , j)))
-      ... | no  ¬all = no (λ X≈Y → ¬all (combine-all Fₛ Fₛ _,_ (allFin n) (allFin n) (λ {x} {y} _ _ → X≈Y x y)))
+      X ≟ₘ Y = all? (λ i  → X i ≟ₜ Y i)
 
       ≈ₘ-isEquivalence : IsEquivalence _≈ₘ_
       ≈ₘ-isEquivalence = record {
@@ -127,13 +170,13 @@ module RoutingLib.Routing.Definitions where
           sym = ≈ₘ-sym ;
           trans = ≈ₘ-trans
         }
-
+{-
       ≉ₘ-witness : ∀ {X Y} → X ≉ₘ Y → ∃₂ λ i j → ¬ (X i j ≈ Y i j)
       ≉ₘ-witness {X} {Y} X≉Y with (all (λ {(i , j) → X i j ≟ Y i j})) srcDstPairs
       ... | yes all  = contradiction (λ i j → all-lookup all (∈-srcDstPairs (i , j))) X≉Y
       ... | no  ¬all with satisfied (¬All→Any¬ (λ {(i , j) → X i j ≟ Y i j}) ¬all)
       ...   | (i , j) , y = i , j , y
-
+-}
 
 
     Sₘ : Setoid b ℓ
@@ -142,3 +185,17 @@ module RoutingLib.Routing.Definitions where
        _≈_ = _≈ₘ_ ;
        isEquivalence = ≈ₘ-isEquivalence
       }
+
+  
+    ----------------------
+    -- Routing matrices --
+    ----------------------
+
+    srcDstPairs : List (Fin n × Fin n)
+    srcDstPairs = combine _,_ (allFin n) (allFin n)
+
+    abstract
+
+      
+      ∈-srcDstPairs : ∀ (p : Fin n × Fin n) → p ∈ srcDstPairs
+      ∈-srcDstPairs (i , j) = ∈-combine _,_ (∈-allFin i) (∈-allFin j)

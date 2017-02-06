@@ -2,7 +2,7 @@ open import Level using () renaming (zero to lzero)
 open import Data.Fin using (Fin; _<_; _≤_) renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties using (_≟_)
 open import Data.Nat using (ℕ; zero; suc; _≤?_; z≤n; s≤s) renaming (_<_ to _<ℕ_)
-open import Data.Nat.Properties using ()
+open import Data.Nat.Properties using (≰⇒>)
 open import Data.Product using (_,_)
 open import Data.List using (List; []; _∷_; map)
 open import Relation.Nullary using (¬_; yes; no)
@@ -13,7 +13,6 @@ open import Function using (_∘_)
 
 open import RoutingLib.Data.Graph
 open import RoutingLib.Data.Fin.Pigeonhole using (pigeonhole)
-open import RoutingLib.Data.Nat.Properties using (m≰n⇨n<m)
 
 module RoutingLib.Data.Graph.SPath where
 
@@ -101,7 +100,7 @@ module RoutingLib.Data.Graph.SPath where
   |p|ₙₑₚ<n : ∀ {n} (p : NonEmptySPath n) → length p <ℕ n
   |p|ₙₑₚ<n {n} p with suc (length p) ≤? n
   ... | yes |p|<n = |p|<n
-  ... | no  |p|≮n with pigeonhole (m≰n⇨n<m |p|≮n) (lookup p)
+  ... | no  |p|≮n with pigeonhole (≰⇒> |p|≮n) (lookup p)
   ...   | i , j , i≢j , pᵢ≡pⱼ = contradiction pᵢ≡pⱼ (lookup! p i≢j)
 
 

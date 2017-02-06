@@ -1,7 +1,7 @@
 
 open import Data.Nat using (suc; _*_)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
-open import Data.Vec using (Vec; []; _∷_; _∈_; map; here; there; _⊛*_)
+open import Data.Vec hiding (map; zip; zipWith)
 open import Data.Product using (_,_; _×_)
 open import Data.List using (List; []; _∷_) renaming (map to mapₗ)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
@@ -11,16 +11,46 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
 module RoutingLib.Data.Vec where
 
+  ----------------------
+  -- Pushed to stdlib --
+  ----------------------
+
+  map : ∀ {a b n} {A : Set a} {B : Set b} →
+      (A → B) → Vec A n → Vec B n
+  map f []       = []
+  map f (x ∷ xs) = f x ∷ map f xs
+
+  zipWith : ∀ {a b c n} {A : Set a} {B : Set b} {C : Set c} →
+          (A → B → C) → Vec A n → Vec B n → Vec C n
+  zipWith f []       []       = []
+  zipWith f (x ∷ xs) (y ∷ ys) = f x y ∷ zipWith f xs ys
+
+  zip : ∀ {a b n} {A : Set a} {B : Set b} →
+        Vec A n → Vec B n → Vec (A × B) n
+  zip = zipWith _,_
+
+
+  -----------------------
+  -- To push to stdlib --
+  -----------------------
+
   _∉_ : ∀ {a n} {A : Set a} → A → Vec A n → Set a
   v ∉ xs = ¬ (v ∈ xs)
 
-  ∉-extend : ∀ {a n} {A : Set a} {v x : A} {xs : Vec A n} → ¬ (v ≡ x) → v ∉ xs → v ∉ (x ∷ xs)
-  ∉-extend {v = v} {x = .v} v≢x v∉xs here         = v≢x refl
-  ∉-extend                  _   v∉xs (there v∈xs) = v∉xs v∈xs
+  foldr₂ : ∀ {a} {A : Set a} {m} → (A → A → A) → A → Vec A m → A
+  foldr₂ {A = A} _⊕_ e xs = foldr (λ _ → A) _⊕_ e xs
+
+  foldl₂ : ∀ {a} {A : Set a} {m} → (A → A → A) → A → Vec A m → A
+  foldl₂ {A = A} _⊕_ e xs = foldl (λ _ → A) _⊕_ e xs
+
 
   ---------------------------
   -- Additional operations --
   ---------------------------
+
+  ∉-extend : ∀ {a n} {A : Set a} {v x : A} {xs : Vec A n} → ¬ (v ≡ x) → v ∉ xs → v ∉ (x ∷ xs)
+  ∉-extend v≢x v∉xs here         = v≢x refl
+  ∉-extend _   v∉xs (there v∈xs) = v∉xs v∈xs
 
   find : ∀ {a n} {A : Set a} → Decidable (_≡_ {A = A}) → (v : A) (xs : Vec A n) → v ∈ xs ⊎ v ∉ xs
   find _   v [] = inj₂ λ()

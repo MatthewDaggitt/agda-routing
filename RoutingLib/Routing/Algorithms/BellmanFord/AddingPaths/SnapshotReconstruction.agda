@@ -102,7 +102,7 @@ module RoutingLib.Routing.Algorithms.BellmanFord.AddingPaths.SnapshotReconstruct
 
     -- construction𝔸 prepends the activation sequence required to generate the provided state and messages in flight
     construction𝔸 : ∀ (𝕤 : Schedule n) t → RMatrix → Snapshot (Schedule.β 𝕤) t → 𝔸 n
-    construction𝔸 𝕤 t X sn = all𝔸 (messagesToList (dynamic 𝕤) sn ++ stateToList X) α
+    construction𝔸 𝕤 t X sn = all𝔸 (messagesToList (dynamic 𝕤) sn ++ stateToList X) (α 𝕤)
 
 
     -- Properties
@@ -311,7 +311,7 @@ module RoutingLib.Routing.Algorithms.BellmanFord.AddingPaths.SnapshotReconstruct
     ... | _        |  _       = all𝔹 xs t i j
 -}
 
-    construction𝕊 : ∀ (𝕤 : Schedule n) t → RMatrix → Snapshot (Schedule.β 𝕤) t → Schedule n
+    construction𝕊 : ∀ (𝕤 : Schedule n) t → RMatrix → Snapshot (β 𝕤) t → Schedule n
     construction𝕊 𝕤 t X snapshot = record
       { α              = construction𝔸 𝕤 t X snapshot
       ; β              = {!!}
@@ -321,15 +321,15 @@ module RoutingLib.Routing.Algorithms.BellmanFord.AddingPaths.SnapshotReconstruct
       }
       where open Schedule 𝕤
 
-    δᵗ¹X≈δᶜᵗI : ∀ 𝕤₁ t₁ X (sn₁ : Snapshot (Schedule.β 𝕤₁) t₁) → X ≈ₘ δ (construction𝕊 𝕤₁ t₁ X sn₁) (construction𝕋 X (Schedule.dynamic 𝕤₁) sn₁) I
+    δᵗ¹X≈δᶜᵗI : ∀ 𝕤₁ t₁ X (sn₁ : Snapshot (β 𝕤₁) t₁) → X ≈ₘ δ (construction𝕊 𝕤₁ t₁ X sn₁) (construction𝕋 X (dynamic 𝕤₁) sn₁) I
     δᵗ¹X≈δᶜᵗI 𝕤₁ t₁ X sn₁ = {!!}
 
-    𝕤₁≈c𝕤 : ∀ 𝕤₁ t₁ X (sn₁ : Snapshot (Schedule.β 𝕤₁) t₁) →  𝕤₁ ⟦ t₁ ⟧≈⟦ construction𝕋 X (Schedule.dynamic 𝕤₁) sn₁ ⟧ construction𝕊 𝕤₁ t₁ X sn₁
+    𝕤₁≈c𝕤 : ∀ 𝕤₁ t₁ X (sn₁ : Snapshot (β 𝕤₁) t₁) →  𝕤₁ ⟦ t₁ ⟧≈⟦ construction𝕋 X (dynamic 𝕤₁) sn₁ ⟧ construction𝕊 𝕤₁ t₁ X sn₁
     𝕤₁≈c𝕤 𝕤₁ t₁ X sn₁ = {!!} , {!!} 
     
-    sn₁≈csn : ∀ 𝕤₁ t₁ X (sn₁ : Snapshot (Schedule.β 𝕤₁) t₁) → sn₁ ≈ₛ snapshot (construction𝕊 𝕤₁ t₁ X sn₁) (construction𝕋 X (Schedule.dynamic 𝕤₁) sn₁) I
+    sn₁≈csn : ∀ 𝕤₁ t₁ X (sn₁ : Snapshot (β 𝕤₁) t₁) → sn₁ ≈ₛ snapshot (construction𝕊 𝕤₁ t₁ X sn₁) (construction𝕋 X (dynamic 𝕤₁) sn₁) I
     sn₁≈csn 𝕤₁ t₁ X sn₁ = {!!}
 
-    reconstruct : ∀ 𝕤₁ t₁ X (sn₁ : Snapshot (Schedule.β 𝕤₁) t₁) → ∃₂ λ 𝕤₂ t₂ → X ≈ₘ δ 𝕤₂ t₂ I × 𝕤₁ ⟦ t₁ ⟧≈⟦ t₂ ⟧ 𝕤₂ × sn₁ ≈ₛ snapshot 𝕤₂ t₂ I
-    reconstruct 𝕤₁ t₁ X sn₁ = construction𝕊 𝕤₁ t₁ X sn₁ , construction𝕋 X dynamic sn₁ , δᵗ¹X≈δᶜᵗI 𝕤₁ t₁ X sn₁ , 𝕤₁≈c𝕤 𝕤₁ t₁ X sn₁ , sn₁≈csn 𝕤₁ t₁ X sn₁
+    reconstruct : ∀ 𝕤₁ t₁ X (sn₁ : Snapshot (β 𝕤₁) t₁) → ∃₂ λ 𝕤₂ t₂ → X ≈ₘ δ 𝕤₂ t₂ I × 𝕤₁ ⟦ t₁ ⟧≈⟦ t₂ ⟧ 𝕤₂ × sn₁ ≈ₛ snapshot 𝕤₂ t₂ I
+    reconstruct 𝕤₁ t₁ X sn₁ = construction𝕊 𝕤₁ t₁ X sn₁ , construction𝕋 X (dynamic 𝕤₁) sn₁ , δᵗ¹X≈δᶜᵗI 𝕤₁ t₁ X sn₁ , 𝕤₁≈c𝕤 𝕤₁ t₁ X sn₁ , sn₁≈csn 𝕤₁ t₁ X sn₁
       where open Schedule 𝕤₁

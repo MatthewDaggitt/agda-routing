@@ -5,6 +5,9 @@ open import Data.List.All.Properties
 open import Data.List.Any using (Any; here; there)
 open import Data.Maybe using (Maybe; just; nothing; Eq; drop-just)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Data.Nat using (ℕ; suc; zero; z≤n; s≤s; _≤_)
+open import Data.Nat.Properties using (⊔-sel)
+open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Decidable; _⊆_)
@@ -17,9 +20,11 @@ open import Function.Surjection hiding (_∘_)
 open import Algebra.FunctionProperties.Core using (Op₂)
 open import Relation.Unary using () renaming (_⊆_ to _⋐_)
 
+open import RoutingLib.Data.List using (max; tabulate)
 open import RoutingLib.Data.List.All
 open import RoutingLib.Data.List using (allFin; combine)
 open import RoutingLib.Data.Maybe.Properties using () renaming (trans to eq-trans)
+open import RoutingLib.Data.Nat.Properties using (≤-trans)
 
 module RoutingLib.Data.List.All.Properties where
 
@@ -82,11 +87,20 @@ module RoutingLib.Data.List.All.Properties where
   concat-all []           = []
   concat-all (pxs ∷ pxss) = ++-all pxs (concat-all pxss)
 
-
-
   -----------
   -- Other --
   -----------
+
+  tabulate-all : ∀ {a p} {A : Set a} {P : A → Set p} {n} {f : Fin n → A}
+                 → (∀ i → P (f i)) → All P (tabulate f)
+  tabulate-all {n = zero}  Pf = []
+  tabulate-all {n = suc n} Pf = Pf fzero ∷ tabulate-all (Pf ∘ fsuc)
+
+  max≤x : ∀ {v xs} → All (_≤ v) xs → max xs ≤ v
+  max≤x {_} {_}       []         = z≤n
+  max≤x {_} {x ∷ xs} (x≤v ∷ pxs) with ⊔-sel x (max xs)
+  ... | inj₁ x⊔m≡x rewrite x⊔m≡x = x≤v
+  ... | inj₂ x⊔m≡m rewrite x⊔m≡m = max≤x pxs
 
   -- All pairs
 

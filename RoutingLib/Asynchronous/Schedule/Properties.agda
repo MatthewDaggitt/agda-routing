@@ -1,203 +1,122 @@
-open import Data.Nat using (ℕ; zero; suc; _≤_; _<_; _⊔_; _∸_; z≤n; s≤s; _≟_; _≤?_; module ≤-Reasoning)
-open import Data.Nat.Properties using (m≤m⊔n; n≤1+n; ⊔-sel)
-open import Data.Fin using (Fin; toℕ)
-open import Data.Fin.Properties using ()
-open import Data.Fin.Subset using (_∈_)
-open import Data.Fin.Dec using (_∈?_)
-open import Data.Product using (∃; _,_; _×_; proj₁; proj₂)
-open import Data.Sum using (inj₁; inj₂; _⊎_)
-open import Data.List.Any using (Any) renaming (map to anyMap)
-open import Data.List using (List; foldr; map; []; _∷_)
-open import Data.Vec using (Vec; lookup) renaming (map to mapᵥ; allFin to allFinᵥ)
-open import Induction.WellFounded using (Acc; acc)
+open import Data.Nat using (ℕ; zero; suc; _≤_; _<_; _∸_; _+_; z≤n; s≤s; _≟_; _≤?_)
+open import Data.Nat.Properties using (∸-+-assoc; m≤m+n; ≰⇒>; n∸n≡0; +-∸-assoc)
+open import Data.Nat.Properties.Simple using (+-assoc; +-comm; +-right-identity)
+open import Data.Fin using (Fin)
+open import Data.Fin.Subset using (Subset; _∈_)
+open import Data.Product using (∃; _,_; _×_)
+open import Relation.Binary.PropositionalEquality using (refl; sym; trans; subst; cong; cong₂; _≢_; _≡_; module ≡-Reasoning)
 open import Relation.Nullary using (yes; no)
-open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Binary using (tri<; tri≈; tri>)
-open import Relation.Binary.PropositionalEquality using (refl; sym; cong; subst; _≢_; _≡_)
 
-open import RoutingLib.Asynchronous.Schedule using (Schedule; module SpecialTimes)
-open import RoutingLib.Data.Nat.Properties using (cmp; ≤+≢⇒<; m<n≤o⇨o∸n<o∸m; ≤-refl; <⇒≤; ⊔-⊎preserves-x≤; ∀x≤m:n≢x⇒m<n; 0-idᵣ-⊔; <-irrefl; ≤-trans; ≤-reflexive; ≮⇒≥; m⊔n≡m⇨n≤m; n⊔m≡m⇨n≤m; n≤m⊔n; m+1≤n+1⇨m≤n)
-open import RoutingLib.Induction.Nat using () renaming (<-well-founded to <-wf)
-open import RoutingLib.Data.List using (allFin; applyDownFrom; tabulate)
-open import RoutingLib.Data.List.Folds using (foldr-⊎preserves)
-open import RoutingLib.Data.List.Any.Properties using (map⁺)
-open import RoutingLib.Data.List.Any.PropositionalMembership using (∈-allFin; ∈-map; ∈-tabulate)
+open import RoutingLib.Asynchronous.Schedule
+open import RoutingLib.Data.Nat.Properties using (≤-trans; m≤n⇨m+o≡n; ≤-stepsᵣ; ≤-refl; ≰⇒≥; +-∸-comm)
 
-module RoutingLib.Asynchronous.Schedule.Properties {p : ℕ} (sch : Schedule p) where
+module RoutingLib.Asynchronous.Schedule.Properties where
 
-  open Schedule sch
-  open SpecialTimes sch
-  
-  -----------------
-  -- Activations --
-  -----------------
+  open Schedule
+  open ≡-Reasoning
 
   abstract
 
-    -- nextActivation
+    --------------------------
+    -- Activation functions --
+    --------------------------
 
-    private
+    ≈𝔸-refl : ∀ {n} (α : 𝔸 n) t → α ⟦ t ⟧≈𝔸⟦ t ⟧ α
+    ≈𝔸-refl _ _ _ = refl
 
-      nextActivation-after' : ∀ {t t' i} tAcc → (t<t' : t < t') → (i∈αₜ' : i ∈ α t') → t < nextActivation' tAcc t<t' i∈αₜ'
-      nextActivation-after' {t} {t'} {i} (acc t'∸t-acc) t<t' i∈αₜ' with i ∈? α (suc t) | (suc t) ≟ t'
-      ... | yes i∈αₜ₊₁ | _          = ≤-refl
-      ... | no  i∉αₜ₊₁ | yes t+1≡t' = contradiction (subst (λ t → i ∈ α t) (sym t+1≡t') i∈αₜ') i∉αₜ₊₁
-      ... | no  i∉αₜ₊₁ | no  t+1≢t' = <⇒≤ (nextActivation-after' (t'∸t-acc (t' ∸ suc t) (m<n≤o⇨o∸n<o∸m ≤-refl t<t')) (≤+≢⇒< t<t' t+1≢t') i∈αₜ')
-    
-      nextActivation-active' : ∀ {t t' i} tAcc → (t<t' : t < t') → (i∈αₜ' : i ∈ α t') → i ∈ α (nextActivation' tAcc t<t' i∈αₜ')
-      nextActivation-active' {t} {t'} {i} (acc t'∸t-acc) t<t' i∈αₜ' with i ∈? α (suc t) | (suc t) ≟ t'
-      ... | yes i∈αₜ₊₁ | _          = i∈αₜ₊₁
-      ... | no  i∉αₜ₊₁ | yes t+1≡t' = contradiction (subst (λ t → i ∈ α t) (sym t+1≡t') i∈αₜ') i∉αₜ₊₁
-      ... | no  i∉αₜ₊₁ | no  t+1≢t' = nextActivation-active' (t'∸t-acc (t' ∸ suc t) (m<n≤o⇨o∸n<o∸m ≤-refl t<t')) (≤+≢⇒< t<t' t+1≢t') i∈αₜ'
+    ≈𝔸-sym  : ∀ {n} (α₁ α₂ : 𝔸 n) {t₁ t₂} → α₁ ⟦ t₁ ⟧≈𝔸⟦ t₂ ⟧ α₂ → α₂ ⟦ t₂ ⟧≈𝔸⟦ t₁ ⟧ α₁
+    ≈𝔸-sym _ _ α₁≈α₂ t = sym (α₁≈α₂ t)
 
-      nextActivation-next' : ∀ {t t' i} tAcc → (t<t' : t < t') → (i∈αₜ' : i ∈ α t') → (∀ {t''} → t < t'' → i ∈ α t'' → (nextActivation' tAcc t<t' i∈αₜ') ≤ t'')
-      nextActivation-next' {t} {t'} {i} (acc t'∸t-acc) t<t' i∈αₜ' with i ∈? α (suc t) | (suc t) ≟ t'
-      ... | yes i∈αₜ₊₁ | _          = λ t<t'' _ → t<t''
-      ... | no  i∉αₜ₊₁ | yes t+1≡t' = contradiction (subst (λ t → i ∈ α t) (sym t+1≡t') i∈αₜ') i∉αₜ₊₁
-      ... | no  i∉αₜ₊₁ | no  t+1≢t' with nextActivation-next' (t'∸t-acc (t' ∸ suc t) (m<n≤o⇨o∸n<o∸m ≤-refl t<t')) (≤+≢⇒< t<t' t+1≢t') i∈αₜ'
-      ...   | earliest = λ t<t'' i∈αₜ'' → earliest (≤+≢⇒< t<t'' (λ t+1≡t'' → i∉αₜ₊₁ (subst (λ t → i ∈ α t) (sym t+1≡t'') i∈αₜ''))) i∈αₜ''
+    ≈𝔸-trans : ∀ {n} {α₁ α₂ α₃ : 𝔸 n} {t₁ t₂ t₃} → α₁ ⟦ t₁ ⟧≈𝔸⟦ t₂ ⟧ α₂ → α₂ ⟦ t₂ ⟧≈𝔸⟦ t₃ ⟧ α₃ → α₁ ⟦ t₁ ⟧≈𝔸⟦ t₃ ⟧ α₃
+    ≈𝔸-trans α₁≈α₂ α₂≈α₃ t = trans (α₁≈α₂ t) (α₂≈α₃ t)
 
-    nextActivation-after : ∀ t i → t < nextActivation t i
-    nextActivation-after t i with infiniteActivation t i
-    ... | (t' , t<t' , i∈αₜ') = nextActivation-after' (<-wf (t' ∸ t)) t<t' i∈αₜ'
-  
-    nextActivation-active : ∀ t i → i ∈ α (nextActivation t i)
-    nextActivation-active t i with infiniteActivation t i
-    ... | (t' , t<t' , i∈αₜ') = nextActivation-active' (<-wf (t' ∸ t)) t<t' i∈αₜ'
+    ≈𝔸-fastForward : ∀ {n} {α₁ α₂ : 𝔸 n} {t₁ t₂} → α₁ ⟦ t₁ ⟧≈𝔸⟦ t₂ ⟧ α₂ → ∀ t → α₁ ⟦ t + t₁ ⟧≈𝔸⟦ t + t₂ ⟧ α₂
+    ≈𝔸-fastForward {t₁ = t₁} {t₂} eq t t' rewrite sym (+-assoc t' t t₁) | sym (+-assoc t' t t₂) = eq (t' + t)
 
-    nextActivation-next : ∀ {t i t''} → t < t'' → i ∈ α t'' → nextActivation t i ≤ t''
-    nextActivation-next {t} {i} with infiniteActivation t i
-    ... | (t' , t<t' , i∈αₜ') = nextActivation-next' (<-wf (t' ∸ t)) t<t' i∈αₜ'
-
-    nextActivation-all : ∀ t i → ∃ λ tₐ → t < tₐ × i ∈ α tₐ × (∀ {t''} → t < t'' → i ∈ α t'' → tₐ ≤ t'')
-    nextActivation-all t i = nextActivation t i , nextActivation-after t i , nextActivation-active t i , nextActivation-next
+    ≈𝔸-starvationFree : ∀ {n} {α₁ α₂ : 𝔸 n} → StarvationFree α₁ → ∀ {t₁} {t₂} → α₁ ⟦ t₁ ⟧≈𝔸⟦ t₂ ⟧ α₂ → StarvationFree α₂
+    ≈𝔸-starvationFree {_} {α₁} {α₂} sf {t₁} {t₂} α-eq t i with sf (t + t₁) i
+    ... | (t' , t+t₁<t' , i∈αₜ') with m≤n⇨m+o≡n t+t₁<t'
+    ...   | (o , refl) = suc t + (o + t₂) , m≤m+n (suc t) (o + t₂) , subst (i ∈_) (
+      (begin
+        α₁ (suc t + t₁ + o)   ≡⟨ cong α₁ (+-assoc (suc t) t₁ o) ⟩
+        α₁ (suc t + (t₁ + o)) ≡⟨ cong (λ v → α₁ (suc t + v)) (+-comm t₁ o) ⟩
+        α₁ (suc t + (o + t₁)) ≡⟨ cong α₁ (sym (+-assoc (suc t) o t₁)) ⟩
+        α₁ (suc t + o + t₁)   ≡⟨ α-eq (suc t + o) ⟩
+        α₂ (suc t + o + t₂)   ≡⟨ cong α₂ (+-assoc (suc t) o t₂) ⟩
+        α₂ (suc t + (o + t₂))
+      ∎)) i∈αₜ'
 
 
-    --  nextTotalActivation
 
-    nextTotalActivation-after : ∀ t → t < nextTotalActivation t
-    nextTotalActivation-after t = foldr-⊎preserves (t <_) ⊔-⊎preserves-x≤ (suc t) (tabulate (nextActivation t)) (inj₁ ≤-refl)
+    -------------------------
+    -- Data flow functions --
+    -------------------------
 
-    nextTotalActivation-activated : ∀ t i → ∃ λ t' → t < t' × t' ≤ nextTotalActivation t × i ∈ α t'
-    nextTotalActivation-activated t i = nextActivation t i , nextActivation-after t i , foldr-⊎preserves (nextActivation t i ≤_) ⊔-⊎preserves-x≤ (suc t) (tabulate (nextActivation t)) (inj₂ (anyMap ≤-reflexive (∈-tabulate (nextActivation t) i))) , nextActivation-active t i
+    ≈𝔹-refl : ∀ {n} {β : 𝔹 n} {t} → β ⟦ t ⟧≈𝔹⟦ t ⟧ β
+    ≈𝔹-refl _ _ _ = refl
+
+    ≈𝔹-sym  : ∀ {n} (β₁ β₂ : 𝔹 n) {t₁ t₂} → β₁ ⟦ t₁ ⟧≈𝔹⟦ t₂ ⟧ β₂ → β₂ ⟦ t₂ ⟧≈𝔹⟦ t₁ ⟧ β₁
+    ≈𝔹-sym _ _ β₁≈β₂ t i j = sym (β₁≈β₂ t i j)
+
+    ≈𝔹-trans : ∀ {n} {β₁ β₂ β₃ : 𝔹 n} {t₁ t₂ t₃} → β₁ ⟦ t₁ ⟧≈𝔹⟦ t₂ ⟧ β₂ → β₂ ⟦ t₂ ⟧≈𝔹⟦ t₃ ⟧ β₃ → β₁ ⟦ t₁ ⟧≈𝔹⟦ t₃ ⟧ β₃
+    ≈𝔹-trans β₁≈β₂ β₂≈β₃ t i j = trans (β₁≈β₂ t i j) (β₂≈β₃ t i j)
+
+    ≈𝔹-fastForward : ∀ {n} {β₁ β₂ : 𝔹 n} {t₁ t₂} → β₁ ⟦ t₁ ⟧≈𝔹⟦ t₂ ⟧ β₂ → ∀ t → β₁ ⟦ t + t₁ ⟧≈𝔹⟦ t + t₂ ⟧ β₂
+    ≈𝔹-fastForward {_} {β₁} {β₂} {t₁} {t₂} eq t t' i j =
+      begin
+        β₁ (suc t' + (t + t₁)) i j ∸ (t + t₁) ≡⟨ cong₂ _∸_ (cong (λ t → β₁ t i j) (sym (+-assoc (suc t') t t₁))) (+-comm t t₁) ⟩
+        β₁ ((suc t' + t) + t₁) i j ∸ (t₁ + t) ≡⟨ sym (∸-+-assoc (β₁ (suc t' + t + t₁) i j) t₁ t) ⟩
+        β₁ ((suc t' + t) + t₁) i j ∸ t₁ ∸ t   ≡⟨ cong (_∸ t) (eq (t' + t) i j) ⟩
+        β₂ ((suc t' + t) + t₂) i j ∸ t₂ ∸ t   ≡⟨ ∸-+-assoc (β₂ (suc t' + t + t₂) i j) t₂ t ⟩
+        β₂ ((suc t' + t) + t₂) i j ∸ (t₂ + t) ≡⟨ cong₂ _∸_ (cong (λ t → β₂ t i j) (+-assoc (suc t') t t₂)) (+-comm t₂ t) ⟩
+        β₂ (suc t' + (t + t₂)) i j ∸ (t + t₂)
+      ∎
+
+    postulate ≈𝔹-dynamic : ∀ {n} {β₁ β₂ : 𝔹 n} → Dynamic β₁ → ∀ {t₁ t₂} → β₁ ⟦ t₁ ⟧≈𝔹⟦ t₂ ⟧ β₂ → Dynamic β₂
+{-
+    ≈𝔹-dynamic {_} {β₁} {β₂} β₁-dynamic {t₁} {t₂} β-eq t i j with β₁-dynamic (t ∸ t₂ + t₁) i j
+    ... | (tᶠ , tᶠ-final) with tᶠ ≤? t₁
+    ...   | yes tᶠ≤t₁ = t₂ , t₂-final
+      where
+
+      t₂-final : ∀ {t'} → suc t₂ ≤ t' → β₂ t' i j ≢ t
+      t₂-final {t'} t₂<t' β₂t'≡t with m≤n⇨m+o≡n t₂<t'
+      ... | o , refl = tᶠ-final {suc t₁ + o} (s≤s (≤-stepsᵣ o tᶠ≤t₁)) (
+        begin
+          β₁ (suc t₁ + o) i j
+        ≡⟨ {!!} ⟩
+          β₁ (suc o + t₁) i j ∸ t₁ + t₁
+        ≡⟨ cong (_+ t₁) (β-eq o i j) ⟩
+          β₂ (suc o + t₂) i j ∸ t₂ + t₁
+        ≡⟨ cong (λ t → β₂ (suc t) i j ∸ t₂ + t₁) (+-comm o t₂) ⟩
+          β₂ (suc t₂ + o) i j ∸ t₂ + t₁
+        ≡⟨ cong (λ t → t ∸ t₂ + t₁) β₂t'≡t ⟩
+          t ∸ t₂ + t₁
+        ∎) --(trans (trans {! !} (cong (λ t → β₂ t i j) 1+t₂+o≡t')) β₂t'≡t)
 
 
-    -- previousActivation
+    ...   | no  tᶠ≰t₁ with m≤n⇨m+o≡n (≰⇒≥ tᶠ≰t₁)
+    ...     | o , refl = t₂ + o , t₂+o-final
+      where
 
-    previousActivation-before : ∀ {t p i} (p≤t : p ≤ t) (i∈αₚ : i ∈ α p) → previousActivation p≤t i∈αₚ ≤ t
-    previousActivation-before {t} {p} {i} _ _ with i ∈? α t | p ≟ t
-    previousActivation-before {t}         p≤t _    | yes i∈αₜ | _        = ≤-refl
-    previousActivation-before {t}         p≤t i∈αₚ | no  _    | yes refl = p≤t
-    previousActivation-before {t} {p} {i} p≤t i∈αₚ | no  i∉αₜ | no p≢t   with ≤+≢⇒< p≤t p≢t
-    ... | s≤s p≤t₂ = ≤-trans (previousActivation-before p≤t₂ i∈αₚ) (n≤1+n _)
+      t₂+o-final : ∀ {t'} → suc (t₂ + o) ≤ t' → β₂ t' i j ≢ t
+      t₂+o-final {t'} 1+t₂+o<t' βt'≡t = tᶠ-final {suc t₁ + o} ≤-refl {!!}
 
-    previousActivation-after : ∀ {t p i} (p≤t : p ≤ t) (i∈αₚ : i ∈ α p) → p ≤ previousActivation p≤t i∈αₚ
-    previousActivation-after {t} {p} {i} _ _ with i ∈? α t | p ≟ t
-    previousActivation-after {t}         p≤t _    | yes i∈αₜ | _        = p≤t
-    previousActivation-after {t}         p≤t i∈αₚ | no  _    | yes refl = p≤t
-    previousActivation-after {t} {p} {i} p≤t i∈αₚ | no  i∉αₜ | no p≢t   with ≤+≢⇒< p≤t p≢t
-    ... | s≤s p≤t₂ = previousActivation-after p≤t₂ i∈αₚ
+{-
+      tᶠ' , tᶠ'-expires
 
-    previousActivation-active : ∀ {t p i} (p≤t : p ≤ t) (i∈αₚ : i ∈ α p) → i ∈ α (previousActivation p≤t i∈αₚ)
-    previousActivation-active {t} {p} {i} _ _ with i ∈? α t | p ≟ t
-    previousActivation-active {t}         p≤t _    | yes i∈αₜ | _        =  i∈αₜ
-    previousActivation-active {t}         p≤t i∈αₚ | no  _    | yes refl = i∈αₚ
-    previousActivation-active {_} {_} {i} p≤t i∈αₚ | no  i∉αₜ | no p≢t   with ≤+≢⇒< p≤t p≢t
-    ... | s≤s p≤t₂ = previousActivation-active p≤t₂ i∈αₚ
+      where
 
-    previousActivation-mostRecent : ∀ {t p i} (p≤t : p ≤ t) (i∈αₚ : i ∈ α p) → ∀ {t'} → t' ≤ t → i ∈ α t' → t' ≤ previousActivation p≤t i∈αₚ
-    previousActivation-mostRecent {t} {p} {i} _ _ with i ∈? α t | p ≟ t
-    previousActivation-mostRecent {t}         p≤t _    | yes i∈αₜ | _        = λ t''≤t _ → t''≤t
-    previousActivation-mostRecent {t}         p≤t i∈αₚ | no  _    | yes refl = λ t''≤t _ → t''≤t
-    previousActivation-mostRecent {_} {_} {i} p≤t i∈αₚ | no  i∉αₜ | no p≢t   with ≤+≢⇒< p≤t p≢t
-    ... | s≤s p≤t₂ = λ t''≤t i∈αₜ'' → (previousActivation-mostRecent p≤t₂ i∈αₚ) (m+1≤n+1⇨m≤n (≤+≢⇒< t''≤t (λ t''≡t → i∉αₜ (subst (λ t → i ∈ α t) t''≡t i∈αₜ'')))) i∈αₜ''
+      tᶠ' : ℕ
+      tᶠ' = tᶠ
 
-    previousActivation-all : ∀ {t p i} → p ≤ t → i ∈ α p → ∃ λ t' → p ≤ t' × t' ≤ t × i ∈ α t' × (∀ {t''} → t'' ≤ t → i ∈ α t'' → t'' ≤ t')
-    previousActivation-all p≤t i∈αₚ = 
-      previousActivation p≤t i∈αₚ , 
-      previousActivation-after p≤t i∈αₚ , 
-      previousActivation-before p≤t i∈αₚ , 
-      previousActivation-active p≤t i∈αₚ , 
-      previousActivation-mostRecent p≤t i∈αₚ
-
-
+      tᶠ'-expires : ∀ {t'} → suc tᶠ' ≤ t' → β₂ t' i j ≢ t
+      tᶠ'-expires tᶠ<t' βt'≡t = tᶠ-final {!!} {!!}
+-}
+-}
     ---------------
-    -- Data flow --
+    -- Schedules --
     ---------------
 
-    -- pointExpiryᵢⱼ≤t
-
-    pointExpiryᵢⱼ≤t-expired : ∀ tᵍ {t} i j {s} → pointExpiryᵢⱼ≤t tᵍ t i j ≤ s → s < t → β s i j ≢ tᵍ
-    pointExpiryᵢⱼ≤t-expired tᵍ {zero}  i j {s} _ ()
-    pointExpiryᵢⱼ≤t-expired tᵍ {suc t} i j {s} _ _ with β t i j ≟ tᵍ | s ≟ t
-    pointExpiryᵢⱼ≤t-expired tᵍ {suc t} i j {_} (s≤s t≤s) (s≤s s<t') | yes _       | _        = contradiction (≤-trans s<t' t≤s) (<-irrefl refl)
-    pointExpiryᵢⱼ≤t-expired tᵍ {suc t} i j {_} exp≤s     (s≤s s≤t') | no  βt'ij≢t | yes refl = βt'ij≢t
-    pointExpiryᵢⱼ≤t-expired tᵍ {suc t} i j {_} exp≤s     (s≤s s≤t') | no  _       | no  s≢t' = pointExpiryᵢⱼ≤t-expired tᵍ i j exp≤s (≤+≢⇒< s≤t' s≢t')
-
-    -- pointExpiryᵢⱼ
-
-    pointExpiryᵢⱼ-expired : ∀ tᵍ i j {s} → pointExpiryᵢⱼ tᵍ i j ≤ s → β s i j ≢ tᵍ
-    pointExpiryᵢⱼ-expired tᵍ i j {s} exp≤s with eventualExpiry tᵍ i j
-    ... | (tᶠ , tᶠ-exp) with suc tᶠ ≤? s
-    ...   | yes tᶠ<s = tᶠ-exp tᶠ<s
-    ...   | no  tᶠ≮s = pointExpiryᵢⱼ≤t-expired tᵍ i j exp≤s (s≤s (≮⇒≥ tᶠ≮s))
-
-    --- expiryᵢⱼ 
-
-    x≤t⇒eₓ≤teₜ : ∀ i j {x t} → x ≤ t → pointExpiryᵢⱼ x i j ≤ expiryᵢⱼ t i j
-    x≤t⇒eₓ≤teₜ i j {zero}  {zero}  x≤t rewrite 0-idᵣ-⊔ (pointExpiryᵢⱼ 0 i j) = ≤-refl
-    x≤t⇒eₓ≤teₜ i j {suc x} {zero}  ()
-    x≤t⇒eₓ≤teₜ i j {x}     {suc t} x≤t with x ≟ suc t
-    ... | yes x≡t+1 rewrite x≡t+1 = m≤m⊔n (pointExpiryᵢⱼ (suc t) i j) (expiryᵢⱼ t i j)
-    ... | no  x≢t+1 = ≤-trans (x≤t⇒eₓ≤teₜ i j (m+1≤n+1⇨m≤n (≤+≢⇒< x≤t x≢t+1))) (n≤m⊔n (pointExpiryᵢⱼ (suc t) i j) (expiryᵢⱼ t i j))
-
-    expiryᵢⱼ-expired-lemma : ∀ {t t'} i j {x} → expiryᵢⱼ t i j ≤ t' → x ≤ t → β t' i j ≢ x
-    expiryᵢⱼ-expired-lemma {zero}  {t'} i j {zero}  ndfₜ≤t' z≤n rewrite 0-idᵣ-⊔ (pointExpiryᵢⱼ zero i j) = pointExpiryᵢⱼ-expired zero i j ndfₜ≤t'
-    expiryᵢⱼ-expired-lemma {zero}  {t'} i j {suc x} _      ()
-    expiryᵢⱼ-expired-lemma {suc t} {t'} i j {x}     ndfₜ≤t' x≤t+1 with ⊔-sel (pointExpiryᵢⱼ (suc t) i j) (expiryᵢⱼ t i j) | x ≟ suc t
-    ... | inj₁ eₜ⊔e≤ₜ≡eₜ  | yes x≡t+1 rewrite eₜ⊔e≤ₜ≡eₜ  | x≡t+1 = pointExpiryᵢⱼ-expired (suc t) i j ndfₜ≤t'
-    ... | inj₁ eₜ⊔e≤ₜ≡eₜ  | no  x≢t+1 rewrite eₜ⊔e≤ₜ≡eₜ          = pointExpiryᵢⱼ-expired x       i j (≤-trans (≤-trans (x≤t⇒eₓ≤teₜ i j (m+1≤n+1⇨m≤n (≤+≢⇒< x≤t+1 x≢t+1))) (m⊔n≡m⇨n≤m eₜ⊔e≤ₜ≡eₜ)) ndfₜ≤t')
-    ... | inj₂ eₜ⊔e≤ₜ≡e≤ₜ | yes x≡t+1 rewrite eₜ⊔e≤ₜ≡e≤ₜ | x≡t+1 = pointExpiryᵢⱼ-expired (suc t) i j (≤-trans (n⊔m≡m⇨n≤m eₜ⊔e≤ₜ≡e≤ₜ) ndfₜ≤t')
-    ... | inj₂ eₜ⊔e≤ₜ≡e≤ₜ | no  x≢t+1 rewrite eₜ⊔e≤ₜ≡e≤ₜ         = expiryᵢⱼ-expired-lemma        i j ndfₜ≤t' (m+1≤n+1⇨m≤n (≤+≢⇒< x≤t+1 x≢t+1))
-
-    expiryᵢⱼ-expired : ∀ t {t'} i j → expiryᵢⱼ t i j ≤ t' → t < β t' i j
-    expiryᵢⱼ-expired t {t'} i j ndfₜ≤t' = ∀x≤m:n≢x⇒m<n t (β t' i j) (expiryᵢⱼ-expired-lemma i j ndfₜ≤t')
-
-
-    -- expiryᵢ
-
-    expiryᵢ-expired : ∀ t {t'} i j → expiryᵢ t i ≤ t' → t < β t' i j
-    expiryᵢ-expired t i j fdfₜ≤t' = expiryᵢⱼ-expired t i j (≤-trans (foldr-⊎preserves (expiryᵢⱼ t i j ≤_) ⊔-⊎preserves-x≤ t (tabulate (expiryᵢⱼ t i))
-      (inj₂ (anyMap ≤-reflexive (∈-tabulate (expiryᵢⱼ t i) j)))) fdfₜ≤t')
-
-  
-    -- expiry
-
-    expiry-expired : ∀ t {t'} i j → expiry t ≤ t' → t < β t' i j
-    expiry-expired t i j fdₜ≤t' = expiryᵢ-expired t i j (≤-trans (foldr-⊎preserves (expiryᵢ t i ≤_) ⊔-⊎preserves-x≤ t (tabulate (expiryᵢ t))
-      (inj₂ (anyMap ≤-reflexive (∈-tabulate (expiryᵢ t) i)))) fdₜ≤t')
-
-    t≤expiryₜ : ∀ t → t ≤ expiry t
-    t≤expiryₜ t = foldr-⊎preserves (t ≤_) ⊔-⊎preserves-x≤ t (tabulate (expiryᵢ t)) (inj₁ ≤-refl)
-
-
-
-    -----------
-    -- Other --
-    -----------
-
-    n≤syncIterₙ : ∀ n → n ≤ syncIter n
-    n≤syncIterₙ zero    = z≤n
-    n≤syncIterₙ (suc n) = ≤-trans (≤-trans (s≤s (n≤syncIterₙ n)) (s≤s (t≤expiryₜ (syncIter n)))) (nextTotalActivation-after _)
-
-    syncIter-expired : ∀ n i j {t} → syncIter (suc n) ≤ t → syncIter n < β t i j
-    syncIter-expired n i j {t} siₙ≤t = expiry-expired (syncIter n) i j (≤-trans (≤-trans (n≤1+n _) (nextTotalActivation-after _)) siₙ≤t)
-
-    syncIter-activated : ∀ n i → ∃ λ t' → syncIter n < t' × t' ≤ syncIter (suc n) × i ∈ α t' × (∀ i j {t''} → t' ≤ t'' → syncIter n < β t'' i j)
-    syncIter-activated n i with nextTotalActivation-activated (expiry (syncIter n)) i
-    ... | (t' , e[siₙ]<t' , t'≤siₙ₊₁ , i∈αₜ') =
-      t' ,
-      ≤-trans (s≤s (t≤expiryₜ (syncIter n))) e[siₙ]<t' ,
-      t'≤siₙ₊₁ ,
-      i∈αₜ' ,
-      (λ i j t'≤t'' → expiry-expired (syncIter n) i j (≤-trans (<⇒≤ e[siₙ]<t') t'≤t''))
+    ⟦⟧≈⟦⟧-fastForward : ∀ {n} {𝕤₁ 𝕤₂ : Schedule n} {t₁ t₂} → 𝕤₁ ⟦ t₁ ⟧≈⟦ t₂ ⟧ 𝕤₂ → ∀ t → 𝕤₁ ⟦ t + t₁ ⟧≈⟦ t + t₂ ⟧ 𝕤₂
+    ⟦⟧≈⟦⟧-fastForward {_} {𝕤₁} {𝕤₂} (α-eq , β-eq) t = ≈𝔸-fastForward {_} {α 𝕤₁} {α 𝕤₂} α-eq t , ≈𝔹-fastForward {_} {β 𝕤₁} {β 𝕤₂} β-eq t

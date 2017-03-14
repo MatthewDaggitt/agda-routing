@@ -1,5 +1,5 @@
 open import Data.List hiding (downFrom)
-open import Data.Nat using (ℕ; zero; suc)
+open import Data.Nat using (ℕ; zero; suc; _⊓_; _⊔_)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Function using (_∘_; id)
 
@@ -32,3 +32,13 @@ module RoutingLib.Data.List where
          → (A → B → C) → List A → List B → List C
   combine f [] _ = []
   combine f (x ∷ xs) ys = map (f x) ys ++ combine f xs ys
+
+
+
+  -- Max and min
+
+  max : List ℕ → ℕ
+  max xs = foldr _⊔_ 0 xs
+
+  min : List ℕ → ℕ
+  min xs = foldr _⊓_ 0 xs

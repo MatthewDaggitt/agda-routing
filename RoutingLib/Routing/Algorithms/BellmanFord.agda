@@ -10,12 +10,12 @@ open import Relation.Binary using (Rel)
 open import Relation.Nullary using (¬_; yes; no)
 
 open import RoutingLib.Routing.Definitions
-open import RoutingLib.Asynchronous using (Parallelisation) renaming (δ^ to δ^'; σ^ to σ^')
+open import RoutingLib.Data.Vec using (foldr₂)
+open import RoutingLib.Asynchronous using (Parallelisation)
 open import RoutingLib.Asynchronous.Schedule using (Schedule)
 open import RoutingLib.Function using (_^_)
-open import RoutingLib.Data.Nat.Properties using (≤-refl)
-open import RoutingLib.Induction.Nat using () renaming (<-well-founded to <-wf)
 
+-- Distributed BellmanFord
 module RoutingLib.Routing.Algorithms.BellmanFord
   {a b ℓ n} (rp : RoutingProblem a b ℓ n) where
 
@@ -28,22 +28,15 @@ module RoutingLib.Routing.Algorithms.BellmanFord
 
   -- Algorithm for a single iteration
   σ : RMatrix → RMatrix
-  σ X i j = foldr (λ _ → Route) _⊕_ (I i j) (tabulate (λ k → A i k ▷ X k j))
+  σ X i j = foldr₂ _⊕_ (I i j) (tabulate (λ k → A i k ▷ X k j))
 
-  σ-cong : ∀ {X Y} → X ≈ₘ Y → σ X ≈ₘ σ Y
-  σ-cong X≈Y i j = {!foldr-!}
+  -- A possible parallelisation of the algorithm where each 
+  -- node is in charge of its own routes
+  σ∥ : Parallelisation b ℓ n
+  σ∥ = record 
+    { Sᵢ = λ _ → Sₜ 
+    ; σ = σ
+    }
 
-  -- A possible parallelisation of the algorithm
-  parallelisation : Parallelisation b ℓ n
-  parallelisation = record { 
-    Sᵢ = λ _ → DSₜ ; 
-    σᵢ = λ i X → σ X i ;
-    σᵢ-cong = λ {i} X≈Y → σ-cong X≈Y i }
-
-  -- The asynchronous state function
-  δ^ : Schedule n → ℕ → RMatrix → RMatrix
-  δ^ = δ^' parallelisation
-
-  -- The synchronous state function
-  σ^ : ℕ → RMatrix → RMatrix
-  σ^ = σ^' parallelisation
+  open Parallelisation σ∥ using (δ; σ^) public
+  open RoutingProblem rp using (RMatrix) public

@@ -1,31 +1,32 @@
+open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _∸_) renaming (_<_ to _<ℕ_; _≤_ to _≤ℕ_; _≟_ to _≟ℕ_)
+open import Data.Nat.Properties using (n≤1+n)
+open import Data.Fin.Properties using () renaming (_≟_ to _≟[Fin]_)
+open import Data.Product using (∃₂; _,_; _×_; proj₁)
+open import Function using (_∘_)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary using (module DecTotalOrder)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; subst; subst₂; cong; cong₂; inspect; [_]) renaming (sym to ≡-sym; trans to ≡-trans)
-open import Data.Sum using (inj₁; inj₂)
-open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _∸_) renaming (_<_ to _<ℕ_; _≤_ to _≤ℕ_; _≟_ to _≟ℕ_)
-open import Data.Nat.Properties using (n≤1+n)
-open import Data.Fin.Properties using () renaming (_≟_ to _≟[Fin]_)
-open import Data.Product using (_,_; proj₁)
-open import Function using (_∘_)
 
 open import RoutingLib.Routing.Definitions
-open import RoutingLib.Routing.Algorithms.DistributedBellmanFord.Convergence.SufficientConditions
 open import RoutingLib.Data.Nat.Properties using (m<n≤o⇨o∸n<o∸m; n≢0⇒0<n) renaming (≤-antisym to ≤ℕ-antisym; ≤-trans to ≤ℕ-trans)
 open import RoutingLib.Function.HeightFunction
 
-module RoutingLib.Routing.Algorithms.DistributedBellmanFord.Convergence.Step3_SimilarityIncreasing
+open import RoutingLib.Routing.Algorithms.BellmanFord.Convergence.SufficientConditions
+
+module RoutingLib.Routing.Algorithms.BellmanFord.Convergence.Step3_SimilarityIncreasing
   {a b ℓ n-1}
   (rp : RoutingProblem a b ℓ (suc n-1))
-  (cc : ConvergenceConditions rp)
+  (cc : ConvergenceConditions (RoutingProblem.ra rp))
   (bhf : BoundedHeightFunction (ConvergenceConditions.≤-poset cc)) 
   where
   
-  open import RoutingLib.Routing.Algorithms.DistributedBellmanFord.Convergence.Step1_HeightFunction rp cc hiding (h-resp-≤; ≤-resp-h)
-  open import RoutingLib.Routing.Algorithms.DistributedBellmanFord.Convergence.Step2_Ultrametric rp cc bhf using (d; H; h≤H; d-sym; dₑ; dₑ-sym; d-metric; Xᵢⱼ≉Yᵢⱼ⇨H∸hXᵢⱼ≤d; dₑ≡H∸hx⇨hx≤hy; d≡0⇨X≈Y; X≈Y⇨d≡0)
+  open import RoutingLib.Routing.Algorithms.BellmanFord.Convergence.Step2_Ultrametric rp cc bhf using (d; H; h≤H; d-sym; dₑ; dₑ-sym; d-metric; Xᵢⱼ≉Yᵢⱼ⇨H∸hXᵢⱼ≤d; dₑ≡H∸hx⇨hx≤hy; d≡0⇨X≈Y; X≈Y⇨d≡0; d≡dₑ; x≈y⇨dₑ≡0; dₑxy=hx⊎hy)
+  open import RoutingLib.Routing.Algorithms.BellmanFord.Convergence.SufficientConditions.Properties rp cc using (σXᵢᵢ≈σYᵢᵢ; σXᵢⱼ≤Aᵢₖ▷Xₖⱼ; σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ)
 
-  open import RoutingLib.Routing.Algorithms.DistributedBellmanFord.Synchronous rp
-  open import RoutingLib.Routing.Algorithms.DistributedBellmanFord.Synchronous.Properties rp as BFProps using (Iᵢⱼ≈0#)
+  open import RoutingLib.Routing.Algorithms.BellmanFord rp
+  open import RoutingLib.Routing.Algorithms.BellmanFord.Properties rp as BFProps using (Iᵢⱼ≈0#)
 
   open RoutingProblem rp
   open ConvergenceConditions cc
@@ -52,14 +53,13 @@ module RoutingLib.Routing.Algorithms.DistributedBellmanFord.Convergence.Step3_Si
     d≡H∸hσXᵢⱼ : d (σ X) (σ Y) ≡ H ∸ h (σ X i j)
     d≡H∸hσXᵢⱼ = ≡-trans d≡dₑᵢⱼ dₑᵢⱼ≡H∸hσXᵢⱼ
 
-
     abstract
 
       -- Result for when the minimal disagreement lies on the diagonal of the matrices
       diagonal-result : j ≡ i → d (σ X) (σ Y) <ℕ d X Y
       diagonal-result j≡i = 
         contradiction 
-          (σXᵢᵢ≈σYᵢᵢ' X Y i) 
+          (σXᵢᵢ≈σYᵢᵢ X Y i) 
           (subst (λ v → σ X i v ≉ σ Y i v) j≡i σXᵢⱼ≉σYᵢⱼ)
 
 
@@ -80,7 +80,7 @@ module RoutingLib.Routing.Algorithms.DistributedBellmanFord.Convergence.Step3_Si
         σXᵢⱼ≉σYᵢⱼ (
           ≤-antisym 
             (≤-resp-h (dₑ≡H∸hx⇨hx≤hy dₑᵢⱼ≡H∸hσXᵢⱼ)) 
-            (≤-respᵣ-≈ (sym (trans σXᵢⱼ≈Aᵢₖ▷Xₖⱼ (▷-pres-≈ (A i k) Xₖⱼ≈Yₖⱼ))) (σXᵢⱼ≤Aᵢₖ▷Xₖⱼ' Y i j k)))
+            (≤-respᵣ-≈ (sym (trans σXᵢⱼ≈Aᵢₖ▷Xₖⱼ (▷-pres-≈ (A i k) Xₖⱼ≈Yₖⱼ))) (σXᵢⱼ≤Aᵢₖ▷Xₖⱼ Y i j k)))
 
       extend-result : ∀ {k} → j ≢ i → σ X i j ≈ A i k ▷ X k j → X k j ≉ 0# → d (σ X) (σ Y) <ℕ d X Y
       extend-result {k} j≢i σXᵢⱼ≈Aᵢₖ▷Xₖⱼ Xₖⱼ≉0# =
@@ -102,7 +102,7 @@ module RoutingLib.Routing.Algorithms.DistributedBellmanFord.Convergence.Step3_Si
       result : d (σ X) (σ Y) <ℕ d X Y
       result with j ≟[Fin] i 
       ...  | yes j≡i = diagonal-result j≡i
-      ...  | no  j≢i with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ' X i j
+      ...  | no  j≢i with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
       ...    | inj₂ σXᵢⱼ≈Iᵢⱼ = drop-result j≢i (trans σXᵢⱼ≈Iᵢⱼ (Iᵢⱼ≈0# j≢i))
       ...    | inj₁ (k , σXᵢⱼ≈Aᵢₖ▷Xₖⱼ) with X k j ≟ 0#
       ...      | yes Xₖⱼ≈0# = drop-result j≢i (trans σXᵢⱼ≈Aᵢₖ▷Xₖⱼ (trans (▷-pres-≈ (A i k) Xₖⱼ≈0#) (0#-anᵣ-▷ (A i k))))
@@ -112,7 +112,7 @@ module RoutingLib.Routing.Algorithms.DistributedBellmanFord.Convergence.Step3_Si
   abstract
 
     open PostDisagreementResult using (result)
-    open import RoutingLib.Function.Metric.Contraction d-metric using (StrictlyContracting; StrictlyContractingOnOrbits; sc⇨scob)
+    open import RoutingLib.Function.Metric.Contraction Sₘ using (StrictlyContracting; StrictlyContractingOnOrbits; sc⇨scob)
 
     findWorstDisagreement : ∀ {X Y} → X ≉ₘ Y 
                               → ∃₂ λ i j 
@@ -124,7 +124,7 @@ module RoutingLib.Routing.Algorithms.DistributedBellmanFord.Convergence.Step3_Si
     ... | no  d≢0 | i , j , d≡dₑXᵢⱼYᵢⱼ with λ Xᵢⱼ≈Yᵢⱼ → d≢0 (≡-trans d≡dₑXᵢⱼYᵢⱼ (x≈y⇨dₑ≡0 Xᵢⱼ≈Yᵢⱼ))
     ...   | Xᵢⱼ≉Yᵢⱼ  = i , j , Xᵢⱼ≉Yᵢⱼ , d≡dₑXᵢⱼYᵢⱼ , dₑxy=hx⊎hy Xᵢⱼ≉Yᵢⱼ
 
-    σ-strictlyContracting : StrictlyContracting σ
+    σ-strictlyContracting : StrictlyContracting d σ
     σ-strictlyContracting {X} {Y} X≉Y with σ X ≟ₘ σ Y | d X Y ≟ℕ 0
     ... | yes σX≈σY | yes d≡0 = contradiction (d≡0⇨X≈Y d≡0) X≉Y
     ... | yes σX≈σY | no  d≢0 rewrite X≈Y⇨d≡0 σX≈σY = n≢0⇒0<n d≢0
@@ -137,5 +137,5 @@ module RoutingLib.Routing.Algorithms.DistributedBellmanFord.Convergence.Step3_Si
           (≡-trans (≡-trans (d-sym (σ Y) (σ X)) d≡dₑᵢⱼ) (dₑ-sym (σ X i j) (σ Y i j))) 
           (≡-trans (dₑ-sym (σ Y i j) (σ X i j)) dₑᵢⱼ≡H∸hσYᵢⱼ))
 
-    σ-strictlyContractingOnOrbits : StrictlyContractingOnOrbits σ
-    σ-strictlyContractingOnOrbits = sc⇨scob σ σ-strictlyContracting
+    σ-strictlyContractingOnOrbits : StrictlyContractingOnOrbits d σ
+    σ-strictlyContractingOnOrbits = sc⇨scob σ-strictlyContracting

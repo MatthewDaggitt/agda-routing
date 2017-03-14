@@ -3,6 +3,7 @@ open import Data.Nat.Properties
 open import Induction.WellFounded using (Well-founded; Acc; acc)
 open import Induction.Nat renaming (<-well-founded to <'-well-founded)
 
+open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 module RoutingLib.Induction.Nat where
 
   -- Pushed to stdlib

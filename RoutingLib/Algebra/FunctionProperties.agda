@@ -11,6 +11,13 @@ module RoutingLib.Algebra.FunctionProperties {a ℓ} {A : Set a} (_≈_ : Rel A 
   open import RoutingLib.Algebra.FunctionProperties.Core public
   open import Algebra.FunctionProperties _≈_ using (Op₁; Op₂; Idempotent; Commutative; Associative)
 
+  LeftCancellative : Op₂ A → Set _
+  LeftCancellative _•_ = ∀ a {b c} → (a • b) ≈ (a • c) → b ≈ c
+
+  RightCancellative : Op₂ A → Set _
+  RightCancellative _•_ = ∀ {a b} c → (a • c) ≈ (b • c) → a ≈ b
+
+
   ---------------
   -- Operators --
   ---------------

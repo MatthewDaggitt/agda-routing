@@ -50,16 +50,17 @@ module RoutingLib.Routing.Definitions where
     open IsDecEquivalence ≈-isDecEquivalence public
 
     S : Setoid b ℓ
-    S = record {
-        _≈_ = _≈_;
-        isEquivalence = isEquivalence
+    S = record 
+      { _≈_           = _≈_
+      ; isEquivalence = isEquivalence
       }
 
     DS : DecSetoid b ℓ
-    DS = record { 
-      Carrier = Route ; 
-      _≈_ = _≈_ ; 
-      isDecEquivalence = ≈-isDecEquivalence }
+    DS = record 
+      { Carrier = Route 
+      ; _≈_ = _≈_ 
+      ; isDecEquivalence = ≈-isDecEquivalence 
+      }
 
 
 
@@ -118,13 +119,13 @@ module RoutingLib.Routing.Definitions where
 
       _≟ₜ_ : Decidable _≈ₜ_
       X ≟ₜ Y = all? (λ i → X i ≟ Y i)
-      
+        
       ≈ₜ-isEquivalence : IsEquivalence _≈ₜ_
       ≈ₜ-isEquivalence = record { refl = ≈ₜ-refl ; sym = ≈ₜ-sym ; trans = ≈ₜ-trans }
-
+  
       ≈ₜ-isDecEquivalence : IsDecEquivalence _≈ₜ_
       ≈ₜ-isDecEquivalence = record { isEquivalence = ≈ₜ-isEquivalence ; _≟_ = _≟ₜ_ }
-
+  
     Sₜ : Setoid b ℓ
     Sₜ = record { Carrier = RTable ; _≈_ = _≈ₜ_ ; isEquivalence = ≈ₜ-isEquivalence }
 
@@ -147,29 +148,27 @@ module RoutingLib.Routing.Definitions where
     _≉ₘ_ : Rel RMatrix ℓ
     A ≉ₘ B = ¬ (A ≈ₘ B)
 
-    abstract
+    ≈ₘ-reflexive : _≡_ ⇒ _≈ₘ_
+    ≈ₘ-reflexive ≡-refl i j = reflexive ≡-refl
 
-      ≈ₘ-reflexive : _≡_ ⇒ _≈ₘ_
-      ≈ₘ-reflexive ≡-refl i j = reflexive ≡-refl
+    ≈ₘ-refl : Reflexive _≈ₘ_
+    ≈ₘ-refl i j = refl
 
-      ≈ₘ-refl : Reflexive _≈ₘ_
-      ≈ₘ-refl i j = refl
+    ≈ₘ-sym : Symmetric _≈ₘ_
+    ≈ₘ-sym A≈B i j = sym (A≈B i j)
 
-      ≈ₘ-sym : Symmetric _≈ₘ_
-      ≈ₘ-sym A≈B i j = sym (A≈B i j)
+    ≈ₘ-trans : Transitive _≈ₘ_
+    ≈ₘ-trans A≈B B≈C i j = trans (A≈B i j) (B≈C i j)
 
-      ≈ₘ-trans : Transitive _≈ₘ_
-      ≈ₘ-trans A≈B B≈C i j = trans (A≈B i j) (B≈C i j)
+    _≟ₘ_ : Decidable _≈ₘ_
+    X ≟ₘ Y = all? (λ i  → X i ≟ₜ Y i)
 
-      _≟ₘ_ : Decidable _≈ₘ_
-      X ≟ₘ Y = all? (λ i  → X i ≟ₜ Y i)
-
-      ≈ₘ-isEquivalence : IsEquivalence _≈ₘ_
-      ≈ₘ-isEquivalence = record {
-          refl = ≈ₘ-refl ;
-          sym = ≈ₘ-sym ;
-          trans = ≈ₘ-trans
-        }
+    ≈ₘ-isEquivalence : IsEquivalence _≈ₘ_
+    ≈ₘ-isEquivalence = record {
+        refl = ≈ₘ-refl ;
+        sym = ≈ₘ-sym ;
+        trans = ≈ₘ-trans
+      }
 {-
       ≉ₘ-witness : ∀ {X Y} → X ≉ₘ Y → ∃₂ λ i j → ¬ (X i j ≈ Y i j)
       ≉ₘ-witness {X} {Y} X≉Y with (all (λ {(i , j) → X i j ≟ Y i j})) srcDstPairs

@@ -8,13 +8,13 @@ open import Data.Maybe using (just; nothing)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; subst) renaming (refl to ≡-refl; sym to ≡-sym; trans to ≡-trans)
-open import Algebra.FunctionProperties using (Op₂)
+open import Algebra.FunctionProperties using (Op₂; Congruent₂; Selective)
 
-open import RoutingLib.Algebra.FunctionProperties using (_Preserves_; _Preservesₗ_; Selective)
+open import RoutingLib.Algebra.FunctionProperties using (_Preservesₗ_)
 open import RoutingLib.Routing.Definitions
-open import RoutingLib.Data.Graph using (Graph; _ᵉ∈ᵍ?_)
-open import RoutingLib.Data.Graph.SPath
-open import RoutingLib.Data.Graph.SPath.Properties
+open import RoutingLib.Data.Graph using (Graph; _∈?_)
+open import RoutingLib.Data.Graph.SimplePath renaming (_≈_ to _≈ₚ_)
+open import RoutingLib.Data.Graph.SimplePath.Properties using (_≤ₚ?_; _∉?_; ≤ₚ-resp-≈; ≈-pres-∉; p≈q⇒p₀≡q₀) renaming (_≟_ to _≟ₚ_; ≈-refl to ≈ₚ-refl; ≈-sym to ≈ₚ-sym; ≈-trans to ≈ₚ-trans)
 open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_; Respects₂⇨RespectedBy)
 
 
@@ -46,7 +46,7 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent
 
   data IRoute : Set (a ⊔ b ⊔ ℓ) where
     inull  : IRoute
-    iroute : Route → SPath n → IRoute
+    iroute : Route → SimplePath n → IRoute
 
 
   -- Steps
@@ -77,17 +77,17 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent
 
   _▷ⁱ_ : IStep → IRoute → IRoute
   _       ▷ⁱ inull = inull
-  (i , j) ▷ⁱ (iroute x []) with i ≟ᶠ j | (i , j) ᵉ∈ᵍ? G
+  (i , j) ▷ⁱ (iroute x []) with i ≟ᶠ j | (i , j) ∈? G
   ... | yes _  | _           = inull
   ... | _      | no  _       = inull
   ... | no i≢j | yes (v , _) with v ▷ x ≟ 0#
   ...   | yes _ = inull
   ...   | no  _ = iroute (v ▷ x) [ i ∺ j ∣ i≢j ]
-  (i , j) ▷ⁱ (iroute x [ p ]) with j ≟ᶠ source p | i ∉ₙₑₚ? p | (i , j) ᵉ∈ᵍ? G
+  (i , j) ▷ⁱ (iroute x [ p ]) with j ≟ᶠ source p | i ∉? [ p ] | (i , j) ∈? G
   ... | no _       | _       | _           = inull
   ... | _          | no  _   | _           = inull
   ... | _          | _       | no _        = inull
-  ... | yes j≡s[p] | yes i∉p | yes (v , _) with v ▷ x ≟ 0#
+  ... | yes j≡s[p] | yes [ i∉p ] | yes (v , _) with v ▷ x ≟ 0#
   ...   | yes _ = inull
   ...   | no  _ = iroute (v ▷ x) [ i ∷ p ∣ i∉p ]
 
@@ -132,28 +132,7 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent
     ... | _       | no  p≉q = no λ{(irouteEq _ p≈q) → p≉q p≈q}
     ... | yes x≈y | yes p≈q = yes (irouteEq x≈y p≈q)
 
-    ≈ⁱ-isEquivalence : IsEquivalence _≈ⁱ_
-    ≈ⁱ-isEquivalence = record {
-        refl = ≈ⁱ-refl ;
-        sym = ≈ⁱ-sym ;
-        trans = ≈ⁱ-trans
-      }
-
-    ≈ⁱ-isDecEquivalence : IsDecEquivalence _≈ⁱ_
-    ≈ⁱ-isDecEquivalence = record {
-        isEquivalence = ≈ⁱ-isEquivalence ;
-        _≟_ = _≟ⁱ_
-      }
-
-  ≈ⁱ-setoid : Setoid (a ⊔ b ⊔ ℓ) (a ⊔ b ⊔ ℓ)
-  ≈ⁱ-setoid = record {
-      _≈_ = _≈ⁱ_;
-      isEquivalence = ≈ⁱ-isEquivalence
-    }
-
-  abstract
-
-    ⊕ⁱ-pres-≈ⁱ : _⊕ⁱ_ Preserves _≈ⁱ_
+    ⊕ⁱ-pres-≈ⁱ : Congruent₂ _≈ⁱ_ _⊕ⁱ_
     ⊕ⁱ-pres-≈ⁱ inullEq inullEq = inullEq
     ⊕ⁱ-pres-≈ⁱ inullEq (irouteEq y≈z r≈s) = irouteEq y≈z r≈s
     ⊕ⁱ-pres-≈ⁱ (irouteEq w≈x p≈q) inullEq = irouteEq w≈x p≈q
@@ -168,13 +147,13 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent
     ... | sel≈ w⊕y≈w _     | sel₂ x⊕z≉x _     = contradiction (trans (trans (sym (⊕-pres-≈ w≈x y≈z)) w⊕y≈w) w≈x) x⊕z≉x
     ... | sel≈ _     _     | sel≈ _     _     with p ≤ₚ? r | q ≤ₚ? s
     ...   | yes _   | yes _   = irouteEq w≈x p≈q
-    ...   | yes p≤r | no  q≰s = contradiction (≤ₚ-resp-≈ₚ p≈q r≈s p≤r) q≰s
-    ...   | no  p≰r | yes q≤s = contradiction (≤ₚ-resp-≈ₚ (≈ₚ-sym p≈q) (≈ₚ-sym r≈s) q≤s) p≰r
+    ...   | yes p≤r | no  q≰s = contradiction (≤ₚ-resp-≈ p≈q r≈s p≤r) q≰s
+    ...   | no  p≰r | yes q≤s = contradiction (≤ₚ-resp-≈ (≈ₚ-sym p≈q) (≈ₚ-sym r≈s) q≤s) p≰r
     ...   | no  _   | no  _   = irouteEq y≈z r≈s
 
     ▷ⁱ-pres-≈ⁱ : _▷ⁱ_ Preservesₗ _≈ⁱ_
-    ▷ⁱ-pres-≈ⁱ {b = (_ , _)} inullEq = inullEq
-    ▷ⁱ-pres-≈ⁱ (i , j) {iroute x []}    {iroute y []}    (irouteEq x≈y []) with i ≟ᶠ j | (i , j) ᵉ∈ᵍ? G
+    ▷ⁱ-pres-≈ⁱ (_ , _) inullEq = inullEq
+    ▷ⁱ-pres-≈ⁱ (i , j) {iroute x []}    {iroute y []}    (irouteEq x≈y []) with i ≟ᶠ j | (i , j) ∈? G
     ... | yes _ | _           = inullEq
     ... | no  _ | no  _       = inullEq
     ... | no  _ | yes (v , _) with v ▷ x ≟ 0# | v ▷ y ≟ 0#
@@ -183,36 +162,53 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent
     ...   | no  v▷x≉0 | yes v▷y≈0 = contradiction (trans (▷-pres-≈ v x≈y) v▷y≈0) v▷x≉0
     ...   | no  _     | no _      = irouteEq (▷-pres-≈ v x≈y) ≈ₚ-refl
     ▷ⁱ-pres-≈ⁱ (i , j) {iroute x [ _ ]} {iroute y []}    (irouteEq x≈y ())
-    ▷ⁱ-pres-≈ⁱ (i , j) {iroute x [ p ]} {iroute y [ q ]} (irouteEq x≈y [ p≈q ]) with j ≟ᶠ source p | j ≟ᶠ source q | i ∉ₙₑₚ? p | i ∉ₙₑₚ? q | (i , j) ᵉ∈ᵍ? G
+    ▷ⁱ-pres-≈ⁱ (i , j) {iroute x [ p ]} {iroute y [ q ]} (irouteEq x≈y [ p≈q ]) with j ≟ᶠ source p | j ≟ᶠ source q | i ∉? [ p ] | i ∉? [ q ] | (i , j) ∈? G
     ... | no  _    | no  _    | _       | _       | _           = inullEq
-    ... | no  j≢p₀ | yes j≡q₀ | _       | _       | _           = contradiction (≡-trans j≡q₀ (p≈q⇒p₀≡q₀ (≈ₙₑₚ-sym p≈q))) j≢p₀
+    ... | no  j≢p₀ | yes j≡q₀ | _       | _       | _           = contradiction (≡-trans j≡q₀ (≡-sym (p≈q⇒p₀≡q₀ p≈q))) j≢p₀
     ... | yes j≡p₀ | no  j≢q₀ | _       | _       | _           = contradiction (≡-trans j≡p₀ (p≈q⇒p₀≡q₀ p≈q)) j≢q₀
     ... | yes _    | yes _    | no  _   | no  _   | _           = inullEq
-    ... | yes _    | yes _    | no  i∈p | yes i∉q | _           = contradiction (i∉p∧p≈q⇒i∉q i∉q (≈ₙₑₚ-sym p≈q)) i∈p
-    ... | yes _    | yes _    | yes i∉p | no  i∈q | _           = contradiction (i∉p∧p≈q⇒i∉q i∉p p≈q) i∈q
+    ... | yes _    | yes _    | no  i∈p | yes i∉q | _           = contradiction (≈-pres-∉ i∉q (≈ₚ-sym [ p≈q ])) i∈p
+    ... | yes _    | yes _    | yes i∉p | no  i∈q | _           = contradiction (≈-pres-∉ i∉p [ p≈q ]) i∈q
     ... | yes _    | yes _    | yes _   | yes  _  | no  _       = inullEq
-    ... | yes _    | yes _    | yes _   | yes _   | yes (v , _) with v ▷ x ≟ 0# | v ▷ y ≟ 0#
+    ... | yes _    | yes _    | yes [ _ ] | yes [ _ ] | yes (v , _) with v ▷ x ≟ 0# | v ▷ y ≟ 0#
     ...   | yes _     | yes _     = inullEq
     ...   | yes v▷x≈0 | no  v▷y≉0 = contradiction (trans (▷-pres-≈ v (sym x≈y)) v▷x≈0) v▷y≉0
     ...   | no  v▷x≉0 | yes v▷y≈0 = contradiction (trans (▷-pres-≈ v x≈y) v▷y≈0) v▷x≉0
     ...   | no  _     | no _      = irouteEq (▷-pres-≈ v x≈y) [ ≡-refl ∷ p≈q ]
 
+    ≈ⁱ-isEquivalence : IsEquivalence _≈ⁱ_
+    ≈ⁱ-isEquivalence = record 
+      { refl  = ≈ⁱ-refl 
+      ; sym   = ≈ⁱ-sym 
+      ; trans = ≈ⁱ-trans
+      }
+
+    ≈ⁱ-isDecEquivalence : IsDecEquivalence _≈ⁱ_
+    ≈ⁱ-isDecEquivalence = record 
+      { isEquivalence = ≈ⁱ-isEquivalence 
+      ; _≟_           = _≟ⁱ_
+      }
+
+  Iₛ : Setoid (a ⊔ b ⊔ ℓ) (a ⊔ b ⊔ ℓ)
+  Iₛ = record 
+    { _≈_           = _≈ⁱ_
+    ; isEquivalence = ≈ⁱ-isEquivalence
+    }
 
   -- A routing algebra can now be formed
-
   ira : RoutingAlgebra _ _ _
-  ira = record {
-      Step = IStep;
-      Route = IRoute;
-      _⊕_ = _⊕ⁱ_;
-      _▷_ = _▷ⁱ_;
-      0# = inull;
-      1# = iroute 1# [];
+  ira = record 
+    { Step  = IStep
+    ; Route = IRoute
+    ; _⊕_   = _⊕ⁱ_
+    ; _▷_   = _▷ⁱ_
+    ; 0#    = inull
+    ; 1#    = iroute 1# []
 
-      _≈_ = _≈ⁱ_;
-      ≈-isDecEquivalence = ≈ⁱ-isDecEquivalence;
-      ▷-pres-≈ = ▷ⁱ-pres-≈ⁱ;
-      ⊕-pres-≈ = ⊕ⁱ-pres-≈ⁱ
+    ; _≈_                = _≈ⁱ_
+    ; ≈-isDecEquivalence = ≈ⁱ-isDecEquivalence
+    ; ▷-pres-≈           = ▷ⁱ-pres-≈ⁱ
+    ; ⊕-pres-≈           = ⊕ⁱ-pres-≈ⁱ
     }
 
 
@@ -228,3 +224,11 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent
        ra = ira;
        A = Aⁱ
     }
+
+  -----------
+  -- Other --
+  -----------
+
+  size : IRoute → ℕ
+  size inull        = 0
+  size (iroute _ p) = length p

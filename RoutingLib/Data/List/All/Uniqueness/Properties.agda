@@ -4,11 +4,10 @@ open import Data.Bool using (true; false)
 open import Data.Maybe using (Maybe; just; nothing)
 open import Data.List using (List; []; _∷_; length; gfilter; filter; map; concat; _++_)
 open import Data.List.Any using (here; there; module Membership)
-open import Data.List.All using (All; []; _∷_; lookup) renaming (map to mapₐ)
+open import Data.List.All using (All; []; _∷_; lookup) renaming (map to mapₐ; tabulate to tabulateₐ)
 open import Data.List.All.Properties using (gmap)
 open import Data.Fin using (Fin) renaming (suc to fsuc)
 open import Data.Fin.Properties using (suc-injective)
-open import Data.Vec using (toList; tabulate)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_×_; _,_)
 open import Function using (_∘_; id)
@@ -17,9 +16,9 @@ open import Relation.Binary.PropositionalEquality using (subst; _≡_; _≢_; in
 open import Relation.Nullary using (¬_)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Data.List using (combine; allFin)
+open import RoutingLib.Data.List using (combine; allFin; tabulate)
 open import RoutingLib.Data.List.All using (AllPairs; []; _∷_)
-open import RoutingLib.Data.List.All.Properties using (All¬→¬Any; ¬Any→All¬; ++-all; All-∈; forced-map)
+open import RoutingLib.Data.List.All.Properties using (All¬→¬Any; ¬Any→All¬; ++-all; All-∈; forced-map; tabulate-all)
 open import RoutingLib.Data.Vec.Properties using (∉⇒List-∉; ∉-tabulate)
 open import RoutingLib.Data.Nat.Properties using (≤-antisym)
 open import RoutingLib.Data.Fin.Properties using (suc≢zero)
@@ -30,6 +29,9 @@ open import RoutingLib.Data.List.Any.GenericMembership using (filter-pres-∉; �
 
 
 module RoutingLib.Data.List.All.Uniqueness.Properties where
+
+  Fₛ : ∀ {n} → Setoid _ _
+  Fₛ {n} = ≡-setoid (Fin n)
 
   module SingleSetoid {c ℓ} (S : Setoid c ℓ) where
 
@@ -64,9 +66,9 @@ module RoutingLib.Data.List.All.Uniqueness.Properties where
     concat!                   ([]       ∷ xss!)      (_ ∷ xss-dj)       = concat! xss! xss-dj
     concat! {(x ∷ xs) ∷ xss}  ((x∉xs ∷ xs!) ∷ xss!) (x∷xs-dj ∷ xss-dj)  = ++-all x∉xs (¬Any→All¬ (∈xs⇨∉ys S (disjoint-concat S x∷xs-dj) (here refl))) ∷ concat! (xs! ∷ xss!) ((mapₐ (disjoint-contract₁ S) x∷xs-dj) ∷ xss-dj)
 
-    tabulate! : ∀ {a n} {A : Set a} (f : Fin n → A) → (∀ {i j} → f i ≡ f j → i ≡ j) → Unique (≡-setoid A) (toList (tabulate f))
-    tabulate! {n = zero} f _ = []
-    tabulate! {n = suc n} f f-inj = ¬Any→All¬ (∉⇒List-∉ (∉-tabulate (f ∘ fsuc) (λ _ → suc≢zero ∘ f-inj))) ∷ (tabulate! (f ∘ fsuc) (suc-injective ∘ f-inj))
+    tabulate! : ∀ {n} (f : Fin n → A) → (∀ {i j} → f i ≈ f j → i ≡ j) → Unique S (tabulate f)
+    tabulate! {n = zero}  f _     = []
+    tabulate! {n = suc n} f f-inj = tabulate-all (λ _ → suc≢zero ∘ f-inj ∘ sym) ∷ tabulate! (f ∘ fsuc) (suc-injective ∘ f-inj)
 
     -- Other
 
@@ -107,22 +109,8 @@ module RoutingLib.Data.List.All.Uniqueness.Properties where
 
     open DoubleSetoid public
 
-
-
-
   open SingleSetoid public
-
-
-  --allFin! : ∀ n → Unique (≡-setoid (Fin n)) (toList (allFin n))
-  --allFin! n = tabulate! (≡-setoid (Fin n)) id id
-
-  Fₛ : ∀ {n} → Setoid _ _
-  Fₛ {n} = ≡-setoid (Fin n)
-
-  private
-    i≢j⇒i+1≢j+1 : ∀ {m} {i j : Fin m} → i ≢ j → fsuc i ≢ fsuc j
-    i≢j⇒i+1≢j+1 {_} {i} {.i} i≢i ≡-refl = i≢i ≡-refl
 
   allFin! : ∀ n → Unique Fₛ (allFin n)
   allFin! zero = []
-  allFin! (suc n) = forced-map (λ _ ()) (allFin n) ∷ map! Fₛ Fₛ i≢j⇒i+1≢j+1 (allFin! n)
+  allFin! (suc n) = tabulate! Fₛ id id

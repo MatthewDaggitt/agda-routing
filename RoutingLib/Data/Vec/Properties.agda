@@ -1,7 +1,7 @@
 open import Data.Nat using (ℕ; zero; suc; s≤s; _+_)
 open import Data.Fin using (Fin; _<_; _≤_; inject₁) renaming (zero to fzero; suc to fsuc)
 open import Algebra.FunctionProperties using (Op₂)
-open import Data.Vec hiding (map)
+open import Data.Vec hiding (map; zipWith)
 open import Data.Product using (∃; ∃₂; _,_; _×_)
 open import Data.List.Any as Any using (here; there)
 open Any.Membership-≡ using () renaming (_∈_ to _∈ₗ_; _∉_ to _∉ₗ_)
@@ -64,7 +64,6 @@ module RoutingLib.Data.Vec.Properties where
   ----------
   -- Rest --
   ----------
-
 
   map-∃-∈ : ∀ {a b n} {A : Set a} {B : Set b} {f : A → B} {v : B} (xs : Vec A n) → v ∈ map f xs → ∃ λ y → y ∈ xs × v ≡ f y
   map-∃-∈ []       ()

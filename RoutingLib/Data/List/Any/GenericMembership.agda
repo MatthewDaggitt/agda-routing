@@ -139,11 +139,6 @@ module RoutingLib.Data.List.Any.GenericMembership {c ℓ} (setoid : Setoid c ℓ
   ... | (w , w∈xs , Pw≈justᵥ) = w , there w∈xs , Pw≈justᵥ
 
 
-
-
-
-
-
   -- Types
 
   -- Disjoint sets

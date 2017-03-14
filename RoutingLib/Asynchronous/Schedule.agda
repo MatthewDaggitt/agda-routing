@@ -1,23 +1,62 @@
 open import Level using () renaming (zero to lzero)
-open import Data.Nat using (ℕ; zero; suc; s≤s; _<_; _≤_; _∸_; _≟_; _⊔_)
+open import Data.Nat using (ℕ; zero; suc; s≤s; _<_; _≤_; _∸_; _+_)
 open import Data.Nat.Properties using (1+n≰n)
 open import Data.Fin using (Fin)
-open import Data.Fin.Properties using ()
 open import Data.Fin.Subset using (Subset; _∈_; ⊤)
-open import Data.Fin.Dec using (_∈?_)
 open import Data.Fin.Subset.Properties using (∈⊤)
-open import Data.List using (foldr)
 open import Data.Product using (∃; _×_; _,_)
-open import Relation.Binary.PropositionalEquality using (_≢_; refl; sym; trans; subst)
-open import Relation.Nullary using (yes; no)
-open import Relation.Nullary.Negation using (contradiction)
-open import Induction.WellFounded using (Acc; acc)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 
-open import RoutingLib.Data.Nat.Properties using (≤-refl; m<n≤o⇨o∸n<o∸m; ≤+≢⇒<; <⇒≤)
-open import RoutingLib.Induction.Nat using () renaming (<-well-founded to <-wf)
-open import RoutingLib.Data.List using (tabulate; applyDownFrom)
+open import RoutingLib.Data.Nat.Properties using (≤-refl)
 
 module RoutingLib.Asynchronous.Schedule where
+
+  ----------
+  -- Time --
+  ----------
+
+  𝕋 : Set lzero
+  𝕋 = ℕ
+
+
+  --------------------------
+  -- Activation functions --
+  --------------------------
+  -- An activation function maps times to a subset of active processors
+  -- i.e. "α t" is the set of active processors at time t
+  𝔸 : ℕ → Set lzero
+  𝔸 n = 𝕋 → Subset n
+
+  -- Two activation functions are considered equal if the processors activate in lockstep after some point in time
+  _⟦_⟧≈𝔸⟦_⟧_ : ∀ {n} → 𝔸 n → 𝕋 → 𝕋 → 𝔸 n → Set lzero
+  α₁ ⟦ t₁ ⟧≈𝔸⟦ t₂ ⟧ α₂ = ∀ t → α₁ (t + t₁) ≡ α₂ (t + t₂)
+
+  -- An activation function is starvation free if every processor will continue to activate indefinitely
+  StarvationFree : ∀ {n} → 𝔸 n → Set lzero
+  StarvationFree α = ∀ t i → ∃ λ t' → t < t' × i ∈ α t'
+
+
+  -------------------------
+  -- Data flow functions --
+  -------------------------
+  -- A data flow function describes how information flows between processors
+  -- i.e. "β t i j" is the time at which the information from processor j used at processor i at time t was generated
+  𝔹 : ℕ → Set lzero
+  𝔹 n = 𝕋 → Fin n → Fin n → 𝕋
+  
+  -- Two data flow functions are considered equal if after some point in time data originates from the same relative point in time
+  -- Note that they need never agree at time zero as data at time zero has no origin.
+  _⟦_⟧≈𝔹⟦_⟧_ : ∀ {n} → 𝔹 n → 𝕋 → 𝕋 → 𝔹 n → Set lzero
+  β₁ ⟦ t₁ ⟧≈𝔹⟦ t₂ ⟧ β₂ = ∀ t i j → β₁ (suc t + t₁) i j ∸ t₁ ≡ β₂ (suc t + t₂) i j ∸ t₂
+
+  -- A data flow function is causal if data always flows forwards in time.
+  Causal : ∀ {n} → 𝔹 n → Set lzero
+  Causal β = ∀ t i j → β (suc t) i j < suc t
+
+  -- A data flow function is dynamic if each piece of data is only used a finite number of times (i.e. eventually fresh data will be used).
+  Dynamic : ∀ {n} → 𝔹 n → Set lzero
+  Dynamic β = ∀ t i j → ∃ λ tᶠ → ∀ {t'} → tᶠ < t' → β t' i j ≢ t
+  
 
   --------------
   -- Schedule --
@@ -25,18 +64,16 @@ module RoutingLib.Asynchronous.Schedule where
   -- An asynchronous schedule for n processors
   record Schedule (n : ℕ) : Set lzero where
     field
-      -- "α t" is the set of active processors at time t
-      α : ℕ → Subset n
-      -- "β i j t" is the time at which the information from j used at i at time t was generated
-      β : ℕ → Fin n → Fin n → ℕ
-      
-      -- Information flows forward in time
-      causality :          ∀ t i j → β (suc t) i j < suc t
-      -- Every node activates infinitely often
-      infiniteActivation : ∀ t i → ∃ λ t' → t < t' × i ∈ α t'
-      -- All information is eventually discarded 
-      eventualExpiry :     ∀ t i j → ∃ λ tᶠ → ∀ {t'} → tᶠ < t' → β t' i j ≢ t
+      α              : 𝔸 n
+      β              : 𝔹 n
+      starvationFree : StarvationFree α
+      causality      : Causal β
+      dynamic        : Dynamic β
 
+  -- Two schedules are considered equal if their activation and data flow functions are equal
+  _⟦_⟧≈⟦_⟧_ : ∀ {n} → Schedule n → 𝕋 → 𝕋 → Schedule n → Set lzero
+  𝕤₁ ⟦ t₁ ⟧≈⟦ t₂ ⟧ 𝕤₂ = (α 𝕤₁) ⟦ t₁ ⟧≈𝔸⟦ t₂ ⟧ (α 𝕤₂) × (β 𝕤₁) ⟦ t₁ ⟧≈𝔹⟦ t₂ ⟧ (β 𝕤₂)
+    where open Schedule
 
 
   -----------------------
@@ -44,105 +81,29 @@ module RoutingLib.Asynchronous.Schedule where
   -----------------------
   -- The "synchronous" schedule
 
-  α-sync : ∀ {n} → ℕ → Subset n
+  α-sync : ∀ {n} → 𝔸 n
   α-sync _ = ⊤
 
-  β-sync : ∀ {n} → ℕ → Fin n → Fin n → ℕ
+  β-sync : ∀ {n} → 𝔹 n
   β-sync zero    _ _ = zero
   β-sync (suc t) _ _ = t
 
-  syncCausality : ∀ {n} t i j → β-sync {n} (suc t) i j < suc t
-  syncCausality _ _ _ = ≤-refl
-
-  syncInfiniteActivation : ∀ {n} t i → ∃ λ t' → t < t' × i ∈ α-sync {n} t'
-  syncInfiniteActivation t _ = suc t , ≤-refl , ∈⊤
-
-  syncEventualExpiry : ∀ {n} t i j → ∃ λ tᶠ → ∀ {t'} → tᶠ < t' → β-sync {n} t' i j ≢ t
-  syncEventualExpiry t _ _ = suc t , λ {(s≤s t<t) refl → 1+n≰n t<t}
-
-  syncSchedule : ∀ n → Schedule n
-  syncSchedule n = record { 
-    α = α-sync ;
-    β = β-sync ; 
-    causality = syncCausality ; 
-    infiniteActivation = syncInfiniteActivation ;
-    eventualExpiry = syncEventualExpiry }
-
-
-
-
-  -------------------
-  -- Special times --
-  -------------------
-
-  module SpecialTimes {n} (sch : Schedule n) where
-
-    open Schedule sch
-
-    -----------------
-    -- Activations --
-    -----------------
-
-    nextActivation' : ∀ {t t' i} → Acc _<_ (t' ∸ t) → t < t' → i ∈ α t' → ℕ
-    nextActivation' {t} {t'} {i} (acc t'∸t-acc) t<t' i∈αₜ' with i ∈? α (suc t) | (suc t) ≟ t'
-    ... | yes i∈αₜ₊₁ | _          = suc t
-    ... | no  i∉αₜ₊₁ | yes t+1≡t' = contradiction (subst (λ t → i ∈ α t) (sym t+1≡t') i∈αₜ') i∉αₜ₊₁
-    ... | no  i∉αₜ₊₁ | no  t+1≢t' = nextActivation' (t'∸t-acc (t' ∸ suc t) (m<n≤o⇨o∸n<o∸m ≤-refl t<t')) (≤+≢⇒< t<t' t+1≢t') i∈αₜ'
-
-    -- Returns the next time processor i is active after time t
-    nextActivation : ℕ → Fin n → ℕ
-    nextActivation t i with infiniteActivation t i
-    ... | (t' , t<t' , i∈αₜ') = nextActivation' (<-wf (t' ∸ t)) t<t' i∈αₜ'
+  abstract
     
-    -- Returns the first time such that all processors have activated after time t
-    nextTotalActivation : ℕ → ℕ
-    nextTotalActivation t = foldr _⊔_ (suc t) (tabulate (nextActivation t))
+    α-sync-starvationFree : ∀ {n} → StarvationFree (α-sync {n})
+    α-sync-starvationFree t _ = suc t , ≤-refl , ∈⊤
 
-    -- Given that a processor has been active before, returns the most recent activation since time t
-    previousActivation : ∀ {t p i} → p ≤ t → i ∈ α p → ℕ
-    previousActivation {t} {p} {i} _   _    with i ∈? α t | p ≟ t
-    previousActivation {t} {_} {_} _   _    | yes _  | _       =  t
-    previousActivation {t} {_} {_} _   _    | _      | yes refl = t
-    previousActivation {_} {_} {i} p≤t i∈αₚ | no i∉αₜ | no p≢t with ≤+≢⇒< p≤t p≢t
-    ... | s≤s p≤t₂ = previousActivation p≤t₂ i∈αₚ
+    β-sync-causal : ∀ {n} → Causal (β-sync {n})
+    β-sync-causal _ _ _ = ≤-refl
 
+    β-sync-dynamic : ∀ {n} → Dynamic (β-sync {n})
+    β-sync-dynamic t _ _ = suc t , λ {(s≤s t<t) refl → 1+n≰n t<t}
 
-    ---------------
-    -- Data flow --
-    ---------------
-
-    -- The first time such that data generated by j at time tᵍ is not used again by i before time t
-    pointExpiryᵢⱼ≤t : ℕ → ℕ → Fin n → Fin n → ℕ
-    pointExpiryᵢⱼ≤t tᵍ zero     i j = zero
-    pointExpiryᵢⱼ≤t tᵍ (suc t) i j with β t i j ≟ tᵍ
-    ... | yes _ = suc t
-    ... | no  _ = pointExpiryᵢⱼ≤t tᵍ t i j
-
-    -- The first time such that data generated by j at time tᵍ is not used again by i
-    pointExpiryᵢⱼ : ℕ → Fin n → Fin n → ℕ
-    pointExpiryᵢⱼ tᵍ i j with eventualExpiry tᵍ i j
-    ... | (tᶠ , tᶠ-exp) = pointExpiryᵢⱼ≤t tᵍ (suc tᶠ) i j
-
-    -- The first time such that i only ever uses data generated by j after time t 
-    expiryᵢⱼ : ℕ → Fin n → Fin n → ℕ
-    expiryᵢⱼ t i j = foldr _⊔_ 0 (applyDownFrom (λ t → pointExpiryᵢⱼ t i j) (suc t))
-
-    -- The first time such that i only ever uses data generated after time t
-    expiryᵢ : ℕ → Fin n → ℕ
-    expiryᵢ t i = foldr _⊔_ t (tabulate (expiryᵢⱼ t i))
-
-    -- The first time such that all processors only ever use data generated after time t
-    expiry : ℕ → ℕ
-    expiry t = foldr _⊔_ t (tabulate (expiryᵢ t))
-
-    
-    -----------
-    -- Other --
-    -----------
-
-    -- Time at which n complete "synchronous" iterations have occurred
-    syncIter : ℕ → ℕ
-    syncIter zero    = zero
-    syncIter (suc n) = nextTotalActivation (expiry (syncIter n))
-
-  open SpecialTimes public
+  𝕤-sync : ∀ n → Schedule n
+  𝕤-sync n = record 
+    { α              = α-sync 
+    ; β              = β-sync 
+    ; starvationFree = α-sync-starvationFree
+    ; causality      = β-sync-causal 
+    ; dynamic        = β-sync-dynamic 
+    }

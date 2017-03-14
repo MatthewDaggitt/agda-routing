@@ -1,5 +1,5 @@
 open import Level using (_⊔_)
-open import Data.Nat using (ℕ; suc; zero)
+open import Data.Nat using (ℕ; suc; zero; _<_)
 open import Data.Sum using (inj₁; inj₂)
 open import Relation.Nullary using (¬_; yes; no)
 open import Data.Product using (∃₂; _×_; _,_)
@@ -9,13 +9,13 @@ open import Data.Maybe using (just; nothing)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary using (Decidable; Rel; IsDecEquivalence; Transitive)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; subst) renaming (refl to ≡-refl; sym to ≡-sym; trans to ≡-trans)
-open import Algebra.FunctionProperties using (Op₂; Idempotent; Associative; Commutative; RightIdentity; RightZero)
+open import Algebra.FunctionProperties using (Op₂; Selective; Idempotent; Associative; Commutative; RightIdentity; RightZero)
 
-open import RoutingLib.Algebra.FunctionProperties using (Selective)
 open import RoutingLib.Routing.Definitions
-open import RoutingLib.Data.Graph using (Graph; _ᵉ∈ᵍ_; _ᵉ∈ᵍ?_)
-open import RoutingLib.Data.Graph.SPath
-open import RoutingLib.Data.Graph.SPath.Properties
+open import RoutingLib.Data.Graph using (Graph; _∈_; _∈?_)
+open import RoutingLib.Data.Graph.SimplePath renaming (_≈_ to _≈ₚ_)
+open import RoutingLib.Data.Graph.SimplePath.Properties renaming (_≟_ to _≟ₚ_)
+open import RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties using (p≉i∷p)
 
 module RoutingLib.Routing.AlgebraicPaths.Inconsistent.Properties
   {a b ℓ} (ra : RoutingAlgebra a b ℓ)
@@ -194,20 +194,22 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent.Properties
 
     ⊕ⁱ-almost-strictly-absorbs-▷ⁱ : (∀ s r → (s ▷ r) ⊕ r ≈ r) → ∀ s {r} → r ≉ⁱ inull → ((s ▷ⁱ r) ⊕ⁱ r ≈ⁱ r) × (r ≉ⁱ s ▷ⁱ r)
     ⊕ⁱ-almost-strictly-absorbs-▷ⁱ _   _       {inull}       r≉inull = contradiction inullEq r≉inull
-    ⊕ⁱ-almost-strictly-absorbs-▷ⁱ abs (i , j) {iroute x []} _ with i ≟ᶠ j | (i , j) ᵉ∈ᵍ? G
-    ... | yes _ | _           = ≈ⁱ-refl , λ()
-    ... | no  _ | no _        = ≈ⁱ-refl , λ()
-    ... | no  _ | yes (v , _) with v ▷ x ≟ 0#
+    ⊕ⁱ-almost-strictly-absorbs-▷ⁱ abs (i , j) {iroute x []} _ with i ≟ᶠ j | (i , j) ∈? G
+    ... | yes _   | _           = ≈ⁱ-refl , λ()
+    ... | no  _   | no _        = ≈ⁱ-refl , λ()
+    ... | no  i≢j | yes (v , _) with v ▷ x ≟ 0#
     ...   | yes _ = ≈ⁱ-refl , λ()
     ...   | no  _ with select (v ▷ x) x
     ...     | sel₁ _ vx⊕x≉x = contradiction (abs v x) vx⊕x≉x
     ...     | sel₂ _ _      = ≈ⁱ-refl , λ{(irouteEq x≈vx ())}
-    ...     | sel≈ _ _      = ≈ⁱ-refl , λ{(irouteEq x≈vx ())}
-    ⊕ⁱ-almost-strictly-absorbs-▷ⁱ abs (i , j) {iroute x [ p ]} _  with j ≟ᶠ source p | i ∉ₙₑₚ? p  | (i , j) ᵉ∈ᵍ? G
-    ... | no  _ | _       | _           = ≈ⁱ-refl , λ()
-    ... | yes _ | no  _   | _           = ≈ⁱ-refl , λ()
-    ... | yes _ | yes _   | no  _       = ≈ⁱ-refl , λ()
-    ... | yes _ | yes i∉p | yes (v , _)  with v ▷ x ≟ 0#
+    ...     | sel≈ _ _      with [ i ∺ j ∣ i≢j ] ≤ₚ? []
+    ...       | yes ()
+    ...       | no  _ = ≈ⁱ-refl , λ{(irouteEq x≈vx ())}
+    ⊕ⁱ-almost-strictly-absorbs-▷ⁱ abs (i , j) {iroute x [ p ]} _  with j ≟ᶠ source p | i ∉? [ p ] | (i , j) ∈? G
+    ... | no  _ | _           | _           = ≈ⁱ-refl , λ()
+    ... | yes _ | no  _       | _           = ≈ⁱ-refl , λ()
+    ... | yes _ | yes _       | no  _       = ≈ⁱ-refl , λ()
+    ... | yes _ | yes [ i∉p ] | yes (v , _)  with v ▷ x ≟ 0#
     ...   | yes _ = ≈ⁱ-refl , λ()
     ...   | no  _ with select (v ▷ x) x
     ...     | sel₁ _       vx⊕x≉x = contradiction (abs v x) vx⊕x≉x
@@ -216,9 +218,11 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent.Properties
     ...       | yes i∷p≤p = contradiction i∷p≤p i∷p≰p
     ...       | no  i∷p≰p = ≈ⁱ-refl , λ{(irouteEq _ [ p≈i∷p ]) → p≉i∷p p≈i∷p}
 
+    postulate ▷ⁱ-extensionWitness : ∀ {s} r {x p} → s ▷ⁱ r ≈ⁱ iroute x p → ∃₂ λ y q → r ≈ⁱ iroute y q × length p ≡ suc (length q)
+    
+    postulate ▷ⁱ-size : ∀ {s} r {x p} → s ▷ⁱ r ≈ⁱ iroute x p → size (s ▷ⁱ r) ≡ suc (size r)
 
-
-    postulate ▷ⁱ-extensionWitness : ∀ i j r x p → (i , j) ▷ⁱ r ≈ⁱ iroute x p → ∃₂ λ y q → r ≈ⁱ iroute y q × lengthₚ p ≡ suc (lengthₚ q)
+    postulate x≈y⇒|x|≡|y| : ∀ {x y} → x ≈ⁱ y → size x ≡ size y
     --▷-witness = {!!}
 
 

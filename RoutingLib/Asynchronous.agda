@@ -61,7 +61,7 @@ module RoutingLib.Asynchronous where
     δ' 𝕤 {zero}  _           X = X
     δ' 𝕤 {suc t} (acc tAcc) X i with i ∈? α 𝕤 (suc t)
     ... | no  i∉αₜ = δ' 𝕤 (tAcc t ≤-refl) X i
-    ... | yes i∈αₜ = σ (λ k → δ' 𝕤 (tAcc (β 𝕤 (suc t) i k) (causality 𝕤 t i k)) X k) i
+    ... | yes i∈αₜ = σ (λ k → δ' 𝕤 (tAcc (β 𝕤 (suc t) i k) (causal 𝕤 t i k)) X k) i
 
     δ : Schedule n → ℕ → M → M
     δ 𝕤 t = δ' 𝕤 (<-wf t)

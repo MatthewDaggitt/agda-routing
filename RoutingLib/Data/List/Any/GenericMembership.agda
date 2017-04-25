@@ -1,13 +1,15 @@
 open import Level using (_⊔_)
-open import Relation.Binary
+open import Relation.Binary using (Setoid; Rel; Symmetric; _Respects_; _Preserves_⟶_; _Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality using (refl; _≡_; _≢_; cong; subst; subst₂; inspect; [_]) renaming (trans to ≡-trans; sym to ≡-sym; setoid to ≡-setoid)
 open import Relation.Binary.List.Pointwise using ([]; _∷_) renaming (setoid to list-setoid)
 open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Nullary using (¬_)
+open import Relation.Nullary using (¬_; yes; no)
+open import Relation.Unary using (Decidable)
 open import Function using (_∘_)
 open import Data.List.Any as Any using (here; there)
 open import Data.List.All using (All; _∷_; [])
 open import Data.Nat using (_≤_; suc; s≤s; z≤n)
+open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Maybe using (nothing; just; Maybe; Eq; drop-just)
 open import Data.Empty using (⊥-elim)
 open import Algebra.FunctionProperties using (Op₂; RightIdentity; Selective)
@@ -18,7 +20,7 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Bool using (true; false; if_then_else_)
 open import Relation.Unary using () renaming (_⊆_ to _⋐_)
 
-open import RoutingLib.Data.List using (combine)
+open import RoutingLib.Data.List using (combine; tabulate; applyUpTo; applyDownFrom; decFilter)
 open import RoutingLib.Data.List.Any.Properties
 open import RoutingLib.Data.Maybe.Base
 open import RoutingLib.Data.Maybe.Properties using (just-injective) renaming (reflexive to eq-reflexive; sym to eq-sym; trans to eq-trans)
@@ -55,7 +57,6 @@ module RoutingLib.Data.List.Any.GenericMembership {c ℓ} (setoid : Setoid c ℓ
   -----------------------
   -- To push to stdlib --
   -----------------------
-
 
   filter-pres-∉ : ∀ P {v xs} → v ∉ xs → v ∉ filter P xs
   filter-pres-∉ P {v} {[]} _ ()
@@ -317,3 +318,15 @@ module RoutingLib.Data.List.Any.GenericMembership {c ℓ} (setoid : Setoid c ℓ
 
 -}
 
+
+  ∈-tabulate : ∀ {n} (f : Fin n → A) i → f i ∈ tabulate f
+  ∈-tabulate f fzero    = here ≈-refl
+  ∈-tabulate f (fsuc i) = there (∈-tabulate (f ∘ fsuc) i)
+
+  ∈-decFilter : ∀ {b} {P : A → Set b} → (P? : Decidable P) → P Respects _≈_ → ∀ {v} → P v → ∀ {xs} → v ∈ xs → v ∈ decFilter P? xs
+  ∈-decFilter P? resp Pv {x ∷ _} (here v≈x)   with P? x
+  ... | yes _   = here v≈x
+  ... | no  ¬Px = contradiction (resp v≈x Pv) ¬Px
+  ∈-decFilter P? resp Pv {x ∷ _} (there v∈xs) with P? x
+  ... | yes _ = there (∈-decFilter P? resp Pv v∈xs)
+  ... | no  _ = ∈-decFilter P? resp Pv v∈xs

@@ -2,6 +2,8 @@ open import Data.List hiding (downFrom)
 open import Data.Nat using (ℕ; zero; suc; _⊓_; _⊔_)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Function using (_∘_; id)
+open import Relation.Unary using (Decidable)
+open import Relation.Nullary using (yes; no)
 
 module RoutingLib.Data.List where
 
@@ -42,3 +44,10 @@ module RoutingLib.Data.List where
 
   min : List ℕ → ℕ
   min xs = foldr _⊓_ 0 xs
+
+
+  decFilter : ∀ {a b} {A : Set a} {P : A → Set b} → Decidable P → List A → List A
+  decFilter dec [] = []
+  decFilter dec (x ∷ xs) with dec x
+  ... | no  _ = decFilter dec xs
+  ... | yes _ = x ∷ decFilter dec xs

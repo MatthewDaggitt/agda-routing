@@ -1,4 +1,4 @@
-open import Relation.Binary using (Decidable; Total; Reflexive; Symmetric; Antisymmetric; Transitive; tri≈; tri<; tri>)
+open import Relation.Binary using (Decidable; Total; Reflexive; Symmetric; Antisymmetric; Transitive; _Respects_; tri≈; tri<; tri>)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; trans; subst; cong)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
@@ -10,6 +10,7 @@ open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (_,_)
 open import Function using (_∘_)
 
+open import RoutingLib.Data.Graph using (Graph; ∈-resp-≡ₗ)
 open import RoutingLib.Data.Graph.SimplePath.NonEmpty
 open import RoutingLib.Data.Nat.Properties using (<⇒≢; <⇒≯; ≤-refl; m+n≮n; m+1+n≢n; suc-injective) renaming (cmp to ≤ℕ-cmp)
 open import RoutingLib.Data.Fin.Properties using (≤-trans; ≤-antisym; ≤-total; _<?_)
@@ -61,9 +62,9 @@ module RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties {n} where
     ... | _       | no  i∈p = no λ{(notHere _ i∉p) → i∈p i∉p}
     ... | no  i≢j | yes i∉p = yes (notHere i≢j i∉p)
 
-    ≈-pres-∉ : ∀ {p q} {k : Fin n} → k ∉ p → p ≈ q → k ∉ q
-    ≈-pres-∉ (notThere k≢i k≢j) (refl ∺ refl) = notThere k≢i k≢j
-    ≈-pres-∉ (notHere  k≢i k∉p) (refl ∷ p≈q)  = notHere  k≢i (≈-pres-∉ k∉p p≈q)
+    ∉-resp-≈ : ∀ {k : Fin n} → (k ∉_) Respects _≈_
+    ∉-resp-≈ (refl ∺ refl) (notThere k≢i k≢j) = notThere k≢i k≢j
+    ∉-resp-≈ (refl ∷ p≈q)  (notHere  k≢i k∉p) = notHere  k≢i (∉-resp-≈ p≈q k∉p)
 
 
     -------------------
@@ -113,7 +114,7 @@ module RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties {n} where
     ≤ₗₑₓ-resp-≈ (refl ∷ _)    (refl ∷ _)    (stepUnequal i<k)    = stepUnequal i<k
     ≤ₗₑₓ-resp-≈ (refl ∷ p≈q)  (refl ∷ r≈s)  (stepEqual refl p≤r) = stepEqual refl (≤ₗₑₓ-resp-≈ p≈q r≈s p≤r)
 
-
+    --------------------
     -- Operations
 
     p≈q⇒|p|≡|q| : ∀ {p q : SimplePathⁿᵗ n} → p ≈ q → length p ≡ length q
@@ -153,3 +154,10 @@ module RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties {n} where
     ... | no  |p|≮n with pigeonhole (≰⇒> |p|≮n) (lookup p)
     ...   | i , j , i≢j , pᵢ≡pⱼ = contradiction pᵢ≡pⱼ (lookup! p i≢j)
   
+
+    ---------------------
+    -- Graph membership
+
+    ∈𝔾-resp-≈ : ∀ {a} {A : Set a} {G : Graph A n} → (_∈𝔾 G) Respects _≈_
+    ∈𝔾-resp-≈ (refl ∺ refl) (edge-∺ ij∈G)     = edge-∺ ij∈G
+    ∈𝔾-resp-≈ {G = G} {i ∷ _ ∣ _} (refl ∷ p≈q)  (edge-∷ ip∈G p∈G) = edge-∷ (∈-resp-≡ₗ {i = i} {G = G} ip∈G (p≈q⇒p₀≡q₀ p≈q)) (∈𝔾-resp-≈ p≈q p∈G)

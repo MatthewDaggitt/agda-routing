@@ -29,7 +29,7 @@ module RoutingLib.Asynchronous.Schedule where
 
   -- Two activation functions are considered equal if the processors activate in lockstep after some point in time
   _⟦_⟧≈𝔸⟦_⟧_ : ∀ {n} → 𝔸 n → 𝕋 → 𝕋 → 𝔸 n → Set lzero
-  α₁ ⟦ t₁ ⟧≈𝔸⟦ t₂ ⟧ α₂ = ∀ t → α₁ (t + t₁) ≡ α₂ (t + t₂)
+  α₁ ⟦ t₁ ⟧≈𝔸⟦ t₂ ⟧ α₂ = ∀ t → α₁ (suc t + t₁) ≡ α₂ (suc t + t₂)
 
   -- An activation function is starvation free if every processor will continue to activate indefinitely
   StarvationFree : ∀ {n} → 𝔸 n → Set lzero
@@ -67,7 +67,7 @@ module RoutingLib.Asynchronous.Schedule where
       α              : 𝔸 n
       β              : 𝔹 n
       starvationFree : StarvationFree α
-      causality      : Causal β
+      causal         : Causal β
       dynamic        : Dynamic β
 
   -- Two schedules are considered equal if their activation and data flow functions are equal
@@ -104,6 +104,6 @@ module RoutingLib.Asynchronous.Schedule where
     { α              = α-sync 
     ; β              = β-sync 
     ; starvationFree = α-sync-starvationFree
-    ; causality      = β-sync-causal 
+    ; causal         = β-sync-causal 
     ; dynamic        = β-sync-dynamic 
     }

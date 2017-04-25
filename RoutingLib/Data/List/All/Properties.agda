@@ -20,9 +20,8 @@ open import Function.Surjection hiding (_∘_)
 open import Algebra.FunctionProperties.Core using (Op₂)
 open import Relation.Unary using () renaming (_⊆_ to _⋐_)
 
-open import RoutingLib.Data.List using (max; tabulate)
+open import RoutingLib.Data.List using (max; tabulate; decFilter; allFin; combine)
 open import RoutingLib.Data.List.All
-open import RoutingLib.Data.List using (allFin; combine)
 open import RoutingLib.Data.Maybe.Properties using () renaming (trans to eq-trans)
 open import RoutingLib.Data.Nat.Properties using (≤-trans)
 
@@ -179,3 +178,9 @@ module RoutingLib.Data.List.All.Properties where
     ... | just t = {!!} ∷ filter-all P xs
 -}
 
+
+  all-decFilter : ∀ {a b} {A : Set a} {P : A → Set b} (P? : Decidable P) xs → All P (decFilter P? xs)
+  all-decFilter P? []       = []
+  all-decFilter P? (x ∷ xs) with P? x
+  ... | yes Px = Px ∷ all-decFilter P? xs
+  ... | no  _  = all-decFilter P? xs

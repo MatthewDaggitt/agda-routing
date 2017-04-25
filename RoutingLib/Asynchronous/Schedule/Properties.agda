@@ -41,11 +41,21 @@ module RoutingLib.Asynchronous.Schedule.Properties where
         α₁ (suc t + t₁ + o)   ≡⟨ cong α₁ (+-assoc (suc t) t₁ o) ⟩
         α₁ (suc t + (t₁ + o)) ≡⟨ cong (λ v → α₁ (suc t + v)) (+-comm t₁ o) ⟩
         α₁ (suc t + (o + t₁)) ≡⟨ cong α₁ (sym (+-assoc (suc t) o t₁)) ⟩
-        α₁ (suc t + o + t₁)   ≡⟨ α-eq (suc t + o) ⟩
+        α₁ (suc t + o + t₁)   ≡⟨ α-eq (t + o) ⟩
         α₂ (suc t + o + t₂)   ≡⟨ cong α₂ (+-assoc (suc t) o t₂) ⟩
         α₂ (suc t + (o + t₂))
       ∎)) i∈αₜ'
 
+    ≈𝔸-appTrans : ∀ {n} (f g : 𝔸 n → 𝔸 n) {t₁ t₂} → (∀ α → α ⟦ 0 ⟧≈𝔸⟦ t₁ ⟧ f α) → (∀ α → α ⟦ 0 ⟧≈𝔸⟦ t₂ ⟧ g α) → ∀ α → α ⟦ 0 ⟧≈𝔸⟦ t₁ + t₂ ⟧ f (g α)  
+    ≈𝔸-appTrans f g {t₁} {t₂} α≈fα α≈gα α t =
+      begin
+        α (suc t + 0)               ≡⟨ α≈gα α t ⟩
+        g α (suc t + t₂)            ≡⟨ cong (g α) (sym (+-right-identity _)) ⟩
+        g α (suc t + t₂ + 0)        ≡⟨ α≈fα (g α) (t + t₂) ⟩
+        f (g α) (suc t + t₂ + t₁)   ≡⟨ cong (f (g α)) (+-assoc (suc t) t₂ t₁) ⟩
+        f (g α) (suc t + (t₂ + t₁)) ≡⟨ cong (λ v → f (g α) (suc t + v)) (+-comm t₂ t₁)  ⟩
+        f (g α) (suc t + (t₁ + t₂))
+      ∎
 
 
     -------------------------
@@ -70,50 +80,20 @@ module RoutingLib.Asynchronous.Schedule.Properties where
         β₂ ((suc t' + t) + t₂) i j ∸ t₂ ∸ t   ≡⟨ ∸-+-assoc (β₂ (suc t' + t + t₂) i j) t₂ t ⟩
         β₂ ((suc t' + t) + t₂) i j ∸ (t₂ + t) ≡⟨ cong₂ _∸_ (cong (λ t → β₂ t i j) (+-assoc (suc t') t t₂)) (+-comm t₂ t) ⟩
         β₂ (suc t' + (t + t₂)) i j ∸ (t + t₂)
-      ∎
+     ∎
+    
+    ≈𝔹-appTrans : ∀ {n} (f g : 𝔹 n → 𝔹 n) t₁ t₂ → (∀ β → β ⟦ 0 ⟧≈𝔹⟦ t₁ ⟧ f β) → (∀ β → β ⟦ 0 ⟧≈𝔹⟦ t₂ ⟧ g β) → ∀ β → β ⟦ 0 ⟧≈𝔹⟦ t₁ + t₂ ⟧ f (g β)  
+    ≈𝔹-appTrans f g t₁ t₂ β≈fβ β≈gβ β t i j = sym (
+      begin
+        f (g β) (suc t + (t₁ + t₂)) i j ∸ (t₁ + t₂)   ≡⟨ sym (∸-+-assoc _ t₁ t₂) ⟩
+        f (g β) (suc t + (t₁ + t₂)) i j ∸ t₁ ∸ t₂     ≡⟨ cong (λ v → f (g β) (suc t + v) i j ∸ t₁ ∸ t₂) (+-comm t₁ t₂) ⟩
+        f (g β) (suc t + (t₂ + t₁)) i j ∸ t₁ ∸ t₂     ≡⟨ sym (cong (λ t → f (g β) t i j ∸ t₁ ∸ t₂) (+-assoc (suc t) t₂ t₁)) ⟩
+        f (g β) (suc t + t₂ + t₁) i j ∸ t₁ ∸ t₂       ≡⟨ sym (cong (_∸ t₂) (β≈fβ (g β) (t + t₂) i j)) ⟩
+        g β (suc t + t₂ + 0) i j ∸ t₂                 ≡⟨ cong (λ t → g β t i j ∸ t₂) (+-right-identity (suc t + t₂)) ⟩
+        g β (suc t + t₂) i j ∸ t₂                     ≡⟨ sym (β≈gβ β t i j) ⟩
+        β (suc t + 0) i j   
+      ∎)
 
-    postulate ≈𝔹-dynamic : ∀ {n} {β₁ β₂ : 𝔹 n} → Dynamic β₁ → ∀ {t₁ t₂} → β₁ ⟦ t₁ ⟧≈𝔹⟦ t₂ ⟧ β₂ → Dynamic β₂
-{-
-    ≈𝔹-dynamic {_} {β₁} {β₂} β₁-dynamic {t₁} {t₂} β-eq t i j with β₁-dynamic (t ∸ t₂ + t₁) i j
-    ... | (tᶠ , tᶠ-final) with tᶠ ≤? t₁
-    ...   | yes tᶠ≤t₁ = t₂ , t₂-final
-      where
-
-      t₂-final : ∀ {t'} → suc t₂ ≤ t' → β₂ t' i j ≢ t
-      t₂-final {t'} t₂<t' β₂t'≡t with m≤n⇨m+o≡n t₂<t'
-      ... | o , refl = tᶠ-final {suc t₁ + o} (s≤s (≤-stepsᵣ o tᶠ≤t₁)) (
-        begin
-          β₁ (suc t₁ + o) i j
-        ≡⟨ {!!} ⟩
-          β₁ (suc o + t₁) i j ∸ t₁ + t₁
-        ≡⟨ cong (_+ t₁) (β-eq o i j) ⟩
-          β₂ (suc o + t₂) i j ∸ t₂ + t₁
-        ≡⟨ cong (λ t → β₂ (suc t) i j ∸ t₂ + t₁) (+-comm o t₂) ⟩
-          β₂ (suc t₂ + o) i j ∸ t₂ + t₁
-        ≡⟨ cong (λ t → t ∸ t₂ + t₁) β₂t'≡t ⟩
-          t ∸ t₂ + t₁
-        ∎) --(trans (trans {! !} (cong (λ t → β₂ t i j) 1+t₂+o≡t')) β₂t'≡t)
-
-
-    ...   | no  tᶠ≰t₁ with m≤n⇨m+o≡n (≰⇒≥ tᶠ≰t₁)
-    ...     | o , refl = t₂ + o , t₂+o-final
-      where
-
-      t₂+o-final : ∀ {t'} → suc (t₂ + o) ≤ t' → β₂ t' i j ≢ t
-      t₂+o-final {t'} 1+t₂+o<t' βt'≡t = tᶠ-final {suc t₁ + o} ≤-refl {!!}
-
-{-
-      tᶠ' , tᶠ'-expires
-
-      where
-
-      tᶠ' : ℕ
-      tᶠ' = tᶠ
-
-      tᶠ'-expires : ∀ {t'} → suc tᶠ' ≤ t' → β₂ t' i j ≢ t
-      tᶠ'-expires tᶠ<t' βt'≡t = tᶠ-final {!!} {!!}
--}
--}
     ---------------
     -- Schedules --
     ---------------

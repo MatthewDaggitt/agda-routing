@@ -121,8 +121,6 @@ module RoutingLib.Routing.Algorithms.BellmanFord.AddingPaths
     cₜ : Schedule n → ℕ
     cₜ 𝕤 = pseudoperiod𝔸 𝕤 (suc n)
 
-
-
     consistentStateAt-cₜ : ∀ 𝕤 X i j → ∃ λ cr → I.δ 𝕤 (cₜ 𝕤) X i j ≃ cr
     consistentStateAt-cₜ 𝕤 X i j = flushing-lemma 𝕤 (<⇒≤ (pseudoperiod𝔸-inc 𝕤 n)) (size<n (I.δ 𝕤 (cₜ 𝕤) X i j))
 

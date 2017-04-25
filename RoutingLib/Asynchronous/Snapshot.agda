@@ -18,7 +18,7 @@ module RoutingLib.Asynchronous.Snapshot {a ℓ n} (p : Parallelisation a ℓ n) 
     open Parallelisation p
 
     -- Snapshot
-    Snapshot : (ℕ → Fin n → Fin n → ℕ) → ℕ → Set a
+    Snapshot : 𝔹 n → ℕ → Set a
     Snapshot β t = ∀ {t'} i j → t ≤ t' → β t' i j ≤ t → Mᵢ {j}
 
     snapshot : ∀ 𝕤 t → M → Snapshot (β 𝕤) t
@@ -35,15 +35,15 @@ module RoutingLib.Asynchronous.Snapshot {a ℓ n} (p : Parallelisation a ℓ n) 
     -- Lists --
     -----------
 
-    toListᵢⱼ-bounded : ∀ {β tₛ} (t : 𝕋) → Snapshot β tₛ → ∀ (i j : Fin n) → List (Mᵢ {j})
-    toListᵢⱼ-bounded {β} {tₛ} zero     snapshot i j = []
-    toListᵢⱼ-bounded {β} {tₛ}  (suc t) snapshot i j with tₛ ≤? suc t | β (suc t) i j ≤? tₛ
-    ... | no _     | _       = toListᵢⱼ-bounded t snapshot i j
-    ... | _        | no  _   = toListᵢⱼ-bounded t snapshot i j
-    ... | yes tₛ≤t | yes β≤tₛ = snapshot i j tₛ≤t β≤tₛ ∷ toListᵢⱼ-bounded t snapshot i j
+    toListᵢⱼ-bounded : ∀ {β tₛ} → Snapshot β tₛ → (t : 𝕋) → ∀ (i j : Fin n) → List (Mᵢ {j})
+    toListᵢⱼ-bounded {β} {tₛ} snapshot zero    i j = []
+    toListᵢⱼ-bounded {β} {tₛ} snapshot (suc t) i j with tₛ ≤? suc t | β (suc t) i j ≤? tₛ
+    ... | no _     | _       = toListᵢⱼ-bounded snapshot t i j
+    ... | _        | no  _   = toListᵢⱼ-bounded snapshot t i j
+    ... | yes tₛ≤t | yes β≤tₛ = snapshot i j tₛ≤t β≤tₛ ∷ toListᵢⱼ-bounded snapshot t i j
 
     toListᵢⱼ : ∀ {β tₛ} → Dynamic β → Snapshot β tₛ → ∀ (i j : Fin n) → List (Mᵢ {j})
-    toListᵢⱼ {β} {tₛ} dynamic snapshot i j = toListᵢⱼ-bounded (expiryᵢⱼ dynamic tₛ i j) snapshot i j
+    toListᵢⱼ {β} {tₛ} dynamic snapshot i j = toListᵢⱼ-bounded snapshot (expiryᵢⱼ dynamic tₛ i j) i j
 
     toListⱼ : ∀ {β tₛ} → Dynamic β → Snapshot β tₛ → ∀ (j : Fin n) → List (Mᵢ {j})
     toListⱼ dynamic snapshot j = concat (map (λ i → toListᵢⱼ dynamic snapshot i j) (allFin n))

@@ -14,7 +14,7 @@ open import RoutingLib.Algebra.FunctionProperties using (_Preservesₗ_)
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Data.Graph using (Graph; _∈?_)
 open import RoutingLib.Data.Graph.SimplePath renaming (_≈_ to _≈ₚ_; weight to weight')
-open import RoutingLib.Data.Graph.SimplePath.Properties using (_≤ₚ?_; _∉?_; ≤ₚ-resp-≈; ≈-pres-∉; p≈q⇒p₀≡q₀) renaming (≈-refl to ≈ₚ-refl; ≈-sym to ≈ₚ-sym; ≈-trans to ≈ₚ-trans; _≟_ to _≟ₚ_)
+open import RoutingLib.Data.Graph.SimplePath.Properties using (_≤ₚ?_; _∉?_; ≤ₚ-resp-≈; ∉-resp-≈; p≈q⇒p₀≡q₀) renaming (≈-refl to ≈ₚ-refl; ≈-sym to ≈ₚ-sym; ≈-trans to ≈ₚ-trans; _≟_ to _≟ₚ_)
 
 open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_; Respects₂⇨RespectedBy)
 
@@ -171,8 +171,8 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent
     ... | no  j≢p₀ | yes j≡q₀ | _       | _       | _           = contradiction (≡-trans j≡q₀ (≡-sym (p≈q⇒p₀≡q₀ p≈q))) j≢p₀
     ... | yes j≡p₀ | no  j≢q₀ | _       | _       | _           = contradiction (≡-trans j≡p₀ (p≈q⇒p₀≡q₀ p≈q)) j≢q₀
     ... | yes _    | yes _    | no  _   | no  _   | _           = cnullEq
-    ... | yes _    | yes _    | no  i∈p | yes i∉q | _           = contradiction (≈-pres-∉ i∉q (≈ₚ-sym [ p≈q ])) i∈p
-    ... | yes _    | yes _    | yes i∉p | no  i∈q | _           = contradiction (≈-pres-∉ i∉p [ p≈q ]) i∈q
+    ... | yes _    | yes _    | no  i∈p | yes i∉q | _           = contradiction (∉-resp-≈ (≈ₚ-sym [ p≈q ]) i∉q) i∈p
+    ... | yes _    | yes _    | yes i∉p | no  i∈q | _           = contradiction (∉-resp-≈ [ p≈q ] i∉p) i∈q
     ... | yes _    | yes _    | yes _   | yes _   | no  _       = cnullEq
     ... | yes _    | yes _    | yes [ _ ] | yes [ _ ] | yes (v , _) with v ▷ x ≟ 0# | v ▷ y ≟ 0#
     ...   | yes _     | yes _     = cnullEq

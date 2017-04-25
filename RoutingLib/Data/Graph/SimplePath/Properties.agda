@@ -1,4 +1,4 @@
-open import Relation.Binary using (Decidable; Total; Reflexive; Symmetric; Antisymmetric; Transitive; tri≈; tri<; tri>)
+open import Relation.Binary using (Decidable; Total; Reflexive; Symmetric; Antisymmetric; Transitive; _Respects_; tri≈; tri<; tri>)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; subst; cong)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
@@ -8,6 +8,7 @@ open import Data.Fin using (Fin; _<_; _≤?_) renaming (suc to fsuc)
 open import Data.Fin.Properties using (cmp)
 open import Data.Sum using (inj₁; inj₂)
 
+open import RoutingLib.Data.Graph using (Graph)
 open import RoutingLib.Data.Graph.SimplePath
 open import RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties as NEP using ()
 open import RoutingLib.Data.Nat.Properties using (<⇒≢; <⇒≯; ≤-refl; m+n≮n; m+1+n≢n; suc-injective) renaming (cmp to ≤ℕ-cmp)
@@ -55,9 +56,17 @@ module RoutingLib.Data.Graph.SimplePath.Properties {n} where
     ... | yes k∉p = yes [ k∉p ]
     ... | no  k∈p = no λ{[ k∉p ] → k∈p k∉p}
 
-    ≈-pres-∉ : ∀ {p q} {k : Fin n} → k ∉ p → p ≈ q → k ∉ q
-    ≈-pres-∉ []      []      = []
-    ≈-pres-∉ [ k∉p ] [ p≈q ] = [ NEP.≈-pres-∉ k∉p p≈q ]
+    ∉-resp-≈ : ∀ {k : Fin n} → (k ∉_) Respects _≈_
+    ∉-resp-≈ []      []      = []
+    ∉-resp-≈ [ p≈q ] [ k∉p ] = [ NEP.∉-resp-≈ p≈q k∉p ]
+
+
+    -- Graph membership
+
+    ∈𝔾-resp-≈ : ∀ {a} {A : Set a} {G : Graph A n} → (_∈𝔾 G) Respects _≈_
+    ∈𝔾-resp-≈ []      []      = []
+    ∈𝔾-resp-≈ [ p≈q ] [ p∈G ] = [ NEP.∈𝔾-resp-≈ p≈q p∈G ]
+
 
     -- Ordering
 

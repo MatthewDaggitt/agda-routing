@@ -135,7 +135,7 @@ module RoutingLib.Routing.Algorithms.BellmanFord.AddingPaths
     messagesAt-cₜ 𝕤 X {t'} i j cₜ≤t' βt'≤cₜ k = proj₁ (consistentMessagesAt-cₜ 𝕤 X i j k cₜ≤t' βt'≤cₜ)
 
     convergeToConsistency : ∀ 𝕤₁ X → ∃₂ λ t₁ t₂ → ∃ λ 𝕤₂ → I.δ 𝕤₁ t₁ X ≃ₘ C.δ 𝕤₂ t₂ C.I × 𝕤₁ ⟦ t₁ ⟧≈⟦ t₂ ⟧ 𝕤₂ × snapshot I.σ∥ 𝕤₁ t₁ X ≃ₛ snapshot C.σ∥ 𝕤₂ t₂ C.I
-    convergeToConsistency 𝕤₁ X with reconstructionAll 𝕤₁ (cₜ 𝕤₁) (stateAt-cₜ 𝕤₁ X) (messagesAt-cₜ 𝕤₁ X)
+    convergeToConsistency 𝕤₁ X with reconstructionAll 𝕤₁ (stateAt-cₜ 𝕤₁ X) (messagesAt-cₜ 𝕤₁ X)
     ... | (𝕤₂ , t₂ , δᶜᵗX≈δᵗ²I , 𝕤₁≈𝕤₂ , z) = 
       cₜ 𝕤₁ , 
       t₂ , 

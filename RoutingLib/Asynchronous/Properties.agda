@@ -79,13 +79,13 @@ module RoutingLib.Asynchronous.Properties {a ℓ n} (p : Parallelisation a ℓ n
       δ'-stateCong : ∀ 𝕤 {X Y} → X ≈ₘ Y → ∀ {t} (tAcc : Acc _<_ t) → δ' 𝕤 tAcc X ≈ₘ δ' 𝕤 tAcc Y
       δ'-stateCong 𝕤 X≈Y {zero}  _ = X≈Y
       δ'-stateCong 𝕤 X≈Y {suc t} (acc 1+tAcc) i with i ∈? α 𝕤 (suc t)
-      ... | yes _ = σ-cong (λ k → δ'-stateCong 𝕤 X≈Y (1+tAcc _ (causality 𝕤 t i k)) k) i
+      ... | yes _ = σ-cong (λ k → δ'-stateCong 𝕤 X≈Y (1+tAcc _ (causal 𝕤 t i k)) k) i
       ... | no  _ = δ'-stateCong 𝕤 X≈Y (1+tAcc t ≤-refl) i
   
       δ'-timeCong : ∀ 𝕤 X {s t} → s ≡ t → (tAcc : Acc _<_ t) (sAcc : Acc _<_ s) → δ' 𝕤 tAcc X ≈ₘ δ' 𝕤 sAcc X
       δ'-timeCong 𝕤 X {zero}  refl _          _          = ≈ₘ-refl
       δ'-timeCong 𝕤 X {suc t} refl (acc tAcc) (acc sAcc) i with i ∈? α 𝕤 (suc t)
-      ... | yes _ = σ-cong (λ k → δ'-timeCong 𝕤 X refl (tAcc _ (causality 𝕤 t i k)) (sAcc _ (causality 𝕤 t i k)) k) i
+      ... | yes _ = σ-cong (λ k → δ'-timeCong 𝕤 X refl (tAcc _ (causal 𝕤 t i k)) (sAcc _ (causal 𝕤 t i k)) k) i
       ... | no  _ = δ'-timeCong 𝕤 X refl (tAcc t ≤-refl) (sAcc t ≤-refl) i
 
       -- Activation properties
@@ -125,8 +125,8 @@ module RoutingLib.Asynchronous.Properties {a ℓ n} (p : Parallelisation a ℓ n
       ≈ₛ⇒≈ₘ' {𝕤₁} {𝕤₂} {t₁} {t₂} X₁ X₂ (α-eq , β-eq) snapshot-eq δᵗ¹X₁≈δᵗ²X₂ zero   t₁Acc t₂Acc = ≈ₘ-trans (≈ₘ-trans (δ'-timeCong 𝕤₁ X₁ refl t₁Acc (<-wf t₁)) δᵗ¹X₁≈δᵗ²X₂) (δ'-timeCong 𝕤₂ X₂ refl (<-wf t₂) t₂Acc)
       ≈ₛ⇒≈ₘ' {𝕤₁} {𝕤₂} {t₁} {t₂} X₁ X₂ (α-eq , β-eq) snapshot-eq δᵗ¹X₁≈δᵗ²X₂ (suc t) (acc t+t₁Acc) (acc t+t₂Acc) i with i ∈? α 𝕤₁ (suc (t + t₁)) | i ∈? α 𝕤₂ (suc (t + t₂))
       ... | no  _   | no _    = ≈ₛ⇒≈ₘ' X₁ X₂ (α-eq , β-eq) snapshot-eq δᵗ¹X₁≈δᵗ²X₂ t (t+t₁Acc (t + t₁) ≤-refl) (t+t₂Acc (t + t₂) ≤-refl) i
-      ... | yes i∈α | no  i∉α = contradiction (subst (i ∈_) (     α-eq (suc t))  i∈α) i∉α
-      ... | no  i∉α | yes i∈α = contradiction (subst (i ∈_) (sym (α-eq (suc t))) i∈α) i∉α
+      ... | yes i∈α | no  i∉α = contradiction (subst (i ∈_) (     α-eq t)  i∈α) i∉α
+      ... | no  i∉α | yes i∈α = contradiction (subst (i ∈_) (sym (α-eq t)) i∈α) i∉α
       ... | yes _   | yes _   = σ-cong result i
         where
         result : ∀ k → δ' 𝕤₁ (t+t₁Acc (β 𝕤₁ (suc t + t₁) i k) _) X₁ k ≈ᵢ δ' 𝕤₂ (t+t₂Acc (β 𝕤₂ (suc t + t₂) i k) _) X₂ k
@@ -135,7 +135,7 @@ module RoutingLib.Asynchronous.Properties {a ℓ n} (p : Parallelisation a ℓ n
         ... | no  t₁≮β | yes t₂<β = contradiction (trans (sym (β-eq t i k)) (m≤n⇒m∸n≡0 (≮⇒≥ t₁≮β))) (m>n⇒m∸n≢0 t₂<β)
         ... | yes t₁<β | no  t₂≮β = contradiction (trans      (β-eq t i k)  (m≤n⇒m∸n≡0 (≮⇒≥ t₂≮β))) (m>n⇒m∸n≢0 t₁<β)
         ... | yes t₁<β | yes t₂<β with w∸x≡y∸z⇒v+x≡w∧v+y≡z (β-eq t i k) (<⇒≤ t₁<β) (<⇒≤ t₂<β)
-        ... | (o , o+t₁≡β , o+t₂≡β) = ≈ᵢ-trans (≈ᵢ-trans (δ'-timeCong 𝕤₁ X₁ o+t₁≡β _ _ k) (≈ₛ⇒≈ₘ' X₁ X₂ (α-eq , β-eq) snapshot-eq δᵗ¹X₁≈δᵗ²X₂ o (t+t₁Acc (o + t₁) (s≤s (≤-trans (≤-reflexive o+t₁≡β) (≤-pred (causality 𝕤₁ (t + t₁) i k))))) (<-wf (o + t₂)) k)) (δ'-timeCong 𝕤₂ X₂ (sym o+t₂≡β) _ _ k)
+        ... | (o , o+t₁≡β , o+t₂≡β) = ≈ᵢ-trans (≈ᵢ-trans (δ'-timeCong 𝕤₁ X₁ o+t₁≡β _ _ k) (≈ₛ⇒≈ₘ' X₁ X₂ (α-eq , β-eq) snapshot-eq δᵗ¹X₁≈δᵗ²X₂ o (t+t₁Acc (o + t₁) (s≤s (≤-trans (≤-reflexive o+t₁≡β) (≤-pred (causal 𝕤₁ (t + t₁) i k))))) (<-wf (o + t₂)) k)) (δ'-timeCong 𝕤₂ X₂ (sym o+t₂≡β) _ _ k)
 
 
       ≈ₛ⇒≈ₘ : ∀ {𝕤₁ 𝕤₂ t₁ t₂} X₁ X₂ → 𝕤₁ ⟦ t₁ ⟧≈⟦ t₂ ⟧ 𝕤₂ → snapshot 𝕤₁ t₁ X₁ ≈ₛ snapshot 𝕤₂ t₂ X₂ → 

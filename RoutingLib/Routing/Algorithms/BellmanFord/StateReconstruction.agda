@@ -27,6 +27,7 @@ module RoutingLib.Routing.Algorithms.BellmanFord.StateReconstruction
   {a b ℓ n-1} (ra : RoutingAlgebra a b ℓ)
   (⊕-sel : Selective (RoutingAlgebra._≈_ ra) (RoutingAlgebra._⊕_ ra))
   (G : Graph (RoutingAlgebra.Step ra) (suc n-1))
+  (𝕤 : Schedule (suc n-1))
   where
 
   private
@@ -39,52 +40,38 @@ module RoutingLib.Routing.Algorithms.BellmanFord.StateReconstruction
     open import RoutingLib.Routing.Algorithms.BellmanFord.StateReconstruction.Core ra ⊕-sel G
     open import RoutingLib.Routing.Algorithms.BellmanFord.StateReconstruction.Activation ra ⊕-sel G
     open import RoutingLib.Routing.Algorithms.BellmanFord.StateReconstruction.DataFlow ra ⊕-sel G
-
     open import RoutingLib.Routing.AlgebraicPaths.Consistent ra ⊕-sel G
-    open RoutingAlgebra ra using (refl)
 
-    open Schedule
     open import RoutingLib.Routing.Algorithms.BellmanFord crp using (σ∥; I; δ)
+    open import RoutingLib.Asynchronous.Snapshot σ∥ using (Snapshot; _≈ₛ_; snapshot)
     open RoutingProblem crp using (RMatrix)
-    open import RoutingLib.Asynchronous.Snapshot σ∥ using (Snapshot; toListⱼ; _≈ₛ_; snapshot)
-    open import RoutingLib.Data.List.Any.GenericMembership (Cₛ) using (_∈_)
-
     open Parallelisation σ∥ using (_≈ₘ_)
+    open Schedule 𝕤
 
-    
 
-    -- Schedules
-   
-{-
-    locateTime : ∀ {x xs} → x ∈ xs → 𝕋
-    locateTime {_} {xs} (here  _)    = listConstruction𝕋 xs
-    locateTime {_} {_}  (there x∈xs) = locateTime x∈xs
-
-    construct𝔹 : ∀ (β : 𝔹 n) tₛ xs → (∀ {t i j} → tₛ ≤ t → β t i j ≤ tₛ → ∃ λ x → x ∈ xs) → 𝔹 n
-    construct𝔹 β tₛ xs index t i j with listConstruction𝕋 xs ≤? t | β (tₛ + t ∸ listConstruction𝕋 xs) i j ≤? tₛ
-    ... | yes ct≤t | yes β≤tₛ = locateTime (proj₂ (index (subst (tₛ ≤_) (≡-sym (+-∸-assoc tₛ ct≤t)) (m≤m+n tₛ (t ∸ listConstruction𝕋 xs))) β≤tₛ)) 
-    ... | _        |  _       = all𝔹 xs t i j
--}
-
-    construction𝕊 : ∀ (𝕤 : Schedule n) t → RMatrix → Snapshot (β 𝕤) t → Schedule n
-    construction𝕊 𝕤 t X sn = record
-      { α              = final𝔸 𝕤 t X sn
-      ; β              = final𝔹 𝕤 t X sn
-      ; starvationFree = final𝔸-starvationFree 𝕤 t X sn
-      ; causal         = final𝔹-causal 𝕤 t X sn
-      ; dynamic        = final𝔹-dynamic 𝕤 t X sn
+    -- The final reconstructed schedule
+    𝕤ʳ : ∀ {tₛ} → RMatrix → Snapshot β tₛ → Schedule n
+    𝕤ʳ {tₛ} X sn = record
+      { α              = final𝔸 𝕤 tₛ X sn
+      ; β              = final𝔹 𝕤 tₛ X sn
+      ; starvationFree = final𝔸-starvationFree 𝕤 tₛ X sn
+      ; causal         = final𝔹-causal 𝕤 tₛ X sn
+      ; dynamic        = final𝔹-dynamic 𝕤 tₛ X sn
       }
 
-    δᵗ¹X≈δᶜᵗI : ∀ 𝕤 t X (sn : Snapshot (β 𝕤) t) → X ≈ₘ δ (construction𝕊 𝕤 t X sn) (build𝕋 X (dynamic 𝕤) sn) I
-    δᵗ¹X≈δᶜᵗI 𝕤 t X sn = {!!}
+    -- We need to show that when the new schedule 𝕤ʳ merges that the state (δ 𝕤ʳ build𝕋 I) matches up with the provided state (X)
+    postulate X≈δᵗʳI : ∀ X {tₛ} (sn : Snapshot β tₛ) → X ≈ₘ δ (𝕤ʳ X sn) (build𝕋 X dynamic sn) I
 
-    𝕤₁≈c𝕤 : ∀ 𝕤 tₛ X (sn : Snapshot (β 𝕤) tₛ) →  𝕤 ⟦ tₛ ⟧≈⟦ build𝕋 X (dynamic 𝕤) sn ⟧ construction𝕊 𝕤 tₛ X sn
-    𝕤₁≈c𝕤 𝕤 tₛ X sn = final𝔸-≈𝔸 𝕤 tₛ X sn , {!final𝔹-≈𝔹 𝕤 tₛ X sn!} 
+    -- After merging, the reconstructed schedule 𝕤ʳ must be equal to the original schedule 𝕤
+    postulate 𝕤≈𝕤ʳ : ∀ X {tₛ} (sn : Snapshot β tₛ) →  𝕤 ⟦ tₛ ⟧≈⟦ build𝕋 X dynamic sn ⟧ 𝕤ʳ X sn
     
-    sn₁≈csn : ∀ 𝕤 t X (sn : Snapshot (β 𝕤) t) → sn ≈ₛ snapshot (construction𝕊 𝕤 t X sn) (build𝕋 X (dynamic 𝕤) sn) I
-    sn₁≈csn 𝕤 t X sn = {!!}
+    -- We also need to show that the messages in flight at the merge time are the same for both schedules
+    postulate sn≈snʳ : ∀ X {tₛ} (sn : Snapshot β tₛ) → sn ≈ₛ snapshot (𝕤ʳ X sn) (build𝕋 X dynamic sn) I
 
 
-    reconstructionAll : ∀ 𝕤₁ t₁ X (sn₁ : Snapshot (β 𝕤₁) t₁) → ∃₂ λ 𝕤₂ t₂ → X ≈ₘ δ 𝕤₂ t₂ I × 𝕤₁ ⟦ t₁ ⟧≈⟦ t₂ ⟧ 𝕤₂ × sn₁ ≈ₛ snapshot 𝕤₂ t₂ I
-    reconstructionAll 𝕤₁ t₁ X sn₁ = construction𝕊 𝕤₁ t₁ X sn₁ , build𝕋 X (dynamic 𝕤₁) sn₁ , δᵗ¹X≈δᶜᵗI 𝕤₁ t₁ X sn₁ , 𝕤₁≈c𝕤 𝕤₁ t₁ X sn₁ , sn₁≈csn 𝕤₁ t₁ X sn₁
-      where open Schedule 𝕤₁
+    reconstructionAll : ∀ X {tₛ} (sn : Snapshot β tₛ) → 
+                          ∃₂ λ 𝕤ʳ tʳ → 
+                            X ≈ₘ δ 𝕤ʳ tʳ I × 
+                            𝕤 ⟦ tₛ ⟧≈⟦ tʳ ⟧ 𝕤ʳ × 
+                            sn ≈ₛ snapshot 𝕤ʳ tʳ I
+    reconstructionAll X sn = 𝕤ʳ X sn , build𝕋 X dynamic sn , X≈δᵗʳI X sn , 𝕤≈𝕤ʳ X sn , sn≈snʳ X sn

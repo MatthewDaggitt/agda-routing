@@ -193,7 +193,7 @@ module RoutingLib.Routing.Algorithms.BellmanFord.StateReconstruction.Core
   all-nonTrivialMessages dyn sn = all-decFilter nonTrivialMessage? (messages dyn sn)
 
 
-  -- The amount of time needed to reconstruct the current state
+  -- The amount of time needed to reconstruct the messages in flight
   -- (for a path [ p ] we need: |p| (to construct p) + 1 (to reset the state after) = |p|+1
   messages𝕋 : ∀ {β t} → Dynamic β → Snapshot β t → 𝕋
   messages𝕋 dyn sn = sum (map (suc ∘ size) (nonTrivialMessages dyn sn))
@@ -207,7 +207,7 @@ module RoutingLib.Routing.Algorithms.BellmanFord.StateReconstruction.Core
   indexNonTrivialMessages≤messages𝕋 {_ ∷ xs} (ntMessage _ _ ∷ xs-all) (here px₁)   = ≤-step (≤-reflexive (+-comm (sum (map (suc ∘ size) xs)) _))
   indexNonTrivialMessages≤messages𝕋 {x ∷ _}  (px ∷ xs-all)            (there x∈xs) = m≤n⇒m≤o+n (suc (size x)) (indexNonTrivialMessages≤messages𝕋 xs-all x∈xs)
 
-
+  -- For a given message returns the time in the new schedule at which it can be found
   indexMessage : RMatrix → ∀ {β tₛ} → Dynamic β → (sn : Snapshot β tₛ) → ∀ i j t → tₛ ≤ t → β t i j ≤ tₛ → 𝕋
   indexMessage X dyn sn i j t tₛ≤t βt≤tₛ with nonTrivialMessage? (sn i j tₛ≤t βt≤tₛ j)
   ... | no _   = zero
@@ -223,7 +223,7 @@ module RoutingLib.Routing.Algorithms.BellmanFord.StateReconstruction.Core
   -- Other --
   -----------
 
-  -- The time required by a schedule that builds every element in the given matrix and snapshot
+  -- The time required to build a schedule that builds the provided state and the provided messages
   build𝕋 : RMatrix → ∀ {β tₛ} → Dynamic β → Snapshot β tₛ → 𝕋
   build𝕋 X dyn sn = suc (state𝕋 X + messages𝕋 dyn sn)
   
@@ -240,6 +240,7 @@ module RoutingLib.Routing.Algorithms.BellmanFord.StateReconstruction.Core
   indexMessage<build𝕋 X dyn sn i j t tₛ≤t βt≤tₛ = s≤s (indexMessage≤state𝕋+messages𝕋 X dyn sn i j t tₛ≤t βt≤tₛ)
   
 
+  -- Abstract versions of build𝕋 (for performance reasons)
   abstract
 
     build𝕋𝔸 : RMatrix → ∀ {β t} → Dynamic β → Snapshot β t → 𝕋

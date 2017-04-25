@@ -15,7 +15,7 @@ open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.Graph using (Graph; _∈?_; _∈_)
 open import RoutingLib.Data.Graph.SimplePath using ([]; [_]; _∷_; _∺_; source) renaming (_≈_ to _≈ₚ_)
-open import RoutingLib.Data.Graph.SimplePath.Properties using (_≤ₚ?_; _∉?_; ≈-pres-∉; ≤ₚ-resp-≈; p≈q⇒p₀≡q₀) renaming (≈-refl to ≈ₚ-refl; ≈-sym to ≈ₚ-sym; ≈-trans to ≈ₚ-trans)
+open import RoutingLib.Data.Graph.SimplePath.Properties using (_≤ₚ?_; _∉?_; ∉-resp-≈; ≤ₚ-resp-≈; p≈q⇒p₀≡q₀) renaming (≈-refl to ≈ₚ-refl; ≈-sym to ≈ₚ-sym; ≈-trans to ≈ₚ-trans)
 open import RoutingLib.Data.Maybe.Properties using (just-injective)
 open import RoutingLib.Data.Vec.Properties using (lookup-map)
 open import RoutingLib.Routing.Definitions
@@ -92,8 +92,8 @@ module RoutingLib.Routing.AlgebraicPaths.Bisimilarity
     ... | no  j≢p₀ | yes j≡q₀ | _         | _       | _           = contradiction (≡-trans j≡q₀ (≡-sym (p≈q⇒p₀≡q₀ p≈q))) j≢p₀
     ... | yes j≡p₀ | no  j≢q₀ | _         | _       | _           = contradiction (≡-trans j≡p₀ (p≈q⇒p₀≡q₀ p≈q)) j≢q₀
     ... | yes _    | yes _    | no  _     | no _    | _           = nullEq
-    ... | yes _    | yes _    | yes i∉p   | no  i∈q | _           = contradiction (≈-pres-∉ i∉p [ p≈q ]) i∈q
-    ... | yes _    | yes _    | no  i∈p   | yes i∉q | _           = contradiction (≈-pres-∉ i∉q (≈ₚ-sym [ p≈q ])) i∈p
+    ... | yes _    | yes _    | yes i∉p   | no  i∈q | _           = contradiction (∉-resp-≈ [ p≈q ] i∉p) i∈q
+    ... | yes _    | yes _    | no  i∈p   | yes i∉q | _           = contradiction (∉-resp-≈ (≈ₚ-sym [ p≈q ]) i∉q) i∈p
     ... | yes _    | yes _    | yes _     | yes _   | no  _       = nullEq
     ... | yes _    | yes _    | yes [ _ ] | yes [ _ ] | yes (v , _) with v ▷ x ≟ 0# | v ▷ y ≟ 0#
     ...   | yes _     | yes _     = nullEq

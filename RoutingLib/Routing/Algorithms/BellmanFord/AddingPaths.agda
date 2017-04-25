@@ -40,7 +40,7 @@ module RoutingLib.Routing.Algorithms.BellmanFord.AddingPaths
   open import RoutingLib.Routing.AlgebraicPaths.Inconsistent ra ⊕-sel G using (IRoute; iroute; inull; irp; _≈ⁱ_; _⊕ⁱ_; _▷ⁱ_; ▷ⁱ-pres-≈ⁱ; ≈ⁱ-reflexive; ≈ⁱ-trans; ≈ⁱ-sym; size)
   open import RoutingLib.Routing.AlgebraicPaths.Inconsistent.Properties ra ⊕-sel G using (⊕ⁱ-sel; ▷ⁱ-extensionWitness; ▷ⁱ-size; x≈y⇒|x|≡|y|)
   open import RoutingLib.Routing.AlgebraicPaths.Bisimilarity ra ⊕-sel G
-  open import RoutingLib.Routing.Algorithms.BellmanFord.AddingPaths.SnapshotReconstruction ra ⊕-sel G using (reconstruct)
+  open import RoutingLib.Routing.Algorithms.BellmanFord.StateReconstruction ra ⊕-sel G using (reconstructionAll)
 
   open RoutingAlgebra ra
   open BisimilarityReasoning
@@ -135,7 +135,7 @@ module RoutingLib.Routing.Algorithms.BellmanFord.AddingPaths
     messagesAt-cₜ 𝕤 X {t'} i j cₜ≤t' βt'≤cₜ k = proj₁ (consistentMessagesAt-cₜ 𝕤 X i j k cₜ≤t' βt'≤cₜ)
 
     convergeToConsistency : ∀ 𝕤₁ X → ∃₂ λ t₁ t₂ → ∃ λ 𝕤₂ → I.δ 𝕤₁ t₁ X ≃ₘ C.δ 𝕤₂ t₂ C.I × 𝕤₁ ⟦ t₁ ⟧≈⟦ t₂ ⟧ 𝕤₂ × snapshot I.σ∥ 𝕤₁ t₁ X ≃ₛ snapshot C.σ∥ 𝕤₂ t₂ C.I
-    convergeToConsistency 𝕤₁ X with reconstruct 𝕤₁ (cₜ 𝕤₁) (stateAt-cₜ 𝕤₁ X) (messagesAt-cₜ 𝕤₁ X)
+    convergeToConsistency 𝕤₁ X with reconstructionAll 𝕤₁ (cₜ 𝕤₁) (stateAt-cₜ 𝕤₁ X) (messagesAt-cₜ 𝕤₁ X)
     ... | (𝕤₂ , t₂ , δᶜᵗX≈δᵗ²I , 𝕤₁≈𝕤₂ , z) = 
       cₜ 𝕤₁ , 
       t₂ , 

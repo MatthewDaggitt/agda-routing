@@ -31,11 +31,11 @@ module RoutingLib.Data.Fin.Pigeonhole where
   punchout-inj {suc n} {suc i}  {suc j} {zero}  _   _   ()
   punchout-inj {suc n} {suc i}  {suc j} {suc k} i≢j i≢k pⱼ≡pₖ = cong suc (punchout-inj (i≢j ∘ cong suc) (i≢k ∘ cong suc) (suc-injective pⱼ≡pₖ))
 
-  pigeonhole : ∀ {m n} → m < n → (f : Fin n → Fin m) → ∃₂ (λ i j → i ≢ j × f i ≡ f j)
+  pigeonhole : ∀ {m n} → m < n → (f : Fin n → Fin m) → ∃₂ λ i j → i ≢ j × f i ≡ f j
   pigeonhole (s≤s z≤n) f with f zero
   ... | ()
   pigeonhole (s≤s (s≤s m≤n)) f with any? ((_≟_ (f zero)) ∘ f ∘ suc)
   ... | yes (j , f₀≡fⱼ₊₁) = zero , suc j , (λ()) , f₀≡fⱼ₊₁
   ... | no  ∄k[f₀≡fₖ₊₁] with pigeonhole (s≤s m≤n) (λ j → punchout (∄k[f₀≡fₖ₊₁] ∘ (j ,_ )))
-  ...    | (i , j , i≢j , fᵢ≡fⱼ) = (suc i , suc j , i≢j ∘ suc-injective , punchout-inj (∄k[f₀≡fₖ₊₁] ∘ (i ,_)) (∄k[f₀≡fₖ₊₁] ∘ (j ,_)) fᵢ≡fⱼ)
+  ...    | (i , j , i≢j , fᵢ≡fⱼ) = suc i , suc j , i≢j ∘ suc-injective , punchout-inj (∄k[f₀≡fₖ₊₁] ∘ (i ,_)) (∄k[f₀≡fₖ₊₁] ∘ (j ,_)) fᵢ≡fⱼ
 

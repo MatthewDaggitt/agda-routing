@@ -1,31 +1,34 @@
-open import Relation.Binary using (Decidable; Total; Reflexive; Symmetric; Antisymmetric; Transitive; _Respects_; tri≈; tri<; tri>)
+open import Level using () renaming (zero to lzero)
+open import Relation.Binary using (Decidable; Total; Reflexive; Symmetric; Antisymmetric; Transitive; _Respects_; tri≈; tri<; tri>; IsEquivalence; IsDecEquivalence; Setoid; DecSetoid)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; subst; cong)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
-open import Data.Nat using (suc; z≤n; s≤s) renaming (_≟_ to _≟ℕ_; _≤?_ to _≤ℕ?_; _<_ to _<ℕ_)
-open import Data.Nat.Properties using (<-trans)
+open import Data.Nat using (ℕ; suc; z≤n; s≤s) renaming (_≟_ to _≟ℕ_; _≤?_ to _≤ℕ?_; _<_ to _<ℕ_)
+open import Data.Nat.Properties using (<-trans; m≢1+m+n)
 open import Data.Fin using (Fin; _<_; _≤?_) renaming (suc to fsuc)
 open import Data.Fin.Properties using (cmp)
 open import Data.Sum using (inj₁; inj₂)
 
 open import RoutingLib.Data.Graph using (Graph)
 open import RoutingLib.Data.Graph.SimplePath
+open import RoutingLib.Data.Graph.SimplePath.NonEmpty as NE using ()
 open import RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties as NEP using ()
-open import RoutingLib.Data.Nat.Properties using (<⇒≢; <⇒≯; ≤-refl; m+n≮n; m+1+n≢n; suc-injective) renaming (cmp to ≤ℕ-cmp)
+open import RoutingLib.Data.Nat.Properties using (<⇒≢; <⇒≯; ≤-refl; m+n≮n; suc-injective; <-cmp; n≢1+n)
 open import RoutingLib.Data.Fin.Properties using (≤-trans; ≤-antisym; ≤-total; _<?_)
 open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_)
 
-module RoutingLib.Data.Graph.SimplePath.Properties {n} where
+module RoutingLib.Data.Graph.SimplePath.Properties {n : ℕ} where
 
   open import RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties using (p≈q⇒p₀≡q₀; p≉i∷p) public
 
   abstract
 
-    ------------
-    -- SPaths --
-    ------------
+    --------------
+    -- Equality --
+    --------------
 
-    -- Equality
+    [-]-injective : ∀ {p q} → [ p ] ≈ [ q ] → NE._≈_ {n} p  q
+    [-]-injective [ p≈q ] = p≈q
 
     ≈-refl : Reflexive (_≈_ {n})
     ≈-refl {[]}    = []
@@ -47,8 +50,37 @@ module RoutingLib.Data.Graph.SimplePath.Properties {n} where
     ... | no  p≉q = no (λ{[ p≈q ] → p≉q p≈q})
     ... | yes p≈q = yes [ p≈q ]
 
+    ≈-isEquivalence : IsEquivalence (_≈_ {n})
+    ≈-isEquivalence = record
+      { refl  = ≈-refl
+      ; sym   = ≈-sym
+      ; trans = ≈-trans
+      }
 
-    -- Membership
+    ≈-isDecEquivalence : IsDecEquivalence (_≈_ {n})
+    ≈-isDecEquivalence = record
+      { isEquivalence = ≈-isEquivalence
+      ; _≟_           = _≟_
+      }
+
+  ℙₛ : Setoid lzero lzero
+  ℙₛ = record 
+    { Carrier       = SimplePath n 
+    ; _≈_           = _≈_ 
+    ; isEquivalence = ≈-isEquivalence 
+    }
+
+  Decℙₛ : DecSetoid lzero lzero
+  Decℙₛ = record 
+    { Carrier          = SimplePath n 
+    ; _≈_              = _≈_ 
+    ; isDecEquivalence = ≈-isDecEquivalence 
+    }
+
+
+  -- Membership
+
+  abstract
   
     _∉?_ : Decidable (_∉_ {n})
     k ∉? []    = yes []
@@ -63,11 +95,24 @@ module RoutingLib.Data.Graph.SimplePath.Properties {n} where
 
     -- Graph membership
 
+    _∈𝔾?_ : ∀ {a} {A : Set a} → Decidable (_∈𝔾_ {a} {n} {A})
+    []    ∈𝔾? G = yes []
+    [ p ] ∈𝔾? G with p NEP.∈𝔾? G
+    ... | yes p∈G = yes [ p∈G ]
+    ... | no  p∉G = no (λ {[ p∈G ] → p∉G p∈G})
+
+    _∉𝔾?_ : ∀ {a} {A : Set a} → Decidable (_∉𝔾_ {a} {n} {A})
+    p ∉𝔾? G with p ∈𝔾? G
+    ... | yes p∈G = no (λ p∉G → p∉G p∈G)
+    ... | no  p∉G = yes p∉G
+
     ∈𝔾-resp-≈ : ∀ {a} {A : Set a} {G : Graph A n} → (_∈𝔾 G) Respects _≈_
     ∈𝔾-resp-≈ []      []      = []
     ∈𝔾-resp-≈ [ p≈q ] [ p∈G ] = [ NEP.∈𝔾-resp-≈ p≈q p∈G ]
 
-
+    ∉𝔾-resp-≈ : ∀ {a} {A : Set a} {G : Graph A n} → (_∉𝔾 G) Respects _≈_
+    ∉𝔾-resp-≈ p≈q p∉G q∈G = contradiction (∈𝔾-resp-≈ (≈-sym p≈q) q∈G) p∉G
+    
     -- Ordering
 
     ≤ₚ-refl : Reflexive (_≤ₚ_ {n})
@@ -100,7 +145,7 @@ module RoutingLib.Data.Graph.SimplePath.Properties {n} where
     ≤ₚ-total : Total (_≤ₚ_ {n})
     ≤ₚ-total [] _ = inj₁ stop
     ≤ₚ-total _ [] = inj₂ stop
-    ≤ₚ-total [ p ] [ q ] with ≤ℕ-cmp (length [ p ]) (length [ q ])
+    ≤ₚ-total [ p ] [ q ] with <-cmp (length [ p ]) (length [ q ])
     ≤ₚ-total [ _ ] [ _ ] | tri< |p|<|q| _ _ = inj₁ (len |p|<|q|)
     ≤ₚ-total [ _ ] [ _ ] | tri> _ _ |p|<|q| = inj₂ (len |p|<|q|)
     ≤ₚ-total [ i ∺ j ∣ _ ] [ k ∺ l ∣ _ ] | tri≈ _ _ _ with cmp i k | ≤-total j l
@@ -127,8 +172,19 @@ module RoutingLib.Data.Graph.SimplePath.Properties {n} where
 
     i∷p≰p : ∀ {i : Fin n} {p} {i∉p} → [ i ∷ p ∣ i∉p ] ≰ₚ [ p ]
     i∷p≰p (len 1+|p|<|p|)   = contradiction 1+|p|<|p| (m+n≮n 1 _)
-    i∷p≰p (lex 1+|p|≡|p| _) = contradiction 1+|p|≡|p| (m+1+n≢n 0 _)
+    i∷p≰p (lex 1+|p|≡|p| _) = contradiction (sym 1+|p|≡|p|) (n≢1+n _)
+
+
+    -- Length
 
     length<n : (p : SimplePath (suc n)) → length p <ℕ (suc n)
     length<n []    = s≤s z≤n
     length<n [ p ] = NEP.|p|<n p
+
+    p≈q⇒|p|≡|q| : ∀ {p q : SimplePath n} → p ≈ q → length p ≡ length q
+    p≈q⇒|p|≡|q| []      = refl
+    p≈q⇒|p|≡|q| [ p≈q ] = NEP.p≈q⇒|p|≡|q| p≈q
+
+    weight-cong : ∀ {a b} {A : Set a} {B : Set b} _▷_ (1# : B) {p q : SimplePath n} {G : Graph A n} (p≈q : p ≈ q) (p∈G : p ∈𝔾 G) (q∈G : q ∈𝔾 G) → weight _▷_ 1# p∈G ≡ weight _▷_ 1# q∈G
+    weight-cong _▷_ 1# []      []      []      = refl
+    weight-cong _▷_ 1# [ p≈q ] [ p∈G ] [ q∈G ] = NEP.weight-cong _▷_ 1# p≈q p∈G q∈G

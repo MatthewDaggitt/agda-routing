@@ -1,4 +1,5 @@
 
+
 open import Data.Nat using (zero; suc)
 open import Data.Fin
 open import Relation.Binary.PropositionalEquality using (cong; _≢_; refl)
@@ -7,6 +8,10 @@ open import Function using (_∘_)
 
 module RoutingLib.Data.Fin where
 
+  ---------------------
+  -- Added to stdlib --
+  ---------------------
+  
   -- The function f(i,j) = if j>i then j-1 else j
   punchdown : ∀ {m} {i j : Fin (suc m)} → i ≢ j → Fin m
   punchdown {_}     {zero}   {zero}  i≢j = contradiction refl i≢j

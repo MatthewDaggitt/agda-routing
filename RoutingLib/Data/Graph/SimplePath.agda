@@ -66,6 +66,8 @@ module RoutingLib.Data.Graph.SimplePath where
     []  : ∀ {G} → [] ∈𝔾 G
     [_] : ∀ {G p} → p NT.∈𝔾 G → [ p ] ∈𝔾 G
 
+  _∉𝔾_ : ∀ {a n} {A : Set a} → SimplePath n → Graph A n → Set a
+  p ∉𝔾 G = ¬ (p ∈𝔾 G) 
 
   ----------------
   -- Operations --

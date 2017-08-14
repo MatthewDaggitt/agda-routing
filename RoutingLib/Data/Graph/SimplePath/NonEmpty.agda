@@ -19,27 +19,31 @@ module RoutingLib.Data.Graph.SimplePath.NonEmpty where
   -- Non-empty paths --
   ---------------------
 
-  infix 4 _∉_ _∈𝔾_ _≈_ _≤ₗₑₓ_ _≤ₗ_
-
   mutual
 
     data SimplePathⁿᵗ (n : ℕ) : Set lzero where
       _∺_∣_ : ∀ (i j : Fin n) → i ≢ j → SimplePathⁿᵗ n
       _∷_∣_ : ∀ i p → i ∉ p → SimplePathⁿᵗ n
 
-  -- Membership
-
+    infix 4 _∉_
+    
     data _∉_ {n : ℕ} : Fin n → SimplePathⁿᵗ n → Set lzero where
       notThere : ∀ {i j k i≢j} → k ≢ i → k ≢ j   → k ∉ i ∺ j ∣ i≢j
       notHere  : ∀ {i p k i∉p} → k ≢ i → k ∉ p → k ∉ i ∷ p ∣ i∉p
 
+
   -- Equality 
+
+  infix 4 _≈_ _≉_
 
   data _≈_ {n : ℕ} : Rel (SimplePathⁿᵗ n) lzero where
     _∺_ : ∀ {i j k l i≢j k≢l} → i ≡ k → j ≡ l → (i ∺ j ∣ i≢j) ≈ (k ∺ l ∣ k≢l)
     _∷_ : ∀ {i j p q i∉p j∉q} → i ≡ j → p ≈ q → (i ∷ p ∣ i∉p) ≈ (j ∷ q ∣ j∉q)
 
+  _≉_ : ∀ {n} → Rel (SimplePathⁿᵗ n) lzero
+  p ≉ q = ¬ (p ≈ q)
  
+
   -- Operations
 
   source : ∀ {n} → SimplePathⁿᵗ n → Fin n
@@ -53,17 +57,18 @@ module RoutingLib.Data.Graph.SimplePath.NonEmpty where
   length : ∀ {n} → SimplePathⁿᵗ n → ℕ
   length (_ ∺ _ ∣ _) = 1
   length (_ ∷ p ∣ _) = suc (length p)
-
-  lookup : ∀ {n} → (p : SimplePathⁿᵗ n) → Fin (suc (length p)) → Fin n
-  lookup (i ∺ _ ∣ _) fzero            = i
-  lookup (_ ∺ j ∣ _) (fsuc fzero)     = j
-  lookup (_ ∺ _ ∣ _) (fsuc (fsuc ()))
-  lookup (i ∷ _ ∣ _) fzero            = i
-  lookup (_ ∷ p ∣ _) (fsuc k)         = lookup p k
+ 
+  _⟦_⟧ : ∀ {n} → (p : SimplePathⁿᵗ n) → Fin (suc (length p)) → Fin n
+  (i ∺ _ ∣ _) ⟦ fzero ⟧          = i
+  (_ ∺ j ∣ _) ⟦ fsuc fzero ⟧     = j
+  (_ ∺ _ ∣ _) ⟦ fsuc (fsuc ()) ⟧ 
+  (i ∷ _ ∣ _) ⟦ fzero ⟧          = i
+  (_ ∷ p ∣ _) ⟦ fsuc k ⟧         = p ⟦ k ⟧
 
   ----------------------------------------------------------------------------------------------
   -- Orders
 
+  infix 4 _≤ₗₑₓ_ _≤ₗ_
   -- Lexicographic order
   data _≤ₗₑₓ_ {n : ℕ} : Rel (SimplePathⁿᵗ n) lzero where
     stopFirst   : ∀ {i j k l i≢j k≢l} → i ≡ k → j ≤ l → i ∺ j ∣ i≢j ≤ₗₑₓ k ∺ l ∣ k≢l
@@ -78,10 +83,15 @@ module RoutingLib.Data.Graph.SimplePath.NonEmpty where
   
   -- Exists in graph
 
-  data _∈𝔾_ {a} {n : ℕ} {A : Set a} : SimplePathⁿᵗ n → Graph A n → Set a where
+  infix 4 _∈𝔾_ _∉𝔾_
+
+  data _∈𝔾_ {a n} {A : Set a} : SimplePathⁿᵗ n → Graph A n → Set a where
     edge-∺ : ∀ {G i j i≢j} → (i , j) ∈𝔼 G → i ∺ j ∣ i≢j ∈𝔾 G
     edge-∷ : ∀ {G i p i≢p₀} → (i , source p) ∈𝔼 G → p ∈𝔾 G → i ∷ p ∣ i≢p₀ ∈𝔾 G
 
+  _∉𝔾_ : ∀ {a n} {A : Set a} → SimplePathⁿᵗ n → Graph A n → Set a
+  p ∉𝔾 G = ¬ p ∈𝔾 G
+  
   weight : ∀ {a b} {A : Set a} {B : Set b} → (A → B → B) → B → ∀ {n} {G : Graph A n} {p} → p ∈𝔾 G → B
   weight _▷_ 1# (edge-∺ (v , _))     = v ▷ 1#
   weight _▷_ 1# (edge-∷ (v , _) p∈G) = v ▷ weight _▷_ 1# p∈G

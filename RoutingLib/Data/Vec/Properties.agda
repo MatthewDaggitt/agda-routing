@@ -2,10 +2,10 @@ open import Data.Nat using (ℕ; zero; suc; s≤s; _+_)
 open import Data.Fin using (Fin; _<_; _≤_; inject₁) renaming (zero to fzero; suc to fsuc)
 open import Algebra.FunctionProperties using (Op₂)
 open import Data.Vec hiding (map; zipWith)
-open import Data.Product using (∃; ∃₂; _,_; _×_)
+open import Data.Product using (∃; ∃₂; _,_; _×_) renaming (map to mapₚ)
+open import Data.List using ([]; _∷_)
 open import Data.List.Any as Any using (here; there)
-open Any.Membership-≡ using () renaming (_∈_ to _∈ₗ_; _∉_ to _∉ₗ_)
-open import Function using (_∘_)
+open import Function using (_∘_; id)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary using (Decidable)
@@ -13,10 +13,8 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym
 
 open import RoutingLib.Data.Vec
 open import RoutingLib.Data.List.SucMap using (0∉mapₛ; ∈-mapₛ; mapₛ-∈)
-open import RoutingLib.Data.List.Any.GenericMembership using (∈-resp-≈)
-open import RoutingLib.Data.List.All using ([]) renaming (_∷_ to _∷ₚ_)
-open import RoutingLib.Data.List.All.Properties using (forced-map)
 open import RoutingLib.Algebra.FunctionProperties using (_×-Preserves_)
+open import RoutingLib.Data.List.Membership.Propositional using () renaming (_∈_ to _∈ₗ_)
 
 module RoutingLib.Data.Vec.Properties where
 
@@ -29,15 +27,30 @@ module RoutingLib.Data.Vec.Properties where
   ∈-map f (there x∈xs) = there (∈-map f x∈xs)
 
   ∈-lookup : ∀ {a n} {A : Set a} {v : A} {xs : Vec A n} → v ∈ xs → ∃ λ i → lookup i xs ≡ v
-  ∈-lookup {xs = []} ()
-  ∈-lookup {xs = x ∷ xs} here = fzero , refl
-  ∈-lookup {xs = x ∷ xs} (there v∈xs) with ∈-lookup v∈xs
-  ... | i , xsᵢ≡v = fsuc i , xsᵢ≡v
+  ∈-lookup here = fzero , refl
+  ∈-lookup (there v∈xs) = mapₚ fsuc id (∈-lookup v∈xs)
 
+  ∈-lookup⁺ : ∀ {a n} {A : Set a} i (xs : Vec A n) → lookup i xs ∈ xs
+  ∈-lookup⁺ fzero    (x ∷ xs) = here
+  ∈-lookup⁺ (fsuc i) (x ∷ xs) = there (∈-lookup⁺ i xs)
+
+  ∈-fromList⁻ : ∀ {a} {A : Set a} {v : A} {xs} → v ∈ fromList xs → v ∈ₗ xs
+  ∈-fromList⁻ {xs = []}    ()
+  ∈-fromList⁻ {xs = _ ∷ _} here         = here refl
+  ∈-fromList⁻ {xs = _ ∷ _} (there v∈xs) = there (∈-fromList⁻ v∈xs)
+
+  {-
+  ∈-toList⁺ : ∀ {a n} {A : Set a} {xs : Vec A n} {v}  → v ∈ xs → v ∈ₗ toList xs
+  ∈-toList⁺ hereᵥ         = here (reflexive refl)
+  ∈-toList⁺ (thereᵥ v∈xs) = there (∈-toList⁺ v∈xs)
+  -}
+{-
+{-
   ∈-toList : ∀ {a n} {A : Set a} {v : A} {xs : Vec A n} → v ∈ₗ (toList xs) → v ∈ xs
   ∈-toList {xs = []}     ()
   ∈-toList {xs = x ∷ xs} (here refl)  = here
   ∈-toList {xs = x ∷ xs} (there v∈xs) = there (∈-toList v∈xs)
+-}
 
   lookup-map : ∀ {a b n} {A : Set a} {B : Set b} {f : A → B} (i : Fin n) (xs : Vec A n) → lookup i (map f xs) ≡ f (lookup i xs)
   lookup-map fzero (x ∷ xs) = refl
@@ -79,10 +92,12 @@ module RoutingLib.Data.Vec.Properties where
   foldr₁-pres-P _ _   _        (x ∷ [])     P-holds  = P-holds fzero
   foldr₁-pres-P P _⊕_ ⊕-pres-P (x ∷ y ∷ xs) P-holds  = ⊕-pres-P (P-holds fzero) (foldr₁-pres-P P _⊕_ ⊕-pres-P (y ∷ xs) (P-holds ∘ fsuc))
 
+{-
   ∉⇒List-∉ : ∀ {a} {A : Set a} {n x} {xs : Vec A n} → x ∉ xs → x ∉ₗ toList xs
   ∉⇒List-∉ {xs = []} _ ()
   ∉⇒List-∉ {xs = x ∷ xs} x∉x∷xs (here refl) = x∉x∷xs here
   ∉⇒List-∉ {xs = x ∷ xs} x∉x∷xs (there x∈xsₗ) = ∉⇒List-∉ (λ x∈xs → x∉x∷xs (there x∈xs)) x∈xsₗ
+-}
 
   0∉map-fsuc : ∀ {n m} (xs : Vec (Fin m) n) → fzero ∉ map fsuc xs
   0∉map-fsuc [] ()
@@ -92,21 +107,6 @@ module RoutingLib.Data.Vec.Properties where
   ∉-tabulate {n = zero}  _ _   ()
   ∉-tabulate {n = suc n} _ v∉f here           = v∉f fzero refl
   ∉-tabulate {n = suc n} f v∉f (there v∈tabᶠ) = ∉-tabulate (f ∘ fsuc) (v∉f ∘ fsuc) v∈tabᶠ
-
-  {-
-  postulate map-∃-∈ : ∀ {a b n} {A : Set a} {B : Set b} {f : A → B} {v} {xs : Vec A n} → v ∈ map f xs → ∃ λ y → (y ∈ xs × v ≡ f y)
-
-  postulate concat-∃-∈ : ∀ {a m n} {A : Set a} {v} {xss : Vec (Vec A m) n} → v ∈ concat xss → ∃ λ ys → (v ∈ ys × ys ∈ xss)
-
-  concat-∃-∈ {xss = []} ()
-  concat-∃-∈ {xss = [] ∷ []} ()
-  concat-∃-∈ {xss = [] ∷ (xs ∷ xss)} v∈concat[xs∷xss] with concat-∃-∈ v∈concat[xs∷xss]
-  ... | (ys , v∈ys , ys∈xss) = ys , v∈ys , there ys∈xss
-  concat-∃-∈ {xss = (x ∷ xs) ∷ xss} here = x ∷ xs , here , here
-  concat-∃-∈ {xss = (x ∷ xs) ∷ xss} (there v∈concat[xs∷xss]) with concat-∃-∈ {xss = xs ∷ xss} v∈concat[xs∷xss]
-  ... | (ys , v∈ys , here) = x ∷ xs , ? , here
-  ... | (ys , v∈ys , there ys∈xss) = ys , v∈ys , there ys∈xss
-  -}
 
 
   --- RoutingLib operation properties
@@ -121,6 +121,7 @@ module RoutingLib.Data.Vec.Properties where
   deleteAt-∈ᵣ {i = fzero}               (x ∷ xs)      _        = refl
   deleteAt-∈ᵣ {i = fsuc i} {j = fsuc j} (x ∷ y ∷ xs) (s≤s i≤j) = deleteAt-∈ᵣ (y ∷ xs) i≤j
 
+{-
   findAll-hit : ∀ {a n} {A : Set a} {_≟_ : Decidable _≡_} {xs : Vec A n} {v} i → i ∈ₗ findAll _≟_ v xs → lookup i xs ≡ v
   findAll-hit {_≟_ = _≟_} {xs = x ∷ xs} {v = v} fzero i∈find with v ≟ x
   ... | yes v≡x = sym v≡x
@@ -146,7 +147,8 @@ module RoutingLib.Data.Vec.Properties where
   findAll-miss _≟_ (x ∷ xs) v (fsuc i) i∉find with v ≟ x
   ... | no  v≢x = findAll-miss _≟_ xs v i (λ i∈f → i∉find (mapₛ-∈ i∈f))
   ... | yes v≡x = findAll-miss _≟_ xs v i (λ i∈f → i∉find (there (mapₛ-∈ i∈f)))
-
+-}
 
   allPairs-∃-∈ : ∀ {a} {A : Set a} {m n : ℕ} {xs : Vec A m} {ys : Vec A n} {v} → v ∈ allPairs xs ys → ∃₂ λ x y → v ≡ (x , y)
   allPairs-∃-∈ {v = (x , y)} xy∈allPairs = x , y , refl
+-}

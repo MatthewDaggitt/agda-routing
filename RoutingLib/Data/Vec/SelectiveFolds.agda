@@ -42,8 +42,6 @@ module RoutingLib.Data.Vec.SelectiveFolds
 
   module _ (comm : Commutative _≈_ _•_) (assoc : Associative _≈_ _•_) where
 
-    ------ Shortcuts
-
     private
 
       ≤ᵣ-isPartialOrder : IsPartialOrder _≈_ _≤ᵣ_
@@ -72,6 +70,65 @@ module RoutingLib.Data.Vec.SelectiveFolds
     foldr₁≤xs (x ∷ y ∷ xs) (fsuc l)  = ≤ᵣ-trans (≤ᵣ-absᵣ' comm assoc idem (foldr₁ _•_ (y ∷ xs)) x) (foldr₁≤xs (y ∷ xs) l)
 
 
+
+
+
+
+
+    -----------
+    -- foldr --
+    -----------
+
+    foldrₓₛ≤xsᵢ : ∀ {n} e (xs : Vec A n) → ∀ i → foldr (λ _ → A) _•_ e xs ≤ᵣ lookup i xs
+    foldrₓₛ≤xsᵢ e []       ()
+    foldrₓₛ≤xsᵢ e (x ∷ xs) fzero     = ≤ᵣ-absₗ assoc idem x (foldr (λ _ → A) _•_ e xs)
+    foldrₓₛ≤xsᵢ e (x ∷ xs) (fsuc i)  = ≤ᵣ-trans (≤ᵣ-absᵣ' comm assoc idem (foldr (λ _ → A) _•_ e xs) x) (foldrₓₛ≤xsᵢ e xs i)
+
+    foldrₑ≤e : ∀ {n} e (xs : Vec A n) → foldr (λ _ → A) _•_ e xs ≤ᵣ e
+    foldrₑ≤e e []       = idem e
+    foldrₑ≤e e (x ∷ xs) = ≤ᵣ-trans (≤ᵣ-absᵣ' comm assoc idem (foldr (λ _ → A) _•_ e xs) x) (foldrₑ≤e e xs)
+
+
+
+    postulate foldrₓₛ≈foldrᵥₛ : ∀ {n} e (xs ys : Vec A n) → (∀ k → lookup k xs ≈ lookup k ys ⊎ ((∃ λ l → lookup l xs <ᵣ lookup k xs) × (∃ λ m → lookup m ys <ᵣ lookup k ys))) → foldr (λ _ → A) _•_ e xs ≈ foldr (λ _ → A) _•_ e ys
+
+{-
+    foldrₓₛ≈foldrᵥₛ e [] [] _ = refl
+    foldrₓₛ≈foldrᵥₛ e (x ∷ xs) (y ∷ ys) eqCon with eqCon fzero
+    ... | inj₂ ((fzero , _ , x≉x) ,       _)                        = contradiction refl x≉x
+    ... | inj₂ (_ ,                       (fzero , _ , y≉y))        = contradiction refl y≉y
+    ... | inj₂ ((fsuc l , xsₗ≤x , xsₗ≉x) , (fsuc m , ysₘ≤y , ysₘ≉y)) = trans (trans (≤ᵣ-trans (foldrₓₛ≤xsᵢ e xs l) xsₗ≤x) (foldrₓₛ≈foldrᵥₛ e xs ys res)) (sym (≤ᵣ-trans (foldrₓₛ≤xsᵢ e ys m) ysₘ≤y))
+
+      where
+      res : ∀ k → lookup k xs ≈ lookup k ys ⊎ (∃ λ i → lookup i xs <ᵣ lookup k xs) × (∃ λ j → lookup j ys <ᵣ lookup k ys)
+      res k with eqCon (fsuc k)
+      ... | inj₁ xsₖ≈ysₖ = inj₁ xsₖ≈ysₖ
+      ... | inj₂ ((fsuc i , xsᵢ<xsₖ) , (fsuc j , ysⱼ<ysₖ)) = inj₂ ((i , xsᵢ<xsₖ) ,                       (j , ysⱼ<ysₖ))
+      ... | inj₂ ((fzero  , x<xsₖ)  , (fsuc j , ysⱼ<ysₖ)) = inj₂ ((l , <ᵣ-trans (xsₗ≤x , xsₗ≉x) x<xsₖ) , (j , ysⱼ<ysₖ))
+      ... | inj₂ ((fsuc i , xsᵢ<xsₖ) , (fzero , y<ysₖ))   = inj₂ ((i , xsᵢ<xsₖ) ,                       (m , <ᵣ-trans (ysₘ≤y , ysₘ≉y) y<ysₖ))
+      ... | inj₂ ((fzero  , x<xsₖ)  , (fzero , y<ysₖ))   = inj₂ ((l , <ᵣ-trans (xsₗ≤x , xsₗ≉x) x<xsₖ) , (m ,  <ᵣ-trans (ysₘ≤y , ysₘ≉y) y<ysₖ))
+
+
+    ... | inj₁ x≈y with sel x (foldr (λ A → _) _•_ e xs) | sel y (foldr (λ A → _) _•_ e ys) | ∃-foldr e xs | ∃-foldr e ys
+    ...   | inj₁ x≤f | inj₁ y≤f | _ | _ = trans (trans x≤f x≈y) (sym y≤f)
+    ...   | inj₁ x≤f | inj₂ f≤y | _ | _ = {!!}
+    ...   | inj₂ f≤x | inj₁ y≤f | _ | _ = {!!}
+    ...   | inj₂ f≤x | inj₂ f≤y | inj₂ fxs≈e      | inj₂ fys≈e        = pres x≈y (trans fxs≈e (sym fys≈e))
+    ...   | inj₂ f≤x | inj₂ f≤y | inj₂ fxs≈e      | inj₁ (j , fys≈ysⱼ) = {!!}
+    ...   | inj₂ f≤x | inj₂ f≤y | inj₁ (i , f≈xsᵢ) | inj₂ fys≈e          = {!!}
+    ...   | inj₂ f≤x | inj₂ f≤y | inj₁ (i , f≈xsᵢ) | inj₁ (j , fys≈ysⱼ) = pres x≈y (foldrₓₛ≈foldrᵥₛ e xs ys res)
+
+      where
+      res : ∀ k → (lookup k xs ≈ lookup k ys ⊎
+          (∃ λ l → lookup l xs <ᵣ lookup k xs) ×
+          (∃ λ m → lookup m ys <ᵣ lookup k ys))
+      res k with eqCon (fsuc k)
+      ... | inj₁ xsₖ≈ysₖ = inj₁ xsₖ≈ysₖ
+      ... | inj₂ ((fzero  , x<xsₖ)  , (fzero , y<ysₖ))   = inj₂ ((i , {!!}) , (j , {!!}))
+      ... | inj₂ ((fzero  , x<xsₖ)  , (fsuc m , ysₘ<ysₖ)) = inj₂ ((i , {!!}) , (m , ysₘ<ysₖ))
+      ... | inj₂ ((fsuc l , xsₗ<xsₖ) , (fzero , y<ysₖ))   = inj₂ ((l , xsₗ<xsₖ) , (j , {!!}))
+      ... | inj₂ ((fsuc l , xsₗ<xsₖ) , (fsuc m , ysₘ<ysₖ)) = inj₂ ((l , xsₗ<xsₖ) , (m , ysₘ<ysₖ))
+-}
 
 
 
@@ -146,60 +203,4 @@ module RoutingLib.Data.Vec.SelectiveFolds
       ... | inj₂ ((fzero   , x<xsₖ)  , (fsuc m₂ , ysₘ₂<ysₖ)) = inj₂ ((l , <ᵣ-trans ≤ᵣ-isPartialOrder xsₗ<x x<xsₖ) ,      (m₂ , ysₘ₂<ysₖ))
       ... | inj₂ ((fsuc l₂ , xsₗ<xsₖ) , (fzero , y<ysₖ))      = inj₂ ((l₂ , xsₗ<xsₖ) , (m , <ᵣ-trans ≤ᵣ-isPartialOrder ysₘ<y y<ysₖ))
       ... | inj₂ ((fzero   , x<xsₖ)  , (fzero , y<ysₖ))      = inj₂ ((l , (<ᵣ-trans ≤ᵣ-isPartialOrder xsₗ<x x<xsₖ)) , (m , (<ᵣ-trans ≤ᵣ-isPartialOrder ysₘ<y y<ysₖ)))
--}
-
-
-    -----------
-    -- foldr --
-    -----------
-
-    foldrₓₛ≤xsᵢ : ∀ {n} e (xs : Vec A n) → ∀ i → foldr (λ _ → A) _•_ e xs ≤ᵣ lookup i xs
-    foldrₓₛ≤xsᵢ e []       ()
-    foldrₓₛ≤xsᵢ e (x ∷ xs) fzero     = ≤ᵣ-absₗ assoc idem x (foldr (λ _ → A) _•_ e xs)
-    foldrₓₛ≤xsᵢ e (x ∷ xs) (fsuc i)  = ≤ᵣ-trans (≤ᵣ-absᵣ' comm assoc idem (foldr (λ _ → A) _•_ e xs) x) (foldrₓₛ≤xsᵢ e xs i)
-
-    foldrₑ≤e : ∀ {n} e (xs : Vec A n) → foldr (λ _ → A) _•_ e xs ≤ᵣ e
-    foldrₑ≤e e []       = idem e
-    foldrₑ≤e e (x ∷ xs) = ≤ᵣ-trans (≤ᵣ-absᵣ' comm assoc idem (foldr (λ _ → A) _•_ e xs) x) (foldrₑ≤e e xs)
-
-
-
-    postulate foldrₓₛ≈foldrᵥₛ : ∀ {n} e (xs ys : Vec A n) → (∀ k → lookup k xs ≈ lookup k ys ⊎ ((∃ λ l → lookup l xs <ᵣ lookup k xs) × (∃ λ m → lookup m ys <ᵣ lookup k ys))) → foldr (λ _ → A) _•_ e xs ≈ foldr (λ _ → A) _•_ e ys
-
-{-
-    foldrₓₛ≈foldrᵥₛ e [] [] _ = refl
-    foldrₓₛ≈foldrᵥₛ e (x ∷ xs) (y ∷ ys) eqCon with eqCon fzero
-    ... | inj₂ ((fzero , _ , x≉x) ,       _)                        = contradiction refl x≉x
-    ... | inj₂ (_ ,                       (fzero , _ , y≉y))        = contradiction refl y≉y
-    ... | inj₂ ((fsuc l , xsₗ≤x , xsₗ≉x) , (fsuc m , ysₘ≤y , ysₘ≉y)) = trans (trans (≤ᵣ-trans (foldrₓₛ≤xsᵢ e xs l) xsₗ≤x) (foldrₓₛ≈foldrᵥₛ e xs ys res)) (sym (≤ᵣ-trans (foldrₓₛ≤xsᵢ e ys m) ysₘ≤y))
-
-      where
-      res : ∀ k → lookup k xs ≈ lookup k ys ⊎ (∃ λ i → lookup i xs <ᵣ lookup k xs) × (∃ λ j → lookup j ys <ᵣ lookup k ys)
-      res k with eqCon (fsuc k)
-      ... | inj₁ xsₖ≈ysₖ = inj₁ xsₖ≈ysₖ
-      ... | inj₂ ((fsuc i , xsᵢ<xsₖ) , (fsuc j , ysⱼ<ysₖ)) = inj₂ ((i , xsᵢ<xsₖ) ,                       (j , ysⱼ<ysₖ))
-      ... | inj₂ ((fzero  , x<xsₖ)  , (fsuc j , ysⱼ<ysₖ)) = inj₂ ((l , <ᵣ-trans (xsₗ≤x , xsₗ≉x) x<xsₖ) , (j , ysⱼ<ysₖ))
-      ... | inj₂ ((fsuc i , xsᵢ<xsₖ) , (fzero , y<ysₖ))   = inj₂ ((i , xsᵢ<xsₖ) ,                       (m , <ᵣ-trans (ysₘ≤y , ysₘ≉y) y<ysₖ))
-      ... | inj₂ ((fzero  , x<xsₖ)  , (fzero , y<ysₖ))   = inj₂ ((l , <ᵣ-trans (xsₗ≤x , xsₗ≉x) x<xsₖ) , (m ,  <ᵣ-trans (ysₘ≤y , ysₘ≉y) y<ysₖ))
-
-
-    ... | inj₁ x≈y with sel x (foldr (λ A → _) _•_ e xs) | sel y (foldr (λ A → _) _•_ e ys) | ∃-foldr e xs | ∃-foldr e ys
-    ...   | inj₁ x≤f | inj₁ y≤f | _ | _ = trans (trans x≤f x≈y) (sym y≤f)
-    ...   | inj₁ x≤f | inj₂ f≤y | _ | _ = {!!}
-    ...   | inj₂ f≤x | inj₁ y≤f | _ | _ = {!!}
-    ...   | inj₂ f≤x | inj₂ f≤y | inj₂ fxs≈e      | inj₂ fys≈e        = pres x≈y (trans fxs≈e (sym fys≈e))
-    ...   | inj₂ f≤x | inj₂ f≤y | inj₂ fxs≈e      | inj₁ (j , fys≈ysⱼ) = {!!}
-    ...   | inj₂ f≤x | inj₂ f≤y | inj₁ (i , f≈xsᵢ) | inj₂ fys≈e          = {!!}
-    ...   | inj₂ f≤x | inj₂ f≤y | inj₁ (i , f≈xsᵢ) | inj₁ (j , fys≈ysⱼ) = pres x≈y (foldrₓₛ≈foldrᵥₛ e xs ys res)
-
-      where
-      res : ∀ k → (lookup k xs ≈ lookup k ys ⊎
-          (∃ λ l → lookup l xs <ᵣ lookup k xs) ×
-          (∃ λ m → lookup m ys <ᵣ lookup k ys))
-      res k with eqCon (fsuc k)
-      ... | inj₁ xsₖ≈ysₖ = inj₁ xsₖ≈ysₖ
-      ... | inj₂ ((fzero  , x<xsₖ)  , (fzero , y<ysₖ))   = inj₂ ((i , {!!}) , (j , {!!}))
-      ... | inj₂ ((fzero  , x<xsₖ)  , (fsuc m , ysₘ<ysₖ)) = inj₂ ((i , {!!}) , (m , ysₘ<ysₖ))
-      ... | inj₂ ((fsuc l , xsₗ<xsₖ) , (fzero , y<ysₖ))   = inj₂ ((l , xsₗ<xsₖ) , (j , {!!}))
-      ... | inj₂ ((fsuc l , xsₗ<xsₖ) , (fsuc m , ysₘ<ysₖ)) = inj₂ ((l , xsₗ<xsₖ) , (m , ysₘ<ysₖ))
 -}

@@ -1,8 +1,10 @@
-open import Relation.Binary using (Decidable; Total; Reflexive; Symmetric; Antisymmetric; Transitive; _Respects_; tri≈; tri<; tri>)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; trans; subst; cong)
+open import Level using () renaming (zero to lzero)
+open import Relation.Binary using (Setoid; DecSetoid; Decidable; Total; Reflexive; Symmetric; Antisymmetric; Transitive; _Respects_; IsEquivalence; IsDecEquivalence; tri≈; tri<; tri>)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; trans; subst; cong; cong₂) renaming (setoid to ≡-setoid)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
-open import Data.Nat using (suc) renaming (_≟_ to _≟ℕ_; _≤?_ to _≤ℕ?_; _<_ to _<ℕ_)
+open import Relation.Binary.List.Pointwise using ([]; _∷_) renaming (setoid to listSetoid)
+open import Data.Nat using (ℕ; suc) renaming (_≟_ to _≟ℕ_; _≤?_ to _≤ℕ?_; _<_ to _<ℕ_)
 open import Data.Nat.Properties using (<-trans; ≰⇒>)
 open import Data.Fin using (Fin; _<_; _≤?_) renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties using (cmp) renaming (_≟_ to _≟𝔽_)
@@ -10,19 +12,20 @@ open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (_,_)
 open import Function using (_∘_)
 
-open import RoutingLib.Data.Graph using (Graph; ∈-resp-≡ₗ)
+open import RoutingLib.Data.Graph using (Graph; ∈-resp-≡ₗ; _∈?_)
 open import RoutingLib.Data.Graph.SimplePath.NonEmpty
-open import RoutingLib.Data.Nat.Properties using (<⇒≢; <⇒≯; ≤-refl; m+n≮n; m+1+n≢n; suc-injective) renaming (cmp to ≤ℕ-cmp)
+open import RoutingLib.Data.Nat.Properties using (<⇒≢; <⇒≯; ≤-refl)
 open import RoutingLib.Data.Fin.Properties using (≤-trans; ≤-antisym; ≤-total; _<?_)
 open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_)
 open import RoutingLib.Data.Fin.Pigeonhole using (pigeonhole)
+open import RoutingLib.Data.Maybe.Properties using (just-injective)
 
 module RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties {n} where
 
-  abstract
+  -------------------
+  -- Equality
 
-    -------------------
-    -- Equality
+  abstract
 
     ≈-refl : Reflexive (_≈_ {n})
     ≈-refl {_ ∺ _ ∣ _} = refl ∺ refl
@@ -34,7 +37,7 @@ module RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties {n} where
 
     ≈-trans : Transitive (_≈_ {n})
     ≈-trans (refl ∺ refl) (refl ∺ refl) = refl ∺ refl
-    ≈-trans (refl ∷ p≈q) (refl ∷ q≈r) = refl ∷ (≈-trans p≈q q≈r)
+    ≈-trans (refl ∷ p≈q)  (refl ∷ q≈r)  = refl ∷ (≈-trans p≈q q≈r)
 
     _≟_ : Decidable (_≈_ {n})
     (i ∺ j ∣ _) ≟ (k ∺ l ∣ _) with i ≟𝔽 k | j ≟𝔽 l
@@ -48,9 +51,38 @@ module RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties {n} where
     ... | _       | no  p≢q = no (λ{(_ ∷ p≡q) → p≢q p≡q})
     ... | yes i≡k | yes p≡q = yes (i≡k ∷ p≡q)
 
+    ≈-isEquivalence : IsEquivalence (_≈_ {n})
+    ≈-isEquivalence = record 
+      { refl  = ≈-refl 
+      ; sym   = ≈-sym 
+      ; trans = ≈-trans 
+      }
 
-    ----------------------
-    -- Membership
+    ≈-isDecEquivalence : IsDecEquivalence (_≈_ {n})
+    ≈-isDecEquivalence = record 
+      { isEquivalence = ≈-isEquivalence 
+      ; _≟_           = _≟_ 
+      }
+
+  ≈-setoid : Setoid lzero lzero
+  ≈-setoid = record 
+    { Carrier       = SimplePathⁿᵗ n 
+    ; _≈_           = _≈_ 
+    ; isEquivalence = ≈-isEquivalence 
+    }
+
+  ≈-decSetoid : DecSetoid lzero lzero
+  ≈-decSetoid = record
+    { Carrier          = SimplePathⁿᵗ n 
+    ; _≈_              = _≈_ 
+    ; isDecEquivalence = ≈-isDecEquivalence 
+    }
+
+
+  ----------------------
+  -- Membership
+
+  abstract
 
     _∉?_ : Decidable (_∉_ {n})
     k ∉? (i ∺ j ∣ _) with k ≟𝔽 i | k ≟𝔽 j
@@ -125,19 +157,23 @@ module RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties {n} where
     p≈q⇒p₀≡q₀ (refl ∺ _) = refl
     p≈q⇒p₀≡q₀ (refl ∷ _) = refl
 
+    p₀≢q₀⇨p≉q : ∀ {p q : SimplePathⁿᵗ n} → source p ≢ source q → p ≉ q
+    p₀≢q₀⇨p≉q i≢j (i≡j ∺ _) = i≢j i≡j
+    p₀≢q₀⇨p≉q i≢j (i≡j ∷ _) = i≢j i≡j
+
     p≉i∷p : ∀ {i : Fin n} {p i∉p} → ¬ (p ≈ i ∷ p ∣ i∉p)
     p≉i∷p {p = _ ∺ _ ∣ _} ()
     p≉i∷p {p = _ ∷ _ ∣ _} (_ ∷ p≈i∷p) = p≉i∷p p≈i∷p
 
 
-    lookup-∈ : (p : SimplePathⁿᵗ n) → ∀ i {k} → lookup p i ≡ k → ¬ (k ∉ p)
+    lookup-∈ : (p : SimplePathⁿᵗ n) → ∀ i {k} → p ⟦ i ⟧ ≡ k → ¬ (k ∉ p)
     lookup-∈ (i ∺ j ∣ _) fzero            refl (notThere i≢i _) = i≢i refl
     lookup-∈ (i ∺ j ∣ _) (fsuc fzero)     refl (notThere _ j≢j) = j≢j refl
     lookup-∈ (i ∺ j ∣ _) (fsuc (fsuc ()))
     lookup-∈ (i ∷ p ∣ _) fzero            refl (notHere i≢i _)  = i≢i refl
     lookup-∈ (i ∷ p ∣ _) (fsuc k)         pᵢ≡k  (notHere _ i∉p)  = lookup-∈ p k pᵢ≡k i∉p
 
-    lookup! : ∀ (p : SimplePathⁿᵗ n) {k l} → k ≢ l → lookup p k ≢ lookup p l
+    lookup! : ∀ (p : SimplePathⁿᵗ n) {k l} → k ≢ l → p ⟦ k ⟧ ≢ p ⟦ l ⟧
     lookup! _             {fzero}          {fzero}          0≢0 _ = 0≢0 refl
     lookup! (i ∺ j ∣ i≢j) {fzero}          {fsuc fzero}     _     = i≢j
     lookup! (i ∺ j ∣ i≢j) {fsuc fzero}     {fzero}          _     = i≢j ∘ sym
@@ -151,7 +187,7 @@ module RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties {n} where
     |p|<n : ∀ (p : SimplePathⁿᵗ n) → length p <ℕ n
     |p|<n p with suc (length p) ≤ℕ? n
     ... | yes |p|<n = |p|<n
-    ... | no  |p|≮n with pigeonhole (≰⇒> |p|≮n) (lookup p)
+    ... | no  |p|≮n with pigeonhole (≰⇒> |p|≮n) (p ⟦_⟧)
     ...   | i , j , i≢j , pᵢ≡pⱼ = contradiction pᵢ≡pⱼ (lookup! p i≢j)
   
 
@@ -161,3 +197,19 @@ module RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties {n} where
     ∈𝔾-resp-≈ : ∀ {a} {A : Set a} {G : Graph A n} → (_∈𝔾 G) Respects _≈_
     ∈𝔾-resp-≈ (refl ∺ refl) (edge-∺ ij∈G)     = edge-∺ ij∈G
     ∈𝔾-resp-≈ {G = G} {i ∷ _ ∣ _} (refl ∷ p≈q)  (edge-∷ ip∈G p∈G) = edge-∷ (∈-resp-≡ₗ {i = i} {G = G} ip∈G (p≈q⇒p₀≡q₀ p≈q)) (∈𝔾-resp-≈ p≈q p∈G)
+
+    ∉𝔾-resp-≈ : ∀ {a} {A : Set a} {G : Graph A n} → (_∉𝔾 G) Respects _≈_
+    ∉𝔾-resp-≈ p≈q p∉G q∈G = contradiction (∈𝔾-resp-≈ (≈-sym p≈q) q∈G) p∉G
+    
+    _∈𝔾?_ : ∀ {a} {A : Set a} → Decidable (_∈𝔾_ {n = n} {A})
+    (i ∺ j ∣ x) ∈𝔾? G with (i , j) ∈? G
+    ... | yes ij∈G = yes (edge-∺ ij∈G)
+    ... | no  ij∉G = no (λ {(edge-∺ ij∈G) → ij∉G ij∈G})
+    (i ∷ p ∣ x) ∈𝔾? G with (i , source p) ∈? G | p ∈𝔾? G
+    ... | yes ip₀∈G | yes p∈G = yes (edge-∷ ip₀∈G p∈G)
+    ... | no  ip₀∉G | _       = no (λ {(edge-∷ ip₀∈G _) → ip₀∉G ip₀∈G})
+    ... | _         | no  p∉G = no (λ {(edge-∷ _ p∈G) → p∉G p∈G})
+    
+    weight-cong : ∀ {a b} {A : Set a} {B : Set b} _▷_ (1# : B) {p q : SimplePathⁿᵗ n} {G : Graph A n} → p ≈ q → (p∈G : p ∈𝔾 G) (q∈G : q ∈𝔾 G) → weight _▷_ 1# p∈G ≡ weight _▷_ 1# q∈G
+    weight-cong _▷_ 1# {G = G} (refl ∺ refl) (edge-∺ (v , Gᵢⱼ≈v))     (edge-∺ (w , Gᵢⱼ≈w))     = cong (_▷ 1#) (just-injective (trans (sym Gᵢⱼ≈v) Gᵢⱼ≈w))
+    weight-cong _▷_ 1# {G = G} (refl ∷ p≈q)  (edge-∷ (v , Gᵢⱼ≈v) p∈G) (edge-∷ (w , Gᵢⱼ≈w) q∈G) = cong₂ _▷_ (just-injective (trans (sym Gᵢⱼ≈v) (trans (cong (G _) (p≈q⇒p₀≡q₀ p≈q)) Gᵢⱼ≈w))) (weight-cong _▷_ 1# p≈q p∈G q∈G)

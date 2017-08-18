@@ -16,18 +16,18 @@ module RoutingLib.Data.Table.Membership.Properties where
     open Membership S
     open Setoid S renaming (Carrier to A)
 
-    sel⇒foldr∈t : ∀ {_•_} → Selective _≈_ _•_ → ∀ e {n} (t : Table A n) →
+    sel⇒foldr[t]∈t : ∀ {_•_} → Selective _≈_ _•_ → ∀ e {n} (t : Table A n) →
                   foldr _•_ e t ≈ e ⊎ foldr _•_ e t ∈ t
-    sel⇒foldr∈t sel e {zero}  t = inj₁ refl
-    sel⇒foldr∈t sel e {suc n} t with sel (t fzero) (foldr _ e (t ∘ fsuc))
+    sel⇒foldr[t]∈t sel e {zero}  t = inj₁ refl
+    sel⇒foldr[t]∈t sel e {suc n} t with sel (t fzero) (foldr _ e (t ∘ fsuc))
     ... | inj₁ t₀•f≈t₀ = inj₂ (fzero , t₀•f≈t₀)
-    ... | inj₂ t₀•f≈f  with sel⇒foldr∈t sel e (t ∘ fsuc)
+    ... | inj₂ t₀•f≈f  with sel⇒foldr[t]∈t sel e (t ∘ fsuc)
     ...   | inj₁ f≈e        = inj₁ (trans t₀•f≈f f≈e)
     ...   | inj₂ (i , f≈tᵢ) = inj₂ (fsuc i , trans t₀•f≈f f≈tᵢ)
 
-    sel⇒foldr+∈t : ∀ {_•_} → Selective _≈_ _•_ →
-                   ∀ {n} (t : Table A (suc n)) → foldr+ _•_ t ∈ t
-    sel⇒foldr+∈t sel t with sel⇒foldr∈t sel (t fzero) (t ∘ fsuc)
+    sel⇒foldr⁺[t]∈t : ∀ {_•_} → Selective _≈_ _•_ →
+                   ∀ {n} (t : Table A (suc n)) → foldr⁺ _•_ t ∈ t
+    sel⇒foldr⁺[t]∈t sel t with sel⇒foldr[t]∈t sel (t fzero) (t ∘ fsuc)
     ... | inj₁ f≈t₀      = fzero , f≈t₀
     ... | inj₂ (i , f≈tᵢ) = fsuc i , f≈tᵢ
 

@@ -3,15 +3,13 @@ open import Relation.Binary using (Setoid; Rel)
 open import Relation.Nullary using (¬_)
 open import Function using (_∘_)
 open import Data.List using (List; []; [_]; _∷_)
+open import Data.List.Any using (here; there)
 open import Data.Product using (_×_; _,_)
-
-import RoutingLib.Data.List.Membership as Membership
 
 module RoutingLib.Data.List.Disjoint {c ℓ} (S : Setoid c ℓ) where
 
   open Setoid S renaming (Carrier to A)
-  open Membership S using (_∈_; _∉_)
-  open Membership S using (here; there) public
+  open import Data.List.Any.Membership S using (_∈_; _∉_)
 
   infix 4 _#_
 

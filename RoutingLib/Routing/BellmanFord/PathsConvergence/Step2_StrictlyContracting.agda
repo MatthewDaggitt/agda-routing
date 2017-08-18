@@ -1,6 +1,6 @@
 open import Data.Product using (∃; ∃₂; _×_; _,_)
-open import Data.Nat using (ℕ; zero; suc; _+_; z≤n; s≤s; _<_; _≤_; _≤?_; _∸_; _⊔_; _⊓_; ≤-pred; module ≤-Reasoning)
-open import Data.Nat.Properties using (m≤m+n; m+n∸m≡n; _+-mono_; ∸-mono; m≤m⊔n; m⊓n≤m)
+open import Data.Nat using (ℕ; zero; suc; _+_; z≤n; s≤s; _<_; _≤_; _≤?_; _∸_; _⊔_; _⊓_; ≤-pred)
+open import Data.Nat.Properties using (≤-trans; ≤-refl; ≤-reflexive; m≤m+n; m+n∸m≡n; +-mono-≤; ∸-mono; ⊓-mono-<; m≤m⊔n; m⊓n≤m; ≰⇒≥; n≤m⊔n; m⊓n≤n; <-transˡ; <-transʳ; module ≤-Reasoning)
 open import Data.Fin using (Fin)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Relation.Binary.PropositionalEquality using (_≡_; cong; subst; subst₂; cong₂) renaming (refl to ≡-refl; sym to ≡-sym; trans to ≡-trans)
@@ -13,9 +13,9 @@ open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Data.Graph
 open import RoutingLib.Routing.BellmanFord.PathsConvergence.SufficientConditions
 open import RoutingLib.Routing.BellmanFord.GeneralConvergence.SufficientConditions using () renaming (SufficientConditions to GeneralSufficientConditions)
-open import RoutingLib.Data.Nat.Properties using (≰⇒≥; n≤m⊔n; m⊓n≤n; ≤-trans; ≤-refl; ≤-reflexive; m≤n⇒m≤n⊔o; m≤n⇒m≤o⊔n; ⊓-mono-<; ⊓-⊎preservesₗ-<x; m≤n⇒m⊓o≤n; <-transₗ; <-transᵣ)
-open import RoutingLib.Data.Matrix using (Any; map; min+)
-open import RoutingLib.Data.Matrix.Properties using (min+[M]<min+[N]; min+∈M)
+open import RoutingLib.Data.Nat.Properties using (m≤n⇒m≤n⊔o; m≤o⇒m≤n⊔o; n<m⇒n⊓o<m; n≤m⇒n⊓o≤m)
+open import RoutingLib.Data.Matrix using (Any; map; min⁺)
+open import RoutingLib.Data.Matrix.Properties using (min⁺[M]<min⁺[N])
 import RoutingLib.Routing.BellmanFord.PathsConvergence.Prelude as Prelude
 
 module RoutingLib.Routing.BellmanFord.PathsConvergence.Step2_StrictlyContracting
@@ -28,8 +28,6 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence.Step2_StrictlyContracting
 
   open SufficientConditions sc
   open Prelude 𝓡𝓐 ⊕-sel G
-
-  open import RoutingLib.Routing.BellmanFord.PathsConvergence.InconsistentPathProperties 𝓡𝓐 ⊕-sel G
 
   open import RoutingLib.Routing.BellmanFord.GeneralConvergence.Step2_UltrametricAlt 𝓡𝓟ᶜ (convertSufficientConditions sc) using () renaming (d to dᶜ; dₘₐₓ to dᶜₘₐₓ; d≡0⇒X≈Y to dᶜ≡0⇒X≈Y; d-sym to dᶜ-sym; d-cong₂ to dᶜ-cong; d-maxTriIneq to dᶜ-maxTriIneq; d≤dₘₐₓ to dᶜ≤dᶜₘₐₓ)
   open import RoutingLib.Routing.BellmanFord.GeneralConvergence.Step3_StrictlyContracting 𝓡𝓟ᶜ (convertSufficientConditions sc) using () renaming (σ-strictlyContracting to σᶜ-strContrOver-dᶜ)
@@ -50,19 +48,19 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence.Step2_StrictlyContracting
     lengthⁱ-inc : ∀ X → 𝑰ₘ (σⁱ X) → ∀ i j → ∃₂ λ k l → lengthⁱ (X k l) < lengthⁱ (σⁱ X i j)
     lengthⁱ-inc X σXⁱ i j with 𝑪? (σⁱ X i j) | 𝑰ₘ-witness σXⁱ
     ... | no  σXᵢⱼⁱ | _              = 𝒊-parent X i j σXᵢⱼⁱ , j , test₃ X i j σXᵢⱼⁱ
-    ... | yes σXᵢⱼᶜ  | k , l , σXₖₗⁱ = 𝒊-parent X k l σXₖₗⁱ , l , <-transₗ (test₃ X k l σXₖₗⁱ) (sizeⁱ≤n-1 (σⁱ X k l))
+    ... | yes σXᵢⱼᶜ  | k , l , σXₖₗⁱ = 𝒊-parent X k l σXₖₗⁱ , l , <-transˡ (test₃ X k l σXₖₗⁱ) (sizeⁱ≤n-1 (σⁱ X k l))
       
     σⁱ-strContr-sh : ∀ X → 𝑰ₘ (σⁱ X) → shortest X < shortest (σⁱ X) 
-    σⁱ-strContr-sh X σXⁱ = min+[M]<min+[N] (lengthⁱ-inc X σXⁱ)
+    σⁱ-strContr-sh X σXⁱ = min⁺[M]<min⁺[N] (lengthⁱ-inc X σXⁱ)
 
     σⁱ-strContr-sh⊓sh : ∀ X Y → 𝑰ₘ (σⁱ X) ⊎ 𝑰ₘ (σⁱ Y) → shortest X ⊓ shortest Y < shortest (σⁱ X) ⊓ shortest (σⁱ Y)
     σⁱ-strContr-sh⊓sh X Y (inj₁ σXⁱ) with 𝑪ₘ? Y | 𝑪ₘ? (σⁱ Y)
     ... | yes Yᶜ | _       = subst₂ _<_ (≡-sym (Yᶜ⇒shX⊓shY≡shX X Yᶜ)) (≡-sym (Yᶜ⇒shX⊓shY≡shX (σⁱ X) (σⁱ-pres-𝑪ₘ Yᶜ))) (σⁱ-strContr-sh X σXⁱ)
-    ... | no  Yⁱ | yes σYᶜ = subst (shortest X ⊓ shortest Y <_) (≡-sym (Yᶜ⇒shX⊓shY≡shX (σⁱ X) σYᶜ)) (<-transᵣ (m⊓n≤m (shortest X) (shortest Y)) (σⁱ-strContr-sh X σXⁱ))
+    ... | no  Yⁱ | yes σYᶜ = subst (shortest X ⊓ shortest Y <_) (≡-sym (Yᶜ⇒shX⊓shY≡shX (σⁱ X) σYᶜ)) (<-transʳ (m⊓n≤m (shortest X) (shortest Y)) (σⁱ-strContr-sh X σXⁱ))
     ... | no  Yⁱ | no  σYⁱ = ⊓-mono-< (σⁱ-strContr-sh X σXⁱ) (σⁱ-strContr-sh Y σYⁱ)
     σⁱ-strContr-sh⊓sh X Y (inj₂ σYⁱ) with 𝑪ₘ? X | 𝑪ₘ? (σⁱ X)
     ... | yes Xᶜ | _       = subst₂ _<_ (≡-sym (Xᶜ⇒shX⊓shY≡shY Y Xᶜ)) (≡-sym (Xᶜ⇒shX⊓shY≡shY (σⁱ Y) (σⁱ-pres-𝑪ₘ Xᶜ))) (σⁱ-strContr-sh Y σYⁱ)
-    ... | no  Xⁱ | yes σXᶜ = subst (shortest X ⊓ shortest Y <_) (≡-sym (Xᶜ⇒shX⊓shY≡shY (σⁱ Y) σXᶜ)) (<-transᵣ (m⊓n≤n (shortest X) (shortest Y)) (σⁱ-strContr-sh Y σYⁱ))
+    ... | no  Xⁱ | yes σXᶜ = subst (shortest X ⊓ shortest Y <_) (≡-sym (Xᶜ⇒shX⊓shY≡shY (σⁱ Y) σXᶜ)) (<-transʳ (m⊓n≤n (shortest X) (shortest Y)) (σⁱ-strContr-sh Y σYⁱ))
     ... | no  Xⁱ | no  σXⁱ = ⊓-mono-< (σⁱ-strContr-sh X σXⁱ) (σⁱ-strContr-sh Y σYⁱ)
 
 

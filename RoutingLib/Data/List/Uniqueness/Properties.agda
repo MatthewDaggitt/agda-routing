@@ -1,11 +1,12 @@
 open import Level using (_⊔_)
 open import Data.Nat using (zero; suc; z≤n; s≤s; _≤_; _<_)
+open import Data.Nat.Properties using (≤-antisym; <⇒≢)
 open import Data.Bool using (true; false)
 open import Data.Maybe using (Maybe; just; nothing; Eq)
-open import Data.List using (List; []; _∷_; length; gfilter; filter; map; concat; _++_; drop; take)
+open import Data.List using (List; []; _∷_; length; gfilter; filter; map; concat; tabulate; upTo; _++_; drop; take)
 open import Data.List.Any using (here; there; any)
 open import Data.List.All using (All; []; _∷_; lookup) renaming (map to mapₐ; tabulate to tabulateₐ)
-open import Data.List.All.Properties using (gmap)
+open import Data.List.All.Properties using (gmap; ¬Any⇒All¬; tabulate⁺)
 open import Data.Fin using (Fin) renaming (suc to fsuc)
 open import Data.Fin.Properties using (suc-injective)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
@@ -18,13 +19,12 @@ open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Decidable)
 
 open import RoutingLib.Data.List
-open import RoutingLib.Data.List.Membership as Membership using ()
-open import RoutingLib.Data.List.Membership.Properties as MembershipP using ()
+open import RoutingLib.Data.List.Any.Membership as Membership using ()
+open import RoutingLib.Data.List.Any.Membership.Properties as MembershipP using ()
 open import RoutingLib.Data.List.All using (AllPairs; []; _∷_)
 open import RoutingLib.Data.List.All.Properties
-open import RoutingLib.Data.Nat.Properties using (ℕₛ; ≤-antisym; <⇒≢)
+open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 open import RoutingLib.Data.Fin.Properties using (suc≢zero)
-open import RoutingLib.Data.Maybe.Base
 open import RoutingLib.Data.Maybe.Properties using (just-injective)
 open import RoutingLib.Data.List.Uniqueness as Uniqueness using (Unique)
 import RoutingLib.Data.List.Disjoint as Disjoint
@@ -36,7 +36,8 @@ module RoutingLib.Data.List.Uniqueness.Properties where
   module SingleSetoid {c ℓ} (S : Setoid c ℓ) where
 
     open Setoid S renaming (Carrier to A)
-    open Membership S using (_∈_; _∉_; _⊆_; deduplicate)
+    open import Data.List.Any.Membership S using (_∈_; _∉_; _⊆_)
+    open import RoutingLib.Data.List.Any.Membership S using (deduplicate)
     open Disjoint S using (_#_; ∈ₗ⇒∉ᵣ; contractₗ)
     open DisjointProperties S using (#-concat; #⇒AllAll≉) 
 {-
@@ -53,7 +54,7 @@ module RoutingLib.Data.List.Uniqueness.Properties where
     deduplicate!⁺ _≟_ [] = []
     deduplicate!⁺ _≟_ (x ∷ xs) with any (x ≟_) xs
     ... | yes _    = deduplicate!⁺ _≟_ xs
-    ... | no  x∉xs = ¬Any⇒All¬ (x∉xs ∘ (MembershipP.∈-deduplicate⁻ S _≟_)) ∷ deduplicate!⁺ _≟_ xs
+    ... | no  x∉xs = ¬Any⇒All¬ _ (x∉xs ∘ (MembershipP.∈-deduplicate⁻ S _≟_)) ∷ deduplicate!⁺ _≟_ xs
     
     dfilter!⁺ : ∀ {b} {P : A → Set b} (P? : Decidable P) → ∀ {xs} → Unique S xs → Unique S (dfilter P? xs)
     dfilter!⁺ P? xs! = AllPairs-dfilter⁺ P? xs!
@@ -67,7 +68,7 @@ module RoutingLib.Data.List.Uniqueness.Properties where
 
     tabulate! : ∀ {n} (f : Fin n → A) → (∀ {i j} → f i ≈ f j → i ≡ j) → Unique S (tabulate f)
     tabulate! {n = zero}  f _     = []
-    tabulate! {n = suc n} f f-inj = All-tabulate⁺ (λ _ → suc≢zero ∘ f-inj ∘ sym) ∷ tabulate! (f ∘ fsuc) (suc-injective ∘ f-inj)
+    tabulate! {n = suc n} f f-inj = tabulate⁺ (λ _ → suc≢zero ∘ f-inj ∘ sym) ∷ tabulate! (f ∘ fsuc) (suc-injective ∘ f-inj)
 
 {-
     tabulate!⁺ : ∀ {n} (f : Fin n → A) → (∀ {i j} → f i ≈ f j → i ≡ j) → Unique S (tabulate f)

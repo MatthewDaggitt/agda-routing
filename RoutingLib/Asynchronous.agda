@@ -1,22 +1,19 @@
 open import Level using (_⊔_) renaming (zero to lzero; suc to lsuc)
 open import Data.Fin using (Fin)
-open import Data.Fin.Subset using (Subset; _∈_; ⊤)
-open import Data.Fin.Subset.Properties using (∈⊤)
-open import Data.Fin.Dec using (_∈?_; all?)
-open import Data.Nat using (ℕ; _<_; _≤_; _+_; s≤s; zero; suc)
-open import Data.Nat.Properties using (1+n≰n; m≤m+n; n≤m+n)
-open import Data.Bool using (Bool)
-open import Data.Product using (∃; _×_; proj₂; _,_)
-open import Relation.Binary using (_⇒_; Reflexive; Symmetric; Transitive; IsEquivalence; Decidable)
+open import Data.Fin.Dec using (_∈?_)
+open import Data.Nat using (ℕ; _<_; _≤_; _+_; zero; suc)
+open import Data.Nat.Properties using (≤-refl)
+open import Data.Product using (∃)
+open import Relation.Binary using (DecSetoid; Setoid; Rel; _Preserves_⟶_)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 open import Relation.Nullary using (¬_; yes; no)
-open import Relation.Nullary.Negation using (¬∀⟶∃¬; contradiction)
-open import Relation.Binary using (DecSetoid; Setoid; Rel)
+open import Relation.Nullary.Negation using (contradiction)
 open import Induction.WellFounded using (Acc; acc)
+open import Induction.Nat using () renaming (<-well-founded to <-wf)
 
-open import RoutingLib.Data.Nat.Properties using (≤-refl)
-open import RoutingLib.Induction.Nat using () renaming (<-well-founded to <-wf)
 open import RoutingLib.Asynchronous.Schedule using (Schedule; 𝕤-sync)
+open import RoutingLib.Data.Table using (Table)
+import RoutingLib.Data.Table.Relation.Equality as TableEquality
 
 module RoutingLib.Asynchronous where
 
@@ -26,35 +23,28 @@ module RoutingLib.Asynchronous where
   -- Parallel function --
   -----------------------
   -- An operation σ that can be decomposed and carried out on n separate processors 
-  record Parallelisation a ℓ (n : ℕ) : Set (lsuc (a ⊔ ℓ)) where
-    field
-      -- The type of information at each processor
-      Sᵢ : Fin n → Setoid a ℓ
-      -- The update functions: "σ X i" is the result of processor i activating on state X 
-      σ : (∀ j → Setoid.Carrier (Sᵢ j)) → ∀ i → Setoid.Carrier (Sᵢ i)
+  record Parallelisation {a ℓ} (S : Setoid a ℓ) (n : ℕ) : Set (lsuc (a ⊔ ℓ)) where
 
-    -- Re-export setoid properties with the associated processor left implicit
-    module _ {i} where
-      open Setoid (Sᵢ i)
-        renaming 
-        ( Carrier   to Mᵢ
-        ; _≈_       to _≈ᵢ_
-        ; reflexive to ≈ᵢ-reflexive
-        ; refl      to ≈ᵢ-refl
-        ; sym       to ≈ᵢ-sym
-        ; trans     to ≈ᵢ-trans
-        ) public
-
+    open Setoid S
+      renaming 
+      ( Carrier   to Mᵢ
+      ; _≈_       to _≈ᵢ_
+      ; reflexive to ≈ᵢ-reflexive
+      ; refl      to ≈ᵢ-refl
+      ; sym       to ≈ᵢ-sym
+      ; trans     to ≈ᵢ-trans
+      ) public
+        
     -- The global state space
     M : Set a
-    M = (∀ i → Mᵢ {i})
+    M = Table Mᵢ n
 
-    _≈ₘ_ : Rel M ℓ
-    X ≈ₘ Y = ∀ i → X i ≈ᵢ Y i
+    open TableEquality S renaming (_≈ₜ_ to _≈ₘ_; _≉ₜ_ to _≉ₘ_) public
 
-    _≉ₘ_ : Rel M ℓ
-    X ≉ₘ Y = ¬ (X ≈ₘ Y)
-
+    field
+      -- The update functions: "σ X i" is the result of processor i activating on state X 
+      σ      : M → M
+      σ-cong : σ Preserves _≈ₘ_ ⟶ _≈ₘ_
 
     -- The asynchronous state function
     δ' : Schedule n → ∀ {t} → Acc _<_ t → M → M
@@ -74,11 +64,12 @@ module RoutingLib.Asynchronous where
   -----------
   -- Other --
   -----------
-
+  
   -- A record encapsulating the idea that p is a well behaved parallelisation
-  record IsAsynchronouslySafe {a ℓ n} (p : Parallelisation a ℓ n) : Set (lsuc (a ⊔ ℓ)) where
+  record IsAsynchronouslySafe {a ℓ n} {S : Setoid a ℓ} (p : Parallelisation S n) : Set (lsuc (a ⊔ ℓ)) where
+  
     open Parallelisation p
+    
     field
       m*         : M
       m*-reached : ∀ 𝕤 X → ∃ λ tᶜ → ∀ t → δ 𝕤 (tᶜ + t) X ≈ₘ m*
-

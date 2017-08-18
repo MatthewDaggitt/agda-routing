@@ -1,12 +1,13 @@
-open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _+_; _∸_; module ≤-Reasoning) renaming (_≤_ to _≤ℕ_; _<_ to _<ℕ_; _≟_ to _≟ℕ_)
-open import Data.Nat.Properties using (≤-step; ≤-steps; ∸-mono; +-∸-assoc; n∸m≤n; n∸n≡0)
-open import Data.List using (List; _∷_; drop)
+open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _+_; _∸_) renaming (_≤_ to _≤ℕ_; _<_ to _<ℕ_; _≟_ to _≟ℕ_)
+open import Data.Nat.Properties using (≤-step; ≤-steps; <⇒≤; <⇒≢; ≤+≢⇒<; ∸-mono; +-∸-assoc; n∸m≤n; n∸n≡0; ≤⇒pred≤; module ≤-Reasoning)  renaming (≤-refl to ≤ℕ-refl; ≤-trans to ≤ℕ-trans)
+open import Data.List using (List; _∷_; drop; upTo)
 open import Data.List.All using (All; _∷_) renaming (map to mapₐ)
 open import Data.Product using (∃; _,_; proj₁; proj₂)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Fin using (Fin)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
 open import Data.List.Any using (here; there)
+open import Data.List.Any.Membership.Propositional using (_∈_)
 open import Relation.Binary using (Setoid)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; cong; subst; module ≡-Reasoning; inspect; [_])
@@ -22,11 +23,12 @@ open import RoutingLib.Data.List.All using (_∷_)
 open import RoutingLib.Data.List.All.Properties using (s≤betweenₛₑ; betweenₛₑ<e)
 open import RoutingLib.Data.List.Uniqueness using (Unique)
 open import RoutingLib.Data.List.Uniqueness.Properties using (drop!⁺; upTo!⁺; between!⁺)
-open import RoutingLib.Data.List.Membership.Propositional using (_∈_; ∈-upTo⁺; ∈-between⁺; ∈-between⁻)
-open import RoutingLib.Data.List using (upTo; between)
-open import RoutingLib.Data.Nat.Properties using (ℕₛ; m∸[m∸n]≡n; <⇒≤; <⇒≢; ≤+≢⇒<; m<n⇒n≢0; m<n⇒n≡1+o; m∸n<o⇒m∸o<n) renaming (≤-refl to ≤ℕ-refl; ≤-trans to ≤ℕ-trans)
-open import RoutingLib.Data.Matrix using (Matrix; max+; map)
-open import RoutingLib.Data.Matrix.Properties using (max+∈M; M≤max+)
+open import RoutingLib.Data.List.Any.Membership.Propositional using (∈-upTo⁺; ∈-between⁺; ∈-between⁻)
+open import RoutingLib.Data.List using (between)
+open import RoutingLib.Data.Nat.Properties using (ℕₛ; m∸[m∸n]≡n; m<n⇒n≢0; m<n⇒n≡1+o; m∸n<o⇒m∸o<n)
+open import RoutingLib.Data.Matrix using (Matrix; max⁺; map)
+open import RoutingLib.Data.Matrix.Properties using (M≤max⁺)
+open import RoutingLib.Data.Matrix.Membership.Propositional.Properties using (max⁺[M]∈M)
 
 module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step4_AsynchronousConditions
   {a b ℓ n-1}
@@ -65,16 +67,16 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step4_AsynchronousCondi
   -- Zₛₜ is the maximal element in Z with respect to the height function
   
   s : Fin n
-  s with max+∈M (map h Z)
+  s with max⁺[M]∈M (map h Z)
   ... | i , _ , _ = i
   
   t : Fin n
-  t with max+∈M (map h Z)
+  t with max⁺[M]∈M (map h Z)
   ... | _ , j , _ = j
   
   hZᵢⱼ≤hZₛₜ : ∀ i j → h (Z i j) ≤ℕ h (Z s t)
-  hZᵢⱼ≤hZₛₜ i j with max+∈M (map h Z)
-  ... | _ , _ , hZₛₜ≡max+ = subst (h (Z i j) ≤ℕ_) hZₛₜ≡max+ (M≤max+ (map h Z) i j)
+  hZᵢⱼ≤hZₛₜ i j with max⁺[M]∈M (map h Z)
+  ... | _ , _ , hZₛₜ≡max⁺ = subst (h (Z i j) ≤ℕ_) hZₛₜ≡max⁺ (M≤max⁺ (map h Z) i j)
 
 
   -- As Zₛₜ is the maximial element we can define the minimal distance
@@ -162,7 +164,7 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step4_AsynchronousCondi
     hZ[x]ₛₜ<hZₛₜ : h (Z[ x ] s t) <ℕ h (Z s t)
     hZ[x]ₛₜ<hZₛₜ = begin
       suc (h (Z[ x ] s t)) ≡⟨ cong suc hZ[x]ₛₜ≡dₛᵤₚ∸i ⟩
-      suc (dₛᵤₚ ∸ i)       ≤⟨ m∸n<o⇒m∸o<n h≤dₛᵤₚ dₛᵤₚ∸hZₛₜ<i ⟩
+      suc (dₛᵤₚ ∸ i)       ≤⟨ m∸n<o⇒m∸o<n (≤⇒pred≤ i<dₛᵤₚ) dₛᵤₚ∸hZₛₜ<i ⟩
       h (Z s t)            ∎
       where open ≤-Reasoning
 

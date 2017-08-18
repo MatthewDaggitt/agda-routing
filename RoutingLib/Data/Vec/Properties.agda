@@ -5,6 +5,7 @@ open import Data.Vec hiding (map; zipWith)
 open import Data.Product using (∃; ∃₂; _,_; _×_) renaming (map to mapₚ)
 open import Data.List using ([]; _∷_)
 open import Data.List.Any as Any using (here; there)
+open import Data.List.Any.Membership.Propositional using () renaming (_∈_ to _∈ₗ_)
 open import Function using (_∘_; id)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
@@ -14,17 +15,12 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym
 open import RoutingLib.Data.Vec
 open import RoutingLib.Data.List.SucMap using (0∉mapₛ; ∈-mapₛ; mapₛ-∈)
 open import RoutingLib.Algebra.FunctionProperties using (_×-Preserves_)
-open import RoutingLib.Data.List.Membership.Propositional using () renaming (_∈_ to _∈ₗ_)
 
 module RoutingLib.Data.Vec.Properties where
 
   -----------------------
   -- To push to stdlib --
   -----------------------
-
-  ∈-map : ∀ {a b m} {A : Set a} {B : Set b} {x : A} {xs : Vec A m} (f : A → B) → x ∈ xs → f x ∈ map f xs
-  ∈-map f here          = here
-  ∈-map f (there x∈xs) = there (∈-map f x∈xs)
 
   ∈-lookup : ∀ {a n} {A : Set a} {v : A} {xs : Vec A n} → v ∈ xs → ∃ λ i → lookup i xs ≡ v
   ∈-lookup here = fzero , refl

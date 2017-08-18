@@ -1,6 +1,7 @@
 open import Data.Nat using (ℕ; suc; z≤n; s≤s; ≤-pred) renaming (_≤_ to _≤ℕ_; _<_ to _<ℕ_)
-open import Data.Nat.Properties using (≰⇒>)
+open import Data.Nat.Properties using (≰⇒>; <⇒≱; <⇒≤; suc-injective) renaming (≤-reflexive to ≤ℕ-reflexive)
 open import Data.List using (List; length)
+open import Data.List.All.Properties using (All-universal)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (∃; _×_; _,_; proj₁; proj₂)
 open import Relation.Binary using (_Preserves_⟶_)
@@ -9,10 +10,8 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Routing.Definitions using (RoutingProblem; RoutingAlgebra)
-open import RoutingLib.Data.Nat.Properties using (<⇒≱; <⇒≤; suc-injective) renaming (≤-reflexive to ≤ℕ-reflexive)
 open import RoutingLib.Routing.BellmanFord.GeneralConvergence.SufficientConditions using (SufficientConditions)
 open import RoutingLib.Data.List using (index)
-open import RoutingLib.Data.List.All.Properties using (All-universal)
 open import RoutingLib.Data.List.Uniqueness using (Unique)
 
 module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step1_HeightFunction 
@@ -25,8 +24,9 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step1_HeightFunction
   open RoutingProblem 𝓡𝓟
   open SufficientConditions sc
   open import RoutingLib.Data.List.Uniset DS using (Enumeration)
-  open import RoutingLib.Data.List.Membership S using (_∈_; indexOf)
-  open import RoutingLib.Data.List.Membership.Properties using (indexOf-cong; indexOf-revCong; indexOf-index)
+  open import Data.List.Any.Membership S using (_∈_)
+  open import RoutingLib.Data.List.Any.Membership S using (indexOf)
+  open import RoutingLib.Data.List.Any.Membership.Properties using (indexOf-cong; indexOf-revCong; indexOf-index)
 
   open import RoutingLib.Data.List.Sorting ≤-decTotalOrder using (Sorted; sort; sort-↗; _↗_; sort-Sorted)
   open import RoutingLib.Data.List.Sorting.Properties ≤-decTotalOrder using (↗-unique; ↗-∈ˡ; ↗-indexOf-mono-<; ↗-indexOf-revMono-≤; ↗-indexOf-⊤)

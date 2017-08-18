@@ -8,7 +8,7 @@ open import RoutingLib.Data.List.All using (_∷_; [])
 open import RoutingLib.Data.Graph.SimplePath hiding (_∈_)
 open import RoutingLib.Data.Graph.SimplePath.Properties using ([-]-injective; ℙₛ)
 open import RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties using () renaming (≈-setoid to NEPₛ)
-open import RoutingLib.Data.List.Membership.Properties using (∈-map⁺)
+open import RoutingLib.Data.List.Any.Membership.Properties using (∈-map⁺)
 open import RoutingLib.Data.List.Uniqueness using (Unique)
 
 module RoutingLib.Data.Graph.SimplePath.Enumeration where
@@ -17,7 +17,7 @@ module RoutingLib.Data.Graph.SimplePath.Enumeration where
 
   private
     module _ {n : ℕ} where
-      open import RoutingLib.Data.List.Membership (ℙₛ {n}) using (_∈_) public
+      open import Data.List.Any.Membership (ℙₛ {n}) using (_∈_) public
 
   abstract
   

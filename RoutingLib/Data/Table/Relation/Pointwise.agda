@@ -55,16 +55,12 @@ module RoutingLib.Data.Table.Relation.Pointwise where
 
   setoid : ∀ {a ℓ} → Setoid a ℓ → ℕ → Setoid a ℓ
   setoid S n = record
-    { Carrier       = Table (Setoid.Carrier S) n
-    ; _≈_           = Pointwise (Setoid._≈_ S)
-    ; isEquivalence = isEquivalence (Setoid.isEquivalence S)
+    { isEquivalence = isEquivalence (Setoid.isEquivalence S) {n}
     }
 
   decSetoid : ∀ {a ℓ} → DecSetoid a ℓ → ℕ → DecSetoid a ℓ
   decSetoid DS n = record
-    { Carrier          = Table (DecSetoid.Carrier DS) n
-    ; _≈_              = Pointwise (DecSetoid._≈_ DS)
-    ; isDecEquivalence = isDecEquivalence (DecSetoid.isDecEquivalence DS)
+    { isDecEquivalence = isDecEquivalence (DecSetoid.isDecEquivalence DS) {n}
     }
 
 
@@ -95,9 +91,9 @@ module RoutingLib.Data.Table.Relation.Pointwise where
   foldr-cong fg-cong d~e {zero}  s~t = d~e
   foldr-cong fg-cong d~e {suc n} s~t = fg-cong (s~t fzero) (foldr-cong (λ {w x y z} → fg-cong {w} {x} {y} {z}) d~e (s~t ∘ fsuc))
 
-  foldr+-cong : ∀ {a b ℓ} {A : Set a} {B : Set b} {_~_ : REL A B ℓ}
+  foldr⁺-cong : ∀ {a b ℓ} {A : Set a} {B : Set b} {_~_ : REL A B ℓ}
                 {_•_ : Op₂ A} {_◦_ : Op₂ B} →
                 (∀ {w x y z} → w ~ x → y ~ z → (w • y) ~ (x ◦ z)) →
                 ∀ {n} {s : Table A (suc n)} {t : Table B (suc n)} →
-                Pointwise _~_ s t → foldr+ _•_ s ~ foldr+ _◦_ t
-  foldr+-cong •◦-cong s~t = foldr-cong (λ {w x y z} → •◦-cong {w} {x} {y} {z}) (s~t fzero) (s~t ∘ fsuc)
+                Pointwise _~_ s t → foldr⁺ _•_ s ~ foldr⁺ _◦_ t
+  foldr⁺-cong •◦-cong s~t = foldr-cong (λ {w x y z} → •◦-cong {w} {x} {y} {z}) (s~t fzero) (s~t ∘ fsuc)

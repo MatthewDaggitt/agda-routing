@@ -1,13 +1,11 @@
 open import Level using () renaming (zero to lzero)
 open import Data.Nat using (ℕ; zero; suc; s≤s; _<_; _≤_; _∸_; _+_)
-open import Data.Nat.Properties using (1+n≰n)
+open import Data.Nat.Properties using (1+n≰n; ≤-refl)
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (Subset; _∈_; ⊤)
 open import Data.Fin.Subset.Properties using (∈⊤)
 open import Data.Product using (∃; _×_; _,_)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
-
-open import RoutingLib.Data.Nat.Properties using (≤-refl)
 
 module RoutingLib.Asynchronous.Schedule where
 

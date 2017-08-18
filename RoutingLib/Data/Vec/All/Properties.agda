@@ -1,5 +1,5 @@
-open import Data.Vec as Vec hiding (map; zip)
-open import Data.Vec.All using (All; []; _∷_) renaming (map to mapₐ; lookup to lookupₐ)
+open import Data.Vec as Vec
+open import Data.Vec.All using (All; All₂; []; _∷_) renaming (map to mapₐ; lookup to lookupₐ)
 open import Data.Product using (_×_; _,_; uncurry)
 open import Data.Fin using (Fin; _<_) renaming (zero to fzero; suc to fsuc)
 open import Data.Nat using (zero; suc; s≤s)
@@ -10,8 +10,8 @@ open import Relation.Binary using (Rel; _⇒_)
 open import Function using (_∘_)
 open import Algebra.FunctionProperties using (Op₂)
 
-open import RoutingLib.Data.Vec using (map; zip; foldr₂)
-open import RoutingLib.Data.Vec.All using (All₂; AllPairs; []; _∷_)
+open import RoutingLib.Data.Vec using (foldr₂)
+open import RoutingLib.Data.Vec.All using (AllPairs; []; _∷_)
 open import RoutingLib.Data.List.All using ([]; _∷_) renaming (AllPairs to AllPairsₗ)
 
 module RoutingLib.Data.Vec.All.Properties where

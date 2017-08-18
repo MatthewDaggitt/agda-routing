@@ -3,17 +3,17 @@ open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Subset using (⊤; _∈_)
 open import Data.Fin.Dec using (_∈?_)
+open import Data.List using (tabulate)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (∃; ∃₂; _,_; _×_; proj₁; proj₂)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_) renaming (refl to ≡-refl; sym to ≡-sym; trans to ≡-trans)
+open import Algebra.FunctionProperties.Consequences using (sel⇒idem)
 
-open import RoutingLib.Algebra.FunctionProperties using (Sel⇒Idem)
 open import RoutingLib.Routing.Definitions using (RoutingAlgebra; RoutingProblem)
-open import RoutingLib.Data.List using (tabulate)
 open import RoutingLib.Data.List.Properties using (foldr≤ₗe; foldr≤ᵣxs)
-open import RoutingLib.Data.List.Membership.Properties using (foldr-∈; ∈-tabulate⁻; ∈-tabulate⁺)
+open import RoutingLib.Data.List.Any.Membership.Properties using (foldr-∈; ∈-tabulate⁻; ∈-tabulate⁺)
 open import RoutingLib.Data.List.All.Properties using (foldr-All₂; All₂-tabulate)
 import RoutingLib.Routing.BellmanFord as BellmanFord
 
@@ -74,7 +74,7 @@ module RoutingLib.Routing.BellmanFord.Properties
     ... | inj₂ σXᵢᵢ≈Iᵢᵢ           = σXᵢᵢ≈Iᵢᵢ
     ... | inj₁ (k , σXᵢᵢ≈AᵢₖXₖⱼ) =
       begin
-        σ X i i         ≈⟨ sym (foldr≤ₗe S ⊕-cong (Sel⇒Idem _≈_ ⊕-sel) ⊕-assoc ⊕-comm (I i i) (tabulate (λ k → A i k ▷ X k i))) ⟩
+        σ X i i         ≈⟨ sym (foldr≤ₗe S ⊕-cong (sel⇒idem S ⊕-sel) ⊕-assoc ⊕-comm (I i i) (tabulate (λ k → A i k ▷ X k i))) ⟩
         σ X i i ⊕ I i i ≈⟨ Iᵢᵢ-idᵣ-⊕ 1#-anᵣ-⊕ i (σ X i i) ⟩
         I i i
       ∎

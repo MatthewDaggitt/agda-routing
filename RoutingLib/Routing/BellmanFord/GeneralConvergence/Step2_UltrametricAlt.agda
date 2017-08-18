@@ -4,15 +4,16 @@ open import Relation.Binary using (DecTotalOrder; Setoid; _Preserves₂_⟶_⟶_
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; cong; cong₂; subst; subst₂; module ≡-Reasoning) renaming (refl to ≡-refl; sym to ≡-sym; trans to ≡-trans)
 open import Data.Fin using (Fin) renaming (zero to fzero)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
-open import Data.Nat using (ℕ; suc; zero; z≤n; s≤s; decTotalOrder; _⊔_; _*_; _∸_; module ≤-Reasoning) renaming (_≤_ to _≤ℕ_; _≥_ to _≥ℕ_; _<_ to _<ℕ_; _≟_ to _≟ℕ_)
-open import Data.Nat.Properties using (n≤1+n; 1+n≰n; m≤m⊔n; ⊔-sel; n∸m≤n; ≤-step; ∸-mono; +-∸-assoc; n∸n≡0)
+open import Data.Nat using (ℕ; suc; zero; z≤n; s≤s; _⊔_; _*_; _∸_) renaming (_≤_ to _≤ℕ_; _≥_ to _≥ℕ_; _<_ to _<ℕ_; _≟_ to _≟ℕ_)
+open import Data.Nat.Properties using (n≤1+n; 1+n≰n; m≤m⊔n; <⇒≤; <⇒≢;  ⊔-sel; ⊔-comm; ⊔-identityʳ; n≤m⊔n; ⊔-mono-≤; n∸m≤n; ≤-step; ∸-mono; +-∸-assoc; n∸n≡0; module ≤-Reasoning) renaming (≤-reflexive to ≤ℕ-reflexive; ≤-refl to ≤ℕ-refl; ≤-trans to ≤ℕ-trans; ≤-antisym to ≤ℕ-antisym)
 open import Data.Product using (∃₂;_×_; _,_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 
-open import RoutingLib.Data.Nat.Properties using (ℕₛ; ⊔-comm; n≤m⊔n; ⊔-mono-≤; 0-idᵣ-⊔; m⊔n≡m⇒n≤m; o∸n≤o∸m∧m≤o⇒m≤n; m<n⇒n≡1+o; <⇒≤; <⇒≢; ⊔-preserves-≡x; ⊔-forces×-≤x; ⊔-×preserves-≤x; ⊔-⊎preservesₗ-x≤; m<n⇒0<n∸m; n≤m⇒m⊔n≡m; m≤n⇒m⊔n≡n; ∸-left-cancellative) renaming (≤-reflexive to ≤ℕ-reflexive; ≤-refl to ≤ℕ-refl; ≤-trans to ≤ℕ-trans; ≤-antisym to ≤ℕ-antisym)
+open import RoutingLib.Data.Nat.Properties using (ℕₛ; m⊔n≡m⇒n≤m; o∸n≤o∸m∧m≤o⇒m≤n; m<n⇒n≡1+o; ⊔-preserves-≡x; n⊔o≤m⇒n≤m×o≤m; n≤m×o≤m⇒n⊔o≤m; m≤n⇒m≤n⊔o; m<n⇒0<n∸m; n≤m⇒m⊔n≡m; m≤n⇒m⊔n≡n; ∸-cancelˡ)
 open import RoutingLib.Function.Distance using (IsUltrametric; MaxTriangleIneq)
-open import RoutingLib.Data.Matrix using (Matrix; zipWith; max+)
-open import RoutingLib.Data.Matrix.Properties using (max+-cong; M≤max+; M≤⇒max+≤; max+∈M; max+-constant; zipWith-sym; max+≡Mᵢⱼ; foldʳᵈ+-×preserves)
+open import RoutingLib.Data.Matrix using (Matrix; zipWith; max⁺)
+open import RoutingLib.Data.Matrix.Properties using (max⁺-cong; M≤max⁺; max⁺[M]≡x; max⁺[M]≤x; max⁺-constant; zipWith-sym)
+open import RoutingLib.Data.Matrix.Membership.Propositional.Properties using (max⁺[M]∈M)
 open import RoutingLib.Data.Matrix.Relation.Pointwise using (zipWith-cong)
 
 open import RoutingLib.Routing.Definitions using (RoutingProblem; RoutingAlgebra)
@@ -62,7 +63,7 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step2_UltrametricAlt
 
     -- the overall distance between two iterations
     d : RMatrix → RMatrix → ℕ
-    d X Y = max+ (zipWith dₑ X Y)
+    d X Y = max⁺ (zipWith dₑ X Y)
 
     ----------------
     -- Properties --
@@ -81,7 +82,7 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step2_UltrametricAlt
     ... | (o , h≡1+o) rewrite h≡1+o = n∸m≤n o hₘₐₓ
 
     dₛᵤₚ∸hx≡1⇒x≈0 : ∀ {x} → dₛᵤₚ ∸ h x ≡ 1 → x ≈ 0#
-    dₛᵤₚ∸hx≡1⇒x≈0 {x} dₛᵤₚ∸hx≡1 = ≈-resp-h (∸-left-cancellative h≤dₛᵤₚ h≤dₛᵤₚ (begin
+    dₛᵤₚ∸hx≡1⇒x≈0 {x} dₛᵤₚ∸hx≡1 = ≈-resp-h (∸-cancelˡ h≤dₛᵤₚ h≤dₛᵤₚ (begin
       dₛᵤₚ ∸ h x        ≡⟨ dₛᵤₚ∸hx≡1 ⟩
       1                 ≡⟨ cong suc (≡-sym (n∸n≡0 hₘₐₓ)) ⟩
       suc (hₘₐₓ ∸ hₘₐₓ) ≡⟨ ≡-sym (+-∸-assoc 1 {hₘₐₓ} ≤ℕ-refl) ⟩
@@ -92,10 +93,10 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step2_UltrametricAlt
     -- dₕ
 
     0<dₕ : ∀ {x y} → 0 <ℕ dₕ x y
-    0<dₕ = ⊔-⊎preservesₗ-x≤ _ 0<dₛᵤₚ∸h
+    0<dₕ = m≤n⇒m≤n⊔o _ 0<dₛᵤₚ∸h
 
     dₕ<dₘₐₓ : ∀ x y → dₕ x y ≤ℕ dₘₐₓ
-    dₕ<dₘₐₓ x y = ⊔-×preserves-≤x dₛᵤₚ∸h≤dₘₐₓ dₛᵤₚ∸h≤dₘₐₓ
+    dₕ<dₘₐₓ x y = n≤m×o≤m⇒n⊔o≤m dₛᵤₚ∸h≤dₘₐₓ dₛᵤₚ∸h≤dₘₐₓ
     
     dₕ-sym : ∀ x y → dₕ x y ≡ dₕ y x
     dₕ-sym x y = ⊔-comm (dₛᵤₚ ∸ h x) (dₛᵤₚ ∸ h y)
@@ -214,23 +215,23 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step2_UltrametricAlt
     ... | no  _   | no  _   | no _   = dₕ-maxTriIneq x y z
     ... | no  _   | yes y≈z | no _   = begin
       dₕ x z     ≡⟨ dₕ-cong₂ refl (sym y≈z) ⟩
-      dₕ x y     ≡⟨ ≡-sym (0-idᵣ-⊔ (dₕ x y)) ⟩
+      dₕ x y     ≡⟨ ≡-sym (⊔-identityʳ (dₕ x y)) ⟩
       dₕ x y ⊔ 0 ∎     
       where open ≤-Reasoning
       
     -- dₑ
 
     d-sym : ∀ X Y → d X Y ≡ d Y X
-    d-sym X Y = max+-cong (zipWith-sym _≡_ dₑ-sym X Y)
+    d-sym X Y = max⁺-cong (zipWith-sym _≡_ dₑ-sym X Y)
 
     d-cong₂ : d Preserves₂ _≈ₘ_ ⟶ _≈ₘ_ ⟶ _≡_
-    d-cong₂ X≈Y U≈V = max+-cong (zipWith-cong _≈_ _≈_ _≡_ dₑ-cong₂ X≈Y U≈V)
+    d-cong₂ X≈Y U≈V = max⁺-cong (zipWith-cong _≈_ _≈_ _≡_ dₑ-cong₂ X≈Y U≈V)
 
     dₑ≤d : ∀ X Y i j → dₑ (X i j) (Y i j) ≤ℕ d X Y
-    dₑ≤d X Y i j = M≤max+ (zipWith dₑ X Y) i j
+    dₑ≤d X Y i j = M≤max⁺ (zipWith dₑ X Y) i j
 
     d≤dₘₐₓ : ∀ X Y → d X Y ≤ℕ dₘₐₓ
-    d≤dₘₐₓ X Y = M≤⇒max+≤ (λ i j → dₑ≤dₘₐₓ (X i j) (Y i j))
+    d≤dₘₐₓ X Y = max⁺[M]≤x (λ i j → dₑ≤dₘₐₓ (X i j) (Y i j))
 
     d<dₛᵤₚ : ∀ X Y → d X Y <ℕ dₛᵤₚ
     d<dₛᵤₚ X Y = s≤s (d≤dₘₐₓ X Y)
@@ -245,13 +246,13 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step2_UltrametricAlt
     dₛᵤₚ∸hYᵢⱼ≤d {X} {Y} Xᵢⱼ≉Yᵢⱼ = ≤ℕ-trans (dₛᵤₚ∸hy≤dₑ Xᵢⱼ≉Yᵢⱼ) (dₑ≤d X Y _ _)
     
     X≈Y⇒d≡0 : ∀ {X Y} → X ≈ₘ Y → d X Y ≡ 0
-    X≈Y⇒d≡0 X≈Y = max+-constant (λ i j → x≈y⇒dₑ≡0 (X≈Y i j))
+    X≈Y⇒d≡0 X≈Y = max⁺-constant (λ i j → x≈y⇒dₑ≡0 (X≈Y i j))
     
     d≡0⇒X≈Y : ∀ {X Y} → d X Y ≡ 0 → X ≈ₘ Y
     d≡0⇒X≈Y {X} {Y} d≡0 i j = dₑ≡0⇒x≈y (≤ℕ-antisym (subst (dₑ (X i j) (Y i j) ≤ℕ_) d≡0 (dₑ≤d X Y i j)) z≤n)
 
     d≡dₑ : ∀ X Y → ∃₂ λ i j → d X Y ≡ dₑ (X i j) (Y i j)
-    d≡dₑ X Y = max+∈M (zipWith dₑ X Y)
+    d≡dₑ X Y = max⁺[M]∈M (zipWith dₑ X Y)
 
     d≢1 : ∀ X Y → d X Y ≢ 1
     d≢1 X Y d≡1 with d≡dₑ X Y
@@ -260,12 +261,12 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step2_UltrametricAlt
     d≡dₛᵤₚ∸Xᵢⱼ : ∀ {X Y i j} →
                  (∀ k l → dₑ (X k l) (Y k l) ≤ℕ dₑ (X i j) (Y i j)) →
                  h (X i j) <ℕ h (Y i j) → d X Y ≡ dₛᵤₚ ∸ h (X i j) 
-    d≡dₛᵤₚ∸Xᵢⱼ ≤dₑᵢⱼ hXᵢⱼ<hYᵢⱼ = ≡-trans (max+≡Mᵢⱼ ≤dₑᵢⱼ) (dₑ≡dₛᵤₚ∸hx hXᵢⱼ<hYᵢⱼ)
+    d≡dₛᵤₚ∸Xᵢⱼ ≤dₑᵢⱼ hXᵢⱼ<hYᵢⱼ = ≡-trans (max⁺[M]≡x (_ , _ , ≡-refl) ≤dₑᵢⱼ) (dₑ≡dₛᵤₚ∸hx hXᵢⱼ<hYᵢⱼ)
     
     d≡dₛᵤₚ∸Yᵢⱼ : ∀ {X Y i j} →
                  (∀ k l → dₑ (X k l) (Y k l) ≤ℕ dₑ (X i j) (Y i j)) →
                  h (Y i j) <ℕ h (X i j) → d X Y ≡ dₛᵤₚ ∸ h (Y i j)
-    d≡dₛᵤₚ∸Yᵢⱼ ≤dₑᵢⱼ hYᵢⱼ<hXᵢⱼ = ≡-trans (max+≡Mᵢⱼ ≤dₑᵢⱼ) (dₑ≡dₛᵤₚ∸hy hYᵢⱼ<hXᵢⱼ)
+    d≡dₛᵤₚ∸Yᵢⱼ ≤dₑᵢⱼ hYᵢⱼ<hXᵢⱼ = ≡-trans (max⁺[M]≡x (_ , _ , ≡-refl) ≤dₑᵢⱼ) (dₑ≡dₛᵤₚ∸hy hYᵢⱼ<hXᵢⱼ)
 
     d-maxTriIneq : MaxTriangleIneq ℝ𝕄ₛ d
     d-maxTriIneq X Y Z with d≡dₑ X Z

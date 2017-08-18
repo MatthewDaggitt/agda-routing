@@ -8,34 +8,6 @@ open import Relation.Nullary using (yes; no)
 
 module RoutingLib.Data.List where
 
-  -- stdlib
-  applyUpTo : ∀ {a} {A : Set a} (f : ℕ → A) n → List A
-  applyUpTo f zero    = []
-  applyUpTo f (suc n) = f zero ∷ applyUpTo (f ∘ suc) n
-
-  -- stdlib
-  applyDownFrom : ∀ {a} {A : Set a} (f : ℕ → A) n → List A
-  applyDownFrom f zero    = []
-  applyDownFrom f (suc n) = f n ∷ applyDownFrom f n
-
-  -- stdlib
-  upTo : ∀ n → List ℕ
-  upTo = applyUpTo id
-
-  -- stdlib
-  downFrom : ∀ n → List ℕ
-  downFrom = applyDownFrom id
-
-  -- stdlib
-  tabulate : ∀ {a n} {A : Set a} (f : Fin n → A) → List A
-  tabulate {_} {zero}  f = []
-  tabulate {_} {suc n} f = f fzero ∷ tabulate (f ∘ fsuc)
-
-  -- stdlib
-  allFin : ∀ n → List (Fin n)
-  allFin n = tabulate id
-
-
   -----------
   -- Other --
   -----------

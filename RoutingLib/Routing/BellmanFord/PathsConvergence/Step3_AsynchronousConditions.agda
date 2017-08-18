@@ -2,6 +2,7 @@ open import Data.Nat using (ℕ; suc; _+_; _∸_; _⊓_; _≤_) renaming (_≟_ 
 open import Data.Nat.Properties using (m≤m+n)
 open import Data.Fin using () renaming (zero to fzero)
 open import Data.List using (List; map; _++_)
+open import Data.List.Any.Membership.Propositional using (_∈_)
 open import Data.List.All using (All; lookup)
 open import Data.List.All.Properties using (All-map)
 open import Data.Product using (∃; _×_; _,_)
@@ -20,11 +21,11 @@ open import RoutingLib.Data.Graph.SimplePath.Properties using (ℙₛ; p≈q⇒|
 open import RoutingLib.Data.Graph.SimplePath.Enumeration
 open import RoutingLib.Data.List using (dfilter)
 open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique; deduplicate!⁺; ++!⁺; map!⁺)
-open import RoutingLib.Data.List.Membership.Propositional using (_∈_; deduplicate; ∈-++⁺ʳ; ∈-++⁺ˡ; ∈-++⁻; ∈-deduplicate⁺; ∈-deduplicate⁻)
-open import RoutingLib.Data.List.Membership.Properties using (∈-map⁺; ∈-map⁻; ∈-dfilter⁻; ∈-dfilter⁺)
+open import RoutingLib.Data.List.Any.Membership.Propositional using (deduplicate; ∈-++⁺ʳ; ∈-++⁺ˡ; ∈-++⁻; ∈-deduplicate⁺; ∈-deduplicate⁻)
+open import RoutingLib.Data.List.Any.Membership.Properties using (∈-map⁺; ∈-map⁻; ∈-dfilter⁻; ∈-dfilter⁺)
 open import RoutingLib.Data.List.All.Properties using (deduplicate⁺; All-map⁺₂)
 import RoutingLib.Data.Matrix as Matrix
-open import RoutingLib.Data.Matrix.Properties using (min+-constant)
+open import RoutingLib.Data.Matrix.Properties using (min⁺-constant)
 open import RoutingLib.Data.Nat.Properties using (ℕₛ; ℕᵈˢ; ≤⇒≯)
 open import RoutingLib.Data.List.Disjoint ℕₛ using (_#_)
 open import RoutingLib.Routing.Definitions
@@ -45,7 +46,6 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence.Step3_AsynchronousConditi
   open SufficientConditions sc
   open Prelude 𝓡𝓐 ⊕-sel G
   
-  
   private
 
     scwp : _
@@ -53,7 +53,6 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence.Step3_AsynchronousConditi
     
   open import RoutingLib.Routing.BellmanFord.PathsConvergence.Step1_Ultrametric 𝓡𝓐 sc G
   open import RoutingLib.Routing.BellmanFord.PathsConvergence.Step2_StrictlyContracting 𝓡𝓐 sc G using (σⁱ-strContr-dⁱ)
-  open import RoutingLib.Routing.BellmanFord.PathsConvergence.InconsistentPathProperties 𝓡𝓐 ⊕-sel G
 
   open import RoutingLib.Routing.BellmanFord.GeneralConvergence.Step2_UltrametricAlt 𝓡𝓟ᶜ scwp using () renaming (d to dᶜ; d-cong₂ to dᶜ-cong; dₛᵤₚ to dᶜₛᵤₚ; X≈Y⇒d≡0 to X≈Y⇒dᶜ≡0)
   open import RoutingLib.Routing.BellmanFord.GeneralConvergence.Step4_AsynchronousConditions 𝓡𝓟ᶜ scwp using () renaming
@@ -70,8 +69,8 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence.Step3_AsynchronousConditi
   ------------------------------------------------------------------------------
   -- Fixed point
   ------------------------------------------------------------------------------
-  -- As applications of σ perserves consistency then Z, the fixed point for σⁱ,
-  -- is the same as that for σᶜ
+  -- As applications of σ perserves consistency then Z, the fixed point for σᶜ,
+  -- is also the fixed point for σⁱ
   
   Z : IMatrix
   Z = toIₘ cZ
@@ -139,7 +138,7 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence.Step3_AsynchronousConditi
   Z[p]≉Z p = Z≉Xⁱ (Z[p]ⁱ p) ∘ ≈ⁱₘ-sym
 
   shZ[p]≡|p| : ∀ p → shortest Z[ p ] ≡ length p
-  shZ[p]≡|p| p = min+-constant {n-1} {n-1} (λ i j → inconsistentIRoute-sizeⁱ p)
+  shZ[p]≡|p| p = min⁺-constant {n-1} {n-1} (λ i j → inconsistentIRoute-sizeⁱ p)
 
   dZ[p]Z≡inv|p| : ∀ p → d Z[ p ] Z ≡ invert (length p)
   dZ[p]Z≡inv|p| p = begin

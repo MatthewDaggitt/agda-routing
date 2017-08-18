@@ -1,9 +1,9 @@
 open import Data.Nat using (suc)
 open import Data.List using (List; []; _∷_; map)
 open import Data.List.Any as Any using (here; there)
+open import Data.List.Any.Membership.Propositional using (_∈_; _∉_)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Relation.Binary.PropositionalEquality using (refl)
-open Any.Membership-≡ using (_∈_; _∉_)
 
 
 module RoutingLib.Data.List.SucMap where

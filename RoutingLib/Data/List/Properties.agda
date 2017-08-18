@@ -1,15 +1,15 @@
 open import Data.Nat using (zero; suc; z≤n; s≤s; _≤_; _<_; _⊔_; _+_)
-open import Data.Nat.Properties using (≤-step; ⊓-sel; ⊔-sel; m≤m⊔n)
-open import Data.Nat.Properties.Simple using (+-suc)
+open import Data.Nat.Properties using (≤-step; ≤-antisym; ⊓-sel; ⊔-sel; m≤m⊔n; ⊔-mono-≤; +-suc; ⊔-identityʳ; n≤m⊔n; ⊓-mono-≤; ≤-refl; ≤-trans; <-transʳ; <-transˡ; m⊓n≤n; <⇒≢)
 open import Data.List
 open import Data.List.All using (All; []; _∷_)
 open import Data.List.Any using (Any; here; there)
+open import Data.List.Any.Membership.Propositional using (_∈_; lose)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Maybe using (Maybe; just; nothing)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_,_)
 open import Relation.Binary using (Rel; Setoid)
-open import Relation.Unary using (Decidable; ∁)
+open import Relation.Unary using (Decidable; Pred; ∁)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; cong; cong₂; trans)
@@ -20,9 +20,8 @@ open import Algebra.FunctionProperties using (Op₂; Idempotent; Associative; Co
 open import RoutingLib.Data.List
 open import RoutingLib.Data.List.All using (All₂; []; _∷_)
 open import RoutingLib.Data.List.All.Properties using (All-applyBetween⁺₁)
-open import RoutingLib.Data.Nat.Properties using (⊔-mono-≤; 0-idᵣ-⊔; n≤m⊔n; ⊓-mono-≤; ≤-refl; ≤-trans; <-transᵣ; <-transₗ; m⊓n≤n; ⊔-×preserves-≤x; ⊓-⊎preservesᵣ-≤x; ⊓-⊎preserves-≤x; ⊓-⊎preserves-<x; ⊓-⊎preservesᵣ-<x; m⊓n≡n⇒n≤m; <⇒≢; ⊓-×preserves-x≤; ⊔-⊎preserves-x≤; ⊔-⊎preservesᵣ-x≤; n≤m⇒m⊔n≡m; m≤n⇒m⊔n≡n; m≤n⇒m⊓n≡m; n≤m⇒m⊓n≡n)
+open import RoutingLib.Data.Nat.Properties
 open import RoutingLib.Data.Maybe.Properties using (just-injective)
-open import RoutingLib.Data.List.Membership.Propositional using (_∈_; lose)
 open import RoutingLib.Relation.Unary.Consequences using (P?⇒¬P?)
 open import RoutingLib.Algebra.FunctionProperties
 
@@ -90,24 +89,24 @@ module RoutingLib.Data.List.Properties where
 
   -- Properties of foldr
 
-  module _ {a} {A : Set a} where
+  module _ {a p} {A : Set a} {P : Pred A p} {_•_ : Op₂ A} where
   
-    foldr-forces× : ∀ {p} {P : A → Set p} {_•_} → _•_ Forces-× P → ∀ e xs → P (foldr _•_ e xs) → All P xs
+    foldr-forces× : _•_ Forces-× P → ∀ e xs → P (foldr _•_ e xs) → All P xs
     foldr-forces× _          _ []       _     = []
-    foldr-forces× •-forces-P _ (x ∷ xs) Pfold with •-forces-P Pfold
+    foldr-forces× •-forces-P _ (x ∷ xs) Pfold with •-forces-P _ _ Pfold
     ... | (px , pfxs) = px ∷ foldr-forces× •-forces-P _ xs pfxs
 
-    foldr-×preserves : ∀ {p} {P : A → Set p} {_•_} → _•_ ×-Preserves P → ∀ {e xs} → All P xs → P e → P (foldr _•_ e xs)
-    foldr-×preserves _    []         pe = pe
-    foldr-×preserves pres (px ∷ pxs) pe = pres px (foldr-×preserves pres pxs pe)
+    foldr-×pres : _•_ ×-Preserves P → ∀ {e xs} → All P xs → P e → P (foldr _•_ e xs)
+    foldr-×pres _    []         pe = pe
+    foldr-×pres pres (px ∷ pxs) pe = pres px (foldr-×pres pres pxs pe)
   
-    foldr-⊎preservesᵣ : ∀ {p} {P : A → Set p} {_•_} → _•_ ⊎-Preservesᵣ P → ∀ {e} xs → P e → P (foldr _•_ e xs)
-    foldr-⊎preservesᵣ •-pres-P []       Pe = Pe
-    foldr-⊎preservesᵣ •-pres-P (_ ∷ xs) Pe = •-pres-P _ (foldr-⊎preservesᵣ •-pres-P xs Pe)
+    foldr-⊎presʳ : _•_ ⊎-Preservesʳ P → ∀ {e} xs → P e → P (foldr _•_ e xs)
+    foldr-⊎presʳ •-pres-P []       Pe = Pe
+    foldr-⊎presʳ •-pres-P (_ ∷ xs) Pe = •-pres-P _ (foldr-⊎presʳ •-pres-P xs Pe)
 
-    foldr-⊎preserves : ∀ {p} {P : A → Set p} {_•_} → _•_ ⊎-Preserves P → ∀ {xs} e → Any P xs → P (foldr _•_ e xs)
-    foldr-⊎preserves (presₗ , presᵣ) e (here px)   = presₗ _ px
-    foldr-⊎preserves (presₗ , presᵣ) e (there pxs) = presᵣ _ (foldr-⊎preserves (presₗ , presᵣ) e pxs)
+    foldr-⊎pres : _•_ ⊎-Preserves P → ∀ {xs} e → Any P xs → P (foldr _•_ e xs)
+    foldr-⊎pres •-pres-P e (here px)   = •-pres-P _ _ (inj₁ px)
+    foldr-⊎pres •-pres-P e (there pxs) = •-pres-P _ _ (inj₂ (foldr-⊎pres •-pres-P e pxs))
 
   -- Properties of zipWith
   
@@ -129,23 +128,22 @@ module RoutingLib.Data.List.Properties where
   -- Properties of min
   
   min[xs]≤x : ∀ {x xs} ⊤ → Any (_≤ x) xs → min ⊤ xs ≤ x
-  min[xs]≤x = foldr-⊎preserves ⊓-⊎preserves-≤x
+  min[xs]≤x = foldr-⊎pres n≤m⊎o≤m⇒n⊓o≤m
 
   min[xs]<x : ∀ {x xs} ⊤ → Any (_< x) xs → min ⊤ xs < x
-  min[xs]<x = foldr-⊎preserves ⊓-⊎preserves-<x
-
+  min[xs]<x = foldr-⊎pres n<m⊎o<m⇒n⊓o<m
+  
   min[xs]≤⊤ : ∀ ⊤ xs → min ⊤ xs ≤ ⊤
-  min[xs]≤⊤ ⊤ xs = foldr-⊎preservesᵣ ⊓-⊎preservesᵣ-≤x xs ≤-refl
+  min[xs]≤⊤ ⊤ xs = foldr-⊎presʳ n≤m⇒o⊓n≤m xs ≤-refl
 
   x≤min[xs] : ∀ {x xs ⊤} → All (x ≤_) xs → x ≤ ⊤ → x ≤ min ⊤ xs
-  x≤min[xs] = foldr-×preserves ⊓-×preserves-x≤
+  x≤min[xs] = foldr-×pres m≤n×m≤o⇒m≤n⊓o
 
   x<min[xs] : ∀ {x xs ⊤} → All (x <_) xs → x < ⊤ → x < min ⊤ xs
-  x<min[xs] = foldr-×preserves ⊓-×preserves-x≤
+  x<min[xs] = foldr-×pres m≤n×m≤o⇒m≤n⊓o
 
   min[xs]≡x : ∀ {x xs ⊤} → x ∈ xs → All (x ≤_) xs → x ≤ ⊤ → min ⊤ xs ≡ x
-  min[xs]≡x (here  refl) (x≤x ∷ x≤xs) x≤⊤ = m≤n⇒m⊓n≡m (x≤min[xs] x≤xs x≤⊤)
-  min[xs]≡x (there x∈xs) (z≤x ∷ x≤xs) x≤⊤ = trans (n≤m⇒m⊓n≡n (min[xs]≤x _ (lose x∈xs z≤x))) (min[xs]≡x x∈xs x≤xs x≤⊤)
+  min[xs]≡x x∈xs x≤xs x≤⊤ = ≤-antisym (min[xs]≤x _ (lose x∈xs ≤-refl)) (x≤min[xs] x≤xs x≤⊤)
   
   min[xs]∈xs : ∀ {⊤ xs} → min ⊤ xs ≢ ⊤ → min ⊤ xs ∈ xs
   min[xs]∈xs {⊤} {[]}     ⊤≢⊤ = contradiction refl ⊤≢⊤
@@ -154,7 +152,7 @@ module RoutingLib.Data.List.Properties where
   ... | inj₂ y⊓m≡m rewrite y⊓m≡m = there (min[xs]∈xs m≢⊤)
   
   min[xs]<min[ys]₁ : ∀ {xs ys ⊤₁ ⊤₂} → ⊤₁ < ⊤₂ → All (λ y → Any (_< y) xs) ys → min ⊤₁ xs < min ⊤₂ ys
-  min[xs]<min[ys]₁ {xs} {[]}     {_}  {_}  ⊤₁<⊤₂ [] = <-transᵣ (min[xs]≤⊤ _ xs) ⊤₁<⊤₂
+  min[xs]<min[ys]₁ {xs} {[]}     {_}  {_}  ⊤₁<⊤₂ [] = <-transʳ (min[xs]≤⊤ _ xs) ⊤₁<⊤₂
   min[xs]<min[ys]₁ {xs} {y ∷ ys} {⊤₁} {⊤₂} ⊤₁<⊤₂ (xs<y  ∷ pxs) with ⊓-sel y (min ⊤₂ ys)
   ... | inj₁ y⊓m≡y rewrite y⊓m≡y = min[xs]<x ⊤₁ xs<y
   ... | inj₂ y⊓m≡m rewrite y⊓m≡m = min[xs]<min[ys]₁ ⊤₁<⊤₂ pxs
@@ -167,27 +165,25 @@ module RoutingLib.Data.List.Properties where
 
 
 
-
   -- Properties of max
 
   max[xs]≤x : ∀ {x xs ⊥} → All (_≤ x) xs → ⊥ ≤ x → max ⊥ xs ≤ x
-  max[xs]≤x = foldr-×preserves ⊔-×preserves-≤x
+  max[xs]≤x = foldr-×pres n≤m×o≤m⇒n⊔o≤m
 
   max[xs]<x : ∀ {x xs ⊥} → All (_< x) xs → ⊥ < x → max ⊥ xs < x
-  max[xs]<x = foldr-×preserves ⊔-×preserves-≤x
+  max[xs]<x = foldr-×pres n≤m×o≤m⇒n⊔o≤m
 
   x≤max[xs] : ∀ {x xs} ⊥ → Any (x ≤_) xs → x ≤ max ⊥ xs
-  x≤max[xs] = foldr-⊎preserves ⊔-⊎preserves-x≤
+  x≤max[xs] = foldr-⊎pres m≤n⊎m≤o⇒m≤n⊔o
   
   x<max[xs] : ∀ {x xs} ⊥ → Any (x <_) xs → x < max ⊥ xs
-  x<max[xs] = foldr-⊎preserves ⊔-⊎preserves-x≤
+  x<max[xs] = foldr-⊎pres m≤n⊎m≤o⇒m≤n⊔o
 
   ⊥≤max[xs] : ∀ ⊥ xs → ⊥ ≤ max ⊥ xs
-  ⊥≤max[xs] ⊥ xs = foldr-⊎preservesᵣ  ⊔-⊎preservesᵣ-x≤ xs ≤-refl
-
+  ⊥≤max[xs] ⊥ xs = foldr-⊎presʳ m≤o⇒m≤n⊔o xs ≤-refl
+  
   max[xs]≡x : ∀ {x xs ⊥} → x ∈ xs → All (_≤ x) xs → ⊥ ≤ x → max ⊥ xs ≡ x
-  max[xs]≡x (here  refl) (x≤x ∷ xs≤x) ⊥≤x = n≤m⇒m⊔n≡m (max[xs]≤x xs≤x ⊥≤x)
-  max[xs]≡x (there x∈xs) (x≤z ∷ xs≤x) ⊥≤x = trans (m≤n⇒m⊔n≡n (x≤max[xs] _ (lose x∈xs x≤z))) (max[xs]≡x x∈xs xs≤x ⊥≤x)
+  max[xs]≡x x∈xs xs≤x ⊥≤x = ≤-antisym (max[xs]≤x xs≤x ⊥≤x) (x≤max[xs] _ (lose x∈xs ≤-refl))
   
   max[xs]∈xs : ∀ {⊥ xs} → max ⊥ xs ≢ ⊥ → max ⊥ xs ∈ xs
   max[xs]∈xs {⊥} {[]}     ⊥≢⊥ = contradiction refl ⊥≢⊥
@@ -196,22 +192,11 @@ module RoutingLib.Data.List.Properties where
   ... | inj₂ x⊔r≡r rewrite x⊔r≡r = there (max[xs]∈xs m≢⊥)
 
 
-{-
-  
-  ∈⇒≤max : ∀ {x xs} → x ∈ xs → x ≤ max xs
-  ∈⇒≤max {x} {_ ∷ xs} (here refl) = m≤m⊔n x (max xs)
-  ∈⇒≤max {x} {y ∷ xs} (there x∈xs) = ≤-trans (∈⇒≤max x∈xs) (n≤m⊔n y (max xs))
-
-  i≤j⇒maxᵢ≤maxⱼ : ∀ {i j} xs → i ≤ j → foldr _⊔_ i xs ≤ foldr _⊔_ j xs
-  i≤j⇒maxᵢ≤maxⱼ []       i≤j = i≤j
-  i≤j⇒maxᵢ≤maxⱼ (v ∷ xs) i≤j = ⊔-mono-≤ (≤-refl {v}) (i≤j⇒maxᵢ≤maxⱼ xs i≤j)
--}
-
 
   module _ {a ℓ} (S : Setoid a ℓ) where
 
     open Setoid S renaming (Carrier to A; refl to ≈-refl; sym to ≈-sym; trans to ≈-trans)
-    open import RoutingLib.Data.List.Membership S using () renaming (_∈_ to _∈ₛ_)
+    open import Data.List.Any.Membership S using () renaming (_∈_ to _∈ₛ_)
     open import Relation.Binary.EqReasoning S
     
     foldr≤ᵣe : ∀ {_•_ : Op₂ A} → Congruent₂ _≈_ _•_ → Idempotent _≈_ _•_ → Associative _≈_ _•_ → Commutative _≈_ _•_ → ∀ e xs → e • foldr _•_ e xs ≈ foldr _•_ e xs

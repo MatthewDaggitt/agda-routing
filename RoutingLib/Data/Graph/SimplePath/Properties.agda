@@ -4,17 +4,16 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Data.Nat using (ℕ; suc; z≤n; s≤s) renaming (_≟_ to _≟ℕ_; _≤?_ to _≤ℕ?_; _<_ to _<ℕ_)
-open import Data.Nat.Properties using (<-trans; m≢1+m+n)
+open import Data.Nat.Properties using (<-trans; m≢1+m+n; <⇒≢; <⇒≯; ≤-refl; m+n≮n; suc-injective; <-cmp)
 open import Data.Fin using (Fin; _<_; _≤?_) renaming (suc to fsuc)
-open import Data.Fin.Properties using (cmp)
+open import Data.Fin.Properties using (cmp; ≤-trans; ≤-antisym; ≤-total; _<?_)
 open import Data.Sum using (inj₁; inj₂)
 
 open import RoutingLib.Data.Graph using (Graph)
 open import RoutingLib.Data.Graph.SimplePath
 open import RoutingLib.Data.Graph.SimplePath.NonEmpty as NE using ()
 open import RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties as NEP using ()
-open import RoutingLib.Data.Nat.Properties using (<⇒≢; <⇒≯; ≤-refl; m+n≮n; suc-injective; <-cmp; n≢1+n)
-open import RoutingLib.Data.Fin.Properties using (≤-trans; ≤-antisym; ≤-total; _<?_)
+open import RoutingLib.Data.Nat.Properties using (n≢1+n)
 open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_)
 
 module RoutingLib.Data.Graph.SimplePath.Properties {n : ℕ} where

@@ -4,10 +4,10 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Relation.Binary.PropositionalEquality using (setoid; _≡_; _≢_; refl)
 open import Function using (id)
 
-open import RoutingLib.Data.List using (allFin; combine)
+open import RoutingLib.Data.List using (combine)
 open import RoutingLib.Data.List.Disjoint using (_#_)
 open import RoutingLib.Data.List.Uniqueness using () renaming (Unique to Unique')
-open import RoutingLib.Data.List.Membership.Propositional using (deduplicate)
+open import RoutingLib.Data.List.Any.Membership.Propositional using (deduplicate)
 import RoutingLib.Data.List.Uniqueness.Properties as UP
 
 module RoutingLib.Data.List.Uniqueness.Propositional where

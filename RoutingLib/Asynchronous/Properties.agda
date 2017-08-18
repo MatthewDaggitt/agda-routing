@@ -1,23 +1,24 @@
 open import Data.Nat using (ℕ; _≤_; _≤?_; _<_; _+_; _∸_; zero; suc; z≤n; s≤s; _≟_; ≤-pred)
-open import Data.Nat.Properties using (n≤1+n; ≰⇒>; +-∸-assoc; n∸n≡0)
-open import Data.Nat.Properties.Simple using (+-right-identity; +-assoc)
+open import Data.Nat.Properties using (n≤1+n; ≰⇒>; +-∸-assoc; n∸n≡0; ≤-refl; ≤-antisym; ≤+≢⇒<; ≤-reflexive; ≤-trans; +-assoc; +-identityʳ; _<?_; ≮⇒≥; <⇒≤; +-cancelʳ-≡)
+open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (_∈_; ⊤)
 open import Data.Fin.Subset.Properties using (∈⊤)
-open import Data.Fin.Dec using (_∈?_; all?)
+open import Data.Fin.Dec using (_∈?_; all?; ¬∀⟶∃¬)
 open import Data.Product using (∃; _,_; _×_)
 open import Relation.Binary using (_Preserves_⟶_; _⇒_; Reflexive; Symmetric; Transitive; Decidable; IsEquivalence; Setoid)
 open import Relation.Binary.PropositionalEquality using (_≡_; cong; refl; sym; trans; _≗_; subst; module ≡-Reasoning)
 open import Relation.Nullary using (¬_; yes; no)
-open import Relation.Nullary.Negation using (contradiction; ¬∀⟶∃¬)
+open import Relation.Nullary.Negation using (contradiction)
 open import Induction.WellFounded using (Acc; acc)
+open import Induction.Nat using () renaming (<-well-founded to <-wf)
 
 open import RoutingLib.Asynchronous
 open import RoutingLib.Asynchronous.Schedule using (Schedule; 𝕤-sync; _⟦_⟧≈⟦_⟧_)
 open import RoutingLib.Asynchronous.Schedule.Properties using (⟦⟧≈⟦⟧-fastForward)
-open import RoutingLib.Induction.Nat using () renaming (<-well-founded to <-wf)
-open import RoutingLib.Data.Nat.Properties using (≤-refl; ≤-antisym; ≤+≢⇒<; ≤-reflexive; ≤-trans; m≤n⇒m∸n≡0; m>n⇒m∸n≢0; m≤n⇨m+o≡n; _<?_; ≮⇒≥; <⇒≤; cancel-+-right; w∸x≡y∸z⇒v+x≡w∧v+y≡z)
+open import RoutingLib.Data.Nat.Properties using (m≤n⇒m∸n≡0; m>n⇒m∸n≢0; w∸x≡y∸z⇒v+x≡w∧v+y≡z)
+open import RoutingLib.Data.Table.Relation.Equality as TableEquality
 
-module RoutingLib.Asynchronous.Properties {a ℓ n} (p : Parallelisation a ℓ n) where
+module RoutingLib.Asynchronous.Properties {a ℓ n} {S : Setoid a ℓ} (p : Parallelisation S n) where
   
   open Parallelisation p
 
@@ -25,40 +26,24 @@ module RoutingLib.Asynchronous.Properties {a ℓ n} (p : Parallelisation a ℓ n
   -- Equality properties --
   -------------------------
 
+  open TableEquality S public using () renaming
+    ( ≈ₜ-reflexive to ≈ₘ-reflexive
+    ; ≈ₜ-refl to ≈ₘ-refl
+    ; ≈ₜ-sym to ≈ₘ-sym
+    ; ≈ₜ-trans to ≈ₘ-trans
+    ; ≈ₜ-isEquivalence to ≈ₘ-isEquivalence
+    ; 𝕋ₛ to Sₘ
+    )
+    
   -- Equality
-  ≈ₘ-reflexive : _≡_ ⇒ _≈ₘ_
-  ≈ₘ-reflexive refl i = ≈ᵢ-refl
-
-  ≈ₘ-refl : Reflexive _≈ₘ_
-  ≈ₘ-refl i = ≈ᵢ-refl
-
-  ≈ₘ-sym : Symmetric _≈ₘ_
-  ≈ₘ-sym A≈B i = ≈ᵢ-sym (A≈B i)
-
-  ≈ₘ-trans : Transitive _≈ₘ_
-  ≈ₘ-trans A≈B B≈C i = ≈ᵢ-trans (A≈B i) (B≈C i)
-
-  ≈ₘ-dec : (∀ {i} → Decidable (_≈ᵢ_ {i})) → Decidable _≈ₘ_
+  
+  ≈ₘ-dec : Decidable _≈ᵢ_ → Decidable (_≈ₘ_ {n})
   ≈ₘ-dec _≟ᵢ_ X Y = all? (λ i → (X i) ≟ᵢ (Y i))
 
-  ≉ₘ-witness : (∀ {i} → Decidable (_≈ᵢ_ {i})) → ∀ {X Y} → X ≉ₘ Y → ∃ λ i → ¬ (X i ≈ᵢ Y i)
+  ≉ₘ-witness : Decidable _≈ᵢ_ → ∀ {X Y} → X ≉ₘ Y → ∃ λ i → ¬ (X i ≈ᵢ Y i)
   ≉ₘ-witness _≟ᵢ_ {X} {Y} X≉Y with all? (λ i → X i ≟ᵢ Y i)
   ... | yes all  = contradiction all X≉Y
   ... | no  ¬all = ¬∀⟶∃¬ n (λ i → X i ≈ᵢ Y i) (λ i → X i ≟ᵢ Y i) ¬all
-
-  ≈ₘ-isEquivalence : IsEquivalence _≈ₘ_
-  ≈ₘ-isEquivalence = record 
-    { refl = ≈ₘ-refl 
-    ; sym = ≈ₘ-sym 
-    ; trans = ≈ₘ-trans 
-    }
-
-  Sₘ : Setoid a ℓ
-  Sₘ = record 
-    { Carrier = M 
-    ; _≈_ = _≈ₘ_ 
-    ; isEquivalence = ≈ₘ-isEquivalence
-    }
   
 
   ----------------------
@@ -131,7 +116,7 @@ module RoutingLib.Asynchronous.Properties {a ℓ n} (p : Parallelisation a ℓ n
         where
         result : ∀ k → δ' 𝕤₁ (t+t₁Acc (β 𝕤₁ (suc t + t₁) i k) _) X₁ k ≈ᵢ δ' 𝕤₂ (t+t₂Acc (β 𝕤₂ (suc t + t₂) i k) _) X₂ k
         result k with t₁ <? β 𝕤₁ (suc (t + t₁)) i k | t₂ <? β 𝕤₂ (suc (t + t₂)) i k
-        ... | no  t₁≮β | no  t₂≮β = ≈ᵢ-trans (≈ᵢ-trans (δ'-timeCong 𝕤₁ X₁ {β 𝕤₁ (suc t + t₁) i k} refl _ _ k) (snapshot-eq (suc t) i k (≮⇒≥ t₁≮β) (≮⇒≥ t₂≮β))) (δ'-timeCong 𝕤₂ X₂ {β 𝕤₂ (suc t + t₂) i k} refl _ _ k)
+        ... | no  t₁≮β | no  t₂≮β = ≈ᵢ-trans (≈ᵢ-trans (δ'-timeCong 𝕤₁ X₁ {β 𝕤₁ (suc t + t₁) i k} refl _ _ k) (snapshot-eq t i k (≮⇒≥ t₁≮β) (≮⇒≥ t₂≮β))) (δ'-timeCong 𝕤₂ X₂ {β 𝕤₂ (suc t + t₂) i k} refl _ _ k)
         ... | no  t₁≮β | yes t₂<β = contradiction (trans (sym (β-eq t i k)) (m≤n⇒m∸n≡0 (≮⇒≥ t₁≮β))) (m>n⇒m∸n≢0 t₂<β)
         ... | yes t₁<β | no  t₂≮β = contradiction (trans      (β-eq t i k)  (m≤n⇒m∸n≡0 (≮⇒≥ t₂≮β))) (m>n⇒m∸n≢0 t₁<β)
         ... | yes t₁<β | yes t₂<β with w∸x≡y∸z⇒v+x≡w∧v+y≡z (β-eq t i k) (<⇒≤ t₁<β) (<⇒≤ t₂<β)
@@ -141,3 +126,5 @@ module RoutingLib.Asynchronous.Properties {a ℓ n} (p : Parallelisation a ℓ n
       ≈ₛ⇒≈ₘ : ∀ {𝕤₁ 𝕤₂ t₁ t₂} X₁ X₂ → 𝕤₁ ⟦ t₁ ⟧≈⟦ t₂ ⟧ 𝕤₂ → snapshot 𝕤₁ t₁ X₁ ≈ₛ snapshot 𝕤₂ t₂ X₂ → 
                 δ 𝕤₁ t₁ X₁ ≈ₘ δ 𝕤₂ t₂ X₂ → ∀ t → δ 𝕤₁ (t + t₁) X₁ ≈ₘ δ 𝕤₂ (t + t₂) X₂
       ≈ₛ⇒≈ₘ X₁ X₂ 𝕤-eq snapshot-eq δX₁≈δX₂ t = ≈ₛ⇒≈ₘ' X₁ X₂ 𝕤-eq snapshot-eq δX₁≈δX₂ t (<-wf _) (<-wf _)
+
+      

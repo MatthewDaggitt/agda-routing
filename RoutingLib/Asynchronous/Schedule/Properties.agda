@@ -1,5 +1,5 @@
 open import Data.Nat using (ℕ; zero; suc; _≤_; _<_; _∸_; _+_; z≤n; s≤s; _≟_; _≤?_)
-open import Data.Nat.Properties using (∸-+-assoc; m≤m+n; ≰⇒>; n∸n≡0; +-∸-assoc)
+open import Data.Nat.Properties using (∸-+-assoc; m≤m+n; ≰⇒>; n∸n≡0; +-∸-assoc; ≤-trans; ≤-refl; ≰⇒≥; +-∸-comm)
 open import Data.Nat.Properties.Simple using (+-assoc; +-comm; +-right-identity)
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (Subset; _∈_)
@@ -8,7 +8,7 @@ open import Relation.Binary.PropositionalEquality using (refl; sym; trans; subst
 open import Relation.Nullary using (yes; no)
 
 open import RoutingLib.Asynchronous.Schedule
-open import RoutingLib.Data.Nat.Properties using (≤-trans; m≤n⇨m+o≡n; ≤-stepsᵣ; ≤-refl; ≰⇒≥; +-∸-comm)
+open import RoutingLib.Data.Nat.Properties using (m≤n⇒m+o≡n)
 
 module RoutingLib.Asynchronous.Schedule.Properties where
 
@@ -33,9 +33,9 @@ module RoutingLib.Asynchronous.Schedule.Properties where
     ≈𝔸-fastForward : ∀ {n} {α₁ α₂ : 𝔸 n} {t₁ t₂} → α₁ ⟦ t₁ ⟧≈𝔸⟦ t₂ ⟧ α₂ → ∀ t → α₁ ⟦ t + t₁ ⟧≈𝔸⟦ t + t₂ ⟧ α₂
     ≈𝔸-fastForward {t₁ = t₁} {t₂} eq t t' rewrite sym (+-assoc t' t t₁) | sym (+-assoc t' t t₂) = eq (t' + t)
 
-    ≈𝔸-starvationFree : ∀ {n} {α₁ α₂ : 𝔸 n} → StarvationFree α₁ → ∀ {t₁} {t₂} → α₁ ⟦ t₁ ⟧≈𝔸⟦ t₂ ⟧ α₂ → StarvationFree α₂
+    ≈𝔸-starvationFree : ∀ {n} {α₁ α₂ : 𝔸 n} → StarvationFree α₁ → ∀ {t₁ t₂} → α₁ ⟦ t₁ ⟧≈𝔸⟦ t₂ ⟧ α₂ → StarvationFree α₂
     ≈𝔸-starvationFree {_} {α₁} {α₂} sf {t₁} {t₂} α-eq t i with sf (t + t₁) i
-    ... | (t' , t+t₁<t' , i∈αₜ') with m≤n⇨m+o≡n t+t₁<t'
+    ... | (t' , t+t₁<t' , i∈αₜ') with m≤n⇒m+o≡n t+t₁<t'
     ...   | (o , refl) = suc t + (o + t₂) , m≤m+n (suc t) (o + t₂) , subst (i ∈_) (
       (begin
         α₁ (suc t + t₁ + o)   ≡⟨ cong α₁ (+-assoc (suc t) t₁ o) ⟩

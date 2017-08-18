@@ -1,7 +1,9 @@
 open import Data.Product using (_,_)
 open import Data.Sum using (inj₁; inj₂)
 open import Relation.Binary
+open import Relation.Nullary using (¬_)
 open import Algebra.FunctionProperties using (Congruent₂; Op₂)
+
 
 open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_; Respects₂⇨RespectedBy)
 
@@ -17,10 +19,13 @@ module RoutingLib.Algebra.Selectivity.NaturalOrders
   -- Left natural order --
   ------------------------
 
-  infix 4 _≤ₗ_
+  infix 4 _≤ₗ_ _≰ₗ_
 
   _≤ₗ_ : Rel A ℓ
   x ≤ₗ y = (x • y) ≈ x
+
+  _≰ₗ_ : Rel A ℓ
+  x ≰ₗ y = ¬ (x ≤ₗ y)
 
   -- Properties
 
@@ -81,10 +86,13 @@ module RoutingLib.Algebra.Selectivity.NaturalOrders
   -- Right natural order --
   -------------------------
 
-  infix 4 _≤ᵣ_
+  infix 4 _≤ᵣ_ _≰ᵣ_
 
   _≤ᵣ_ : Rel A ℓ
   x ≤ᵣ y = (y • x) ≈ x
+  
+  _≰ᵣ_ : Rel A ℓ
+  x ≰ᵣ y = ¬ (x ≤ᵣ y)
 
   -- Properties
 
@@ -182,6 +190,21 @@ module RoutingLib.Algebra.Selectivity.NaturalOrders
       _≈_ = _≈_ ;
       _≤_ = _≤ᵣ_ ;
       isTotalOrder = ≤ᵣ-isTotalOrder comm assoc sel
+    }
+
+  ≤ᵣ-isDecTotalOrder : Decidable _≈_ → Commutative _•_ → Associative _•_ → Selective _•_ → IsDecTotalOrder _≈_ _≤ᵣ_
+  ≤ᵣ-isDecTotalOrder dec comm assoc sel = record
+    { isTotalOrder = ≤ᵣ-isTotalOrder comm assoc sel
+    ; _≟_          = dec
+    ; _≤?_         = ≤ᵣ-dec dec
+    }
+
+  ≤ᵣ-decTotalOrder : Decidable _≈_ → Commutative _•_ → Associative _•_ → Selective _•_ → DecTotalOrder a ℓ ℓ
+  ≤ᵣ-decTotalOrder dec comm assoc sel = record
+    { Carrier = A
+    ; _≈_ = _≈_
+    ; _≤_ = _≤ᵣ_
+    ; isDecTotalOrder = ≤ᵣ-isDecTotalOrder dec comm assoc sel
     }
 
 

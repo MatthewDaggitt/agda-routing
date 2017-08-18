@@ -7,18 +7,18 @@ open import Data.List using (List; []; _∷_; length)
 open import Data.Nat using (ℕ)
 open import Algebra.FunctionProperties using (Op₂)
 open import Data.List.All using ([]; _∷_)
+open import Data.List.All.Properties using (¬Any⇒All¬)
 open import Function using (_∘_)
 
 open import RoutingLib.Data.List using (dfilter)
 open import RoutingLib.Data.List.All using ([]; _∷_)
 open import RoutingLib.Data.List.Uniqueness using (Unique)
-open import RoutingLib.Data.List.All.Properties using (¬Any⇒All¬)
 
 module RoutingLib.Data.List.Uniset {c ℓ} (DS : DecSetoid c ℓ) where
   
   open DecSetoid DS renaming (Carrier to A; setoid to S)
-  open import RoutingLib.Data.List.Membership S using () renaming (_∈_ to _∈ₗ_)
-  open import RoutingLib.Data.List.Membership.Properties using (∈-dec)
+  open import Data.List.Any.Membership S using () renaming (_∈_ to _∈ₗ_)
+  open import RoutingLib.Data.List.Any.Membership.Properties using (∈-dec)
   open import RoutingLib.Data.List.Uniqueness.Properties using (dfilter!⁺)
 
   private
@@ -80,7 +80,7 @@ module RoutingLib.Data.List.Uniset {c ℓ} (DS : DecSetoid c ℓ) where
   add : A → Uniset → Uniset
   add x (xs , xs!) with x ∈ₗ? xs
   ... | yes _    = xs , xs!
-  ... | no  x∉xs = x ∷ xs , ¬Any⇒All¬ x∉xs ∷ xs!
+  ... | no  x∉xs = x ∷ xs , ¬Any⇒All¬ _ x∉xs ∷ xs!
 
   remove : A → Uniset → Uniset
   remove x X = filter (x ≉?_) X

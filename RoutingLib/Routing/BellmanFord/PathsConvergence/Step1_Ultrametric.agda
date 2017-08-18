@@ -1,7 +1,7 @@
 open import Data.Product using (∃; ∃₂; _,_; _×_)
 open import Data.Sum using (_⊎_; inj₁; inj₂; [_,_]′)
-open import Data.Nat using (ℕ; zero; suc; _+_; z≤n; s≤s; _<_; _≤_; _≤?_; _∸_; _⊔_; _⊓_; ≤-pred; module ≤-Reasoning) renaming (_≟_ to _≟ℕ_)
-open import Data.Nat.Properties using (m≤m+n; m+n∸m≡n; _+-mono_; ∸-mono; m≤m⊔n; m⊓n≤m; cancel-+-left)
+open import Data.Nat using (ℕ; zero; suc; _+_; z≤n; s≤s; _<_; _≤_; _≤?_; _∸_; _⊔_; _⊓_; ≤-pred) renaming (_≟_ to _≟ℕ_)
+open import Data.Nat.Properties using (m≤m+n; m+n∸m≡n; suc-injective; ≤-trans; ≤-refl; ≤-reflexive; ≰⇒≥; +-comm; +-assoc; +-mono-≤; ∸-mono; m≤m⊔n; ⊔-mono-≤; ⊓-mono-≤; m⊓n≤m; ⊓-idem; ⊓-assoc; ⊔-identityʳ; ⊓-comm; +-cancelˡ-≡; +-distribˡ-⊔; n≤m⊔n; +-monoʳ-<; <⇒≤;  module ≤-Reasoning)
 open import Data.Fin using (Fin) renaming (zero to fzero)
 open import Data.Maybe using (Maybe; just; nothing)
 open import Relation.Binary using (_Preserves₂_⟶_⟶_)
@@ -17,9 +17,10 @@ open import RoutingLib.Routing.Definitions
 open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Data.Graph
 open import RoutingLib.Routing.BellmanFord.PathsConvergence.SufficientConditions
-open import RoutingLib.Data.Nat.Properties using (suc-injective; m≤n⇒m+o≡n; ≰⇒≥; +-comm; +-assoc; n≤m⊔n; ≤-trans; ≤-refl; ≤-reflexive; ⊔-mono-≤; 0-idᵣ-⊔; ⊓-comm; +-distribˡ-⊔; ∸-distribˡ-⊓-⊔; ⊓-mono-≤; ⊓-monoˡ-≤; ⊓-monoʳ-≤; m≤n⇒m≤n⊔o; m≤n⇒m≤o⊔n; ⊓-idem; ⊓-assoc; +-monoʳ-<; ∸-monoₗ-<; m≤n⇒m⊓n≡m; ∸-left-cancellative; ⊓-⊎preservesₗ-<x; ⊓-triangulate; n≢0⇒0<n; <⇒≤;  ≤-stepsᵣ)
-open import RoutingLib.Data.Matrix using (min+; map)
-open import RoutingLib.Data.Matrix.Properties using (min+-cong; min+-constant; min+[M]≤x; min+∈M)
+open import RoutingLib.Data.Nat.Properties using (m≤n⇒m+o≡n; ∸-distribˡ-⊓-⊔; n⊓-mono-≤; ⊓n-mono-≤; m≤n⇒m≤n⊔o; m≤o⇒m≤n⊔o; ∸-monoˡ-<; m≤n⇒m⊓n≡m; ∸-cancelˡ; n<m⇒n⊓o<m; ⊓-triangulate; n≢0⇒0<n; ≤-stepsʳ)
+open import RoutingLib.Data.Matrix using (min⁺; map)
+open import RoutingLib.Data.Matrix.Properties using (min⁺-cong; min⁺-constant; min⁺[M]≤x)
+open import RoutingLib.Data.Matrix.Membership.Propositional.Properties using (min⁺[M]∈M)
 open import RoutingLib.Function.Distance using (IsUltrametric; MaxTriangleIneq)
 import RoutingLib.Routing.BellmanFord.PathsConvergence.Prelude as Prelude
 
@@ -87,13 +88,13 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence.Step1_Ultrametric
   -- The length of the shortest inconsistent route in X
   
   shortest : IMatrix → ℕ
-  shortest X = min+ (map lengthⁱ X)
+  shortest X = min⁺ (map lengthⁱ X)
 
   shortest-cong : ∀ {X Y} → X ≈ⁱₘ Y → shortest X ≡ shortest Y
-  shortest-cong X≈Y = min+-cong (λ i j → lengthⁱ-cong (X≈Y i j))
+  shortest-cong X≈Y = min⁺-cong (λ i j → lengthⁱ-cong (X≈Y i j))
 
   shX<n : ∀ X → shortest X < n
-  shX<n X = s≤s (min+[M]≤x (map lengthⁱ X) (fzero , fzero , lengthⁱ≤n-1 (X fzero fzero)))
+  shX<n X = s≤s (min⁺[M]≤x (map lengthⁱ X) (fzero , fzero , lengthⁱ≤n-1 (X fzero fzero)))
 
   postulate shXⁱ≡|Xⁱᵢⱼ| : ∀ {X} → 𝑰ₘ X → ∃₂ λ i j → shortest X ≡ sizeⁱ (X i j) × 𝑰 (X i j)
   {-
@@ -112,7 +113,7 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence.Step1_Ultrametric
                           ∃ λ (p : SimplePath n) → shortest X ⊓ shortest Y ≡ length p
     
   Xᶜ⇒shX≡n-1 : ∀ {X} → 𝑪ₘ X → shortest X ≡ n-1
-  Xᶜ⇒shX≡n-1 Xᶜ = min+-constant (λ i j → lengthⁱ≡n-1 (Xᶜ i j))
+  Xᶜ⇒shX≡n-1 Xᶜ = min⁺-constant (λ i j → lengthⁱ≡n-1 (Xᶜ i j))
 
   Yᶜ⇒shX≤shY : ∀ X {Y} → 𝑪ₘ Y → shortest X ≤ shortest Y
   Yᶜ⇒shX≤shY X Yᶜ = ≤-trans (≤-pred (shX<n X)) (≤-reflexive (≡-sym (Xᶜ⇒shX≡n-1 Yᶜ)))
@@ -124,7 +125,7 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence.Step1_Ultrametric
   Xᶜ⇒shX⊓shY≡shY Y Xᶜ = ≡-trans (⊓-comm _ (shortest Y)) (Yᶜ⇒shX⊓shY≡shX Y Xᶜ)
 
   shX⊓shY<n : ∀ X Y → shortest X ⊓ shortest Y < n
-  shX⊓shY<n X Y = ⊓-⊎preservesₗ-<x (shortest Y) (shX<n X)
+  shX⊓shY<n X Y = n<m⇒n⊓o<m (shortest Y) (shX<n X)
 
   ------------------------------------------------------------------------------
   -- Mapping length into the right range
@@ -135,16 +136,16 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence.Step1_Ultrametric
   invert x = dᶜₛᵤₚ + (n ∸ x)
 
   invert-≤ : ∀ {x y} → y ≤ x → invert x ≤ invert y
-  invert-≤ y≤x = _+-mono_ {dᶜₛᵤₚ} ≤-refl (∸-mono ≤-refl y≤x)
+  invert-≤ y≤x = +-mono-≤ {dᶜₛᵤₚ} ≤-refl (∸-mono ≤-refl y≤x)
   
   invert-< : ∀ {x y} → y < x → x < n → invert x < invert y
-  invert-< y<x x<n = +-monoʳ-< {dᶜₛᵤₚ} ≤-refl (∸-monoₗ-< y<x x<n)
+  invert-< y<x x<n = +-monoʳ-< {dᶜₛᵤₚ} ≤-refl (∸-monoˡ-< y<x x<n)
 
   invert-<sh : ∀ {X Y} → shortest Y < shortest X → invert (shortest X) < invert (shortest Y)
   invert-<sh {X} shY<shX = invert-< shY<shX (shX<n X)
   
   invert-¬cong : ∀ {x y} → x ≤ n → y ≤ n → x ≢ y → invert x ≢ invert y
-  invert-¬cong x≤n y≤n x≢y ix≡iy = x≢y (∸-left-cancellative x≤n y≤n (cancel-+-left dᶜₛᵤₚ ix≡iy))
+  invert-¬cong x≤n y≤n x≢y ix≡iy = x≢y (∸-cancelˡ x≤n y≤n (+-cancelˡ-≡ dᶜₛᵤₚ ix≡iy))
 
   invert-distr2 : ∀ x y → invert (x ⊓ y) ≡ invert x ⊔ invert y
   invert-distr2 x y = begin
@@ -184,13 +185,13 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence.Step1_Ultrametric
     where open ≤-Reasoning ; sh = shortest
 
   dᶜ<dⁱ : ∀ W X Y Z → dᶜ W X < dⁱ Y Z
-  dᶜ<dⁱ W X Y Z = s≤s (≤-stepsᵣ _ (dᶜ≤dᶜₘₐₓ W X))
+  dᶜ<dⁱ W X Y Z = s≤s (≤-stepsʳ _ (dᶜ≤dᶜₘₐₓ W X))
   
   Xᶜ⇒dⁱXZ≤dⁱYZ : ∀ {X} → 𝑪ₘ X → ∀ Y Z → dⁱ X Z ≤ dⁱ Y Z
-  Xᶜ⇒dⁱXZ≤dⁱYZ Xᶜ Y Z = invert-≤ (⊓-monoˡ-≤ (shortest Z) (Yᶜ⇒shX≤shY Y Xᶜ))
+  Xᶜ⇒dⁱXZ≤dⁱYZ Xᶜ Y Z = invert-≤ (⊓n-mono-≤ (shortest Z) (Yᶜ⇒shX≤shY Y Xᶜ))
 
   Yᶜ⇒dⁱXY≤dⁱXZ : ∀ X {Y} → 𝑪ₘ Y → ∀ Z → dⁱ X Y ≤ dⁱ X Z
-  Yᶜ⇒dⁱXY≤dⁱXZ X Yᶜ Z = invert-≤ (⊓-monoʳ-≤ (shortest X) (Yᶜ⇒shX≤shY Z Yᶜ))
+  Yᶜ⇒dⁱXY≤dⁱXZ X Yᶜ Z = invert-≤ (n⊓-mono-≤ (shortest X) (Yᶜ⇒shX≤shY Z Yᶜ))
   
   ------------------------------------------------------------------------------
   -- Pseudo-distance function
@@ -225,7 +226,7 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence.Step1_Ultrametric
   dₕ-maxTriIneq : MaxTriangleIneq ℝ𝕄ⁱₛ dₕ
   dₕ-maxTriIneq X Y Z with 𝑪ₘ? X | 𝑪ₘ? Y | 𝑪ₘ? Z
   ... | yes _  | yes _ | yes _  = dᶜ-maxTriIneq _ _ _
-  ... | yes Xᶜ | yes _ | no  _  = m≤n⇒m≤o⊔n (dᶜ _ _) (Xᶜ⇒dⁱXZ≤dⁱYZ Xᶜ Y Z)
+  ... | yes Xᶜ | yes _ | no  _  = m≤o⇒m≤n⊔o (dᶜ _ _) (Xᶜ⇒dⁱXZ≤dⁱYZ Xᶜ Y Z)
   ... | no  _  | yes _ | yes Zᶜ = m≤n⇒m≤n⊔o (dᶜ _ _) (Yᶜ⇒dⁱXY≤dⁱXZ X Zᶜ Y)
   ... | yes _  | no  _ | yes _  = m≤n⇒m≤n⊔o (dⁱ Y Z) (<⇒≤ (dᶜ<dⁱ _ _ X Y))
   ... | yes _  | no  _ | no  _  = dⁱ-maxTriangleIneq X Y Z

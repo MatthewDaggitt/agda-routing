@@ -1,6 +1,6 @@
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _∸_) renaming (_<_ to _<ℕ_; _≤_ to _≤ℕ_; _≟_ to _≟ℕ_)
-open import Data.Nat.Properties using (n≤1+n)
+open import Data.Nat.Properties using (n≤1+n; <⇒≤; module ≤-Reasoning)  renaming (≤-antisym to ≤ℕ-antisym; ≤-trans to ≤ℕ-trans)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
 open import Data.Product using (∃₂; _,_; _×_; proj₁)
 open import Function using (_∘_)
@@ -10,7 +10,7 @@ open import Relation.Binary using (module DecTotalOrder)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; subst; subst₂; cong; cong₂; inspect; [_]) renaming (refl to ≡-refl; sym to ≡-sym; trans to ≡-trans)
 
 open import RoutingLib.Routing.Definitions using (RoutingProblem; RoutingAlgebra)
-open import RoutingLib.Data.Nat.Properties using (m<n≤o⇒o∸n<o∸m; n≢0⇒0<n; <⇒≤) renaming (≤-antisym to ≤ℕ-antisym; ≤-trans to ≤ℕ-trans)
+open import RoutingLib.Data.Nat.Properties using (m<n≤o⇒o∸n<o∸m; n≢0⇒0<n)
 
 open import RoutingLib.Routing.BellmanFord.GeneralConvergence.SufficientConditions
 
@@ -87,7 +87,7 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step3_StrictlyContracti
           dₛᵤₚ ∸ h (X k j)                ≤⟨ dₛᵤₚ∸hXᵢⱼ≤d (extend-lemma σXᵢⱼ≈Aᵢₖ▷Xₖⱼ) ⟩
           d X Y
         ∎
-        where open Data.Nat.≤-Reasoning
+        where open ≤-Reasoning
 
 
       -- Putting the three cases together to get the required result

@@ -1,8 +1,9 @@
 open import Data.Nat using (ℕ; suc; zero; _<_; _≤_; s≤s; z≤n; _≟_)
-open import Data.Nat.Properties using (⊔-sel; m≤m⊔n)
+open import Data.Nat.Properties using (⊔-sel; m≤m⊔n; ≤+≢⇒<; ⊔-identityʳ; n≤m⊔n; ≤-trans)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
-open import Data.List hiding (downFrom)
+open import Data.List
 open import Data.List.Any as Any using (here; there)
+open import Data.List.Any.Membership.Propositional using (_∈_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (∃; _,_; _×_; proj₂)
 open import Relation.Binary using (Setoid; Decidable)
@@ -10,14 +11,12 @@ open import Relation.Binary.PropositionalEquality using (_≡_; setoid; refl; co
 open import Relation.Nullary using (yes; no)
 open import Function using (_∘_; id)
 
-open import RoutingLib.Data.List
-open import RoutingLib.Data.Nat.Properties using (ℕₛ; ≤+≢⇒<; 0-idᵣ-⊔; n≤m⊔n; ≤-trans)
+open import RoutingLib.Data.List using (combine; applyBetween; between; allFinPairs)
+open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 open import RoutingLib.Data.List.Permutation using (_⇿_)
-import RoutingLib.Data.List.Membership as Membership
+import RoutingLib.Data.List.Any.Membership as Membership
 
-module RoutingLib.Data.List.Membership.Propositional where
-
-  open Any.Membership-≡ public
+module RoutingLib.Data.List.Any.Membership.Propositional where
 
   deduplicate : ∀ {a} {A : Set a} → Decidable (_≡_ {A = A}) → List A → List A
   deduplicate {A = A} = Membership.deduplicate (setoid A)
@@ -25,11 +24,7 @@ module RoutingLib.Data.List.Membership.Propositional where
 
 
 
-  import RoutingLib.Data.List.Membership.Properties as GM
-
-  ∈-map⁺ : ∀ {a b} {A : Set a} {B : Set b} {v xs}
-          (f : A → B) → v ∈ xs → f v ∈ map f xs
-  ∈-map⁺ f = GM.∈-map⁺ (setoid _) (setoid _) (cong f)
+  import RoutingLib.Data.List.Any.Membership.Properties as GM
 
   postulate ∈-concat⁺ : ∀ {a} {A : Set a} {v : A} {xs xss} → v ∈ xs → xs ∈ xss → v ∈ concat xss
   --∈-concat {A = A} v∈xs xs∈xss = GM.∈-concat (setoid A) v∈xs {!xs∈xss!}

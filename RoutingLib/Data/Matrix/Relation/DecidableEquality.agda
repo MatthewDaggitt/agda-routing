@@ -1,9 +1,9 @@
 open import Data.Nat using (ℕ)
 open import Data.Product using (∃₂; _,_)
-open import Data.Fin.Dec using (all?)
+open import Data.Fin.Dec using (all?;  ¬∀⟶∃¬)
 open import Relation.Binary using (DecSetoid)
 open import Relation.Nullary using (¬_; yes; no)
-open import Relation.Nullary.Negation using (contradiction; ¬∀⟶∃¬)
+open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.Matrix
 open import RoutingLib.Data.Matrix.Relation.Pointwise

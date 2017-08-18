@@ -1,6 +1,8 @@
 open import Data.Nat using (ℕ; z≤n; s≤s; suc; ≤-pred) renaming (_<_ to _<ℕ_; _≤_ to _≤ℕ_)
+open import Data.Nat.Properties using (≤+≢⇒<)
 open import Data.List using (_∷_; length)
 open import Data.List.All using (All; []; _∷_) renaming (map to mapₐ)
+open import Data.List.Any using (here; there)
 open import Data.Product using (_,_; proj₁; proj₂; uncurry′)
 open import Relation.Binary using (DecTotalOrder)
 open import Relation.Binary.PropositionalEquality using (_≡_; cong) renaming (setoid to ≡-setoid; refl to ≡-refl)
@@ -10,8 +12,8 @@ open import RoutingLib.Data.List.All using (AllPairs; []; _∷_) using (allPairs
 open import RoutingLib.Data.List.Uniqueness using (Unique)
 open import RoutingLib.Data.List.Uniqueness.Properties using (perm!)
 open import RoutingLib.Data.List.Permutation.Properties using (⇿-sym; ⇿-length)
-open import RoutingLib.Data.List.Membership.Properties using (∈-perm)
-open import RoutingLib.Data.Nat.Properties using (≤+≢⇒<; ≤⇒≯)
+open import RoutingLib.Data.List.Any.Membership.Properties using (∈-perm)
+open import RoutingLib.Data.Nat.Properties using (≤⇒≯)
 
 module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTotalOrder a ℓ₁ ℓ₂) where
 
@@ -19,7 +21,8 @@ module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTot
   open Eq using () renaming (setoid to S; trans to ≈-trans; sym to ≈-sym)
   
   open import RoutingLib.Data.List.Sorting order
-  open import RoutingLib.Data.List.Membership S using (here; there; _∈_; indexOf; lookupₐ)
+  open import Data.List.Any.Membership S using (_∈_)
+  open import RoutingLib.Data.List.Any.Membership S using (indexOf; lookupₐ)
   open import Relation.Binary.NonStrictToStrict _≈_ _≤_ using (_<_) renaming (irrefl to <-irrefl)
   
   

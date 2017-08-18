@@ -1,9 +1,12 @@
-open import Data.List using (List; []; _∷_; map; concat)
 open import Data.Fin using (Fin)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟F_)
 open import Data.Nat using (ℕ; zero; suc; _<_)
+open import Data.Nat.Properties using (<⇒≢)
+open import Data.List using (List; []; _∷_; map; concat; allFin; applyUpTo)
 open import Data.List.Any using (here; there)
+open import Data.List.Any.Membership.Propositional using (_∈_)
 open import Data.List.All using (All; []; _∷_) renaming (map to mapₐ)
+open import Data.List.All.Properties using (applyUpTo⁺₂; concat⁺) 
 open import Data.Product using (∃₂; _,_; _×_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Relation.Binary using (Setoid; DecSetoid; _Respects_)
@@ -13,15 +16,13 @@ open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Function using (_∘_)
 
-open import RoutingLib.Data.Nat.Properties using (<⇒≢)
-open import RoutingLib.Data.List using (allFin; applyUpTo; dfilter; combine)
+open import RoutingLib.Data.List using (dfilter; combine)
 open import RoutingLib.Data.List.All using ([]; _∷_)
-open import RoutingLib.Data.List.All.Properties using (All-applyUpTo⁺₂; AllPairs-applyUpTo⁺₁; All-concat⁺; All-map⁺₂; AllPairs-map⁺₂; All-∈)
-open import RoutingLib.Data.List.Uniqueness using ()
+open import RoutingLib.Data.List.All.Properties using (AllPairs-applyUpTo⁺₁; All-map⁺₂; AllPairs-map⁺₂; All-∈)
 open import RoutingLib.Data.List.Uniqueness.Properties using (map!⁺; concat!⁺) -- combine!
 open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique; allFin!⁺; combine!⁺)
-open import RoutingLib.Data.List.Membership.Propositional using (_∈_; ∈-allFin⁺; ∈-combine⁺)
-open import RoutingLib.Data.List.Membership.Properties using (∈-map⁺; ∈-concat⁺; ∈-applyUpTo⁺)
+open import RoutingLib.Data.List.Any.Membership.Propositional using (∈-allFin⁺; ∈-combine⁺)
+open import RoutingLib.Data.List.Any.Membership.Properties using (∈-map⁺; ∈-concat⁺; ∈-applyUpTo⁺)
 open import RoutingLib.Data.List.Uniset using (Uniset; Enumeration; IsEnumeration)
 open import RoutingLib.Data.Graph.SimplePath.NonEmpty
 open import RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties
@@ -69,7 +70,7 @@ module RoutingLib.Data.Graph.SimplePath.NonEmpty.Enumeration (n : ℕ) where
     LPₛ : Setoid _ _
     LPₛ = listSetoid Pₛ
 
-    open import RoutingLib.Data.List.Membership Pₛ using () renaming (_∈_ to _∈ₚ_; _∉_ to _∉ₚ_)
+    open import Data.List.Any.Membership Pₛ using () renaming (_∈_ to _∈ₚ_; _∉_ to _∉ₚ_)
     open import RoutingLib.Data.List.Disjoint   Pₛ using () renaming (_#_ to _#ₚ_)
     open import RoutingLib.Data.List.Uniqueness Pₛ using () renaming (Unique to Uniqueₚ)
     open Setoid LPₛ using () renaming (reflexive to ≈ₗₚ-reflexive)
@@ -176,7 +177,7 @@ module RoutingLib.Data.Graph.SimplePath.NonEmpty.Enumeration (n : ℕ) where
     allPathsOfLength-length : ∀ l → All (λ p → length p ≡ l) (allPathsOfLength l)
     allPathsOfLength-length zero          = []
     allPathsOfLength-length (suc zero)    = allPathsOfLength1-length1 allSrcDst
-    allPathsOfLength-length (suc (suc l)) = All-concat⁺ (All-map⁺₂ (extendAll-length (allPathsOfLength-length (suc l))) (allFin n))
+    allPathsOfLength-length (suc (suc l)) = concat⁺ (All-map⁺₂ (extendAll-length (allPathsOfLength-length (suc l))) (allFin n))
 
     l-resp-≈ : ∀ l → (λ p → length p ≡ l) Respects (_≈_ {n})
     l-resp-≈ _ x≈y |x|≡l  = ≡-trans (≡-sym (p≈q⇒|p|≡|q| x≈y)) |x|≡l
@@ -194,7 +195,7 @@ module RoutingLib.Data.Graph.SimplePath.NonEmpty.Enumeration (n : ℕ) where
     ∈-allPaths p = ∈-concat⁺ Pₛ (∈-allPathsOfLength p) (∈-applyUpTo⁺ LPₛ allPathsOfLength (|p|<n p))
 
     allPaths! : Uniqueₚ allPaths
-    allPaths! = concat!⁺ Pₛ (All-applyUpTo⁺₂ allPathsOfLength n allPathsOfLength!) (AllPairs-applyUpTo⁺₁ allPathsOfLength n #-<-allPathsOfLength)
+    allPaths! = concat!⁺ Pₛ (applyUpTo⁺₂ allPathsOfLength n allPathsOfLength!) (AllPairs-applyUpTo⁺₁ allPathsOfLength n #-<-allPathsOfLength)
 
 
 

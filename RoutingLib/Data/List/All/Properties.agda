@@ -1,12 +1,12 @@
 open import Data.Bool using (Bool; true; if_then_else_)
-open import Data.List using (List; []; _∷_; _++_; filter; drop; take; concat; foldr; gfilter; map; zipWith)
+open import Data.List using (List; []; _∷_; _++_; filter; drop; take; concat; foldr; gfilter; map; zipWith; applyUpTo; tabulate)
 open import Data.List.All using (All; []; _∷_) renaming (map to mapₐ)
 open import Data.List.All.Properties
 open import Data.List.Any using (Any; here; there; any)
 open import Data.Maybe using (Maybe; just; nothing; Eq; drop-just)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Nat using (ℕ; suc; zero; z≤n; s≤s; _≤_; _<_)
-open import Data.Nat.Properties using (⊔-sel)
+open import Data.Nat.Properties using (⊔-sel; ≤-trans)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Empty using (⊥-elim)
 open import Data.Product using (∃; _×_; _,_; proj₁; proj₂)
@@ -21,21 +21,12 @@ open import Relation.Unary using () renaming (_⊆_ to _⋐_)
 
 open import RoutingLib.Data.List
 open import RoutingLib.Data.List.All
-open import RoutingLib.Data.Maybe.Properties using (just-injective) renaming (trans to eq-trans)
-open import RoutingLib.Data.Nat.Properties using (≤-trans)
+open import RoutingLib.Data.Maybe.Properties using (just-injective)
 open import RoutingLib.Data.List.Permutation using (_⇿_; _◂_≡_; here; there; []; _∷_)
 
 module RoutingLib.Data.List.All.Properties where
 
-
-
   module _ {a p} {A : Set a} {P : A → Set p} where
-
-    -- stdlib
-    All-universal : Universal P → ∀ xs → All P xs
-    All-universal u [] = []
-    All-universal u (x ∷ xs) = u x ∷ All-universal u xs
-    
 
     -- Permutations
     
@@ -51,42 +42,16 @@ module RoutingLib.Data.List.All.Properties where
     All-map⁺₂ Pf []       = []
     All-map⁺₂ Pf (x ∷ xs) = Pf x ∷ All-map⁺₂ Pf xs
 
-    -- stdlib
-    All-++⁺ : ∀ {xs ys} → All P xs → All P ys → All P (xs ++ ys)
-    All-++⁺ []         pys = pys
-    All-++⁺ (px ∷ pxs) pys = px ∷ All-++⁺ pxs pys
-
-    -- stdlib
-    All-concat⁺ : ∀ {xss} → All (All P) xss → All P (concat xss)
-    All-concat⁺ []           = []
-    All-concat⁺ (pxs ∷ pxss) = All-++⁺ pxs (All-concat⁺ pxss)
-
-    -- stdlib
-    All-drop⁺ : ∀ {xs} n → All P xs → All P (drop n xs)
-    All-drop⁺ zero    pxs        = pxs
-    All-drop⁺ (suc n) []         = []
-    All-drop⁺ (suc n) (px ∷ pxs) = All-drop⁺ n pxs
-
-    -- stdlib
-    All-take⁺ : ∀ {xs} n → All P xs → All P (take n xs)
-    All-take⁺ zero    pxs        = []
-    All-take⁺ (suc n) []         = []
-    All-take⁺ (suc n) (px ∷ pxs) = px ∷ All-take⁺ n pxs
-
-
-
     -----------
     -- Other --
     -----------
 
-    -- stdlib
     All-dfilter⁺₁ : ∀ (P? : Decidable P) xs → All P (dfilter P? xs)
     All-dfilter⁺₁ P? []       = []
     All-dfilter⁺₁ P? (x ∷ xs) with P? x
     ... | yes Px = Px ∷ All-dfilter⁺₁ P? xs
     ... | no  _  = All-dfilter⁺₁ P? xs
 
-    -- stdlib
     All-dfilter⁺₂ : ∀ {q} {Q : A → Set q} (P? : Decidable P) 
                    {xs} → All Q xs → All Q (dfilter P? xs)
     All-dfilter⁺₂ P? {_} [] = []
@@ -94,22 +59,8 @@ module RoutingLib.Data.List.All.Properties where
     ... | no  _ = All-dfilter⁺₂ P? Qxs
     ... | yes _ = Qx ∷ All-dfilter⁺₂ P? Qxs
 
-    -- stdlib
-    All-tabulate⁺ : ∀ {n} {f : Fin n → A} → (∀ i → P (f i)) → All P (tabulate f)
-    All-tabulate⁺ {n = zero}  Pf = []
-    All-tabulate⁺ {n = suc n} Pf = Pf fzero ∷ All-tabulate⁺ (Pf ∘ fsuc)
-
-    -- stdlib
-    All-applyUpTo⁺₁ : ∀ f n → (∀ {i} → i < n → P (f i)) → All P (applyUpTo f n)
-    All-applyUpTo⁺₁ f zero    Pf = []
-    All-applyUpTo⁺₁ f (suc n) Pf = Pf (s≤s z≤n) ∷ All-applyUpTo⁺₁ (f ∘ suc) n (Pf ∘ s≤s)
-
-    -- stdlib
-    All-applyUpTo⁺₂ : ∀ f n → (∀ i → P (f i)) → All P (applyUpTo f n)
-    All-applyUpTo⁺₂ f n Pf = All-applyUpTo⁺₁ f n (λ _ → Pf _)
-
     All-applyBetween⁺₁ : ∀ f s e → (∀ {i} → s ≤ i → i < e → P (f i)) → All P (applyBetween f s e)
-    All-applyBetween⁺₁ f zero    e       Pf = All-applyUpTo⁺₁ f e (Pf z≤n)
+    All-applyBetween⁺₁ f zero    e       Pf = applyUpTo⁺₁ f e (Pf z≤n)
     All-applyBetween⁺₁ f (suc s) zero    Pf = []
     All-applyBetween⁺₁ f (suc s) (suc e) Pf = All-applyBetween⁺₁ (f ∘ suc) s e (λ s≤i i<e → Pf (s≤s s≤i) (s≤s i<e))
 
@@ -150,33 +101,13 @@ module RoutingLib.Data.List.All.Properties where
   -- Pushed to stdlib --
   ----------------------
 
-  
-
-  -- stdlib
-  ¬All⇒Any¬ : ∀ {a p} {A : Set a} {P : A → Set p} {xs} → Decidable P → ¬ (All P xs) → Any (¬_ ∘ P) xs
-  ¬All⇒Any¬ {xs = []}     dec ¬∀ = ⊥-elim (¬∀ [])
-  ¬All⇒Any¬ {xs = x ∷ xs} dec ¬∀ with dec x
-  ... | yes p = there (¬All⇒Any¬ dec (¬∀ ∘ _∷_ p))
-  ... | no ¬p = here ¬p
-
-  -- stdlib
-  ¬Any⇒All¬ : ∀ {a p} {A : Set a} {P : A → Set p} {xs} → ¬ (Any P xs) → All (¬_ ∘ P) xs
-  ¬Any⇒All¬ {xs = []} ¬p = []
-  ¬Any⇒All¬ {xs = x ∷ xs} ¬p = (¬p ∘ here) ∷ ¬Any⇒All¬ (¬p ∘ there)
-
-  -- stdlib
-  All¬⇒¬Any : ∀ {a p} {A : Set a} {P : A → Set p} {xs} → All (¬_ ∘ P) xs → ¬ (Any P xs)
-  All¬⇒¬Any []        ()
-  All¬⇒¬Any (¬p ∷ _)  (here  p) = ¬p p
-  All¬⇒¬Any (_  ∷ ¬p) (there p) = All¬⇒¬Any ¬p p
-
 
   -- All pairs
 
   module SetoidProperties {a ℓ} (S : Setoid a ℓ) where
 
     open Setoid S renaming (Carrier to A)
-    open import RoutingLib.Data.List.Membership S using (_∈_)
+    open import Data.List.Any.Membership S using (_∈_)
 
     ∈-All : ∀ {p} {P : A → Set p} xs → (∀ {v} → v ∈ xs → P v) → All P xs
     ∈-All [] _ = []
@@ -196,7 +127,7 @@ module RoutingLib.Data.List.All.Properties where
   module DecSetoidProperties {a ℓ} (DS : DecSetoid a ℓ) where
 
     open DecSetoid DS renaming (Carrier to A)
-    open import RoutingLib.Data.List.Membership setoid using (deduplicate)
+    open import RoutingLib.Data.List.Any.Membership setoid using (deduplicate)
 
     deduplicate⁺ : ∀ {p} {P : A → Set p} {xs} → All P xs → All P (deduplicate _≟_ xs)
     deduplicate⁺ {xs = _}      [] = []
@@ -214,12 +145,12 @@ module RoutingLib.Data.List.All.Properties where
     open Setoid S₁ renaming (Carrier to A₁; refl to refl₁)
     open Setoid S₂ renaming (Carrier to A₂)
 
-    open Data.List.Any.Membership S₁ using () renaming (_∈_ to _∈₁_)
-    open Data.List.Any.Membership S₂ using () renaming (_∈_ to _∈₂_)
+    open import Data.List.Any.Membership S₁ using () renaming (_∈_ to _∈₁_)
+    open import Data.List.Any.Membership S₂ using () renaming (_∈_ to _∈₂_)
 
     All-combine⁺ : ∀ {b p} {B : Set b} {P : B → Set p} _•_ (xs : List A₁) (ys : List A₂) → (∀ {x y} → x ∈₁ xs → y ∈₂ ys → P (x • y)) → All P (combine _•_ xs ys)
     All-combine⁺ _•_ []       ys pres = []
-    All-combine⁺ _•_ (x ∷ xs) ys pres = All-++⁺ (map-all S₂ (x •_) (pres (here refl₁))) (All-combine⁺ _•_ xs ys (pres ∘ there))
+    All-combine⁺ _•_ (x ∷ xs) ys pres = ++⁺ (map-all S₂ (x •_) (pres (here refl₁))) (All-combine⁺ _•_ xs ys (pres ∘ there))
 
   open DoubleSetoidProperties public
 
@@ -267,15 +198,10 @@ module RoutingLib.Data.List.All.Properties where
     ... | no  _ = AllPairs-dfilter⁺ P? xs!
     ... | yes _ = All-dfilter⁺₂ P? x∉xs ∷ AllPairs-dfilter⁺ P? xs!
     
-
-  
-
-    
-
     AllPairs-++⁺ : ∀ {xs ys} → AllPairs _~_ xs → AllPairs _~_ ys 
                  → All (λ x → All (x ~_) ys) xs → AllPairs _~_ (xs ++ ys)
     AllPairs-++⁺ []         ~ys _              = ~ys
-    AllPairs-++⁺ (px ∷ ~xs) ~ys (x~ys ∷ xs~ys) = All-++⁺ px x~ys ∷ AllPairs-++⁺ ~xs ~ys xs~ys
+    AllPairs-++⁺ (px ∷ ~xs) ~ys (x~ys ∷ xs~ys) = ++⁺ px x~ys ∷ AllPairs-++⁺ ~xs ~ys xs~ys
 
 
     AllPairs-drop⁺ : ∀ {xs} n → AllPairs _~_ xs → AllPairs _~_ (drop n xs)
@@ -286,11 +212,11 @@ module RoutingLib.Data.List.All.Properties where
     AllPairs-take⁺ : ∀ {xs} n → AllPairs _~_ xs → AllPairs _~_ (take n xs)
     AllPairs-take⁺ zero    pxs          = []
     AllPairs-take⁺ (suc n) []           = []
-    AllPairs-take⁺ (suc n) (x~xs ∷ pxs) = All-take⁺ n x~xs ∷ (AllPairs-take⁺ n pxs)
+    AllPairs-take⁺ (suc n) (x~xs ∷ pxs) = take⁺ n x~xs ∷ (AllPairs-take⁺ n pxs)
 
     AllPairs-applyUpTo⁺₁ : ∀ f n → (∀ {i j} → i < j → j < n → f i ~ f j) → AllPairs _~_ (applyUpTo f n)
     AllPairs-applyUpTo⁺₁ f zero    f~ = []
-    AllPairs-applyUpTo⁺₁ f (suc n) f~ = All-applyUpTo⁺₁ (f ∘ suc) n (f~ (s≤s z≤n) ∘ s≤s) ∷ AllPairs-applyUpTo⁺₁ (f ∘ suc) n (λ i≤j j<n → f~ (s≤s i≤j) (s≤s j<n))
+    AllPairs-applyUpTo⁺₁ f (suc n) f~ = applyUpTo⁺₁ (f ∘ suc) n (f~ (s≤s z≤n) ∘ s≤s) ∷ AllPairs-applyUpTo⁺₁ (f ∘ suc) n (λ i≤j j<n → f~ (s≤s i≤j) (s≤s j<n))
 
     AllPairs-applyUpTo⁺₂ : ∀ f n → (∀ i j → f i ~ f j) → AllPairs _~_ (applyUpTo f n)
     AllPairs-applyUpTo⁺₂ f n f~ = AllPairs-applyUpTo⁺₁ f n (λ _ _ → f~ _ _)

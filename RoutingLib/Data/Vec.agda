@@ -1,8 +1,6 @@
-
-open import Data.Nat using (suc; _*_)
+open import Data.Nat using (suc)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
-open import Data.Vec hiding (map; zip; zipWith)
-open import Data.Product using (_,_; _×_)
+open import Data.Vec
 open import Data.List using (List; []; _∷_) renaming (map to mapₗ)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Relation.Nullary using (¬_; yes; no)
@@ -10,25 +8,6 @@ open import Relation.Binary using (Decidable)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
 module RoutingLib.Data.Vec where
-
-  ----------------------
-  -- Pushed to stdlib --
-  ----------------------
-
-  map : ∀ {a b n} {A : Set a} {B : Set b} →
-      (A → B) → Vec A n → Vec B n
-  map f []       = []
-  map f (x ∷ xs) = f x ∷ map f xs
-
-  zipWith : ∀ {a b c n} {A : Set a} {B : Set b} {C : Set c} →
-          (A → B → C) → Vec A n → Vec B n → Vec C n
-  zipWith f []       []       = []
-  zipWith f (x ∷ xs) (y ∷ ys) = f x y ∷ zipWith f xs ys
-
-  zip : ∀ {a b n} {A : Set a} {B : Set b} →
-        Vec A n → Vec B n → Vec (A × B) n
-  zip = zipWith _,_
-
 
   -----------------------
   -- To push to stdlib --

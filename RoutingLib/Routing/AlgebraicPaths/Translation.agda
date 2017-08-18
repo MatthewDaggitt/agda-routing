@@ -14,8 +14,6 @@ open import RoutingLib.Routing.Definitions
 open import RoutingLib.Data.Graph using (Graph; _∈?_)
 open import RoutingLib.Data.Graph.SimplePath using ([]; [_]; source)
 open import RoutingLib.Data.Graph.SimplePath.Properties using (_≤ₚ?_; _∉?_) renaming (_≟_ to _≟ₚ_; ≈-refl to ≈ₚ-refl)
-open import RoutingLib.Data.List.Properties using (foldr-×preserves)
-open import RoutingLib.Data.List.All.Properties using (All-tabulate⁺)
 
 module RoutingLib.Routing.AlgebraicPaths.Translation
   {a b ℓ}

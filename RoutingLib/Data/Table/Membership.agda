@@ -1,6 +1,7 @@
 open import Relation.Binary using (Setoid)
 
 open import RoutingLib.Data.Table
+open import RoutingLib.Data.Table.Any
 
 module RoutingLib.Data.Table.Membership {a ℓ} (S : Setoid a ℓ) where
 

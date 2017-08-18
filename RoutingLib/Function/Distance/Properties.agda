@@ -1,11 +1,10 @@
 open import Data.Nat using (ℕ; zero; suc; _≤_; _<_; _+_)
+open import Data.Nat.Properties using (≤-trans; m⊔n≤m+n)
 open import Data.Product using (∃; _,_; proj₁; proj₂)
 open import Relation.Binary using (Setoid; Decidable)
 open import Relation.Nullary using (yes; no)
 open import Induction.WellFounded using (Acc; acc)
-
-open import RoutingLib.Data.Nat.Properties using (≤-trans; m⊔n≤m+n)
-open import RoutingLib.Induction.Nat using (<-well-founded)
+open import Induction.Nat using (<-well-founded)
 
 module RoutingLib.Function.Distance.Properties {a} {ℓ} (S : Setoid a ℓ) where
 

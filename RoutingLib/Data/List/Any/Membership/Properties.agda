@@ -6,12 +6,15 @@ open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Nullary using (¬_; yes; no)
 open import Function using (_∘_; id)
 open import Data.List.All using (All; _∷_; [])
+open import Data.List.All.Properties using (All¬⇒¬Any)
 open import Data.Nat using (_≤_; _<_; zero; suc; s≤s; z≤n)
+open import Data.Nat.Properties using (suc-injective)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
-open import Data.Maybe using (nothing; just; Maybe; Eq; drop-just)
+open import Data.Maybe using (nothing; just; Maybe; Eq; Eq-refl; Eq-sym; Eq-trans; drop-just)
 open import Data.Empty using (⊥-elim)
 open import Data.List hiding (any)
 open import Data.List.Any using (here; there; any) renaming (map to mapₐ)
+open import Data.List.Any.Properties
 open import Data.Vec using (Vec; toList; fromList) renaming (_∈_ to _∈ᵥ_; here to hereᵥ; there to thereᵥ)
 open import Data.Product using (∃; ∃₂; _×_; _,_; swap) renaming (map to mapₚ)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
@@ -20,18 +23,16 @@ open import Relation.Unary using (Decidable; _⇒_) renaming (_⊆_ to _⋐_)
 open import Algebra.FunctionProperties using (Op₂; RightIdentity; Selective)
 
 open import RoutingLib.Data.List
-open import RoutingLib.Data.Maybe.Base
-open import RoutingLib.Data.Maybe.Properties using (just-injective) renaming (reflexive to eq-reflexive; sym to eq-sym; trans to eq-trans)
-import RoutingLib.Data.List.Membership as Membership
-open import RoutingLib.Data.Nat.Properties using (suc-injective)
+open import RoutingLib.Data.Maybe using (Eq-reflexive)
+open import RoutingLib.Data.Maybe.Properties using (just-injective)
+import RoutingLib.Data.List.Any.Membership as Membership
 open import RoutingLib.Data.List.Any.Properties
 open import RoutingLib.Data.List.Permutation using (_⇿_; _◂_≡_; _∷_; []; here; there)
 open import RoutingLib.Data.List.Uniqueness using (Unique; _∷_)
 open import RoutingLib.Data.List.All using ([]; _∷_)
-open import RoutingLib.Data.List.All.Properties using (All¬⇒¬Any)
 
 
-module RoutingLib.Data.List.Membership.Properties where
+module RoutingLib.Data.List.Any.Membership.Properties where
 
   -----------------------------------
   -- Properties involving 1 setoid --
@@ -42,8 +43,9 @@ module RoutingLib.Data.List.Membership.Properties where
     open Setoid S renaming (Carrier to A; refl to ≈-refl)
     open Setoid (list-setoid S) using () renaming (_≈_ to _≈ₗ_; sym to symₗ; refl to reflₗ)
 
-    open Membership S using (_∈_; _∉_; _⊆_; indexOf; deduplicate)
-    open Membership (list-setoid S) using () renaming (_∈_ to _∈ₗ_)
+    open import Data.List.Any.Membership S using (_∈_; _∉_; _⊆_)
+    open import RoutingLib.Data.List.Any.Membership S using (indexOf; deduplicate)
+    open import Data.List.Any.Membership (list-setoid S) using () renaming (_∈_ to _∈ₗ_)
 
     ∈-dec : Decidable₂ _≈_ → Decidable₂ _∈_
     ∈-dec _≟_ x [] = no λ()
@@ -70,15 +72,15 @@ module RoutingLib.Data.List.Membership.Properties where
 
     -- stdlib
     ∈-++⁺ʳ : ∀ {v} xs {ys} → v ∈ ys → v ∈ xs ++ ys
-    ∈-++⁺ʳ = Any-++⁺ʳ
+    ∈-++⁺ʳ = ++⁺ʳ
 
     -- stdlib
     ∈-++⁺ˡ : ∀ {v xs ys} → v ∈ xs → v ∈ xs ++ ys
-    ∈-++⁺ˡ = Any-++⁺ˡ
+    ∈-++⁺ˡ = ++⁺ˡ
 
     -- stdlib
     ∈-++⁻ : ∀ {v} xs {ys} → v ∈ xs ++ ys → v ∈ xs ⊎ v ∈ ys
-    ∈-++⁻ = Any-++⁻
+    ∈-++⁻ = ++⁻
 
     -- concat
 
@@ -103,10 +105,10 @@ module RoutingLib.Data.List.Membership.Properties where
     -- tabulate
 
     ∈-tabulate⁺ : ∀ {n} (f : Fin n → A) i → f i ∈ tabulate f
-    ∈-tabulate⁺ f i = Any-tabulate⁺ i ≈-refl
+    ∈-tabulate⁺ f i = tabulate⁺ i ≈-refl
     
     ∈-tabulate⁻ : ∀ {n} {f : Fin n → A} {x} → x ∈ tabulate f → ∃ λ i → x ≈ f i
-    ∈-tabulate⁻ = Any-tabulate⁻
+    ∈-tabulate⁻ = tabulate⁻
     
 
     -- applyUpTo
@@ -280,13 +282,13 @@ module RoutingLib.Data.List.Membership.Properties where
 
   module DoubleSetoid {c₁ c₂ ℓ₁ ℓ₂} (S₁ : Setoid c₁ ℓ₁) (S₂ : Setoid c₂ ℓ₂) where
 
-    open Setoid S₁ using () renaming (Carrier to A; _≈_ to _≈₁_; refl to refl₁; sym to sym₁; trans to trans₁)
-    open Setoid S₂ using () renaming (Carrier to B; _≈_ to _≈₂_; refl to refl₂; sym to sym₂; trans to trans₂)
-    open Membership S₁ using () renaming (_∈_ to _∈₁_)
-    open Membership S₂ using () renaming (_∈_ to _∈₂_)
+    open Setoid S₁ using () renaming (Carrier to A; _≈_ to _≈₁_; refl to refl₁; reflexive to reflexive₁; sym to sym₁; trans to trans₁)
+    open Setoid S₂ using () renaming (Carrier to B; _≈_ to _≈₂_; refl to refl₂; reflexive to reflexive₂; sym to sym₂; trans to trans₂)
+    open import Data.List.Any.Membership S₁ using () renaming (_∈_ to _∈₁_)
+    open import Data.List.Any.Membership S₂ using () renaming (_∈_ to _∈₂_)
 
     ∈-map⁺ : ∀ {f} → f Preserves _≈₁_ ⟶ _≈₂_ → ∀ {v xs} → v ∈₁ xs → f v ∈₂ map f xs
-    ∈-map⁺ f-pres v∈xs = Any-map⁺ (mapₐ f-pres v∈xs)
+    ∈-map⁺ f-pres v∈xs = map⁺ (mapₐ f-pres v∈xs)
 
     ∈-map⁻ : ∀ {f v xs} → v ∈₂ map f xs → ∃ λ a → a ∈₁ xs × v ≈₂ f a
     ∈-map⁻ {xs = []}     ()
@@ -297,9 +299,9 @@ module RoutingLib.Data.List.Membership.Properties where
     ∈-gfilter : ∀ P {v xs a} → v ∈₁ xs → Eq _≈₂_ (P v) (just a) → (∀ {x y} → x ≈₁ y → Eq _≈₂_ (P x) (P y)) → a ∈₂ gfilter P xs
     ∈-gfilter _ {_} {[]}     ()
     ∈-gfilter P {v} {x ∷ xs} v∈xs Pᵥ≈justₐ P-resp-≈ with P x | inspect P x | v∈xs
-    ... | nothing | [ Px≡nothing ] | here v≈x    = contradiction (eq-trans trans₂ (eq-trans trans₂ (eq-reflexive refl₂ (≡-sym Px≡nothing)) (P-resp-≈ (sym₁ v≈x))) Pᵥ≈justₐ) λ()
+    ... | nothing | [ Px≡nothing ] | here v≈x    = contradiction (Eq-trans trans₂ (Eq-trans trans₂ (Eq-reflexive reflexive₂ (≡-sym Px≡nothing)) (P-resp-≈ (sym₁ v≈x))) Pᵥ≈justₐ) λ()
     ... | nothing | [ _ ]          | there v∈xs₂ = ∈-gfilter P v∈xs₂ Pᵥ≈justₐ P-resp-≈
-    ... | just b  | [ Px≡justb ]   | here v≈x    = here (drop-just (eq-trans trans₂ (eq-trans trans₂ (eq-sym sym₂ Pᵥ≈justₐ) (P-resp-≈ v≈x)) (eq-reflexive refl₂ Px≡justb)))
+    ... | just b  | [ Px≡justb ]   | here v≈x    = here (drop-just (Eq-trans trans₂ (Eq-trans trans₂ (Eq-sym sym₂ Pᵥ≈justₐ) (P-resp-≈ v≈x)) (Eq-reflexive reflexive₂ Px≡justb)))
     ... | just b  | _              | there v∈xs₂ = there (∈-gfilter P v∈xs₂ Pᵥ≈justₐ P-resp-≈)
 
 
@@ -315,9 +317,9 @@ module RoutingLib.Data.List.Membership.Properties where
     open Setoid S₁ using () renaming (Carrier to A; _≈_ to _≈₁_; refl to refl₁; sym to sym₁; trans to trans₁)
     open Setoid S₂ using () renaming (Carrier to B; _≈_ to _≈₂_; refl to refl₂; sym to sym₂; trans to trans₂)
     open Setoid S₃ using () renaming (Carrier to C; _≈_ to _≈₃_; refl to refl₃; sym to sym₃; trans to trans₃)
-    open Membership S₁ using () renaming (_∈_ to _∈₁_)
-    open Membership S₂ using () renaming (_∈_ to _∈₂_)
-    open Membership S₃ using () renaming (_∈_ to _∈₃_)
+    open import Data.List.Any.Membership S₁ using () renaming (_∈_ to _∈₁_)
+    open import Data.List.Any.Membership S₂ using () renaming (_∈_ to _∈₂_)
+    open import Data.List.Any.Membership S₃ using () renaming (_∈_ to _∈₃_)
 
     -- combine
 

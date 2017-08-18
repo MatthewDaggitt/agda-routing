@@ -1,17 +1,14 @@
 open import Relation.Binary using (Setoid; _Respects_; Decidable)
-open import Data.List.Any as Any using (any)
+open import Data.List.Any using (any; here; there)
 open import Data.List using (List; []; _∷_)
 open import Data.List.All using (All; _∷_)
 open import Data.Nat using (ℕ; zero; suc)
 open import Relation.Nullary using (yes; no)
 
-module RoutingLib.Data.List.Membership {c ℓ} (S : Setoid c ℓ) where
+module RoutingLib.Data.List.Any.Membership {c ℓ} (S : Setoid c ℓ) where
 
-  open Any.Membership S public hiding (∈-resp-≈)
-  open Any public using (here; there)
   open Setoid S using (_≈_; sym) renaming (Carrier to A)
-
-
+  open import Data.List.Any.Membership S using (_∈_)
 
   indexOf : ∀ {x xs} → x ∈ xs → ℕ
   indexOf (here px)    = zero

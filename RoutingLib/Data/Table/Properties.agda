@@ -1,8 +1,9 @@
 open import Algebra.FunctionProperties using (Op₂)
-open import Data.Nat using (ℕ; zero; suc)
-open import Data.Fin using () renaming (zero to fzero; suc to fsuc)
+open import Data.Nat using (ℕ; zero; suc; _<_; _≤_; _⊓_)
+open import Data.Nat.Properties using (⊓-sel; ⊓-mono-<; module ≤-Reasoning)
+open import Data.Fin using (Fin; inject₁) renaming (zero to fzero; suc to fsuc)
 open import Data.Product using (_,_; proj₁; proj₂)
-open import Data.Sum using (inj₁; inj₂)
+open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Function using (_∘_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_)
@@ -13,6 +14,7 @@ open import RoutingLib.Data.Table
 open import RoutingLib.Data.Table.All using (All)
 open import RoutingLib.Data.Table.Any using (Any)
 open import RoutingLib.Algebra.FunctionProperties
+open import RoutingLib.Data.Nat.Properties
 
 module RoutingLib.Data.Table.Properties where
 
@@ -52,21 +54,47 @@ module RoutingLib.Data.Table.Properties where
       pres _ _ (inj₂ (foldr-⊎pres pres e (i , Ptᵢ)))
 
 
-
   -- Properties of foldr⁺
   
   module _ {a p} {A : Set a} (P : Pred A p) {_•_ : Op₂ A} where
 
     foldr⁺-forces× : _•_ Forces-× P → ∀ {n} (t : Table A (suc n)) →
                     P (foldr⁺ _•_ t) → All P t
-    foldr⁺-forces× forces t Pft fzero    = foldr-forces×ʳ P (forces×⇒forces×ʳ forces) (t fzero) (t ∘ fsuc) Pft
-    foldr⁺-forces× forces t Pft (fsuc i) = foldr-forces× P forces (t fzero) (t ∘ fsuc) Pft i
+    foldr⁺-forces× forces {zero}  t Pt₀ fzero     = Pt₀
+    foldr⁺-forces× forces {zero}  t Pft (fsuc ()) 
+    foldr⁺-forces× forces {suc n} t Pft (fzero)   = proj₁ (forces (t fzero) _ Pft)
+    foldr⁺-forces× forces {suc n} t Pft (fsuc i)  = foldr⁺-forces× forces (t ∘ fsuc) (proj₂ (forces _ _ Pft)) i
     
     foldr⁺-×pres : _•_ ×-Preserves P → ∀ {n} {t : Table A (suc n)} →
                    All P t → P (foldr⁺ _•_ t)
-    foldr⁺-×pres pres PM = foldr-×pres P pres (PM fzero) (PM ∘ fsuc)
-
+    foldr⁺-×pres pres {zero}  Pt = Pt fzero
+    foldr⁺-×pres pres {suc n} Pt = pres (Pt _) (foldr⁺-×pres pres (Pt ∘ fsuc))
+    
     foldr⁺-⊎pres : _•_ ⊎-Preserves P → ∀ {n} {t : Table A (suc n)} →
                        Any P t → P (foldr⁺ _•_ t)
-    foldr⁺-⊎pres pres {t = t} (fzero  , Pt₀) = foldr-⊎presʳ P (⊎pres⇒⊎presʳ pres) Pt₀ (t ∘ fsuc)
-    foldr⁺-⊎pres pres (fsuc i , Ptᵢ) = foldr-⊎pres P pres _ (i , Ptᵢ)
+    foldr⁺-⊎pres pres {zero}  (fzero , Pt₀) = Pt₀
+    foldr⁺-⊎pres pres {suc n} (fzero , Pt₀) = pres _ _ (inj₁ Pt₀)
+    foldr⁺-⊎pres pres {zero}  (fsuc () , _)
+    foldr⁺-⊎pres pres {suc n} (fsuc i , Ptᵢ) = pres _ _ (inj₂ (foldr⁺-⊎pres pres (i , Ptᵢ)))
+
+
+  min[t]<x : ∀ ⊤ {n} (t : Table ℕ n) {x} → ⊤ < x ⊎ Any (_< x) t → min ⊤ t < x
+  min[t]<x ⊤ t (inj₁ ⊤<x) = foldr-⊎presʳ (_< _) o<m⇒n⊓o<m ⊤<x t
+  min[t]<x ⊤ t (inj₂ t<x) = foldr-⊎pres (_< _) n<m⊎o<m⇒n⊓o<m ⊤ t<x
+  
+  min⁺[t]<x : ∀ {n} {t : Table ℕ (suc n)} {x} → Any (_< x) t → min⁺ t < x
+  min⁺[t]<x = foldr⁺-⊎pres _ n<m⊎o<m⇒n⊓o<m
+
+  postulate x<min⁺[t] : ∀ {n} {t : Table ℕ (suc n)} {x} → All (x <_) t → x < min⁺ t
+
+  min[s]<min[t] : ∀ ⊤₁ {⊤₂} {m n} {s : Table ℕ m} {t : Table ℕ n} → ⊤₁ < ⊤₂ ⊎ Any (_< ⊤₂) s →
+                  All (λ y → ⊤₁ < y ⊎ Any (_< y) s) t → min ⊤₁ s < min ⊤₂ t
+  min[s]<min[t] ⊤₁ {n = zero}  v all = min[t]<x ⊤₁ _ v
+  min[s]<min[t] ⊤₁ {n = suc m} v all = m<n×m<o⇒m<n⊓o
+    (min[t]<x ⊤₁ _ (all fzero))
+    (min[s]<min[t] ⊤₁ v (all ∘ fsuc))
+
+  min⁺[s]<min⁺[t] : ∀ {m n} {s : Table ℕ (suc m)} {t : Table ℕ (suc n)} →
+                   All (λ y → Any (_< y) s) t → min⁺ s < min⁺ t
+  min⁺[s]<min⁺[t] {n = zero}  {s} {t} all = min⁺[t]<x (all fzero)
+  min⁺[s]<min⁺[t] {n = suc n} {s} {t} all = m<n×m<o⇒m<n⊓o (min⁺[t]<x (all fzero)) (min⁺[s]<min⁺[t] (all ∘ fsuc))

@@ -1,5 +1,5 @@
 open import Data.Nat using (ℕ; zero; suc; _⊔_; _⊓_)
-open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
+open import Data.Fin using (Fin; toℕ; fromℕ; inject₁) renaming (zero to fzero; suc to fsuc)
 open import Relation.Binary using (Rel; REL)
 open import Relation.Unary using (Pred)
 open import Data.Product using (∃; _×_; _,_)
@@ -46,13 +46,20 @@ module RoutingLib.Data.Table where
   foldr f e {suc n} t = f (t fzero) (foldr f e (t ∘ fsuc))
   
   foldr⁺ : ∀ {a} {A : Set a} → Op₂ A → ∀ {n} → Table A (suc n) → A
-  foldr⁺ f t = foldr f (t fzero) (t ∘ fsuc)
+  foldr⁺ f {zero}  t = t fzero
+  foldr⁺ f {suc n} t = f (t fzero) (foldr⁺ f (t ∘ fsuc))
   
   foldl⁺ : ∀ {a} {A : Set a} → Op₂ A → ∀ {n} → Table A (suc n) → A
-  foldl⁺ f t = foldl f (t fzero) (t ∘ fsuc)
+  foldl⁺ f {n} t = foldl f (t fzero) (t ∘ fsuc)
 
+  max : ∀ {n} → ℕ → Table ℕ n → ℕ
+  max ⊥ t = foldr _⊔_ ⊥ t
+  
   max⁺ : ∀ {n} → Table ℕ (suc n) → ℕ
   max⁺ t = foldr⁺ _⊔_ t
 
+  min : ∀ {n} → ℕ → Table ℕ n → ℕ
+  min ⊤ t = foldr _⊓_ ⊤ t
+  
   min⁺ : ∀ {n} → Table ℕ (suc n) → ℕ
   min⁺ t = foldr⁺ _⊓_ t

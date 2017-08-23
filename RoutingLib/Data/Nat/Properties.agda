@@ -186,16 +186,15 @@ module RoutingLib.Data.Nat.Properties where
     m⊔n≤o⇒m≤o : ∀ {m n o} → m ⊔ n ≤ o → m ≤ o
     m⊔n≤o⇒m≤o m⊔n≤o = ≤-trans (m≤m⊔n _ _) m⊔n≤o
 
-
-    n≤m⇒o⊓n≤m : ∀ {m} → _⊓_ ⊎-Preservesʳ (_≤ m)
-    n≤m⇒o⊓n≤m o m≤n = ≤-trans (m⊓n≤n o _) m≤n
-
     n≤m⇒n⊓o≤m : ∀ {m} → _⊓_ ⊎-Preservesˡ (_≤ m)
     n≤m⇒n⊓o≤m o m≤n = ≤-trans (m⊓n≤m _ o) m≤n
+
+    o≤m⇒n⊓o≤m : ∀ {m} → _⊓_ ⊎-Preservesʳ (_≤ m)
+    o≤m⇒n⊓o≤m n o≤m = ≤-trans (m⊓n≤n n _) o≤m
     
     n≤m⊎o≤m⇒n⊓o≤m : ∀ {m} → _⊓_ ⊎-Preserves (_≤ m)
     n≤m⊎o≤m⇒n⊓o≤m _ o (inj₁ n≤m) = n≤m⇒n⊓o≤m o n≤m
-    n≤m⊎o≤m⇒n⊓o≤m n _ (inj₂ o≤m) = n≤m⇒o⊓n≤m n o≤m
+    n≤m⊎o≤m⇒n⊓o≤m n _ (inj₂ o≤m) = o≤m⇒n⊓o≤m n o≤m
 
     n≤m×o≤m⇒n⊓o≤m : ∀ {m} → _⊓_ ×-Preserves (_≤ m)
     n≤m×o≤m⇒n⊓o≤m n≤m o≤m = n≤m⇒n⊓o≤m _ n≤m
@@ -230,6 +229,9 @@ module RoutingLib.Data.Nat.Properties where
     n<m⊎o<m⇒n⊓o<m n o (inj₁ n<m) = n<m⇒n⊓o<m o n<m
     n<m⊎o<m⇒n⊓o<m n o (inj₂ o<m) = o<m⇒n⊓o<m n o<m
 
+    m<n×m<o⇒m<n⊓o : ∀ {m} → _⊓_ ×-Preserves (m <_)
+    m<n×m<o⇒m<n⊓o m<n m<o = subst (_< _) (⊓-idem _) (⊓-mono-< m<n m<o)
+    
 
     
     ⊓-triangulate : ∀ x y z → x ⊓ y ⊓ z ≡ (x ⊓ y) ⊓ (y ⊓ z)

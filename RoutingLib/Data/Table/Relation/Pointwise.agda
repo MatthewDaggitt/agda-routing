@@ -96,4 +96,5 @@ module RoutingLib.Data.Table.Relation.Pointwise where
                 (∀ {w x y z} → w ~ x → y ~ z → (w • y) ~ (x ◦ z)) →
                 ∀ {n} {s : Table A (suc n)} {t : Table B (suc n)} →
                 Pointwise _~_ s t → foldr⁺ _•_ s ~ foldr⁺ _◦_ t
-  foldr⁺-cong •◦-cong s~t = foldr-cong (λ {w x y z} → •◦-cong {w} {x} {y} {z}) (s~t fzero) (s~t ∘ fsuc)
+  foldr⁺-cong •◦-cong {zero}  s~t = s~t fzero
+  foldr⁺-cong •◦-cong {suc n} s~t = •◦-cong (s~t fzero) (foldr⁺-cong (λ {w x y z} → •◦-cong {w} {x} {y} {z}) (s~t ∘ fsuc))

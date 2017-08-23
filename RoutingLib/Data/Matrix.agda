@@ -1,7 +1,7 @@
-open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
+open import Data.Fin using (Fin; toℕ) renaming (zero to fzero; suc to fsuc)
 open import Data.Nat
 open import Data.List using (List; concat; tabulate)
-open import Data.Product using (∃₂)
+open import Data.Product using (∃₂; _×_; _,_)
 open import Relation.Unary using (Pred)
 open import Algebra.FunctionProperties using (Op₂)
 open import Function using (_∘_)
@@ -42,10 +42,13 @@ module RoutingLib.Data.Matrix where
   fold f e M = Table.foldr (λ t e → Table.foldr f e t) e M
   
   fold⁺ : ∀ {a} {A : Set a} → Op₂ A → ∀ {m n} → Matrix A (suc m) (suc n) → A
-  fold⁺ _•_ M = fold _•_ (Table.foldr⁺ _•_ (M fzero)) (M ∘ fsuc)
-
+  fold⁺ _•_ {zero}  M = Table.foldr⁺ _•_ (M fzero)
+  fold⁺ _•_ {suc m} M = Table.foldr⁺ _•_ (M fzero) • fold⁺ _•_ (M ∘ fsuc)
+  
   max⁺ : ∀ {m n} → Matrix ℕ (suc m) (suc n) → ℕ
   max⁺ M = fold⁺ _⊔_ M
 
   min⁺ : ∀ {m n} → Matrix ℕ (suc m) (suc n) → ℕ
   min⁺ M = fold⁺ _⊓_ M
+
+  

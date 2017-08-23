@@ -8,6 +8,7 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (∃; _,_; _×_; proj₂)
 open import Relation.Binary using (Setoid; Decidable)
 open import Relation.Binary.PropositionalEquality using (_≡_; setoid; refl; cong; cong₂)
+open import Relation.Binary.List.Pointwise using (≡⇒Rel≡)
 open import Relation.Nullary using (yes; no)
 open import Function using (_∘_; id)
 
@@ -26,9 +27,6 @@ module RoutingLib.Data.List.Any.Membership.Propositional where
 
   import RoutingLib.Data.List.Any.Membership.Properties as GM
 
-  postulate ∈-concat⁺ : ∀ {a} {A : Set a} {v : A} {xs xss} → v ∈ xs → xs ∈ xss → v ∈ concat xss
-  --∈-concat {A = A} v∈xs xs∈xss = GM.∈-concat (setoid A) v∈xs {!xs∈xss!}
-
   ∈-++⁺ʳ : ∀ {a} {A : Set a} {v : A} xs {ys} → v ∈ ys → v ∈ xs ++ ys
   ∈-++⁺ʳ = GM.∈-++⁺ʳ (setoid _)
 
@@ -37,7 +35,9 @@ module RoutingLib.Data.List.Any.Membership.Propositional where
 
   ∈-++⁻ : ∀ {a} {A : Set a} {v : A}  xs {ys} → v ∈ xs ++ ys → v ∈ xs ⊎ v ∈ ys
   ∈-++⁻ = GM.∈-++⁻ (setoid _)
-    
+
+  ∈-concat⁺ : ∀ {a} {A : Set a} {v : A} {xs xss} → v ∈ xs → xs ∈ xss → v ∈ concat xss
+  ∈-concat⁺ {A = A} {xss = xss} v∈xs xs∈xss = GM.∈-concat⁺ (setoid A) v∈xs (Any.map ≡⇒Rel≡ xs∈xss)
 
   ∈-deduplicate⁺ : ∀ {a} {A : Set a} → ∀ _≟_ {x : A} {xs} → x ∈ xs → x ∈ deduplicate _≟_ xs
   ∈-deduplicate⁺ = GM.∈-deduplicate⁺ (setoid _)

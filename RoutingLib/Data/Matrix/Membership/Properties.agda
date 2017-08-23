@@ -32,11 +32,11 @@ module RoutingLib.Data.Matrix.Membership.Properties where
     sel⇒fold⁺[M]∈M : ∀ {_•_ : Op₂ A} → Selective _≈_ _•_ →
                        ∀ {m n} (M : Matrix A (suc m) (suc n)) →
                        fold⁺ _•_ M ∈ M
-    sel⇒fold⁺[M]∈M {_•_} •-sel M with sel⇒fold[M]∈M •-sel _ (M ∘ fsuc)
-    ... | inj₂ (i , j , f≈Mᵢⱼ) = fsuc i , j , f≈Mᵢⱼ
-    ... | inj₁ f≈fM₀ with TableMP.sel⇒foldr⁺[t]∈t S •-sel (M fzero)
-    ...   | (j , fM₀≈M₀ⱼ) = fzero , j , trans f≈fM₀ fM₀≈M₀ⱼ
-
+    sel⇒fold⁺[M]∈M {_•_} •-sel {zero}  M = fzero , TableMP.sel⇒foldr⁺[t]∈t S •-sel (M fzero)
+    sel⇒fold⁺[M]∈M {_•_} •-sel {suc m} M with •-sel _ (fold⁺ _•_ (M ∘ fsuc)) | TableMP.sel⇒foldr⁺[t]∈t S •-sel (M fzero) | sel⇒fold⁺[M]∈M •-sel (M ∘ fsuc)
+    ... | inj₁ t•f≈t | (j , t≈tⱼ) | _ = fzero , j , trans t•f≈t t≈tⱼ
+    ... | inj₂ t•f≈f | _          | (i , j , f≈tᵢⱼ) = fsuc i , j , trans t•f≈f f≈tᵢⱼ
+    
   open SingleSetoid public
 
 

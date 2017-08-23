@@ -89,9 +89,6 @@ module RoutingLib.Data.Vec.SelectiveFolds
     foldrₑ≤e e (x ∷ xs) = ≤ᵣ-trans (≤ᵣ-absᵣ' comm assoc idem (foldr (λ _ → A) _•_ e xs) x) (foldrₑ≤e e xs)
 
 
-
-    postulate foldrₓₛ≈foldrᵥₛ : ∀ {n} e (xs ys : Vec A n) → (∀ k → lookup k xs ≈ lookup k ys ⊎ ((∃ λ l → lookup l xs <ᵣ lookup k xs) × (∃ λ m → lookup m ys <ᵣ lookup k ys))) → foldr (λ _ → A) _•_ e xs ≈ foldr (λ _ → A) _•_ e ys
-
 {-
     foldrₓₛ≈foldrᵥₛ e [] [] _ = refl
     foldrₓₛ≈foldrᵥₛ e (x ∷ xs) (y ∷ ys) eqCon with eqCon fzero

@@ -134,7 +134,7 @@ module RoutingLib.Data.List.Properties where
   min[xs]<x = foldr-⊎pres n<m⊎o<m⇒n⊓o<m
   
   min[xs]≤⊤ : ∀ ⊤ xs → min ⊤ xs ≤ ⊤
-  min[xs]≤⊤ ⊤ xs = foldr-⊎presʳ n≤m⇒o⊓n≤m xs ≤-refl
+  min[xs]≤⊤ ⊤ xs = foldr-⊎presʳ o≤m⇒n⊓o≤m xs ≤-refl
 
   x≤min[xs] : ∀ {x xs ⊤} → All (x ≤_) xs → x ≤ ⊤ → x ≤ min ⊤ xs
   x≤min[xs] = foldr-×pres m≤n×m≤o⇒m≤n⊓o

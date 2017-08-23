@@ -12,7 +12,7 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import RoutingLib.Data.Nat.Properties using (ℕₛ; m⊔n≡m⇒n≤m; o∸n≤o∸m∧m≤o⇒m≤n; m<n⇒n≡1+o; ⊔-preserves-≡x; n⊔o≤m⇒n≤m×o≤m; n≤m×o≤m⇒n⊔o≤m; m≤n⇒m≤n⊔o; m<n⇒0<n∸m; n≤m⇒m⊔n≡m; m≤n⇒m⊔n≡n; ∸-cancelˡ)
 open import RoutingLib.Function.Distance using (IsUltrametric; MaxTriangleIneq)
 open import RoutingLib.Data.Matrix using (Matrix; zipWith; max⁺)
-open import RoutingLib.Data.Matrix.Properties using (max⁺-cong; M≤max⁺; max⁺[M]≡x; max⁺[M]≤x; max⁺-constant; zipWith-sym)
+open import RoutingLib.Data.Matrix.Properties using (max⁺-cong; M≤max⁺[M]; max⁺[M]≡x; max⁺[M]≤x; max⁺-constant; zipWith-sym)
 open import RoutingLib.Data.Matrix.Membership.Propositional.Properties using (max⁺[M]∈M)
 open import RoutingLib.Data.Matrix.Relation.Pointwise using (zipWith-cong)
 
@@ -228,7 +228,7 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step2_UltrametricAlt
     d-cong₂ X≈Y U≈V = max⁺-cong (zipWith-cong _≈_ _≈_ _≡_ dₑ-cong₂ X≈Y U≈V)
 
     dₑ≤d : ∀ X Y i j → dₑ (X i j) (Y i j) ≤ℕ d X Y
-    dₑ≤d X Y i j = M≤max⁺ (zipWith dₑ X Y) i j
+    dₑ≤d X Y i j = M≤max⁺[M] (zipWith dₑ X Y) i j
 
     d≤dₘₐₓ : ∀ X Y → d X Y ≤ℕ dₘₐₓ
     d≤dₘₐₓ X Y = max⁺[M]≤x (λ i j → dₑ≤dₘₐₓ (X i j) (Y i j))

@@ -83,10 +83,11 @@ module RoutingLib.Data.Table.Properties where
   min[t]<x ⊤ t (inj₂ t<x) = foldr-⊎pres (_< _) n<m⊎o<m⇒n⊓o<m ⊤ t<x
   
   min⁺[t]<x : ∀ {n} {t : Table ℕ (suc n)} {x} → Any (_< x) t → min⁺ t < x
-  min⁺[t]<x = foldr⁺-⊎pres _ n<m⊎o<m⇒n⊓o<m
+  min⁺[t]<x = foldr⁺-⊎pres (_< _) n<m⊎o<m⇒n⊓o<m
 
-  postulate x<min⁺[t] : ∀ {n} {t : Table ℕ (suc n)} {x} → All (x <_) t → x < min⁺ t
-
+  x<min⁺[t] : ∀ {n} {t : Table ℕ (suc n)} {x} → All (x <_) t → x < min⁺ t
+  x<min⁺[t] = foldr⁺-×pres (_ <_) m<n×m<o⇒m<n⊓o
+  
   min[s]<min[t] : ∀ ⊤₁ {⊤₂} {m n} {s : Table ℕ m} {t : Table ℕ n} → ⊤₁ < ⊤₂ ⊎ Any (_< ⊤₂) s →
                   All (λ y → ⊤₁ < y ⊎ Any (_< y) s) t → min ⊤₁ s < min ⊤₂ t
   min[s]<min[t] ⊤₁ {n = zero}  v all = min[t]<x ⊤₁ _ v

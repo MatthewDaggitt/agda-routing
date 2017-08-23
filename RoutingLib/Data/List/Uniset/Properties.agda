@@ -5,9 +5,11 @@ open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using () renaming (Decidable to Decidableᵤ)
 open import Data.Product using (Σ; ∃; _,_; _×_; proj₁)
 open import Data.List using (List; []; _∷_; length)
+open import Data.List.Any using (here; there)
 open import Data.List.All using ([]; _∷_; map)
+open import Data.List.All.Properties using (¬Any⇒All¬; All¬⇒¬Any)
 open import Data.Nat using (_≤_; _<_; suc)
-open import Data.Nat.Properties using (≤-step)
+open import Data.Nat.Properties using (≤-step; ≤-refl)
 open import Algebra.FunctionProperties using (Op₂)
 open import Function using (_∘_)
 
@@ -15,14 +17,12 @@ open import RoutingLib.Data.List using (dfilter)
 open import RoutingLib.Data.List.Properties using (|dfilter[xs]|≤|xs|)
 open import RoutingLib.Data.List.All using ([]; _∷_)
 open import RoutingLib.Data.List.Uniqueness using (Unique)
-open import RoutingLib.Data.List.All.Properties using (¬Any→All¬; All¬→¬Any; All-map₂)
-open import RoutingLib.Data.Nat.Properties using (≤-refl)
 
 module RoutingLib.Data.List.Uniset.Properties {c ℓ} (DS : DecSetoid c ℓ) where
   
   open DecSetoid DS renaming (Carrier to A; setoid to S)
-  open import RoutingLib.Data.List.Membership S using (here; there) renaming (_∈_ to _∈ₗ_)
-  open import RoutingLib.Data.List.Membership.Properties
+  open import Data.List.Any.Membership S using () renaming (_∈_ to _∈ₗ_)
+  open import Data.List.Any.Membership.Properties
   open import RoutingLib.Data.List.Uniqueness.Properties using (dfilter!⁺)
   open import RoutingLib.Data.List.Uniset DS
 
@@ -141,16 +141,6 @@ module RoutingLib.Data.List.Uniset.Properties {c ℓ} (DS : DecSetoid c ℓ) whe
   |X/x|≤|X| : ∀ x X → size (remove x X) ≤ size X
   |X/x|≤|X| x X = |filterX|≤|X| _ X
 
-{-
-  remove-size₂ : ∀ x X → x ∈ X → suc (size (remove x X)) ≡ size X
-  remove-size₂ x (xs , xs!) = {!!}
-
-  remove-size₃ : ∀ x X → x ∈ X → size (remove x X) < size X
-  remove-size₃ x (xs , xs!) = {!!}
-
-  remove-size₄ : ∀ x X → x ∉ X → size (remove x X) ≡ size X
-  remove-size₄ x (xs , xs!) = {!!}
--}
 
   -- Subset
 
@@ -166,16 +156,6 @@ module RoutingLib.Data.List.Uniset.Properties {c ℓ} (DS : DecSetoid c ℓ) whe
   --_⊆?_ : Decidable _⊆_
   --_⊆?_ X Y = {!!}
 
-  
-  postulate ⊆-size : ∀ X Y → X ⊆ Y → size X ≤ size Y
-  --⊆-size X⊆Y = {!!}
-
-  postulate ⊂-size : ∀ X Y → X ⊂ Y → size X < size Y
-  --⊂-size (X⊆Y , (y , y∈Y , y∉X)) = {!!}
-  
-  postulate ∈-size : ∀ {x} X → x ∈ X → 1 ≤ size X
-
-  --∈-remove : ∀ x y X → x ∈ X → x ∈ remove 
 
   -- Membership
 

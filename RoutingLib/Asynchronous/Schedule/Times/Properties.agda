@@ -1,27 +1,27 @@
-open import Data.Nat using (ℕ; zero; suc; _≤_; _<_; _⊔_; _∸_; _+_; z≤n; s≤s; _≟_; _≤?_; module ≤-Reasoning; ≤-pred)
-open import Data.Nat.Properties using (m≤m⊔n; n≤1+n; ⊔-sel)
+open import Data.Nat using (ℕ; zero; suc; _≤_; _<_; _⊔_; _∸_; _+_; z≤n; s≤s; _≟_; _≤?_; ≤-pred)
+open import Data.Nat.Properties using (m≤m⊔n; n≤1+n; ⊔-sel; module ≤-Reasoning; <-cmp; ≤+≢⇒<; ≤-refl; <⇒≤; ⊔-identityʳ; <-irrefl; ≤-trans; ≤-reflexive; ≮⇒≥; n≤m⊔n; ⊔-mono-≤)
 open import Data.Fin using (Fin; toℕ)
 open import Data.Fin.Properties using ()
 open import Data.Fin.Subset using (_∈_)
 open import Data.Fin.Dec using (_∈?_)
 open import Data.Product using (∃; _,_; _×_; proj₁; proj₂)
 open import Data.Sum using (inj₁; inj₂; _⊎_)
+open import Data.List using (List; []; _∷_; foldr; map; allFin; applyDownFrom; tabulate)
 open import Data.List.Any using (Any) renaming (map to anyMap)
-open import Data.List using (List; foldr; map; []; _∷_)
+open import Data.List.Any.Properties using (map⁺)
+open import Data.List.Any.Membership.Propositional.Properties using (∈-map⁺)
 open import Data.Vec using (Vec; lookup) renaming (map to mapᵥ; allFin to allFinᵥ)
 open import Induction.WellFounded using (Acc; acc)
+open import Induction.Nat using () renaming (<-well-founded to <-wf)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary using (tri<; tri≈; tri>)
 open import Relation.Binary.PropositionalEquality using (refl; sym; cong; subst; _≢_; _≡_)
 
 open import RoutingLib.Asynchronous.Schedule
-open import RoutingLib.Data.Nat.Properties using (<-cmp; ≤+≢⇒<; m<n≤o⇒o∸n<o∸m; ≤-refl; <⇒≤; ⊔-⊎preserves-x≤; ∀x≤m:n≢x⇒m<n; 0-idᵣ-⊔; <-irrefl; ≤-trans; ≤-reflexive; ≮⇒≥; m⊔n≡m⇒n≤m; n⊔m≡m⇒n≤m; n≤m⊔n; ⊔-mono-≤)
-open import RoutingLib.Induction.Nat using () renaming (<-well-founded to <-wf)
-open import RoutingLib.Data.List using (allFin; applyDownFrom; tabulate)
+open import RoutingLib.Data.Nat.Properties using ( m<n≤o⇒o∸n<o∸m; m≤n⊎m≤o⇒m≤n⊔o; ∀x≤m:n≢x⇒m<n; m⊔n≡m⇒n≤m; n⊔m≡m⇒n≤m)
 open import RoutingLib.Data.List.Properties using (x≤max[xs]; ⊥≤max[xs])
-open import RoutingLib.Data.List.Any.Properties using (Any-map⁺)
-open import RoutingLib.Data.List.Membership.Propositional using (∈-allFin⁺; ∈-map⁺; ∈-tabulate⁺; ∈-applyDownFrom⁺)
+open import RoutingLib.Data.List.Any.Membership.Propositional using (∈-allFin⁺; ∈-tabulate⁺; ∈-applyDownFrom⁺)
 open import RoutingLib.Asynchronous.Schedule.Times using (module ActivationTimes; module DataFlowTimes; module ScheduleTimes)
 
 module RoutingLib.Asynchronous.Schedule.Times.Properties {n} where
@@ -160,7 +160,7 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} where
       x≤t⇒peₓ≤eₜ i j {x} {t} x≤t = x≤max[xs] t (anyMap ≤-reflexive (∈-applyDownFrom⁺ (λ t → pointExpiryᵢⱼ t i j) (s≤s x≤t)))
 
       expiryᵢⱼ-expired-lemma : ∀ {t t'} i j {x} → expiryᵢⱼ t i j ≤ t' → x ≤ t → β t' i j ≢ x
-      expiryᵢⱼ-expired-lemma {zero}  {t'} i j {zero}  ndfₜ≤t' z≤n rewrite 0-idᵣ-⊔ (pointExpiryᵢⱼ zero i j) = pointExpiryᵢⱼ-expired zero i j ndfₜ≤t'
+      expiryᵢⱼ-expired-lemma {zero}  {t'} i j {zero}  ndfₜ≤t' z≤n rewrite ⊔-identityʳ (pointExpiryᵢⱼ zero i j) = pointExpiryᵢⱼ-expired zero i j ndfₜ≤t'
       expiryᵢⱼ-expired-lemma {zero}  {t'} i j {suc x} _      ()
       expiryᵢⱼ-expired-lemma {suc t} {t'} i j {x}     ndfₜ≤t' x≤t+1 = pointExpiryᵢⱼ-expired x i j (≤-trans (x≤t⇒peₓ≤eₜ i j x≤t+1) ndfₜ≤t')
 
@@ -169,9 +169,6 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} where
 
       t≤expiryᵢⱼ : ∀ t i j → t ≤ expiryᵢⱼ t i j
       t≤expiryᵢⱼ t i j = ⊥≤max[xs] t (applyDownFrom (λ t → pointExpiryᵢⱼ t i j) (suc t))
-      
-      --postulate x≤t⇒eₓ≤eₜ : ∀ i j {x t} → x ≤ t → expiryᵢⱼ x i j ≤ expiryᵢⱼ t i j
-      
 
       -- expiryᵢ
 

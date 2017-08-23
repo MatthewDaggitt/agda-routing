@@ -27,7 +27,7 @@ open import RoutingLib.Data.List.Any.Membership.Propositional using (∈-upTo⁺
 open import RoutingLib.Data.List using (between)
 open import RoutingLib.Data.Nat.Properties using (ℕₛ; m∸[m∸n]≡n; m<n⇒n≢0; m<n⇒n≡1+o; m∸n<o⇒m∸o<n)
 open import RoutingLib.Data.Matrix using (Matrix; max⁺; map)
-open import RoutingLib.Data.Matrix.Properties using (M≤max⁺)
+open import RoutingLib.Data.Matrix.Properties using (M≤max⁺[M])
 open import RoutingLib.Data.Matrix.Membership.Propositional.Properties using (max⁺[M]∈M)
 
 module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step4_AsynchronousConditions
@@ -76,7 +76,7 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step4_AsynchronousCondi
   
   hZᵢⱼ≤hZₛₜ : ∀ i j → h (Z i j) ≤ℕ h (Z s t)
   hZᵢⱼ≤hZₛₜ i j with max⁺[M]∈M (map h Z)
-  ... | _ , _ , hZₛₜ≡max⁺ = subst (h (Z i j) ≤ℕ_) hZₛₜ≡max⁺ (M≤max⁺ (map h Z) i j)
+  ... | _ , _ , hZₛₜ≡max⁺ = subst (h (Z i j) ≤ℕ_) hZₛₜ≡max⁺ (M≤max⁺[M] (map h Z) i j)
 
 
   -- As Zₛₜ is the maximial element we can define the minimal distance

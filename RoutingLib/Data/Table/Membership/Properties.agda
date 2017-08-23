@@ -27,8 +27,10 @@ module RoutingLib.Data.Table.Membership.Properties where
 
     sel⇒foldr⁺[t]∈t : ∀ {_•_} → Selective _≈_ _•_ →
                    ∀ {n} (t : Table A (suc n)) → foldr⁺ _•_ t ∈ t
-    sel⇒foldr⁺[t]∈t sel t with sel⇒foldr[t]∈t sel (t fzero) (t ∘ fsuc)
-    ... | inj₁ f≈t₀      = fzero , f≈t₀
-    ... | inj₂ (i , f≈tᵢ) = fsuc i , f≈tᵢ
+    sel⇒foldr⁺[t]∈t sel {zero}  t = fzero , refl
+    sel⇒foldr⁺[t]∈t sel {suc n} t with sel (t fzero) (foldr⁺ _ (t ∘ fsuc))
+    ... | inj₁ t₀•f≈t₀ = fzero , t₀•f≈t₀
+    ... | inj₂ t₀•f≈f  with sel⇒foldr⁺[t]∈t sel (t ∘ fsuc)
+    ...   | (i , f≈tᵢ) = fsuc i , trans t₀•f≈f f≈tᵢ
 
   open SingleSetoid public

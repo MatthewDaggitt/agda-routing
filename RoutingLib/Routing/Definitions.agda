@@ -1,24 +1,18 @@
 open import Algebra.FunctionProperties using (Op₂; Congruent₂)
-open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
-open import Data.Fin.Dec using (all?; ¬∀⟶∃¬)
-open import Data.Nat using (ℕ; suc)
-open import Data.List using (List; concat; tabulate; allFin)
-open import Data.List.All using (All; []; _∷_; all) renaming (lookup to all-lookup)
-open import Data.List.Any using (Any)
-open import Data.List.Any.Membership.Propositional using (_∈_)
-open import Data.Product using (∃; ∃₂; _×_; _,_)
+open import Data.Fin using (Fin)
+open import Data.Nat using (ℕ)
+open import Data.Product using (∃; _×_; Σ)
+open import Data.Maybe
 open import Level using (_⊔_) renaming (zero to lzero; suc to lsuc)
-open import Relation.Nullary using (¬_; yes; no)
-open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Binary using (Rel; IsDecEquivalence; Setoid; Reflexive; Symmetric; Transitive; Decidable; DecSetoid; IsEquivalence; _⇒_)
-open import Relation.Binary.PropositionalEquality using (_≡_) renaming (refl to ≡-refl; setoid to ≡-setoid)
+open import Relation.Nullary using (¬_; Dec; yes; no)
+open import Relation.Binary using (Rel; IsDecEquivalence; Setoid; DecSetoid; IsEquivalence)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
 open import RoutingLib.Algebra.FunctionProperties using (_Preservesₗ_)
-open import RoutingLib.Data.List using (combine)
-open import RoutingLib.Data.List.All using (All₂; []; _∷_)
-open import RoutingLib.Data.List.Any using (Any₂; here; there)
 open import RoutingLib.Data.List.Any.Membership.Propositional using (∈-concat⁺; ∈-tabulate⁺)
 open import RoutingLib.Data.Matrix using (SquareMatrix; Matrix)
+open import RoutingLib.Data.Graph.SimplePath using (SimplePath; []; [_]; _∺_; _∷_; _∺_∣_; _∷_∣_; _∈_; source) renaming (_≈_ to _≈ₚ_)
+open import RoutingLib.Data.Graph.SimplePath.Properties using (p≈q⇒p₀≡q₀)
 
 module RoutingLib.Routing.Definitions where
 
@@ -45,13 +39,18 @@ module RoutingLib.Routing.Definitions where
       ≈-isDecEquivalence : IsDecEquivalence _≈_
       ⊕-cong             : Congruent₂ _≈_ _⊕_
       ▷-cong             : _▷_ Preservesₗ _≈_
-      0≉1                : ¬ (0# ≈ 1#)
+      1≉0                : ¬ (1# ≈ 0#)
       
     -- A few useful consequences of equality to export
     _≉_ : Rel Route ℓ
     x ≉ y = ¬ (x ≈ y)
 
-    open IsDecEquivalence ≈-isDecEquivalence public
+    open IsDecEquivalence ≈-isDecEquivalence renaming
+      ( refl      to ≈-refl
+      ; reflexive to ≈-reflexive
+      ; sym       to ≈-sym
+      ; trans     to ≈-trans
+      ) public
 
     S : Setoid b ℓ
     S = record 
@@ -64,9 +63,7 @@ module RoutingLib.Routing.Definitions where
       { Carrier = Route 
       ; _≈_ = _≈_ 
       ; isDecEquivalence = ≈-isDecEquivalence 
-      }
-
-
+      }    
 
   ---------------------
   -- Routing problem --
@@ -91,3 +88,15 @@ module RoutingLib.Routing.Definitions where
     
     ℝ𝕄ₛ : Setoid b ℓ
     ℝ𝕄ₛ = 𝕄ₛ n n
+
+    weight : SimplePath n → Route
+    weight []            = 1#
+    weight [ i ∺ j ∣ _ ] = A i j ▷ 1#
+    weight [ i ∷ p ∣ _ ] = A i (source p) ▷ weight [ p ]
+
+    weight-cong : ∀ {p q : SimplePath n} → p ≈ₚ q → weight p ≈ weight q
+    weight-cong []              = ≈-refl
+    weight-cong [ refl ∺ refl ] = ≈-refl
+    weight-cong [ refl ∷ p≈q  ] rewrite p≈q⇒p₀≡q₀ p≈q =
+      ▷-cong _ (weight-cong [ p≈q ])
+    

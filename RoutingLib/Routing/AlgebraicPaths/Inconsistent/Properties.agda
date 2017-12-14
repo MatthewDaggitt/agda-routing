@@ -16,7 +16,7 @@ open import Algebra.FunctionProperties using (Op₂; Selective; Idempotent; Asso
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Data.Graph using (Graph; _∈?_; ∈-resp-≡ₗ)
 open import RoutingLib.Data.Graph.SimplePath hiding (weight) renaming (_≈_ to _≈ₚ_)
-open import RoutingLib.Data.Graph.SimplePath.Properties renaming (_≟_ to _≟ₚ_; ≈-refl to ≈ₚ-refl; ∈𝔾-resp-≈ to ∈𝔾-resp-≈ₚ)
+open import RoutingLib.Data.Graph.SimplePath.Properties renaming (_≟_ to _≟ₚ_; ≈-reflexive to ≈ₚ-reflexive; ≈-refl to ≈ₚ-refl; ≈-sym to ≈ₚ-sym; ≈-trans to ≈ₚ-trans; ∈𝔾-resp-≈ to ∈𝔾-resp-≈ₚ)
 open import RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties using (p≉i∷p)
 open import RoutingLib.Algebra.FunctionProperties using (_×-Preserves_)
 
@@ -54,16 +54,16 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent.Properties
     ⊕ⁱ-comm _    inull        (iroute _ _) = ≈ⁱ-refl
     ⊕ⁱ-comm _    (iroute _ _) inull        = ≈ⁱ-refl
     ⊕ⁱ-comm comm (iroute x p) (iroute y q) with ⊕-select x y | ⊕-select y x
-    ... | sel₁ x⊕y≈x _     | sel₁ _     y⊕x≉x = contradiction (trans (comm y x) x⊕y≈x) y⊕x≉x
+    ... | sel₁ x⊕y≈x _     | sel₁ _     y⊕x≉x = contradiction (≈-trans (comm y x) x⊕y≈x) y⊕x≉x
     ... | sel₁ _     _     | sel₂ _     _     = ≈ⁱ-refl
-    ... | sel₁ _     x⊕y≉y | sel≈ y⊕x≈y _     = contradiction (trans (comm x y) y⊕x≈y) x⊕y≉y
+    ... | sel₁ _     x⊕y≉y | sel≈ y⊕x≈y _     = contradiction (≈-trans (comm x y) y⊕x≈y) x⊕y≉y
     ... | sel₂ _ _         | sel₁ _     _     = ≈ⁱ-refl
-    ... | sel₂ x⊕y≉x _     | sel₂ _     y⊕x≈x = contradiction (trans (comm x y) y⊕x≈x) x⊕y≉x
-    ... | sel₂ x⊕y≉x _     | sel≈ _     y⊕x≈x = contradiction (trans (comm x y) y⊕x≈x) x⊕y≉x
-    ... | sel≈ x⊕y≈x _     | sel₁ _     y⊕x≉x = contradiction (trans (comm y x) x⊕y≈x) y⊕x≉x
-    ... | sel≈ _     x⊕y≈y | sel₂ y⊕x≉y _     = contradiction (trans (comm y x) x⊕y≈y) y⊕x≉y
+    ... | sel₂ x⊕y≉x _     | sel₂ _     y⊕x≈x = contradiction (≈-trans (comm x y) y⊕x≈x) x⊕y≉x
+    ... | sel₂ x⊕y≉x _     | sel≈ _     y⊕x≈x = contradiction (≈-trans (comm x y) y⊕x≈x) x⊕y≉x
+    ... | sel≈ x⊕y≈x _     | sel₁ _     y⊕x≉x = contradiction (≈-trans (comm y x) x⊕y≈x) y⊕x≉x
+    ... | sel≈ _     x⊕y≈y | sel₂ y⊕x≉y _     = contradiction (≈-trans (comm y x) x⊕y≈y) y⊕x≉y
     ... | sel≈ x⊕y≈x x⊕y≈y | sel≈ _     _     with p ≤ₚ? q | q ≤ₚ? p
-    ...   | yes p≤q | yes q≤p = irouteEq (trans (sym x⊕y≈x) x⊕y≈y) (≤ₚ-antisym p≤q q≤p)
+    ...   | yes p≤q | yes q≤p = irouteEq (≈-trans (≈-sym x⊕y≈x) x⊕y≈y) (≤ₚ-antisym p≤q q≤p)
     ...   | yes _   | no  _   = ≈ⁱ-refl
     ...   | no  _   | yes _   = ≈ⁱ-refl
     ...   | no  p≰q | no  q≰p with ≤ₚ-total p q
@@ -241,7 +241,7 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent.Properties
     
     𝑪-cong : ∀ {x y} → 𝑪 x → x ≈ⁱ y → 𝑪 y
     𝑪-cong 𝒄-null               inullEq            = 𝒄-null
-    𝑪-cong (𝒄-route p∈G x≈w[p]) (irouteEq x≈y p≈q) = 𝒄-route (∈𝔾-resp-≈ₚ p≈q p∈G) (trans (trans (sym x≈y) x≈w[p]) (reflexive (weight-cong _▷_ 1# p≈q p∈G (∈𝔾-resp-≈ₚ p≈q p∈G))))
+    𝑪-cong (𝒄-route p∈G x≈w[p]) (irouteEq x≈y p≈q) = 𝒄-route (∈𝔾-resp-≈ₚ p≈q p∈G) (≈-trans (≈-trans (≈-sym x≈y) x≈w[p]) (≈-reflexive (weight-cong _▷_ 1# p≈q p∈G (∈𝔾-resp-≈ₚ p≈q p∈G))))
 
     𝑪ₘ-cong : ∀ {X Y} → 𝑪ₘ X → X ≈ₘ Y → 𝑪ₘ Y
     𝑪ₘ-cong Xᶜ X≈Y i j = 𝑪-cong (Xᶜ i j) (X≈Y i j)

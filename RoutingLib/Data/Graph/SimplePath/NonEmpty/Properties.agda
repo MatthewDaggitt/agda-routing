@@ -96,6 +96,9 @@ module RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties {n} where
     ∉-resp-≈ (refl ∺ refl) (notThere k≢i k≢j) = notThere k≢i k≢j
     ∉-resp-≈ (refl ∷ p≈q)  (notHere  k≢i k∉p) = notHere  k≢i (∉-resp-≈ p≈q k∉p)
 
+    i∉p⇒i≢p₀ : ∀ {i : Fin n} {p} → i ∉ p → i ≢ source p
+    i∉p⇒i≢p₀ (notThere i≢j i≢k) = i≢j
+    i∉p⇒i≢p₀ (notHere  i≢j i∉p) = i≢j
 
     -------------------
     -- Orderings

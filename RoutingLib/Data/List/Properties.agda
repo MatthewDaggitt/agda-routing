@@ -19,7 +19,6 @@ open import Algebra.FunctionProperties using (Op₂; Idempotent; Associative; Co
 
 open import RoutingLib.Data.List
 open import RoutingLib.Data.List.All using (All₂; []; _∷_)
-open import RoutingLib.Data.List.All.Properties using (All-applyBetween⁺₁)
 open import RoutingLib.Data.Nat.Properties
 open import RoutingLib.Data.Maybe.Properties using (just-injective)
 open import RoutingLib.Relation.Unary.Consequences using (P?⇒¬P?)
@@ -93,21 +92,44 @@ module RoutingLib.Data.List.Properties where
   
     foldr-forces× : _•_ Forces-× P → ∀ e xs → P (foldr _•_ e xs) → All P xs
     foldr-forces× _          _ []       _     = []
-    foldr-forces× •-forces-P _ (x ∷ xs) Pfold with •-forces-P _ _ Pfold
-    ... | (px , pfxs) = px ∷ foldr-forces× •-forces-P _ xs pfxs
+    foldr-forces× forces _ (x ∷ xs) Pfold with forces _ _ Pfold
+    ... | (px , pfxs) = px ∷ foldr-forces× forces _ xs pfxs
 
     foldr-×pres : _•_ ×-Preserves P → ∀ {e xs} → All P xs → P e → P (foldr _•_ e xs)
     foldr-×pres _    []         pe = pe
     foldr-×pres pres (px ∷ pxs) pe = pres px (foldr-×pres pres pxs pe)
-  
+
     foldr-⊎presʳ : _•_ ⊎-Preservesʳ P → ∀ {e} xs → P e → P (foldr _•_ e xs)
-    foldr-⊎presʳ •-pres-P []       Pe = Pe
-    foldr-⊎presʳ •-pres-P (_ ∷ xs) Pe = •-pres-P _ (foldr-⊎presʳ •-pres-P xs Pe)
+    foldr-⊎presʳ pres []       Pe = Pe
+    foldr-⊎presʳ pres (_ ∷ xs) Pe = pres _ (foldr-⊎presʳ pres xs Pe)
 
     foldr-⊎pres : _•_ ⊎-Preserves P → ∀ {xs} e → Any P xs → P (foldr _•_ e xs)
-    foldr-⊎pres •-pres-P e (here px)   = •-pres-P _ _ (inj₁ px)
-    foldr-⊎pres •-pres-P e (there pxs) = •-pres-P _ _ (inj₂ (foldr-⊎pres •-pres-P e pxs))
+    foldr-⊎pres pres e (here px)   = pres _ _ (inj₁ px)
+    foldr-⊎pres pres e (there pxs) = pres _ _ (inj₂ (foldr-⊎pres pres e pxs))
 
+  -- Properties of foldl
+
+  module _ {a p} {A : Set a} {P : Pred A p} {_•_ : Op₂ A} where
+
+{-
+    foldl-forces× : _•_ Forces-× P → ∀ e xs → P (foldl _•_ e xs) → All P xs
+    foldl-forces× _      _ []       _     = []
+    foldl-forces× forces e (x ∷ xs) Pfold with forces {!!} {!!} {!!}
+    ... | (px , pfxs) = {!!} --px ∷ foldl-forces× •-forces-P _ xs pfxs
+-}
+
+    foldl-×pres : _•_ ×-Preserves P → ∀ {e xs} → All P xs → P e → P (foldl _•_ e xs)
+    foldl-×pres _    []         pe = pe
+    foldl-×pres pres (px ∷ pxs) pe = foldl-×pres pres pxs (pres pe px)
+    
+    foldl-⊎presˡ : _•_ ⊎-Preservesˡ P → ∀ {e} xs → P e → P (foldl _•_ e xs)
+    foldl-⊎presˡ pres []       Pe = Pe
+    foldl-⊎presˡ pres (x ∷ xs) Pe = foldl-⊎presˡ pres xs (pres x Pe)
+    
+    foldl-⊎pres : _•_ ⊎-Preserves P → ∀ {xs} e → Any P xs → P (foldl _•_ e xs)
+    foldl-⊎pres pres {x ∷ xs} e (here px)   = foldl-⊎presˡ (⊎pres⇒⊎presˡ pres) xs (pres e _ (inj₂ px))
+    foldl-⊎pres pres {x ∷ xs} e (there pxs) = foldl-⊎pres pres _ pxs
+    
   -- Properties of zipWith
   
   zipWith-comm : ∀ {a b} {A : Set a} {B : Set b} {f : A → A → B} → (∀ x y → f x y ≡ f y x) → ∀ xs ys → zipWith f xs ys ≡ zipWith f ys xs

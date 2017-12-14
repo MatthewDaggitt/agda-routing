@@ -70,6 +70,9 @@ module RoutingLib.Data.Matrix.Properties where
   min⁺[M]≤x : ∀ {m n} (M : Matrix ℕ (suc m) (suc n)) → ∀ {x} → Any (_≤ x) M → min⁺ M ≤ x
   min⁺[M]≤x _ = fold⁺-⊎pres (_≤ _) n≤m⊎o≤m⇒n⊓o≤m
 
+  min⁺[M]≤M : ∀ {m n} (M : Matrix ℕ (suc m) (suc n)) → All (min⁺ M ≤_) M
+  min⁺[M]≤M M i j = min⁺[M]≤x M (i , j , ≤-refl)
+  
   min⁺[M]<x : ∀ {m n} (M : Matrix ℕ (suc m) (suc n)) → ∀ {x} → Any (_< x) M → min⁺ M < x
   min⁺[M]<x _ = fold⁺-⊎pres (_< _) n<m⊎o<m⇒n⊓o<m
   

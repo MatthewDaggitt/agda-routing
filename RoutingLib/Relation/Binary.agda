@@ -87,9 +87,6 @@ module RoutingLib.Relation.Binary where
 
 
 
-
-
-
   record IsDecTotalPreorder {a ℓ₁ ℓ₂} {A : Set a}
                          (_≈_ : Rel A ℓ₁) (_≤_ : Rel A ℓ₂) :
                          Set (a ⊔ ℓ₁ ⊔ ℓ₂) where

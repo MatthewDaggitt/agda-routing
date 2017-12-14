@@ -10,6 +10,7 @@ open import Relation.Nullary using (yes; no)
 open import Function using (_∘_)
 
 open import RoutingLib.Algebra.FunctionProperties
+open import RoutingLib.Relation.Binary
 
 module RoutingLib.Data.Nat.Properties where
 
@@ -35,6 +36,24 @@ module RoutingLib.Data.Nat.Properties where
     -- Ordering --
     --------------
 
+    ≤-isTotalPreorder : IsTotalPreorder _≡_ _≤_
+    ≤-isTotalPreorder = record
+      { isPreorder = ≤-isPreorder
+      ; total      = ≤-total
+      }
+    
+    ≤-isDecTotalPreorder : IsDecTotalPreorder _≡_ _≤_
+    ≤-isDecTotalPreorder = record
+      { isTotalPreorder = ≤-isTotalPreorder
+      ; _≟_             = _≟_
+      ; _≤?_            = _≤?_
+      }
+
+  ≤-decTotalPreorder : DecTotalPreorder lzero lzero lzero
+  ≤-decTotalPreorder = record { isDecTotalPreorder = ≤-isDecTotalPreorder }
+
+  abstract
+  
     ≤-stepsʳ : ∀ {m n} k → m ≤ n → m ≤ n + k
     ≤-stepsʳ {m} {n} k m≤n = subst (m ≤_) (+-comm k n) (≤-steps k m≤n)
 
@@ -109,7 +128,6 @@ module RoutingLib.Data.Nat.Properties where
 
     ⊓-preserves-x≡ : ∀ {x} → _⊓_ ×-Preserves (x ≡_)
     ⊓-preserves-x≡ refl refl = sym (⊓-idem _)
-
 
     -- _⊔_ and _≤_
 

@@ -1,6 +1,6 @@
 open import Level using (_⊔_)
 open import Data.List using (List; length; []; _∷_)
-open import Relation.Binary using (DecTotalOrder; Rel)
+open import Relation.Binary using (Rel; DecTotalOrder)
 open import Relation.Binary.PropositionalEquality using (_≡_)
 open import Relation.Nullary using (yes; no)
 
@@ -32,6 +32,6 @@ module RoutingLib.Data.List.Sorting {a ℓ₁ ℓ₂} (order : DecTotalOrder a �
     postulate sort-Sorted : ∀ xs → Sorted (sort xs)
 
     postulate sort-⇿ : ∀ xs → xs ⇿ sort xs
-    
+
     sort-↗ : ∀ xs → xs ↗ (sort xs)
     sort-↗ xs = sorting (sort-⇿ xs) (sort-Sorted xs)

@@ -3,7 +3,7 @@ open import Data.Product using (∃; _×_; proj₁; proj₂)
 open import Data.Sum using (_⊎_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
-open import Algebra.FunctionProperties using (Associative; Commutative; LeftIdentity; RightIdentity; RightZero; Idempotent; Selective)
+import Algebra.FunctionProperties as FunctionProperties
 
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_)
@@ -22,18 +22,19 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.SufficientConditions  w
     {a b ℓ} (𝓡𝓐 : RoutingAlgebra a b ℓ) : Set (a ⊔ b ⊔ ℓ) where
 
     open RoutingAlgebra 𝓡𝓐
-
+    open FunctionProperties _≈_
+    
     field
       -- Operator properties
-      ⊕-assoc : Associative _≈_ _⊕_
-      ⊕-sel   : Selective   _≈_ _⊕_
-      ⊕-comm  : Commutative _≈_ _⊕_
+      ⊕-assoc : Associative _⊕_
+      ⊕-sel   : Selective   _⊕_
+      ⊕-comm  : Commutative _⊕_
       ⊕-almost-strictly-absorbs-▷ : ∀ s {r} → r ≉ 0# → ((s ▷ r) ⊕ r ≈ r) × (r ≉ s ▷ r)
 
       -- Special element properties
-      0#-idᵣ-⊕ : RightIdentity _≈_ 0# _⊕_
-      0#-anᵣ-▷ : ∀ s → s ▷ 0# ≈ 0#
-      1#-anᵣ-⊕ : RightZero _≈_ 1# _⊕_
+      0#-idᵣ-⊕ : RightIdentity 0# _⊕_
+      0#-an-▷ : ∀ s → s ▷ 0# ≈ 0#
+      1#-anᵣ-⊕ : RightZero 1# _⊕_
 
       -- Other properties
       routes-enumerable : Enumeration DS
@@ -42,7 +43,7 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.SufficientConditions  w
 
     -- Immediate properties about the algebra
 
-    ⊕-idem : Idempotent _≈_ _⊕_
+    ⊕-idem : Idempotent _⊕_
     ⊕-idem = idem _≈_ _⊕_ ⊕-sel
 
     open import RoutingLib.Algebra.Selectivity.NaturalOrders S _⊕_ ⊕-cong using () renaming (_≤ᵣ_ to _≤_; _≰ᵣ_ to _≰_; ≤ᵣ-respᵣ-≈ to ≤-respᵣ-≈; ≤ᵣ-respₗ-≈ to ≤-respₗ-≈) public
@@ -70,5 +71,5 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.SufficientConditions  w
     <-resp-≈ₗ : _
     <-resp-≈ₗ = proj₂ (<-resp-≈' isEquivalence ≤-resp-≈)
     
-    0#-idₗ-⊕ : LeftIdentity _≈_ 0# _⊕_
-    0#-idₗ-⊕ x = trans (⊕-comm 0# x) (0#-idᵣ-⊕ x)
+    0#-idₗ-⊕ : LeftIdentity 0# _⊕_
+    0#-idₗ-⊕ x = ≈-trans (⊕-comm 0# x) (0#-idᵣ-⊕ x)

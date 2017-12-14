@@ -1,7 +1,8 @@
 open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _+_; _∸_) renaming (_≤_ to _≤ℕ_; _<_ to _<ℕ_; _≟_ to _≟ℕ_)
-open import Data.Nat.Properties using (≤-step; ≤-steps; <⇒≤; <⇒≢; ≤+≢⇒<; ∸-mono; +-∸-assoc; n∸m≤n; n∸n≡0; ≤⇒pred≤; module ≤-Reasoning)  renaming (≤-refl to ≤ℕ-refl; ≤-trans to ≤ℕ-trans)
+open import Data.Nat.Properties using (≤-step; ≤-steps; <⇒≤; <⇒≢; ≤+≢⇒<; ∸-mono; +-∸-assoc; n∸m≤n; n∸n≡0; ≤⇒pred≤; ≤-decTotalOrder; module ≤-Reasoning)  renaming (≤-refl to ≤ℕ-refl; ≤-trans to ≤ℕ-trans)
 open import Data.List using (List; _∷_; drop; upTo)
 open import Data.List.All using (All; _∷_) renaming (map to mapₐ)
+open import Data.List.All.Properties using (All-universal)
 open import Data.Product using (∃; _,_; proj₁; proj₂)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Fin using (Fin)
@@ -10,8 +11,8 @@ open import Data.List.Any using (here; there)
 open import Data.List.Any.Membership.Propositional using (_∈_)
 open import Relation.Binary using (Setoid)
 open import Relation.Binary.PropositionalEquality
-  using (_≡_; _≢_; cong; subst; module ≡-Reasoning; inspect; [_])
-   renaming (setoid to ≡-setoid; refl to ≡-refl; sym to ≡-sym; trans to ≡-trans)
+  using (_≡_; _≢_; refl; sym; trans; cong; subst; module ≡-Reasoning; inspect; [_])
+   renaming (setoid to ≡-setoid)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Function using (_∘_)
@@ -25,6 +26,8 @@ open import RoutingLib.Data.List.Uniqueness using (Unique)
 open import RoutingLib.Data.List.Uniqueness.Properties using (drop!⁺; upTo!⁺; between!⁺)
 open import RoutingLib.Data.List.Any.Membership.Propositional using (∈-upTo⁺; ∈-between⁺; ∈-between⁻)
 open import RoutingLib.Data.List using (between)
+open import RoutingLib.Data.List.Sorting ≤-decTotalOrder using (Sorted)
+open import RoutingLib.Data.List.Sorting.Nat using (↗-between)
 open import RoutingLib.Data.Nat.Properties using (ℕₛ; m∸[m∸n]≡n; m<n⇒n≢0; m<n⇒n≡1+o; m∸n<o⇒m∸o<n)
 open import RoutingLib.Data.Matrix using (Matrix; max⁺; map)
 open import RoutingLib.Data.Matrix.Properties using (M≤max⁺[M])
@@ -38,7 +41,7 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step4_AsynchronousCondi
   where
   
   open import RoutingLib.Routing.BellmanFord.GeneralConvergence.Step1_HeightFunction 𝓡𝓟 sc using (h; hₘₐₓ; h≤hₘₐₓ; h⁻¹; h⁻¹-isInverse; h-resp-≈; h-resp-<; hₘₐₓ≡h0)
-  open import RoutingLib.Routing.BellmanFord.GeneralConvergence.Step2_UltrametricAlt 𝓡𝓟 sc using (d; dₑ; d-cong₂; dₛᵤₚ; d<dₛᵤₚ; d≡dₛᵤₚ∸Xᵢⱼ; x≈y⇒dₑ≡0; d≢1; X≈Y⇒d≡0; x≉y⇒0<dₑ; h≤dₛᵤₚ; d≡dₑ; dₛᵤₚ∸hYᵢⱼ≤d; dₑ≤d; d≡dₛᵤₚ∸Yᵢⱼ; d-isUltrametric; d≡0⇒X≈Y; d-findWorstDisagreement; x≉y⇒dₑ≡dₕ)
+  open import RoutingLib.Routing.BellmanFord.GeneralConvergence.Step2_Ultrametric 𝓡𝓟 sc using (d; dₑ; d-cong₂; dₛᵤₚ; d<dₛᵤₚ; d≡dₛᵤₚ∸Xᵢⱼ; x≈y⇒dₑ≡0; d≢1; X≈Y⇒d≡0; x≉y⇒0<dₑ; h≤dₛᵤₚ; d≡dₑ; dₛᵤₚ∸hYᵢⱼ≤d; dₑ≤d; d≡dₛᵤₚ∸Yᵢⱼ; d-isUltrametric; d≡0⇒X≈Y; d-findWorstDisagreement; x≉y⇒dₑ≡dₕ)
   open import RoutingLib.Routing.BellmanFord.GeneralConvergence.Step3_StrictlyContracting 𝓡𝓟 sc using (σ-strictlyContracting; σ-strictlyContractingOnOrbits)
   open import RoutingLib.Routing.BellmanFord.GeneralConvergence.SufficientConditions.Properties 𝓡𝓟 sc using (σXᵢᵢ≈σYᵢᵢ; σXᵢⱼ≤Aᵢₖ▷Xₖⱼ; σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ)
 
@@ -112,37 +115,37 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step4_AsynchronousCondi
 
   Z[x]ᵢⱼ≡Zᵢⱼ : ∀ x {i j} → (i , j) ≢ (s , t) → Z[ x ] i j ≡ Z i j
   Z[x]ᵢⱼ≡Zᵢⱼ x {i} {j} ij≢st with i ≟𝔽 s | j ≟𝔽 t
-  ... | yes ≡-refl | yes ≡-refl = contradiction ≡-refl ij≢st
-  ... | no  _      | _          = ≡-refl
-  ... | yes _      | no _       = ≡-refl
+  ... | yes refl | yes refl = contradiction refl ij≢st
+  ... | no  _    | _        = refl
+  ... | yes _    | no _     = refl
 
   Z[x]ₛₜ≡x : ∀ x → Z[ x ] s t ≡ x
   Z[x]ₛₜ≡x x with s ≟𝔽 s | t ≟𝔽 t
-  ... | yes _     | yes _   = ≡-refl
-  ... | no  s≢s   | _       = contradiction ≡-refl s≢s
-  ... | yes _     | no  t≢t = contradiction ≡-refl t≢t
+  ... | yes _     | yes _   = refl
+  ... | no  s≢s   | _       = contradiction refl s≢s
+  ... | yes _     | no  t≢t = contradiction refl t≢t
 
   dₑZᵢⱼ≤dₑZₛₜ : ∀ {x} → ∀ i j → dₑ (Z[ x ] i j) (Z i j) ≤ℕ dₑ (Z[ x ] s t) (Z s t)
   dₑZᵢⱼ≤dₑZₛₜ i j with i ≟𝔽 s | j ≟𝔽 t
-  ... | no  _      | _          = subst (_≤ℕ _) (≡-sym (x≈y⇒dₑ≡0 refl)) z≤n
-  ... | yes _      | no _       = subst (_≤ℕ _) (≡-sym (x≈y⇒dₑ≡0 refl)) z≤n
-  ... | yes ≡-refl | yes ≡-refl with s ≟𝔽 s | t ≟𝔽 t
-  ...   | no  s≢s   | _       = contradiction ≡-refl s≢s
-  ...   | yes _     | no  t≢t = contradiction ≡-refl t≢t
+  ... | no  _    | _        = subst (_≤ℕ _) (sym (x≈y⇒dₑ≡0 ≈-refl)) z≤n
+  ... | yes _    | no _     = subst (_≤ℕ _) (sym (x≈y⇒dₑ≡0 ≈-refl)) z≤n
+  ... | yes refl | yes refl with s ≟𝔽 s | t ≟𝔽 t
+  ...   | no  s≢s   | _       = contradiction refl s≢s
+  ...   | yes _     | no  t≢t = contradiction refl t≢t
   ...   | yes _     | yes _   = ≤ℕ-refl
 
   Zₛₜ<Z[0]ₛₜ : Z s t ≉ 0# → Z s t < Z[ 0# ] s t
   Zₛₜ<Z[0]ₛₜ Zₛₜ≉0# with s ≟𝔽 s | t ≟𝔽 t
   ... | yes _     | yes _   = 0#-idₗ-⊕ (Z s t) , Zₛₜ≉0#
-  ... | no  s≢s   | _       = contradiction ≡-refl s≢s
-  ... | yes _     | no  t≢t = contradiction ≡-refl t≢t
+  ... | no  s≢s   | _       = contradiction refl s≢s
+  ... | yes _     | no  t≢t = contradiction refl t≢t
 
   ∃X⇒dₛᵤₚ∸hZₛₜ : Z s t ≉ 0# →  ∃ λ X → d X Z ≡ dₛᵤₚ ∸ h (Z s t)
   ∃X⇒dₛᵤₚ∸hZₛₜ Zₛₜ≉0# = Z[ 0# ] , d≡dₛᵤₚ∸Yᵢⱼ dₑZᵢⱼ≤dₑZₛₜ (h-resp-< (Zₛₜ<Z[0]ₛₜ Zₛₜ≉0#))
   
   test : ∀ {i} → dₛᵤₚ ∸ h (Z s t) <ℕ i → i <ℕ dₛᵤₚ → ∃ λ X → d X Z ≡ i 
   test {i} dₛᵤₚ∸hZₛₜ<i i<dₛᵤₚ with m<n⇒n≡1+o dₛᵤₚ∸hZₛₜ<i
-  ... | (i-1 , ≡-refl) = Z[ x ] , (begin
+  ... | (i-1 , refl) = Z[ x ] , (begin
     d Z[ x ] Z            ≡⟨ d≡dₛᵤₚ∸Xᵢⱼ dₑZᵢⱼ≤dₑZₛₜ hZ[x]ₛₜ<hZₛₜ ⟩
     dₛᵤₚ ∸ h (Z[ x ] s t) ≡⟨ cong (dₛᵤₚ ∸_) hZ[x]ₛₜ≡dₛᵤₚ∸i ⟩
     dₛᵤₚ ∸ (dₛᵤₚ ∸ i)     ≡⟨ m∸[m∸n]≡n (<⇒≤ i<dₛᵤₚ) ⟩
@@ -150,7 +153,7 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step4_AsynchronousCondi
     where
 
     1≤dₛᵤₚ∸i : 1 ≤ℕ dₛᵤₚ ∸ i
-    1≤dₛᵤₚ∸i = subst (1 ≤ℕ_) (≡-sym (+-∸-assoc 1 i<dₛᵤₚ)) (s≤s z≤n)
+    1≤dₛᵤₚ∸i = subst (1 ≤ℕ_) (sym (+-∸-assoc 1 i<dₛᵤₚ)) (s≤s z≤n)
 
     dₛᵤₚ∸i≤hₘₐₓ : dₛᵤₚ ∸ i ≤ℕ hₘₐₓ
     dₛᵤₚ∸i≤hₘₐₓ = n∸m≤n i-1 hₘₐₓ
@@ -159,7 +162,7 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step4_AsynchronousCondi
     x = h⁻¹ 1≤dₛᵤₚ∸i dₛᵤₚ∸i≤hₘₐₓ
 
     hZ[x]ₛₜ≡dₛᵤₚ∸i : h (Z[ x ] s t) ≡ dₛᵤₚ ∸ i
-    hZ[x]ₛₜ≡dₛᵤₚ∸i = ≡-trans (cong h (Z[x]ₛₜ≡x x)) h⁻¹-isInverse
+    hZ[x]ₛₜ≡dₛᵤₚ∸i = trans (cong h (Z[x]ₛₜ≡x x)) h⁻¹-isInverse
     
     hZ[x]ₛₜ<hZₛₜ : h (Z[ x ] s t) <ℕ h (Z s t)
     hZ[x]ₛₜ<hZₛₜ = begin
@@ -189,19 +192,23 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step4_AsynchronousCondi
     ... | no  X≉Z = there (∈-between⁺ (dₘᵢₙ≤dXZ X≉Z) (d<dₛᵤₚ X Z))
 
     image-sound : ∀ {i} → i ∈ image → ∃ λ X → d X Z ≡ i 
-    image-sound {_} (here  ≡-refl)  = Z , X≈Y⇒d≡0 ≈ₘ-refl
+    image-sound {_} (here  refl)  = Z , X≈Y⇒d≡0 ≈ₘ-refl
     image-sound {i} (there i∈btwn) with Z s t ≟ 0# | ∈-between⁻ dₘᵢₙ dₛᵤₚ i∈btwn
     ... | yes Zₛₜ≈0# | 2≤i         , i<dₛᵤₚ = test (begin
       suc (dₛᵤₚ ∸ h (Z s t)) ≡⟨ cong (λ v → suc (dₛᵤₚ ∸ v)) (h-resp-≈ Zₛₜ≈0#) ⟩
-      suc (dₛᵤₚ ∸ h 0#)      ≡⟨ cong (λ v → suc (dₛᵤₚ ∸ v)) (≡-sym hₘₐₓ≡h0) ⟩
+      suc (dₛᵤₚ ∸ h 0#)      ≡⟨ cong (λ v → suc (dₛᵤₚ ∸ v)) (sym hₘₐₓ≡h0) ⟩
       suc (dₛᵤₚ ∸ hₘₐₓ)      ≡⟨ cong suc (+-∸-assoc 1 {hₘₐₓ} ≤ℕ-refl) ⟩
       2 + (hₘₐₓ ∸ hₘₐₓ)      ≡⟨ cong (2 +_) (n∸n≡0 hₘₐₓ) ⟩
       2                       ≤⟨ 2≤i ⟩
       i ∎) i<dₛᵤₚ
       where open ≤-Reasoning
     ... | no  Zₛₜ≉0# | dₛᵤₚ∸hZₛₜ≤i , i<dₛᵤₚ with dₛᵤₚ ∸ h (Z s t) ≟ℕ i 
-    ...  | yes ≡-refl      = ∃X⇒dₛᵤₚ∸hZₛₜ Zₛₜ≉0# 
+    ...  | yes refl         = ∃X⇒dₛᵤₚ∸hZₛₜ Zₛₜ≉0# 
     ...  | no  dₛᵤₚ∸hZₛₜ≢i = test (≤+≢⇒< dₛᵤₚ∸hZₛₜ≤i dₛᵤₚ∸hZₛₜ≢i) i<dₛᵤₚ
+
+    image-sorted : Sorted image
+    image-sorted = All-universal (λ _ → z≤n) _ ∷ ↗-between dₘᵢₙ dₛᵤₚ
+  
 
 {-
   ultrametricConditions : UltrametricConditions σ∥

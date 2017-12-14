@@ -109,7 +109,7 @@ module RoutingLib.Routing.AlgebraicPaths.Translation
 
     fromI-toI : ∀ {x} (xᶜ : 𝑪 (toI x)) → fromI xᶜ ≈ᶜ x
     fromI-toI {cnull}          𝒄-null        = cnullEq
-    fromI-toI {croute _ _ _ _} (𝒄-route _ _) = crouteEq refl ≈ₚ-refl
+    fromI-toI {croute _ _ _ _} (𝒄-route _ _) = crouteEq ≈-refl ≈ₚ-refl
 
     fromIₘ-toIₘ : ∀ {X} (Xᶜ : 𝑪ₘ (toIₘ X)) → fromIₘ Xᶜ ≈ᶜₘ X
     fromIₘ-toIₘ Xᶜ i j = fromI-toI (Xᶜ i j)
@@ -125,26 +125,26 @@ module RoutingLib.Routing.AlgebraicPaths.Translation
     ... | no  _ | no  _       | 𝒄-null = cnullEq
     ... | no  _ | yes (v , _) | v▷rᶜ' with v ▷ x ≟ 0# | v▷rᶜ'
     ...   | yes _ | 𝒄-null      = cnullEq
-    ...   | no  _ | 𝒄-route _ _ = crouteEq refl ≈ₚ-refl
+    ...   | no  _ | 𝒄-route _ _ = crouteEq ≈-refl ≈ₚ-refl
     ▷-fromI-commute {i , j} {iroute x [ p ]} (𝒄-route [ _ ] _) v▷rᶜ with j ≟𝔽 source p | i ∉? [ p ] | (i , j) ∈? G | v▷rᶜ
     ... | no  _ | _         | _           | 𝒄-null = cnullEq
     ... | yes _ | no  _     | _           | 𝒄-null = cnullEq
     ... | yes _ | yes _     | no _        | 𝒄-null = cnullEq
     ... | yes _ | yes [ _ ] | yes (v , _) | v▷rᶜ'  with v ▷ x ≟ 0# | v▷rᶜ'
     ...   | yes _ | 𝒄-null  = cnullEq
-    ...   | no  _ | 𝒄-route _ _ = crouteEq refl ≈ₚ-refl
+    ...   | no  _ | 𝒄-route _ _ = crouteEq ≈-refl ≈ₚ-refl
 
     ⊕-fromI-commute : ∀ {r s} (rᶜ : 𝑪 r) (sᶜ : 𝑪 s) (r⊕sᶜ : 𝑪 (r ⊕ⁱ s)) →
                       fromI r⊕sᶜ ≈ᶜ (fromI rᶜ) ⊕ᶜ (fromI sᶜ)
     ⊕-fromI-commute 𝒄-null        𝒄-null        𝒄-null        = cnullEq
-    ⊕-fromI-commute 𝒄-null        (𝒄-route _ _) (𝒄-route _ _) = crouteEq refl ≈ₚ-refl
-    ⊕-fromI-commute (𝒄-route _ _) 𝒄-null        (𝒄-route _ _) = crouteEq refl ≈ₚ-refl
+    ⊕-fromI-commute 𝒄-null        (𝒄-route _ _) (𝒄-route _ _) = crouteEq ≈-refl ≈ₚ-refl
+    ⊕-fromI-commute (𝒄-route _ _) 𝒄-null        (𝒄-route _ _) = crouteEq ≈-refl ≈ₚ-refl
     ⊕-fromI-commute {iroute x p} {iroute y q} (𝒄-route _ _) (𝒄-route _ _) r⊕sᶜ with ⊕-select x y | r⊕sᶜ
-    ... | sel₁ _ _ | 𝒄-route _ _ = crouteEq refl ≈ₚ-refl
-    ... | sel₂ _ _ | 𝒄-route _ _ = crouteEq refl ≈ₚ-refl
+    ... | sel₁ _ _ | 𝒄-route _ _ = crouteEq ≈-refl ≈ₚ-refl
+    ... | sel₂ _ _ | 𝒄-route _ _ = crouteEq ≈-refl ≈ₚ-refl
     ... | sel≈ _ _ | r⊕sᶜ' with p ≤ₚ? q | r⊕sᶜ'
-    ...   | yes _ | 𝒄-route _ _ = crouteEq refl ≈ₚ-refl
-    ...   | no  _ | 𝒄-route _ _ = crouteEq refl ≈ₚ-refl
+    ...   | yes _ | 𝒄-route _ _ = crouteEq ≈-refl ≈ₚ-refl
+    ...   | no  _ | 𝒄-route _ _ = crouteEq ≈-refl ≈ₚ-refl
 
     foldr-fromI-commute : ∀ {e f} (eᶜ : 𝑪 e) → fromI eᶜ ≈ᶜ f → 
                           ∀ {xs ys} (foldrᶜ : 𝑪 (foldr _⊕ⁱ_ e xs)) →

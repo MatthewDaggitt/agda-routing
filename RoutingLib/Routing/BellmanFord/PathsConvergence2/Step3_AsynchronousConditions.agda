@@ -1,11 +1,12 @@
 open import Data.Nat using (ℕ; suc; _+_; _∸_; _⊓_; _≤_) renaming (_≟_ to _≟ℕ_)
 open import Data.Nat.Properties using (m≤m+n; ≤-decTotalOrder)
 open import Data.Fin using () renaming (zero to fzero)
-open import Data.List using (List; map; _++_)
+open import Data.List using (List; map; _++_; gfilter)
 open import Data.List.Any.Membership.Propositional using (_∈_)
 open import Data.List.All using (All; lookup)
 open import Data.List.All.Properties using (All-map)
-open import Data.Product using (∃; _×_; _,_)
+open import Data.Maybe using (Maybe; just; nothing)
+open import Data.Product using (∃; _×_; _,_; proj₁; proj₂)
 open import Data.Sum using (inj₁; inj₂)
 open import Relation.Binary.PropositionalEquality
   using (subst; cong; _≡_; module ≡-Reasoning)
@@ -30,33 +31,35 @@ open import RoutingLib.Data.Matrix.Properties using (min⁺-constant)
 open import RoutingLib.Data.Nat.Properties using (ℕₛ; ℕᵈˢ; ≤⇒≯)
 open import RoutingLib.Data.List.Disjoint ℕₛ using (_#_)
 open import RoutingLib.Routing.Definitions
-open import RoutingLib.Routing.BellmanFord.PathsConvergence.SufficientConditions
+open import RoutingLib.Routing.BellmanFord.PathsConvergence2.SufficientConditions
 open import RoutingLib.Asynchronous.Theorems using (UltrametricConditions)
 import RoutingLib.Routing.AlgebraicPaths.Inconsistent as InconsistentPaths
 import RoutingLib.Routing.AlgebraicPaths.Consistent as ConsistentPaths
-import RoutingLib.Routing.BellmanFord.PathsConvergence.Prelude as Prelude
+import RoutingLib.Routing.BellmanFord.PathsConvergence2.Prelude as Prelude
 
-module RoutingLib.Routing.BellmanFord.PathsConvergence.Step3_AsynchronousConditions
-  {a b ℓ}
-  (𝓡𝓐 : RoutingAlgebra a b ℓ)
-  (sc : SufficientConditions 𝓡𝓐)
-  {n-1 : ℕ} 
-  (G : Graph (RoutingAlgebra.Step 𝓡𝓐) (suc n-1))
+import RoutingLib.Routing.BellmanFord.PathsConvergence2.Step1_Ultrametric as Step1
+import RoutingLib.Routing.BellmanFord.PathsConvergence2.Step2_StrictlyContracting as Step2
+
+import RoutingLib.Routing.BellmanFord.GeneralConvergence.Step2_Ultrametric as ConsistentUltrametric
+import RoutingLib.Routing.BellmanFord.GeneralConvergence.Step4_AsynchronousConditions as ConsistentAsyncConditions
+
+module RoutingLib.Routing.BellmanFord.PathsConvergence2.Step3_AsynchronousConditions
+  {a b ℓ} {𝓡𝓐 : RoutingAlgebra a b ℓ}
+  {n-1} {𝓡𝓟 : RoutingProblem 𝓡𝓐 (suc n-1)}
+  (𝓟𝓢𝓒 : PathSufficientConditions 𝓡𝓟)
   where
 
-  open SufficientConditions sc
-  open Prelude 𝓡𝓐 ⊕-sel G
-  
-  private
+  open Prelude 𝓟𝓢𝓒
 
-    scwp : _
-    scwp = convertSufficientConditions sc
-    
-  open import RoutingLib.Routing.BellmanFord.PathsConvergence.Step1_Ultrametric 𝓡𝓐 sc G
-  open import RoutingLib.Routing.BellmanFord.PathsConvergence.Step2_StrictlyContracting 𝓡𝓐 sc G using (σⁱ-strContr-dⁱ)
+  open Step1 𝓟𝓢𝓒
+  open Step2 𝓟𝓢𝓒 using (σ-strContr-dⁱ)
 
-  open import RoutingLib.Routing.BellmanFord.GeneralConvergence.Step2_UltrametricAlt 𝓡𝓟ᶜ scwp using () renaming (d to dᶜ; d-cong₂ to dᶜ-cong; dₛᵤₚ to dᶜₛᵤₚ; X≈Y⇒d≡0 to X≈Y⇒dᶜ≡0)
-  open import RoutingLib.Routing.BellmanFord.GeneralConvergence.Step4_AsynchronousConditions 𝓡𝓟ᶜ scwp using () renaming
+  open ConsistentUltrametric 𝓡𝓟ᶜ 𝓢𝓒 using () renaming
+    ( d              to dᶜ
+    ; d-cong₂        to dᶜ-cong
+    ; dₛᵤₚ           to dᶜₛᵤₚ
+    ; X≈Y⇒d≡0        to X≈Y⇒dᶜ≡0)
+  open ConsistentAsyncConditions 𝓡𝓟ᶜ 𝓢𝓒 using () renaming
     ( image          to imageᶜ
     ; image<dₛᵤₚ     to imageᶜ<dᶜₛᵤₚ
     ; image!         to imageᶜ!
@@ -67,43 +70,46 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence.Step3_AsynchronousConditi
     ; Z-fixed        to cZ-fixed
     )
   
-
   ------------------------------------------------------------------------------
   -- Fixed point
   ------------------------------------------------------------------------------
   -- As applications of σ perserves consistency then Z, the fixed point for σᶜ,
   -- is also the fixed point for σⁱ
   
-  Z : IMatrix
-  Z = toIₘ cZ
+  Z : RMatrix
+  Z i j = proj₁ (cZ i j)
 
   Zᶜ : 𝑪ₘ Z
-  Zᶜ = toIₘᶜ cZ
+  Zᶜ i j = proj₂ (cZ i j)
   
-  Z-fixed : σⁱ Z ≈ⁱₘ Z
-  Z-fixed = fromIₘ-injective (σⁱ-pres-𝑪ₘ Zᶜ) Zᶜ (begin
+  postulate Z-fixed : σ Z ≈ₘ Z
+  {-
+  Z-fixed = proj₁ (begin
     fromIₘ (σⁱ-pres-𝑪ₘ Zᶜ) ≈⟨ σ-fromIₘ-commute Zᶜ _ ⟩
     σᶜ (fromIₘ Zᶜ)          ≈⟨ σᶜ-cong (fromIₘ-toIₘ (toIₘᶜ cZ)) ⟩
     σᶜ (cZ)                 ≈⟨ cZ-fixed ⟩
     cZ                      ≈⟨ ≈ᶜₘ-sym (fromIₘ-toIₘ (toIₘᶜ cZ)) ⟩
     fromIₘ Zᶜ               ∎)
-    where open import Relation.Binary.EqReasoning ℝ𝕄ᶜₛ
-    
-  Z≉Xⁱ : ∀ {X} → 𝑰ₘ X → Z ≉ⁱₘ X
-  Z≉Xⁱ Xⁱ X≈Z = Xⁱ (𝑪ₘ-cong Zᶜ X≈Z)
+    where
+    open RoutingProblem 𝓡𝓟ᶜ renaming (ℝ𝕄ₛ to ℝ𝕄ᶜₛ)
+    open import Relation.Binary.EqReasoning ℝ𝕄ᶜₛ
 
+  
+  Z≉Xⁱ : ∀ {X} → 𝑰ₘ X → Z ≉ₘ X
+  Z≉Xⁱ Xⁱ X≈Z = Xⁱ (𝑪ₘ-cong Zᶜ X≈Z)
+  -}
+  
   ------------------------------------------------------------------------------
   -- Paths to inconsistent routes
   ------------------------------------------------------------------------------
   -- Given a path we can always create an inconsistent IRoute
 
-  inconsistentIRoute : SimplePath n → IRoute
-  inconsistentIRoute p with p ∈𝔾? G
-  ... | no  _   = iroute 0# p
-  ... | yes p∈G with weight p∈G ≟ 0#
-  ...   | yes _ = iroute 1# p
-  ...   | no  _ = iroute 0# p 
+  inconsistentIRoute : SimplePath n → Maybe Route
+  inconsistentIRoute p with path-inconsistent p
+  ...   | yes (r , _) = just r
+  ...   | no  _       = nothing 
 
+{-
   inconsistentIRouteⁱ : ∀ p → 𝑰 (inconsistentIRoute p)
   inconsistentIRouteⁱ p pᶜ with p ∈𝔾? G
   ... | no  p∉G = contradiction pᶜ (𝒊-route-∉ 0# p∉G)
@@ -144,7 +150,7 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence.Step3_AsynchronousConditi
 
   dZ[p]Z≡inv|p| : ∀ p → d Z[ p ] Z ≡ invert (length p)
   dZ[p]Z≡inv|p| p = begin
-    d Z[ p ] Z                           ≡⟨ d≡dⁱ (Z[p]≉Z p) (inj₁ (Z[p]ⁱ p)) ⟩
+    d Z[ p ] Z                            ≡⟨ d≡dⁱ (Z[p]≉Z p) (inj₁ (Z[p]ⁱ p)) ⟩
     invert (shortest Z[ p ] ⊓ shortest Z) ≡⟨ cong invert (Yᶜ⇒shX⊓shY≡shX Z[ p ] Zᶜ) ⟩
     invert (shortest Z[ p ])              ≡⟨ cong invert (shZ[p]≡|p| p) ⟩
     invert (length p)                     ∎
@@ -156,10 +162,12 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence.Step3_AsynchronousConditi
   ------------------------------------------------------------------------------
   -- A unique list of all the possible distances between Z and inconsistent
   -- states
+-}
 
   imageⁱ : List ℕ
-  imageⁱ = deduplicate _≟ℕ_ (map (invert ∘ length) (allPaths n))
+  imageⁱ = deduplicate _≟ℕ_ (gfilter (invert ∘ size) (allPaths n))
 
+{-
   imageⁱ≥dᶜₛᵤₚ : All (dᶜₛᵤₚ ≤_) imageⁱ
   imageⁱ≥dᶜₛᵤₚ = deduplicate⁺ ℕᵈˢ (All-map⁺₂ (λ _ → m≤m+n dᶜₛᵤₚ _) (allPaths n))
   
@@ -247,4 +255,5 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence.Step3_AsynchronousConditi
     ; m*-image-complete = image-complete
     ; m*-image-sound    = image-sound
     }
+-}
 -}

@@ -1,6 +1,6 @@
 open import Level using () renaming (zero to lzero)
-open import Relation.Binary using (Decidable; Total; Reflexive; Symmetric; Antisymmetric; Transitive; _Respects_; tri≈; tri<; tri>; IsEquivalence; IsDecEquivalence; Setoid; DecSetoid)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; subst; cong)
+open import Relation.Binary using (Decidable; Total; _⇒_; Reflexive; Symmetric; Antisymmetric; Transitive; _Respects_; tri≈; tri<; tri>; IsEquivalence; IsDecEquivalence; Setoid; DecSetoid)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; trans; subst; cong)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Data.Nat using (ℕ; suc; z≤n; s≤s) renaming (_≟_ to _≟ℕ_; _≤?_ to _≤ℕ?_; _<_ to _<ℕ_)
@@ -28,10 +28,13 @@ module RoutingLib.Data.Graph.SimplePath.Properties {n : ℕ} where
 
     [-]-injective : ∀ {p q} → [ p ] ≈ [ q ] → NE._≈_ {n} p  q
     [-]-injective [ p≈q ] = p≈q
-
+    
     ≈-refl : Reflexive (_≈_ {n})
     ≈-refl {[]}    = []
     ≈-refl {[ _ ]} = [ NEP.≈-refl ]
+
+    ≈-reflexive : _≡_ ⇒ (_≈_ {n})
+    ≈-reflexive refl = ≈-refl
 
     ≈-sym : Symmetric (_≈_ {n})
     ≈-sym [] = []
@@ -90,7 +93,6 @@ module RoutingLib.Data.Graph.SimplePath.Properties {n : ℕ} where
     ∉-resp-≈ : ∀ {k : Fin n} → (k ∉_) Respects _≈_
     ∉-resp-≈ []      []      = []
     ∉-resp-≈ [ p≈q ] [ k∉p ] = [ NEP.∉-resp-≈ p≈q k∉p ]
-
 
     -- Graph membership
 
@@ -187,3 +189,4 @@ module RoutingLib.Data.Graph.SimplePath.Properties {n : ℕ} where
     weight-cong : ∀ {a b} {A : Set a} {B : Set b} _▷_ (1# : B) {p q : SimplePath n} {G : Graph A n} (p≈q : p ≈ q) (p∈G : p ∈𝔾 G) (q∈G : q ∈𝔾 G) → weight _▷_ 1# p∈G ≡ weight _▷_ 1# q∈G
     weight-cong _▷_ 1# []      []      []      = refl
     weight-cong _▷_ 1# [ p≈q ] [ p∈G ] [ q∈G ] = NEP.weight-cong _▷_ 1# p≈q p∈G q∈G
+

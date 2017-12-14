@@ -74,7 +74,7 @@ module RoutingLib.Routing.BellmanFord.Properties
     ... | inj₂ σXᵢᵢ≈Iᵢᵢ           = σXᵢᵢ≈Iᵢᵢ
     ... | inj₁ (k , σXᵢᵢ≈AᵢₖXₖⱼ) =
       begin
-        σ X i i         ≈⟨ sym (foldr≤ₗe S ⊕-cong (sel⇒idem S ⊕-sel) ⊕-assoc ⊕-comm (I i i) (tabulate (λ k → A i k ▷ X k i))) ⟩
+        σ X i i         ≈⟨ ≈-sym (foldr≤ₗe S ⊕-cong (sel⇒idem S ⊕-sel) ⊕-assoc ⊕-comm (I i i) (tabulate (λ k → A i k ▷ X k i))) ⟩
         σ X i i ⊕ I i i ≈⟨ Iᵢᵢ-idᵣ-⊕ 1#-anᵣ-⊕ i (σ X i i) ⟩
         I i i
       ∎
@@ -84,7 +84,7 @@ module RoutingLib.Routing.BellmanFord.Properties
     σXᵢᵢ≈σYᵢᵢ : Selective _⊕_ → Associative _⊕_ →
               Commutative _⊕_ → RightZero 1# _⊕_ →
               ∀ X Y i → σ X i i ≈ σ Y i i
-    σXᵢᵢ≈σYᵢᵢ ⊕-sel ⊕-assoc ⊕-comm 1#-anᵣ-⊕ X Y i = trans (σXᵢᵢ≈Iᵢᵢ ⊕-sel ⊕-assoc ⊕-comm 1#-anᵣ-⊕ X i) (sym (σXᵢᵢ≈Iᵢᵢ ⊕-sel ⊕-assoc ⊕-comm 1#-anᵣ-⊕ Y i))
+    σXᵢᵢ≈σYᵢᵢ ⊕-sel ⊕-assoc ⊕-comm 1#-anᵣ-⊕ X Y i = ≈-trans (σXᵢᵢ≈Iᵢᵢ ⊕-sel ⊕-assoc ⊕-comm 1#-anᵣ-⊕ X i) (≈-sym (σXᵢᵢ≈Iᵢᵢ ⊕-sel ⊕-assoc ⊕-comm 1#-anᵣ-⊕ Y i))
 
     {-
     -- A sufficient (but not necessary condition) for σXᵢⱼ ≈ σYᵢⱼ

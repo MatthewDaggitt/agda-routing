@@ -1,5 +1,5 @@
 open import Data.Bool using (Bool; true; if_then_else_)
-open import Data.List using (List; []; _∷_; _++_; filter; drop; take; concat; foldr; gfilter; map; zipWith; applyUpTo; tabulate)
+open import Data.List using (List; []; _∷_; _++_; reverse; filter; drop; take; concat; foldr; gfilter; map; zipWith; applyUpTo; tabulate)
 open import Data.List.All using (All; []; _∷_) renaming (map to mapₐ)
 open import Data.List.All.Properties
 open import Data.List.Any using (Any; here; there; any)
@@ -12,7 +12,7 @@ open import Data.Empty using (⊥-elim)
 open import Data.Product using (∃; _×_; _,_; proj₁; proj₂)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Unary using (Universal; Decidable; _⊆_)
+open import Relation.Unary using (Pred; Universal; Decidable; _⊆_)
 open import Relation.Binary using (Rel; REL; _Preserves_⟶_; _Respects_; DecSetoid; Setoid; Symmetric)
 open import Relation.Binary.PropositionalEquality using (_≡_; inspect; [_]; subst; subst₂) renaming (refl to ≡-refl; sym to ≡-sym; trans to ≡-trans)
 open import Function using (_∘_; id)
@@ -21,10 +21,18 @@ open import Relation.Unary using () renaming (_⊆_ to _⋐_)
 
 open import RoutingLib.Data.List
 open import RoutingLib.Data.List.All
+open import RoutingLib.Data.List.Properties
 open import RoutingLib.Data.Maybe.Properties using (just-injective)
 open import RoutingLib.Data.List.Permutation using (_⇿_; _◂_≡_; here; there; []; _∷_)
 
 module RoutingLib.Data.List.All.Properties where
+
+  All-swap : ∀ {a b ℓ} {A : Set a} {B : Set b} {_~_ : REL (List A) B ℓ} →
+             ∀ {xss ys} → All (λ xs → All (xs ~_) ys) xss →
+             All (λ y → All (_~ y) xss) ys
+  All-swap {ys = []}      _  = []
+  All-swap {ys = _ ∷ _}  []  = All-universal (λ _ → []) _
+  All-swap {ys = y ∷ ys} ((x~y ∷ x~ys) ∷ pxss) = (x~y ∷ (mapₐ (λ {(x~y ∷ _) → x~y}) pxss)) ∷ All-swap (x~ys ∷ (mapₐ (λ {(_ ∷ pys) → pys}) pxss))
 
   module _ {a p} {A : Set a} {P : A → Set p} where
 
@@ -45,6 +53,12 @@ module RoutingLib.Data.List.All.Properties where
     -----------
     -- Other --
     -----------
+
+{-
+    reverse⁺ : ∀ {xs} → All P xs → All P (reverse xs)
+    reverse⁺ pxs = foldl-×pres {_•_ = λ rev x → x ∷ rev} {!!} {!!} []
+    -- reverse xs ≡ foldl (λ rev x → x ∷ rev) [] xs
+-}
 
     All-dfilter⁺₁ : ∀ (P? : Decidable P) xs → All P (dfilter P? xs)
     All-dfilter⁺₁ P? []       = []
@@ -102,8 +116,6 @@ module RoutingLib.Data.List.All.Properties where
   ----------------------
 
 
-  -- All pairs
-
   module SetoidProperties {a ℓ} (S : Setoid a ℓ) where
 
     open Setoid S renaming (Carrier to A)
@@ -156,6 +168,13 @@ module RoutingLib.Data.List.All.Properties where
 
 
 
+  -- All pairs
+
+  All⇒AllPairs : ∀ {a p ℓ} {A : Set a} {P : Pred A p} {_~_ : Rel A ℓ} {xs} →
+                 All P xs → (∀ {x y} → P x → P y → x ~ y) → AllPairs _~_ xs
+  All⇒AllPairs []         pres = []
+  All⇒AllPairs (px ∷ pxs) pres = mapₐ (pres px) pxs ∷ (All⇒AllPairs pxs pres)
+  
   AllPairs-map⁺₂ : ∀ {a b ℓ₁ ℓ₂} {A : Set a} {B : Set b}  {_~₁_ : Rel A ℓ₁} {_~₂_ : Rel B ℓ₂}
               {f : A → B} → f Preserves _~₁_ ⟶ _~₂_ → AllPairs _~₁_ ⋐ AllPairs _~₂_ ∘ map f
   AllPairs-map⁺₂ f-pres []           = []
@@ -203,6 +222,11 @@ module RoutingLib.Data.List.All.Properties where
     AllPairs-++⁺ []         ~ys _              = ~ys
     AllPairs-++⁺ (px ∷ ~xs) ~ys (x~ys ∷ xs~ys) = ++⁺ px x~ys ∷ AllPairs-++⁺ ~xs ~ys xs~ys
 
+    AllPairs-concat⁺ : ∀ {xss} → All (AllPairs _~_) xss →
+                       AllPairs (λ xs ys → All (λ x → All (x ~_) ys) xs) xss →
+                       AllPairs _~_ (concat xss)
+    AllPairs-concat⁺ []           []              = []
+    AllPairs-concat⁺ (pxs ∷ pxss) (xs~xss ∷ ~xss) = AllPairs-++⁺ pxs (AllPairs-concat⁺ pxss ~xss) (mapₐ concat⁺ (All-swap xs~xss))
 
     AllPairs-drop⁺ : ∀ {xs} n → AllPairs _~_ xs → AllPairs _~_ (drop n xs)
     AllPairs-drop⁺ zero    pxs       = pxs
@@ -230,6 +254,20 @@ module RoutingLib.Data.List.All.Properties where
     AllPairs-applyBetween⁺₂ f s e Pf = AllPairs-applyBetween⁺₁ f s e (λ _ _ _ → Pf)
   
 
+  module AllPairsDecSetoidProperties {a ℓ} (DS : DecSetoid a ℓ) where
+
+    open DecSetoid DS renaming (Carrier to A)
+    open import RoutingLib.Data.List.Any.Membership setoid using (deduplicate)
+
+    AllPairs-deduplicate⁺ : ∀ {ℓ} {_~_ : Rel A ℓ} {xs} → AllPairs _~_ xs →
+                            AllPairs _~_ (deduplicate _≟_ xs)
+    AllPairs-deduplicate⁺ {xs = _}      [] = []
+    AllPairs-deduplicate⁺ {xs = x ∷ xs} (px ∷ pxs) with any (x ≟_) xs
+    ... | yes _ = AllPairs-deduplicate⁺ pxs
+    ... | no  _ = deduplicate⁺ _ px ∷ AllPairs-deduplicate⁺ pxs
+
+  open AllPairsDecSetoidProperties public
+  
 
 
   module _ {a b ℓ} {A : Set a} {B : Set b} {_~_ : REL A B ℓ} where

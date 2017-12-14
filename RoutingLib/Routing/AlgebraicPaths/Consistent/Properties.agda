@@ -68,16 +68,16 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent.Properties
     ⊕ᶜ-comm _    cnull            (croute _ _ _ _) = ≈ᶜ-refl
     ⊕ᶜ-comm _    (croute _ _ _ _) cnull            = ≈ᶜ-refl
     ⊕ᶜ-comm comm (croute x p _ _) (croute y q _ _) with ⊕-select x y | ⊕-select y x
-    ... | sel₁ x⊕y≈x _     | sel₁ _     y⊕x≉x = contradiction (trans (comm y x) x⊕y≈x) y⊕x≉x
+    ... | sel₁ x⊕y≈x _     | sel₁ _     y⊕x≉x = contradiction (≈-trans (comm y x) x⊕y≈x) y⊕x≉x
     ... | sel₁ _     _     | sel₂ _     _     = ≈ᶜ-refl
-    ... | sel₁ _     x⊕y≉y | sel≈ y⊕x≈y _     = contradiction (trans (comm x y) y⊕x≈y) x⊕y≉y
+    ... | sel₁ _     x⊕y≉y | sel≈ y⊕x≈y _     = contradiction (≈-trans (comm x y) y⊕x≈y) x⊕y≉y
     ... | sel₂ _ _         | sel₁ _     _     = ≈ᶜ-refl
-    ... | sel₂ x⊕y≉x _     | sel₂ _     y⊕x≈x = contradiction (trans (comm x y) y⊕x≈x) x⊕y≉x
-    ... | sel₂ x⊕y≉x _     | sel≈ _     y⊕x≈x = contradiction (trans (comm x y) y⊕x≈x) x⊕y≉x
-    ... | sel≈ x⊕y≈x _     | sel₁ _     y⊕x≉x = contradiction (trans (comm y x) x⊕y≈x) y⊕x≉x
-    ... | sel≈ _     x⊕y≈y | sel₂ y⊕x≉y _     = contradiction (trans (comm y x) x⊕y≈y) y⊕x≉y
+    ... | sel₂ x⊕y≉x _     | sel₂ _     y⊕x≈x = contradiction (≈-trans (comm x y) y⊕x≈x) x⊕y≉x
+    ... | sel₂ x⊕y≉x _     | sel≈ _     y⊕x≈x = contradiction (≈-trans (comm x y) y⊕x≈x) x⊕y≉x
+    ... | sel≈ x⊕y≈x _     | sel₁ _     y⊕x≉x = contradiction (≈-trans (comm y x) x⊕y≈x) y⊕x≉x
+    ... | sel≈ _     x⊕y≈y | sel₂ y⊕x≉y _     = contradiction (≈-trans (comm y x) x⊕y≈y) y⊕x≉y
     ... | sel≈ x⊕y≈x x⊕y≈y | sel≈ _     _     with p ≤ₚ? q | q ≤ₚ? p
-    ...   | yes p≤q | yes q≤p = crouteEq (trans (sym x⊕y≈x) x⊕y≈y) (≤ₚ-antisym p≤q q≤p)
+    ...   | yes p≤q | yes q≤p = crouteEq (≈-trans (≈-sym x⊕y≈x) x⊕y≈y) (≤ₚ-antisym p≤q q≤p)
     ...   | yes _   | no  _   = ≈ᶜ-refl
     ...   | no  _   | yes _   = ≈ᶜ-refl
     ...   | no  p≰q | no  q≰p with ≤ₚ-total p q
@@ -245,7 +245,7 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent.Properties
     cnull-anᵣ-▷ᶜ : ∀ e → e ▷ᶜ cnull ≈ᶜ cnull
     cnull-anᵣ-▷ᶜ _ = ≈ᶜ-refl
 
-    1[]-anᵣ-⊕ᶜ : RightZero _≈_ 1# _⊕_ → RightZero _≈ᶜ_ (croute 1# [] [] refl) _⊕ᶜ_
+    1[]-anᵣ-⊕ᶜ : RightZero _≈_ 1# _⊕_ → RightZero _≈ᶜ_ (croute 1# [] [] ≈-refl) _⊕ᶜ_
     1[]-anᵣ-⊕ᶜ rz cnull = ≈ᶜ-refl
     1[]-anᵣ-⊕ᶜ rz (croute x p p∈G x≈wp) with ⊕-select x 1#
     ... | sel₁ _ x⊕1≉1 = contradiction (rz x) x⊕1≉1
@@ -260,7 +260,7 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent.Properties
     -------------------------
 
     pathToCRoute-cong : ∀ {p q} → p ≈ₚ q → (p∈G : p ∈𝔾 G) (q∈G : q ∈𝔾 G) → pathToCRoute p∈G ≈ᶜ pathToCRoute q∈G
-    pathToCRoute-cong p≈q p∈G q∈G = crouteEq (reflexive (weight-cong _▷_ 1# p≈q p∈G q∈G)) p≈q
+    pathToCRoute-cong p≈q p∈G q∈G = crouteEq (≈-reflexive (weight-cong _▷_ 1# p≈q p∈G q∈G)) p≈q
 
     pathToCRoute-¬cong : ∀ {p q} → p ≉ₚ q → (p∈G : p ∈𝔾 G) (q∈G : q ∈𝔾 G) → pathToCRoute p∈G ≉ᶜ pathToCRoute q∈G
     pathToCRoute-¬cong p≉q _ _ (crouteEq _ p≈q) = p≉q p≈q
@@ -285,7 +285,7 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent.Properties
 
     pathToCRouteMaybe≈xp : ∀ {p} (p∈G : p ∈𝔾 G) {x} (x≈w[p] : x ≈ weight p∈G) → Eq _≈ᶜ_ (pathToCRouteMaybe p) (just (croute x p p∈G x≈w[p]))
     pathToCRouteMaybe≈xp {p} p∈G x≈w[p] with p ∈𝔾? G
-    ... | yes p∈G' = just (crouteEq (sym (trans x≈w[p] (reflexive (weight-cong _▷_ 1# ≈ₚ-refl p∈G p∈G')))) ≈ₚ-refl)
+    ... | yes p∈G' = just (crouteEq (≈-sym (≈-trans x≈w[p] (≈-reflexive (weight-cong _▷_ 1# ≈ₚ-refl p∈G p∈G')))) ≈ₚ-refl)
     ... | no  p∉G  = contradiction p∈G p∉G
 
 
@@ -320,7 +320,7 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent.Properties
       ; ⊕-almost-strictly-absorbs-▷ = ⊕ᶜ-almost-strictly-absorbs-▷ᶜ ⊕-absorbs-▷
 
       ; 0#-idᵣ-⊕ = cnull-idᵣ-⊕ᶜ
-      ; 0#-anᵣ-▷ = cnull-anᵣ-▷ᶜ
+      ; 0#-an-▷ = cnull-anᵣ-▷ᶜ
       ; 1#-anᵣ-⊕ = 1[]-anᵣ-⊕ᶜ 1#-anᵣ-⊕
 
       ; routes-enumerable = ℂ-enumeration

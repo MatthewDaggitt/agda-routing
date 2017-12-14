@@ -73,7 +73,7 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence.Prelude
 
   Iⁱᶜ : 𝑪ₘ Iⁱ
   Iⁱᶜ i j with j ≟𝔽 i
-  ... | yes _ = 𝒄-route [] refl
+  ... | yes _ = 𝒄-route [] ≈-refl
   ... | no  _ = 𝒄-null
     
   σⁱ-pres-𝑪ₘ : ∀ {X} → 𝑪ₘ X → 𝑪ₘ (σⁱ X)

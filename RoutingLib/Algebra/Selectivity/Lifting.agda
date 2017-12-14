@@ -1,29 +1,33 @@
-
-open import Algebra.FunctionProperties using (Op₂; Associative; Idempotent; Commutative)
+open import Algebra.FunctionProperties using (Op₂; Associative; Idempotent; Commutative; Selective)
 open import Relation.Binary using (Rel; Reflexive; Decidable; Transitive; Symmetric; IsEquivalence)
 open import Relation.Nullary using (¬_; yes; no)
 open import Data.Sum using (_⊎_; inj₁; inj₂; [_,_])
 open import Data.Product using (_×_; _,_)
 open import Level using (_⊔_)
 open import Relation.Nullary.Negation using (contradiction)
-open import Function using (id; _on_)
-
-open import RoutingLib.Algebra.FunctionProperties using (Selective; _Preserves_)
+open import Function using (id) renaming (_on_ to _onᶠ_)
 
 module RoutingLib.Algebra.Selectivity.Lifting
   {a b ℓ} {A : Set a} (_≈_ : Rel A ℓ)
-  (_•_ : Op₂ A) (•-sel : Selective _≈_ _•_)
+  {_•_ : Op₂ A} (•-sel : Selective _≈_ _•_)
   {B : Set b} (f : B → A)
   where
 
-  open import RoutingLib.Algebra.Selectivity.Properties _≈_ _•_ •-sel using (•-idem)
-
+  open import RoutingLib.Algebra.Selectivity.Properties _≈_ _•_ •-sel using ()
+  open import RoutingLib.Algebra.Selectivity.Lifting.Core public
+  
   infix 7 _◦_
-  _◦_ : Op₂ B
-  x ◦ y with •-sel (f x) (f y)
-  ... | inj₁ _ = x
-  ... | inj₂ _ = y
 
+  _◦_ : Op₂ B
+  _◦_ = Lift _≈_ _•_ •-sel f
+
+  distrib : ∀ x y → (f x • f y) ≈ f (x ◦ y)
+  distrib x y with •-sel (f x) (f y)
+  ... | inj₁ fx•fy≈fx = fx•fy≈fx
+  ... | inj₂ fx•fy≈fy = fx•fy≈fy
+
+
+{-
   preserves : Symmetric _≈_ → Transitive _≈_ → _•_ Preserves _≈_ → _◦_ Preserves (_≈_ on f)
   preserves sym trans resp {x = x} {y} {u} {v} fx≈fy fu≈fv with •-sel (f x) (f u) | •-sel (f y) (f v)
   ... | inj₁ fx•fu≈fx | inj₁ fy•fv≈fy = fx≈fy
@@ -31,10 +35,7 @@ module RoutingLib.Algebra.Selectivity.Lifting
   ... | inj₂ fx•fu≈fu | inj₁ fy•fv≈fy = trans (trans (sym fx•fu≈fu) (resp fx≈fy fu≈fv)) fy•fv≈fy
   ... | inj₂ fx•fu≈fu | inj₂ fy•fv≈fv = fu≈fv
 
-  distr : ∀ x y → (f x • f y) ≈ f (x ◦ y)
-  distr x y with •-sel (f x) (f y)
-  ... | inj₁ fx•fy≈fx = fx•fy≈fx
-  ... | inj₂ fx•fy≈fy = fx•fy≈fy
+  
 
   module Properties (_≈′_ : Rel B ℓ) (f-inj : ∀ {x y} → f x ≈ f y → x ≈′ y) where
 
@@ -112,3 +113,4 @@ module RoutingLib.Algebra.Selectivity.Lifting
       ... | inj₂ _     | inj₂ _     = (f-inj refl)
 
   open Properties public
+-}

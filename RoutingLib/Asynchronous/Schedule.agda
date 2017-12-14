@@ -59,7 +59,8 @@ module RoutingLib.Asynchronous.Schedule where
   --------------
   -- Schedule --
   --------------
-  -- An asynchronous schedule for n processors
+{-
+-- An asynchronous schedule for n processors
   record Schedule (n : ℕ) : Set lzero where
     field
       α              : 𝔸 n
@@ -67,7 +68,18 @@ module RoutingLib.Asynchronous.Schedule where
       starvationFree : StarvationFree α
       causal         : Causal β
       dynamic        : Dynamic β
+-}
 
+  
+  -- An asynchronous schedule for n processors
+  record Schedule (n : ℕ) : Set lzero where
+    field
+      α              : 𝕋 → Subset n
+      β              : 𝕋 → Fin n → Fin n → 𝕋
+      starvationFree : ∀ t i → ∃ λ t' → t < t' × i ∈ α t'
+      causal         : ∀ t i j → β (suc t) i j < suc t
+      dynamic        : ∀ t i j → ∃ λ tᶠ → ∀ {t'} → tᶠ < t' → β t' i j ≢ t
+      
   -- Two schedules are considered equal if their activation and data flow functions are equal
   _⟦_⟧≈⟦_⟧_ : ∀ {n} → Schedule n → 𝕋 → 𝕋 → Schedule n → Set lzero
   𝕤₁ ⟦ t₁ ⟧≈⟦ t₂ ⟧ 𝕤₂ = (α 𝕤₁) ⟦ t₁ ⟧≈𝔸⟦ t₂ ⟧ (α 𝕤₂) × (β 𝕤₁) ⟦ t₁ ⟧≈𝔹⟦ t₂ ⟧ (β 𝕤₂)

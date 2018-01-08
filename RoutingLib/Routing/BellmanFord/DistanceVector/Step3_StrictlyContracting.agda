@@ -6,30 +6,29 @@ open import Data.Product using (∃₂; _,_; _×_; proj₁)
 open import Function using (_∘_)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; trans; subst; subst₂; cong; cong₂; inspect; [_])
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; trans; subst; subst₂; cong; cong₂)
 
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Data.Nat.Properties using (m<n≤o⇒o∸n<o∸m; n≢0⇒0<n)
 
-open import RoutingLib.Routing.BellmanFord.GeneralConvergence.SufficientConditions
+open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions
 
-module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step3_StrictlyContracting
+import RoutingLib.Routing.BellmanFord.DistanceVector.Prelude as Prelude
+import RoutingLib.Routing.BellmanFord.DistanceVector.Step1_HeightFunction as Step1
+import RoutingLib.Routing.BellmanFord.DistanceVector.Step2_Ultrametric as Step2
+
+module RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StrictlyContracting
   {a b ℓ n-1}
   {𝓡𝓐 : RoutingAlgebra a b ℓ}
   (𝓡𝓟 : RoutingProblem 𝓡𝓐 (suc n-1)) 
   (𝓢𝓒 : SufficientConditions 𝓡𝓐)
   where
-  
-  open import RoutingLib.Routing.BellmanFord.GeneralConvergence.Step1_HeightFunction 𝓡𝓟 𝓢𝓒
-  open import RoutingLib.Routing.BellmanFord.GeneralConvergence.Step2_Ultrametric 𝓡𝓟 𝓢𝓒
-  open import RoutingLib.Routing.BellmanFord.GeneralConvergence.SufficientConditions.Properties 𝓡𝓟 𝓢𝓒 using (σXᵢᵢ≈σYᵢᵢ; σXᵢⱼ≤Aᵢₖ▷Xₖⱼ; σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ)
 
-  open import RoutingLib.Routing.BellmanFord 𝓡𝓟
+  open Prelude 𝓡𝓟 𝓢𝓒
+  open Step1 𝓡𝓟 𝓢𝓒
+  open Step2 𝓡𝓟 𝓢𝓒
+  
   open import RoutingLib.Routing.BellmanFord.Properties 𝓡𝓟 using (Iᵢⱼ≡0#)
-
-  open RoutingProblem 𝓡𝓟
-  open SufficientConditions 𝓢𝓒
-  
 
   ---------------------------
   -- Similarity increasing --
@@ -42,24 +41,23 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step3_StrictlyContracti
   -- or h(Yᵢⱼ))
 
   module PostDisagreementResult 
-    {X Y i j}
-    (σXᵢⱼ≉σYᵢⱼ : σ X i j ≉ σ Y i j)
-    (d≡dₑᵢⱼ : d (σ X) (σ Y) ≡ dₑ (σ X i j) (σ Y i j))
-    (dₑᵢⱼ≡dₛᵤₚ∸hσXᵢⱼ : dₑ (σ X i j) (σ Y i j) ≡ dₛᵤₚ ∸ h (σ X i j)) 
+    {X Y i j} (σXᵢⱼ≉σYᵢⱼ : σ X i j ≉ σ Y i j)
+    (D≡dᵢⱼ : D (σ X) (σ Y) ≡ d (σ X i j) (σ Y i j))
+    (dᵢⱼ≡dₛᵤₚ∸hσXᵢⱼ : d (σ X i j) (σ Y i j) ≡ Dₛᵤₚ ∸ h (σ X i j)) 
     where 
 
     h[σXᵢⱼ]≤h[σYᵢⱼ] : h (σ X i j) ≤ℕ h (σ Y i j)
-    h[σXᵢⱼ]≤h[σYᵢⱼ] = dₑ≡dₛᵤₚ∸hx⇒hx≤hy dₑᵢⱼ≡dₛᵤₚ∸hσXᵢⱼ
+    h[σXᵢⱼ]≤h[σYᵢⱼ] = d≡Dₛᵤₚ∸hx⇒hx≤hy dᵢⱼ≡dₛᵤₚ∸hσXᵢⱼ
     
     abstract
 
       -- Result for when the minimal disagreement lies on the diagonal of the matrices
-      diagonal-result : j ≡ i → d (σ X) (σ Y) <ℕ d X Y
+      diagonal-result : j ≡ i → D (σ X) (σ Y) <ℕ D X Y
       diagonal-result refl = contradiction (σXᵢᵢ≈σYᵢᵢ X Y i) σXᵢⱼ≉σYᵢⱼ
 
 
       -- Result for when the minimal disagreement is taken from the identity matrix
-      drop-result : j ≢ i → σ X i j ≈ 0# → d (σ X) (σ Y) <ℕ d X Y
+      drop-result : j ≢ i → σ X i j ≈ 0# → D (σ X) (σ Y) <ℕ D X Y
       drop-result j≢i σXᵢⱼ≈0# = 
         contradiction 
           (≈-resp-h 
@@ -77,20 +75,20 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step3_StrictlyContracti
             (≤-resp-h h[σXᵢⱼ]≤h[σYᵢⱼ]) 
             (≤-respᵣ-≈ (≈-sym (≈-trans σXᵢⱼ≈Aᵢₖ▷Xₖⱼ (▷-cong (A i k) Xₖⱼ≈Yₖⱼ))) (σXᵢⱼ≤Aᵢₖ▷Xₖⱼ Y i j k)))
 
-      extend-result : ∀ {k} → j ≢ i → σ X i j ≈ A i k ▷ X k j → X k j ≉ 0# → d (σ X) (σ Y) <ℕ d X Y
+      extend-result : ∀ {k} → j ≢ i → σ X i j ≈ A i k ▷ X k j → X k j ≉ 0# → D (σ X) (σ Y) <ℕ D X Y
       extend-result {k} j≢i σXᵢⱼ≈Aᵢₖ▷Xₖⱼ Xₖⱼ≉0# =
         begin
-          suc (d (σ X) (σ Y))             ≡⟨ cong suc (trans d≡dₑᵢⱼ dₑᵢⱼ≡dₛᵤₚ∸hσXᵢⱼ) ⟩ 
-          suc (dₛᵤₚ ∸ h (σ X i j))        ≡⟨ cong suc (cong (dₛᵤₚ ∸_) (h-resp-≈ σXᵢⱼ≈Aᵢₖ▷Xₖⱼ)) ⟩ 
-          suc (dₛᵤₚ ∸ h (A i k ▷ X k j))  ≤⟨ m<n≤o⇒o∸n<o∸m (h-resp-< (⊕-almost-strictly-absorbs-▷ (A i k) Xₖⱼ≉0#)) (<⇒≤ (s≤s h≤hₘₐₓ)) ⟩
-          dₛᵤₚ ∸ h (X k j)                ≤⟨ dₛᵤₚ∸hXᵢⱼ≤d (extend-lemma σXᵢⱼ≈Aᵢₖ▷Xₖⱼ) ⟩
-          d X Y
+          suc (D (σ X) (σ Y))             ≡⟨ cong suc (trans D≡dᵢⱼ dᵢⱼ≡dₛᵤₚ∸hσXᵢⱼ) ⟩ 
+          suc (Dₛᵤₚ ∸ h (σ X i j))        ≡⟨ cong suc (cong (Dₛᵤₚ ∸_) (h-resp-≈ σXᵢⱼ≈Aᵢₖ▷Xₖⱼ)) ⟩ 
+          suc (Dₛᵤₚ ∸ h (A i k ▷ X k j))  ≤⟨ m<n≤o⇒o∸n<o∸m (h-resp-< (⊕-almost-strictly-absorbs-▷ (A i k) Xₖⱼ≉0#)) (<⇒≤ (s≤s h≤hₘₐₓ)) ⟩
+          Dₛᵤₚ ∸ h (X k j)                ≤⟨ Dₛᵤₚ∸hXᵢⱼ≤D (extend-lemma σXᵢⱼ≈Aᵢₖ▷Xₖⱼ) ⟩
+          D X Y
         ∎
         where open ≤-Reasoning
 
 
       -- Putting the three cases together to get the required result
-      result : d (σ X) (σ Y) <ℕ d X Y
+      result : D (σ X) (σ Y) <ℕ D X Y
       result with j ≟𝔽 i 
       ...  | yes j≡i = diagonal-result j≡i
       ...  | no  j≢i with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
@@ -106,18 +104,18 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step3_StrictlyContracti
     open import RoutingLib.Function.Distance ℝ𝕄ₛ using (_StrContrOver_; _StrContrOnOrbitsOver_)
     open import RoutingLib.Function.Distance.Properties using (strContr⇒strContrOnOrbits)
 
-    σ-strictlyContracting : σ StrContrOver d
-    σ-strictlyContracting {X} {Y} Y≉X with σ X ≟ₘ σ Y | d X Y ≟ℕ 0
-    ... | yes σX≈σY | yes d≡0 = contradiction (d≡0⇒X≈Y d≡0) (Y≉X ∘ ≈ₘ-sym)
-    ... | yes σX≈σY | no  d≢0 rewrite X≈Y⇒d≡0 σX≈σY = n≢0⇒0<n d≢0
-    ... | no  σX≉σY | _       with d-findWorstDisagreement σX≉σY
-    ...   | i , j , σXᵢⱼ≉σYᵢⱼ , d≡dₑᵢⱼ , inj₁ dₑᵢⱼ≡dₛᵤₚ∸hσXᵢⱼ = result σXᵢⱼ≉σYᵢⱼ d≡dₑᵢⱼ dₑᵢⱼ≡dₛᵤₚ∸hσXᵢⱼ 
-    ...   | i , j , σXᵢⱼ≉σYᵢⱼ , d≡dₑᵢⱼ , inj₂ dₑᵢⱼ≡dₛᵤₚ∸hσYᵢⱼ = 
-      subst₂ _<ℕ_ (d-sym (σ Y) (σ X)) (d-sym Y X) (
+    σ-strictlyContracting : σ StrContrOver D
+    σ-strictlyContracting {X} {Y} Y≉X with σ X ≟ₘ σ Y | D X Y ≟ℕ 0
+    ... | yes σX≈σY | yes D≡0 = contradiction (D≡0⇒X≈Y D≡0) (Y≉X ∘ ≈ₘ-sym)
+    ... | yes σX≈σY | no  D≢0 rewrite X≈Y⇒D≡0 σX≈σY = n≢0⇒0<n D≢0
+    ... | no  σX≉σY | _       with D-findWorstDisagreement σX≉σY
+    ...   | i , j , σXᵢⱼ≉σYᵢⱼ , D≡dᵢⱼ , inj₁ dᵢⱼ≡dₛᵤₚ∸hσXᵢⱼ = result σXᵢⱼ≉σYᵢⱼ D≡dᵢⱼ dᵢⱼ≡dₛᵤₚ∸hσXᵢⱼ 
+    ...   | i , j , σXᵢⱼ≉σYᵢⱼ , D≡dᵢⱼ , inj₂ dᵢⱼ≡dₛᵤₚ∸hσYᵢⱼ = 
+      subst₂ _<ℕ_ (D-sym (σ Y) (σ X)) (D-sym Y X) (
         result 
           (σXᵢⱼ≉σYᵢⱼ ∘ ≈-sym) 
-          (trans (trans (d-sym (σ Y) (σ X)) d≡dₑᵢⱼ) (dₑ-sym (σ X i j) (σ Y i j))) 
-          (trans (dₑ-sym (σ Y i j) (σ X i j)) dₑᵢⱼ≡dₛᵤₚ∸hσYᵢⱼ))
+          (trans (trans (D-sym (σ Y) (σ X)) D≡dᵢⱼ) (d-sym (σ X i j) (σ Y i j))) 
+          (trans (d-sym (σ Y i j) (σ X i j)) dᵢⱼ≡dₛᵤₚ∸hσYᵢⱼ))
 
-    σ-strictlyContractingOnOrbits : σ StrContrOnOrbitsOver d
+    σ-strictlyContractingOnOrbits : σ StrContrOnOrbitsOver D
     σ-strictlyContractingOnOrbits = strContr⇒strContrOnOrbits ℝ𝕄ₛ σ-strictlyContracting

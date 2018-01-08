@@ -11,6 +11,7 @@ module RoutingLib.Algebra.FunctionProperties {a ℓ} {A : Set a} (_≈_ : Rel A 
   open import RoutingLib.Algebra.FunctionProperties.Core public
   open import Algebra.FunctionProperties _≈_ using (Op₁; Op₂; Idempotent; Commutative; Associative; Selective)
 
+{-
   ---------------
   -- Operators --
   ---------------
@@ -36,3 +37,4 @@ module RoutingLib.Algebra.FunctionProperties {a ℓ} {A : Set a} (_≈_ : Rel A 
 
   _IncreasingOver_ : ∀ {ℓ₂} → Op₂ A → Rel A ℓ₂ → Set _
   _•_ IncreasingOver _≤_ = ∀ {a b} → a ≤ (a • b)
+-}

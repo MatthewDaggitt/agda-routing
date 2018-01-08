@@ -8,6 +8,22 @@ open import Relation.Nullary using (yes; no)
 
 module RoutingLib.Data.List where
 
+  -- stdlib
+  max : ℕ → List ℕ → ℕ
+  max ⊥ xs = foldr _⊔_ ⊥ xs
+
+  -- stdlib
+  min : ℕ → List ℕ → ℕ
+  min ⊤ xs = foldr _⊓_ ⊤ xs
+
+  -- stdlib
+  dfilter : ∀ {a p} {A : Set a} {P : A → Set p} → Decidable P → List A → List A
+  dfilter dec [] = []
+  dfilter dec (x ∷ xs) with dec x
+  ... | no  _ = dfilter dec xs
+  ... | yes _ = x ∷ dfilter dec xs
+
+
   -----------
   -- Other --
   -----------
@@ -24,24 +40,10 @@ module RoutingLib.Data.List where
   combine f [] _ = []
   combine f (x ∷ xs) ys = map (f x) ys ++ combine f xs ys
 
-
   allFinPairs : ∀ n → List (Fin n × Fin n)
   allFinPairs n = combine _,_ (allFin n) (allFin n)
 
-
   -- Max and min
-
-  max : ℕ → List ℕ → ℕ
-  max ⊥ xs = foldr _⊔_ ⊥ xs
-
-  min : ℕ → List ℕ → ℕ
-  min ⊤ xs = foldr _⊓_ ⊤ xs
-
-  dfilter : ∀ {a p} {A : Set a} {P : A → Set p} → Decidable P → List A → List A
-  dfilter dec [] = []
-  dfilter dec (x ∷ xs) with dec x
-  ... | no  _ = dfilter dec xs
-  ... | yes _ = x ∷ dfilter dec xs
 
   index : ∀ {a} {A : Set a} (xs : List A) {i} → i < length xs → A
   index []       {_}     ()

@@ -53,10 +53,15 @@ module RoutingLib.Data.Nat.Properties where
   ≤-decTotalPreorder = record { isDecTotalPreorder = ≤-isDecTotalPreorder }
 
   abstract
-  
+
+    -- stdlib
+    ≤-stepsˡ = ≤-steps
+    
+    -- stdlib
     ≤-stepsʳ : ∀ {m n} k → m ≤ n → m ≤ n + k
     ≤-stepsʳ {m} {n} k m≤n = subst (m ≤_) (+-comm k n) (≤-steps k m≤n)
 
+    -- stdlib
     ≤⇒≯ : _≤_ ⇒ _≯_
     ≤⇒≯ z≤n       ()
     ≤⇒≯ (s≤s m≤n) (s≤s n≤m) = ≤⇒≯ m≤n n≤m
@@ -64,6 +69,7 @@ module RoutingLib.Data.Nat.Properties where
     >⇒≰ : _>_ ⇒ _≰_
     >⇒≰ = <⇒≱
 
+    -- stdlib
     ≤-cardinality : ∀ {m n} (≤₁ : m ≤ n) (≤₂ : m ≤ n) → ≤₁ ≡ ≤₂
     ≤-cardinality z≤n      z≤n      = refl
     ≤-cardinality (s≤s ≤₁) (s≤s ≤₂) = cong s≤s (≤-cardinality ≤₁ ≤₂)
@@ -83,6 +89,7 @@ module RoutingLib.Data.Nat.Properties where
     n≤0⇒n≡0 : ∀ {n} → n ≤ 0 → n ≡ 0
     n≤0⇒n≡0 z≤n = refl
 
+    -- stdlib
     n≮n : ∀ n → n ≮ n
     n≮n n = <-irrefl (refl {x = n})
 
@@ -93,6 +100,17 @@ module RoutingLib.Data.Nat.Properties where
     m<n⇒n≡1+o {_} {zero} ()
     m<n⇒n≡1+o {_} {suc o} m<n = o , refl
 
+
+    -- stdlib
+    +-monoˡ-≤ : ∀ n → (_+ n) Preserves _≤_ ⟶ _≤_
+    +-monoˡ-≤ n m≤o = +-mono-≤ m≤o (≤-refl {n})
+
+    -- stdlib
+    +-monoʳ-≤ : ∀ n → (n +_) Preserves _≤_ ⟶ _≤_
+    +-monoʳ-≤ n m≤o = +-mono-≤ (≤-refl {n}) m≤o
+    
+    
+    --+-incrˡ :
     
     ---------------------------------
     -- Addition and multiplication --
@@ -131,27 +149,30 @@ module RoutingLib.Data.Nat.Properties where
 
     -- _⊔_ and _≤_
 
-    n⊔-mono-≤ : ∀ n → (n ⊔_) Preserves _≤_ ⟶ _≤_
-    n⊔-mono-≤ n m≤o = ⊔-mono-≤ (≤-refl {n}) m≤o
+    -- stdlib
+    ⊔-monoʳ-≤ : ∀ n → (n ⊔_) Preserves _≤_ ⟶ _≤_
+    ⊔-monoʳ-≤ n m≤o = ⊔-mono-≤ (≤-refl {n}) m≤o
 
-    ⊔n-mono-≤ : ∀ n → (_⊔ n) Preserves _≤_ ⟶ _≤_
-    ⊔n-mono-≤ n m≤o = ⊔-mono-≤ m≤o ≤-refl
+    -- stdlib
+    ⊔-monoˡ-≤ : ∀ n → (_⊔ n) Preserves _≤_ ⟶ _≤_
+    ⊔-monoˡ-≤ n m≤o = ⊔-mono-≤ m≤o ≤-refl
 
     
     n≤m⇒m⊔n≡m : ∀ {m n} → n ≤ m → m ⊔ n ≡ m
     n≤m⇒m⊔n≡m z≤n       = ⊔-identityʳ _
     n≤m⇒m⊔n≡m (s≤s n≤m) = cong suc (n≤m⇒m⊔n≡m n≤m)
 
+    -- stdlib
     m≤n⇒m⊔n≡n : ∀ {m n} → m ≤ n → m ⊔ n ≡ n
     m≤n⇒m⊔n≡n {m} m≤n = trans (⊔-comm m _) (n≤m⇒m⊔n≡m m≤n)
 
+    -- stdlib
     m⊔n≡m⇒n≤m : ∀ {m n} → m ⊔ n ≡ m → n ≤ m
     m⊔n≡m⇒n≤m {m} {n} m⊔n≡m rewrite sym m⊔n≡m = n≤m⊔n m n
 
     n⊔m≡m⇒n≤m : ∀ {m n} → n ⊔ m ≡ m → n ≤ m
     n⊔m≡m⇒n≤m n⊔m≡m = subst (_ ≤_) n⊔m≡m (m≤m⊔n _ _)
     
-
     m≤n⇒m≤n⊔o : ∀ {m} → _⊔_ ⊎-Preservesˡ (m ≤_)
     m≤n⇒m≤n⊔o o m≤n = ≤-trans m≤n (m≤m⊔n _ o)
     
@@ -184,13 +205,15 @@ module RoutingLib.Data.Nat.Properties where
 
     -- _⊓_ and _≤_
 
-    n⊓-mono-≤ : ∀ n → (n ⊓_) Preserves _≤_ ⟶ _≤_
-    n⊓-mono-≤ n m≤o = ⊓-mono-≤ (≤-refl {n}) m≤o
-    
-    ⊓n-mono-≤ : ∀ n → (_⊓ n) Preserves _≤_ ⟶ _≤_
-    ⊓n-mono-≤ n m≤o = ⊓-mono-≤ m≤o ≤-refl
+    -- stdlib
+    ⊓-monoʳ-≤ : ∀ n → (n ⊓_) Preserves _≤_ ⟶ _≤_
+    ⊓-monoʳ-≤ n m≤o = ⊓-mono-≤ (≤-refl {n}) m≤o
 
+    -- stdlib
+    ⊓-monoˡ-≤ : ∀ n → (_⊓ n) Preserves _≤_ ⟶ _≤_
+    ⊓-monoˡ-≤ n m≤o = ⊓-mono-≤ m≤o ≤-refl
 
+    -- stdlib
     m≤n⇒m⊓n≡m : ∀ {m n} → m ≤ n → m ⊓ n ≡ m
     m≤n⇒m⊓n≡m z≤n       = refl
     m≤n⇒m⊓n≡m (s≤s m≤n) = cong suc (m≤n⇒m⊓n≡m m≤n)
@@ -261,17 +284,18 @@ module RoutingLib.Data.Nat.Properties where
       (x ⊓ y) ⊓ (y ⊓ z)   ∎
       where open ≡-Reasoning
 
-    
+    ⊔-triangulate : ∀ x y z → x ⊔ y ⊔ z ≡ (x ⊔ y) ⊔ (y ⊔ z)
+    ⊔-triangulate x y z = begin
+      x ⊔ y ⊔ z           ≡⟨ cong (λ v → x ⊔ v ⊔ z) (sym (⊔-idem y)) ⟩
+      x ⊔ (y ⊔ y) ⊔ z     ≡⟨ ⊔-assoc x _ _ ⟩
+      x ⊔ ((y ⊔ y) ⊔ z)   ≡⟨ cong (x ⊔_) (⊔-assoc y _ _) ⟩
+      x ⊔ (y ⊔ (y ⊔ z))   ≡⟨ sym (⊔-assoc x _ _) ⟩
+      (x ⊔ y) ⊔ (y ⊔ z)   ∎
+      where open ≡-Reasoning
+      
     -----------------
     -- Subtraction --
     -----------------
-
-    m∸n+n≡m : ∀ {m n} → n ≤ m → m ∸ n + n ≡ m
-    m∸n+n≡m {m} {n} n≤m = trans (sym (+-∸-comm n n≤m)) (m+n∸n≡m m n)
-
-    m∸[m∸n]≡n : ∀ {m n} → n ≤ m → m ∸ (m ∸ n) ≡ n
-    m∸[m∸n]≡n {m}     {zero}  z≤n       = n∸n≡0 m
-    m∸[m∸n]≡n {suc m} {suc n} (s≤s n≤m) = trans (+-∸-assoc 1 (n∸m≤n n m)) (cong suc (m∸[m∸n]≡n n≤m))
     
     ∸-monoʳ-≤ : ∀ {m n o} → m ≤ n → o ≤ n → m ∸ o ≤ n ∸ o
     ∸-monoʳ-≤ z≤n       (s≤s o≤n) = z≤n
@@ -320,7 +344,15 @@ module RoutingLib.Data.Nat.Properties where
     m>n⇒m∸n≢0 {n = zero}  (s≤s m>n) = λ()
     m>n⇒m∸n≢0 {n = suc n} (s≤s m>n) = m>n⇒m∸n≢0 m>n
 
-
+    -- stdlib
+    m∸[m∸n]≡n : ∀ {m n} → n ≤ m → m ∸ (m ∸ n) ≡ n
+    m∸[m∸n]≡n {m}     {_}     z≤n       = n∸n≡0 m
+    m∸[m∸n]≡n {suc m} {suc n} (s≤s n≤m) = begin
+      suc m ∸ (m ∸ n)   ≡⟨ +-∸-assoc 1 (n∸m≤n n m) ⟩
+      suc (m ∸ (m ∸ n)) ≡⟨ cong suc (m∸[m∸n]≡n n≤m) ⟩
+      suc n             ∎
+      where open ≡-Reasoning
+      
     -- _∸_ distributes over _⊓_ (sort of)
     
     ∸-distribˡ-⊓-⊔ : ∀ x y z → x ∸ (y ⊓ z) ≡ (x ∸ y) ⊔ (x ∸ z)

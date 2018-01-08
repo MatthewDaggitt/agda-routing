@@ -10,7 +10,7 @@ open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_)
 open import RoutingLib.Data.List.Uniset using (Enumeration)
 open import RoutingLib.Algebra.Selectivity.Properties using (idem)
 
-module RoutingLib.Routing.BellmanFord.GeneralConvergence.SufficientConditions  where
+module RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions  where
 
   -------------------
   -- Without paths --

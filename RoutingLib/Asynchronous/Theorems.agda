@@ -39,10 +39,13 @@ module RoutingLib.Asynchronous.Theorems {a ℓ n} {S : Setoid a ℓ} (p : Parall
   record BoxConditions : Set (a ⊔ lsuc lzero) where
     field
       k            : ℕ
+      
       C            : Fin (suc k) → Pred M lzero
+
       Cₖ≡M         : ∀ m      → m ∈ᵤ C (fromℕ k)
       C-strictMono : ∀ {r s}  → r <𝔽 s → C r ⊂ᵤ C s
       σ-dec        : ∀ {m r} → m ∈ᵤ C r → σ m ∈ᵤ C (pred r)
+
 
   postulate BoxConditions⇒AsynchronouslySafe : BoxConditions → IsAsynchronouslySafe p
 

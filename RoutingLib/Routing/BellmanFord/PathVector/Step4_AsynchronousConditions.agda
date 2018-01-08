@@ -31,19 +31,19 @@ open import RoutingLib.Data.Matrix.Properties using (min⁺-constant)
 open import RoutingLib.Data.Nat.Properties using (ℕₛ; ℕᵈˢ; ≤⇒≯)
 open import RoutingLib.Data.List.Disjoint ℕₛ using (_#_)
 open import RoutingLib.Routing.Definitions
-open import RoutingLib.Routing.BellmanFord.PathsConvergence2.SufficientConditions
+open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
 open import RoutingLib.Asynchronous.Theorems using (UltrametricConditions)
 import RoutingLib.Routing.AlgebraicPaths.Inconsistent as InconsistentPaths
 import RoutingLib.Routing.AlgebraicPaths.Consistent as ConsistentPaths
-import RoutingLib.Routing.BellmanFord.PathsConvergence2.Prelude as Prelude
+import RoutingLib.Routing.BellmanFord.PathVector.Prelude as Prelude
 
-import RoutingLib.Routing.BellmanFord.PathsConvergence2.Step1_Ultrametric as Step1
-import RoutingLib.Routing.BellmanFord.PathsConvergence2.Step2_StrictlyContracting as Step2
+import RoutingLib.Routing.BellmanFord.PathVector.Step1_Ultrametric as Step1
+import RoutingLib.Routing.BellmanFord.PathVector.Step2_StrictlyContracting as Step2
 
-import RoutingLib.Routing.BellmanFord.GeneralConvergence.Step2_Ultrametric as ConsistentUltrametric
-import RoutingLib.Routing.BellmanFord.GeneralConvergence.Step4_AsynchronousConditions as ConsistentAsyncConditions
+import RoutingLib.Routing.BellmanFord.DistanceConvergence.Step2_Ultrametric as ConsistentUltrametric
+import RoutingLib.Routing.BellmanFord.DistanceConvergence.Step4_AsynchronousConditions as ConsistentAsyncConditions
 
-module RoutingLib.Routing.BellmanFord.PathsConvergence2.Step3_AsynchronousConditions
+module RoutingLib.Routing.BellmanFord.PathVector.Step4_AsynchronousConditions
   {a b ℓ} {𝓡𝓐 : RoutingAlgebra a b ℓ}
   {n-1} {𝓡𝓟 : RoutingProblem 𝓡𝓐 (suc n-1)}
   (𝓟𝓢𝓒 : PathSufficientConditions 𝓡𝓟)

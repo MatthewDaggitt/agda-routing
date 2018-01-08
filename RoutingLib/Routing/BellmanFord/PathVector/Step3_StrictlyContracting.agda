@@ -11,16 +11,17 @@ open import Function using (_∘_)
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Data.Graph
-open import RoutingLib.Routing.BellmanFord.PathsConvergence2.SufficientConditions
-open import RoutingLib.Routing.BellmanFord.GeneralConvergence.SufficientConditions using () renaming (SufficientConditions to GeneralSufficientConditions)
+open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
+open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions using () renaming (SufficientConditions to GeneralSufficientConditions)
 open import RoutingLib.Data.Nat.Properties using (m≤n⇒m≤n⊔o; m≤o⇒m≤n⊔o; n<m⇒n⊓o<m; n≤m⇒n⊓o≤m)
 open import RoutingLib.Data.Matrix using (Any; map; min⁺)
 open import RoutingLib.Data.Matrix.Properties using (min⁺[M]<min⁺[N])
-import RoutingLib.Routing.BellmanFord.PathsConvergence2.Prelude as Prelude
-import RoutingLib.Routing.BellmanFord.GeneralConvergence.Step2_Ultrametric as ConsistentUltrametric
-import RoutingLib.Routing.BellmanFord.GeneralConvergence.Step3_StrictlyContracting as ConsistentStrictlyContracting
 
-module RoutingLib.Routing.BellmanFord.PathsConvergence2.Step2_StrictlyContracting
+import RoutingLib.Routing.BellmanFord.PathVector.Prelude as Prelude
+import RoutingLib.Routing.BellmanFord.DistanceVector.Step2_Ultrametric as Step2ᶜ
+import RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StrictlyContracting as Step3ᶜ
+
+module RoutingLib.Routing.BellmanFord.PathVector.Step3_StrictlyContracting
   {a b ℓ} {𝓡𝓐 : RoutingAlgebra a b ℓ}
   {n-1} {𝓡𝓟 : RoutingProblem 𝓡𝓐 (suc n-1)}
   (𝓟𝓢𝓒 : PathSufficientConditions 𝓡𝓟)
@@ -28,18 +29,18 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence2.Step2_StrictlyContractin
 
   open Prelude 𝓟𝓢𝓒
 
-  open ConsistentUltrametric 𝓡𝓟ᶜ 𝓢𝓒 using () renaming
+  open Step2ᶜ 𝓡𝓟ᶜ 𝓢𝓒 using () renaming
     ( d            to dᶜ
     ; d-cong₂      to dᶜ-cong
     )
-  open ConsistentStrictlyContracting 𝓡𝓟ᶜ 𝓢𝓒 using () renaming
+  open Step3ᶜ 𝓡𝓟ᶜ 𝓢𝓒 using () renaming
     ( σ-strictlyContracting to σᶜ-strContrOver-dᶜ )
   
-  open import RoutingLib.Routing.BellmanFord.PathsConvergence2.Step1_Ultrametric 𝓟𝓢𝓒
+  open import RoutingLib.Routing.BellmanFord.PathVector.Step2_Ultrametric 𝓟𝓢𝓒
   open import RoutingLib.Function.Distance ℝ𝕄ₛ using (_StrContrOver_)
 
   abstract
-
+  
     |Xₖⱼ|<|σXᵢⱼ| : ∀ X i j (σXᵢⱼⁱ : 𝑰 (σ X i j)) →
                    lengthⁱ (X (𝒊-parent X i j σXᵢⱼⁱ) j) < size (σ X i j)
     |Xₖⱼ|<|σXᵢⱼ| X i j σXᵢⱼⁱ with 𝑪? (X (𝒊-parent X i j σXᵢⱼⁱ) j)

@@ -22,7 +22,8 @@ module RoutingLib.Routing.Definitions where
   -- A routing algebra represents the underlying algebra for a set of routing problems.
 
   record RoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
-
+    no-eta-equality -- Needed due to bug #2732 in Agda
+    
     infix 7 _⊕_
     infix 6 _▷_
     infix 4 _≈_ _≉_
@@ -72,6 +73,8 @@ module RoutingLib.Routing.Definitions where
   -- In particular we need an adjacency matrix (representing the topology)
 
   record RoutingProblem {a b ℓ} (𝓡𝓐 : RoutingAlgebra a b ℓ) (n : ℕ) : Set (lsuc (a ⊔ b ⊔ ℓ)) where
+    no-eta-equality -- Needed due to bug #2732 in Agda
+    
     field
       A  : SquareMatrix (RoutingAlgebra.Step 𝓡𝓐) n
 

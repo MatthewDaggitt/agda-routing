@@ -17,7 +17,9 @@ module RoutingLib.Function where
   f ^ʳ zero    = id
   f ^ʳ (suc n) = (f ^ˡ n) ∘ f
 
-
+  _∘₂_ : ∀ {a b c d} → {A : Set a} {B : Set b} {C : Set c} {D : Set d} → (f : C → D) → (g : A → B → C) → (A → B → D) 
+  f ∘₂ g = λ x y → f (g x y)
+  
 {-
   eq : ∀ {a} {A : Set a} (f : A → A) n → (f ^ˡ n) ≡ (f ^ʳ n)
   eq f zero    = refl

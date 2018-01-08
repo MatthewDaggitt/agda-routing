@@ -25,8 +25,8 @@ open import RoutingLib.Data.Graph.SimplePath.Properties using (ℙₛ; length<n;
 open import RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties using (i∉p⇒i≢p₀) renaming (≈-refl to ≈ₙₑₚ-refl)
 open import RoutingLib.Data.Graph.SimplePath.Enumeration
 open import RoutingLib.Routing.Definitions
-open import RoutingLib.Routing.BellmanFord.PathsConvergence2.SufficientConditions
-open import RoutingLib.Routing.BellmanFord.GeneralConvergence.SufficientConditions
+open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
+open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions
 open import RoutingLib.Data.List.Properties using (foldr-×pres)
 open import RoutingLib.Data.List.Uniqueness using (Unique; []; _∷_)
 open import RoutingLib.Data.List.Uniqueness.Properties using (deduplicate!⁺)
@@ -36,7 +36,7 @@ import RoutingLib.Routing.BellmanFord as BellmanFord
 open import RoutingLib.Routing.BellmanFord.Properties
 open import RoutingLib.Algebra.FunctionProperties using (_Preservesₗ_)
 
-module RoutingLib.Routing.BellmanFord.PathsConvergence2.Prelude
+module RoutingLib.Routing.BellmanFord.PathVector.Prelude
   {a b ℓ} {𝓡𝓐 : RoutingAlgebra a b ℓ}
   {n-1} {𝓡𝓟 : RoutingProblem 𝓡𝓐 (suc n-1)}
   (𝓟𝓢𝓒 : PathSufficientConditions 𝓡𝓟)
@@ -54,7 +54,7 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence2.Prelude
 
   e▷r≉0⇒r≉0 : ∀ {e r} → e ▷ r ≉ 0# → r ≉ 0#
   e▷r≉0⇒r≉0 e▷r≉0 r≈0 = e▷r≉0 (r≈0⇒e▷r≈0 r≈0)
-  
+
   -----------------
   -- Consistency --
   -----------------
@@ -101,16 +101,25 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence2.Prelude
   𝑰ₘ : RMatrix → Set _
   𝑰ₘ X = ¬ 𝑪ₘ X
 
-  𝑪ₘ? : DecidableU 𝑪ₘ
-  𝑪ₘ? X = all? (λ i → all? (λ j → 𝑪? (X i j)))
+  abstract
   
-  𝑪ₘ-cong : ∀ {X Y} → X ≈ₘ Y → 𝑪ₘ X → 𝑪ₘ Y
-  𝑪ₘ-cong X≈Y Xᶜ i j = 𝑪-cong (X≈Y i j) (Xᶜ i j)
+    𝑪ₘ? : DecidableU 𝑪ₘ
+    𝑪ₘ? X = all? (λ i → all? (λ j → 𝑪? (X i j)))
   
-  𝑰ₘ-witness : ∀ {X} → 𝑰ₘ X → ∃₂ λ i j → 𝑰 (X i j)
-  𝑰ₘ-witness {X} ¬Xᶜ with ¬∀⟶∃¬ n _ (λ i → all? (λ j → 𝑪? (X i j))) ¬Xᶜ
-  ... | (i , ¬Xᵢᶜ) with ¬∀⟶∃¬ n _ (λ j → 𝑪? (X i j)) ¬Xᵢᶜ
-  ...   | (j , ¬Xᵢⱼᶜ) = i , j , ¬Xᵢⱼᶜ
+    𝑪ₘ-cong : ∀ {X Y} → X ≈ₘ Y → 𝑪ₘ X → 𝑪ₘ Y
+    𝑪ₘ-cong X≈Y Xᶜ i j = 𝑪-cong (X≈Y i j) (Xᶜ i j)
+  
+    𝑰ₘ-witness : ∀ {X} → 𝑰ₘ X → ∃₂ λ i j → 𝑰 (X i j)
+    𝑰ₘ-witness {X} ¬Xᶜ with ¬∀⟶∃¬ n _ (λ i → all? (λ j → 𝑪? (X i j))) ¬Xᶜ
+    ... | (i , ¬Xᵢᶜ) with ¬∀⟶∃¬ n _ (λ j → 𝑪? (X i j)) ¬Xᵢᶜ
+    ...   | (j , ¬Xᵢⱼᶜ) = i , j , ¬Xᵢⱼᶜ
+
+  xᶜ∧yⁱ⇒x≉y : ∀ {x y} → 𝑪 x → 𝑰 y → x ≉ y
+  xᶜ∧yⁱ⇒x≉y xᶜ yⁱ x≈y = yⁱ (𝑪-cong x≈y xᶜ)
+
+  Xᶜ∧Yⁱ⇒X≉Y : ∀ {X Y} → 𝑪ₘ X → 𝑰ₘ Y → X ≉ₘ Y
+  Xᶜ∧Yⁱ⇒X≉Y Xᶜ Yⁱ X≈Y with 𝑰ₘ-witness Yⁱ
+  ... | i , j , Yᵢⱼⁱ = xᶜ∧yⁱ⇒x≉y (Xᶜ i j) Yᵢⱼⁱ (X≈Y i j)
   
   -----------
   -- Other --
@@ -260,15 +269,21 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence2.Prelude
   𝓡𝓟ᶜ : RoutingProblem 𝓡𝓐ᶜ n
   𝓡𝓟ᶜ = record { A = A }
 
-  open RoutingProblem 𝓡𝓟ᶜ using () renaming (_≈ₘ_ to _≈ᶜₘ_; ≈-trans to ≈ᶜ-trans)
+  open RoutingProblem 𝓡𝓟ᶜ using () renaming (RMatrix to CMatrix; _≈ₘ_ to _≈ᶜₘ_; ≈-trans to ≈ᶜ-trans)
   open BellmanFord 𝓡𝓟ᶜ using () renaming (I to Ic; σ to σᶜ)
   
   toCRoute : ∀ {r} → 𝑪 r → CRoute
   toCRoute {r} rᶜ = _ , rᶜ
 
-  toCMatrix : ∀ {X} → 𝑪ₘ X → (Fin n → Fin n → CRoute)
+  toCMatrix : ∀ {X} → 𝑪ₘ X → CMatrix 
   toCMatrix {X} Xᶜ i j = X i j , Xᶜ i j
 
+  toIMatrix : CMatrix → RMatrix
+  toIMatrix X i j = proj₁ (X i j)
+
+  toCMatrix-cong : ∀ {X Y} (Xᶜ : 𝑪ₘ X) (Yᶜ : 𝑪ₘ Y) → X ≈ₘ Y → toCMatrix Xᶜ ≈ᶜₘ toCMatrix Yᶜ
+  toCMatrix-cong _ _ X≈Y i j = X≈Y i j
+  
   postulate I≈toCI : ∀ i j → toCRoute (Iᶜ i j) ≈ᶜ Ic i j
   {-
   I≈toCI i j with j ≟𝔽 i
@@ -288,7 +303,7 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence2.Prelude
                         toCRoute foldrᶜ ≈ᶜ foldr _⊕ᶜ_ f ys
   foldr-toCRoute-commute eᶜ e≈f foldrᶜ []            = e≈f
   foldr-toCRoute-commute eᶜ e≈f foldrᶜ (x≈y ∷ xs≈ys) = ⊕-cong x≈y (foldr-toCRoute-commute eᶜ e≈f (foldrᶜ-lemma eᶜ xs≈ys) xs≈ys)
-    
+
   σ-toCMatrix-commute : ∀ {X} (Xᶜ : 𝑪ₘ X) (σXᶜ : 𝑪ₘ (σ X)) → toCMatrix σXᶜ ≈ᶜₘ σᶜ (toCMatrix Xᶜ)
   σ-toCMatrix-commute {X} Xᶜ σXᶜ i j =
     foldr-toCRoute-commute (Iᶜ i j) (I≈toCI i j) (σXᶜ i j)
@@ -307,18 +322,20 @@ module RoutingLib.Routing.BellmanFord.PathsConvergence2.Prelude
   pathToCRoute : SimplePath n → CRoute
   pathToCRoute p = weight p , weightᶜ p
 
-  allCRoutes : List CRoute
-  allCRoutes = deduplicate _≟ᶜ_ ((0# , 0ᶜ) ∷ map pathToCRoute (allPaths n))
+  abstract
+  
+    allCRoutes : List CRoute
+    allCRoutes = deduplicate _≟ᶜ_ ((0# , 0ᶜ) ∷ map pathToCRoute (allPaths n))
  
-  allCRoutes! : Unique Sᶜ allCRoutes
-  allCRoutes! = deduplicate!⁺ Sᶜ _≟ᶜ_ ((0# , 0ᶜ) ∷ map pathToCRoute (allPaths n)) 
+    allCRoutes! : Unique Sᶜ allCRoutes
+    allCRoutes! = deduplicate!⁺ Sᶜ _≟ᶜ_ ((0# , 0ᶜ) ∷ map pathToCRoute (allPaths n)) 
 
-  ∈-allCRoutes : ∀ r → r ∈ allCRoutes
-  ∈-allCRoutes (r , 𝒄-null  r≈0)      = ∈-deduplicate⁺ Sᶜ _≟ᶜ_ {x = (r , 𝒄-null  r≈0)}     {xs = (0# , 0ᶜ) ∷ map pathToCRoute (allPaths n)} (here r≈0)
-  ∈-allCRoutes (r , 𝒄-route r≉0 wᵣ≈r) = ∈-deduplicate⁺ Sᶜ _≟ᶜ_ {x = (r , 𝒄-route r≉0 wᵣ≈r)} {xs = (0# , 0ᶜ) ∷ map pathToCRoute (allPaths n)} (there test)
-    where
-    test : (r , 𝒄-route r≉0 wᵣ≈r) ∈ map pathToCRoute (allPaths n)
-    test = ∈-resp-≈ Sᶜ  {v = pathToCRoute (path r≉0)} {w = r , 𝒄-route r≉0 wᵣ≈r} (∈-map⁺ ℙₛ Sᶜ weight-cong (∈-allPaths (path r≉0))) wᵣ≈r
+    ∈-allCRoutes : ∀ r → r ∈ allCRoutes
+    ∈-allCRoutes (r , 𝒄-null  r≈0)      = ∈-deduplicate⁺ Sᶜ _≟ᶜ_ {x = (r , 𝒄-null  r≈0)}     {xs = (0# , 0ᶜ) ∷ map pathToCRoute (allPaths n)} (here r≈0)
+    ∈-allCRoutes (r , 𝒄-route r≉0 wᵣ≈r) = ∈-deduplicate⁺ Sᶜ _≟ᶜ_ {x = (r , 𝒄-route r≉0 wᵣ≈r)} {xs = (0# , 0ᶜ) ∷ map pathToCRoute (allPaths n)} (there test)
+      where
+      test : (r , 𝒄-route r≉0 wᵣ≈r) ∈ map pathToCRoute (allPaths n)
+      test = ∈-resp-≈ Sᶜ  {v = pathToCRoute (path r≉0)} {w = r , 𝒄-route r≉0 wᵣ≈r} (∈-map⁺ ℙₛ Sᶜ weight-cong (∈-allPaths (path r≉0))) wᵣ≈r
 
 
 

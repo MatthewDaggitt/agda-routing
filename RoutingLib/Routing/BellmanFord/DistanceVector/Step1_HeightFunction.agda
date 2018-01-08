@@ -10,19 +10,21 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Routing.Definitions using (RoutingProblem; RoutingAlgebra)
-open import RoutingLib.Routing.BellmanFord.GeneralConvergence.SufficientConditions using (SufficientConditions)
+open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions using (SufficientConditions)
 open import RoutingLib.Data.List using (index)
 open import RoutingLib.Data.List.Uniqueness using (Unique)
 
-module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step1_HeightFunction 
-  {a b ℓ n}
+import RoutingLib.Routing.BellmanFord.DistanceVector.Prelude as Prelude
+
+module RoutingLib.Routing.BellmanFord.DistanceVector.Step1_HeightFunction 
+  {a b ℓ n-1}
   {𝓡𝓐 : RoutingAlgebra a b ℓ}
-  (𝓡𝓟 : RoutingProblem 𝓡𝓐 n) 
-  (sc : SufficientConditions 𝓡𝓐)
+  (𝓡𝓟 : RoutingProblem 𝓡𝓐 (suc n-1)) 
+  (𝓢𝓒 : SufficientConditions 𝓡𝓐)
   where
   
-  open RoutingProblem 𝓡𝓟
-  open SufficientConditions sc
+  open Prelude 𝓡𝓟 𝓢𝓒
+
   open import RoutingLib.Data.List.Uniset DS using (Enumeration)
   open import Data.List.Any.Membership S using (_∈_)
   open import RoutingLib.Data.List.Any.Membership S using (indexOf)
@@ -84,15 +86,17 @@ module RoutingLib.Routing.BellmanFord.GeneralConvergence.Step1_HeightFunction
     ≤-resp-h : ∀ {u v} → h u ≤ℕ h v → u ≤ v
     ≤-resp-h h[u]≤h[v] = ↗-indexOf-revMono-≤ ↗-↗routes _ _ (≤-pred h[u]≤h[v])
   
+    1≤h : ∀ x → 1 ≤ℕ h x
+    1≤h x = s≤s z≤n
 
     -- We have a maximal element
 
     hₘₐₓ : ℕ
     hₘₐₓ = h 0#
 
-    1≤h : ∀ x → 1 ≤ℕ h x
-    1≤h x = s≤s z≤n
-
+    1≤hₘₐₓ : 1 ≤ℕ hₘₐₓ
+    1≤hₘₐₓ = 1≤h 0#
+    
     h≤hₘₐₓ : ∀ {x} → h x ≤ℕ hₘₐₓ
     h≤hₘₐₓ = h-resp-≤ (0#-idₗ-⊕ _)
 

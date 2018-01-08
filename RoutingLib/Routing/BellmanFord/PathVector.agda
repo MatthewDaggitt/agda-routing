@@ -10,13 +10,13 @@ open import Relation.Unary using (Decidable)
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Data.Graph
-open import RoutingLib.Routing.BellmanFord.PathsConvergence.SufficientConditions using (SufficientConditions)
-open import RoutingLib.Routing.BellmanFord.GeneralConvergence.SufficientConditions using () renaming (SufficientConditions to GeneralSufficientConditions)
+open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions using (SufficientConditions)
+open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions using () renaming (SufficientConditions to GeneralSufficientConditions)
 open import RoutingLib.Asynchronous
 open import RoutingLib.Data.Nat.Properties using (suc-injective; ≰⇒≥; +-comm; +-assoc)
 open import RoutingLib.Data.List using (max)
 
-module RoutingLib.Routing.BellmanFord.PathsConvergence
+module RoutingLib.Routing.BellmanFord.PathVector
   {a b ℓ}
   (𝓡𝓐 : RoutingAlgebra a b ℓ)
   (sc : SufficientConditions 𝓡𝓐)

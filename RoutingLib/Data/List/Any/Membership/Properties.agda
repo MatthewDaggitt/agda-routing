@@ -8,7 +8,7 @@ open import Function using (_∘_; id)
 open import Data.List.All using (All; _∷_; [])
 open import Data.List.All.Properties using (All¬⇒¬Any)
 open import Data.Nat using (_≤_; _<_; zero; suc; s≤s; z≤n)
-open import Data.Nat.Properties using (suc-injective)
+open import Data.Nat.Properties using (suc-injective; <⇒≤)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Maybe using (nothing; just; Maybe; Eq; Eq-refl; Eq-sym; Eq-trans; drop-just)
 open import Data.Empty using (⊥-elim)
@@ -209,10 +209,13 @@ module RoutingLib.Data.List.Any.Membership.Properties where
     ∈-index {suc i} {x ∷ xs} (s≤s i<|xs|) = there (∈-index i<|xs|)
 
 
-    indexOf[xs]≤|xs| : ∀ {x xs} (x∈xs : x ∈ xs) → indexOf x∈xs ≤ length xs
-    indexOf[xs]≤|xs| (here px)    = z≤n
-    indexOf[xs]≤|xs| (there x∈xs) = s≤s (indexOf[xs]≤|xs| x∈xs)
+    indexOf[xs]<|xs| : ∀ {x xs} (x∈xs : x ∈ xs) → indexOf x∈xs < length xs
+    indexOf[xs]<|xs| (here px)    = s≤s z≤n
+    indexOf[xs]<|xs| (there x∈xs) = s≤s (indexOf[xs]<|xs| x∈xs)
 
+    indexOf[xs]≤|xs| : ∀ {x xs} (x∈xs : x ∈ xs) → indexOf x∈xs ≤ length xs
+    indexOf[xs]≤|xs| = <⇒≤ ∘ indexOf[xs]<|xs|
+    
     indexOf-cong : ∀ {x y xs} → x ≈ y → (x∈xs : x ∈ xs) (y∈xs : y ∈ xs) → Unique S xs → indexOf x∈xs ≡ indexOf y∈xs
     indexOf-cong x≈y (here x≈z)   (here y≈z)   _            = refl
     indexOf-cong x≈y (here x≈z)   (there y∈xs) (z≉xs ∷ xs!) = contradiction (∈-resp-≈ y∈xs (trans (sym x≈y) x≈z)) (All¬⇒¬Any z≉xs)

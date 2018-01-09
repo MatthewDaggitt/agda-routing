@@ -1,7 +1,7 @@
 open import Data.Nat using (ℕ; suc; _+_; _≤_; _<_; ≤-pred)
-open import Data.Nat.Properties using (≤-refl; <-irrefl)
+open import Data.Nat.Properties using (≤-refl; ≤-reflexive; <-irrefl; ≤-trans)
 open import Data.Product using (∃; _,_)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; cong; subst₂)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; cong; subst₂)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
@@ -64,6 +64,10 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step1_HeightFunction
   -}
   
   postulate hⁱ[r]<n-1⇒rⁱ : ∀ {r} → hⁱ r < n-1 → 𝑰 r
+
+  hⁱr≤hⁱsᶜ : ∀ r {s} → 𝑪 s → hⁱ r ≤ hⁱ s
+  hⁱr≤hⁱsᶜ r sᶜ = ≤-trans (hⁱ≤n-1 r) (≤-reflexive (sym (hⁱ[rᶜ]≡n-1 sᶜ)))
+  
   {-
   ⟨r⟩<n-1⇒rⁱ {r} |r|<n-1 with 𝑪? r
   ... | yes _  = contradiction |r|<n-1 (<-irrefl refl)

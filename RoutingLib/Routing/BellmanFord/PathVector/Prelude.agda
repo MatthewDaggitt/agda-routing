@@ -114,12 +114,12 @@ module RoutingLib.Routing.BellmanFord.PathVector.Prelude
     ... | (i , ¬Xᵢᶜ) with ¬∀⟶∃¬ n _ (λ j → 𝑪? (X i j)) ¬Xᵢᶜ
     ...   | (j , ¬Xᵢⱼᶜ) = i , j , ¬Xᵢⱼᶜ
 
-  xᶜ∧yⁱ⇒x≉y : ∀ {x y} → 𝑪 x → 𝑰 y → x ≉ y
-  xᶜ∧yⁱ⇒x≉y xᶜ yⁱ x≈y = yⁱ (𝑪-cong x≈y xᶜ)
+  𝑪𝑰⇒≉ : ∀ {x y} → 𝑪 x → 𝑰 y → x ≉ y
+  𝑪𝑰⇒≉ xᶜ yⁱ x≈y = yⁱ (𝑪-cong x≈y xᶜ)
 
-  Xᶜ∧Yⁱ⇒X≉Y : ∀ {X Y} → 𝑪ₘ X → 𝑰ₘ Y → X ≉ₘ Y
-  Xᶜ∧Yⁱ⇒X≉Y Xᶜ Yⁱ X≈Y with 𝑰ₘ-witness Yⁱ
-  ... | i , j , Yᵢⱼⁱ = xᶜ∧yⁱ⇒x≉y (Xᶜ i j) Yᵢⱼⁱ (X≈Y i j)
+  𝑪𝑰⇒≉ₘ : ∀ {X Y} → 𝑪ₘ X → 𝑰ₘ Y → X ≉ₘ Y
+  𝑪𝑰⇒≉ₘ Xᶜ Yⁱ X≈Y with 𝑰ₘ-witness Yⁱ
+  ... | i , j , Yᵢⱼⁱ = 𝑪𝑰⇒≉ (Xᶜ i j) Yᵢⱼⁱ (X≈Y i j)
   
   -----------
   -- Other --

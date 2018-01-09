@@ -37,8 +37,8 @@ import RoutingLib.Routing.AlgebraicPaths.Inconsistent as InconsistentPaths
 import RoutingLib.Routing.AlgebraicPaths.Consistent as ConsistentPaths
 import RoutingLib.Routing.BellmanFord.PathVector.Prelude as Prelude
 
-import RoutingLib.Routing.BellmanFord.PathVector.Step1_Ultrametric as Step1
-import RoutingLib.Routing.BellmanFord.PathVector.Step2_StrictlyContracting as Step2
+import RoutingLib.Routing.BellmanFord.PathVector.Step2_Ultrametric as Step2
+import RoutingLib.Routing.BellmanFord.PathVector.Step3_StrictlyContracting as Step3
 
 import RoutingLib.Routing.BellmanFord.DistanceConvergence.Step2_Ultrametric as ConsistentUltrametric
 import RoutingLib.Routing.BellmanFord.DistanceConvergence.Step4_AsynchronousConditions as ConsistentAsyncConditions

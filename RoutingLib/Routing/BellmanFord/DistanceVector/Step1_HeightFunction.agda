@@ -1,19 +1,23 @@
-open import Data.Nat using (ℕ; suc; z≤n; s≤s; ≤-pred) renaming (_≤_ to _≤ℕ_; _<_ to _<ℕ_)
-open import Data.Nat.Properties using (≰⇒>; <⇒≱; <⇒≤; suc-injective) renaming (≤-reflexive to ≤ℕ-reflexive)
-open import Data.List using (List; length)
+open import Data.Nat using (ℕ; suc; z≤n; s≤s; ≤-pred; _∸_) renaming (_≤_ to _≤ℕ_; _≥_ to _≥ℕ_; _<_ to _<ℕ_)
+open import Data.Nat.Properties using (≰⇒>; <⇒≱; <⇒≤; suc-injective; n∸m≤n) renaming (≤-reflexive to ≤ℕ-reflexive; ≤-trans to ≤ℕ-trans; ≤-decTotalOrder to ≤ℕ-decTotalOrder)
+open import Data.List using (List; length; map)
 open import Data.List.All.Properties using (All-universal)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (∃; _×_; _,_; proj₁; proj₂)
+open import Function using (_∘_)
 open import Relation.Binary using (_Preserves_⟶_)
-open import Relation.Binary.PropositionalEquality using (_≡_; cong; subst) renaming (refl to ≡-refl)
+open import Relation.Binary.PropositionalEquality using (_≡_; cong; subst; module ≡-Reasoning) renaming (refl to ≡-refl)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
+open import RoutingLib.Data.List using (index; between)
+open import RoutingLib.Data.List.Uniqueness using (Unique)
+open import RoutingLib.Data.List.Uniqueness.Properties using (between!⁺)
+open import RoutingLib.Data.List.Any.Membership.Propositional using (∈-between⁺; ∈-between⁻)
+open import RoutingLib.Data.Nat.Properties using (ℕₛ; ∸-cancelˡ-≡; ∸-monoˡ-<; ∸-monoˡ-≤; ∸-cancelˡ-≤; m<n⇒0<n∸m; n∸1+m<n; m∸[m∸n]≡n)
+
 open import RoutingLib.Routing.Definitions using (RoutingProblem; RoutingAlgebra)
 open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions using (SufficientConditions)
-open import RoutingLib.Data.List using (index)
-open import RoutingLib.Data.List.Uniqueness using (Unique)
-
 import RoutingLib.Routing.BellmanFord.DistanceVector.Prelude as Prelude
 
 module RoutingLib.Routing.BellmanFord.DistanceVector.Step1_HeightFunction 
@@ -27,11 +31,15 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step1_HeightFunction
 
   open import RoutingLib.Data.List.Uniset DS using (Enumeration)
   open import Data.List.Any.Membership S using (_∈_)
-  open import RoutingLib.Data.List.Any.Membership S using (indexOf)
-  open import RoutingLib.Data.List.Any.Membership.Properties using (indexOf-cong; indexOf-revCong; indexOf-index)
+  open import Data.List.Any.Membership ℕₛ using () renaming (_∈_ to _∈ℕ_)
 
+  open import RoutingLib.Data.List.Any.Membership S using (indexOf)
+  open import RoutingLib.Data.List.Any.Membership.Properties using (indexOf-cong; indexOf-revCong; indexOf-index; indexOf[xs]≤|xs|; indexOf[xs]<|xs|)
+  
   open import RoutingLib.Data.List.Sorting ≤-decTotalOrder using (Sorted; sort; sort-↗; _↗_; sort-Sorted)
+  open import RoutingLib.Data.List.Sorting ≤ℕ-decTotalOrder using () renaming (Sorted to Sortedℕ)
   open import RoutingLib.Data.List.Sorting.Properties ≤-decTotalOrder using (↗-unique; ↗-∈ˡ; ↗-indexOf-mono-<; ↗-indexOf-revMono-≤; ↗-indexOf-⊤)
+  open import RoutingLib.Data.List.Sorting.Nat using (↗-between)
 
   open Enumeration routes-enumerable renaming (X to R-uniset; isEnumeration to R-isEnumeration)
 
@@ -66,50 +74,72 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step1_HeightFunction
 
     -- The height of an element x is h(x) = |{y | y ≤ x}|
 
+    H : ℕ
+    H = length ↗routes
+    
     h : Route → ℕ
-    h x = suc (indexOf (∈-↗routes x))
+    h x = H ∸ indexOf (∈-↗routes x)
 
     h-resp-≈ : ∀ {u v} → u ≈ v → h u ≡ h v
-    h-resp-≈ u≈v = cong suc (indexOf-cong S u≈v _ _ ↗routes!)
+    h-resp-≈ {u} {v} u≈v = cong (H ∸_) (indexOf-cong S u≈v (∈-↗routes u) (∈-↗routes v) ↗routes!)
 
     ≈-resp-h : ∀ {u v} → h u ≡ h v → u ≈ v
-    ≈-resp-h hᵤ≡hᵥ = indexOf-revCong S _ _ (suc-injective hᵤ≡hᵥ)
+    ≈-resp-h {u} {v} hᵤ≡hᵥ = indexOf-revCong S (∈-↗routes u) (∈-↗routes v) (∸-cancelˡ-≡ (indexOf[xs]≤|xs| S _) (indexOf[xs]≤|xs| S _) hᵤ≡hᵥ)
 
-    h-resp-< : ∀ {u v} → u ≤ v × ¬ (u ≈ v) → h u <ℕ h v
-    h-resp-< u<v = s≤s (↗-indexOf-mono-< ↗-↗routes _ _ u<v)
+    h-resp-< : ∀ {u v} → u < v → h v <ℕ h u
+    h-resp-< {u} {v} u<v = ∸-monoˡ-< (↗-indexOf-mono-< ↗-↗routes (∈-↗routes u) (∈-↗routes v) u<v) (indexOf[xs]≤|xs| S _)
 
-    h-resp-≤ : h Preserves _≤_ ⟶ _≤ℕ_
+    h-resp-≤ : h Preserves _≤_ ⟶ _≥ℕ_
     h-resp-≤ {u} {v} u≤v with u ≟ v
-    ... | yes u≈v = ≤ℕ-reflexive (h-resp-≈ u≈v)
+    ... | yes u≈v = ≤ℕ-reflexive (h-resp-≈ (≈-sym u≈v))
     ... | no  u≉v = <⇒≤ (h-resp-< (u≤v , u≉v))
 
-    ≤-resp-h : ∀ {u v} → h u ≤ℕ h v → u ≤ v
-    ≤-resp-h h[u]≤h[v] = ↗-indexOf-revMono-≤ ↗-↗routes _ _ (≤-pred h[u]≤h[v])
-  
+    ≤-resp-h : ∀ {u v} → h u ≤ℕ h v → v ≤ u
+    ≤-resp-h {u} {v} h[u]≤h[v] = ↗-indexOf-revMono-≤ ↗-↗routes (∈-↗routes v) (∈-↗routes u) (∸-cancelˡ-≤ (indexOf[xs]≤|xs| S _) h[u]≤h[v])
+
+
     1≤h : ∀ x → 1 ≤ℕ h x
-    1≤h x = s≤s z≤n
+    1≤h x = m<n⇒0<n∸m (indexOf[xs]<|xs| S (∈-↗routes x)) --s≤s z≤n
 
-    -- We have a maximal element
+    h≤H : ∀ x → h x ≤ℕ H
+    h≤H x = n∸m≤n (indexOf (∈-↗routes x)) H
 
-    hₘₐₓ : ℕ
-    hₘₐₓ = h 0#
-
-    1≤hₘₐₓ : 1 ≤ℕ hₘₐₓ
-    1≤hₘₐₓ = 1≤h 0#
+    1≤H : 1 ≤ℕ H
+    1≤H = ≤ℕ-trans (1≤h 0#) (h≤H 0#)
     
-    h≤hₘₐₓ : ∀ {x} → h x ≤ℕ hₘₐₓ
-    h≤hₘₐₓ = h-resp-≤ (0#-idₗ-⊕ _)
+    h-incr : ∀ e {x} → x ≉ 0# → h (e ▷ x) <ℕ h x
+    h-incr e x≉0 = h-resp-< (⊕-almost-strictly-absorbs-▷ e x≉0)
 
-    hₘₐₓ≡|routes| : hₘₐₓ ≡ length ↗routes
-    hₘₐₓ≡|routes| = ↗-indexOf-⊤ ↗-↗routes ↗routes! _ (All-universal 0#-idₗ-⊕ ↗routes)
 
-    hₘₐₓ≡h0 : hₘₐₓ ≡ h 0#
-    hₘₐₓ≡h0 = ≡-refl
+
 
     -- Furthermore for any valid height, we can retrieve the route with that height
 
-    h⁻¹ : ∀ {i} → 1 ≤ℕ i → i ≤ℕ hₘₐₓ → Route
-    h⁻¹ {suc i} (s≤s z≤n) i≤hₘₐₓ rewrite hₘₐₓ≡|routes| = index ↗routes i≤hₘₐₓ
+    h⁻¹ : ∀ {i} → 1 ≤ℕ i → i ≤ℕ H → Route
+    h⁻¹ {suc i} (s≤s z≤n) i≤H = index ↗routes (n∸1+m<n i 1≤H)
+    
+    h⁻¹-isInverse : ∀ {i} (1≤i : 1 ≤ℕ i) i≤H → h (h⁻¹ 1≤i i≤H) ≡ i
+    h⁻¹-isInverse {suc i} (s≤s z≤n) i<H = begin
+      h (h⁻¹ (s≤s z≤n) i<H) ≡⟨ cong (H ∸_) (indexOf-index S ↗routes! (n∸1+m<n i 1≤H) (∈-↗routes _)) ⟩
+      H ∸ (H ∸ (suc i))     ≡⟨ m∸[m∸n]≡n i<H ⟩
+      suc i                 ∎
+      where open ≡-Reasoning
 
-    h⁻¹-isInverse : ∀ {i} {1≤i : 1 ≤ℕ i} {i≤hₘₐₓ} → h (h⁻¹ 1≤i i≤hₘₐₓ) ≡ i
-    h⁻¹-isInverse {_} {s≤s z≤n} {i≤hₘₐₓ} rewrite hₘₐₓ≡|routes| = cong suc (indexOf-index S ↗routes! i≤hₘₐₓ (∈-↗routes _))
+
+    -- We can therefore reconstruct the image of the h
+
+    h-image : List ℕ
+    h-image = between 1 (suc H)
+
+    h-image! : Unique ℕₛ h-image
+    h-image! = between!⁺ 1 (suc H)
+
+    h-image-complete : ∀ x → h x ∈ℕ h-image
+    h-image-complete x = ∈-between⁺ (1≤h x) (s≤s (h≤H x))
+
+    h-image-sound : ∀ {i} → i ∈ℕ h-image → ∃ λ x → h x ≡ i
+    h-image-sound {i} i∈betw with ∈-between⁻ 1 (suc H) i∈betw
+    ... | 1≤i , (s≤s i≤H) = h⁻¹ 1≤i i≤H , h⁻¹-isInverse 1≤i i≤H
+
+    h-image↗ : Sortedℕ h-image
+    h-image↗ = ↗-between 1 (suc H)

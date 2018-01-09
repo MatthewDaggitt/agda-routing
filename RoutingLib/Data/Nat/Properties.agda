@@ -296,21 +296,27 @@ module RoutingLib.Data.Nat.Properties where
     -----------------
     -- Subtraction --
     -----------------
+
+    ∸-monoˡ-≤ : ∀ {m n o} → m ≤ n → o ∸ n ≤ o ∸ m
+    ∸-monoˡ-≤ m≤n = ∸-mono ≤-refl m≤n 
     
     ∸-monoʳ-≤ : ∀ {m n o} → m ≤ n → o ≤ n → m ∸ o ≤ n ∸ o
     ∸-monoʳ-≤ z≤n       (s≤s o≤n) = z≤n
     ∸-monoʳ-≤ m≤n       z≤n       = m≤n
     ∸-monoʳ-≤ (s≤s m≤n) (s≤s o≤n) = ∸-monoʳ-≤ m≤n o≤n
 
-    ∸-monoˡ-< : ∀ {m n o} → o < n → n < m → m ∸ n < m ∸ o
+    ∸-monoˡ-< : ∀ {m n o} → o < n → n ≤ m → m ∸ n < m ∸ o
     ∸-monoˡ-< {_} {suc n} {zero}  (s≤s o<n) (s≤s n<m) = s≤s (n∸m≤n n _)
     ∸-monoˡ-< {_} {suc n} {suc o} (s≤s o<n) (s≤s n<m) = ∸-monoˡ-< o<n n<m
-    
+
     m∸n≡0⇒m≤n : ∀ {m n} → m ∸ n ≡ 0 → m ≤ n
     m∸n≡0⇒m≤n {zero}  {_}    _   = z≤n
     m∸n≡0⇒m≤n {suc m} {zero} ()
     m∸n≡0⇒m≤n {suc m} {suc n} eq = s≤s (m∸n≡0⇒m≤n eq)
 
+    n∸1+m<n : ∀ m {n} → 1 ≤ n → n ∸ suc m < n
+    n∸1+m<n m (s≤s z≤n) = s≤s (n∸m≤n m _)
+    
     m<n⇒0<n∸m : ∀ {m n} → m < n → 0 < n ∸ m
     m<n⇒0<n∸m {_}     {zero}  ()
     m<n⇒0<n∸m {zero}  {suc n} _         = s≤s z≤n
@@ -329,12 +335,6 @@ module RoutingLib.Data.Nat.Properties where
     m<n≤o⇒o∸n<o∸m : ∀ {m n o} → m < n → n ≤ o → o ∸ n < o ∸ m
     m<n≤o⇒o∸n<o∸m {zero}  {suc n} (s≤s m<n) (s≤s n≤o) = s≤s (n∸m≤n n _)
     m<n≤o⇒o∸n<o∸m {suc m} {_}     (s≤s m<n) (s≤s n≤o) = m<n≤o⇒o∸n<o∸m m<n n≤o
-
-    o∸n≤o∸m∧m≤o⇒m≤n : ∀ {m n o} → o ∸ n ≤ o ∸ m → m ≤ o → m ≤ n
-    o∸n≤o∸m∧m≤o⇒m≤n {zero}  {_}     {_}     _ _ = z≤n
-    o∸n≤o∸m∧m≤o⇒m≤n {suc m} {_}     {zero}  _ ()
-    o∸n≤o∸m∧m≤o⇒m≤n {suc m} {zero}  {suc o} o+1≤o∸m n≤o = contradiction (≤-trans o+1≤o∸m (n∸m≤n m o)) 1+n≰n
-    o∸n≤o∸m∧m≤o⇒m≤n {_}     {suc n} {_}     o∸n≤o∸m (s≤s m≤o) = s≤s (o∸n≤o∸m∧m≤o⇒m≤n o∸n≤o∸m m≤o)
 
     m≤n⇒m∸n≡0 : ∀ {m n} → m ≤ n → m ∸ n ≡ 0
     m≤n⇒m∸n≡0 {n = n} z≤n = 0∸n≡0 n
@@ -374,11 +374,17 @@ module RoutingLib.Data.Nat.Properties where
     ∸-distribˡ-⊔-⊓ (suc x) (suc y) zero    = sym (m≤n⇒m⊓n≡m (≤-step (n∸m≤n y x)))
     ∸-distribˡ-⊔-⊓ (suc x) (suc y) (suc z) = ∸-distribˡ-⊔-⊓ x y z
 
-    ∸-cancelˡ :  ∀ {x y z} → y ≤ x → z ≤ x → x ∸ y ≡ x ∸ z → y ≡ z
-    ∸-cancelˡ {_} {_}     {_}     z≤n       z≤n       _       = refl
-    ∸-cancelˡ {x} {_}     {suc z} z≤n       (s≤s z≤x) 1+x≡x∸z = contradiction (sym 1+x≡x∸z) (<⇒≢ (s≤s (n∸m≤n z _)))
-    ∸-cancelˡ {x} {suc y} {_}     (s≤s y≤x) z≤n       x∸y≡1+x = contradiction x∸y≡1+x (<⇒≢ (s≤s (n∸m≤n y _)))
-    ∸-cancelˡ {_} {_}     {_}     (s≤s y≤x) (s≤s z≤x) x∸y≡x∸z = cong suc (∸-cancelˡ y≤x z≤x x∸y≡x∸z)
+    ∸-cancelˡ-≡ :  ∀ {x y z} → y ≤ x → z ≤ x → x ∸ y ≡ x ∸ z → y ≡ z
+    ∸-cancelˡ-≡ {_} {_}     {_}     z≤n       z≤n       _       = refl
+    ∸-cancelˡ-≡ {x} {_}     {suc z} z≤n       (s≤s z≤x) 1+x≡x∸z = contradiction (sym 1+x≡x∸z) (<⇒≢ (s≤s (n∸m≤n z _)))
+    ∸-cancelˡ-≡ {x} {suc y} {_}     (s≤s y≤x) z≤n       x∸y≡1+x = contradiction x∸y≡1+x (<⇒≢ (s≤s (n∸m≤n y _)))
+    ∸-cancelˡ-≡ {_} {_}     {_}     (s≤s y≤x) (s≤s z≤x) x∸y≡x∸z = cong suc (∸-cancelˡ-≡ y≤x z≤x x∸y≡x∸z)
+
+    ∸-cancelˡ-≤ : ∀ {m n o} → m ≤ o → o ∸ n ≤ o ∸ m → m ≤ n
+    ∸-cancelˡ-≤ {zero}  {_}     {_}     _         _       = z≤n
+    ∸-cancelˡ-≤ {suc m} {_}     {zero}  ()       
+    ∸-cancelˡ-≤ {suc m} {zero}  {suc o} n≤o       o+1≤o∸m = contradiction (≤-trans o+1≤o∸m (n∸m≤n m o)) 1+n≰n
+    ∸-cancelˡ-≤ {_}     {suc n} {_}     (s≤s m≤o) o∸n≤o∸m = s≤s (∸-cancelˡ-≤ m≤o o∸n≤o∸m)
     
     ≤-move-+ʳ : ∀ {m} n {o} → m + n ≤ o → m ≤ o ∸ n
     ≤-move-+ʳ {m} n {o} m+n≤o = begin

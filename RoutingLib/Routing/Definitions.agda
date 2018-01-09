@@ -1,8 +1,11 @@
 open import Algebra.FunctionProperties using (Op₂; Congruent₂)
 open import Data.Fin using (Fin)
+open import Data.List using (List)
+import Data.List.Any.Membership as Membership
 open import Data.Nat using (ℕ)
 open import Data.Product using (∃; _×_; Σ)
 open import Data.Maybe
+open import Function.Equality using (_⟶_; Π)
 open import Level using (_⊔_) renaming (zero to lzero; suc to lsuc)
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Binary using (Rel; IsDecEquivalence; Setoid; DecSetoid; IsEquivalence)
@@ -10,8 +13,9 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
 open import RoutingLib.Algebra.FunctionProperties using (_Preservesₗ_)
 open import RoutingLib.Data.List.Any.Membership.Propositional using (∈-concat⁺; ∈-tabulate⁺)
+open import RoutingLib.Data.List.Uniqueness using (Unique)
 open import RoutingLib.Data.Matrix using (SquareMatrix; Matrix)
-open import RoutingLib.Data.Graph.SimplePath using (SimplePath; []; [_]; _∺_; _∷_; _∺_∣_; _∷_∣_; _∈_; source) renaming (_≈_ to _≈ₚ_)
+open import RoutingLib.Data.Graph.SimplePath using (SimplePath; []; [_]; _∺_; _∷_; _∺_∣_; _∷_∣_; source) renaming (_≈_ to _≈ₚ_)
 open import RoutingLib.Data.Graph.SimplePath.Properties using (p≈q⇒p₀≡q₀)
 
 module RoutingLib.Routing.Definitions where
@@ -103,3 +107,27 @@ module RoutingLib.Routing.Definitions where
     weight-cong [ refl ∷ p≈q  ] rewrite p≈q⇒p₀≡q₀ p≈q =
       ▷-cong _ (weight-cong [ p≈q ])
     
+
+
+
+
+  -----------
+  -- Other --
+  -----------
+{-
+  record HasFiniteImage {a b ℓ₁ ℓ₂} (F : Setoid a ℓ₁) (T : Setoid b ℓ₂) (fun : F ⟶ T) : Set _ where
+
+    open Setoid F using () renaming (Carrier to A)
+    open Setoid T using () renaming (Carrier to B)
+    open Membership T using (_∈_)
+    open Π fun using () renaming (_⟨$⟩_ to f)
+    
+    field
+      image    : List B
+      unique   : Unique T image
+      complete : ∀ a → f a ∈ image
+      sound    : ∀ {b} → b ∈ image → ∃ λ a → f a ≡ b
+      {-
+      sorted   : Sortedℕ h-image
+      -}
+-}

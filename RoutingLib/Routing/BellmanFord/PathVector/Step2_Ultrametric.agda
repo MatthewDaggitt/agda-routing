@@ -14,9 +14,9 @@ open import Function using (_∘_; _$_; id)
 open import RoutingLib.Data.Graph.SimplePath using (SimplePath) renaming (length to lengthₚ)
 open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Data.Graph
-open import RoutingLib.Data.Nat.Properties using (m≤n⇒m+o≡n; ∸-distribˡ-⊓-⊔; ⊔-monoˡ-≤; m≤n⇒m≤n⊔o; m≤o⇒m≤n⊔o; +-monoʳ-≤; ≤-stepsˡ; ∸-monoˡ-<; m≤n⇒m⊓n≡m; ∸-cancelˡ; n<m⇒n⊓o<m; ⊔-triangulate; n≢0⇒0<n; ≤-stepsʳ; m>n⇒m∸n≢0; m<n⇒n≢0)
+open import RoutingLib.Data.Nat.Properties using (m≤n⇒m+o≡n; ∸-distribˡ-⊓-⊔; ⊔-monoˡ-≤; m≤n⇒m≤n⊔o; m≤o⇒m≤n⊔o; +-monoʳ-≤; ≤-stepsˡ; ∸-monoˡ-<; m≤n⇒m⊓n≡m; ∸-cancelˡ; n<m⇒n⊓o<m; ⊔-triangulate; n≢0⇒0<n; ≤-stepsʳ; m>n⇒m∸n≢0; m<n⇒n≢0; ∸-monoˡ-≤; n≤m⇒n⊓o≤m)
 open import RoutingLib.Data.Matrix using (min⁺; map; max⁺; zipWith)
-open import RoutingLib.Data.Matrix.Properties using (min⁺-cong; max⁺-constant; zipWith-sym; max⁺-cong; max⁺[M]≤max⁺[N]; M≤max⁺[M]; max⁺[M]-distrib-⊔)
+open import RoutingLib.Data.Matrix.Properties using (min⁺-cong; max⁺-constant; zipWith-sym; max⁺-cong; max⁺[M]≤max⁺[N]; M≤max⁺[M]; max⁺[M]-distrib-⊔; max⁺[M]≡x)
 open import RoutingLib.Data.Matrix.Membership.Propositional.Properties using (max⁺[M]∈M)
 open import RoutingLib.Function using (_∘₂_)
 open import RoutingLib.Function.Distance using (IsUltrametric; MaxTriangleIneq)
@@ -149,6 +149,16 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step2_Ultrametric
       invert (hⁱ x ⊓ hⁱ y) ⊔ invert (hⁱ y ⊓ hⁱ z)                       ∎
       where open ≤-Reasoning
 
+    dⁱxⁱyᶜ≡Hⁱ∸hⁱx : ∀ {x y} → 𝑰 x → 𝑪 y → dⁱ x y ≡ Hⁱ ∸ hⁱ x
+    dⁱxⁱyᶜ≡Hⁱ∸hⁱx {x} {y} xⁱ yᶜ with x ≟ y
+    ... | yes x≈y = contradiction x≈y (𝑪𝑰⇒≉ yᶜ xⁱ ∘ ≈-sym)
+    ... | no  x≉y = cong (Hⁱ ∸_) (m≤n⇒m⊓n≡m (hⁱr≤hⁱsᶜ x yᶜ))
+
+    dⁱxyᶜ≤Hⁱ∸hⁱx : ∀ x {y} → 𝑪 y → dⁱ x y ≤ Hⁱ ∸ hⁱ x
+    dⁱxyᶜ≤Hⁱ∸hⁱx x {y} yᶜ with x ≟ y
+    ... | yes _ = z≤n
+    ... | no  _ = ∸-monoˡ-≤ (≤-reflexive (sym (m≤n⇒m⊓n≡m (hⁱr≤hⁱsᶜ x yᶜ))))
+    
   ------------------------------------------------------------------------------
   -- Distance metric for inconsistent routes
   ------------------------------------------------------------------------------
@@ -182,15 +192,23 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step2_Ultrametric
       Dⁱ X Y ⊔ Dⁱ Y Z ∎
       where open ≤-Reasoning
     
-    
 
+    max⁺[dⁱXⁱ]ⁱ : ∀ {X} → 𝑰ₘ X → ∃₂ λ i j → max⁺ (map (invert ∘ hⁱ) X) ≡ Hⁱ ∸ hⁱ (X i j) × 𝑰 (X i j)
+    max⁺[dⁱXⁱ]ⁱ {X} Xⁱ with 𝑰ₘ-witness Xⁱ | max⁺[M]∈M (map (invert ∘ hⁱ) X)
+    ... | k , l , Xₖₗⁱ | i , j , max⁺≡Xᵢⱼ with X k l ≟ X i j
+    ...   | yes Xₖₗ≈Xᵢⱼ = k , l , trans max⁺≡Xᵢⱼ (cong invert (hⁱ-cong (≈-sym Xₖₗ≈Xᵢⱼ))) , Xₖₗⁱ
+    ...   | no  Xₖₗ≉Xᵢⱼ = i , j , {!max⁺≡Xᵢⱼ!} , {!!}
+    
     XⁱYᶜ⇒DⁱXY≡DⁱX : ∀ {X Y} → 𝑰ₘ X → 𝑪ₘ Y → Dⁱ X Y ≡ max⁺ (map (invert ∘ hⁱ) X)
-    XⁱYᶜ⇒DⁱXY≡DⁱX {X} {Y} Xⁱ Yᶜ with max⁺[M]∈M (zipWith dⁱ X Y) | 𝑰ₘ-witness Xⁱ
-    ... | (i , j , max[M]≡dXᵢⱼYᵢⱼ) | (k , l , Xₖₗⁱ) = begin
-      max⁺ (zipWith dⁱ X Y)      ≡⟨ {!!} ⟩
-      max⁺ (map (invert ∘ hⁱ) X) ∎
-      where open ≡-Reasoning
-{-
+    XⁱYᶜ⇒DⁱXY≡DⁱX {X} {Y} Xⁱ Yᶜ with max⁺[dⁱXⁱ]ⁱ Xⁱ
+    ... | i , j , max⁺≡H∸hXᵢⱼ , Xᵢⱼⁱ = trans (max⁺[M]≡x Hⁱ∸hⁱx∈DⁱXY DⁱXY≤Hⁱ∸hⁱXᵢⱼ) (sym max⁺≡H∸hXᵢⱼ)
+      where
+
+      Hⁱ∸hⁱx∈DⁱXY = (i , j , sym (dⁱxⁱyᶜ≡Hⁱ∸hⁱx Xᵢⱼⁱ (Yᶜ i j)))
+
+      DⁱXY≤Hⁱ∸hⁱXᵢⱼ = λ k l → ≤-trans (dⁱxyᶜ≤Hⁱ∸hⁱx (X k l) (Yᶜ k l)) (≤-trans (M≤max⁺[M] (map (invert ∘ hⁱ) X) k l) (≤-reflexive max⁺≡H∸hXᵢⱼ))
+      
+      
     XⁱYᶜZᶜ⇒DⁱXZ≤DⁱXY : ∀ {X Y Z} → 𝑰ₘ X → 𝑪ₘ Y → 𝑪ₘ Z → Dⁱ X Z ≤ Dⁱ X Y
     XⁱYᶜZᶜ⇒DⁱXZ≤DⁱXY Xⁱ Yᶜ Zᶜ = ≤-reflexive (trans (XⁱYᶜ⇒DⁱXY≡DⁱX Xⁱ Zᶜ) (sym (XⁱYᶜ⇒DⁱXY≡DⁱX Xⁱ Yᶜ)))
     
@@ -302,5 +320,4 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step2_Ultrametric
   ...   | yes toXᶜ | yes toYᶜ  = dᶜ-cong (fromIₘ-toIₘ toXᶜ) (fromIₘ-toIₘ toYᶜ)
 -}
 
--}
 -}

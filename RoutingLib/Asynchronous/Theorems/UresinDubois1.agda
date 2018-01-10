@@ -34,7 +34,6 @@ open import Function
 open Setoid
   using (Carrier)
 open Data.Nat.Properties.≤-Reasoning
-  using (_≤⟨_⟩_; begin_; _∎)
 
 open import RoutingLib.Asynchronous.Schedule using (Schedule; 𝕋)
 open import RoutingLib.Asynchronous using (Parallelisation)
@@ -79,8 +78,12 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a}{ℓ}{n}{S : Fin n → 
     τK≤k⇒xₖ∈DK {zero}  acc₀ K i τ≤0 = lemma₁ acc₀ K i τ≤0
     τK≤k⇒xₖ∈DK {suc k} (acc rs) K i τ≤sk with i ∈? α (suc k)
     τK≤k⇒xₖ∈DK {suc k} (acc rs) K i τ≤sk | no  i∉α with τ K i ≟ suc k
-    ...   | yes τ≡sk = contradiction (subst (i ∈ₛ_) (cong α τ≡sk) (nextActive-active (φ K) i)) i∉α
     ...   | no  τ≢sk = τK≤k⇒xₖ∈DK (rs k ≤-refl) K i (<⇒≤pred (≤+≢⇒< τ≤sk τ≢sk))
+    τK≤k⇒xₖ∈DK {suc k} (acc rs) zero    i τ≤sk | no i∉α | yes τ≡sk =
+      τK≤k⇒xₖ∈DK {k} (rs k ≤-refl) 0 i z≤n
+      
+
+    τK≤k⇒xₖ∈DK {suc k} (acc rs) (suc K) i τ≤sk | no i∉α | yes τ≡sk = contradiction (subst (i ∈ₛ_) (cong α τ≡sk) (nextActive-active (φ (suc K)) i)) i∉α
     τK≤k⇒xₖ∈DK {suc k} (acc rs) (suc K) i τ≤sk | yes i∈α = f-monotonic K rec i
                where
                accβ : ∀ j → Acc _<_ (β (suc k) i j)
@@ -118,22 +121,23 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a}{ℓ}{n}{S : Fin n → 
 
     accTᶜ+K : ∀ K → Acc _<_ (Tᶜ + K)
     accTᶜ+K K = <-well-founded (φ (suc T) + K)
-    
+
+    τ≤Tᶜ+K : ∀ K j → τ (T + 0) j ≤ Tᶜ + K
+    τ≤Tᶜ+K K j with T
+    ... | zero = z≤n
+    ... | suc t = begin 
+      τ (suc t + 0) j      ≡⟨ cong₂ τ (+-identityʳ (suc t)) refl ⟩
+      τ (suc t) j          ≤⟨ <⇒≤ (nextActiveφ<φs (suc t) j) ⟩
+      φ (suc (suc t))      ≤⟨ m≤m+n (φ (suc (suc t))) K ⟩
+      φ (suc (suc t)) + K  ∎
+
     theorem1-proof : ∀ K → async-iter 𝕤 (accTᶜ+K K) x₀ ≈ ξ
     theorem1-proof K i = ≈ᵢ-sym (proj₂ (D-T+K≡ξ 0) (async-iter 𝕤 (accTᶜ+K K) x₀)
-                   async∈DT
-                   i)
-                   where
-                   τ≤Tᶜ+K : ∀ j → τ (T + 0) j ≤ Tᶜ + K
-                   τ≤Tᶜ+K j = begin
-                     τ (T + 0) j    ≤⟨ ≤-reflexive (cong₂ τ (+-identityʳ T) refl) ⟩
-                     τ T j          ≤⟨ <⇒≤ (nextActiveφ<φs T j) ⟩
-                     φ (suc T)      ≤⟨ m≤m+n (φ (suc T)) K ⟩
-                     φ (suc T) + K ∎
+                   async∈DT i)
+      where
+      async∈DT : async-iter 𝕤 (accTᶜ+K K) x₀ ∈ D (T + 0)
+      async∈DT j = τK≤k⇒xₖ∈DK (accTᶜ+K K) (T + 0) j (τ≤Tᶜ+K K j)
 
-                   async∈DT : async-iter 𝕤 (accTᶜ+K K) x₀ ∈ D (T + 0)
-                   async∈DT j = τK≤k⇒xₖ∈DK (accTᶜ+K K) (T + 0) j (τ≤Tᶜ+K j)
-  
 
     theorem1 : ∃ λ K → ∀ K₁ → async-iter 𝕤 (<-well-founded (K + K₁)) x₀ ≈ ξ
     theorem1 = φ (suc T) , theorem1-proof

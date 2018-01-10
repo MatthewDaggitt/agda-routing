@@ -60,16 +60,16 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
 
   -- Properties of nextActive
   nextActive-inc : ∀ t i → t ≤ nextActive t i
-  nextActive-inc zero i = z≤n
-  nextActive-inc (suc t) i with nonstarvation (suc t) i
-  ... | k , p = nextActive'-inc (suc t) k i p (<-wf k)
+  nextActive-inc t i with nonstarvation t i
+  ... | k , p = nextActive'-inc t k i p (<-wf k)
 
-  nextActive-active : ∀ t i → i ∈ α (nextActive t i)
+  postulate nextActive-active : ∀ t i → i ∈ α (nextActive t i)
+  {-
   nextActive-active zero i = subst (i ∈_) (sym α₀) ∈⊤
   nextActive-active (suc t) i with nonstarvation (suc t) i
   ... | k , p with nextActive' (suc t) k i p (<-wf k)
   ... | _ , active = active
-
+  -}
   ---------------
   -- Data flow --
   ---------------
@@ -164,10 +164,12 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
 
   -- Propeties of τ
   φ≤τ : ∀ t i → φ t ≤ τ t i
-  φ≤τ t i = nextActive-inc (φ t) i
+  φ≤τ zero    i = z≤n
+  φ≤τ (suc t) i = nextActive-inc (φ (suc t)) i
   
   τ-inc : ∀ t i → t ≤ τ t i
-  τ-inc t i = ≤-trans (φ-inc t) (nextActive-inc (φ t) i)
+  τ-inc zero    i = z≤n
+  τ-inc (suc t) i = ≤-trans (φ-inc (suc t)) (nextActive-inc (φ (suc t)) i)
 
   prop1-i : φ zero ≡ zero
   prop1-i = refl
@@ -179,11 +181,11 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
                  nextActiveφ<φs t i
 
   prop1-iii : ∀ t i j k  → (φ t ≤ τ t j) × (τ t j ≤ β (φ (suc t) + k) i j)
-  prop1-iii t i j k = φ≤τ t j , (expiryₜ≤k⇒t≤βk
-    (nextActive (φ t) j) (φ (suc t) + k) i j
+  prop1-iii zero    i j k = z≤n , z≤n
+  prop1-iii (suc t) i j k = φ≤τ (suc t) j , (expiryₜ≤k⇒t≤βk
+    (nextActive (φ (suc t)) j) (φ (suc (suc t)) + k) i j
     (begin
-       expiry (nextActive (φ t) j)      ≤⟨ expiry-monotone (t≤max[t] (φ t) (nextActive (φ t)) j) ⟩
-       expiry (max (φ t) (nextActive (φ t)))  ≤⟨ n≤1+n (expiry (max (φ t) (nextActive (φ t)))) ⟩
-       φ (suc t)                        ≤⟨ m≤m+n (φ (suc t)) k ⟩
-       φ (suc t) + k                    ∎))
-                
+       expiry (nextActive (φ (suc t)) j)      ≤⟨ expiry-monotone (t≤max[t] (φ (suc t)) (nextActive (φ (suc t))) j) ⟩
+       expiry (max (φ (suc t)) (nextActive (φ (suc t))))  ≤⟨ n≤1+n (expiry (max (φ (suc t)) (nextActive (φ (suc t))))) ⟩
+       φ (suc (suc t))                        ≤⟨ m≤m+n (φ (suc (suc t))) k ⟩
+       φ (suc (suc t)) + k                    ∎))

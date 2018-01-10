@@ -66,8 +66,6 @@ module RoutingLib.Asynchronous.Schedule where
     field
       {- α returns a subset of the shared memory elements that are active at time t -}
       α             : (t : 𝕋) → Subset n
-      {- α returns the entire index set at time 0 -}
-      α₀            : α 0 ≡ ⊤
       {- β returns the last time element i was accessed before time t -}
       β             : (t : 𝕋)(i j : Fin n) → 𝕋
       {- A1: Elements can only rely on their past values -}

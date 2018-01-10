@@ -41,9 +41,8 @@ module RoutingLib.Asynchronous.Schedule.Times {n}(𝕤 : Schedule n) where
 
     -- nextActive returns a time after t, t', such that i is accessed at t'
     nextActive : 𝕋 → Fin n → 𝕋
-    nextActive zero _ = 0
-    nextActive (suc t) i with (nonstarvation (suc t) i)
-    ... | (k , p) = proj₁ (nextActive' (suc t) k i p (<-wf k))
+    nextActive t i with (nonstarvation t i)
+    ... | (k , p) = proj₁ (nextActive' t k i p (<-wf k))
 
 
     ---------------
@@ -74,7 +73,8 @@ module RoutingLib.Asynchronous.Schedule.Times {n}(𝕤 : Schedule n) where
     
     -- Definition of τ
     τ : 𝕋 → Fin n → 𝕋
-    τ t i = nextActive (φ t) i
+    τ zero    i = zero
+    τ (suc t) i = nextActive (φ (suc t)) i
 
 {-
     module ActivationTimes {α : 𝔸 n} (sf : StarvationFree α) where

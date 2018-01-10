@@ -1,20 +1,19 @@
-open import Data.Nat using (ℕ; suc; z≤n; s≤s; ≤-pred; _∸_) renaming (_≤_ to _≤ℕ_; _≥_ to _≥ℕ_; _<_ to _<ℕ_)
-open import Data.Nat.Properties using (≰⇒>; <⇒≱; <⇒≤; suc-injective; n∸m≤n) renaming (≤-reflexive to ≤ℕ-reflexive; ≤-trans to ≤ℕ-trans; ≤-decTotalOrder to ≤ℕ-decTotalOrder)
-open import Data.List using (List; length; map)
-open import Data.List.All.Properties using (All-universal)
-open import Data.Sum using (inj₁; inj₂)
-open import Data.Product using (∃; _×_; _,_; proj₁; proj₂)
-open import Function using (_∘_)
+open import Data.Nat using (ℕ; suc; z≤n; s≤s; _∸_) renaming (_≤_ to _≤ℕ_; _≥_ to _≥ℕ_; _<_ to _<ℕ_)
+open import Data.Nat.Properties using (<⇒≤; n∸m≤n) renaming (≤-reflexive to ≤ℕ-reflexive; ≤-trans to ≤ℕ-trans; ≤-decTotalOrder to ≤ℕ-decTotalOrder)
+open import Data.List using (List; length)
+open import Data.Product using (∃; _,_)
 open import Relation.Binary using (_Preserves_⟶_)
-open import Relation.Binary.PropositionalEquality using (_≡_; cong; subst; module ≡-Reasoning) renaming (refl to ≡-refl)
-open import Relation.Nullary using (¬_; yes; no)
+open import Relation.Binary.PropositionalEquality using (_≡_; cong; module ≡-Reasoning)
+open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.List using (index; between)
 open import RoutingLib.Data.List.Uniqueness using (Unique)
 open import RoutingLib.Data.List.Uniqueness.Properties using (between!⁺)
+open import RoutingLib.Data.List.Sorting.Nat using (↗-between)
+open import RoutingLib.Data.List.Any.Membership.Properties using (indexOf-cong; indexOf-revCong; indexOf-index; indexOf[xs]≤|xs|; indexOf[xs]<|xs|)
 open import RoutingLib.Data.List.Any.Membership.Propositional using (∈-between⁺; ∈-between⁻)
-open import RoutingLib.Data.Nat.Properties using (ℕₛ; ∸-cancelˡ-≡; ∸-monoˡ-<; ∸-monoˡ-≤; ∸-cancelˡ-≤; m<n⇒0<n∸m; n∸1+m<n; m∸[m∸n]≡n)
+open import RoutingLib.Data.Nat.Properties using (ℕₛ; ∸-cancelˡ-≡; ∸-monoˡ-<; ∸-cancelˡ-≤; m<n⇒0<n∸m; n∸1+m<n; m∸[m∸n]≡n)
 
 open import RoutingLib.Routing.Definitions using (RoutingProblem; RoutingAlgebra)
 open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions using (SufficientConditions)
@@ -29,53 +28,18 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step1_HeightFunction
   
   open Prelude 𝓡𝓟 𝓢𝓒
 
-  open import RoutingLib.Data.List.Uniset DS using (Enumeration)
-  open import Data.List.Any.Membership S using (_∈_)
   open import Data.List.Any.Membership ℕₛ using () renaming (_∈_ to _∈ℕ_)
 
   open import RoutingLib.Data.List.Any.Membership S using (indexOf)
-  open import RoutingLib.Data.List.Any.Membership.Properties using (indexOf-cong; indexOf-revCong; indexOf-index; indexOf[xs]≤|xs|; indexOf[xs]<|xs|)
   
-  open import RoutingLib.Data.List.Sorting ≤-decTotalOrder using (Sorted; sort; sort-↗; _↗_; sort-Sorted)
   open import RoutingLib.Data.List.Sorting ≤ℕ-decTotalOrder using () renaming (Sorted to Sortedℕ)
   open import RoutingLib.Data.List.Sorting.Properties ≤-decTotalOrder using (↗-unique; ↗-∈ˡ; ↗-indexOf-mono-<; ↗-indexOf-revMono-≤; ↗-indexOf-⊤)
-  open import RoutingLib.Data.List.Sorting.Nat using (↗-between)
 
-  open Enumeration routes-enumerable renaming (X to R-uniset; isEnumeration to R-isEnumeration)
 
   abstract
   
-    -- We have a unique complete list of routes
+    -- The height of an element x is h(x) = H ∸ |{y | y ≤ x}|
 
-    routes : List Route
-    routes = proj₁ R-uniset
-
-    routes! : Unique S routes
-    routes! = proj₂ R-uniset
-
-    ∈-routes : ∀ x → x ∈ routes
-    ∈-routes = R-isEnumeration
-
-
-    -- We can then sort this, preserving the completeness and uniqueness
-  
-    ↗routes : List Route
-    ↗routes = sort routes
-    
-    ↗routes! : Unique S ↗routes
-    ↗routes! = ↗-unique routes! (sort-↗ routes)
-
-    ∈-↗routes : ∀ x → x ∈ ↗routes
-    ∈-↗routes x = ↗-∈ˡ (∈-routes x) (sort-↗ routes)
-
-    ↗-↗routes : Sorted ↗routes
-    ↗-↗routes = sort-Sorted routes
-
-
-    -- The height of an element x is h(x) = |{y | y ≤ x}|
-
-    H : ℕ
-    H = length ↗routes
     
     h : Route → ℕ
     h x = H ∸ indexOf (∈-↗routes x)

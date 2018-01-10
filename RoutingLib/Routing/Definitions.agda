@@ -106,12 +106,8 @@ module RoutingLib.Routing.Definitions where
     weight-cong [ refl ∺ refl ] = ≈-refl
     weight-cong [ refl ∷ p≈q  ] rewrite p≈q⇒p₀≡q₀ p≈q =
       ▷-cong _ (weight-cong [ p≈q ])
-    
 
-
-
-
-  -----------
+-----------
   -- Other --
   -----------
 {-

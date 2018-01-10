@@ -59,26 +59,24 @@ module RoutingLib.Asynchronous.Schedule where
   --------------
   -- Schedule --
   --------------
-{-
--- An asynchronous schedule for n processors
-  record Schedule (n : ℕ) : Set lzero where
-    field
-      α              : 𝔸 n
-      β              : 𝔹 n
-      starvationFree : StarvationFree α
-      causal         : Causal β
-      dynamic        : Dynamic β
--}
 
   
   -- An asynchronous schedule for n processors
-  record Schedule (n : ℕ) : Set lzero where
+  record Schedule (n : ℕ) : Set where
     field
-      α              : 𝕋 → Subset n
-      β              : 𝕋 → Fin n → Fin n → 𝕋
-      starvationFree : ∀ t i → ∃ λ t' → t < t' × i ∈ α t'
-      causal         : ∀ t i j → β (suc t) i j < suc t
-      dynamic        : ∀ t i j → ∃ λ tᶠ → ∀ {t'} → tᶠ < t' → β t' i j ≢ t
+      {- α returns a subset of the shared memory elements that are active at time t -}
+      α             : (t : 𝕋) → Subset n
+      {- α returns the entire index set at time 0 -}
+      α₀            : α 0 ≡ ⊤
+      {- β returns the last time element i was accessed before time t -}
+      β             : (t : 𝕋)(i j : Fin n) → 𝕋
+      {- A1: Elements can only rely on their past values -}
+      causality     : ∀ t i j → β (suc t) i j ≤ t
+      {- A2: Each element gets updated infinitely often -}
+      nonstarvation : ∀ t i → ∃ λ k →  (i ∈ (α (t + suc k)))
+      {- A3: Each element will eventually not need its value at time t -}
+      finite        : ∀ t i j → ∃ λ k → ∀ k₁ → β (t + k + k₁) i j ≢ t
+      
       
   -- Two schedules are considered equal if their activation and data flow functions are equal
   _⟦_⟧≈⟦_⟧_ : ∀ {n} → Schedule n → 𝕋 → 𝕋 → Schedule n → Set lzero
@@ -91,6 +89,7 @@ module RoutingLib.Asynchronous.Schedule where
   -----------------------
   -- The "synchronous" schedule
 
+{-
   α-sync : ∀ {n} → 𝔸 n
   α-sync _ = ⊤
 
@@ -113,7 +112,8 @@ module RoutingLib.Asynchronous.Schedule where
   𝕤-sync n = record 
     { α              = α-sync 
     ; β              = β-sync 
-    ; starvationFree = α-sync-starvationFree
-    ; causal         = β-sync-causal 
-    ; dynamic        = β-sync-dynamic 
+    ; nonstarvation  = α-sync-starvationFree
+    ; causality      = β-sync-causal 
+    ; finite         = β-sync-dynamic 
     }
+-}

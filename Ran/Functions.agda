@@ -18,27 +18,16 @@ open import Data.Nat.Properties
 open import Algebra.FunctionProperties
   using (Op₂)
 
-module Functions where
-  
-  foldr : ∀ {a}{A : Set a} →
-          Op₂ A → A → ∀ {n} → (Fin n → A) → A
-  foldr f e {zero}  t = e
-  foldr f e {suc n} t = f (t fzero) (foldr f e (t ∘ fsuc))
+open import RoutingLib.Data.Table using (foldr)
+
+module Ran.Functions where
 
   -- sum of a Fin n function
   sum : ∀ {n} → (Fin n → ℕ) → ℕ
   sum f = foldr _+_ zero f
 
-  -- max of a Fin n function
-  max : ∀ {n} → (Fin n → ℕ) → ℕ
-  max f = foldr _⊔_ zero f
-
   max∞ : ∀ {n} → (Fin n → ℕ∞) → ℕ∞
   max∞ f = foldr _⊔∞_ (N zero) f
-
-  -- min of a Fin n function
-  min : ∀ {n} → ℕ → (Fin n → ℕ) → ℕ
-  min ⊤ f = foldr _⊓_ ⊤ f
 
   min∞ : ∀ {n} → (Fin n → ℕ∞) → ℕ∞
   min∞ f = foldr _⊓∞_ ∞ f

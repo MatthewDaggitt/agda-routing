@@ -5,7 +5,7 @@ open import Data.Fin using (Fin; pred; fromℕ; inject₁) renaming (_<_ to _<�
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_) renaming (_<?_ to _<𝔽?_)
 open import Data.Product using (∃; _×_; _,_; proj₂)
 open import Data.List using (List; length)
-open import Data.List.Any.Membership.Propositional using (_∈_)
+--open import Data.List.Any.Membership.Propositional using (_∈_)
 open import Data.Vec using (Vec; lookup; fromList) renaming (_∈_ to _∈ᵥ_)
 open import Data.Vec.Properties using (List-∈⇒∈)
 open import Relation.Binary using (Setoid; Decidable; _Preserves₂_⟶_⟶_)
@@ -26,15 +26,18 @@ open import RoutingLib.Data.List.Sorting ≤-decTotalOrder using (sort; sort-Sor
 open import RoutingLib.Data.List.Sorting.Properties ≤-decTotalOrder using (↗-unique; ↗-length; ↗-∈ˡ; ↗-∈ʳ)
 open import RoutingLib.Data.List.Sorting.Nat using (strictlySorted)
 open import RoutingLib.Data.List.Uniqueness using (Unique)
+open import RoutingLib.Data.Table using (Table)
+--open import RoutingLib.Data.GTable using (GTable; GPred)
 open import RoutingLib.Data.Vec.Properties using (∈-lookup; ∈-fromList⁻; ∈-lookup⁺)
 open import RoutingLib.Data.Vec.All.Properties using (AllPairs-lookup; AllPairs-fromList⁺)
 
-module RoutingLib.Asynchronous.Theorems {a ℓ n} {S : Setoid a ℓ} (p : Parallelisation S n) where
+module RoutingLib.Asynchronous.Theorems {a ℓ n}
+                                        {S : Table (Setoid a ℓ) n} (p : Parallelisation S) where
 
   open Parallelisation p
-  open import RoutingLib.Asynchronous.Properties p
-  open import RoutingLib.Function.Distance (Sₘ n)
-  open import RoutingLib.Function.Distance.Properties (Sₘ n) using (x*; x*-fixed)
+  --open import RoutingLib.Asynchronous.Properties p
+  --open import RoutingLib.Function.Distance (Sₘ n)
+  --open import RoutingLib.Function.Distance.Properties (Sₘ n) using (x*; x*-fixed)
 
   record BoxConditions : Set (a ⊔ lsuc lzero) where
     field
@@ -44,13 +47,22 @@ module RoutingLib.Asynchronous.Theorems {a ℓ n} {S : Setoid a ℓ} (p : Parall
 
       Cₖ≡M         : ∀ m      → m ∈ᵤ C (fromℕ k)
       C-strictMono : ∀ {r s}  → r <𝔽 s → C r ⊂ᵤ C s
-      σ-dec        : ∀ {m r} → m ∈ᵤ C r → σ m ∈ᵤ C (pred r)
+      σ-dec        : ∀ {m r} → m ∈ᵤ C r → f m ∈ᵤ C (pred r)
 
 
+  record ACO  : Set (lsuc (lsuc (a ⊔ ℓ))) where
+    field
+      T            : ℕ
+      D            : ℕ → MPred
+      D-decreasing : ∀ K → K < T → D (suc K) ⊂ D K
+      D-finish     : ∃ λ ξ → ∀ K → Singleton-t ξ (D (T + K))
+      f-monotonic  : ∀ K {t} → t ∈ D K → f t ∈ D (suc K)
+      D-subst      : ∀ K {x y} → x ≈ y → x ∈ D K → y ∈ D K
+
+{-
   postulate BoxConditions⇒AsynchronouslySafe : BoxConditions → IsAsynchronouslySafe p
 
   postulate AsynchronouslySafe⇒BoxConditions : IsAsynchronouslySafe p → BoxConditions
-
 
 
 
@@ -195,3 +207,4 @@ module RoutingLib.Asynchronous.Theorems {a ℓ n} {S : Setoid a ℓ} (p : Parall
       ; C-strictMono = C-strictMono
       ; σ-dec = λ {m} {i} → σ-dec {m} {i}
       }
+-}

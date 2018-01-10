@@ -1,7 +1,7 @@
 open import Algebra.FunctionProperties using (Op₂)
 open import Data.Nat using (ℕ; zero; suc; _<_; _≤_; _⊓_)
 open import Data.Nat.Properties using (⊓-sel; ⊓-mono-<; module ≤-Reasoning)
-open import Data.Fin using (Fin; inject₁) renaming (zero to fzero; suc to fsuc)
+open import Data.Fin using (Fin; inject₁; inject≤) renaming (zero to fzero; suc to fsuc)
 open import Data.Product using (_,_; proj₁; proj₂)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Function using (_∘_)
@@ -13,6 +13,7 @@ open import Relation.Unary using (Pred)
 open import RoutingLib.Data.Table
 open import RoutingLib.Data.Table.All using (All)
 open import RoutingLib.Data.Table.Any using (Any)
+open import RoutingLib.Data.Table.Relation.Pointwise using (Pointwise)
 open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Data.Nat.Properties
 
@@ -99,3 +100,35 @@ module RoutingLib.Data.Table.Properties where
                    All (λ y → Any (_< y) s) t → min⁺ s < min⁺ t
   min⁺[s]<min⁺[t] {n = zero}  {s} {t} all = min⁺[t]<x (all fzero)
   min⁺[s]<min⁺[t] {n = suc n} {s} {t} all = m<n×m<o⇒m<n⊓o (min⁺[t]<x (all fzero)) (min⁺[s]<min⁺[t] (all ∘ fsuc))
+
+
+  max[t]≤x : ∀ {n} {t : Table ℕ n} {x ⊥} → All (_≤ x) t → ⊥ ≤ x → max ⊥ t ≤ x
+  max[t]≤x {x = x} xs≤x ⊥≤x = foldr-×pres (_≤ x) n≤m×o≤m⇒n⊔o≤m ⊥≤x xs≤x
+
+  postulate x≤max[t] : ∀ {n x} {t : Table ℕ n} ⊥ → Any (x ≤_) t → x ≤ max ⊥ t
+
+  postulate ⊥≤max[t] : ∀ {n} ⊥ (t : Table ℕ n)→ ⊥ ≤ max ⊥ t
+
+  postulate t≤max[t] : ∀ {n} ⊥ (t : Table ℕ n) → All (_≤ max ⊥ t) t
+
+  postulate x<max[t] : ∀ {n x} {t : Table ℕ n} ⊥ → Any (x <_) t → x < max ⊥ t
+
+  postulate max[t]≤max[s]₂ : ∀ {m n} (m≤n : m ≤ n) {⊥₁ ⊥₂} → ⊥₁ ≤ ⊥₂ →
+                             {s : Table ℕ m} {t : Table ℕ n} →
+                             (∀ i → s i ≤ t (inject≤ i m≤n)) → max ⊥₁ s ≤ max ⊥₂ t
+  
+  postulate max[t]≤max[s] : ∀ {n} {s t : Table ℕ n} ⊥₁ ⊥₂ → ⊥₁ ≤ ⊥₂ → Pointwise _≤_ s t → max ⊥₁ s ≤ max ⊥₂ t
+  
+
+{-
+  Done --postulate   : ∀ {n} f i → t i ≤ max {n} t
+  
+  Done --postulate max-mono   : ∀ {n f g} → (∀ i → f i ≤ g i) → max {n} f ≤ max {n} g
+  Done --postulate max<      : ∀ {n f x} → (∀ (i : Fin n) → x < f i) → x < max f
+  Done --postulate max≤      : ∀ {n f x} → (∀ (i : Fin n) → x ≤ f i) → x ≤ max f
+
+  --postulate m≤n⇒maxₘ≤maxₙ  : ∀ {m n}{f : Fin m → ℕ}{g : Fin n → ℕ}(m≤n : m ≤ n) → (∀ i → f i ≤ g (inject≤ i m≤n)) → max f ≤ max g
+  --postulate min∞-monotone : ∀ {n f g} → (∀ i → f i ≤∞ g i) → min∞ {n} f ≤∞ min∞ {n} g
+  --postulate min∞-dec : ∀ {n} f i → min∞ {n} f ≤∞ f i
+  --postulate min∞-equiv : ∀ {n g h} → (∀ i → g i ≡ h i) → min∞ {n} g ≡ min∞ {n} h
+-}

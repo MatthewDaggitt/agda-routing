@@ -1,14 +1,20 @@
 open import Data.Nat using (zero; suc) renaming (_+_ to _+ℕ_; _≤_ to _≤ℕ_; z≤n to z≤ℕn; s≤s to s≤ℕs; _≤′_ to _≤'ℕ_; ≤′-refl to ≤'ℕ-refl; ≤′-step to ≤'ℕ-step)
-open import Data.Nat.Properties using (+-suc; n≤1+n; <⇒≢) renaming (+-identityʳ to +-idʳℕ; +-comm to +-commℕ) renaming (⊓-sel to ⊓ℕ-sel)
+open import Data.Nat.Properties using (+-suc; n≤1+n; <⇒≢) renaming (+-identityʳ to +-idʳℕ; +-comm to +-commℕ) renaming (⊓-sel to ⊓ℕ-sel; m⊓n≤n to m⊓n≤ℕn; m⊓n≤m to m⊓n≤ℕm)
 open import Data.Product using (∃; _,_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Level using () renaming (zero to lzero)
 open import Relation.Binary using (_⇒_; Reflexive; Antisymmetric; Transitive; _Preserves₂_⟶_⟶_)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; subst; sym; cong; _≢_)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; subst; sym; cong; _≢_; setoid)
 open import Relation.Nullary.Negation using (contradiction)
 
+open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Data.NatInf
 
 module RoutingLib.Data.NatInf.Properties where
+  
+
+  open import Algebra.FunctionProperties {lzero} {A = ℕ∞} _≡_ using (Idempotent)
+  open import Algebra.FunctionProperties.Consequences (setoid ℕ∞) using (sel⇒idem)
 
   -- Properties of equality
   ≢∞ : ∀ {m} → N m ≢ ∞
@@ -190,3 +196,36 @@ module RoutingLib.Data.NatInf.Properties where
   ⊓-sel (N (suc x)) (N (suc y)) with ⊓ℕ-sel x y
   ... | inj₁ m⊓n≡m = inj₁ (cong N (cong suc m⊓n≡m))
   ... | inj₂ m⊓n≡n = inj₂ (cong N (cong suc m⊓n≡n))
+
+  ⊓-idem : Idempotent _⊓_
+  ⊓-idem = sel⇒idem ⊓-sel
+
+  m⊓n≤n : ∀ m n → m ⊓ n ≤ n
+  m⊓n≤n ∞     ∞     = ≤-refl
+  m⊓n≤n ∞     (N n) = ≤-refl
+  m⊓n≤n (N m) ∞     = n≤∞
+  m⊓n≤n (N m) (N n) = ≤ℕ⇒≤ (m⊓n≤ℕn m n)
+
+  m⊓n≤m : ∀ m n → m ⊓ n ≤ m
+  m⊓n≤m ∞     ∞     = ≤-refl
+  m⊓n≤m ∞     (N n) = n≤∞
+  m⊓n≤m (N m) ∞     = ≤-refl
+  m⊓n≤m (N m) (N n) = ≤ℕ⇒≤ (m⊓n≤ℕm m n)
+
+  ⊓-mono-≤ : _⊓_ Preserves₂ _≤_ ⟶ _≤_ ⟶ _≤_
+  ⊓-mono-≤ {x} {y} {u} {v} x≤y u≤v with ⊓-sel y v
+  ... | inj₁ y⊓v≡y rewrite y⊓v≡y = ≤-trans (m⊓n≤m x u) x≤y
+  ... | inj₂ y⊓v≡v rewrite y⊓v≡v = ≤-trans (m⊓n≤n x u) u≤v
+
+  o≤m⇒n⊓o≤m : ∀ {m} → _⊓_ ⊎-Preservesʳ (_≤ m)
+  o≤m⇒n⊓o≤m n o≤m = ≤-trans (m⊓n≤n n _) o≤m
+
+  n≤m⇒n⊓o≤m : ∀ {m} → _⊓_ ⊎-Preservesˡ (_≤ m)
+  n≤m⇒n⊓o≤m o n≤m = ≤-trans (m⊓n≤m _ o) n≤m
+
+  n≤m⊎o≤m⇒n⊓o≤m : ∀ {m} → _⊓_ ⊎-Preserves (_≤ m)
+  n≤m⊎o≤m⇒n⊓o≤m n o (inj₁ n≤m) = n≤m⇒n⊓o≤m o n≤m
+  n≤m⊎o≤m⇒n⊓o≤m n o (inj₂ o≤m) = o≤m⇒n⊓o≤m n o≤m
+
+  m≤n×m≤o⇒m≤n⊓o : ∀ {m} → _⊓_ ×-Preserves (m ≤_)
+  m≤n×m≤o⇒m≤n⊓o m≤n m≤o = subst (_≤ _) (⊓-idem _) (⊓-mono-≤ m≤n m≤o)

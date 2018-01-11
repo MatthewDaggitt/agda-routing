@@ -16,6 +16,8 @@ open import RoutingLib.Data.Table.Any using (Any)
 open import RoutingLib.Data.Table.Relation.Pointwise using (Pointwise)
 open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Data.Nat.Properties
+open import RoutingLib.Data.NatInf using (ℕ∞) renaming (_≤_ to _≤∞_; _⊓_ to _⊓∞_)
+open import RoutingLib.Data.NatInf.Properties using () renaming (≤-refl to ≤∞-refl;  o≤m⇒n⊓o≤m to o≤∞m⇒n⊓o≤∞m; n≤m⊎o≤m⇒n⊓o≤m to n≤∞m⊎o≤∞m⇒n⊓o≤∞m; m≤n×m≤o⇒m≤n⊓o to m≤∞n×m≤∞o⇒m≤∞n⊓o)
 
 module RoutingLib.Data.Table.Properties where
 
@@ -118,17 +120,13 @@ module RoutingLib.Data.Table.Properties where
                              (∀ i → s i ≤ t (inject≤ i m≤n)) → max ⊥₁ s ≤ max ⊥₂ t
   
   postulate max[t]≤max[s] : ∀ {n} {s t : Table ℕ n} ⊥₁ ⊥₂ → ⊥₁ ≤ ⊥₂ → Pointwise _≤_ s t → max ⊥₁ s ≤ max ⊥₂ t
-  
 
-{-
-  Done --postulate   : ∀ {n} f i → t i ≤ max {n} t
-  
-  Done --postulate max-mono   : ∀ {n f g} → (∀ i → f i ≤ g i) → max {n} f ≤ max {n} g
-  Done --postulate max<      : ∀ {n f x} → (∀ (i : Fin n) → x < f i) → x < max f
-  Done --postulate max≤      : ∀ {n f x} → (∀ (i : Fin n) → x ≤ f i) → x ≤ max f
+  min∞[t]≤x : ∀ ⊤ {n} (t : Table ℕ∞ n) {x} → ⊤ ≤∞ x ⊎ Any (_≤∞ x) t → min∞ ⊤ t ≤∞ x
+  min∞[t]≤x ⊤ t (inj₁ ⊤≤x) = foldr-⊎presʳ (_≤∞ _)  o≤∞m⇒n⊓o≤∞m ⊤≤x t
+  min∞[t]≤x ⊤ t (inj₂ t≤x) = foldr-⊎pres (_≤∞ _) n≤∞m⊎o≤∞m⇒n⊓o≤∞m ⊤ t≤x
 
-  --postulate m≤n⇒maxₘ≤maxₙ  : ∀ {m n}{f : Fin m → ℕ}{g : Fin n → ℕ}(m≤n : m ≤ n) → (∀ i → f i ≤ g (inject≤ i m≤n)) → max f ≤ max g
-  --postulate min∞-monotone : ∀ {n f g} → (∀ i → f i ≤∞ g i) → min∞ {n} f ≤∞ min∞ {n} g
-  --postulate min∞-dec : ∀ {n} f i → min∞ {n} f ≤∞ f i
-  --postulate min∞-equiv : ∀ {n g h} → (∀ i → g i ≡ h i) → min∞ {n} g ≡ min∞ {n} h
--}
+  min∞[s]≤min∞[t] : ∀ ⊤₁ {⊤₂} {m n} {s : Table ℕ∞ m} {t : Table ℕ∞ n} → ⊤₁ ≤∞ ⊤₂ ⊎ Any (_≤∞ ⊤₂) s → All (λ y → ⊤₁ ≤∞ y ⊎ Any (_≤∞ y) s) t → min∞ ⊤₁ s ≤∞ min∞ ⊤₂ t
+  min∞[s]≤min∞[t] ⊤₁ {n = zero}  v all = min∞[t]≤x ⊤₁ _ v
+  min∞[s]≤min∞[t] ⊤₁ {n = suc m} v all = m≤∞n×m≤∞o⇒m≤∞n⊓o
+                  (min∞[t]≤x ⊤₁ _ (all fzero))
+                  (min∞[s]≤min∞[t] ⊤₁ v (all ∘ fsuc))

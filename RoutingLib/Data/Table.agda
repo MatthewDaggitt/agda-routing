@@ -8,6 +8,8 @@ open import Data.Vec as Vec using (Vec)
 open import Function using (_∘_)
 open import Algebra.FunctionProperties using (Op₂)
 
+open import RoutingLib.Data.NatInf using (ℕ∞) renaming (_⊓_ to _⊓∞_)
+
 module RoutingLib.Data.Table where
 
   Table : ∀ {a} → Set a → ℕ → Set a
@@ -63,3 +65,9 @@ module RoutingLib.Data.Table where
   
   min⁺ : ∀ {n} → Table ℕ (suc n) → ℕ
   min⁺ t = foldr⁺ _⊓_ t
+
+  min∞ : ∀ {n} → ℕ∞ → Table ℕ∞ n → ℕ∞
+  min∞ ⊤ t = foldr _⊓∞_ ⊤ t
+  
+  min∞⁺ : ∀ {n} → Table ℕ∞ (suc n) → ℕ∞
+  min∞⁺ t = foldr⁺ _⊓∞_ t

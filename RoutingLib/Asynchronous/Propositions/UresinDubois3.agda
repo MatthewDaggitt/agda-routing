@@ -32,9 +32,9 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3 {a ℓ n}
                (≼-reflexive : ∀ {i} → _≈ᵢ_ {i} ⇒ _≼_ {i})
                (≼-antisym : ∀ {i} → Antisymmetric (_≈ᵢ_ {i}) (_≼_ {i}))
                (≼-trans : ∀ {i} → Transitive (_≼_ {i}))
-               (closed : ∀ {x} → x ∈ D₀ → f x ∈ D₀)
+               (closed : ∀ x → x ∈ D₀ → f x ∈ D₀)
                (f-monotone : ∀ {x y} → x ∈ D₀ × y ∈ D₀ → (∀ i → x i ≼ y i) → ∀ i → f x i ≼ f y i)
-               (iter-dec : ∀ K → ∀ i → iter x₀ (suc K) i ≼ iter x₀ K i)
+               (iter-dec : ∀ K i → iter x₀ (suc K) i ≼ iter x₀ K i)
                (iter-converge : ∃ λ T → (∀ t → iter x₀ T ≈ iter x₀ (T + t)) ×
                                 (∀ {t} → t < T → iter x₀ t ≉ iter x₀ (suc t)))
     where
@@ -81,13 +81,16 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3 {a ℓ n}
 
     closed-trans : ∀ K → iter x₀ K ∈ D₀
     closed-trans zero    i = x₀∈D₀ i
-    closed-trans (suc K) i = closed (closed-trans K) i
+    closed-trans (suc K) i = closed (iter x₀ K) (closed-trans K) i
     
     iter-decreasing : ∀ {k t} → k ≤ t → iter x₀ t ⊴ iter x₀ k
     iter-decreasing {.0} {zero} z≤n = ⊴-refl
     iter-decreasing {k} {suc t} k≤t with k ≟ suc t
     ... | yes refl = ⊴-refl
     ... | no  k≢st = ⊴-trans (iter-dec t) (iter-decreasing {k} {t} (pred-mono (≤+≢⇒< k≤t k≢st)))
+
+    x₀∈D0 : x₀ ∈ D 0
+    x₀∈D0 i = (iter-decreasing {0} {T} z≤n i , ≼-refl) , x₀∈D₀ i
 
     iterK∉DsK : ∀ {K} → K < T → iter x₀ K ∉ D (suc K)
     iterK∉DsK {K} K<T iterK∈DsK with proj₂ iter-converge
@@ -124,7 +127,7 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3 {a ℓ n}
     f-monotonic K {t} t∈DK i = (≼-trans (≼-reflexive (ξ≈fξ i))
               (f-monotone (closed-trans T , t∈D₀) ξ⊴t i) ,
               f-monotone (t∈D₀ , closed-trans K) t⊴iterK i) ,
-              closed t∈D₀ i
+              closed t t∈D₀ i
               where
               t∈D₀ : t ∈ D₀
               t∈D₀ j = proj₂ (t∈DK j)

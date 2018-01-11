@@ -84,15 +84,15 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a}{ℓ}{n}{S : Fin n → 
       
 
     τK≤k⇒xₖ∈DK {suc k} (acc rs) (suc K) i τ≤sk | no i∉α | yes τ≡sk = contradiction (subst (i ∈ₛ_) (cong α τ≡sk) (nextActive-active (φ (suc K)) i)) i∉α
-    τK≤k⇒xₖ∈DK {suc k} (acc rs) (suc K) i τ≤sk | yes i∈α = f-monotonic K rec i
+    τK≤k⇒xₖ∈DK {suc k} (acc rs) (suc K) i τ≤sk | yes i∈α = f-monotonic K async∈DK i
                where
                accβ : ∀ j → Acc _<_ (β (suc k) i j)
                accβ j = (rs (β (suc k) i j) (s≤s (causality k i j)))
                
-               rec : ∀ j → async-iter 𝕤 (accβ j) x₀ j ∈ᵤ D K j
-               rec j = τK≤k⇒xₖ∈DK (accβ j) K j (φsK≤sk⇒τK≤βsK k K i j (≤-trans (φ≤τ (suc K) i) τ≤sk))
+               async∈DK : ∀ j → async-iter 𝕤 (accβ j) x₀ j ∈ᵤ D K j
+               async∈DK j = τK≤k⇒xₖ∈DK (accβ j) K j (φsK≤sk⇒τK≤βsK k K i j (≤-trans (φ≤τ (suc K) i) τ≤sk))
     τK≤k⇒xₖ∈DK {suc k} (acc rs) zero    i τ≤sk | yes i∈α with T ≟ 0
-    ... | no  T≢0 = proj₁ (D-decreasing 0 (≤+≢⇒< z≤n (T≢0 ∘ ≡sym)))
+    ... | no  T≢0 = proj₁ (D-decreasing (≤+≢⇒< z≤n (T≢0 ∘ ≡sym)))
           (f (λ j → async-iter 𝕤 (rs (β (suc k) i j) (s≤s (causality k i j))) x₀ j) )
           (f-monotonic 0 (λ j → τK≤k⇒xₖ∈DK (rs (β (suc k) i j) (s≤s (causality k i j))) 0 j z≤n)) i
     ... | yes T≡0 = D-subst 0 {x = ξ}

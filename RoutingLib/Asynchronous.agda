@@ -51,17 +51,26 @@ module RoutingLib.Asynchronous where
     MPred : Set (lsuc a)
     MPred = ∀ i → Pred (Setoid.Carrier (S i)) a
 
+    MRel : Set (lsuc a)
+    MRel = ∀ {i} → Rel (Setoid.Carrier (S i)) a
+
     _∈_ : M → MPred → Set a
     t ∈ P = ∀ i → t i ∈ᵤ P i
 
+    _∉_ : M → MPred → Set a
+    t ∉ P = ¬ (t ∈ P)
+
     _⊆_ : MPred → MPred → Set a
-    P ⊆ Q = ∀ t → t ∈ P → t ∈ Q
+    P ⊆ Q = ∀ t → t ∈ P → t ∈ Q 
 
     _⊂_ : MPred → MPred → Set a
     P ⊂ Q = P ⊆ Q × ∃ λ t → t ∈ Q × ¬ (t ∈ P)
 
     _≈_ : Rel M ℓ
-    t ≈ s = ∀ i → t i ≈ᵢ s i
+    s ≈ t = ∀ i → s i ≈ᵢ t i
+
+    _≉_ : Rel M ℓ
+    s ≉ t = ¬ (s ≈ t)
     
     ｛_｝ : M → Pred M ℓ
     ｛ t ｝ = t ≈_

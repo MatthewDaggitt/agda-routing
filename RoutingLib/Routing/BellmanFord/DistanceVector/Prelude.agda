@@ -20,7 +20,7 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Prelude
   open SufficientConditions sc public
 
   open import RoutingLib.Routing.BellmanFord 𝓡𝓟 public
-  import RoutingLib.Routing.BellmanFord.Properties 𝓡𝓟 as P
+  open import RoutingLib.Routing.BellmanFord.Properties 𝓡𝓟 as P public using (Iᵢⱼ≡0#)
   open import Data.List.Any.Membership S using (_∈_)
 
   n : ℕ

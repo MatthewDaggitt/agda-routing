@@ -80,6 +80,9 @@ module RoutingLib.Asynchronous where
                 x₀ j) i
       ... | no  _ = async-iter (rs t ≤-refl) x₀ i
 
+      δ : ℕ → M → M
+      δ t = async-iter (<-wf t)
+    
      -- β (suc t) i j < suc t
      -- causality :
 
@@ -103,8 +106,7 @@ module RoutingLib.Asynchronous where
     ... | no  i∉αₜ = δ' 𝕤 (tAcc t ≤-refl) X i
     ... | yes i∈αₜ = σ (λ k → δ' 𝕤 (tAcc (β 𝕤 (suc t) i k) (causality 𝕤 t i k)) X k) i
 
-    δ : Schedule n → ℕ → M → M
-    δ 𝕤 t = δ' 𝕤 (<-wf t)
+    
 
     -- The synchronous state function
     σ^ : ℕ → M → M

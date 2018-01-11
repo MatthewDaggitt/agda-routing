@@ -40,10 +40,8 @@ module RoutingLib.Routing.BellmanFord
 
   -- A possible parallelisation of the algorithm where each 
   -- node is in charge of its own routes
-  σ∥ : Parallelisation ℝ𝕋ₛ n
-  σ∥ = record
-    { σ = σ
-    ; σ-cong = σ-cong
-    }
+  σ∥ : Parallelisation (λ _ → ℝ𝕋ₛ)
+  σ∥ = record { f = σ }
 
-  open Parallelisation σ∥ using (δ; δ'; σ^) public
+  open Parallelisation σ∥ using (δ)
+    renaming (async-iter to δ') public

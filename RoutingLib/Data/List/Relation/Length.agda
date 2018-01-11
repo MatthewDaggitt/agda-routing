@@ -14,6 +14,8 @@ module RoutingLib.Data.List.Relation.Length where
   ≤ₗ-decTotalPreorder : ∀ {a} (A : Set a) → DecTotalPreorder a ℓ₀ ℓ₀
   ≤ₗ-decTotalPreorder A = decTotalPreorder ≤-decTotalPreorder (length {A = A})
 
+  --<ₗ-strict
+
   module _ {a} {A : Set a} where
 
     open DecTotalPreorder (≤ₗ-decTotalPreorder A) public
@@ -26,8 +28,5 @@ module RoutingLib.Data.List.Relation.Length where
       ; isPreorder      to ≤ₗ-isPreorder
       ; isTotalPreorder to ≤ₗ-isTotalPreorder
       )
-
-  test : 1 ∷ 2 ∷ [] ≤ₗ 3 ∷ 4 ∷ 5 ∷ []
-  test = {!!}
 
   

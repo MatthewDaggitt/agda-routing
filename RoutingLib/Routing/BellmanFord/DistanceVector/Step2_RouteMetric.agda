@@ -1,17 +1,17 @@
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary using (_Preserves₂_⟶_⟶_)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; module ≡-Reasoning)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst₂; module ≡-Reasoning)
 open import Data.List using (List; _∷_)
 open import Data.List.Any.Membership.Propositional using (_∈_)
-open import Data.Nat using (ℕ; suc; zero; z≤n; s≤s; _⊔_) renaming (_≤_ to _≤ℕ_)
-open import Data.Nat.Properties using (m≤m⊔n; n≤m⊔n; <⇒≢; ⊔-comm; ⊔-identityʳ; ⊔-mono-≤; module ≤-Reasoning) renaming (≤-reflexive to ≤ℕ-reflexive; ≤-refl to ≤ℕ-refl; ≤-trans to ≤ℕ-trans; ≤-antisym to ≤ℕ-antisym; ≤-decTotalOrder to ≤ℕ-decTotalOrder)
+open import Data.Nat using (ℕ; suc; zero; z≤n; s≤s; _⊔_) renaming (_≤_ to _≤ℕ_; _<_ to _<ℕ_)
+open import Data.Nat.Properties using (m≤m⊔n; n≤m⊔n; <⇒≢; ⊔-comm; ⊔-identityʳ; ⊔-mono-≤; ⊔-mono-<; module ≤-Reasoning) renaming (≤-reflexive to ≤ℕ-reflexive; ≤-refl to ≤ℕ-refl; ≤-trans to ≤ℕ-trans; ≤-antisym to ≤ℕ-antisym; ≤-decTotalOrder to ≤ℕ-decTotalOrder)
 open import Data.Product using (∃)
 
 open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique)
 open import RoutingLib.Data.List.Sorting using (Sorted)
 open import RoutingLib.Data.Matrix using (Matrix; zipWith; max⁺)
-open import RoutingLib.Data.Nat.Properties using (ℕₛ; m≤n⇒m≤n⊔o)
+open import RoutingLib.Data.Nat.Properties using (ℕₛ; m≤n⇒m≤n⊔o; n≤m⇒m⊔n≡m)
 open import RoutingLib.Function.Distance using (IsUltrametric; MaxTriangleIneq)
 
 open import RoutingLib.Routing.Definitions using (RoutingProblem; RoutingAlgebra)
@@ -30,16 +30,14 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric
   open Step1 𝓡𝓟 𝓢𝓒 using
     ( h
     ; h-resp-≈
+    ; h-incr
+    ; h-resp-≤
+    ; h-resp-≤₂
     ; 1≤h
-    ; h-image
-    ; h-image!
-    ; h-image-complete
-    ; h-image-sound
-    ; h-image↗
     )
 
   abstract
-  
+
     ----------------------------
     -- distance between two routes
     
@@ -83,97 +81,51 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric
       h x ⊔ h y     ≡⟨ sym (⊔-identityʳ _) ⟩
       h x ⊔ h y ⊔ 0 ∎     
       where open ≤-Reasoning
-
-
-
-
-
-    -- We can therefore reconstruct the image of d
-
-    postulate d-image : List ℕ
-    --d-image = 0 ∷ h-image
     
-    postulate d-image! : Unique d-image
-    --d-image! = {!!}
-
-    postulate d-image-complete : ∀ x y → d x y ∈ d-image
-    --d-image-complete x = {!!}
-
-    postulate d-image-sound : ∀ {i} → i ∈ d-image → ∃ λ x → h x ≡ i
-    --d-image-sound {i} i∈betw = {!!}
-
-    postulate d-image↗ : Sorted ≤ℕ-decTotalOrder d-image
-    --d-image↗ = {!!}
+    strIncr-lemma : ∀ f {x y} → x ≉ 0# → y ≈ 0# → h (f ▷ x) ⊔ h (f ▷ y) <ℕ h x ⊔ h y
+    strIncr-lemma f {x} {y} x≉0 y≈0 = begin
+      suc (h (f ▷ x) ⊔ h (f ▷ y))  ≡⟨ cong (λ v → suc (h (f ▷ x) ⊔ v)) (h-resp-≈ (▷-cong f y≈0)) ⟩
+      suc (h (f ▷ x) ⊔ h (f ▷ 0#)) ≡⟨ cong (λ v → suc (h (f ▷ x) ⊔ v)) (h-resp-≈ (0#-an-▷ f)) ⟩
+      suc (h (f ▷ x) ⊔ h 0#)       ≡⟨ cong suc (n≤m⇒m⊔n≡m (h-resp-≤ (0#-idₗ-⊕ _))) ⟩
+      suc (h (f ▷ x))              ≤⟨ h-incr f x≉0 ⟩
+      h x                          ≡⟨ sym (n≤m⇒m⊔n≡m (h-resp-≤ (0#-idₗ-⊕ _))) ⟩
+      h x            ⊔ h 0#        ≡⟨ cong (h x ⊔_) (h-resp-≈ (≈-sym y≈0)) ⟩
+      h x            ⊔ h y         ∎
+      where open ≤-Reasoning
     
+    d-strContr : ∀ f {x y} → x ≉ y → d (f ▷ x) (f ▷ y) <ℕ d x y
+    d-strContr f {x} {y} x≉y with x ≟ y | f ▷ x ≟ f ▷ y
+    ... | yes x≈y | _           = contradiction x≈y x≉y
+    ... | no  _   | yes e▷x≈e▷y = m≤n⇒m≤n⊔o (h y) (1≤h x)
+    ... | no  _   | no  _       with x ≟ 0# | y ≟ 0#
+    ...   | yes x≈0 | yes y≈0 = contradiction (≈-trans x≈0 (≈-sym y≈0)) x≉y
+    ...   | yes x≈0 | no  y≉0 = subst₂ _<ℕ_ (⊔-comm (h (f ▷ y)) (h (f ▷ x))) (⊔-comm (h y) (h x)) (strIncr-lemma f y≉0 x≈0)
+    ...   | no  x≉0 | yes y≈0 = strIncr-lemma f x≉0 y≈0
+    ...   | no  x≉0 | no  y≉0 = ⊔-mono-< (h-incr f x≉0) (h-incr f y≉0)
 
-{-
-    d-strContr : ∀ {x y} e → e ▷ x ≉ e ▷ y → d (e ▷ x) (e ▷ y) <ℕ d x y
-    d-strContr {x} {y} e e▷x≉e▷y with x ≟ y | e ▷ x ≟ e ▷ y
-    ... | yes x≈y | _           = contradiction {!!} e▷x≉e▷y
-    ... | no  _   | yes e▷x≈e▷y = contradiction e▷x≈e▷y e▷x≉e▷y
-    ... | no  _   | no  _       = {!⊔-mono-< ? ?!}
--}
+    d-mono : ∀ {x y a b} → y ≉ b → x ≤ y → a ≤ b → d x a  ≤ℕ d y b
+    d-mono {x} {y} {a} {b} y≉b x≤y a≤b with x ≟ a | y ≟ b
+    ... | yes _ | _       = z≤n
+    ... | no  _ | yes y≈b = contradiction y≈b y≉b
+    ... | no  _ | no  _   = ⊔-mono-≤ (h-resp-≤₂ x≤y) (h-resp-≤₂ a≤b)
 
-{-
-    d≤H : ∀ x y → d x y ≤ℕ H
-    d≤H x y with x ≟ y
-    ... | yes _ = z≤n
-    ... | no  _ = {!!} --invert<dₘₐₓ x y
 
-    x≉y⇒d≡invert : ∀ {x y} → x ≉ y → d x y ≡ h x ⊔ h y
-    x≉y⇒d≡invert {x} {y} x≉y with x ≟ y
-    ... | yes x≈y = contradiction x≈y x≉y
-    ... | no  _   = refl
-
-    d≢1 : ∀ x y → d x y ≢ 1
-    d≢1 x y d≡1 with x ≟ y
-    ... | yes x≈y = contradiction d≡1 λ()
-    ... | no  x≉y = contradiction {!!} x≉y --(invert≡1⇒x≈y d≡1) x≉y
-
-    Dₛᵤₚ∸hx≤d : ∀ {x y} → x ≉ y → Dₛᵤₚ ∸ h x ≤ℕ d x y
-    Dₛᵤₚ∸hx≤d {x} {y} x≉y with x ≟ y
-    ... | yes x≈y = contradiction x≈y x≉y
-    ... | no  _   = m≤m⊔n (Dₛᵤₚ ∸ h x) (Dₛᵤₚ ∸ h y)
-
-    Dₛᵤₚ∸hy≤d : ∀ {x y} → x ≉ y → Dₛᵤₚ ∸ h y ≤ℕ d x y
-    Dₛᵤₚ∸hy≤d {x} {y} x≉y with x ≟ y
-    ... | yes x≈y = contradiction x≈y x≉y
-    ... | no  _   = n≤m⊔n (Dₛᵤₚ ∸ h x) (Dₛᵤₚ ∸ h y)
-    
-    d≡Dₛᵤₚ∸hx⇒hx≤hy : ∀ {x y} → d x y ≡ Dₛᵤₚ ∸ h x → h x ≤ℕ h y
-    d≡Dₛᵤₚ∸hx⇒hx≤hy {x} {y} d≡dₘₐₓ∸hx with x ≟ y
-    ... | yes x≈y = contradiction (trans d≡dₘₐₓ∸hx (+-∸-assoc 1 h≤hₘₐₓ)) λ()
-    ... | no  x≉y = o∸n≤o∸m∧m≤o⇒m≤n (m⊔n≡m⇒n≤m d≡dₘₐₓ∸hx) h≤Dₛᵤₚ
-
-    d≡Dₛᵤₚ∸hx : ∀ {x y} → h x <ℕ h y → d x y ≡ Dₛᵤₚ ∸ h x
-    d≡Dₛᵤₚ∸hx {x} {y} hx<hy with x ≟ y
-    ... | yes x≈y = contradiction (h-resp-≈ x≈y) (<⇒≢ hx<hy)
-    ... | no  x≉y = n≤m⇒m⊔n≡m (∸-mono (≤ℕ-refl {Dₛᵤₚ}) (<⇒≤ hx<hy))
-
-    d≡Dₛᵤₚ∸hy : ∀ {x y} → h y <ℕ h x → d x y ≡ Dₛᵤₚ ∸ h y
-    d≡Dₛᵤₚ∸hy {x} {y} hy<hx with x ≟ y
-    ... | yes x≈y = contradiction (h-resp-≈ (≈-sym x≈y)) (<⇒≢ hy<hx)
-    ... | no  x≉y = m≤n⇒m⊔n≡n (∸-mono (≤ℕ-refl {Dₛᵤₚ}) (<⇒≤ hy<hx))
-    
-    dxy=hx⊎hy : ∀ {x y} → x ≉ y → (d x y ≡ Dₛᵤₚ ∸ h x) ⊎ (d x y ≡ Dₛᵤₚ ∸ h y)
-    dxy=hx⊎hy {x} {y} x≉y with x ≟ y
-    ... | yes x≈y = contradiction x≈y x≉y
-    ... | no  _   = ⊔-sel (Dₛᵤₚ ∸ h x) (Dₛᵤₚ ∸ h y)
-
-    x≉y⇒0<d : ∀ {x y} → x ≉ y → 0 <ℕ d x y
-    x≉y⇒0<d {x} {y} x≉y with x ≟ y
-    ... | yes x≈y = contradiction x≈y x≉y
-    ... | no  _   = ⊔-mono-≤ 0<Dₛᵤₚ∸h 0<Dₛᵤₚ∸h
-    
-    0<d⇒x≉y : ∀ {x y} → 0 <ℕ d x y → x ≉ y
-    0<d⇒x≉y {x} {y} 0<d with x ≟ y 
-    ... | yes x≈yⱼ = contradiction 0<d 1+n≰n 
-    ... | no  x≉y = x≉y
-
-    
-
-    
+    {-
+    d-mono {u} {v} {x} {y} x≉y u≤x v≤y with u ≟ v | x ≟ y
+    ... | yes _ | _       = z≤n
+    ... | no  _ | yes x≈y = contradiction x≈y x≉y  --contradiction u≈v u≉v
+    ... | no  _ | no  _   = ⊔-mono-≤ (h-resp-≤ {!!}) (h-resp-≤ {!!}) --
     -}
+    
+    d-isUltrametric : IsUltrametric S d
+    d-isUltrametric = record 
+      { eq⇒0        = x≈y⇒d≡0 
+      ; 0⇒eq        = d≡0⇒x≈y 
+      ; sym         = d-sym 
+      ; maxTriangle = d-maxTriIneq 
+      }
+      
+
 {-
     -----------------
     -- Ultrametric --

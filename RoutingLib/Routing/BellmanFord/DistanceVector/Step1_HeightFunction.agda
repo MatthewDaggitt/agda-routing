@@ -1,5 +1,5 @@
 open import Data.Nat using (ℕ; suc; z≤n; s≤s; _∸_) renaming (_≤_ to _≤ℕ_; _≥_ to _≥ℕ_; _<_ to _<ℕ_)
-open import Data.Nat.Properties using (<⇒≤; n∸m≤n) renaming (≤-reflexive to ≤ℕ-reflexive; ≤-trans to ≤ℕ-trans; ≤-decTotalOrder to ≤ℕ-decTotalOrder)
+open import Data.Nat.Properties using (<⇒≤; n∸m≤n) renaming (≤-reflexive to ≤ℕ-reflexive; ≤-trans to ≤ℕ-trans; ≤-antisym to ≤ℕ-antisym; ≤-decTotalOrder to ≤ℕ-decTotalOrder)
 open import Data.List using (List; length)
 open import Data.Product using (∃; _,_)
 open import Relation.Binary using (_Preserves_⟶_)
@@ -58,6 +58,8 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step1_HeightFunction
     ... | yes u≈v = ≤ℕ-reflexive (h-resp-≈ (≈-sym u≈v))
     ... | no  u≉v = <⇒≤ (h-resp-< (u≤v , u≉v))
 
+    postulate h-resp-≤₂ : h Preserves _≤_ ⟶ _≤ℕ_
+    
     ≤-resp-h : ∀ {u v} → h u ≤ℕ h v → v ≤ u
     ≤-resp-h {u} {v} h[u]≤h[v] = ↗-indexOf-revMono-≤ ↗-↗routes (∈-↗routes v) (∈-↗routes u) (∸-cancelˡ-≤ (indexOf[xs]≤|xs| S _) h[u]≤h[v])
 
@@ -70,13 +72,15 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step1_HeightFunction
 
     1≤H : 1 ≤ℕ H
     1≤H = ≤ℕ-trans (1≤h 0#) (h≤H 0#)
+
+    postulate h0≡1 : h 0# ≡ 1
     
     h-incr : ∀ e {x} → x ≉ 0# → h (e ▷ x) <ℕ h x
     h-incr e x≉0 = h-resp-< (⊕-almost-strictly-absorbs-▷ e x≉0)
 
 
 
-
+{-
     -- Furthermore for any valid height, we can retrieve the route with that height
 
     h⁻¹ : ∀ {i} → 1 ≤ℕ i → i ≤ℕ H → Route
@@ -107,3 +111,4 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step1_HeightFunction
 
     h-image↗ : Sortedℕ h-image
     h-image↗ = ↗-between 1 (suc H)
+-}

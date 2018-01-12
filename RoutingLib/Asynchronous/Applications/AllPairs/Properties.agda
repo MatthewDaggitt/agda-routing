@@ -8,6 +8,7 @@ open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.NatInf
 open import RoutingLib.Data.NatInf.Properties
+open import RoutingLib.Data.Table.Properties using (min∞[s]≡min∞[t])
 
 module RoutingLib.Asynchronous.Applications.AllPairs.Properties (n : ℕ) where
 
@@ -40,6 +41,9 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Properties (n : ℕ) where
   transₘ : Transitive _≡ₘ_
   transₘ x≡y y≡z i = transᵣ (x≡y i) (y≡z i)
 
+  f-cong : ∀ {x y} → x ≡ₘ y → f x ≡ₘ f y
+  f-cong {x} {y} x≡y i j = min∞[s]≡min∞[t] (x≡y i j) (path-cost-equiv x≡y i j)
+  
   ≡ᵣ⇒≼ : ∀ {x y} → x ≡ᵣ y → x ≼ y
   ≡ᵣ⇒≼ x≡y i = ≤-reflexive (x≡y i)
 
@@ -64,8 +68,11 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Properties (n : ℕ) where
   ... | yes p = contradiction (p i) x≢y
   ... | no ¬p = ¬p
 
-  ≢ₘ-witness : ∀ {g h} → g ≢ₘ h → ∃ λ i → ∃ λ j → g i j ≢ h i j
-  ≢ₘ-witness {g} {h} g≢h with all? (λ i → g i ≟ᵣ h i)
+  ≢ₘ-witness-≢ᵣ : ∀ {g h} → g ≢ₘ h → ∃ λ i → g i ≢ᵣ h i
+  ≢ₘ-witness-≢ᵣ {g} {h} g≢h with all? (λ i → g i ≟ᵣ h i)
   ... | yes all = contradiction all g≢h
-  ... | no ¬all with ¬∀⟶∃¬ n (λ i → g i ≡ᵣ h i) (λ i → g i ≟ᵣ h i) ¬all
+  ... | no ¬all = ¬∀⟶∃¬ n (λ i → g i ≡ᵣ h i) (λ i → g i ≟ᵣ h i) ¬all
+
+  ≢ₘ-witness : ∀ {g h} → g ≢ₘ h → ∃ λ i → ∃ λ j → g i j ≢ h i j
+  ≢ₘ-witness {g} {h} g≢h with ≢ₘ-witness-≢ᵣ g≢h
   ... | i , gᵢ≢hᵢ = i , ≢ᵣ-witness gᵢ≢hᵢ

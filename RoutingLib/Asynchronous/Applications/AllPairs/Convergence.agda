@@ -1,8 +1,14 @@
 open import Data.Fin using (Fin)
-open import Data.Nat using (ℕ; zero; suc) renaming (_+_ to _+ℕ_; _<_ to _<ℕ_)
+open import Data.Nat using (ℕ; zero; suc) renaming (_+_ to _+ℕ_; _<_ to _<ℕ_; _≤_ to _≤ℕ_)
+open import Data.Nat.Properties using (1+n≰n) renaming (+-identityʳ to +-idʳℕ; +-suc to +ℕ-suc; ≤-reflexive to ≤ℕ-reflexive; ≤-trans to ≤ℕ-trans; n≤1+n to n≤ℕ1+n)
 open import Data.Sum using (inj₁; inj₂; _⊎_)
-open import Data.Product using (_×_; ∃; _,_; proj₁; Σ)
+open import Data.Product using (_×_; ∃; _,_; proj₁; proj₂; Σ)
+open import Function using (_∘_)
+open import Induction.Nat using (<-well-founded)
+open import Induction.WellFounded using (Acc; acc)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; subst; sym; trans; cong)
+open import Relation.Nullary using (yes; no)
+open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (U; U-Universal)
 
 open import RoutingLib.Asynchronous using (Parallelisation)
@@ -50,9 +56,70 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
            ((λ l → U-Universal (iter x₀ (suc K))) , λ l → U-Universal (iter x₀ K))
            (λ j → iter-dec K j) i
 
+  iter-fixed : ∀ t → iter x₀ (suc t) ≡ₘ iter x₀ t → ∀ K → iter x₀ t ≡ₘ iter x₀ (t +ℕ K)
+  iter-fixed t iter≡ zero i j = cong (λ x → iter x₀ x i j) (sym (+-idʳℕ t))
+  iter-fixed t iter≡ (suc K) i j = trans (sym (iter≡ i j)) (subst (iter x₀ (suc t) i j ≡_)
+             (cong (λ x → iter x₀ x i j) (sym (+ℕ-suc t K)))
+             (iter-fixed (suc t) (f-cong iter≡) K i j)) 
+
+  postulate distance : ℕ → ℕ
+
+  postulate iter≢⇒dis< : ∀ K → iter x₀ (suc K) ≢ₘ iter x₀ K → distance (suc K) <ℕ distance K
+
+  iter-fixed-point : ∀ {t} → Acc _<ℕ_ (distance t) → ∃ λ T → ∀ K → iter x₀ T ≡ₘ iter x₀ (T +ℕ K)
+  iter-fixed-point {t} (acc rs) with iter x₀ (suc t) ≟ₘ iter x₀ t
+  ... | yes iter≡ = t , iter-fixed t iter≡
+  ... | no  iter≢ = iter-fixed-point (rs (distance (suc t)) (iter≢⇒dis< t iter≢))
+
+  iter-fixed-point-inc : ∀ {t} → (accₜ : Acc _<ℕ_ (distance t)) →
+                           t ≤ℕ proj₁ (iter-fixed-point accₜ)
+  iter-fixed-point-inc {t} (acc rs) with iter x₀ (suc t) ≟ₘ iter x₀ t
+  ... | yes iter≡ = ≤ℕ-reflexive refl
+  ... | no  iter≢ = ≤ℕ-trans (n≤ℕ1+n t) (iter-fixed-point-inc
+                    (rs (distance (suc t)) (iter≢⇒dis< t iter≢)))
+
+  iter-fixed-point-acc-irrelevant : ∀ {t} (a b : Acc _<ℕ_ (distance t)) →
+                                 proj₁ (iter-fixed-point a) ≡ proj₁ (iter-fixed-point b)
+  iter-fixed-point-acc-irrelevant {t} (acc a) (acc b) with iter x₀ (suc t) ≟ₘ iter x₀ t
+  ... | yes iter≡ = refl
+  ... | no  iter≢  = iter-fixed-point-acc-irrelevant
+                       (a (distance (suc t)) (iter≢⇒dis< t iter≢))
+                       (b (distance (suc t)) (iter≢⇒dis< t iter≢))
+  
+  iter-fixed-point-mono : ∀ {t} → (accₜ : Acc _<ℕ_ (distance t)) →
+                       proj₁ (iter-fixed-point accₜ) ≤ℕ
+                       proj₁ (iter-fixed-point (<-well-founded (distance (suc t))))
+  iter-fixed-point-mono {t} (acc rs) with iter x₀ (suc t) ≟ₘ iter x₀ t
+  ... | yes iter≡ = ≤ℕ-trans (n≤ℕ1+n t) (iter-fixed-point-inc (<-well-founded (distance (suc t))))
+  ... | no  iter≢ = ≤ℕ-reflexive (iter-fixed-point-acc-irrelevant
+                (rs (distance (suc t)) (iter≢⇒dis< t iter≢))
+                (<-well-founded (distance (suc t))))
+
+  iter-fixed-first : ∀ t → proj₁ (iter-fixed-point (<-well-founded (distance 0))) ≤ℕ
+                            proj₁ (iter-fixed-point (<-well-founded (distance t)))
+  iter-fixed-first zero = ≤ℕ-reflexive refl
+  iter-fixed-first (suc t) = ≤ℕ-trans (iter-fixed-first t)
+                     (iter-fixed-point-mono (<-well-founded (distance t)))
+
+  iter≡⇒dis≡t : ∀ t → iter x₀ (suc t) ≡ₘ iter x₀ t →
+                   proj₁ (iter-fixed-point (<-well-founded (distance t))) ≡ t
+  iter≡⇒dis≡t t iter≡ with iter x₀ (suc t) ≟ₘ iter x₀ t
+  ... | yes _    = refl
+  ... | no iter≢ = contradiction iter≡ iter≢
+
+  t<T⇒iter≢ : ∀ {t} → t <ℕ proj₁ (iter-fixed-point (<-well-founded (distance 0))) →
+               iter x₀ t ≢ₘ iter x₀ (suc t)
+  t<T⇒iter≢ {t} t<T with iter x₀ (suc t) ≟ₘ iter x₀ t
+  ... | yes iter≡ = contradiction (≤ℕ-trans t<T
+        (subst ((proj₁ (iter-fixed-point (<-well-founded (distance 0)))) ≤ℕ_)
+        (iter≡⇒dis≡t t iter≡) (iter-fixed-first t))) 1+n≰n
+  ... | no iter≢ = iter≢ ∘ symₘ
+
   iter-converge : ∃ λ T → (∀ t → iter x₀ T ≈ iter x₀ (T +ℕ t)) ×
                                 (∀ {t} → t <ℕ T → iter x₀ t ≉ iter x₀ (suc t))
-  iter-converge = {!!}
+  iter-converge = proj₁ (iter-fixed-point (<-well-founded (distance 0))) ,
+                  proj₂ (iter-fixed-point (<-well-founded (distance 0))) ,
+                  t<T⇒iter≢
 
   open proof x₀ D₀ x₀∈D₀ D₀-subst _≼_ ≼-refl ≼-reflexive ≼-antisym ≼-trans closed f-monotone iter-dec iter-converge hiding (ξ)
 

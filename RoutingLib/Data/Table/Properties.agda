@@ -130,3 +130,5 @@ module RoutingLib.Data.Table.Properties where
   min∞[s]≤min∞[t] ⊤₁ {n = suc m} v all = m≤∞n×m≤∞o⇒m≤∞n⊓o
                   (min∞[t]≤x ⊤₁ _ (all fzero))
                   (min∞[s]≤min∞[t] ⊤₁ v (all ∘ fsuc))
+
+  postulate min∞[s]≡min∞[t] : ∀ {n ⊤₁ ⊤₂} {s t : Table ℕ∞ n} → ⊤₁ ≡ ⊤₂ → (∀ i → s i ≡ t i) → min∞ ⊤₁ s ≡ min∞ ⊤₂ t

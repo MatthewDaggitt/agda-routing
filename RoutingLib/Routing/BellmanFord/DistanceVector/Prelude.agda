@@ -81,20 +81,3 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Prelude
 
   H : ℕ
   H = length ↗routes
-
-
-  ---------------------------------------
-  -- A custom max route implementation --
-  ---------------------------------------
-
-  open import RoutingLib.Data.Matrix.Membership S using () renaming (_∈_ to _∈M_)
-
-  maxRoute : RMatrix → Route
-  maxRoute X = fold⁺ _⊕_ X
-
-  postulate maxRoute[X]∈X : ∀ X → maxRoute X ∈M X
-  --maxRoute[X]∈X = {!!}
-
-  postulate maxRoute[X]<X : ∀ X i j → maxRoute X ≤ X i j
-  
-  --maxRoute

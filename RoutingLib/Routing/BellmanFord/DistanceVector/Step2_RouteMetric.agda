@@ -1,17 +1,17 @@
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Binary using (_Preserves₂_⟶_⟶_)
+open import Relation.Binary using (_Preserves_⟶_; _Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst₂; module ≡-Reasoning)
 open import Data.List using (List; _∷_)
 open import Data.List.Any.Membership.Propositional using (_∈_)
-open import Data.Nat using (ℕ; suc; zero; z≤n; s≤s; _⊔_) renaming (_≤_ to _≤ℕ_; _<_ to _<ℕ_)
-open import Data.Nat.Properties using (m≤m⊔n; n≤m⊔n; <⇒≢; ⊔-comm; ⊔-identityʳ; ⊔-mono-≤; ⊔-mono-<; module ≤-Reasoning) renaming (≤-reflexive to ≤ℕ-reflexive; ≤-refl to ≤ℕ-refl; ≤-trans to ≤ℕ-trans; ≤-antisym to ≤ℕ-antisym; ≤-decTotalOrder to ≤ℕ-decTotalOrder)
-open import Data.Product using (∃)
+open import Data.Nat using (ℕ; suc; zero; z≤n; s≤s; _⊔_) renaming (_≤_ to _≤ℕ_; _≥_ to _≥ℕ_; _<_ to _<ℕ_)
+open import Data.Nat.Properties using (m≤m⊔n; n≤m⊔n; <⇒≢; <⇒≤; ⊔-comm; ⊔-identityʳ; ⊔-mono-≤; ⊔-mono-<; module ≤-Reasoning) renaming (≤-reflexive to ≤ℕ-reflexive; ≤-refl to ≤ℕ-refl; ≤-trans to ≤ℕ-trans; ≤-antisym to ≤ℕ-antisym; ≤-decTotalOrder to ≤ℕ-decTotalOrder)
+open import Data.Product using (∃; _,_)
 
 open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique)
 open import RoutingLib.Data.List.Sorting using (Sorted)
 open import RoutingLib.Data.Matrix using (Matrix; zipWith; max⁺)
-open import RoutingLib.Data.Nat.Properties using (ℕₛ; m≤n⇒m≤n⊔o; n≤m⇒m⊔n≡m)
+open import RoutingLib.Data.Nat.Properties using (ℕₛ; m≤n⇒m≤n⊔o; n≤m⇒m⊔n≡m; n≤m×o≤m⇒n⊔o≤m)
 open import RoutingLib.Function.Distance using (IsUltrametric; MaxTriangleIneq)
 
 open import RoutingLib.Routing.Definitions using (RoutingProblem; RoutingAlgebra)
@@ -30,13 +30,19 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric
   open Step1 𝓡𝓟 𝓢𝓒 using
     ( h
     ; h-resp-≈
-    ; h-incr
-    ; h-resp-≤
-    ; h-resp-≤₂
+    ; h-resp-<
     ; 1≤h
     )
 
   abstract
+
+    h-resp-≤ : h Preserves _≤_ ⟶ _≥ℕ_
+    h-resp-≤ {u} {v} u≤v with u ≟ v
+    ... | yes u≈v = ≤ℕ-reflexive (h-resp-≈ (≈-sym u≈v))
+    ... | no  u≉v = <⇒≤ (h-resp-< (u≤v , u≉v))
+    
+    h[fx]<h[x] : ∀ e {x} → x ≉ 0# → h (e ▷ x) <ℕ h x
+    h[fx]<h[x] e x≉0 = h-resp-< (⊕-almost-strictly-absorbs-▷ e x≉0)
 
     ----------------------------
     -- distance between two routes
@@ -87,7 +93,7 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric
       suc (h (f ▷ x) ⊔ h (f ▷ y))  ≡⟨ cong (λ v → suc (h (f ▷ x) ⊔ v)) (h-resp-≈ (▷-cong f y≈0)) ⟩
       suc (h (f ▷ x) ⊔ h (f ▷ 0#)) ≡⟨ cong (λ v → suc (h (f ▷ x) ⊔ v)) (h-resp-≈ (0#-an-▷ f)) ⟩
       suc (h (f ▷ x) ⊔ h 0#)       ≡⟨ cong suc (n≤m⇒m⊔n≡m (h-resp-≤ (0#-idₗ-⊕ _))) ⟩
-      suc (h (f ▷ x))              ≤⟨ h-incr f x≉0 ⟩
+      suc (h (f ▷ x))              ≤⟨ h[fx]<h[x] f x≉0 ⟩
       h x                          ≡⟨ sym (n≤m⇒m⊔n≡m (h-resp-≤ (0#-idₗ-⊕ _))) ⟩
       h x            ⊔ h 0#        ≡⟨ cong (h x ⊔_) (h-resp-≈ (≈-sym y≈0)) ⟩
       h x            ⊔ h y         ∎
@@ -101,21 +107,13 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric
     ...   | yes x≈0 | yes y≈0 = contradiction (≈-trans x≈0 (≈-sym y≈0)) x≉y
     ...   | yes x≈0 | no  y≉0 = subst₂ _<ℕ_ (⊔-comm (h (f ▷ y)) (h (f ▷ x))) (⊔-comm (h y) (h x)) (strIncr-lemma f y≉0 x≈0)
     ...   | no  x≉0 | yes y≈0 = strIncr-lemma f x≉0 y≈0
-    ...   | no  x≉0 | no  y≉0 = ⊔-mono-< (h-incr f x≉0) (h-incr f y≉0)
+    ...   | no  x≉0 | no  y≉0 = ⊔-mono-< (h[fx]<h[x] f x≉0) (h[fx]<h[x] f y≉0)
 
-    d-mono : ∀ {x y a b} → y ≉ b → x ≤ y → a ≤ b → d x a  ≤ℕ d y b
-    d-mono {x} {y} {a} {b} y≉b x≤y a≤b with x ≟ a | y ≟ b
+    d-mono : ∀ {x a b} → x ≤ a → x < b → d x a ≤ℕ d x b
+    d-mono {x} {a} {b} x≤a (x≤b , x≉b) with x ≟ a | x ≟ b
     ... | yes _ | _       = z≤n
-    ... | no  _ | yes y≈b = contradiction y≈b y≉b
-    ... | no  _ | no  _   = ⊔-mono-≤ (h-resp-≤₂ x≤y) (h-resp-≤₂ a≤b)
-
-
-    {-
-    d-mono {u} {v} {x} {y} x≉y u≤x v≤y with u ≟ v | x ≟ y
-    ... | yes _ | _       = z≤n
-    ... | no  _ | yes x≈y = contradiction x≈y x≉y  --contradiction u≈v u≉v
-    ... | no  _ | no  _   = ⊔-mono-≤ (h-resp-≤ {!!}) (h-resp-≤ {!!}) --
-    -}
+    ... | no  _ | yes x≈b = contradiction x≈b x≉b
+    ... | no  _ | no  _   = ≤ℕ-reflexive (trans (n≤m⇒m⊔n≡m (h-resp-≤ x≤a)) (sym (n≤m⇒m⊔n≡m (h-resp-≤ x≤b))))
     
     d-isUltrametric : IsUltrametric S d
     d-isUltrametric = record 

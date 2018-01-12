@@ -50,10 +50,8 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StateMetric
   D : RMatrix → RMatrix → ℕ
   D X Y = max⁺ (zipWith d X Y)
 
-
   abstract
   
-    
     D-cong : D Preserves₂ _≈ₘ_ ⟶ _≈ₘ_ ⟶ _≡_
     D-cong X≈Y U≈V = max⁺-cong (zipWith-cong _≈_ _≈_ _≡_ d-cong X≈Y U≈V)
     
@@ -77,8 +75,6 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StateMetric
       d (X i j) (Y i j) ⊔ d (Y i j) (Z i j) ≤⟨ ⊔-mono-≤ (d≤D X Y i j) (d≤D Y Z i j) ⟩
       D X Y ⊔ D Y Z                         ∎
       where open ℕₚ.≤-Reasoning
-
-
 
 
   -- Strictly contracting --
@@ -113,6 +109,9 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StateMetric
       σ X i j       ∎))
       where open PO-Reasoning ≤-poset
 
+    σXᵢⱼ≤Aᵢₖ▷Yₖⱼ : ∀ k → σ X i j ≤ A i k ▷ Y k j
+    σXᵢⱼ≤Aᵢₖ▷Yₖⱼ k = ≤-trans σXᵢⱼ≤σYᵢⱼ (σXᵢⱼ≤Aᵢₖ▷Xₖⱼ Y i j k)
+    
     σXᵢⱼ≉Aᵢₖ▷Yₖⱼ : ∀ k → σ X i j ≉ A i k ▷ Y k j
     σXᵢⱼ≉Aᵢₖ▷Yₖⱼ k σXᵢⱼ≈AᵢₖYₖⱼ = σXᵢⱼ≉σYᵢⱼ (≤-antisym σXᵢⱼ≤σYᵢⱼ (≤-trans (σXᵢⱼ≤Aᵢₖ▷Xₖⱼ Y i j k) (≤-reflexive (≈-sym σXᵢⱼ≈AᵢₖYₖⱼ))))
 
@@ -122,7 +121,7 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StateMetric
     ... | inj₂ σXᵢⱼ≈Iᵢⱼ           = contradiction σXᵢⱼ≈Iᵢⱼ σXᵢⱼ≉Iᵢⱼ
     ... | inj₁ (k , σXᵢⱼ≈Aᵢₖ▷Xₖⱼ) = begin
       suc (D (σ X) (σ Y))                     ≡⟨ cong suc D≡dᵢⱼ ⟩ 
-      suc (d (σ X i j) (σ Y i j))             ≤⟨ s≤s (d-mono (σXᵢⱼ≉Aᵢₖ▷Yₖⱼ k) ≤-refl (σXᵢⱼ≤Aᵢₖ▷Xₖⱼ Y i j k)) ⟩ 
+      suc (d (σ X i j) (σ Y i j))             ≤⟨ s≤s (d-mono σXᵢⱼ≤σYᵢⱼ (σXᵢⱼ≤Aᵢₖ▷Yₖⱼ k , σXᵢⱼ≉Aᵢₖ▷Yₖⱼ k)) ⟩
       suc (d (σ X i j) (A i k ▷ Y k j))       ≡⟨ cong suc (d-cong σXᵢⱼ≈Aᵢₖ▷Xₖⱼ ≈-refl) ⟩
       suc (d (A i k ▷ X k j) (A i k ▷ Y k j)) ≤⟨ d-strContr (A i k) (Xₖⱼ≉Yₖⱼ σXᵢⱼ≈Aᵢₖ▷Xₖⱼ) ⟩
       d (X k j) (Y k j)                       ≤⟨ M≤max⁺[M] _ k j ⟩

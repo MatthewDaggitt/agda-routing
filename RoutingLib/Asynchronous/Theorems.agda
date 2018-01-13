@@ -54,7 +54,7 @@ module RoutingLib.Asynchronous.Theorems {a ℓ n}
     field
       T            : ℕ
       D            : ℕ → MPred
-      D-decreasing : ∀ {K} → K < T → D (suc K) ⊂ D K
+      D-decreasing : ∀ K → D (suc K) ⊆ D K
       D-finish     : ∃ λ ξ → ∀ K → Singleton-t ξ (D (T + K))
       f-monotonic  : ∀ K {t} → t ∈ D K → f t ∈ D (suc K)
       D-subst      : ∀ K {x y} → x ≈ y → x ∈ D K → y ∈ D K

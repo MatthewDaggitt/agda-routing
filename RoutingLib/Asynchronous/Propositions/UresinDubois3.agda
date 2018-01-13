@@ -75,8 +75,8 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3 {a ℓ n}
                                 ≼-trans (≼-reflexive (≈ᵢ-sym (x≈y i))) x≼iterK) ,
                                 D₀-subst x≈y (λ j → proj₂ (x∈DK j)) i
 
-    DsK⊆DK : ∀ K → D (suc K) ⊆ D K
-    DsK⊆DK K x x∈DsK i with x∈DsK i
+    D-decreasing : ∀ K → D (suc K) ⊆ D K
+    D-decreasing K x x∈DsK i with x∈DsK i
     ... | ((ξ≼x , x≼iterK ), x∈D₀) = (ξ≼x , ≼-trans x≼iterK (iter-dec K i)) , x∈D₀
 
     closed-trans : ∀ K → iter x₀ K ∈ D₀
@@ -114,9 +114,6 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3 {a ℓ n}
     ξ∈DK K i with K ≤? T
     ... | yes K≤T = (≼-refl , iter-decreasing K≤T i) , closed-trans T i
     ... | no  K≰T = (≼-refl , ≼-reflexive (T≤K⇒ξ≈iterK (≰⇒≥ K≰T) i)) , closed-trans T i
-
-    D-decreasing : ∀ {K} → K < T → D (suc K) ⊂ D K
-    D-decreasing {K} K<T = DsK⊆DK K , (iter x₀ K , iterK∈DK K , iterK∉DsK K<T)
 
     D-finish : ∃ λ ξ → ∀ K → Singleton-t ξ (D (T + K))
     D-finish = ξ , λ K → ξ∈DK (T + K) ,

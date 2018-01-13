@@ -68,14 +68,16 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a}{ℓ}{n}{S : Fin n → 
 
     -- Case lemmas
     
-    lemma₁ : (acc₀ : Acc _<_ 0) → ∀ K i → τ K i ≤ zero → async-iter 𝕤 acc₀ x₀ i ∈ᵤ D K i
+  {-  lemma₁ : (acc₀ : Acc _<_ 0) → ∀ K i → τ K i ≤ zero → async-iter 𝕤 acc₀ x₀ i ∈ᵤ D K i
     lemma₁ _ K i τ≤0 = subst (x₀ i ∈ᵤ_) (cong (λ k → D k i) 0≡k) (x₀∈D₀ i)
       where
       0≡k : 0 ≡ K
       0≡k = (≤-antisym z≤n (subst (K ≤_) (≤-antisym τ≤0 z≤n) (τ-inc K i)))
+-}
 
-    τK≤k⇒xₖ∈DK : ∀ {k} → (accₖ : Acc _<_ k) → ∀ K i → τ K i ≤ k → async-iter 𝕤 accₖ x₀ i ∈ᵤ D K i
-    τK≤k⇒xₖ∈DK {zero}  acc₀ K i τ≤0 = lemma₁ acc₀ K i τ≤0
+    postulate τK≤k⇒xₖ'∈DK : ∀ {k} (accₖ : Acc _<_ k) → ∀ K i → τ K i ≤ k → async-iter' 𝕤 x₀ accₖ i ∈ᵤ D K i
+
+{-    τK≤k⇒xₖ∈DK {zero}  acc₀ K i τ≤0 = lemma₁ acc₀ K i τ≤0
     τK≤k⇒xₖ∈DK {suc k} (acc rs) K i τ≤sk with i ∈? α (suc k)
     τK≤k⇒xₖ∈DK {suc k} (acc rs) K i τ≤sk | no  i∉α with τ K i ≟ suc k
     ...   | no  τ≢sk = τK≤k⇒xₖ∈DK (rs k ≤-refl) K i (<⇒≤pred (≤+≢⇒< τ≤sk τ≢sk))
@@ -111,8 +113,10 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a}{ℓ}{n}{S : Fin n → 
           
           f[newState] : M
           f[newState] = f newState
-
+-}
  
+    τK≤k⇒xₖ∈DK : ∀ k K i → τ K i ≤ k → async-iter 𝕤 x₀ k i ∈ᵤ D K i
+    τK≤k⇒xₖ∈DK k K i τK≤k = τK≤k⇒xₖ'∈DK (<-well-founded k) K i τK≤k
 
     -- Theorem 1
 
@@ -131,13 +135,11 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a}{ℓ}{n}{S : Fin n → 
       φ (suc (suc t))      ≤⟨ m≤m+n (φ (suc (suc t))) K ⟩
       φ (suc (suc t)) + K  ∎
 
-    theorem1-proof : ∀ K → async-iter 𝕤 (accTᶜ+K K) x₀ ≈ ξ
-    theorem1-proof K i = ≈ᵢ-sym (proj₂ (D-T+K≡ξ 0) (async-iter 𝕤 (accTᶜ+K K) x₀)
-                   async∈DT i)
+    theorem1-proof : ∀ K → async-iter 𝕤 x₀ (Tᶜ + K) ≈ ξ
+    theorem1-proof K i = ≈ᵢ-sym (proj₂ (D-T+K≡ξ 0) (async-iter 𝕤 x₀ (Tᶜ + K)) async∈DT i)
       where
-      async∈DT : async-iter 𝕤 (accTᶜ+K K) x₀ ∈ D (T + 0)
-      async∈DT j = τK≤k⇒xₖ∈DK (accTᶜ+K K) (T + 0) j (τ≤Tᶜ+K K j)
-
-
-    theorem1 : ∃ λ K → ∀ K₁ → async-iter 𝕤 (<-well-founded (K + K₁)) x₀ ≈ ξ
-    theorem1 = φ (suc T) , theorem1-proof
+      async∈DT : async-iter 𝕤 x₀ (Tᶜ + K) ∈ D (T + 0)
+      async∈DT j = τK≤k⇒xₖ∈DK (Tᶜ + K) (T + 0) j (τ≤Tᶜ+K K j)
+      
+    theorem1 : ∃ λ K → ∀ K₁ → async-iter 𝕤 x₀ (K + K₁) ≈ ξ
+    theorem1 = Tᶜ , theorem1-proof

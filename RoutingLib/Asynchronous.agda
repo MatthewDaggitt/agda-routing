@@ -11,7 +11,7 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Pred) renaming (_∈_ to _∈ᵤ_)
 open import Induction.WellFounded using (Acc; acc)
-open import Induction.Nat using () renaming (<-well-founded to <-wf)
+open import Induction.Nat using (<-well-founded)
 
 open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 open import RoutingLib.Data.Fin.Properties using ()
@@ -78,47 +78,19 @@ module RoutingLib.Asynchronous where
     Singleton-t : M → Pred MPred (a ⊔ ℓ)
     Singleton-t t P = t ∈ P × ∀ s → s ∈ P → t ≈ s
 
-    module _ (𝕤 : Schedule n) where
+    module _ (𝕤 : Schedule n)(x₀ : M) where
 
       open Schedule 𝕤
 
-      async-iter : ∀ {t} → Acc _<_ t → M → M
-      async-iter {zero} _ x₀ i = x₀ i
-      async-iter {suc t} (acc rs) x₀ i with i ∈? α (suc t)
-      ... | yes _ = f (λ j → async-iter (rs (β (suc t) i j) (s≤s (causality t i j)))
-                x₀ j) i
-      ... | no  _ = async-iter (rs t ≤-refl) x₀ i
+      async-iter' : ∀ {t} → Acc _<_ t → M
+      async-iter' {zero} _ i = x₀ i
+      async-iter' {suc t} (acc rs) i with i ∈? α (suc t)
+      ... | yes _ = f (λ j → async-iter' (rs (β (suc t) i j) (s≤s (causality t i j))) j) i
+      ... | no  _ = async-iter' (rs t ≤-refl) i
 
-     -- β (suc t) i j < suc t
-     -- causality :
+      async-iter : 𝕋 → M
+      async-iter t = async-iter' (<-well-founded t)
 
- 
-{-
-    module _ {i : Fin n} where
-      open Setoid (S i)
-           renaming 
-           ( _≈_       to _≈ᵢ_
-           ; reflexive to ≈ᵢ-reflexive
-           ; refl      to ≈ᵢ-refl
-           ; sym       to ≈ᵢ-sym
-           ; trans     to ≈ᵢ-trans
-           ) public
-           -}
-{-
-    -- The asynchronous state function
-    δ' : Schedule n → ∀ {t} → Acc _<_ t → M → M
-    δ' 𝕤 {zero}  _           X = X
-    δ' 𝕤 {suc t} (acc tAcc) X i with i ∈? α 𝕤 (suc t)
-    ... | no  i∉αₜ = δ' 𝕤 (tAcc t ≤-refl) X i
-    ... | yes i∈αₜ = σ (λ k → δ' 𝕤 (tAcc (β 𝕤 (suc t) i k) (causality 𝕤 t i k)) X k) i
-
-    δ : Schedule n → ℕ → M → M
-    δ 𝕤 t = δ' 𝕤 (<-wf t)
-
-    -- The synchronous state function
-    σ^ : ℕ → M → M
-    σ^ = δ (𝕤-sync n)
--}
 
   -----------
   -- Other --

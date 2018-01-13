@@ -4,9 +4,12 @@ open import Data.Nat.Properties using (1+n≰n) renaming (+-identityʳ to +-idʳ
 open import Data.Sum using (inj₁; inj₂; _⊎_)
 open import Data.Product using (_×_; ∃; _,_; proj₁; proj₂; Σ)
 open import Function using (_∘_)
+open import Induction using (RecStruct)
 open import Induction.Nat using (<-well-founded)
-open import Induction.WellFounded using (Acc; acc)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; subst; sym; trans; cong)
+open import Induction.WellFounded using (Acc; acc; WfRec; Well-founded)
+open import Level using () renaming (zero to lzero)
+open import Relation.Binary using (Rel)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; _≢_; subst; sym; trans; cong)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (U; U-Universal)
@@ -63,9 +66,9 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
              (iter-fixed (suc t) (f-cong iter≡) K i j)) 
 
   postulate distance : ℕ → ℕ
-
+  
   postulate iter≢⇒dis< : ∀ K → iter x₀ (suc K) ≢ₘ iter x₀ K → distance (suc K) <ℕ distance K
-
+  
   iter-fixed-point : ∀ {t} → Acc _<ℕ_ (distance t) → ∃ λ T → ∀ K → iter x₀ T ≡ₘ iter x₀ (T +ℕ K)
   iter-fixed-point {t} (acc rs) with iter x₀ (suc t) ≟ₘ iter x₀ t
   ... | yes iter≡ = t , iter-fixed t iter≡

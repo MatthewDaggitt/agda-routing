@@ -12,14 +12,14 @@ open import Function using (_∘_)
 
 open import RoutingLib.Data.List using (dfilter)
 open import RoutingLib.Data.List.All using ([]; _∷_)
-open import RoutingLib.Data.List.Uniqueness using (Unique)
+open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
 
 module RoutingLib.Data.List.Uniset {c ℓ} (DS : DecSetoid c ℓ) where
   
   open DecSetoid DS renaming (Carrier to A; setoid to S)
   open import Data.List.Any.Membership S using () renaming (_∈_ to _∈ₗ_)
-  open import RoutingLib.Data.List.Any.Membership.Properties using (∈-dec)
-  open import RoutingLib.Data.List.Uniqueness.Properties using (dfilter!⁺)
+  open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-dec)
+  open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (dfilter!⁺)
 
   private
 

@@ -4,7 +4,7 @@ open import Data.Product using (∃; ∃₂; _×_; _,_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym; trans)
 open import Data.Nat using (suc)
 
-open import RoutingLib.Data.List.Uniqueness using (Unique)
+open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
 
 module RoutingLib.Data.List.Permutation {a} {A : Set a} where
 

@@ -139,9 +139,9 @@ module RoutingLib.Data.List.All.Properties where
   module DecSetoidProperties {a ℓ} (DS : DecSetoid a ℓ) where
 
     open DecSetoid DS renaming (Carrier to A)
-    open import RoutingLib.Data.List.Any.Membership setoid using (deduplicate)
+    open import RoutingLib.Data.List.Membership.DecSetoid DS using (deduplicate)
 
-    deduplicate⁺ : ∀ {p} {P : A → Set p} {xs} → All P xs → All P (deduplicate _≟_ xs)
+    deduplicate⁺ : ∀ {p} {P : A → Set p} {xs} → All P xs → All P (deduplicate xs)
     deduplicate⁺ {xs = _}      [] = []
     deduplicate⁺ {xs = x ∷ xs} (px ∷ pxs) with any (x ≟_) xs
     ... | yes _ = deduplicate⁺ pxs
@@ -257,10 +257,10 @@ module RoutingLib.Data.List.All.Properties where
   module AllPairsDecSetoidProperties {a ℓ} (DS : DecSetoid a ℓ) where
 
     open DecSetoid DS renaming (Carrier to A)
-    open import RoutingLib.Data.List.Any.Membership setoid using (deduplicate)
+    open import RoutingLib.Data.List.Membership.DecSetoid DS using (deduplicate)
 
     AllPairs-deduplicate⁺ : ∀ {ℓ} {_~_ : Rel A ℓ} {xs} → AllPairs _~_ xs →
-                            AllPairs _~_ (deduplicate _≟_ xs)
+                            AllPairs _~_ (deduplicate xs)
     AllPairs-deduplicate⁺ {xs = _}      [] = []
     AllPairs-deduplicate⁺ {xs = x ∷ xs} (px ∷ pxs) with any (x ≟_) xs
     ... | yes _ = AllPairs-deduplicate⁺ pxs

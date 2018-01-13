@@ -23,7 +23,6 @@ open import RoutingLib.Asynchronous.Schedule
 open import RoutingLib.Data.Nat.Properties using ( m<n≤o⇒o∸n<o∸m; m≤n⊎m≤o⇒m≤n⊔o; ∀x≤m:n≢x⇒m<n; m⊔n≡m⇒n≤m; n⊔m≡m⇒n≤m)
 open import RoutingLib.Data.Table using (max)
 open import RoutingLib.Data.Table.Properties using (t≤max[t]; x≤max[t]; max[t]≤max[s]; max[t]≤max[s]₂; ⊥≤max[t])
-open import RoutingLib.Data.List.Any.Membership.Propositional using (∈-allFin⁺; ∈-tabulate⁺; ∈-applyDownFrom⁺)
 import RoutingLib.Asynchronous.Schedule.Times as Times
 
 module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n) where

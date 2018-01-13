@@ -8,11 +8,11 @@ open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.List using (index; between)
-open import RoutingLib.Data.List.Uniqueness using (Unique)
-open import RoutingLib.Data.List.Uniqueness.Properties using (between!⁺)
+open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
+open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (between!⁺)
 open import RoutingLib.Data.List.Sorting.Nat using (↗-between)
-open import RoutingLib.Data.List.Any.Membership.Properties using (indexOf-cong; indexOf-revCong; indexOf-index; indexOf[xs]≤|xs|; indexOf[xs]<|xs|)
-open import RoutingLib.Data.List.Any.Membership.Propositional using (∈-between⁺; ∈-between⁻)
+open import RoutingLib.Data.List.Membership.Setoid.Properties using (indexOf-cong; indexOf-revCong; indexOf-index; indexOf[xs]≤|xs|; indexOf[xs]<|xs|)
+open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-between⁺; ∈-between⁻)
 open import RoutingLib.Data.Nat.Properties using (ℕₛ; ∸-cancelˡ-≡; ∸-monoˡ-<; ∸-cancelˡ-≤; m<n⇒0<n∸m; n∸1+m<n; m∸[m∸n]≡n)
 
 open import RoutingLib.Routing.Definitions using (RoutingProblem; RoutingAlgebra)
@@ -30,7 +30,7 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step1_HeightFunction
 
   open import Data.List.Any.Membership ℕₛ using () renaming (_∈_ to _∈ℕ_)
 
-  open import RoutingLib.Data.List.Any.Membership S using (indexOf)
+  open import RoutingLib.Data.List.Membership.Setoid S using (indexOf)
   open import RoutingLib.Data.List.Sorting.Properties ≤-decTotalOrder using (↗-indexOf-mono-<)
 
 

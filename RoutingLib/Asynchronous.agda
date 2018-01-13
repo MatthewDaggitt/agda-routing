@@ -19,7 +19,7 @@ open import RoutingLib.Asynchronous.Schedule using (Schedule; 𝕋)
 open import RoutingLib.Data.Table using (Table)
 
 import RoutingLib.Data.Table.Relation.Equality as TableEquality
-
+import RoutingLib.Data.Table.IndexedTypes as IndexedTypes
 module RoutingLib.Asynchronous where
 
   -----------------------
@@ -28,47 +28,11 @@ module RoutingLib.Asynchronous where
   -- An operation σ that can be decomposed and carried out on n separate processors 
   record Parallelisation {a ℓ n} (S : Table (Setoid a ℓ) n) : Set (lsuc a) where
 
-    M : Set a
-    M = ∀ i → Setoid.Carrier (S i)
-
-    --open TableEquality S renaming (_≈ₜ_ to _≈ₘ_) public
+    open IndexedTypes S public
     
     field
-      -- The update functions: "σ X i" is the result of processor i activating on state X 
       f      : M → M
-      --σ-cong : σ Preserves _≈ₘ_ ⟶ _≈ₘ_
-
-    module _ {i : Fin n} where
-      open Setoid (S i)
-           renaming 
-           ( _≈_       to _≈ᵢ_
-           ; reflexive to ≈ᵢ-reflexive
-           ; refl      to ≈ᵢ-refl
-           ; sym       to ≈ᵢ-sym
-           ; trans     to ≈ᵢ-trans
-           ) public
-           
-    MPred : Set (lsuc a)
-    MPred = ∀ i → Pred (Setoid.Carrier (S i)) a
-
-    _∈_ : M → MPred → Set a
-    t ∈ P = ∀ i → t i ∈ᵤ P i
-
-    _⊆_ : MPred → MPred → Set a
-    P ⊆ Q = ∀ t → t ∈ P → t ∈ Q
-
-    _⊂_ : MPred → MPred → Set a
-    P ⊂ Q = P ⊆ Q × ∃ λ t → t ∈ Q × ¬ (t ∈ P)
-
-    _≈_ : Rel M ℓ
-    t ≈ s = ∀ i → t i ≈ᵢ s i
     
-    ｛_｝ : M → Pred M ℓ
-    ｛ t ｝ = t ≈_
-
-    Singleton-t : M → Pred MPred (a ⊔ ℓ)
-    Singleton-t t P = t ∈ P × ∀ s → s ∈ P → t ≈ s
-
     module _ (𝕤 : Schedule n) where
 
       open Schedule 𝕤
@@ -82,48 +46,14 @@ module RoutingLib.Asynchronous where
 
       δ : ℕ → M → M
       δ t = async-iter (<-wf t)
-    
-     -- β (suc t) i j < suc t
-     -- causality :
 
- 
-{-
-    module _ {i : Fin n} where
-      open Setoid (S i)
-           renaming 
-           ( _≈_       to _≈ᵢ_
-           ; reflexive to ≈ᵢ-reflexive
-           ; refl      to ≈ᵢ-refl
-           ; sym       to ≈ᵢ-sym
-           ; trans     to ≈ᵢ-trans
-           ) public
-           -}
-{-
-    -- The asynchronous state function
-    δ' : Schedule n → ∀ {t} → Acc _<_ t → M → M
-    δ' 𝕤 {zero}  _           X = X
-    δ' 𝕤 {suc t} (acc tAcc) X i with i ∈? α 𝕤 (suc t)
-    ... | no  i∉αₜ = δ' 𝕤 (tAcc t ≤-refl) X i
-    ... | yes i∈αₜ = σ (λ k → δ' 𝕤 (tAcc (β 𝕤 (suc t) i k) (causality 𝕤 t i k)) X k) i
 
-    
-
-    -- The synchronous state function
-    σ^ : ℕ → M → M
-    σ^ = δ (𝕤-sync n)
--}
-
-  -----------
-  -- Other --
-  -----------
-
-{-
   -- A record encapsulating the idea that p is a well behaved parallelisation
-  record IsAsynchronouslySafe {a ℓ n} {S : Setoid a ℓ} (p : Parallelisation S n) : Set (lsuc (a ⊔ ℓ)) where
+  record IsAsynchronouslySafe {a ℓ n} {S : Fin n → Setoid a ℓ} (p : Parallelisation S) : Set (lsuc (a ⊔ ℓ)) where
   
     open Parallelisation p
     
     field
       m*         : M
-      m*-reached : ∀ 𝕤 X → ∃ λ tᶜ → ∀ t → δ 𝕤 (tᶜ + t) X ≈ₘ m*
--}
+      m*-reached : ∀ 𝕤 X → ∃ λ tᶜ → ∀ t → δ 𝕤 (tᶜ + t) X ≈ m*
+

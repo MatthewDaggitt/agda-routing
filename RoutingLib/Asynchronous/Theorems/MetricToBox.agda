@@ -1,72 +1,87 @@
-
-open import Level using (Level; _⊔_) renaming (zero to lzero; suc to lsuc)
-open import Data.Nat using (ℕ; _+_; _∸_; _<_; _≤_; z≤n; zero; suc)
-open import Data.Nat.Properties using (≰⇒>; module ≤-Reasoning; ≤-decTotalOrder; ≤-refl; ≤-trans; <⇒≤; <-irrefl; <-transˡ; <-asym; <⇒≱; ≮⇒≥)
-open import Data.Fin using (Fin; pred; fromℕ; inject₁) renaming (_<_ to _<𝔽_; _≤_ to _≤𝔽_; _≤?_ to _≤𝔽?_; zero to fzero; suc to fsuc)
-open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_) renaming (_<?_ to _<𝔽?_)
-open import Data.Product using (∃; _×_; _,_; proj₂)
+open import Data.Fin using (Fin)
+open import Data.Nat using (ℕ; _≤_; _<_; suc; _+_) renaming (_≟_ to _≟ℕ_)
+open import Data.Nat.Properties using (≤-decTotalOrder; _<?_)
 open import Data.List using (List; length)
-open import Data.Vec using (Vec; lookup; fromList) renaming (_∈_ to _∈ᵥ_)
-open import Data.Vec.Properties using (List-∈⇒∈)
-open import Relation.Binary using (Setoid; Decidable; _Preserves₂_⟶_⟶_)
-open import Relation.Binary.PropositionalEquality using (_≡_; subst; cong; module ≡-Reasoning) renaming (refl to ≡-refl; sym to ≡-sym; trans to ≡-trans; setoid to ≡-setoid)
-open import Relation.Unary using ()
+open import Data.List.Any.Membership.Propositional using () renaming (_∈_ to _∈ℕ_)
+open import Data.Vec using (Vec; fromList)
+open import Data.Product using (∃)
+open import Relation.Binary using (Setoid; Decidable)
+open import Relation.Binary.PropositionalEquality using (_≡_)
 open import Relation.Nullary using (yes; no)
-open import Relation.Nullary.Negation using (contradiction)
-open import Function using (_∘_)
 
-open import RoutingLib.Asynchronous
-open import RoutingLib.Relation.Unary using () renaming (_⊈_ to _⊈ᵤ_)
-open import RoutingLib.Data.Nat.Properties using (n≤0⇒n≡0; ℕₛ)
-open import RoutingLib.Data.Fin.Properties using (≤fromℕ; ≤+≢⇒<; <⇒≤pred)
-open import RoutingLib.Data.List.All using (AllPairs)
-open import RoutingLib.Data.List using (max)
-open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-length)
-open import RoutingLib.Data.List.Sorting ≤-decTotalOrder using (sort; sort-Sorted; sort-↗)
-open import RoutingLib.Data.List.Sorting.Properties ≤-decTotalOrder using (↗-unique; ↗-length; ↗-∈ˡ; ↗-∈ʳ)
-open import RoutingLib.Data.List.Sorting.Nat using (strictlySorted)
-open import RoutingLib.Data.Table using (Table)
-open import RoutingLib.Data.Vec.Properties using (∈-lookup; ∈-fromList⁻; ∈-lookup⁺)
-open import RoutingLib.Data.Vec.All.Properties using (AllPairs-lookup; AllPairs-fromList⁺)
+open import RoutingLib.Data.Nat.Properties using (ℕₛ)
+open import RoutingLib.Data.List using (index)
+open import RoutingLib.Data.List.Membership.DecPropositional _≟ℕ_ using (deduplicate)
+open import RoutingLib.Data.List.Membership.DecPropositional.Properties
+  using (∈-deduplicate⁻; ∈-deduplicate⁺)
+open import RoutingLib.Data.List.Sorting.Mergesort ≤-decTotalOrder
+open import RoutingLib.Data.List.Sorting ≤-decTotalOrder using (Sorted)
+open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique)
+open import RoutingLib.Data.List.Uniqueness.Propositional.Properties using (deduplicate!⁺)
+open import RoutingLib.Asynchronous using (Parallelisation)
+open import RoutingLib.Asynchronous.Theorems using (ACO; UltrametricConditions)
 open import RoutingLib.Function.Image using (FiniteImage)
 
-module RoutingLib.Asynchronous.Theorems {a ℓ n}
-                                        {S : Table (Setoid a ℓ) n} (p : Parallelisation S) where
+module RoutingLib.Asynchronous.Theorems.MetricToBox
+  {a ℓ n} {S : Fin n → Setoid a ℓ} {P : Parallelisation S}
+  (𝓤𝓒 : UltrametricConditions P) where
 
-  open Parallelisation p
-  open import RoutingLib.Function.Distance M-setoid using (IsUltrametric; _StrContrOver_)
+    open Parallelisation P using (M; f; Pred; _⊂_; _≈_; _∈_; Singleton-t)
+    open UltrametricConditions 𝓤𝓒
 
-  record ACO p : Set (lsuc (lsuc (a ⊔ p ⊔ ℓ))) where
-    field
-      T            : ℕ
-      D            : ℕ → Pred p
-      D-subst      : ∀ K {x y} → x ≈ y → x ∈ D K → y ∈ D K
-      
-      D-decreasing : ∀ K → K < T → D (suc K) ⊂ D K
-      D-finish     : ∃ λ ξ → ∀ K → Singleton-t ξ (D (T + K))
-      f-monotonic  : ∀ K {t} → t ∈ D K → f t ∈ D (suc K)
 
-  record UltrametricConditions : Set (a ⊔ ℓ) where
-    field
-      d                  : M → M → ℕ
-      d-isUltrametric    : IsUltrametric d
-      d-finiteImage      : ∀ x → FiniteImage ℕₛ (d x)
-      σ-strContr-d       : f StrContrOver d
-      _≟_                : Decidable _≈_
-      
+    postulate x* : M
+    
+    open FiniteImage (d-finiteImage x*)
+
+
+
+    -- Radii in list form
+    
+    radiiₗ : List ℕ
+    radiiₗ = mergesort (deduplicate image)
+
+    radiiₗ↗ : Sorted radiiₗ
+    radiiₗ↗ = mergesort↗ (deduplicate image)
+    
+    radiiₗ! : Unique radiiₗ
+    radiiₗ! = mergesort!⁺ (deduplicate!⁺ _≟ℕ_ image)
+
+    radiiₗ-complete : ∀ x → d x* x ∈ℕ radiiₗ
+    radiiₗ-complete x = ∈-mergesort⁺ (∈-deduplicate⁺ _≟ℕ_ (complete x))
+
+    radiiₗ-sound : ∀ {r} → r ∈ℕ radiiₗ → ∃ λ x → d x* x ≡ r
+    radiiₗ-sound r∈radii = sound (∈-deduplicate⁻ _≟ℕ_ (∈-mergesort⁻ r∈radii))
+
+
+    -- Total number of radii
+    
+    T : ℕ
+    T = length radiiₗ
+
+    -- Boxes
+
+    D : ℕ → Pred {!!}
+    D t i m = ? -- d x* {!!} ≤ {!!}
+
 {-
-  postulate BoxConditions⇒AsynchronouslySafe : BoxConditions → IsAsynchronouslySafe p
+    D-decreasing : ∀ K → K < T → D (suc K) ⊂ D K
+    D-decreasing = {!!}
+    
+    D-finish     : ∃ λ ξ → ∀ K → Singleton-t ξ (D (T + K))
+    D-finish = {!!}
+    
+    f-monotonic  : ∀ K {t} → t ∈ D K → f t ∈ D (suc K)
+    f-monotonic = {!!}
+    
+    D-subst : ∀ K {x y} → x ≈ y → x ∈ D K → y ∈ D K
+    D-subst = {!!}
 
-  postulate AsynchronouslySafe⇒BoxConditions : IsAsynchronouslySafe p → BoxConditions
-
-  module Ultrametric⇒Box (_≟ₘ_ : Decidable (_≈ₘ_ {n})) (uc : UltrametricConditions) where
-
-    open UltrametricConditions uc
-    open IsUltrametric d-isUltrametric
+    --open IsUltrametric d-isUltrametric
 
     -- Given the finite image of d we can create a sorted list of the values d can take. These are the radii of the balls in the ultrametric space.
-
-
+-}
+{-
     -- The index of the largest ball we are going to construct
     k : ℕ
     k = length m*-image ∸ 1
@@ -174,12 +189,14 @@ module RoutingLib.Asynchronous.Theorems {a ℓ n}
 
     -- Hence we have the required box conditions
 
-    boxConditions : BoxConditions
-    boxConditions = record
-      { k = k
-      ; C = C
-      ; Cₖ≡M = Cₖ≡M
-      ; C-strictMono = C-strictMono
-      ; σ-dec = λ {m} {i} → σ-dec {m} {i}
+
+    aco : ACO P {!!}
+    aco = record
+      { T            = T
+      ; D            = D
+      ; D-decreasing = D-decreasing
+      ; D-finish     = D-finish
+      ; f-monotonic  = f-monotonic
+      ; D-subst      = D-subst
       }
 -}

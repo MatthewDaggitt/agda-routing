@@ -5,7 +5,7 @@ open import Data.List.All using (All; _∷_)
 open import Data.Nat using (ℕ; zero; suc)
 open import Relation.Nullary using (yes; no)
 
-module RoutingLib.Data.List.Any.Membership {c ℓ} (S : Setoid c ℓ) where
+module RoutingLib.Data.List.Membership.Setoid {c ℓ} (S : Setoid c ℓ) where
 
   open Setoid S using (_≈_; sym) renaming (Carrier to A)
   open import Data.List.Any.Membership S using (_∈_)
@@ -17,9 +17,3 @@ module RoutingLib.Data.List.Any.Membership {c ℓ} (S : Setoid c ℓ) where
   lookupₐ : ∀ {p} {P : A → Set p} {xs} → P Respects _≈_ → All P xs → ∀ {x} → x ∈ xs → P x
   lookupₐ resp (pz ∷ pxs) (here  x≈z)  = resp (sym x≈z) pz
   lookupₐ resp (pz ∷ pxs) (there x∈xs) = lookupₐ resp pxs x∈xs
-
-  deduplicate : Decidable _≈_ → List A → List A
-  deduplicate _≟_ []       = []
-  deduplicate _≟_ (x ∷ xs) with any (x ≟_) xs
-  ... | yes _ = deduplicate _≟_ xs
-  ... | no  _ = x ∷ (deduplicate _≟_ xs)

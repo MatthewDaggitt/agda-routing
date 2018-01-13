@@ -6,7 +6,7 @@ open import Data.List.Any as Any using (here; there)
 open import Data.List.Any.Membership.Propositional using (_∈_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (∃; _,_; _×_; proj₂)
-open import Relation.Binary using (Setoid; Decidable)
+open import Relation.Binary using (Setoid; Decidable; DecSetoid)
 open import Relation.Binary.PropositionalEquality using (_≡_; setoid; refl; cong; cong₂)
 open import Relation.Binary.List.Pointwise using (≡⇒Rel≡)
 open import Relation.Nullary using (yes; no)
@@ -15,17 +15,11 @@ open import Function using (_∘_; id)
 open import RoutingLib.Data.List using (combine; applyBetween; between; allFinPairs)
 open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 open import RoutingLib.Data.List.Permutation using (_⇿_)
-import RoutingLib.Data.List.Any.Membership as Membership
+import RoutingLib.Data.List.Membership.Setoid as SetoidMembership
 
-module RoutingLib.Data.List.Any.Membership.Propositional where
+module RoutingLib.Data.List.Membership.Propositional.Properties where
 
-  deduplicate : ∀ {a} {A : Set a} → Decidable (_≡_ {A = A}) → List A → List A
-  deduplicate {A = A} = Membership.deduplicate (setoid A)
-
-
-
-
-  import RoutingLib.Data.List.Any.Membership.Properties as GM
+  import RoutingLib.Data.List.Membership.Setoid.Properties as GM
 
   ∈-++⁺ʳ : ∀ {a} {A : Set a} {v : A} xs {ys} → v ∈ ys → v ∈ xs ++ ys
   ∈-++⁺ʳ = GM.∈-++⁺ʳ (setoid _)
@@ -38,12 +32,6 @@ module RoutingLib.Data.List.Any.Membership.Propositional where
 
   ∈-concat⁺ : ∀ {a} {A : Set a} {v : A} {xs xss} → v ∈ xs → xs ∈ xss → v ∈ concat xss
   ∈-concat⁺ {A = A} {xss = xss} v∈xs xs∈xss = GM.∈-concat⁺ (setoid A) v∈xs (Any.map ≡⇒Rel≡ xs∈xss)
-
-  ∈-deduplicate⁺ : ∀ {a} {A : Set a} → ∀ _≟_ {x : A} {xs} → x ∈ xs → x ∈ deduplicate _≟_ xs
-  ∈-deduplicate⁺ = GM.∈-deduplicate⁺ (setoid _)
-
-  ∈-deduplicate⁻ : ∀ {a} {A : Set a} → ∀ _≟_ {x : A} {xs} → x ∈ deduplicate _≟_ xs → x ∈ xs
-  ∈-deduplicate⁻ = GM.∈-deduplicate⁻ (setoid _)
   
   ∈-combine⁺ : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c}
               {u v xs ys} (f : A → B → C) → u ∈ xs → v ∈ ys 

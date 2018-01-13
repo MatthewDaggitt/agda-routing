@@ -4,7 +4,7 @@ open import Data.Sum using (_⊎_)
 open import Data.List using (List; length)
 
 open import RoutingLib.Data.Matrix using (fold⁺)
-open import RoutingLib.Data.List.Uniqueness using (Unique)
+open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
 
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions

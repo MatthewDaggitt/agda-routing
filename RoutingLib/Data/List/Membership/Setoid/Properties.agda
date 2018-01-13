@@ -25,26 +25,26 @@ open import Algebra.FunctionProperties using (Op₂; RightIdentity; Selective)
 open import RoutingLib.Data.List
 open import RoutingLib.Data.Maybe using (Eq-reflexive)
 open import RoutingLib.Data.Maybe.Properties using (just-injective)
-import RoutingLib.Data.List.Any.Membership as Membership
+import RoutingLib.Data.List.Membership.Setoid as Membership
 open import RoutingLib.Data.List.Any.Properties
 open import RoutingLib.Data.List.Permutation using (_⇿_; _◂_≡_; _∷_; []; here; there)
-open import RoutingLib.Data.List.Uniqueness using (Unique; _∷_)
+open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique; _∷_)
 open import RoutingLib.Data.List.All using ([]; _∷_)
 
 
-module RoutingLib.Data.List.Any.Membership.Properties where
+module RoutingLib.Data.List.Membership.Setoid.Properties where
 
   -----------------------------------
   -- Properties involving 1 setoid --
   -----------------------------------
 
-  module SingleSetoid {c ℓ} (S : Setoid c ℓ) where
+  module _ {c ℓ} (S : Setoid c ℓ) where
 
     open Setoid S renaming (Carrier to A; refl to ≈-refl)
     open Setoid (list-setoid S) using () renaming (_≈_ to _≈ₗ_; sym to symₗ; refl to reflₗ)
 
+    open Membership S using (indexOf)
     open import Data.List.Any.Membership S using (_∈_; _∉_; _⊆_)
-    open import RoutingLib.Data.List.Any.Membership S using (indexOf; deduplicate)
     open import Data.List.Any.Membership (list-setoid S) using () renaming (_∈_ to _∈ₗ_)
 
     ∈-dec : Decidable₂ _≈_ → Decidable₂ _∈_
@@ -179,23 +179,6 @@ module RoutingLib.Data.List.Any.Membership.Properties where
     ...   | inj₁ f≈i  = inj₁ (trans x•f≈f f≈i)
     ...   | inj₂ f∈xs = inj₂ (∈-resp-≈ (there f∈xs) (sym x•f≈f))
 
-    -- deduplicate
-
-    ∈-deduplicate⁺ : ∀ _≟_ {x xs} → x ∈ xs → x ∈ deduplicate _≟_ xs
-    ∈-deduplicate⁺ _≟_ {y} {x ∷ xs} (here y≈x)   with any (x ≟_) xs
-    ... | yes x∈xs = ∈-deduplicate⁺ _≟_ (∈-resp-≈ x∈xs (sym y≈x))
-    ... | no  _    = here y≈x
-    ∈-deduplicate⁺ _≟_ {y} {x ∷ xs} (there y∈xs) with any (x ≟_) xs
-    ... | yes _ = ∈-deduplicate⁺ _≟_ y∈xs
-    ... | no  _ = there (∈-deduplicate⁺ _≟_ y∈xs)
-
-    ∈-deduplicate⁻ : ∀ _≟_ {x xs} → x ∈ deduplicate _≟_ xs → x ∈ xs
-    ∈-deduplicate⁻ _≟_ {y} {[]} ()
-    ∈-deduplicate⁻ _≟_ {y} {x ∷ xs} x∈dedup with any (x ≟_) xs | x∈dedup
-    ... | yes _ | x∈dedup[xs]       = there (∈-deduplicate⁻ _≟_ x∈dedup[xs])
-    ... | no  _ | here y≈x          = here y≈x
-    ... | no  _ | there y∈dedup[xs] = there (∈-deduplicate⁻ _≟_ y∈dedup[xs])
-    
     ∈-perm : ∀ {x xs ys} → x ∈ xs → xs ⇿ ys → x ∈ ys
     ∈-perm = Any-⇿
 
@@ -235,55 +218,13 @@ module RoutingLib.Data.List.Any.Membership.Properties where
     indexOf-index {suc i} (x≉xs ∷ _)   (s≤s i<|xs|) (here xsᵢ≈x)   = contradiction (∈-resp-≈ (∈-index i<|xs|) xsᵢ≈x) (All¬⇒¬Any x≉xs)
     indexOf-index {suc i} (_    ∷ xs!) (s≤s i<|xs|) (there xsᵢ∈xs) = cong suc (indexOf-index xs! i<|xs| xsᵢ∈xs)
 
-  open SingleSetoid public
     
     
-  {-
-    ∈-filter : ∀ {P} → (∀ {x y} → x ≈ y → P x ≡ P y) → ∀ {v xs} → v ∈ xs → P v ≡ true → v ∈ filter P xs
-    ∈-filter {P} P-resp-≈ {v} {xs} v∈xs Pv = ∈-gfilter setoid (λ v → if (P v) then just v else nothing) v∈xs test resp
-      where
-
-      test : Eq _≈_ (if P v then just v else nothing) (just v)
-      test rewrite Pv = just ≈-refl
-
-      resp : ∀ {x y} → x ≈ y → Eq _≈_ (if P x then just x else nothing) (if P y then just y else nothing)
-      resp {x} {y} x≈y rewrite (P-resp-≈ x≈y) with P y
-      ... | false = nothing
-      ... | true  = just x≈y
-
-    ∉-filter₁ : ∀ P {v xs} → v ∉ xs → v ∉ filter P xs
-    ∉-filter₁ P {v} {[]} _ ()
-    ∉-filter₁ P {v} {x ∷ xs} v∉x∷xs with predBoolToMaybe P x | inspect (predBoolToMaybe P) x
-    ... | nothing | _ = ∉-filter₁ P (v∉x∷xs ∘ there)
-    ... | just y  | [ t ] with P x
-    ...   | true  = λ {(here v≈y) → (v∉x∷xs ∘ here) (trans v≈y (sym (reflexive (just-injective t)))); (there v∈fxs) → (∉-filter₁ P (v∉x∷xs ∘ there)) v∈fxs}
-    ...   | false = contradiction t λ()
-
-    ∉-filter₂ : ∀ {P} → (∀ {x y} → x ≈ y → P x ≡ P y) → ∀ {v} → P v ≡ false → ∀ xs → v ∉ filter P xs
-    ∉-filter₂ {_} P-resp-≈ ¬Pv [] ()
-    ∉-filter₂ {P} P-resp-≈ ¬Pv (x ∷ xs) v∈fₚx∷xs with P x | inspect P x
-    ... | false | _ = ∉-filter₂ P-resp-≈ ¬Pv xs v∈fₚx∷xs
-    ... | true  | [ Px ] with v∈fₚx∷xs
-    ...   | here  v≈x    = contradiction (≡-trans (≡-trans (≡-sym Px) (P-resp-≈ (sym v≈x))) ¬Pv) λ()
-    ...   | there v∈fₚxs = ∉-filter₂ P-resp-≈ ¬Pv xs v∈fₚxs
-
-    gfilter-∈ : ∀ P {v} xs → v ∈ gfilter P xs → ∃ λ w → w ∈ xs × Eq _≈_ (P w) (just v)
-    gfilter-∈ P [] ()
-    gfilter-∈ P (x ∷ xs) _ with P x | inspect P x
-    gfilter-∈ P (x ∷ xs) v∈fₚxs         | nothing | _ with gfilter-∈ P xs v∈fₚxs
-    ... | (w , w∈xs , Pw≈justᵥ) = w , there w∈xs , Pw≈justᵥ
-    gfilter-∈ P (x ∷ xs) (here v≈w)     | just w  | [ Px≡justw ] = x , (here ≈-refl) , eq-trans trans (eq-reflexive ≈-refl Px≡justw) (just (sym v≈w))
-    gfilter-∈ P (x ∷ xs) (there v∈fₚxs) | just _  | _ with gfilter-∈ P xs v∈fₚxs
-    ... | (w , w∈xs , Pw≈justᵥ) = w , there w∈xs , Pw≈justᵥ
-  -}
-
-
-
   ------------------------------------
   -- Properties involving 2 setoids --
   ------------------------------------
 
-  module DoubleSetoid {c₁ c₂ ℓ₁ ℓ₂} (S₁ : Setoid c₁ ℓ₁) (S₂ : Setoid c₂ ℓ₂) where
+  module _ {c₁ c₂ ℓ₁ ℓ₂} (S₁ : Setoid c₁ ℓ₁) (S₂ : Setoid c₂ ℓ₂) where
 
     open Setoid S₁ using () renaming (Carrier to A; _≈_ to _≈₁_; refl to refl₁; reflexive to reflexive₁; sym to sym₁; trans to trans₁)
     open Setoid S₂ using () renaming (Carrier to B; _≈_ to _≈₂_; refl to refl₂; reflexive to reflexive₂; sym to sym₂; trans to trans₂)
@@ -308,14 +249,12 @@ module RoutingLib.Data.List.Any.Membership.Properties where
     ... | just b  | _              | there v∈xs₂ = there (∈-gfilter P v∈xs₂ Pᵥ≈justₐ P-resp-≈)
 
 
-  open DoubleSetoid public
-
 
   ------------------------------------
   -- Properties involving 3 setoids --
   ------------------------------------
 
-  module TripleSetoid {c₁ c₂ c₃ ℓ₁ ℓ₂ ℓ₃} (S₁ : Setoid c₁ ℓ₁) (S₂ : Setoid c₂ ℓ₂) (S₃ : Setoid c₃ ℓ₃) where
+  module _ {c₁ c₂ c₃ ℓ₁ ℓ₂ ℓ₃} (S₁ : Setoid c₁ ℓ₁) (S₂ : Setoid c₂ ℓ₂) (S₃ : Setoid c₃ ℓ₃) where
 
     open Setoid S₁ using () renaming (Carrier to A; _≈_ to _≈₁_; refl to refl₁; sym to sym₁; trans to trans₁)
     open Setoid S₂ using () renaming (Carrier to B; _≈_ to _≈₂_; refl to refl₂; sym to sym₂; trans to trans₂)
@@ -337,13 +276,6 @@ module RoutingLib.Data.List.Any.Membership.Properties where
     ... | (b , b∈ys , v≈fxb) = x , b , here refl₁ , b∈ys , v≈fxb
     combine-∈ f (x ∷ xs) ys v∈map++com | inj₂ v∈com with combine-∈ f xs ys v∈com
     ... | (a , b , a∈xs , b∈ys , v≈fab) = a , b , there a∈xs , b∈ys , v≈fab
-
-
-  open TripleSetoid public
-
-  -----------------------
-  -- To push to stdlib --
-  -----------------------
 
 
 

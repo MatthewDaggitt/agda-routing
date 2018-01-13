@@ -9,10 +9,10 @@ open import Relation.Binary.PropositionalEquality using (_≡_; cong) renaming (
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.List.All using (AllPairs; []; _∷_) using (allPairs-product; allPairs-map)
-open import RoutingLib.Data.List.Uniqueness using (Unique)
-open import RoutingLib.Data.List.Uniqueness.Properties using (perm!)
+open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
+open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (perm!)
 open import RoutingLib.Data.List.Permutation.Properties using (⇿-sym; ⇿-length)
-open import RoutingLib.Data.List.Any.Membership.Properties using (∈-perm)
+open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-perm)
 open import RoutingLib.Data.Nat.Properties using (≤⇒≯)
 
 module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTotalOrder a ℓ₁ ℓ₂) where
@@ -22,7 +22,7 @@ module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTot
   
   open import RoutingLib.Data.List.Sorting order
   open import Data.List.Any.Membership S using (_∈_)
-  open import RoutingLib.Data.List.Any.Membership S using (indexOf; lookupₐ)
+  open import RoutingLib.Data.List.Membership.Setoid S using (indexOf; lookupₐ)
   open import Relation.Binary.NonStrictToStrict _≈_ _≤_ using (_<_) renaming (irrefl to <-irrefl)
   
   

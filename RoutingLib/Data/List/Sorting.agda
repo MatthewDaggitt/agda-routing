@@ -6,7 +6,7 @@ open import Relation.Nullary using (yes; no)
 
 open import RoutingLib.Data.List.All using (AllPairs; []; _∷_)
 open import RoutingLib.Data.List.Permutation using (_⇿_)
-open import RoutingLib.Data.List.Uniqueness using (Unique)
+open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
 
 module RoutingLib.Data.List.Sorting {a ℓ₁ ℓ₂} (order : DecTotalOrder a ℓ₁ ℓ₂) where
 

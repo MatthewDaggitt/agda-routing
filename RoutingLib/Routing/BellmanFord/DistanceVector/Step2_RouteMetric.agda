@@ -120,7 +120,8 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric
       { eq⇒0        = x≈y⇒d≡0 
       ; 0⇒eq        = d≡0⇒x≈y 
       ; sym         = d-sym 
-      ; maxTriangle = d-maxTriIneq 
+      ; maxTriangle = d-maxTriIneq
+      ; cong        = d-cong
       }
       
 

@@ -15,7 +15,7 @@ import Relation.Binary.PartialOrderReasoning as PO-Reasoning
 open import RoutingLib.Data.List using (between)
 open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique)
 open import RoutingLib.Data.List.Sorting using (Sorted)
-open import RoutingLib.Data.Nat.Properties using (ℕₛ)
+open import RoutingLib.Data.Nat.Properties as Rℕₚ using (ℕₛ)
 open import RoutingLib.Function.Distance using (IsUltrametric; MaxTriangleIneq)
 open import RoutingLib.Data.Matrix using (Matrix; zipWith; max⁺)
 open import RoutingLib.Data.Matrix.Properties using (max⁺-cong; M≤max⁺[M]; max⁺[M]≡x; max⁺[M]≤x; max⁺-constant; zipWith-sym)
@@ -120,13 +120,13 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StateMetric
     result with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
     ... | inj₂ σXᵢⱼ≈Iᵢⱼ           = contradiction σXᵢⱼ≈Iᵢⱼ σXᵢⱼ≉Iᵢⱼ
     ... | inj₁ (k , σXᵢⱼ≈Aᵢₖ▷Xₖⱼ) = begin
-      suc (D (σ X) (σ Y))                     ≡⟨ cong suc D≡dᵢⱼ ⟩ 
-      suc (d (σ X i j) (σ Y i j))             ≤⟨ s≤s (d-mono σXᵢⱼ≤σYᵢⱼ (σXᵢⱼ≤Aᵢₖ▷Yₖⱼ k , σXᵢⱼ≉Aᵢₖ▷Yₖⱼ k)) ⟩
-      suc (d (σ X i j) (A i k ▷ Y k j))       ≡⟨ cong suc (d-cong σXᵢⱼ≈Aᵢₖ▷Xₖⱼ ≈-refl) ⟩
-      suc (d (A i k ▷ X k j) (A i k ▷ Y k j)) ≤⟨ d-strContr (A i k) (Xₖⱼ≉Yₖⱼ σXᵢⱼ≈Aᵢₖ▷Xₖⱼ) ⟩
-      d (X k j) (Y k j)                       ≤⟨ M≤max⁺[M] _ k j ⟩
-      D X Y                                   ∎
-      where open ℕₚ.≤-Reasoning
+      D (σ X) (σ Y)                      ≡⟨ D≡dᵢⱼ ⟩ 
+      d (σ X i j) (σ Y i j)              ≤⟨ d-mono σXᵢⱼ≤σYᵢⱼ (σXᵢⱼ≤Aᵢₖ▷Yₖⱼ k , σXᵢⱼ≉Aᵢₖ▷Yₖⱼ k) ⟩
+      d (σ X i j) (A i k ▷ Y k j)        ≡⟨ d-cong σXᵢⱼ≈Aᵢₖ▷Xₖⱼ ≈-refl ⟩
+      d (A i k ▷ X k j) (A i k ▷ Y k j)  <⟨ d-strContr (A i k) (Xₖⱼ≉Yₖⱼ σXᵢⱼ≈Aᵢₖ▷Xₖⱼ) ⟩
+      d (X k j) (Y k j)                  ≤⟨ M≤max⁺[M] _ k j ⟩
+      D X Y                              ∎
+      where open Rℕₚ.≤-Reasoning
 
 
 {-

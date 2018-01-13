@@ -26,7 +26,7 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
   {a ℓ n} {S : Fin n → Setoid a ℓ} {P : Parallelisation S}
   (𝓤𝓒 : UltrametricConditions P) where
 
-    open Parallelisation P using (M; f; Pred; _⊂_; _≈_; _∈_; Singleton-t)
+    open Parallelisation P using (M; f; Pred; _⊂_; _⊆_; _≈_; _∈_; Singleton-t)
     open UltrametricConditions 𝓤𝓒
 
 
@@ -59,13 +59,13 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
     T : ℕ
     T = length radiiₗ
 
+
     -- Boxes
 
     D : ℕ → Pred {!!}
-    D t i m = ? -- d x* {!!} ≤ {!!}
+    D t i m = {!!} -- d x* {!!} ≤ {!!}
 
-{-
-    D-decreasing : ∀ K → K < T → D (suc K) ⊂ D K
+    D-decreasing : ∀ K → K < T → D (suc K) ⊆ D K
     D-decreasing = {!!}
     
     D-finish     : ∃ λ ξ → ∀ K → Singleton-t ξ (D (T + K))
@@ -77,6 +77,7 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
     D-subst : ∀ K {x y} → x ≈ y → x ∈ D K → y ∈ D K
     D-subst = {!!}
 
+{-
     --open IsUltrametric d-isUltrametric
 
     -- Given the finite image of d we can create a sorted list of the values d can take. These are the radii of the balls in the ultrametric space.
@@ -188,7 +189,7 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
 
 
     -- Hence we have the required box conditions
-
+-}
 
     aco : ACO P {!!}
     aco = record
@@ -199,4 +200,3 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
       ; f-monotonic  = f-monotonic
       ; D-subst      = D-subst
       }
--}

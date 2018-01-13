@@ -32,6 +32,9 @@ module RoutingLib.Data.Table.IndexedTypes {a ℓ n} (S : Table (Setoid a ℓ) n)
   _≈_ : Rel M ℓ
   s ≈ t = ∀ i → s i ≈ᵢ t i
 
+  _≉_ : Rel M ℓ
+  s ≉ t = ¬ s ≈ t
+  
   ≈-refl : Reflexive _≈_
   ≈-refl i = ≈ᵢ-refl
 

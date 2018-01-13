@@ -42,15 +42,16 @@ module RoutingLib.Asynchronous.Theorems {a ℓ n}
       D            : ℕ → Pred p
       D-subst      : ∀ K {x y} → x ≈ y → x ∈ D K → y ∈ D K
       
-      D-decreasing : ∀ K → K < T → D (suc K) ⊂ D K
+      D-decreasing : ∀ K → K < T → D (suc K) ⊆ D K
       D-finish     : ∃ λ ξ → ∀ K → Singleton-t ξ (D (T + K))
       f-monotonic  : ∀ K {t} → t ∈ D K → f t ∈ D (suc K)
+
 
   record UltrametricConditions : Set (a ⊔ ℓ) where
     field
       d                  : M → M → ℕ
       d-isUltrametric    : IsUltrametric d
-      d-finiteImage      : ∀ x → FiniteImage ℕₛ (d x)
+      d-finiteImage      : ∀ m → FiniteImage ℕₛ (d m)
       σ-strContr-d       : f StrContrOver d
       _≟_                : Decidable _≈_
       

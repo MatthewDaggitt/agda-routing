@@ -12,22 +12,23 @@ open import RoutingLib.Data.Table using (Table)
 
 module RoutingLib.Asynchronous.Propositions.UresinDubois3 {a ℓ n}
                                                           {S : Table (Setoid a ℓ) n}
-                                                          (p : Parallelisation S)
+                                                          (𝕡 : Parallelisation S)
   where
 
-  open Parallelisation p
-  open import RoutingLib.Asynchronous.Properties p using (≈-cong; ≈-trans)
-  open import RoutingLib.Asynchronous.Theorems p using (ACO)
+  open Parallelisation 𝕡 using (f)
+  open import RoutingLib.Asynchronous.Theorems 𝕡 using (ACO)
+  open import RoutingLib.Data.Table.IndexedTypes S
 
   iter : M → ℕ → M
   iter x₀ zero = x₀
   iter x₀ (suc K) = f (iter x₀ K)
 
-  module proof (x₀ : M)
-               (D₀ : MPred)
+  module proof {p}
+               (x₀ : M)
+               (D₀ : Pred p)
                (x₀∈D₀ : x₀ ∈ D₀)
                (D₀-subst : ∀ {x y} → x ≈ y → x ∈ D₀ → y ∈ D₀)
-               (_≼_ : ∀ {i} → Rel (Setoid.Carrier (S i)) a)
+               (_≼_ : ∀ {i} → Rel (Setoid.Carrier (S i)) p)
                (≼-refl : ∀ {i} → Reflexive (_≼_ {i}))
                (≼-reflexive : ∀ {i} → _≈ᵢ_ {i} ⇒ _≼_ {i})
                (≼-antisym : ∀ {i} → Antisymmetric (_≈ᵢ_ {i}) (_≼_ {i}))
@@ -35,13 +36,12 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3 {a ℓ n}
                (closed : ∀ x → x ∈ D₀ → f x ∈ D₀)
                (f-monotone : ∀ {x y} → x ∈ D₀ × y ∈ D₀ → (∀ i → x i ≼ y i) → ∀ i → f x i ≼ f y i)
                (iter-dec : ∀ K i → iter x₀ (suc K) i ≼ iter x₀ K i)
-               (iter-converge : ∃ λ T → (∀ t → iter x₀ T ≈ iter x₀ (T + t)) ×
-                                (∀ {t} → t < T → iter x₀ t ≉ iter x₀ (suc t)))
+               (iter-converge : ∃ λ T → ∀ t → iter x₀ T ≈ iter x₀ (T + t))
     where
 
     
 
-    _⊴_ : Rel M a
+    _⊴_ : Rel M p
     s ⊴ t = ∀ i → s i ≼ t i
 
     ⊴-refl : Reflexive _⊴_
@@ -66,12 +66,12 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3 {a ℓ n}
     ξ = iter x₀ T
 
     -- Sequence of sets
-    D : ℕ → MPred
-    D K i = (λ x → (ξ i ≼ x) × (x ≼ iter x₀ K i)) ∩ D₀ i
+    D : ℕ → Pred p
+    D K i = (λ x → (ξ i ≼ x) × (x ≼ iter x₀ K i)) ∩ D₀ i 
 
     D-subst : ∀ K {x y} → x ≈ y → x ∈ D K → y ∈ D K
     D-subst K x≈y x∈DK i with proj₁ (x∈DK i)
-    ... | ξ≼x , x≼iterK = (≼-trans ξ≼x (≼-reflexive (x≈y i))             ,
+    ... | ξ≼x , x≼iterK =  (≼-trans ξ≼x (≼-reflexive (x≈y i))             ,
                                 ≼-trans (≼-reflexive (≈ᵢ-sym (x≈y i))) x≼iterK) ,
                                 D₀-subst x≈y (λ j → proj₂ (x∈DK j)) i
 
@@ -91,23 +91,12 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3 {a ℓ n}
 
     x₀∈D0 : x₀ ∈ D 0
     x₀∈D0 i = (iter-decreasing {0} {T} z≤n i , ≼-refl) , x₀∈D₀ i
-
-    iterK∉DsK : ∀ {K} → K < T → iter x₀ K ∉ D (suc K)
-    iterK∉DsK {K} K<T iterK∈DsK with proj₂ iter-converge
-    ... | fixed , first = contradiction
-          (λ i → ≼-antisym (proj₂ (proj₁ (iterK∈DsK i))) (iter-dec K i))
-          (first K<T)
-
+    
     T≤K⇒ξ≈iterK : ∀ {K} → T ≤ K → ξ ≈ iter x₀ K
-    T≤K⇒ξ≈iterK {K} T≤K = ≈-trans (proj₁ (proj₂ iter-converge) (K ∸ T)) (≈-cong (iter x₀) (m+n∸m≡n T≤K))
-
-    iterK∈DK : ∀ K → iter x₀ K ∈ D K
-    iterK∈DK K i with K ≤? T
-    ... | yes K≤T = (iter-decreasing K≤T i                   , ≼-refl) , closed-trans K i
-    ... | no  K≰T = (≼-reflexive (T≤K⇒ξ≈iterK (≰⇒≥ K≰T) i) , ≼-refl) , closed-trans K i
+    T≤K⇒ξ≈iterK {K} T≤K = ≈-trans (proj₂ iter-converge (K ∸ T)) (≈-cong (iter x₀) (m+n∸m≡n T≤K))
 
     ξ≈fξ : ξ ≈ f ξ
-    ξ≈fξ i = ≈ᵢ-trans (proj₁ (proj₂ iter-converge) 1 i)
+    ξ≈fξ i = ≈ᵢ-trans (proj₂ iter-converge 1 i)
              (≈-cong (iter x₀) (trans (+-suc T 0) (cong suc (+-identityʳ T))) i)
 
     ξ∈DK : ∀ K → ξ ∈ D K
@@ -118,7 +107,7 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3 {a ℓ n}
     D-finish : ∃ λ ξ → ∀ K → Singleton-t ξ (D (T + K))
     D-finish = ξ , λ K → ξ∈DK (T + K) ,
                λ t t∈D[T+K] i → ≼-antisym (proj₁ (proj₁ (t∈D[T+K] i)))
-               (≼-trans (proj₂ (proj₁ (t∈D[T+K] i))) (iter-decreasing (m≤m+n T K) i))
+               (≼-trans (proj₂ (proj₁ (t∈D[T+K] i))) (iter-decreasing (m≤m+n T K) i)) 
 
     f-monotonic  : ∀ K {t} → t ∈ D K → f t ∈ D (suc K)
     f-monotonic K {t} t∈DK i = (≼-trans (≼-reflexive (ξ≈fξ i))
@@ -134,15 +123,16 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3 {a ℓ n}
 
               t⊴iterK : t ⊴ iter x₀ K
               t⊴iterK j = proj₂ (proj₁ (t∈DK j))
-
-    aco : ACO
+ 
+    aco : ACO p
     aco = record {
       T            = T            ;
       D            = D            ;
+      D-subst      = D-subst      ;
       D-decreasing = D-decreasing ;
       D-finish     = D-finish     ;
-      f-monotonic  = f-monotonic  ;
-      D-subst      = D-subst
+      f-monotonic  = f-monotonic  
       }
     
         
+

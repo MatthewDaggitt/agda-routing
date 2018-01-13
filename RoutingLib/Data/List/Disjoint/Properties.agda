@@ -12,7 +12,7 @@ open import Data.List.All.Properties using (¬Any⇒All¬)
 open import Data.Product using (_×_; _,_; swap)
 open import Data.Sum using (inj₁; inj₂)
 
-import RoutingLib.Data.List.Any.Membership as Membership
+import RoutingLib.Data.List.Membership.Setoid as Membership
 open import RoutingLib.Data.List.All.Properties using (∈-All)
 
 module RoutingLib.Data.List.Disjoint.Properties {c ℓ} (S : Setoid c ℓ) where

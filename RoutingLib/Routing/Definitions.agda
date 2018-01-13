@@ -12,8 +12,8 @@ open import Relation.Binary using (Rel; IsDecEquivalence; Setoid; DecSetoid; IsE
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
 open import RoutingLib.Algebra.FunctionProperties using (_Preservesₗ_)
-open import RoutingLib.Data.List.Any.Membership.Propositional using (∈-concat⁺; ∈-tabulate⁺)
-open import RoutingLib.Data.List.Uniqueness using (Unique)
+open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-concat⁺; ∈-tabulate⁺)
+open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
 open import RoutingLib.Data.Matrix using (SquareMatrix; Matrix)
 open import RoutingLib.Data.Graph.SimplePath using (SimplePath; []; [_]; _∺_; _∷_; _∺_∣_; _∷_∣_; source) renaming (_≈_ to _≈ₚ_)
 open import RoutingLib.Data.Graph.SimplePath.Properties using (p≈q⇒p₀≡q₀)
@@ -107,7 +107,7 @@ module RoutingLib.Routing.Definitions where
     weight-cong [ refl ∷ p≈q  ] rewrite p≈q⇒p₀≡q₀ p≈q =
       ▷-cong _ (weight-cong [ p≈q ])
 
------------
+  -----------
   -- Other --
   -----------
 {-

@@ -57,8 +57,8 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions  where
     ≤-total : Total _≤_
     ≤-total = ass⇨≤-total ⊕-sel ⊕-comm
 
-    --≤-poset : Poset b ℓ ℓ
-    --≤-poset = ass⇨≤-poset ⊕-comm ⊕-assoc ⊕-idem
+    ≤-poset : Poset b ℓ ℓ
+    ≤-poset = ass⇨≤-poset ⊕-comm ⊕-assoc ⊕-idem
 
     ≤-decTotalOrder : DecTotalOrder b ℓ ℓ
     ≤-decTotalOrder = ass⇨≤-decTotalOrder _≟_ ⊕-comm ⊕-assoc ⊕-sel
@@ -71,7 +71,7 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions  where
       ; trans     to ≤-trans
       ; antisym   to ≤-antisym
       )
-
+    
     <-resp-≈ᵣ : _
     <-resp-≈ᵣ = proj₁ (<-resp-≈' isEquivalence ≤-resp-≈)
 

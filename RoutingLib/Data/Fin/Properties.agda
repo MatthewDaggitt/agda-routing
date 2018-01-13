@@ -1,8 +1,8 @@
-
+open import Algebra.FunctionProperties
 open import Data.Fin renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties
 open import Data.Product using (_,_)
-open import Data.Nat using (z≤n; s≤s; zero; suc) renaming (_≤_ to _≤ℕ_; _≤?_ to _≤ℕ?_; ≤-pred to ≤ℕ-pred)
+open import Data.Nat using (z≤n; s≤s; zero; suc) renaming (_+_ to _+ℕ_; _≤_ to _≤ℕ_; _≤?_ to _≤ℕ?_; ≤-pred to ≤ℕ-pred)
 open import Data.Nat.Properties using (1+n≰n; <⇒≢)  renaming (≤-total to ≤ℕ-total; ≤-antisym to ≤ℕ-antisym; ≤-refl to ≤ℕ-refl; ≤-trans to ≤ℕ-trans)
 open import Relation.Nullary using (¬_)
 open import Relation.Nullary.Negation using (contradiction)
@@ -10,6 +10,9 @@ open import Relation.Binary using (_⇒_; _Respects₂_; _Respects_; Decidable; 
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; subst; cong; isEquivalence; sym; trans)
 open import Relation.Binary.Consequences using (trans∧tri⟶resp≈)
 open import Function using (_on_; _∘_; flip)
+
+open import RoutingLib.Data.Fin
+open import RoutingLib.Data.Nat.Properties using (≤-cardinality)
 
 module RoutingLib.Data.Fin.Properties where
 
@@ -86,3 +89,14 @@ module RoutingLib.Data.Fin.Properties where
   ≤fromℕ _       fzero    = z≤n
   ≤fromℕ zero    (fsuc ())
   ≤fromℕ (suc k) (fsuc i) = s≤s (≤fromℕ k i)
+
+
+
+  --------------------
+  -- Absorbing _+↑_ --
+  --------------------
+
+  
+  postulate +↑-comm : ∀ {n} → Commutative {A = Fin n} _≡_ _+↑_
+
+  postulate i∔j≡n : ∀ {n} {i j : Fin (suc n)} → n ≤ℕ toℕ (i + j) → i +↑ j ≡ fromℕ n

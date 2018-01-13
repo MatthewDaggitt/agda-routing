@@ -9,7 +9,7 @@ open import Data.Product using (_,_)
 open import Function using (_∘_)
 
 open import RoutingLib.Data.List.All using (AllPairs)
-open import RoutingLib.Data.List.Uniqueness using (Unique; []; _∷_)
+open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique; []; _∷_)
 
 
 module RoutingLib.Data.List.Permutation.Properties {a} {A : Set a} where

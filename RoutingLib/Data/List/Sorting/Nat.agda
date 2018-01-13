@@ -9,7 +9,7 @@ open import Function using (id)
 
 import RoutingLib.Data.List.Sorting as Sorting
 open import RoutingLib.Data.List
-open import RoutingLib.Data.List.Uniqueness using (Unique)
+open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique)
 open import RoutingLib.Data.List.All using (AllPairs; []; _∷_) using (allPairs-product; allPairs-map)
 open import RoutingLib.Data.List.All.Properties using (AllPairs-applyUpTo⁺₁; AllPairs-applyBetween⁺₁)
 open import RoutingLib.Data.Nat.Properties
@@ -18,7 +18,7 @@ module RoutingLib.Data.List.Sorting.Nat where
 
   open Sorting ≤-decTotalOrder using (Sorted)
   
-  strictlySorted : ∀ {xs} → Sorted xs → Unique (≡-setoid ℕ) xs → AllPairs _<_ xs
+  strictlySorted : ∀ {xs} → Sorted xs → Unique xs → AllPairs _<_ xs
   strictlySorted xs↑ xs! = allPairs-map (uncurry′ ≤+≢⇒<) (allPairs-product xs↑ xs!)
 
   ↗-upTo : ∀ e → Sorted (upTo e) 

@@ -12,32 +12,31 @@ open import Data.Fin.Properties using (suc-injective)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_×_; _,_)
 open import Function using (_∘_; id)
-open import Relation.Binary using (Setoid; Rel)
+open import Relation.Binary using (DecSetoid; Setoid; Rel)
 open import Relation.Binary.PropositionalEquality using (subst; _≡_) renaming (refl to ≡-refl; setoid to ≡-setoid)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Decidable)
 
 open import RoutingLib.Data.List
-open import RoutingLib.Data.List.Any.Membership as Membership using ()
-open import RoutingLib.Data.List.Any.Membership.Properties as MembershipP using ()
+open import RoutingLib.Data.List.Membership.Setoid as Membership using ()
+open import RoutingLib.Data.List.Membership.Setoid.Properties as MembershipP using ()
 open import RoutingLib.Data.List.All using (AllPairs; []; _∷_)
 open import RoutingLib.Data.List.All.Properties
 open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 open import RoutingLib.Data.Fin.Properties using (suc≢zero)
 open import RoutingLib.Data.Maybe.Properties using (just-injective)
-open import RoutingLib.Data.List.Uniqueness as Uniqueness using (Unique)
+open import RoutingLib.Data.List.Uniqueness.Setoid as Uniqueness using (Unique)
 import RoutingLib.Data.List.Disjoint as Disjoint
 import RoutingLib.Data.List.Disjoint.Properties as DisjointProperties
 open import RoutingLib.Data.List.Permutation using (_⇿_)
 
-module RoutingLib.Data.List.Uniqueness.Properties where
+module RoutingLib.Data.List.Uniqueness.Setoid.Properties where
 
   module SingleSetoid {c ℓ} (S : Setoid c ℓ) where
 
     open Setoid S renaming (Carrier to A)
     open import Data.List.Any.Membership S using (_∈_; _∉_; _⊆_)
-    open import RoutingLib.Data.List.Any.Membership S using (deduplicate)
     open Disjoint S using (_#_; ∈ₗ⇒∉ᵣ; contractₗ)
     open DisjointProperties S using (#-concat; #⇒AllAll≉) 
 {-
@@ -50,12 +49,6 @@ module RoutingLib.Data.List.Uniqueness.Properties where
     ...   | true  = ¬Any→All¬ (∉-filter₁ S P (∉-resp-≈ S (All¬→¬Any x∉xs) (reflexive (just-injective t)))) ∷ filter! P xs!
 -}
 
-    deduplicate!⁺ : ∀ _≟_ xs → Unique S (deduplicate _≟_ xs)
-    deduplicate!⁺ _≟_ [] = []
-    deduplicate!⁺ _≟_ (x ∷ xs) with any (x ≟_) xs
-    ... | yes _    = deduplicate!⁺ _≟_ xs
-    ... | no  x∉xs = ¬Any⇒All¬ _ (x∉xs ∘ (MembershipP.∈-deduplicate⁻ S _≟_)) ∷ deduplicate!⁺ _≟_ xs
-    
     dfilter!⁺ : ∀ {b} {P : A → Set b} (P? : Decidable P) → ∀ {xs} → Unique S xs → Unique S (dfilter P? xs)
     dfilter!⁺ P? xs! = AllPairs-dfilter⁺ P? xs!
 
@@ -69,11 +62,6 @@ module RoutingLib.Data.List.Uniqueness.Properties where
     tabulate! : ∀ {n} (f : Fin n → A) → (∀ {i j} → f i ≈ f j → i ≡ j) → Unique S (tabulate f)
     tabulate! {n = zero}  f _     = []
     tabulate! {n = suc n} f f-inj = tabulate⁺ (λ _ → suc≢zero ∘ f-inj ∘ sym) ∷ tabulate! (f ∘ fsuc) (suc-injective ∘ f-inj)
-
-{-
-    tabulate!⁺ : ∀ {n} (f : Fin n → A) → (∀ {i j} → f i ≈ f j → i ≡ j) → Unique S (tabulate f)
-    tabulate!⁺ f f-inj = AllPairs-tabulate⁺ ? ?
--}
 
     drop!⁺ : ∀ {xs} n → Unique S xs → Unique S (drop n xs)
     drop!⁺ = AllPairs-drop⁺
@@ -90,6 +78,18 @@ module RoutingLib.Data.List.Uniqueness.Properties where
 
   open SingleSetoid public
 
+
+  module _ {c ℓ} (DS : DecSetoid c ℓ) where
+
+    open DecSetoid DS renaming (setoid to S)
+    open import RoutingLib.Data.List.Membership.DecSetoid DS using (deduplicate)
+    open import RoutingLib.Data.List.Membership.DecSetoid.Properties using (∈-deduplicate⁻)
+
+    deduplicate!⁺ : ∀ xs → Unique S (deduplicate xs)
+    deduplicate!⁺ [] = []
+    deduplicate!⁺ (x ∷ xs) with any (x ≟_) xs
+    ... | yes _    = deduplicate!⁺ xs
+    ... | no  x∉xs = ¬Any⇒All¬ _ (x∉xs ∘ (∈-deduplicate⁻ DS)) ∷ deduplicate!⁺ xs
 
 
 

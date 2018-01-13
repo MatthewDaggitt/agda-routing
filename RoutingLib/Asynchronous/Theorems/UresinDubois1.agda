@@ -26,8 +26,9 @@ open import Relation.Nullary
   using (yes; no; ¬_)
 open import Relation.Nullary.Negation
   using (contradiction)
+open import Relation.Unary using () renaming (_∈_ to _∈ᵤ_)
 open import Data.Fin.Subset
-  using () renaming (_∈_ to _∈s_)
+  using () renaming (_∈_ to _∈ₛ_)
 open import Function
   using (_∘_)
   
@@ -41,7 +42,7 @@ import RoutingLib.Asynchronous.Schedule.Times as Times
 import RoutingLib.Asynchronous.Schedule.Times.Properties as TimesProperties
 open import RoutingLib.Asynchronous.Theorems using (ACO)
 
-module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a}{ℓ}{n}{S : Fin n → Setoid a ℓ}
+module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a ℓ n} {S : Fin n → Setoid a ℓ}
   (𝕤 : Schedule n)(𝕡 : Parallelisation S) where
 
   open Schedule 𝕤
@@ -56,7 +57,7 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a}{ℓ}{n}{S : Fin n → 
           (proj₂ (prop1-iii K i j (suc k ∸ (φ (suc K)))))
 
 
-  module Theorem1 {x₀ : M}(aco : ACO 𝕡)(x₀∈D₀ : x₀ ∈ (ACO.D aco) 0) where
+  module Theorem1 {p} {x₀ : M} (aco : ACO 𝕡 p) (x₀∈D₀ : x₀ ∈ (ACO.D aco 0)) where
     open ACO aco
 
     -- Extract the fixed point
@@ -89,7 +90,7 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a}{ℓ}{n}{S : Fin n → 
                where
                accβ : ∀ j → Acc _<_ (β (suc k) i j)
                accβ j = (rs (β (suc k) i j) (s≤s (causality k i j)))
-               
+              
                async∈DK : ∀ j → async-iter' 𝕤 x₀ (accβ j) j ∈ᵤ D K j
                async∈DK j = τK≤k⇒xₖ'∈DK (accβ j) K j (φsK≤sk⇒τK≤βsK k K i j (≤-trans (φ≤τ (suc K) i) τ≤sk))
     τK≤k⇒xₖ'∈DK {suc k} (acc rs) zero    i τ≤sk | yes i∈α with T ≟ 0

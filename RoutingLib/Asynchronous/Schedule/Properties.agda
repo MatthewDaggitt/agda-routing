@@ -14,7 +14,7 @@ module RoutingLib.Asynchronous.Schedule.Properties where
 
   open Schedule
   open ≡-Reasoning
-
+{-
   abstract
 
     --------------------------
@@ -100,3 +100,4 @@ module RoutingLib.Asynchronous.Schedule.Properties where
 
     ⟦⟧≈⟦⟧-fastForward : ∀ {n} {𝕤₁ 𝕤₂ : Schedule n} {t₁ t₂} → 𝕤₁ ⟦ t₁ ⟧≈⟦ t₂ ⟧ 𝕤₂ → ∀ t → 𝕤₁ ⟦ t + t₁ ⟧≈⟦ t + t₂ ⟧ 𝕤₂
     ⟦⟧≈⟦⟧-fastForward {_} {𝕤₁} {𝕤₂} (α-eq , β-eq) t = ≈𝔸-fastForward {_} {α 𝕤₁} {α 𝕤₂} α-eq t , ≈𝔹-fastForward {_} {β 𝕤₁} {β 𝕤₂} β-eq t
+-}

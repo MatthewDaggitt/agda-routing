@@ -15,7 +15,7 @@ open import Induction.Nat using () renaming (<-well-founded to <-wf)
 
 open import RoutingLib.Asynchronous
 open import RoutingLib.Asynchronous.Schedule using (Schedule)
-open import RoutingLib.Asynchronous.Schedule.Properties using (⟦⟧≈⟦⟧-fastForward)
+open import RoutingLib.Asynchronous.Schedule.Properties using ()
 open import RoutingLib.Data.Nat.Properties using (m≤n⇒m∸n≡0; m>n⇒m∸n≢0; w∸x≡y∸z⇒v+x≡w∧v+y≡z)
 open import RoutingLib.Data.Table.Relation.Equality as TableEquality
 open import RoutingLib.Data.Table using (Table)
@@ -24,18 +24,6 @@ open import RoutingLib.Data.Table.Any using (Any)
 module RoutingLib.Asynchronous.Properties {a ℓ n} {S : Table (Setoid a ℓ) n} (p : Parallelisation S) where
   
   open Parallelisation p
-
-  ≈-refl : Reflexive _≈_
-  ≈-refl i = ≈ᵢ-refl
-
-  ≈-sym : Symmetric _≈_
-  ≈-sym x≈y i = ≈ᵢ-sym (x≈y i)
-
-  ≈-trans : Transitive _≈_
-  ≈-trans x≈y y≈z i = ≈ᵢ-trans (x≈y i) (y≈z i)
-
-  ≈-cong : ∀ {b} {A : Set b} (g : A → M) {x y} → x ≡ y → g x ≈ g y
-  ≈-cong g refl i = ≈ᵢ-refl
 
 {-
   -------------------------

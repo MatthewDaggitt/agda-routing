@@ -1,6 +1,6 @@
 open import Level using () renaming (zero to lzero)
-open import Data.Nat using (ℕ; zero; suc; s≤s; _<_; _≤_; _∸_; _+_)
-open import Data.Nat.Properties using (1+n≰n; ≤-refl)
+open import Data.Nat using (ℕ; zero; suc; pred; s≤s; _<_; _≤_; _∸_; _+_)
+open import Data.Nat.Properties using (1+n≰n; ≤-refl; module ≤-Reasoning)
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (Subset; _∈_; ⊤)
 open import Data.Fin.Subset.Properties using (∈⊤)
@@ -30,15 +30,16 @@ module RoutingLib.Asynchronous.Schedule where
   α₁ ⟦ t₁ ⟧≈𝔸⟦ t₂ ⟧ α₂ = ∀ t → α₁ (suc t + t₁) ≡ α₂ (suc t + t₂)
 
   -- An activation function is starvation free if every processor will continue to activate indefinitely
-  StarvationFree : ∀ {n} → 𝔸 n → Set lzero
-  StarvationFree α = ∀ t i → ∃ λ t' → t < t' × i ∈ α t'
+  NonStarvation : ∀ {n} → 𝔸 n → Set lzero
+  NonStarvation α = ∀ t i → ∃ λ k → i ∈ α (t + suc k)
 
 
   -------------------------
   -- Data flow functions --
   -------------------------
   -- A data flow function describes how information flows between processors
-  -- i.e. "β t i j" is the time at which the information from processor j used at processor i at time t was generated
+  -- i.e. "β t i j" is the time at which the information from processor j used
+  -- at processor i at time t was generated
   𝔹 : ℕ → Set lzero
   𝔹 n = 𝕋 → Fin n → Fin n → 𝕋
   
@@ -48,19 +49,18 @@ module RoutingLib.Asynchronous.Schedule where
   β₁ ⟦ t₁ ⟧≈𝔹⟦ t₂ ⟧ β₂ = ∀ t i j → β₁ (suc t + t₁) i j ∸ t₁ ≡ β₂ (suc t + t₂) i j ∸ t₂
 
   -- A data flow function is causal if data always flows forwards in time.
-  Causal : ∀ {n} → 𝔹 n → Set lzero
-  Causal β = ∀ t i j → β (suc t) i j < suc t
+  Causality : ∀ {n} → 𝔹 n → Set lzero
+  Causality β = ∀ t i j → β (suc t) i j ≤ t
 
   -- A data flow function is dynamic if each piece of data is only used a finite number of times (i.e. eventually fresh data will be used).
   Dynamic : ∀ {n} → 𝔹 n → Set lzero
-  Dynamic β = ∀ t i j → ∃ λ tᶠ → ∀ {t'} → tᶠ < t' → β t' i j ≢ t
+  Dynamic β = ∀ t i j → ∃ λ k → ∀ k₁ → β (t + k + k₁) i j ≢ t
   
 
   --------------
   -- Schedule --
   --------------
 
-  
   -- An asynchronous schedule for n processors
   record Schedule (n : ℕ) : Set where
     field
@@ -71,7 +71,7 @@ module RoutingLib.Asynchronous.Schedule where
       {- A1: Elements can only rely on their past values -}
       causality     : ∀ t i j → β (suc t) i j ≤ t
       {- A2: Each element gets updated infinitely often -}
-      nonstarvation : ∀ t i → ∃ λ k →  (i ∈ (α (t + suc k)))
+      nonstarvation : ∀ t i → ∃ λ k → i ∈ α (t + suc k)
       {- A3: Each element will eventually not need its value at time t -}
       finite        : ∀ t i j → ∃ λ k → ∀ k₁ → β (t + k + k₁) i j ≢ t
       
@@ -81,37 +81,3 @@ module RoutingLib.Asynchronous.Schedule where
   𝕤₁ ⟦ t₁ ⟧≈⟦ t₂ ⟧ 𝕤₂ = (α 𝕤₁) ⟦ t₁ ⟧≈𝔸⟦ t₂ ⟧ (α 𝕤₂) × (β 𝕤₁) ⟦ t₁ ⟧≈𝔹⟦ t₂ ⟧ (β 𝕤₂)
     where open Schedule
 
-
-  -----------------------
-  -- Example schedules --
-  -----------------------
-  -- The "synchronous" schedule
-
-{-
-  α-sync : ∀ {n} → 𝔸 n
-  α-sync _ = ⊤
-
-  β-sync : ∀ {n} → 𝔹 n
-  β-sync zero    _ _ = zero
-  β-sync (suc t) _ _ = t
-
-  abstract
-    
-    α-sync-starvationFree : ∀ {n} → StarvationFree (α-sync {n})
-    α-sync-starvationFree t _ = suc t , ≤-refl , ∈⊤
-
-    β-sync-causal : ∀ {n} → Causal (β-sync {n})
-    β-sync-causal _ _ _ = ≤-refl
-
-    β-sync-dynamic : ∀ {n} → Dynamic (β-sync {n})
-    β-sync-dynamic t _ _ = suc t , λ {(s≤s t<t) refl → 1+n≰n t<t}
-
-  𝕤-sync : ∀ n → Schedule n
-  𝕤-sync n = record 
-    { α              = α-sync 
-    ; β              = β-sync 
-    ; nonstarvation  = α-sync-starvationFree
-    ; causality      = β-sync-causal 
-    ; finite         = β-sync-dynamic 
-    }
--}

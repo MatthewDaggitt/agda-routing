@@ -13,7 +13,7 @@ open import Algebra.FunctionProperties.Consequences using (sel⇒idem)
 
 open import RoutingLib.Routing.Definitions using (RoutingAlgebra; RoutingProblem)
 open import RoutingLib.Data.List.Properties using (foldr≤ₗe; foldr≤ᵣxs)
-open import RoutingLib.Data.List.Any.Membership.Properties using (foldr-∈; ∈-tabulate⁻; ∈-tabulate⁺)
+open import RoutingLib.Data.List.Membership.Setoid.Properties using (foldr-∈; ∈-tabulate⁻; ∈-tabulate⁺)
 open import RoutingLib.Data.List.All.Properties using (foldr-All₂; All₂-tabulate)
 import RoutingLib.Routing.BellmanFord as BellmanFord
 

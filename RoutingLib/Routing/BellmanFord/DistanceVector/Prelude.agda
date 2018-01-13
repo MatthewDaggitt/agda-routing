@@ -4,7 +4,7 @@ open import Data.Sum using (_⊎_)
 open import Data.List using (List; length)
 
 open import RoutingLib.Data.Matrix using (fold⁺)
-open import RoutingLib.Data.List.Uniqueness using (Unique)
+open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
 
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions
@@ -20,7 +20,7 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Prelude
   open SufficientConditions sc public
 
   open import RoutingLib.Routing.BellmanFord 𝓡𝓟 public
-  import RoutingLib.Routing.BellmanFord.Properties 𝓡𝓟 as P
+  open import RoutingLib.Routing.BellmanFord.Properties 𝓡𝓟 as P public using (Iᵢⱼ≡0#)
   open import Data.List.Any.Membership S using (_∈_)
 
   n : ℕ
@@ -81,20 +81,3 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Prelude
 
   H : ℕ
   H = length ↗routes
-
-
-  ---------------------------------------
-  -- A custom max route implementation --
-  ---------------------------------------
-
-  open import RoutingLib.Data.Matrix.Membership S using () renaming (_∈_ to _∈M_)
-
-  maxRoute : RMatrix → Route
-  maxRoute X = fold⁺ _⊕_ X
-
-  postulate maxRoute[X]∈X : ∀ X → maxRoute X ∈M X
-  --maxRoute[X]∈X = {!!}
-
-  postulate maxRoute[X]<X : ∀ X i j → maxRoute X ≤ X i j
-  
-  --maxRoute

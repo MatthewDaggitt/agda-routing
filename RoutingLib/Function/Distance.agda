@@ -1,7 +1,7 @@
 open import Level using () renaming (_⊔_ to _⊔ₗ_)
 open import Data.Nat using (ℕ; zero; suc; _≤_; _<_; _+_; _⊔_; _<′_)
 open import Data.Nat.Properties using (≤⇒≤′)
-open import Relation.Binary using (Setoid; Decidable; _Preserves_⟶_)
+open import Relation.Binary using (Setoid; Decidable; _Preserves_⟶_; _Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality using (_≡_) renaming (sym to ≡-sym)
 open import Relation.Nullary using (¬_; yes; no)
 open import Data.Product using (∃; _,_)
@@ -52,9 +52,10 @@ module RoutingLib.Function.Distance {a} {ℓ} (S : Setoid a ℓ) where
   
   record IsMetric (d : DistanceFunction) : Set (a ⊔ₗ ℓ) where
     field
-      eq⇒0 : ∀ {x y} → x ≈ y → d x y ≡ 0
-      0⇒eq : ∀ {x y} → d x y ≡ 0 → x ≈ y
-      sym : ∀ x y → d x y ≡ d y x
+      cong     : d Preserves₂ _≈_ ⟶ _≈_ ⟶ _≡_
+      eq⇒0     : ∀ {x y} → x ≈ y → d x y ≡ 0
+      0⇒eq     : ∀ {x y} → d x y ≡ 0 → x ≈ y
+      sym      : ∀ x y → d x y ≡ d y x
       triangle : TriangleIneq d
 
   record Metric : Set (a ⊔ₗ ℓ) where
@@ -67,9 +68,10 @@ module RoutingLib.Function.Distance {a} {ℓ} (S : Setoid a ℓ) where
 
   record IsUltrametric (d : A → A → ℕ) : Set (a ⊔ₗ ℓ) where
     field
-      eq⇒0 : ∀ {x y} → x ≈ y → d x y ≡ 0
-      0⇒eq : ∀ {x y} → d x y ≡ 0 → x ≈ y
-      sym : ∀ x y → d x y ≡ d y x
+      cong        : d Preserves₂ _≈_ ⟶ _≈_ ⟶ _≡_
+      eq⇒0        : ∀ {x y} → x ≈ y → d x y ≡ 0
+      0⇒eq        : ∀ {x y} → d x y ≡ 0 → x ≈ y
+      sym         : ∀ x y → d x y ≡ d y x
       maxTriangle : MaxTriangleIneq d
 
   record Ultrametric : Set (a ⊔ₗ ℓ) where

@@ -1,6 +1,6 @@
 open import Level using () renaming (zero to lzero)
 open import Data.Nat
-open import Data.Nat.Properties
+open import Data.Nat.Properties hiding (module ≤-Reasoning)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (∃; _,_; _×_; proj₁)
 open import Relation.Binary
@@ -11,6 +11,7 @@ open import Function using (_∘_)
 
 open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Relation.Binary
+import RoutingLib.Relation.Binary.StrictReasoning as StrictReasoning
 
 module RoutingLib.Data.Nat.Properties where
 
@@ -89,12 +90,27 @@ module RoutingLib.Data.Nat.Properties where
     n≤0⇒n≡0 : ∀ {n} → n ≤ 0 → n ≡ 0
     n≤0⇒n≡0 z≤n = refl
 
+    
+    -- Equality reasoning --
+
+    module ≤-Reasoning where
+      open StrictReasoning ≤-trans ≤-reflexive <-trans <-transˡ <-transʳ public using
+        ( begin_
+        ; _≡⟨_⟩_ 
+        ; _≤⟨_⟩_
+        ; _<⟨_⟩_
+        ; _∎
+        )
+
     -- stdlib
     n≮n : ∀ n → n ≮ n
     n≮n n = <-irrefl (refl {x = n})
 
     n<1+n : ∀ n → n < suc n
     n<1+n n = ≤-refl
+
+    m+n≮m : ∀ m n → m + n ≮ m
+    m+n≮m m n = subst (_≮ m) (+-comm n m) (m+n≮n n m)
     
     m<n⇒n≡1+o : ∀ {m n} → m < n → ∃ λ o → n ≡ suc o
     m<n⇒n≡1+o {_} {zero} ()
@@ -458,4 +474,5 @@ module RoutingLib.Data.Nat.Properties where
         y ∸ z
       ∎) z≤y
       where open ≡-Reasoning
+
 

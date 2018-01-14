@@ -1,6 +1,6 @@
 open import Data.Fin using (Fin)
 open import Data.Nat using (ℕ; zero; suc) renaming (_+_ to _+ℕ_; _<_ to _<ℕ_; _≤_ to _≤ℕ_)
-open import Data.Nat.Properties using (1+n≰n) renaming (+-identityʳ to +-idʳℕ; +-suc to +ℕ-suc; ≤-reflexive to ≤ℕ-reflexive; ≤-trans to ≤ℕ-trans; n≤1+n to n≤ℕ1+n)
+open import Data.Nat.Properties using (1+n≰n) renaming (+-identityʳ to +-idʳℕ; +-suc to +ℕ-suc; ≤-reflexive to ≤ℕ-reflexive; ≤-trans to ≤ℕ-trans; n≤1+n to n≤ℕ1+n; ≤+≢⇒< to ≤+≢⇒ℕ<)
 open import Data.Sum using (inj₁; inj₂; _⊎_)
 open import Data.Product using (_×_; ∃; _,_; proj₁; proj₂; Σ)
 open import Function using (_∘_)
@@ -66,8 +66,13 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
              (iter-fixed (suc t) (f-cong iter≡) K i j)) 
 
   postulate distance : ℕ → ℕ
-  
-  postulate iter≢⇒dis< : ∀ K → iter x₀ (suc K) ≢ₘ iter x₀ K → distance (suc K) <ℕ distance K
+
+  postulate distance-dec : ∀ K → distance (suc K) ≤ℕ distance K
+
+  postulate iter≢⇒dis≢ : ∀ K → iter x₀ (suc K) ≢ₘ iter x₀ K → distance (suc K) ≢ distance K
+
+  iter≢⇒dis< : ∀ K → iter x₀ (suc K) ≢ₘ iter x₀ K → distance (suc K) <ℕ distance K
+  iter≢⇒dis< K iter≢ = ≤+≢⇒ℕ< (distance-dec K) (iter≢⇒dis≢ K iter≢)
   
   iter-fixed-point : ∀ {t} → Acc _<ℕ_ (distance t) → ∃ λ T → ∀ K → iter x₀ T ≡ₘ iter x₀ (T +ℕ K)
   iter-fixed-point {t} (acc rs) with iter x₀ (suc t) ≟ₘ iter x₀ t

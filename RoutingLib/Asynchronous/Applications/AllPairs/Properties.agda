@@ -1,14 +1,15 @@
 open import Data.Fin.Dec using (all?; ¬∀⟶∃¬)
 open import Data.Nat using (ℕ)
 open import Data.Product using (∃; _,_)
+open import Data.Sum using (inj₁; inj₂)
 open import Relation.Binary using (Reflexive; Antisymmetric; Transitive; Symmetric; IsPreorder; _⇒_)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; _≢_)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; _≢_; sym)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.NatInf
 open import RoutingLib.Data.NatInf.Properties
-open import RoutingLib.Data.Table.Properties using (min∞[s]≡min∞[t])
+open import RoutingLib.Data.Table.Properties using (min∞[s]≤min∞[t])
 
 module RoutingLib.Asynchronous.Applications.AllPairs.Properties (n : ℕ) where
 
@@ -32,6 +33,18 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Properties (n : ℕ) where
   ≼-trans : Transitive _≼_
   ≼-trans x≼y y≼z i = ≤-trans (x≼y i) (y≼z i)
 
+  ≼ₘ-refl : Reflexive _≼ₘ_
+  ≼ₘ-refl i = ≼-refl
+
+  ≼ₘ-reflexive :  _≡ₘ_ ⇒ _≼ₘ_
+  ≼ₘ-reflexive x≡y i = ≼-reflexive (x≡y i)
+
+  ≼ₘ-antisym : Antisymmetric _≡ₘ_ _≼ₘ_
+  ≼ₘ-antisym x≼ₘy y≼ₘx i = ≼-antisym (x≼ₘy i) (y≼ₘx i)
+
+  ≼ₘ-trans : Transitive _≼ₘ_
+  ≼ₘ-trans x≼ₘy y≼ₘz i = ≼-trans (x≼ₘy i) (y≼ₘz i)
+
   reflₘ : Reflexive _≡ₘ_
   reflₘ i j = refl
 
@@ -42,7 +55,13 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Properties (n : ℕ) where
   transₘ x≡y y≡z i = transᵣ (x≡y i) (y≡z i)
 
   f-cong : ∀ {x y} → x ≡ₘ y → f x ≡ₘ f y
-  f-cong {x} {y} x≡y i j = min∞[s]≡min∞[t] (x≡y i j) (path-cost-equiv x≡y i j)
+  f-cong {x} {y} x≡y i j = ≤-antisym
+             (min∞[s]≤min∞[t] (x i j) {y i j} {n} {n}
+               (inj₁ (≤-reflexive (x≡y i j)))
+               λ k → inj₂ (k , path-cost-monotone (≼ₘ-reflexive x≡y) i j k))
+             (min∞[s]≤min∞[t] (y i j) {x i j} {n} {n}
+               (inj₁ (≤-reflexive (sym (x≡y i j))))
+               λ k → inj₂ (k , path-cost-monotone (≼ₘ-reflexive (symₘ x≡y)) i j k))
   
   ≡ᵣ⇒≼ : ∀ {x y} → x ≡ᵣ y → x ≼ y
   ≡ᵣ⇒≼ x≡y i = ≤-reflexive (x≡y i)

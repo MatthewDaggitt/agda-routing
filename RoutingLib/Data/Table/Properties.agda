@@ -1,6 +1,6 @@
 open import Algebra.FunctionProperties using (Op₂)
 open import Data.Nat using (ℕ; zero; suc; _<_; _≤_; _⊓_)
-open import Data.Nat.Properties using (≤-refl; ≤-trans; ⊓-sel; ⊓-mono-<; module ≤-Reasoning)
+open import Data.Nat.Properties using (≤-refl; ≤-trans; ⊔-sel; ⊓-sel; ⊓-mono-<; module ≤-Reasoning)
 open import Data.Fin using (Fin; inject₁; inject≤) renaming (zero to fzero; suc to fsuc)
 open import Data.Product using (_,_; proj₁; proj₂)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
@@ -125,8 +125,8 @@ module RoutingLib.Data.Table.Properties where
   postulate max[t]≤max[s]₂ : ∀ {m n} (m≤n : m ≤ n) {⊥₁ ⊥₂} → ⊥₁ ≤ ⊥₂ →
                              {s : Table ℕ m} {t : Table ℕ n} →
                              (∀ i → s i ≤ t (inject≤ i m≤n)) → max ⊥₁ s ≤ max ⊥₂ t
-
-  postulate max[t]≤max[s] : ∀ {n} {s t : Table ℕ n} ⊥₁ ⊥₂ → ⊥₁ ≤ ⊥₂ → Pointwise _≤_ s t → max ⊥₁ s ≤ max ⊥₂ t
+                             
+  postulate max[t]≤max[s]₃ : ∀ {n} {s t : Table ℕ n} ⊥₁ ⊥₂ → ⊥₁ ≤ ⊥₂ → Pointwise _≤_ s t → max ⊥₁ s ≤ max ⊥₂ t
 
   min∞[t]≤x : ∀ ⊤ {n} (t : Table ℕ∞ n) {x} → ⊤ ≤∞ x ⊎ Any (_≤∞ x) t → min∞ ⊤ t ≤∞ x
   min∞[t]≤x ⊤ t (inj₁ ⊤≤x) = foldr-⊎presʳ (_≤∞ _)  o≤∞m⇒n⊓o≤∞m ⊤≤x t

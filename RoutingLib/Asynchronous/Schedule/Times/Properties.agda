@@ -1,5 +1,5 @@
 open import Data.Nat using (ℕ; zero; suc; _≤_; _<_; _⊔_; _∸_; _+_; z≤n; s≤s; _≟_; _≤?_; ≤-pred)
-open import Data.Nat.Properties using (m≤m⊔n; n≤1+n; ⊔-sel; module ≤-Reasoning; <-cmp; ≤+≢⇒<; ≤-refl; <⇒≤; ⊔-identityʳ; <-irrefl; ≤-trans; ≤-reflexive; ≮⇒≥; n≤m⊔n; ⊔-mono-≤; m≤m+n; m+n∸m≡n)
+open import Data.Nat.Properties using (m≤m⊔n; n≤1+n; ⊔-sel; module ≤-Reasoning; <-cmp; ≤+≢⇒<; ≤-refl; <⇒≤; ⊔-identityʳ; <-irrefl; ≤-trans; ≤-reflexive; ≮⇒≥; n≤m⊔n; ⊔-mono-≤; m≤m+n; m+n∸m≡n; <⇒≢)
 open import Data.Fin using (Fin; toℕ; fromℕ; inject≤) renaming (zero to fzero)
 open import Data.Fin.Properties using (inject≤-lemma)
 open import Data.Fin.Subset using (_∈_)
@@ -12,6 +12,7 @@ open import Data.List.Any using (Any) renaming (map to anyMap)
 open import Data.List.Any.Properties using (map⁺)
 open import Data.List.Any.Membership.Propositional.Properties using (∈-map⁺)
 open import Data.Vec using (Vec; lookup) renaming (map to mapᵥ; allFin to allFinᵥ)
+open import Function using (_∘_)
 open import Induction.WellFounded using (Acc; acc)
 open import Induction.Nat using () renaming (<-well-founded to <-wf)
 open import Relation.Nullary using (yes; no)
@@ -22,7 +23,7 @@ open import Relation.Binary.PropositionalEquality using (refl; sym; trans; cong;
 open import RoutingLib.Asynchronous.Schedule
 open import RoutingLib.Data.Nat.Properties using ( m<n≤o⇒o∸n<o∸m; m≤n⊎m≤o⇒m≤n⊔o; ∀x≤m:n≢x⇒m<n; m⊔n≡m⇒n≤m; n⊔m≡m⇒n≤m)
 open import RoutingLib.Data.Table using (max)
-open import RoutingLib.Data.Table.Properties using (t≤max[t]; x≤max[t]; max[t]≤max[s]; max[t]≤max[s]₂; ⊥≤max[t])
+open import RoutingLib.Data.Table.Properties using (t≤max[t]; x≤max[t]; max[s]≤max[t]; ⊥≤max[t])
 import RoutingLib.Asynchronous.Schedule.Times as Times
 
 module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n) where
@@ -48,8 +49,8 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
   -- Activations --
   -----------------
   -- Properties of nextActive'
-  nextActive'-inc : ∀ t k i (p : i ∈ α (t + suc k))(rs : Acc _<_ k) →
-                    t ≤ proj₁ (nextActive' t k i p rs)
+  nextActive'-inc : ∀ t k i (p : i ∈ α (t + suc k))(accₖ : Acc _<_ k) →
+                    t ≤ proj₁ (nextActive' t k i p accₖ)
   nextActive'-inc t zero i p _ = n≤1+n t
   nextActive'-inc t (suc k) i p (acc rs) with i ∈? α t
   ... | yes i∈α = ≤-reflexive refl
@@ -62,33 +63,30 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
   nextActive-inc t i with nonstarvation t i
   ... | k , p = nextActive'-inc t k i p (<-wf k)
 
-  postulate nextActive-active : ∀ t i → i ∈ α (nextActive t i)
-  {-
-  nextActive-active zero i = subst (i ∈_) (sym α₀) ∈⊤
-  nextActive-active (suc t) i with nonstarvation (suc t) i
-  ... | k , p with nextActive' (suc t) k i p (<-wf k)
-  ... | _ , active = active
-  -}
+  nextActive-active : ∀ t i → i ∈ α (nextActive t i)
+  nextActive-active t i with nonstarvation t i
+  ... | (k , p) = proj₂ (nextActive' t k i p (<-wf k))
+
   ---------------
   -- Data flow --
   ---------------
   -- Properties of expiryᵢⱼ
-  postulate expiryᵢⱼ-inc : ∀ t i j → t ≤ expiryᵢⱼ t i j
-  --expiryᵢⱼ-inc t i j = ≤-trans (finite-inc t i j) (≤-trans {!!} (t≤max[t] {suc t} zero (λ x → (toℕ x) + proj₁ (finite (toℕ x) i j)) (fromℕ t) ))
-              -- (λ x → (toℕ x) + proj₁ (finite (toℕ x) i j))
-              -- (λ x → finite-inc (toℕ x) i j)
+  expiryᵢⱼ-inc : ∀ t i j → t ≤ expiryᵢⱼ t i j
+  expiryᵢⱼ-inc t i j = ⊥≤max[t] {suc t} t ((λ x → (toℕ x) + proj₁ (finite (toℕ x) i j)))
 
   expiryᵢⱼ-monotone : ∀ {t k} → t ≤ k → ∀ i j → expiryᵢⱼ t i j ≤ expiryᵢⱼ k i j
-  expiryᵢⱼ-monotone {t} {k} t≤k i j = max[t]≤max[s]₂ {suc t} {suc k}
-                    (s≤s t≤k) z≤n
-                    {λ x → (toℕ x) + proj₁ (finite (toℕ x) i j)}
-                    {λ x → (toℕ x) + proj₁ (finite (toℕ x) i j)}
-                    ( λ x → ≤-reflexive (trans
-                      (cong (_+ proj₁ (finite (toℕ x) i j))
-                        (sym (inject≤-lemma x (s≤s t≤k))))
-                      (cong (toℕ (inject≤ x (s≤s t≤k)) +_)
-                        (cong (λ y → proj₁ (finite y i j))
-                          (sym (inject≤-lemma x (s≤s t≤k)))))))
+  expiryᵢⱼ-monotone {t} {k} t≤k i j = max[s]≤max[t] t {k} {suc t} {suc k}
+                    {(λ x → (toℕ x) + proj₁ (finite (toℕ x) i j))}
+                    {(λ x → (toℕ x) + proj₁ (finite (toℕ x) i j))}
+                    (inj₁ t≤k) λ x → inj₂ (inject≤ x (s≤s t≤k) , ≤-reflexive (inject-x x))
+                    where
+                    inject-x : ∀ x → toℕ x + proj₁ (finite (toℕ x) i j) ≡
+                               toℕ (inject≤ x (s≤s t≤k)) +
+                               proj₁ (finite (toℕ (inject≤ x (s≤s t≤k))) i j)
+                    inject-x x = trans
+                      (cong (_+ proj₁ (finite (toℕ x) i j)) (sym (inject≤-lemma x (s≤s t≤k))))
+                      (cong (toℕ (inject≤ x (s≤s t≤k)) +_) (cong (λ y → proj₁ (finite y i j))
+                          (sym (inject≤-lemma x (s≤s t≤k)))))
 
 
   -- Properties of expiryᵢ
@@ -98,8 +96,9 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
   expiryᵢ-inc : ∀ t i → t ≤ expiryᵢ t i
   expiryᵢ-inc t i = ⊥≤max[t] t (expiryᵢⱼ t i)
 
-  expiryᵢ-monotone : ∀ {t k} i → t ≤ k → expiryᵢ t i ≤ expiryᵢ k i
-  expiryᵢ-monotone {t} {k} i t≤k = max[t]≤max[s] t k t≤k (expiryᵢⱼ-monotone t≤k i)
+  expiryᵢ-monotone : ∀ {t k} → t ≤ k → ∀ i → expiryᵢ t i ≤ expiryᵢ k i
+  expiryᵢ-monotone {t} {k} t≤k i = max[s]≤max[t] t (inj₁ t≤k)
+                   (λ j → inj₂ (j , expiryᵢⱼ-monotone t≤k i j))
 
   -- Properties of expiry
   expiryᵢ≤expiry : ∀ t i → expiryᵢ t i ≤ expiry t 
@@ -109,6 +108,7 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
   expiry-inc t = ⊥≤max[t] t (expiryᵢ t)
 
   postulate expiryₜ≤k⇒t≤βk : ∀ t k i j → expiry t ≤ k → t ≤ β k i j
+  --<⇒≤ (∀x≤m:n≢x⇒m<n t (β k i j) (λ x≤t → {!!}))
   -- expiryₜ≤k⇒t≤βk t k i j expiryₜ≤k = <⇒≤ (∀x≤m:n≢x⇒m<n t (β k i j) λ x≤t → {!!})
 
 
@@ -123,7 +123,7 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
                    k ∎)))-}
 
   expiry-monotone : ∀ {t k} → t ≤ k → expiry t ≤ expiry k
-  expiry-monotone {t} {k} t≤k = max[t]≤max[s] t k t≤k (λ i → expiryᵢ-monotone i t≤k)
+  expiry-monotone {t} {k} t≤k = max[s]≤max[t] t {k} (inj₁ t≤k) (λ i → inj₂ (i , expiryᵢ-monotone t≤k i))
 
    ---------------
   -- Psuedo-cycles --

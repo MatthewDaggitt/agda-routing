@@ -122,11 +122,12 @@ module RoutingLib.Data.Table.Properties where
   x<max[t] {n} {x} {t} ⊥ (inj₁ x<⊥) = foldr-⊎presʳ (_ <_) m≤o⇒m≤n⊔o x<⊥ t
   x<max[t] ⊥ (inj₂ x<t) = foldr-⊎pres (_ <_) m≤n⊎m≤o⇒m≤n⊔o ⊥ x<t
 
-  postulate max[t]≤max[s]₂ : ∀ {m n} (m≤n : m ≤ n) {⊥₁ ⊥₂} → ⊥₁ ≤ ⊥₂ →
-                             {s : Table ℕ m} {t : Table ℕ n} →
-                             (∀ i → s i ≤ t (inject≤ i m≤n)) → max ⊥₁ s ≤ max ⊥₂ t
-                             
-  postulate max[t]≤max[s]₃ : ∀ {n} {s t : Table ℕ n} ⊥₁ ⊥₂ → ⊥₁ ≤ ⊥₂ → Pointwise _≤_ s t → max ⊥₁ s ≤ max ⊥₂ t
+  max[s]≤max[t] : ∀ ⊥₁ {⊥₂} {m n} {s : Table ℕ m} {t : Table ℕ n} → ⊥₁ ≤ ⊥₂ ⊎ Any (⊥₁ ≤_) t →
+                  All (λ y → y ≤ ⊥₂ ⊎ Any (y ≤_) t) s → max ⊥₁ s ≤ max ⊥₂ t
+  max[s]≤max[t] ⊥₁ {⊥₂} {m = zero}  v all = x≤max[t] ⊥₂ v
+  max[s]≤max[t] ⊥₁ {⊥₂} {m = suc n} {s = s} {t = t}  v all = n≤m×o≤m⇒n⊔o≤m
+                (x≤max[t] ⊥₂ (all fzero))
+                (max[s]≤max[t] ⊥₁ v (all ∘ fsuc))
 
   min∞[t]≤x : ∀ ⊤ {n} (t : Table ℕ∞ n) {x} → ⊤ ≤∞ x ⊎ Any (_≤∞ x) t → min∞ ⊤ t ≤∞ x
   min∞[t]≤x ⊤ t (inj₁ ⊤≤x) = foldr-⊎presʳ (_≤∞ _)  o≤∞m⇒n⊓o≤∞m ⊤≤x t

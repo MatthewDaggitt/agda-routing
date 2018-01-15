@@ -81,38 +81,3 @@ module RoutingLib.Asynchronous.Schedule where
   𝕤₁ ⟦ t₁ ⟧≈⟦ t₂ ⟧ 𝕤₂ = (α 𝕤₁) ⟦ t₁ ⟧≈𝔸⟦ t₂ ⟧ (α 𝕤₂) × (β 𝕤₁) ⟦ t₁ ⟧≈𝔹⟦ t₂ ⟧ (β 𝕤₂)
     where open Schedule
 
-
-  -----------------------
-  -- Example schedules --
-  -----------------------
-  -- The "synchronous" schedule
-
-  α-sync : ∀ {n} → 𝔸 n
-  α-sync _ = ⊤
-
-  β-sync : ∀ {n} → 𝔹 n
-  β-sync t  _ _ = pred t
-
-  abstract
-    
-    α-sync-nonStarvation : ∀ {n} → NonStarvation (α-sync {n})
-    α-sync-nonStarvation t _ = suc t , ∈⊤
-
-    β-sync-causality : ∀ {n} → Causality (β-sync {n})
-    β-sync-causality _ _ _ = ≤-refl
-
-    postulate β-sync-dynamic : ∀ {n} → Dynamic (β-sync {n})
-    {-
-    β-sync-dynamic t _ _ = suc (suc t) , λ k p[t+[2+t]+k]≡t → {!begin
-      t + suc t + k ≡ t? ≈⟨ ? ⟩
-      !}
-      where open ≤-Reasoning
-    -}
-  𝕤-sync : ∀ n → Schedule n
-  𝕤-sync n = record 
-    { α              = α-sync 
-    ; β              = β-sync 
-    ; nonstarvation  = α-sync-nonStarvation
-    ; causality      = β-sync-causality 
-    ; finite         = β-sync-dynamic 
-    }

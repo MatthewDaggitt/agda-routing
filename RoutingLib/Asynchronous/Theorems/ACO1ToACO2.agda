@@ -24,7 +24,7 @@ open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-
 open import RoutingLib.Data.List.Sorting ≤-decTotalOrder using (sort; sort-Sorted; sort-↗)
 open import RoutingLib.Data.List.Sorting.Properties ≤-decTotalOrder using (↗-unique; ↗-length; ↗-∈ˡ; ↗-∈ʳ)
 open import RoutingLib.Data.List.Sorting.Nat using (strictlySorted)
-open import RoutingLib.Data.List.Uniqueness using (Unique)
+--open import RoutingLib.Data.List.Uniqueness using (Unique)
 open import RoutingLib.Data.Table using (Table)
 open import RoutingLib.Data.Vec.Properties using (∈-lookup; ∈-fromList⁻; ∈-lookup⁺)
 open import RoutingLib.Data.Vec.All.Properties using (AllPairs-lookup; AllPairs-fromList⁺)

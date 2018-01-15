@@ -11,7 +11,7 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Pred) renaming (_∈_ to _∈ᵤ_)
 open import Induction.WellFounded using (Acc; acc)
-open import Induction.Nat using () renaming (<-well-founded to <-wf)
+open import Induction.Nat using (<-well-founded)
 
 open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 open import RoutingLib.Data.Fin.Properties using ()
@@ -32,22 +32,22 @@ module RoutingLib.Asynchronous where
     
     field
       f      : M → M
-    
-    module _ (𝕤 : Schedule n) where
+
+    module _ (𝕤 : Schedule n)(x₀ : M) where
 
       open Schedule 𝕤
 
-      async-iter : ∀ {t} → Acc _<_ t → M → M
-      async-iter {zero} _ x₀ i = x₀ i
-      async-iter {suc t} (acc rs) x₀ i with i ∈? α (suc t)
-      ... | yes _ = f (λ j → async-iter (rs (β (suc t) i j) (s≤s (causality t i j)))
-                x₀ j) i
-      ... | no  _ = async-iter (rs t ≤-refl) x₀ i
+      async-iter' : ∀ {t} → Acc _<_ t → M
+      async-iter' {zero} _ i = x₀ i
+      async-iter' {suc t} (acc rs) i with i ∈? α (suc t)
+      ... | yes _ = f (λ j → async-iter' (rs (β (suc t) i j) (s≤s (causality t i j))) j) i
+      ... | no  _ = async-iter' (rs t ≤-refl) i
 
-      δ : ℕ → M → M
-      δ t = async-iter (<-wf t)
+      async-iter : 𝕋 → M
+      async-iter t = async-iter' (<-well-founded t)
 
 
+{-
   -- A record encapsulating the idea that p is a well behaved parallelisation
   record IsAsynchronouslySafe {a ℓ n} {S : Fin n → Setoid a ℓ} (p : Parallelisation S) : Set (lsuc (a ⊔ ℓ)) where
   
@@ -56,4 +56,4 @@ module RoutingLib.Asynchronous where
     field
       m*         : M
       m*-reached : ∀ 𝕤 X → ∃ λ tᶜ → ∀ t → δ 𝕤 (tᶜ + t) X ≈ m*
-
+-}

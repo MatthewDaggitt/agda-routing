@@ -1,61 +1,57 @@
--- imports
-open import Data.Nat
-  using (ℕ; zero; suc) renaming (_+_ to _+ℕ_; _⊓_ to _⊓ℕ_; _⊔_ to _⊔ℕ_)
-open import Relation.Binary
-  using (Rel; Decidable)
-open import Level
-  using () renaming (zero to lzero)
-open import Relation.Binary.PropositionalEquality
-  using (_≡_; refl; subst)
-open import Relation.Nullary
-  using (yes; no; ¬_)
-open import Function
-  using (_∘_)
-open import Data.Sum
-  using (_⊎_; [_,_])
+open import Data.Nat using (ℕ; zero; suc) renaming (_+_ to _+ℕ_; _⊓_ to _⊓ℕ_; _⊔_ to _⊔ℕ_)
+open import Function using (_∘_)
+open import Level using () renaming (zero to lzero; suc to lsuc)
+open import Relation.Binary using (Rel; Decidable)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; subst)
+open import Relation.Nullary using (¬_; yes; no)
 
-module NatInf where
+module RoutingLib.Data.NatInf where
 
   data ℕ∞ : Set where
     ∞ : ℕ∞
     N : ℕ → ℕ∞
 
+  -- Ordering Relations
   infix 4 _≤_
   data _≤_ : Rel ℕ∞ lzero where
-    z≤n : ∀ {n}                         → N zero  ≤ n
-    s≤s : ∀ {m n} (m≤n : (N m) ≤ (N n)) → N (suc m) ≤ N (suc n)
-    n≤∞ : ∀ {n}                         → n ≤ ∞
-
-  data _≤'_ : Rel ℕ∞ lzero where
-    ≤'-∞    : ∀ {m} → (N m) ≤' ∞
-    ≤'-refl : ∀ {m}→ N m ≤' N m
-    ≤'-step : ∀ {m n} (m≤'n : _≤'_ (N m) (N n)) → N m ≤' N (suc n)
-
-  suc∞ : ℕ∞ → ℕ∞
-  suc∞ ∞ = ∞
-  suc∞ (N n) = N (suc n)
-
-  _<'_ : Rel ℕ∞ lzero
-  m <' n = suc∞ m ≤' n
-
-  _≥_ : Rel ℕ∞ lzero
-  n ≥ m = m ≤ n
-
-  _≱_ : Rel ℕ∞ lzero
-  m ≱ n = ¬ (m ≥ n)
-
-  _≰_ : Rel ℕ∞ lzero
-  m ≰ n = ¬ (m ≤ n)
+    z≤n : ∀ {n}                     → N zero ≤ n
+    s≤s : ∀ {m n} (m≤n : N m ≤ N n) → N (suc m) ≤ N (suc n)
+    n≤∞ : ∀ {n}                     → n ≤ ∞
 
   _<_ : Rel ℕ∞ lzero
-  ∞ < n = ∞ ≤ n
-  N m < n = N (suc m) ≤ n
+  ∞   < n = ∞ ≤ n
+  N x < n = N (suc x) ≤ n
+
+  _≥_ : Rel ℕ∞ lzero
+  m ≥ n = n ≤ m
 
   _>_ : Rel ℕ∞ lzero
   m > n = n < m
 
+  _≰_ : Rel ℕ∞ lzero
+  m ≰ n = ¬ (m ≤ n)
+
   _≮_ : Rel ℕ∞ lzero
-  m ≮ n = ¬ (n < m)
+  m ≮ n = ¬ (m < n)
+
+  _≱_ : Rel ℕ∞ lzero
+  m ≱ n = ¬ (m ≥ n)
+
+  _≯_ : Rel ℕ∞ lzero
+  m ≯ n = ¬ (m > n)
+
+  data _≤'_ : Rel ℕ∞ lzero where
+    ≤'-∞    : ∀ {m}                             → (N m) ≤' ∞
+    ≤'-refl : ∀ {m}                             → N m ≤' N m
+    ≤'-step : ∀ {m n} (m≤'n : _≤'_ (N m) (N n)) → N m ≤' N (suc n)
+
+  _<'_ : Rel ℕ∞ lzero
+  ∞   <' n = ∞ ≤' n
+  N x <' n = N (suc x) ≤' n
+
+  -- Operations
+  infix 6 _+_ _⊓_ _⊔_
+  
   _+_ : ℕ∞ → ℕ∞ → ℕ∞
   ∞ + m = ∞
   N n + ∞ = ∞
@@ -77,6 +73,11 @@ module NatInf where
   pred (N zero) = N zero
   pred (N (suc n)) = N n
 
+  extractℕ : ℕ∞ → ℕ
+  extractℕ ∞ = 0
+  extractℕ (N x) = x
+
+  -- Decidability
   _≟_ : Decidable {A = ℕ∞} _≡_
   ∞ ≟ ∞ = yes refl
   ∞ ≟ N n = no λ()
@@ -99,7 +100,3 @@ module NatInf where
   N (suc x) ≤? N (suc x₁) with (N x) ≤? (N x₁)
   ... | yes p = yes (s≤s p)
   ... | no ¬p = no (¬p ∘ ≤-pred)
-
-  extractℕ : ℕ∞ → ℕ
-  extractℕ ∞ = 0
-  extractℕ (N x) = x

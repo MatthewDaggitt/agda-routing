@@ -1,18 +1,14 @@
 -- imports
 open import Data.Nat
   using (ℕ; zero; suc)
-open import NatInf
-  using (ℕ∞; ∞; N)
 open import Data.Fin
   using (Fin) renaming (zero to fzero; suc to fsuc)
-open import Schedule
-  using (Schedule; 𝕋)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; refl)
-open import Schedule.Synchronous
-  using (synchronous-schedule)
 
-module AllPairs.Example where
+open import RoutingLib.Data.NatInf using (ℕ∞; N; ∞)
+
+module RoutingLib.Asynchronous.Applications.AllPairs.Example where
 
   row₁ : Fin 5 → ℕ∞
   row₁ fzero                             = N 0
@@ -58,9 +54,6 @@ module AllPairs.Example where
   grid (fsuc (fsuc (fsuc (fsuc fzero)))) = row₅
   grid (fsuc (fsuc (fsuc (fsuc (fsuc ())))))
 
-  s : Schedule 5
-  s = synchronous-schedule 5
-
   Cᵢ,ᵢ : ∀ i → grid i i ≡ N 0
   Cᵢ,ᵢ fzero = refl
   Cᵢ,ᵢ (fsuc fzero) = refl
@@ -68,12 +61,3 @@ module AllPairs.Example where
   Cᵢ,ᵢ (fsuc (fsuc (fsuc fzero))) = refl
   Cᵢ,ᵢ (fsuc (fsuc (fsuc (fsuc fzero)))) = refl
   Cᵢ,ᵢ (fsuc (fsuc (fsuc (fsuc (fsuc ())))))
-
-  open import AllPairs.Convergence s grid Cᵢ,ᵢ
-    using (convergence; result)
-
-  t : 𝕋
-  t = convergence
-
-  r : Fin 5 → Fin 5 → ℕ∞
-  r = result

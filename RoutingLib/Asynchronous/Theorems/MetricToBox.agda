@@ -72,7 +72,7 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
 -}
 
     -- Radii in list form
-    {-
+{-
     radii : List ℕ
     radii = mergesort (deduplicate allDistances)
 

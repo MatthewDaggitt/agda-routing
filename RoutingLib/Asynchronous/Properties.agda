@@ -1,7 +1,7 @@
 open import Data.Nat using (ℕ; _≤_; _≤?_; _<_; _+_; _∸_; zero; suc; z≤n; s≤s; _≟_; ≤-pred)
 open import Data.Nat.Properties using (n≤1+n; ≰⇒>; +-∸-assoc; n∸n≡0; ≤-refl; ≤-antisym; ≤+≢⇒<; ≤-reflexive; ≤-trans; +-assoc; +-identityʳ; _<?_; ≮⇒≥; <⇒≤; +-cancelʳ-≡)
 open import Data.Fin using (Fin)
-open import Data.Fin.Subset using (_∈_; ⊤)
+-- open import Data.Fin.Subset using (_∈_; ⊤)
 open import Data.Fin.Subset.Properties using (∈⊤)
 open import Data.Fin.Dec using (_∈?_; all?; ¬∀⟶∃¬)
 open import Data.Product using (∃; _,_; _×_)
@@ -9,19 +9,23 @@ open import Relation.Binary using (_Preserves_⟶_; _⇒_; Reflexive; Symmetric;
 open import Relation.Binary.PropositionalEquality using (_≡_; cong; refl; sym; trans; _≗_; subst; module ≡-Reasoning)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
+open import Relation.Unary renaming (_∉_ to _∉ᵤ_)
 open import Induction.WellFounded using (Acc; acc)
 open import Induction.Nat using () renaming (<-well-founded to <-wf)
 
 open import RoutingLib.Asynchronous
-open import RoutingLib.Asynchronous.Schedule using (Schedule; 𝕤-sync; _⟦_⟧≈⟦_⟧_)
-open import RoutingLib.Asynchronous.Schedule.Properties using (⟦⟧≈⟦⟧-fastForward)
+open import RoutingLib.Asynchronous.Schedule using (Schedule)
+open import RoutingLib.Asynchronous.Schedule.Properties using ()
 open import RoutingLib.Data.Nat.Properties using (m≤n⇒m∸n≡0; m>n⇒m∸n≢0; w∸x≡y∸z⇒v+x≡w∧v+y≡z)
 open import RoutingLib.Data.Table.Relation.Equality as TableEquality
+open import RoutingLib.Data.Table using (Table)
+open import RoutingLib.Data.Table.Any using (Any)
 
-module RoutingLib.Asynchronous.Properties {a ℓ n} {S : Setoid a ℓ} (p : Parallelisation S n) where
+module RoutingLib.Asynchronous.Properties {a ℓ n} {S : Table (Setoid a ℓ) n} (p : Parallelisation S) where
   
   open Parallelisation p
 
+{-
   -------------------------
   -- Equality properties --
   -------------------------
@@ -128,3 +132,4 @@ module RoutingLib.Asynchronous.Properties {a ℓ n} {S : Setoid a ℓ} (p : Para
       ≈ₛ⇒≈ₘ X₁ X₂ 𝕤-eq snapshot-eq δX₁≈δX₂ t = ≈ₛ⇒≈ₘ' X₁ X₂ 𝕤-eq snapshot-eq δX₁≈δX₂ t (<-wf _) (<-wf _)
 
       
+-}

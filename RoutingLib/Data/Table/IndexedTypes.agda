@@ -2,6 +2,7 @@ open import Data.Fin using (Fin)
 open import Data.Product using (∃; _×_)
 open import Level using (Level; _⊔_) renaming (suc to lsuc)
 open import Relation.Binary
+open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 open import Relation.Unary using () renaming (Pred to Predᵤ; _∈_ to _∈ᵤ_)
 open import Relation.Nullary using (¬_)
 
@@ -43,6 +44,9 @@ module RoutingLib.Data.Table.IndexedTypes {a ℓ n} (S : Table (Setoid a ℓ) n)
 
   ≈-trans : Transitive _≈_
   ≈-trans r≈s s≈t i = ≈ᵢ-trans (r≈s i) (s≈t i)
+
+  ≈-cong : ∀ {b} {A : Set b} (f : A → M) {x y} → x ≡ y → f x ≈ f y
+  ≈-cong g refl i = ≈ᵢ-refl
   
   ≈-isEquivalence : IsEquivalence _≈_
   ≈-isEquivalence = record
@@ -66,6 +70,9 @@ module RoutingLib.Data.Table.IndexedTypes {a ℓ n} (S : Table (Setoid a ℓ) n)
 
   _∈_ : ∀ {p} → M → Pred p → Set p
   t ∈ P = ∀ i → t i ∈ᵤ P i
+
+  _∉_ : ∀ {p} → M → Pred p → Set p
+  t ∉ P = ¬ (t ∈ P)
 
   _⊆_ : ∀ {p} → Rel (Pred p) (a ⊔ p)
   P ⊆ Q = ∀ {t} → t ∈ P → t ∈ Q

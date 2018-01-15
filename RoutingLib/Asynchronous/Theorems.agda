@@ -20,12 +20,11 @@ open import RoutingLib.Relation.Unary using () renaming (_⊈_ to _⊈ᵤ_)
 open import RoutingLib.Data.Nat.Properties using (n≤0⇒n≡0; ℕₛ)
 open import RoutingLib.Data.Fin.Properties using (≤fromℕ; ≤+≢⇒<; <⇒≤pred)
 open import RoutingLib.Data.List.All using (AllPairs)
-open import RoutingLib.Data.List using (max)
 open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-length)
 open import RoutingLib.Data.List.Sorting ≤-decTotalOrder using (sort; sort-Sorted; sort-↗)
 open import RoutingLib.Data.List.Sorting.Properties ≤-decTotalOrder using (↗-unique; ↗-length; ↗-∈ˡ; ↗-∈ʳ)
 open import RoutingLib.Data.List.Sorting.Nat using (strictlySorted)
-open import RoutingLib.Data.Table using (Table)
+open import RoutingLib.Data.Table using (Table; max)
 open import RoutingLib.Data.Vec.Properties using (∈-lookup; ∈-fromList⁻; ∈-lookup⁺)
 open import RoutingLib.Data.Vec.All.Properties using (AllPairs-lookup; AllPairs-fromList⁺)
 open import RoutingLib.Function.Image using (FiniteImage)
@@ -34,8 +33,9 @@ module RoutingLib.Asynchronous.Theorems {a ℓ n}
                                         {S : Table (Setoid a ℓ) n} (p : Parallelisation S) where
 
   open Parallelisation p
-  open import RoutingLib.Function.Distance M-setoid using (IsUltrametric; _StrContrOver_)
-
+  open import RoutingLib.Function.Distance using (IsUltrametric)
+  open import RoutingLib.Function.Distance M-setoid using (_StrContrOver_)
+  
   record ACO p : Set (lsuc (lsuc (a ⊔ p ⊔ ℓ))) where
     field
       T            : ℕ
@@ -47,12 +47,26 @@ module RoutingLib.Asynchronous.Theorems {a ℓ n}
       f-monotonic  : ∀ K {t} → t ∈ D K → f t ∈ D (suc K)
 
 
-  record UltrametricConditions : Set (a ⊔ ℓ) where
+  record GurneyUltrametricConditions : Set (a ⊔ ℓ) where
     field
       d                  : M → M → ℕ
-      d-isUltrametric    : IsUltrametric d
+      d-isUltrametric    : IsUltrametric M-setoid d
       d-finiteImage      : ∀ m → FiniteImage ℕₛ (d m)
       σ-strContr-d       : f StrContrOver d
+      _≟_                : Decidable _≈_
+      
+  record TrueUltrametricConditions : Set (a ⊔ ℓ) where
+    field
+      dᵢ                 : ∀ {i} → Mᵢ i → Mᵢ i → ℕ
+
+    d : M → M → ℕ
+    d m n = max 0 (λ i → dᵢ {i} (m i) (n i))
+
+    field
+      d-isUltrametric    : ∀ i → IsUltrametric (S i) dᵢ
+      d-finiteImage      : ∀ (m : M) → FiniteImage {A = M} ℕₛ (λ n → max 0 (λ i → dᵢ (m i) (n i)))
+      f-contrOn          : ∀ i m → dᵢ (f (f m) i) (f m i) ≤ dᵢ (f m i) (m i)
+      f-strContrOver-d   : f StrContrOver d
       _≟_                : Decidable _≈_
       
 {-

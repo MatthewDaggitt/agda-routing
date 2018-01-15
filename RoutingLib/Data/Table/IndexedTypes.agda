@@ -68,7 +68,7 @@ module RoutingLib.Data.Table.IndexedTypes {a ℓ n} (S : Table (Setoid a ℓ) n)
   t ∈ P = ∀ i → t i ∈ᵤ P i
 
   _⊆_ : ∀ {p} → Rel (Pred p) (a ⊔ p)
-  P ⊆ Q = ∀ t → t ∈ P → t ∈ Q
+  P ⊆ Q = ∀ {t} → t ∈ P → t ∈ Q
 
   _⊂_ : ∀ {p} → Rel (Pred p) (a ⊔ p)
   P ⊂ Q = P ⊆ Q × ∃ λ t → t ∈ Q × ¬ (t ∈ P)

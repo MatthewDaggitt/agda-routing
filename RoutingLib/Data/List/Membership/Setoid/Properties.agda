@@ -186,10 +186,10 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     ∈-length {_} {_ ∷ xs} (here px)    = length xs , refl
     ∈-length {_} {_ ∷ _}  (there x∈xs) = mapₚ suc (cong suc) (∈-length x∈xs)
 
-    ∈-index : ∀ {i xs} (i<|xs| : i < length xs) → index xs i<|xs| ∈ xs
-    ∈-index {_}     {[]}     ()
-    ∈-index {zero}  {x ∷ xs} (s≤s z≤n)    = here ≈-refl
-    ∈-index {suc i} {x ∷ xs} (s≤s i<|xs|) = there (∈-index i<|xs|)
+    ∈-lookup : ∀ {i xs} (i<|xs| : i < length xs) → lookup xs i<|xs| ∈ xs
+    ∈-lookup {_}     {[]}     ()
+    ∈-lookup {zero}  {x ∷ xs} (s≤s z≤n)    = here ≈-refl
+    ∈-lookup {suc i} {x ∷ xs} (s≤s i<|xs|) = there (∈-lookup i<|xs|)
 
 
     indexOf[xs]<|xs| : ∀ {x xs} (x∈xs : x ∈ xs) → indexOf x∈xs < length xs
@@ -211,12 +211,12 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     indexOf-revCong (there x∈xs) (here y≈z)   ()
     indexOf-revCong (there x∈xs) (there y∈xs) indexEq = indexOf-revCong x∈xs y∈xs (suc-injective indexEq)
 
-    indexOf-index : ∀ {i xs} → Unique S xs → (i<|xs| : i < length xs) (xsᵢ∈xs : (index xs i<|xs|) ∈ xs) → indexOf xsᵢ∈xs ≡ i
-    indexOf-index {_}     []           ()     
-    indexOf-index {zero}  (_    ∷ _)   (s≤s i<|xs|) (here xsᵢ≈x)   = refl
-    indexOf-index {zero}  (x≉xs ∷ _)   (s≤s i<|xs|) (there x∈xs)  = contradiction x∈xs (All¬⇒¬Any x≉xs)
-    indexOf-index {suc i} (x≉xs ∷ _)   (s≤s i<|xs|) (here xsᵢ≈x)   = contradiction (∈-resp-≈ (∈-index i<|xs|) xsᵢ≈x) (All¬⇒¬Any x≉xs)
-    indexOf-index {suc i} (_    ∷ xs!) (s≤s i<|xs|) (there xsᵢ∈xs) = cong suc (indexOf-index xs! i<|xs| xsᵢ∈xs)
+    indexOf-lookup : ∀ {i xs} → Unique S xs → (i<|xs| : i < length xs) (xsᵢ∈xs : (lookup xs i<|xs|) ∈ xs) → indexOf xsᵢ∈xs ≡ i
+    indexOf-lookup {_}     []           ()     
+    indexOf-lookup {zero}  (_    ∷ _)   (s≤s i<|xs|) (here xsᵢ≈x)   = refl
+    indexOf-lookup {zero}  (x≉xs ∷ _)   (s≤s i<|xs|) (there x∈xs)  = contradiction x∈xs (All¬⇒¬Any x≉xs)
+    indexOf-lookup {suc i} (x≉xs ∷ _)   (s≤s i<|xs|) (here xsᵢ≈x)   = contradiction (∈-resp-≈ (∈-lookup i<|xs|) xsᵢ≈x) (All¬⇒¬Any x≉xs)
+    indexOf-lookup {suc i} (_    ∷ xs!) (s≤s i<|xs|) (there xsᵢ∈xs) = cong suc (indexOf-lookup xs! i<|xs| xsᵢ∈xs)
 
     
     

@@ -21,7 +21,13 @@ module RoutingLib.Data.Table.Membership.Propositional.Properties where
   sel⇒foldr⁺[t]∈t : ∀ {a} {A : Set a} {_•_ : Op₂ A} → Selective _≡_ _•_ →
                  ∀ {n} (t : Table A (suc n)) → foldr⁺ _•_ t ∈ t
   sel⇒foldr⁺[t]∈t {A = A} = Prop.sel⇒foldr⁺[t]∈t (setoid A)
-    
+
+  max[t]∈t : ∀ ⊥ {n} (t : Table ℕ n) → max ⊥ t ≡ ⊥ ⊎ max ⊥ t ∈ t
+  max[t]∈t = sel⇒foldr[t]∈t ⊔-sel
+
+  min[t]∈t : ∀ ⊤ {n} (t : Table ℕ n) → min ⊤ t ≡ ⊤ ⊎ min ⊤ t ∈ t
+  min[t]∈t = sel⇒foldr[t]∈t ⊓-sel
+  
   max⁺[t]∈t : ∀ {n} (t : Table ℕ (suc n)) → max⁺ t ∈ t
   max⁺[t]∈t = sel⇒foldr⁺[t]∈t ⊔-sel
 

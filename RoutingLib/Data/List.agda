@@ -52,9 +52,7 @@ module RoutingLib.Data.List where
   allFinPairs : ∀ n → List (Fin n × Fin n)
   allFinPairs n = combine _,_ (allFin n) (allFin n)
 
-  -- Max and min
-
-  index : ∀ {a} {A : Set a} (xs : List A) {i} → i < length xs → A
-  index []       {_}     ()
-  index (x ∷ xs) {zero}  (s≤s i<|xs|) = x
-  index (x ∷ xs) {suc i} (s≤s i<|xs|) = index xs i<|xs|
+  lookup : ∀ {a} {A : Set a} (xs : List A) {i} → i < length xs → A
+  lookup []       {_}     ()
+  lookup (x ∷ xs) {zero}  _            = x
+  lookup (x ∷ xs) {suc i} (s≤s i<|xs|) = lookup xs i<|xs|

@@ -74,7 +74,7 @@ module RoutingLib.Data.Nat.Properties where
     ≤-cardinality : ∀ {m n} (≤₁ : m ≤ n) (≤₂ : m ≤ n) → ≤₁ ≡ ≤₂
     ≤-cardinality z≤n      z≤n      = refl
     ≤-cardinality (s≤s ≤₁) (s≤s ≤₂) = cong s≤s (≤-cardinality ≤₁ ≤₂)
-
+    
     ∀x≤m:n≢x⇒m<n : ∀ m n → (∀ {x} → x ≤ m → n ≢ x) → m < n
     ∀x≤m:n≢x⇒m<n _ zero    x≤m⇒n≢x = contradiction refl (x≤m⇒n≢x z≤n)
     ∀x≤m:n≢x⇒m<n zero (suc n) x≤0⇒n≢x = s≤s z≤n
@@ -96,7 +96,8 @@ module RoutingLib.Data.Nat.Properties where
     module ≤-Reasoning where
       open StrictReasoning ≤-trans ≤-reflexive <-trans <-transˡ <-transʳ public using
         ( begin_
-        ; _≡⟨_⟩_ 
+        ; _≡⟨_⟩_
+        ; _≡⟨⟩_
         ; _≤⟨_⟩_
         ; _<⟨_⟩_
         ; _∎
@@ -330,6 +331,14 @@ module RoutingLib.Data.Nat.Properties where
     m∸n≡0⇒m≤n {suc m} {zero} ()
     m∸n≡0⇒m≤n {suc m} {suc n} eq = s≤s (m∸n≡0⇒m≤n eq)
 
+    m≤n⇒m∸n≡0 : ∀ {m n} → m ≤ n → m ∸ n ≡ 0
+    m≤n⇒m∸n≡0 {n = n} z≤n = 0∸n≡0 n
+    m≤n⇒m∸n≡0 (s≤s m≤n)   = m≤n⇒m∸n≡0 m≤n
+
+    m>n⇒m∸n≢0 : ∀ {m n} → m > n → m ∸ n ≢ 0
+    m>n⇒m∸n≢0 {n = zero}  (s≤s m>n) = λ()
+    m>n⇒m∸n≢0 {n = suc n} (s≤s m>n) = m>n⇒m∸n≢0 m>n
+    
     n∸1+m<n : ∀ m {n} → 1 ≤ n → n ∸ suc m < n
     n∸1+m<n m (s≤s z≤n) = s≤s (n∸m≤n m _)
     
@@ -351,14 +360,6 @@ module RoutingLib.Data.Nat.Properties where
     m<n≤o⇒o∸n<o∸m : ∀ {m n o} → m < n → n ≤ o → o ∸ n < o ∸ m
     m<n≤o⇒o∸n<o∸m {zero}  {suc n} (s≤s m<n) (s≤s n≤o) = s≤s (n∸m≤n n _)
     m<n≤o⇒o∸n<o∸m {suc m} {_}     (s≤s m<n) (s≤s n≤o) = m<n≤o⇒o∸n<o∸m m<n n≤o
-
-    m≤n⇒m∸n≡0 : ∀ {m n} → m ≤ n → m ∸ n ≡ 0
-    m≤n⇒m∸n≡0 {n = n} z≤n = 0∸n≡0 n
-    m≤n⇒m∸n≡0 (s≤s m≤n)   = m≤n⇒m∸n≡0 m≤n
-
-    m>n⇒m∸n≢0 : ∀ {m n} → m > n → m ∸ n ≢ 0
-    m>n⇒m∸n≢0 {n = zero}  (s≤s m>n) = λ()
-    m>n⇒m∸n≢0 {n = suc n} (s≤s m>n) = m>n⇒m∸n≢0 m>n
 
     -- stdlib
     m∸[m∸n]≡n : ∀ {m n} → n ≤ m → m ∸ (m ∸ n) ≡ n

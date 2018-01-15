@@ -22,10 +22,10 @@ module RoutingLib.Relation.Binary.StrictReasoning
     
 
   infix -1 begin_
-  infixr 0 _≡⟨_⟩_ _<⟨_⟩_ _≤⟨_⟩_
+  infixr 0 _≡⟨_⟩_ _<⟨_⟩_ _≤⟨_⟩_ _≡⟨⟩_
   infix  1 _∎ 
 
-  begin_ : ∀ {x y} → (p : x ≲ y) → ⟦ p ⟧
+  begin_ : ∀ {x y} (p : x ≲ y) → ⟦ p ⟧
   begin strict    p = p
   begin nonstrict p = p
     
@@ -34,6 +34,9 @@ module RoutingLib.Relation.Binary.StrictReasoning
   x ≡⟨ x=y ⟩ nonstrict y≤z = nonstrict (case x=y of λ where refl → y≤z)
     -- ^ Note: don't match on the proof here, we need to decide strict vs nonstrict for neutral proofs
 
+  _≡⟨⟩_ : ∀ (x : A) {y} → x ≲ y → x ≲ y
+  x ≡⟨⟩ x≲y = x≲y
+  
   _<⟨_⟩_ : ∀ (x : A) {y z} → x < y → y ≲ z → x ≲ z
   x <⟨ x<y ⟩ strict    y<z = strict (<-trans x<y y<z)
   x <⟨ x<y ⟩ nonstrict y≤z = strict (<-≤-trans x<y y≤z)

@@ -140,12 +140,16 @@ module RoutingLib.Data.List.Properties where
   
   -- Properties of index
   
-  index∈xs : ∀ {a} {A : Set a} (xs : List A) {i} (i<|xs| : i < length xs) → index xs i<|xs| ∈ xs
-  index∈xs []       {_}     ()
-  index∈xs (x ∷ xs) {zero}  (s≤s i<|xs|) = here refl
-  index∈xs (x ∷ xs) {suc i} (s≤s i<|xs|) = there (index∈xs xs i<|xs|)
+  lookup∈xs : ∀ {a} {A : Set a} (xs : List A) {i} (i<|xs| : i < length xs) → lookup xs i<|xs| ∈ xs
+  lookup∈xs []       {_}     ()
+  lookup∈xs (x ∷ xs) {zero}  (s≤s i<|xs|) = here refl
+  lookup∈xs (x ∷ xs) {suc i} (s≤s i<|xs|) = there (lookup∈xs xs i<|xs|)
 
-
+  lookup-cong : ∀ {a} {A : Set a} (xs : List A) {i j} → i ≡ j →
+                (i<|xs| : i < length xs) (j<|xs| : j < length xs) → lookup xs i<|xs| ≡ lookup xs j<|xs|
+  lookup-cong []       {_}     refl ()           _
+  lookup-cong (x ∷ xs) {zero}  refl (s≤s i<|xs|) (s≤s j<|xs|) = refl
+  lookup-cong (x ∷ xs) {suc i} refl (s≤s i<|xs|) (s≤s j<|xs|) = lookup-cong xs refl i<|xs| j<|xs|
 
   -- Properties of min
   

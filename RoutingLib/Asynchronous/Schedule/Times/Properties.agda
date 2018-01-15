@@ -1,7 +1,7 @@
 open import Data.Nat using (ℕ; zero; suc; _≤_; _<_; _⊔_; _∸_; _+_; z≤n; s≤s; _≟_; _≤?_; ≤-pred)
 open import Data.Nat.Properties using (m≤m⊔n; n≤1+n; ⊔-sel; module ≤-Reasoning; <-cmp; ≤+≢⇒<; ≤-refl; <⇒≤; ⊔-identityʳ; <-irrefl; ≤-trans; ≤-reflexive; ≮⇒≥; n≤m⊔n; ⊔-mono-≤; m≤m+n; m+n∸m≡n; <⇒≢)
-open import Data.Fin using (Fin; toℕ; fromℕ; inject≤) renaming (zero to fzero)
-open import Data.Fin.Properties using (inject≤-lemma)
+open import Data.Fin using (Fin; toℕ; fromℕ; inject≤; inject₁) renaming (zero to fzero)
+open import Data.Fin.Properties using (inject≤-lemma; to-from; inject₁-lemma)
 open import Data.Fin.Subset using (_∈_)
 open import Data.Fin.Subset.Properties using (∈⊤)
 open import Data.Fin.Dec using (_∈?_)
@@ -30,17 +30,17 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
 
   open Schedule 𝕤
   open Times 𝕤
-  
+
   -----------------
   -- Finite --
   -----------------
   finite-inc : ∀ t i j → t ≤ t + proj₁ (finite t i j)
   finite-inc t i j = m≤m+n t (proj₁ (finite t i j))
 
-  finite-fin : ∀ t k i j → (t' : Fin (suc t)) →
+  finite-fin : ∀ {t} k i j (t' : Fin (suc t)) →
               (toℕ t') + proj₁ (finite (toℕ t') i j) ≤ k →
               β k i j ≢ toℕ t'
-  finite-fin t k i j t' p  with finite (toℕ t') i j
+  finite-fin {t} k i j t' p  with finite (toℕ t') i j
   ... | (m , q) = subst (_≢ toℕ t')
         (cong (λ x → β x i j) (m+n∸m≡n p))
         (q (k ∸ (toℕ t' + m)))
@@ -89,6 +89,21 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
                           (sym (inject≤-lemma x (s≤s t≤k)))))
 
 
+  expiryᵢⱼt≤k⇒t≤βk : ∀ t k i j → expiryᵢⱼ t i j ≤ k → t ≤ β k i j
+  expiryᵢⱼt≤k⇒t≤βk t k i j expiryᵢⱼt≤k = <⇒≤ (∀x≤m:n≢x⇒m<n t (β k i j)
+                   (λ {x} x≤t → subst (β k i j ≢_) (x'≡x x x≤t) (β≢t' (x' x x≤t))))
+                   where
+                   x' : ∀ x x≤t → Fin (suc t)
+                   x' x x≤t = inject≤ (fromℕ x) (s≤s x≤t)
+                   x'≡x : ∀ x x≤t → toℕ (x' x x≤t) ≡ x
+                   x'≡x x x≤t = trans (inject≤-lemma (fromℕ x) (s≤s x≤t)) (to-from x)
+                   t'≤expiry : ∀ (t' : Fin (suc t)) →
+                               toℕ t' + proj₁ (finite (toℕ t') i j) ≤ expiryᵢⱼ t i j
+                   t'≤expiry t' = t≤max[t] {suc t} t
+                               ((λ x → (toℕ x) + proj₁ (finite (toℕ x) i j))) t'
+                   β≢t' : ∀ (t' : Fin (suc t)) → β k i j ≢ toℕ t'
+                   β≢t' t' = finite-fin k i j t' (≤-trans (t'≤expiry t') expiryᵢⱼt≤k)
+
   -- Properties of expiryᵢ
   expiryᵢⱼ≤expiryᵢ : ∀ t i j → expiryᵢⱼ t i j ≤ expiryᵢ t i
   expiryᵢⱼ≤expiryᵢ t i j = t≤max[t] t (expiryᵢⱼ t i) j
@@ -100,6 +115,10 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
   expiryᵢ-monotone {t} {k} t≤k i = max[s]≤max[t] t (inj₁ t≤k)
                    (λ j → inj₂ (j , expiryᵢⱼ-monotone t≤k i j))
 
+  expiryᵢt≤k⇒t≤βk : ∀ t k i j → expiryᵢ t i ≤ k → t ≤ β k i j
+  expiryᵢt≤k⇒t≤βk t k i j expiryᵢt≤k = expiryᵢⱼt≤k⇒t≤βk t k i j
+                  (≤-trans (expiryᵢⱼ≤expiryᵢ t i j) expiryᵢt≤k)
+
   -- Properties of expiry
   expiryᵢ≤expiry : ∀ t i → expiryᵢ t i ≤ expiry t 
   expiryᵢ≤expiry t i = t≤max[t] t (expiryᵢ t) i
@@ -107,20 +126,9 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
   expiry-inc : ∀ t → t ≤ expiry t
   expiry-inc t = ⊥≤max[t] t (expiryᵢ t)
 
-  postulate expiryₜ≤k⇒t≤βk : ∀ t k i j → expiry t ≤ k → t ≤ β k i j
-  --<⇒≤ (∀x≤m:n≢x⇒m<n t (β k i j) (λ x≤t → {!!}))
-  -- expiryₜ≤k⇒t≤βk t k i j expiryₜ≤k = <⇒≤ (∀x≤m:n≢x⇒m<n t (β k i j) λ x≤t → {!!})
-
-
-{-(∀≢⇒< t (β k i j)
-                 (λ t' → finite-fin t k i j t' (begin
-                   (toℕ t') + proj₁ (finite (toℕ t') i j) ≤⟨
-                     max-inc (λ x → (toℕ x) + proj₁ (finite (toℕ x) i j)) t'
-                     ⟩
-                   expiryᵢⱼ t i j ≤⟨ expiryᵢⱼ≤expiryᵢ t i j ⟩
-                   expiryᵢ t i   ≤⟨ expiryᵢ≤expiry t i ⟩
-                   expiry t     ≤⟨ expiryₜ≤k ⟩
-                   k ∎)))-}
+  expiryₜ≤k⇒t≤βk : ∀ t k i j → expiry t ≤ k → t ≤ β k i j
+  expiryₜ≤k⇒t≤βk t k i j expiryₜ≤k = expiryᵢt≤k⇒t≤βk t k i j
+                 (≤-trans (expiryᵢ≤expiry t i) expiryₜ≤k)
 
   expiry-monotone : ∀ {t k} → t ≤ k → expiry t ≤ expiry k
   expiry-monotone {t} {k} t≤k = max[s]≤max[t] t {k} (inj₁ t≤k) (λ i → inj₂ (i , expiryᵢ-monotone t≤k i))

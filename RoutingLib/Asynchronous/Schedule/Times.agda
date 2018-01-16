@@ -51,7 +51,7 @@ module RoutingLib.Asynchronous.Schedule.Times {n}(𝕤 : Schedule n) where
 
     -- expiryᵢⱼ returns a time such that i only uses data from j after time t
     expiryᵢⱼ : 𝕋 → Fin n → Fin n → 𝕋
-    expiryᵢⱼ t i j = max {suc t} 0 (λ x → (toℕ x) + proj₁ (finite (toℕ x) i j))
+    expiryᵢⱼ t i j = max {suc t} t (λ x → (toℕ x) + proj₁ (finite (toℕ x) i j))
 
     -- expiryᵢ returns a time ≥ t such that i only ever uses data from after time t
     expiryᵢ : 𝕋 → Fin n → 𝕋

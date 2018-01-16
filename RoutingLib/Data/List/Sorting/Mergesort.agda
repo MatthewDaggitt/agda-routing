@@ -1,8 +1,10 @@
 open import Data.List using (List; []; _∷_; length; splitAt)
 import Data.List.Any.Membership as Membership
+open import Data.List.All using (All)
 open import Data.Nat using (⌈_/2⌉)
 open import Data.Product using (_,_)
 open import Relation.Binary using (DecTotalOrder)
+open import Relation.Unary using (Pred)
 
 open import RoutingLib.Data.List using (merge)
 open import RoutingLib.Data.List.Sorting using (Sorted)
@@ -25,6 +27,8 @@ module RoutingLib.Data.List.Sorting.Mergesort {a ℓ₁ ℓ₂} (DTO : DecTotalO
   postulate ∈-mergesort⁺ : ∀ {x xs} → x ∈ xs → x ∈ mergesort xs
 
   postulate ∈-mergesort⁻ : ∀ {x xs} → x ∈ mergesort xs → x ∈ xs
+
+  postulate All-mergesort⁺ : ∀ {p} (P : Pred A p) {xs} → All P xs → All P (mergesort xs)
   
   --postulate mergesort :
 

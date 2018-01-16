@@ -5,9 +5,11 @@ open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (∃; _,_; _×_; proj₁)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
+import Relation.Binary.Flip as Flip
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Nullary using (yes; no)
 open import Function using (_∘_)
+
 
 open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Relation.Binary
@@ -53,6 +55,9 @@ module RoutingLib.Data.Nat.Properties where
   ≤-decTotalPreorder : DecTotalPreorder lzero lzero lzero
   ≤-decTotalPreorder = record { isDecTotalPreorder = ≤-isDecTotalPreorder }
 
+  ≥-decTotalOrder : DecTotalOrder lzero lzero lzero
+  ≥-decTotalOrder = Flip.decTotalOrder ≤-decTotalOrder
+  
   abstract
 
     -- stdlib
@@ -314,13 +319,13 @@ module RoutingLib.Data.Nat.Properties where
     -- Subtraction --
     -----------------
 
-    ∸-monoˡ-≤ : ∀ {m n o} → m ≤ n → o ∸ n ≤ o ∸ m
-    ∸-monoˡ-≤ m≤n = ∸-mono ≤-refl m≤n 
+    ∸-monoʳ-≤ : ∀ {m n o} → m ≤ n → o ∸ n ≤ o ∸ m
+    ∸-monoʳ-≤ m≤n = ∸-mono ≤-refl m≤n 
     
-    ∸-monoʳ-≤ : ∀ {m n o} → m ≤ n → o ≤ n → m ∸ o ≤ n ∸ o
-    ∸-monoʳ-≤ z≤n       (s≤s o≤n) = z≤n
-    ∸-monoʳ-≤ m≤n       z≤n       = m≤n
-    ∸-monoʳ-≤ (s≤s m≤n) (s≤s o≤n) = ∸-monoʳ-≤ m≤n o≤n
+    ∸-monoˡ-≤ : ∀ {m n o} → m ≤ n → o ≤ n → m ∸ o ≤ n ∸ o
+    ∸-monoˡ-≤ z≤n       (s≤s o≤n) = z≤n
+    ∸-monoˡ-≤ m≤n       z≤n       = m≤n
+    ∸-monoˡ-≤ (s≤s m≤n) (s≤s o≤n) = ∸-monoˡ-≤ m≤n o≤n
 
     ∸-monoˡ-< : ∀ {m n o} → o < n → n ≤ m → m ∸ n < m ∸ o
     ∸-monoˡ-< {_} {suc n} {zero}  (s≤s o<n) (s≤s n<m) = s≤s (n∸m≤n n _)
@@ -338,6 +343,11 @@ module RoutingLib.Data.Nat.Properties where
     m>n⇒m∸n≢0 : ∀ {m n} → m > n → m ∸ n ≢ 0
     m>n⇒m∸n≢0 {n = zero}  (s≤s m>n) = λ()
     m>n⇒m∸n≢0 {n = suc n} (s≤s m>n) = m>n⇒m∸n≢0 m>n
+
+    m≮m∸n : ∀ m n → m ≮ m ∸ n
+    m≮m∸n zero    (suc n) ()
+    m≮m∸n m       zero    = n≮n m
+    m≮m∸n (suc m) (suc n) m<m∸n = m≮m∸n m n (≤-trans (n≤1+n (suc m)) m<m∸n)
     
     n∸1+m<n : ∀ m {n} → 1 ≤ n → n ∸ suc m < n
     n∸1+m<n m (s≤s z≤n) = s≤s (n∸m≤n m _)
@@ -397,16 +407,22 @@ module RoutingLib.Data.Nat.Properties where
     ∸-cancelˡ-≡ {x} {suc y} {_}     (s≤s y≤x) z≤n       x∸y≡1+x = contradiction x∸y≡1+x (<⇒≢ (s≤s (n∸m≤n y _)))
     ∸-cancelˡ-≡ {_} {_}     {_}     (s≤s y≤x) (s≤s z≤x) x∸y≡x∸z = cong suc (∸-cancelˡ-≡ y≤x z≤x x∸y≡x∸z)
 
-    ∸-cancelˡ-≤ : ∀ {m n o} → m ≤ o → o ∸ n ≤ o ∸ m → m ≤ n
-    ∸-cancelˡ-≤ {zero}  {_}     {_}     _         _       = z≤n
-    ∸-cancelˡ-≤ {suc m} {_}     {zero}  ()       
-    ∸-cancelˡ-≤ {suc m} {zero}  {suc o} n≤o       o+1≤o∸m = contradiction (≤-trans o+1≤o∸m (n∸m≤n m o)) 1+n≰n
-    ∸-cancelˡ-≤ {_}     {suc n} {_}     (s≤s m≤o) o∸n≤o∸m = s≤s (∸-cancelˡ-≤ m≤o o∸n≤o∸m)
+    ∸-cancelʳ-≤ : ∀ {m n o} → m ≤ o → o ∸ n ≤ o ∸ m → m ≤ n
+    ∸-cancelʳ-≤ {zero}  {_}     {_}     _         _       = z≤n
+    ∸-cancelʳ-≤ {suc m} {_}     {zero}  ()       
+    ∸-cancelʳ-≤ {suc m} {zero}  {suc o} n≤o       o+1≤o∸m = contradiction (≤-trans o+1≤o∸m (n∸m≤n m o)) 1+n≰n
+    ∸-cancelʳ-≤ {_}     {suc n} {_}     (s≤s m≤o) o∸n≤o∸m = s≤s (∸-cancelʳ-≤ m≤o o∸n≤o∸m)
+
+    ∸-cancelʳ-< : ∀ {m n o} → o ∸ m < o ∸ n → n < m
+    ∸-cancelʳ-< {zero}  {n}     {o}    o<o∸n   = contradiction o<o∸n (m≮m∸n o n)
+    ∸-cancelʳ-< {suc m} {zero}  {_}    o∸n<o∸m = s≤s z≤n
+    ∸-cancelʳ-< {suc m} {suc n} {zero} ()
+    ∸-cancelʳ-< {suc m} {suc n} {suc o} o∸n<o∸m = s≤s (∸-cancelʳ-< o∸n<o∸m)
     
     ≤-move-+ʳ : ∀ {m} n {o} → m + n ≤ o → m ≤ o ∸ n
     ≤-move-+ʳ {m} n {o} m+n≤o = begin
         m         ≡⟨ sym (m+n∸n≡m m n) ⟩
-        m + n ∸ n ≤⟨ ∸-monoʳ-≤ m+n≤o (m+n≤o⇒n≤o m m+n≤o) ⟩
+        m + n ∸ n ≤⟨ ∸-monoˡ-≤ m+n≤o (m+n≤o⇒n≤o m m+n≤o) ⟩
         o ∸ n     ∎
       where open ≤-Reasoning
 
@@ -415,7 +431,7 @@ module RoutingLib.Data.Nat.Properties where
       
     ≤-move-+ˡ : ∀ {m} n {o} → m ≤ n + o → m ∸ n ≤ o
     ≤-move-+ˡ {m} n {o} m≤n+o = begin
-        m ∸ n     ≤⟨ ∸-monoʳ-≤ m≤n+o (m≤m+n n o) ⟩
+        m ∸ n     ≤⟨ ∸-monoˡ-≤ m≤n+o (m≤m+n n o) ⟩
         n + o ∸ n ≡⟨ cong (_∸ n) (+-comm n _) ⟩
         o + n ∸ n ≡⟨ m+n∸n≡m o n ⟩
         o         ∎

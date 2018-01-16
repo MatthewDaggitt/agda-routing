@@ -44,16 +44,7 @@ module RoutingLib.Asynchronous.Theorems {a ℓ n}
       D-finish     : ∃ λ ξ → ∀ K → Singleton-t ξ (D (T + K))
       f-monotonic  : ∀ K {t} → t ∈ D K → f t ∈ D (suc K)
 
-
-  record GurneyUltrametricConditions : Set (a ⊔ ℓ) where
-    field
-      d                  : M → M → ℕ
-      d-isUltrametric    : IsUltrametric M-setoid d
-      d-finiteImage      : ∀ m → FiniteImage ℕₛ (d m)
-      σ-strContr-d       : f StrContrOver d
-      _≟_                : Decidable _≈_
-      
-  record TrueUltrametricConditions : Set (a ⊔ ℓ) where
+  record UltrametricConditions : Set (a ⊔ ℓ) where
     field
       dᵢ                 : ∀ {i} → Mᵢ i → Mᵢ i → ℕ
 
@@ -62,7 +53,7 @@ module RoutingLib.Asynchronous.Theorems {a ℓ n}
 
     field
       d-isUltrametric    : ∀ i → IsUltrametric (S i) dᵢ
-      d-finiteImage      : ∀ (m : M) → FiniteImage {A = M} ℕₛ (λ n → max 0 (λ i → dᵢ (m i) (n i)))
+      d-finiteImage      : ∀ (m : M) → FiniteImage ℕₛ (d m)
       f-contrOn          : ∀ i m → dᵢ (f (f m) i) (f m i) ≤ dᵢ (f m i) (m i)
       f-strContrOver-d   : f StrContrOver d
       _≟_                : Decidable _≈_

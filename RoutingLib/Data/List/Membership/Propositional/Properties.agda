@@ -10,9 +10,10 @@ open import Relation.Binary using (Setoid; Decidable; DecSetoid)
 open import Relation.Binary.PropositionalEquality using (_≡_; setoid; refl; cong; cong₂)
 open import Relation.Binary.List.Pointwise using (≡⇒Rel≡)
 open import Relation.Nullary using (yes; no)
+open import Relation.Unary using () renaming (Decidable to Decidableᵤ)
 open import Function using (_∘_; id)
 
-open import RoutingLib.Data.List using (combine; applyBetween; between; allFinPairs)
+open import RoutingLib.Data.List using (combine; dfilter; applyBetween; between; allFinPairs)
 open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 open import RoutingLib.Data.List.Permutation using (_⇿_)
 import RoutingLib.Data.List.Membership.Setoid as SetoidMembership
@@ -21,6 +22,9 @@ module RoutingLib.Data.List.Membership.Propositional.Properties where
 
   import RoutingLib.Data.List.Membership.Setoid.Properties as GM
 
+  ∈-resp-≡ : ∀ {a} {A : Set a} {x y : A} {xs ys} → x ≡ y → xs ≡ ys → x ∈ xs → y ∈ ys 
+  ∈-resp-≡ refl refl = id
+  
   ∈-++⁺ʳ : ∀ {a} {A : Set a} {v : A} xs {ys} → v ∈ ys → v ∈ xs ++ ys
   ∈-++⁺ʳ = GM.∈-++⁺ʳ (setoid _)
 
@@ -81,3 +85,11 @@ module RoutingLib.Data.List.Membership.Propositional.Properties where
 
   ∈-length : ∀ {a} {A : Set a} {x : A} {xs} → x ∈ xs → ∃ λ n → length xs ≡ suc n
   ∈-length x∈xs = GM.∈-length (setoid _) x∈xs
+
+  ∈-dfilter⁺ : ∀ {a p} {A : Set a} {P : A → Set p} (P? : Decidableᵤ P) →
+               ∀ {v} → P v → ∀ {xs} → v ∈ xs → v ∈ dfilter P? xs
+  ∈-dfilter⁺ P? = GM.∈-dfilter⁺ (setoid _) P? λ {refl → id}
+
+  ∈-dfilter⁻ : ∀ {a p} {A : Set a} {P : A → Set p} (P? : Decidableᵤ P)  →
+               ∀ {v xs} → v ∈ dfilter P? xs → v ∈ xs × P v
+  ∈-dfilter⁻ P? = GM.∈-dfilter⁻ (setoid _) P? λ {refl → id}

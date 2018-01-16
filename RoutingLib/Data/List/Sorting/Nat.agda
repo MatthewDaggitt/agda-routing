@@ -1,5 +1,6 @@
 open import Data.Nat using (ℕ; _<_)
 open import Data.Nat.Properties using (≤+≢⇒<; <⇒≤; ≤-decTotalOrder)
+open import Data.Fin using () renaming (_<_ to _<𝔽_)
 open import Data.List
 open import Data.List.All using () renaming (map to mapₐ)
 open import Data.Product using (uncurry′)
@@ -26,3 +27,6 @@ module RoutingLib.Data.List.Sorting.Nat where
 
   ↗-between : ∀ e s → Sorted (between e s)
   ↗-between e s = AllPairs-applyBetween⁺₁ id e s (λ _ i<j _ → <⇒≤ i<j)
+
+  postulate index-mono⁻¹-< : ∀ {xs} → Sorted xs → Unique xs →
+                           ∀ {i j} → lookup xs i < lookup xs j → i <𝔽 j

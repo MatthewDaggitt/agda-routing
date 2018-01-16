@@ -43,7 +43,6 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     open Setoid S renaming (Carrier to A; refl to ≈-refl)
     open Setoid (list-setoid S) using () renaming (_≈_ to _≈ₗ_; sym to symₗ; refl to reflₗ)
 
-    open Membership S using (indexOf)
     open import Data.List.Any.Membership S using (_∈_; _∉_; _⊆_)
     open import Data.List.Any.Membership (list-setoid S) using () renaming (_∈_ to _∈ₗ_)
 
@@ -55,7 +54,7 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     ... | no  x≉y | no  x∉ys = no (λ {(here x≈y) → x≉y x≈y; (there x∈ys) → x∉ys x∈ys})
 
     ∈-resp-≈ : ∀ {v w xs} → v ∈ xs → v ≈ w → w ∈ xs
-    ∈-resp-≈ (here v≈x) v≈w = here (trans (sym v≈w) v≈x)
+    ∈-resp-≈ (here v≈x)   v≈w = here (trans (sym v≈w) v≈x)
     ∈-resp-≈ (there v∈xs) v≈w = there (∈-resp-≈ v∈xs v≈w)
 
     ∉-resp-≈ : ∀ {v w xs} → v ∉ xs → v ≈ w → w ∉ xs
@@ -186,37 +185,13 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     ∈-length {_} {_ ∷ xs} (here px)    = length xs , refl
     ∈-length {_} {_ ∷ _}  (there x∈xs) = mapₚ suc (cong suc) (∈-length x∈xs)
 
-    ∈-lookup : ∀ {i xs} (i<|xs| : i < length xs) → lookup xs i<|xs| ∈ xs
-    ∈-lookup {_}     {[]}     ()
-    ∈-lookup {zero}  {x ∷ xs} (s≤s z≤n)    = here ≈-refl
-    ∈-lookup {suc i} {x ∷ xs} (s≤s i<|xs|) = there (∈-lookup i<|xs|)
+    ∈-lookup : ∀ xs i → lookup xs i ∈ xs
+    ∈-lookup []       ()
+    ∈-lookup (x ∷ xs) fzero    = here ≈-refl
+    ∈-lookup (x ∷ xs) (fsuc i) = there (∈-lookup xs i)
 
 
-    indexOf[xs]<|xs| : ∀ {x xs} (x∈xs : x ∈ xs) → indexOf x∈xs < length xs
-    indexOf[xs]<|xs| (here px)    = s≤s z≤n
-    indexOf[xs]<|xs| (there x∈xs) = s≤s (indexOf[xs]<|xs| x∈xs)
-
-    indexOf[xs]≤|xs| : ∀ {x xs} (x∈xs : x ∈ xs) → indexOf x∈xs ≤ length xs
-    indexOf[xs]≤|xs| = <⇒≤ ∘ indexOf[xs]<|xs|
     
-    indexOf-cong : ∀ {x y xs} → x ≈ y → (x∈xs : x ∈ xs) (y∈xs : y ∈ xs) → Unique S xs → indexOf x∈xs ≡ indexOf y∈xs
-    indexOf-cong x≈y (here x≈z)   (here y≈z)   _            = refl
-    indexOf-cong x≈y (here x≈z)   (there y∈xs) (z≉xs ∷ xs!) = contradiction (∈-resp-≈ y∈xs (trans (sym x≈y) x≈z)) (All¬⇒¬Any z≉xs)
-    indexOf-cong x≈y (there x∈xs) (here y≈z)   (z≉xs ∷ xs!) = contradiction (∈-resp-≈ x∈xs (trans x≈y y≈z)) (All¬⇒¬Any z≉xs)
-    indexOf-cong x≈y (there x∈xs) (there y∈xs) (_ ∷ xs!)    = cong suc (indexOf-cong x≈y x∈xs y∈xs xs!)
-
-    indexOf-revCong : ∀ {x y xs} (x∈xs : x ∈ xs) (y∈xs : y ∈ xs) → indexOf x∈xs ≡ indexOf y∈xs → x ≈ y
-    indexOf-revCong (here x≈z)   (here y≈z)   refl    = trans x≈z (sym y≈z)
-    indexOf-revCong (here x≈z)   (there y∈xs) ()
-    indexOf-revCong (there x∈xs) (here y≈z)   ()
-    indexOf-revCong (there x∈xs) (there y∈xs) indexEq = indexOf-revCong x∈xs y∈xs (suc-injective indexEq)
-
-    indexOf-lookup : ∀ {i xs} → Unique S xs → (i<|xs| : i < length xs) (xsᵢ∈xs : (lookup xs i<|xs|) ∈ xs) → indexOf xsᵢ∈xs ≡ i
-    indexOf-lookup {_}     []           ()     
-    indexOf-lookup {zero}  (_    ∷ _)   (s≤s i<|xs|) (here xsᵢ≈x)   = refl
-    indexOf-lookup {zero}  (x≉xs ∷ _)   (s≤s i<|xs|) (there x∈xs)  = contradiction x∈xs (All¬⇒¬Any x≉xs)
-    indexOf-lookup {suc i} (x≉xs ∷ _)   (s≤s i<|xs|) (here xsᵢ≈x)   = contradiction (∈-resp-≈ (∈-lookup i<|xs|) xsᵢ≈x) (All¬⇒¬Any x≉xs)
-    indexOf-lookup {suc i} (_    ∷ xs!) (s≤s i<|xs|) (there xsᵢ∈xs) = cong suc (indexOf-lookup xs! i<|xs| xsᵢ∈xs)
 
     
     

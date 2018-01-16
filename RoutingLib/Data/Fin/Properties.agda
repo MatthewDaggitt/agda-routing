@@ -2,7 +2,7 @@ open import Algebra.FunctionProperties
 open import Data.Fin renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties
 open import Data.Product using (_,_)
-open import Data.Nat using (z≤n; s≤s; zero; suc) renaming (_+_ to _+ℕ_; _≤_ to _≤ℕ_; _≤?_ to _≤ℕ?_; ≤-pred to ≤ℕ-pred)
+open import Data.Nat using (z≤n; s≤s; zero; suc) renaming (_+_ to _+ℕ_; _<_ to _<ℕ_; _≤_ to _≤ℕ_; _≤?_ to _≤ℕ?_; ≤-pred to ≤ℕ-pred)
 open import Data.Nat.Properties using (1+n≰n; <⇒≢)  renaming (≤-total to ≤ℕ-total; ≤-antisym to ≤ℕ-antisym; ≤-refl to ≤ℕ-refl; ≤-trans to ≤ℕ-trans)
 open import Relation.Nullary using (¬_)
 open import Relation.Nullary.Negation using (contradiction)
@@ -90,8 +90,18 @@ module RoutingLib.Data.Fin.Properties where
   ≤fromℕ zero    (fsuc ())
   ≤fromℕ (suc k) (fsuc i) = s≤s (≤fromℕ k i)
 
+  fromℕ≤-cong : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) → i ≡ j → fromℕ≤ i<n ≡ fromℕ≤ j<n
+  fromℕ≤-cong i<n j<n refl = cong fromℕ≤ (≤-cardinality i<n j<n)
 
+  fromℕ≤-mono-≤ : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
+                   i ≤ℕ j → fromℕ≤ i<n ≤ fromℕ≤ j<n
+  fromℕ≤-mono-≤ (s≤s z≤n)       (s≤s _)         z≤n       = z≤n
+  fromℕ≤-mono-≤ (s≤s (s≤s i<n)) (s≤s z≤n)       ()
+  fromℕ≤-mono-≤ (s≤s (s≤s i<n)) (s≤s (s≤s j<n)) (s≤s i≤j) =
+    s≤s (fromℕ≤-mono-≤ (s≤s i<n) (s≤s j<n) i≤j)
 
+  postulate fromℕ≤-mono⁻¹-< : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
+                              fromℕ≤ i<n < fromℕ≤ j<n → i <ℕ j 
   --------------------
   -- Absorbing _+↑_ --
   --------------------

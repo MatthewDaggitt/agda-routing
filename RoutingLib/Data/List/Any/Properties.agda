@@ -4,7 +4,7 @@ open import Data.Nat using (ℕ; zero; suc; _<_; _≤_; z≤n; s≤s)
 open import Data.Nat.Properties using (suc-injective)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.List
-open import Data.List.Any as Any using (Any; here; there)
+open import Data.List.Any as Any using (Any; here; there; index)
 open import Data.List.Any.Properties
 open import Data.List.Any.Membership.Propositional using (_∈_)
 open import Data.Maybe using (Maybe; just; nothing)
@@ -12,8 +12,9 @@ open import Function using (id; _∘_)
 open import Relation.Binary using (REL)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong; subst)
 open import Relation.Nullary.Negation using (contradiction)
+open import Relation.Unary using (Pred)
 
-open import RoutingLib.Data.List using (applyBetween)
+open import RoutingLib.Data.List using (applyBetween; lookup)
 open import RoutingLib.Data.List.Any
 open import RoutingLib.Data.Maybe.Properties using (just-injective)
 open import RoutingLib.Data.List.Permutation using (_⇿_; _◂_≡_; here; there; []; _∷_)
@@ -57,18 +58,32 @@ module RoutingLib.Data.List.Any.Properties where
 
 
 
+  module _ {a p} {A : Set a} {P : Pred A p} where
 
 
+    lookup-index : ∀ {xs} (p : Any P xs) → P (lookup xs (index p))
+    lookup-index (here px)   = px
+    lookup-index (there pxs) = lookup-index pxs
+    
+{-
+    index-cong : ∀ {x y xs} → x ≈ y → (x∈xs : x ∈ xs) (y∈xs : y ∈ xs) → Unique S xs → indexOf x∈xs ≡ indexOf y∈xs
+    index-cong x≈y (here x≈z)   (here y≈z)   _            = refl
+    index-cong x≈y (here x≈z)   (there y∈xs) (z≉xs ∷ xs!) = contradiction (∈-resp-≈ y∈xs (trans (sym x≈y) x≈z)) (All¬⇒¬Any z≉xs)
+    index-cong x≈y (there x∈xs) (here y≈z)   (z≉xs ∷ xs!) = contradiction (∈-resp-≈ x∈xs (trans x≈y y≈z)) (All¬⇒¬Any z≉xs)
+    index-cong x≈y (there x∈xs) (there y∈xs) (_ ∷ xs!)    = cong suc (indexOf-cong x≈y x∈xs y∈xs xs!)
+-}
 
+{-
+    index-lookup : ∀ {xs} (pxs₁ pxs₂ : Any P xs) → index pxs₁ ≡ index pys₁ → x ≡ y
+    index-lookup (here x≈z)   (here y≈z)   refl    = trans x≈z (sym y≈z)
+    index-lookup (here x≈z)   (there y∈xs) ()
+    index-lookup (there x∈xs) (here y≈z)   ()
+    index (there x∈xs) (there y∈xs) indexEq = indexOf-revCong x∈xs y∈xs (suc-injective indexEq)
 
-  module _ {a b ℓ} {A : Set a} {B : Set b} {_~_ : REL A B ℓ} where
-  
-    Any₂-++⁺ˡ : ∀ {ws xs ys zs} → Any₂ _~_ ws xs → Any₂ _~_ (ws ++ ys) (xs ++ zs)
-    Any₂-++⁺ˡ (here x~y)    = here x~y
-    Any₂-++⁺ˡ (there ws~xs) = there (Any₂-++⁺ˡ ws~xs)
-
-    Any₂-++⁺ʳ : ∀ {ws xs ys zs} → length ws ≡ length xs → Any₂ _~_ ys zs → Any₂ _~_ (ws ++ ys) (xs ++ zs)
-    Any₂-++⁺ʳ {[]}     {[]}     refl          ys~zs = ys~zs
-    Any₂-++⁺ʳ {[]}     {_ ∷ _}  ()
-    Any₂-++⁺ʳ {_ ∷ _}  {[]}     ()
-    Any₂-++⁺ʳ {_ ∷ ws} {_ ∷ xs} 1+|ws|≡1+|xs| ys~zs = there (Any₂-++⁺ʳ {ws} {xs} (suc-injective 1+|ws|≡1+|xs|) ys~zs)
+    index-lookup : ∀ {i xs} → Unique S xs → (i<|xs| : i < length xs) (xsᵢ∈xs : (lookup xs i<|xs|) ∈ xs) → indexOf xsᵢ∈xs ≡ i
+    index-lookup {_}     []           ()     
+    index-lookup {zero}  (_    ∷ _)   (s≤s i<|xs|) (here xsᵢ≈x)   = refl
+    index-lookup {zero}  (x≉xs ∷ _)   (s≤s i<|xs|) (there x∈xs)  = contradiction x∈xs (All¬⇒¬Any x≉xs)
+    index-lookup {suc i} (x≉xs ∷ _)   (s≤s i<|xs|) (here xsᵢ≈x)   = contradiction (∈-resp-≈ (∈-lookup i<|xs|) xsᵢ≈x) (All¬⇒¬Any x≉xs)
+    index-lookup {suc i} (_    ∷ xs!) (s≤s i<|xs|) (there xsᵢ∈xs) = cong suc (indexOf-lookup xs! i<|xs| xsᵢ∈xs)
+-}

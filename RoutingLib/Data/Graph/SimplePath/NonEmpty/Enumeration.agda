@@ -19,10 +19,11 @@ open import Function using (_∘_)
 open import RoutingLib.Data.List using (dfilter; combine)
 open import RoutingLib.Data.List.All using (AllPairs; []; _∷_)
 open import RoutingLib.Data.List.All.Properties using (AllPairs-applyUpTo⁺₁; All⇒AllPairs; All-map⁺₂; AllPairs-map⁺₂; AllPairs-concat⁺; All-∈)
-open import RoutingLib.Data.List.Uniqueness.Properties using (map!⁺; concat!⁺) -- combine!
-open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique; allFin!⁺; combine!⁺)
-open import RoutingLib.Data.List.Any.Membership.Propositional using (∈-allFin⁺; ∈-combine⁺)
-open import RoutingLib.Data.List.Any.Membership.Properties using (∈-map⁺; ∈-concat⁺; ∈-applyUpTo⁺)
+open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (map!⁺; concat!⁺)
+open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique)
+open import RoutingLib.Data.List.Uniqueness.Propositional.Properties using (allFin!⁺; combine!⁺)
+open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-allFin⁺; ∈-combine⁺)
+open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-map⁺; ∈-concat⁺; ∈-applyUpTo⁺)
 open import RoutingLib.Data.List.Uniset using (Uniset; Enumeration; IsEnumeration)
 open import RoutingLib.Data.Graph.SimplePath.NonEmpty
 open import RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties
@@ -72,7 +73,7 @@ module RoutingLib.Data.Graph.SimplePath.NonEmpty.Enumeration (n : ℕ) where
 
     open import Data.List.Any.Membership Pₛ using () renaming (_∈_ to _∈ₚ_; _∉_ to _∉ₚ_)
     open import RoutingLib.Data.List.Disjoint   Pₛ using () renaming (_#_ to _#ₚ_)
-    open import RoutingLib.Data.List.Uniqueness Pₛ using () renaming (Unique to Uniqueₚ)
+    open import RoutingLib.Data.List.Uniqueness.Setoid Pₛ using () renaming (Unique to Uniqueₚ)
     open Setoid LPₛ using () renaming (reflexive to ≈ₗₚ-reflexive)
 
 

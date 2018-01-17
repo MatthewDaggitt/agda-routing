@@ -54,14 +54,13 @@ module RoutingLib.Data.Table.IndexedTypes {a ℓ n} (S : Table (Setoid a ℓ) n)
     ; sym   = ≈-sym
     ; trans = ≈-trans
     }
-  
+
   M-setoid : Setoid a ℓ
   M-setoid = record
     { Carrier       = M
     ; _≈_           = _≈_
     ; isEquivalence = ≈-isEquivalence
     }
-
   
   -- Predicates and relations over predicates
 

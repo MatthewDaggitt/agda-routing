@@ -35,6 +35,13 @@ module RoutingLib.Data.Nat.Properties where
     n≢1+n zero    = λ()
     n≢1+n (suc n) = n≢1+n n ∘ suc-injective
 
+    n≤suc∘pred[n] : ∀ n → n ≤ suc (pred n)
+    n≤suc∘pred[n] zero    = z≤n
+    n≤suc∘pred[n] (suc n) = s≤s ≤-refl
+
+    suc∘pred[n]≡n : ∀ {n} → 1 ≤ n → suc (pred n) ≡ n
+    suc∘pred[n]≡n (s≤s z≤n) = refl
+    
     --------------
     -- Ordering --
     --------------

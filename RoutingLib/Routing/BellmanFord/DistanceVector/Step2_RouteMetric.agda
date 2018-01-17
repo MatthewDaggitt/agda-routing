@@ -12,7 +12,7 @@ open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique)
 open import RoutingLib.Data.List.Sorting using (Sorted)
 open import RoutingLib.Data.Matrix using (Matrix; zipWith; max⁺)
 open import RoutingLib.Data.Nat.Properties using (ℕₛ; m≤n⇒m≤n⊔o; n≤m⇒m⊔n≡m; n≤m×o≤m⇒n⊔o≤m)
-open import RoutingLib.Function.Distance using (IsUltrametric; MaxTriangleIneq)
+open import RoutingLib.Function.Distance using (Ultrametric; IsUltrametric; MaxTriangleIneq)
 
 open import RoutingLib.Routing.Definitions using (RoutingProblem; RoutingAlgebra)
 open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions
@@ -32,6 +32,7 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric
     ; h-resp-≈
     ; h-resp-<
     ; 1≤h
+    ; h≤H
     )
 
   abstract
@@ -114,6 +115,11 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric
     ... | yes _ | _       = z≤n
     ... | no  _ | yes x≈b = contradiction x≈b x≉b
     ... | no  _ | no  _   = ≤ℕ-reflexive (trans (n≤m⇒m⊔n≡m (h-resp-≤ x≤a)) (sym (n≤m⇒m⊔n≡m (h-resp-≤ x≤b))))
+
+    d≤H : ∀ x y → d x y ≤ℕ H
+    d≤H x y with x ≟ y
+    ... | yes _ = z≤n
+    ... | no  _ = n≤m×o≤m⇒n⊔o≤m (h≤H x) (h≤H y)
     
     d-isUltrametric : IsUltrametric S d
     d-isUltrametric = record 
@@ -123,19 +129,9 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric
       ; maxTriangle = d-maxTriIneq
       ; cong        = d-cong
       }
-      
 
-{-
-    -----------------
-    -- Ultrametric --
-    -----------------
-    -- We have now shown that d is an ultrametric
-
-    D-isUltrametric : IsUltrametric ℝ𝕄ₛ D
-    D-isUltrametric = record 
-      { eq⇒0        = X≈Y⇒D≡0 
-      ; 0⇒eq        = D≡0⇒X≈Y 
-      ; sym         = D-sym 
-      ; maxTriangle = D-maxTriIneq 
-      }
--}
+  d-ultrametric : Ultrametric S
+  d-ultrametric = record
+    { d             = d
+    ; isUltrametric = d-isUltrametric
+    }

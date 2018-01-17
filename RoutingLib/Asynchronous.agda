@@ -47,7 +47,7 @@ module RoutingLib.Asynchronous where
       async-iter t = async-iter' (<-well-founded t)
 
 
-{-
+
   -- A record encapsulating the idea that p is a well behaved parallelisation
   record IsAsynchronouslySafe {a ℓ n} {S : Fin n → Setoid a ℓ} (p : Parallelisation S) : Set (lsuc (a ⊔ ℓ)) where
   
@@ -55,5 +55,4 @@ module RoutingLib.Asynchronous where
     
     field
       m*         : M
-      m*-reached : ∀ 𝕤 X → ∃ λ tᶜ → ∀ t → δ 𝕤 (tᶜ + t) X ≈ m*
--}
+      m*-reached : ∀ s X → ∃ λ tᶜ → ∀ t → async-iter s X (tᶜ + t) ≈ m*

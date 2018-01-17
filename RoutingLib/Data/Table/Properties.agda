@@ -1,19 +1,19 @@
 open import Algebra.FunctionProperties using (Op₂)
-open import Data.Nat using (ℕ; zero; suc; _<_; _≤_; _⊓_)
+open import Data.Nat using (ℕ; zero; suc; _<_; _≤_; _⊓_; _⊔_)
 open import Data.Nat.Properties using (≤-refl; ≤-trans; ⊔-sel; ⊓-sel; ⊓-mono-<; module ≤-Reasoning)
 open import Data.Fin using (Fin; inject₁; inject≤) renaming (zero to fzero; suc to fsuc)
 open import Data.Product using (_,_; proj₁; proj₂)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Function using (_∘_)
 open import Relation.Binary
-open import Relation.Binary.PropositionalEquality using (_≡_; sym)
+open import Relation.Binary.PropositionalEquality using (_≡_; sym; cong₂)
   renaming (refl to ≡-refl)
 open import Relation.Unary using (Pred)
 
 open import RoutingLib.Data.Table
 open import RoutingLib.Data.Table.All using (All)
 open import RoutingLib.Data.Table.Any using (Any)
-open import RoutingLib.Data.Table.Relation.Pointwise using (Pointwise)
+open import RoutingLib.Data.Table.Relation.Pointwise using (Pointwise; foldr-cong; foldr⁺-cong)
 open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Data.Nat.Properties
 open import RoutingLib.Data.NatInf using (ℕ∞) renaming (_≤_ to _≤∞_; _⊓_ to _⊓∞_)
@@ -112,6 +112,20 @@ module RoutingLib.Data.Table.Properties where
   x≤max[t] ⊥ (inj₂ x≤t) = foldr-⊎pres (_ ≤_) m≤n⊎m≤o⇒m≤n⊔o ⊥ x≤t
 
 
+
+
+  postulate max-cong : ∀ {n} {⊥₁ ⊥₂} → ⊥₁ ≡ ⊥₂ → {t s : Table ℕ n} →
+             Pointwise _≡_ t s → max ⊥₁ t ≡ max ⊥₂ s
+  --max-cong eq eq₂ = foldr-cong (cong₂ _⊔_) eq eq₂
+
+  postulate max⁺-cong : ∀ {n} {t s : Table ℕ (suc n)} → Pointwise _≡_ t s → max⁺ t ≡ max⁺ s
+
+  postulate t≤max⁺[t] : ∀ {n} (t : Table ℕ (suc n)) → All (_≤ max⁺ t) t
+  
+  postulate max-constant : ∀ {n} {⊥} {t : Table ℕ n} →
+                 ∀ {x} → ⊥ ≡ x → All (_≡ x) t → max ⊥ t ≡ x
+  --max-constant {x = x} = foldr-×pres (_≡ x) ⊔-preserves-≡x
+  
   ⊥≤max[t] : ∀ {n} ⊥ (t : Table ℕ n)→ ⊥ ≤ max ⊥ t
   ⊥≤max[t] {n} ⊥ t = x≤max[t] {n} ⊥ (inj₁ ≤-refl)
 

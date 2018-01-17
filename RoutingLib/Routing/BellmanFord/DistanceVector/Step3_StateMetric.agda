@@ -1,10 +1,11 @@
-open import Data.Fin using (Fin)
+open import Data.Fin using (Fin; zero)
 open import Data.List using (List)
 open import Data.List.Any.Membership.Propositional using (_∈_)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Nat using (ℕ; suc; zero; z≤n; s≤s; _⊔_; _*_; _∸_) renaming (_≤_ to _≤ℕ_; _<_ to _<ℕ_)
-open import Data.Nat.Properties as ℕₚ using (⊔-mono-≤) renaming (≤-antisym to ≤ℕ-antisym; ≤-decTotalOrder to ≤ℕ-decTotalOrder)
-open import Data.Product using (∃; _,_; proj₁; proj₂)
+open import Data.Nat.Properties as ℕₚ using (⊔-mono-≤) renaming (≤-trans to ≤ℕ-trans; ≤-antisym to ≤ℕ-antisym; ≤-decTotalOrder to ≤ℕ-decTotalOrder)
+open import Data.Product using (∃; ∃₂; _×_; _,_; proj₁; proj₂)
+open import Data.List using (upTo)
 open import Function using (_∘_)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
@@ -14,18 +15,23 @@ import Relation.Binary.PartialOrderReasoning as PO-Reasoning
 
 open import RoutingLib.Data.List using (between)
 open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique)
+open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-upTo⁺)
 open import RoutingLib.Data.List.Sorting using (Sorted)
-open import RoutingLib.Data.Nat.Properties as Rℕₚ using (ℕₛ)
+open import RoutingLib.Data.Table using (Table; max⁺; zipWith)
+open import RoutingLib.Data.Nat.Properties as Rℕₚ using (ℕₛ; n≢0⇒0<n)
 open import RoutingLib.Function.Distance using (IsUltrametric; MaxTriangleIneq)
-open import RoutingLib.Data.Matrix using (Matrix; zipWith; max⁺)
+open import RoutingLib.Data.Matrix using (Matrix)
 open import RoutingLib.Data.Matrix.Properties using (max⁺-cong; M≤max⁺[M]; max⁺[M]≡x; max⁺[M]≤x; max⁺-constant; zipWith-sym)
 open import RoutingLib.Data.Matrix.Membership.Propositional.Properties using (max⁺[M]∈M)
 open import RoutingLib.Data.Matrix.Relation.Pointwise using (zipWith-cong)
 
 open import RoutingLib.Routing.Definitions using (RoutingProblem; RoutingAlgebra)
 open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions
+open import RoutingLib.Function.Distance using (Ultrametric)
 import RoutingLib.Routing.BellmanFord.DistanceVector.Prelude as Prelude
 import RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric as Step2
+import RoutingLib.Function.Distance.MaxLift as MaxLift
+open import RoutingLib.Function.Image using (FiniteImage)
 
 module RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StateMetric
   {a b ℓ n-1}
@@ -44,37 +50,58 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StateMetric
     ; d-maxTriIneq
     ; d-strContr
     ; d-mono
+    ; d≤H
+    ; d-ultrametric
     )
 
 
-  D : RMatrix → RMatrix → ℕ
-  D X Y = max⁺ (zipWith d X Y)
+  -------------------------------------
+  -- Ultrametric over routing tables --
+  -------------------------------------
 
-  abstract
+  dᵢ-ultrametric : Ultrametric _
+  dᵢ-ultrametric = MaxLift.ultrametric {n = n} (λ _ → S) (λ _ → d-ultrametric)
+
+  open Ultrametric dᵢ-ultrametric public using ()
+    renaming
+    ( d to dᵢ
+    ; isUltrametric to dᵢ-isUltrametric
+    )
+
+  dᵢ≤H : ∀ X Y → dᵢ X Y ≤ℕ H
+  dᵢ≤H = MaxLift.bounded (λ _ → S) _ H d≤H
+
+  -------------------------------------
+  -- Ultrametric over routing states --
+  -------------------------------------
   
-    D-cong : D Preserves₂ _≈ₘ_ ⟶ _≈ₘ_ ⟶ _≡_
-    D-cong X≈Y U≈V = max⁺-cong (zipWith-cong _≈_ _≈_ _≡_ d-cong X≈Y U≈V)
-    
-    d≤D : ∀ X Y i j → d (X i j) (Y i j) ≤ℕ D X Y
-    d≤D X Y i j = M≤max⁺[M] (zipWith d X Y) i j
-    
-    D-sym : ∀ X Y → D X Y ≡ D Y X
-    D-sym X Y = max⁺-cong (zipWith-sym _≡_ d-sym X Y)
+  D-ultrametric : Ultrametric _
+  D-ultrametric = MaxLift.ultrametric {n = n} (λ _ → _) (λ _ → dᵢ-ultrametric)
 
-    X≈Y⇒D≡0 : ∀ {X Y} → X ≈ₘ Y → D X Y ≡ 0
-    X≈Y⇒D≡0 X≈Y = max⁺-constant (λ i j → x≈y⇒d≡0 (X≈Y i j))
-    
-    D≡0⇒X≈Y : ∀ {X Y} → D X Y ≡ 0 → X ≈ₘ Y
-    D≡0⇒X≈Y {X} {Y} d≡0 i j = d≡0⇒x≈y (≤ℕ-antisym (subst (d (X i j) (Y i j) ≤ℕ_) d≡0 (d≤D X Y i j)) z≤n)
+  open Ultrametric D-ultrametric public using ()
+    renaming
+    ( d to D
+    ; 0⇒eq to D≡0⇒X≈Y
+    ; eq⇒0 to X≈Y⇒D≡0
+    ; sym to D-sym
+    )
 
-    D-maxTriIneq : MaxTriangleIneq ℝ𝕄ₛ D
-    D-maxTriIneq X Y Z with max⁺[M]∈M (zipWith d X Z)
-    ... | i , j , dˣᶻ≡ij = begin
-      D X Z                                 ≡⟨ dˣᶻ≡ij ⟩
-      d (X i j) (Z i j)                     ≤⟨ d-maxTriIneq _ _ _ ⟩
-      d (X i j) (Y i j) ⊔ d (Y i j) (Z i j) ≤⟨ ⊔-mono-≤ (d≤D X Y i j) (d≤D Y Z i j) ⟩
-      D X Y ⊔ D Y Z                         ∎
-      where open ℕₚ.≤-Reasoning
+  D≤H : ∀ X Y → D X Y ≤ℕ H
+  D≤H = MaxLift.bounded (λ _ → ℝ𝕋ₛ) _ H dᵢ≤H
+
+  d≤D : ∀ X Y i j → d (X i j) (Y i j) ≤ℕ D X Y
+  d≤D X Y i j = ≤ℕ-trans (MaxLift.dᵢ≤d (λ _ → S) (λ {i} → d) (X i) (Y i) j) (MaxLift.dᵢ≤d (λ _ → ℝ𝕋ₛ) (λ {i} → dᵢ) X Y i)
+
+  postulate D-witness : ∀ {X Y} → X ≉ₘ Y → ∃₂ λ i j → D X Y ≡ d (X i j) (Y i j) × X i j ≉ Y i j
+  --D-witness X≉Y = {!!}
+  
+  D-image : ∀ X → FiniteImage ℕₛ (D X)
+  D-image X = record
+    { image    = upTo (suc H)
+    ; complete = λ Y → ∈-upTo⁺ (s≤s (D≤H X Y))
+    }
+
+
 
 
   -- Strictly contracting --
@@ -116,59 +143,39 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StateMetric
     σXᵢⱼ≉Aᵢₖ▷Yₖⱼ k σXᵢⱼ≈AᵢₖYₖⱼ = σXᵢⱼ≉σYᵢⱼ (≤-antisym σXᵢⱼ≤σYᵢⱼ (≤-trans (σXᵢⱼ≤Aᵢₖ▷Xₖⱼ Y i j k) (≤-reflexive (≈-sym σXᵢⱼ≈AᵢₖYₖⱼ))))
 
 
-    result : D (σ X) (σ Y) <ℕ D X Y
-    result with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
+    DσXσY<DXY : D (σ X) (σ Y) <ℕ D X Y
+    DσXσY<DXY with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
     ... | inj₂ σXᵢⱼ≈Iᵢⱼ           = contradiction σXᵢⱼ≈Iᵢⱼ σXᵢⱼ≉Iᵢⱼ
     ... | inj₁ (k , σXᵢⱼ≈Aᵢₖ▷Xₖⱼ) = begin
       D (σ X) (σ Y)                      ≡⟨ D≡dᵢⱼ ⟩ 
       d (σ X i j) (σ Y i j)              ≤⟨ d-mono σXᵢⱼ≤σYᵢⱼ (σXᵢⱼ≤Aᵢₖ▷Yₖⱼ k , σXᵢⱼ≉Aᵢₖ▷Yₖⱼ k) ⟩
       d (σ X i j) (A i k ▷ Y k j)        ≡⟨ d-cong σXᵢⱼ≈Aᵢₖ▷Xₖⱼ ≈-refl ⟩
       d (A i k ▷ X k j) (A i k ▷ Y k j)  <⟨ d-strContr (A i k) (Xₖⱼ≉Yₖⱼ σXᵢⱼ≈Aᵢₖ▷Xₖⱼ) ⟩
-      d (X k j) (Y k j)                  ≤⟨ M≤max⁺[M] _ k j ⟩
+      d (X k j) (Y k j)                  ≤⟨ d≤D X Y k j ⟩
       D X Y                              ∎
       where open Rℕₚ.≤-Reasoning
 
 
-{-
-
   abstract
 
-    open PostDisagreementResult using (result)
+    open PostDisagreementResult using (DσXσY<DXY)
+    
     open import RoutingLib.Function.Distance ℝ𝕄ₛ using (_StrContrOver_; _StrContrOnOrbitsOver_)
     open import RoutingLib.Function.Distance.Properties using (strContr⇒strContrOnOrbits)
 
     σ-strictlyContracting : σ StrContrOver D
-    σ-strictlyContracting {X} {Y} Y≉X with σ X ≟ₘ σ Y | D X Y ≟ℕ 0
-    ... | yes σX≈σY | yes D≡0 = contradiction (D≡0⇒X≈Y D≡0) (Y≉X ∘ ≈ₘ-sym)
-    ... | yes σX≈σY | no  D≢0 rewrite X≈Y⇒D≡0 σX≈σY = n≢0⇒0<n D≢0
-    ... | no  σX≉σY | _       with D-findWorstDisagreement σX≉σY
-    ...   | i , j , σXᵢⱼ≉σYᵢⱼ , D≡dᵢⱼ , inj₁ dᵢⱼ≡dₛᵤₚ∸hσXᵢⱼ = result σXᵢⱼ≉σYᵢⱼ D≡dᵢⱼ dᵢⱼ≡dₛᵤₚ∸hσXᵢⱼ 
-    ...   | i , j , σXᵢⱼ≉σYᵢⱼ , D≡dᵢⱼ , inj₂ dᵢⱼ≡dₛᵤₚ∸hσYᵢⱼ = 
-      subst₂ _<ℕ_ (D-sym (σ Y) (σ X)) (D-sym Y X) (
-        result 
-          (σXᵢⱼ≉σYᵢⱼ ∘ ≈-sym) 
-          (trans (trans (D-sym (σ Y) (σ X)) D≡dᵢⱼ) (d-sym (σ X i j) (σ Y i j))) 
-          (trans (d-sym (σ Y i j) (σ X i j)) dᵢⱼ≡dₛᵤₚ∸hσYᵢⱼ))
-
-    σ-strictlyContractingOnOrbits : σ StrContrOnOrbitsOver D
-    σ-strictlyContractingOnOrbits = strContr⇒strContrOnOrbits ℝ𝕄ₛ σ-strictlyContracting
--}
-
-
-
-
-{-
-    
-    -----------------
-    -- Ultrametric --
-    -----------------
-    -- We have now shown that d is an ultrametric
-
-    D-isUltrametric : IsUltrametric ℝ𝕄ₛ D
-    D-isUltrametric = record 
-      { eq⇒0        = X≈Y⇒D≡0 
-      ; 0⇒eq        = D≡0⇒X≈Y 
-      ; sym         = D-sym 
-      ; maxTriangle = D-maxTriIneq 
-      }
--}
+    σ-strictlyContracting {X} {Y} Y≉X with σ X ≟ₘ σ Y
+    ... | yes σX≈σY = begin
+      D (σ X) (σ Y) ≡⟨ X≈Y⇒D≡0 σX≈σY ⟩
+      0             <⟨ n≢0⇒0<n (Y≉X ∘ ≈ₘ-sym ∘ D≡0⇒X≈Y) ⟩
+      D X Y         ∎
+      where open Rℕₚ.≤-Reasoning
+    ... | no  σX≉σY with D-witness σX≉σY
+    ...   | i , j , D≡dᵢⱼ , σXᵢⱼ≉σYᵢⱼ with ≤-total (σ X i j) (σ Y i j)
+    ...     | inj₁ σXᵢⱼ≤σYᵢⱼ = DσXσY<DXY {X} {Y} D≡dᵢⱼ (σXᵢⱼ≤σYᵢⱼ , σXᵢⱼ≉σYᵢⱼ)
+    ...     | inj₂ σYᵢⱼ≤σXᵢⱼ = begin
+      D (σ X) (σ Y) ≡⟨ D-sym (σ X) (σ Y) ⟩
+      D (σ Y) (σ X) <⟨ DσXσY<DXY {Y} {X} (trans (trans (D-sym (σ Y) (σ X)) D≡dᵢⱼ) (d-sym (σ X i j) (σ Y i j))) (σYᵢⱼ≤σXᵢⱼ , σXᵢⱼ≉σYᵢⱼ ∘ ≈-sym) ⟩
+      D Y X         ≡⟨ D-sym Y X ⟩
+      D X Y         ∎
+      where open Rℕₚ.≤-Reasoning

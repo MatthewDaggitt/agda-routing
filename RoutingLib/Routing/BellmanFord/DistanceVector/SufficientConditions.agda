@@ -4,6 +4,7 @@ open import Data.Sum using (_⊎_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
 import Algebra.FunctionProperties as FunctionProperties
+open import Function using (flip)
 
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_)
@@ -62,6 +63,16 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions  where
 
     ≤-decTotalOrder : DecTotalOrder b ℓ ℓ
     ≤-decTotalOrder = ass⇨≤-decTotalOrder _≟_ ⊕-comm ⊕-assoc ⊕-sel
+
+    postulate ≥-isDecTotalOrder : IsDecTotalOrder _≈_ (flip _≤_)
+    
+    ≥-decTotalOrder : DecTotalOrder _ _ _
+    ≥-decTotalOrder = record
+      { Carrier         = Route
+      ; _≈_             = _≈_
+      ; _≤_             = flip _≤_
+      ; isDecTotalOrder = ≥-isDecTotalOrder
+      }
     
     open DecTotalOrder ≤-decTotalOrder public
       using (≤-resp-≈)

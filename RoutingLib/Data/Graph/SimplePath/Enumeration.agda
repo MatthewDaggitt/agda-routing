@@ -9,8 +9,8 @@ open import RoutingLib.Data.List.All using (AllPairs; _∷_; [])
 open import RoutingLib.Data.Graph.SimplePath hiding (_∈_)
 open import RoutingLib.Data.Graph.SimplePath.Properties using ([-]-injective; ℙₛ)
 open import RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties using () renaming (≈-setoid to NEPₛ)
-open import RoutingLib.Data.List.Any.Membership.Properties using (∈-map⁺)
-open import RoutingLib.Data.List.Uniqueness using (Unique)
+open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-map⁺)
+open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
 
 module RoutingLib.Data.Graph.SimplePath.Enumeration where
 

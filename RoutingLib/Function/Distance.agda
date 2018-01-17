@@ -4,6 +4,7 @@ open import Data.Nat.Properties using (≤⇒≤′)
 open import Relation.Binary using (Setoid; Decidable; _Preserves_⟶_; _Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality using (_≡_) renaming (sym to ≡-sym)
 open import Relation.Nullary using (¬_; yes; no)
+open import Relation.Unary using (Pred)
 open import Data.Product using (∃; _,_)
 open import Induction.WellFounded using (Acc; acc)
 open import Algebra.FunctionProperties using (Op₁)
@@ -16,12 +17,15 @@ module RoutingLib.Function.Distance {a} {ℓ} (S : Setoid a ℓ) where
   DistanceFunction = A → A → ℕ
 
 
-  -- Inequalities
+  -- Predicates over distance functions
 
-  TriangleIneq : DistanceFunction → Set a
+  Symmetric : Pred DistanceFunction a
+  Symmetric d = ∀ x y → d x y ≡ d y x
+  
+  TriangleIneq : Pred DistanceFunction a
   TriangleIneq d = ∀ x y z → d x z ≤ d x y + d y z
     
-  MaxTriangleIneq : DistanceFunction → Set a
+  MaxTriangleIneq : Pred DistanceFunction a
   MaxTriangleIneq d = ∀ x y z → d x z ≤ d x y ⊔ d y z
   
 

@@ -12,7 +12,7 @@ open import Data.List.Any.Membership.Propositional.Properties using ()
 open import Data.Vec using (Vec; _∷_; fromList)
 open import Data.Product using (∃; ∃₂; _,_)
 open import Data.Sum using (inj₁; inj₂)
-open import Relation.Binary using (Setoid; Decidable)
+open import Relation.Binary using (Setoid; Decidable; IsDecEquivalence; DecSetoid)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; subst; cong; sym; trans; module ≡-Reasoning)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction; ¬?)
@@ -41,87 +41,79 @@ open import RoutingLib.Data.List.Sorting.Nat using (index-mono⁻¹-<)
 open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique)
 open import RoutingLib.Data.List.Uniqueness.Propositional.Properties using (deduplicate!⁺)
 open import RoutingLib.Asynchronous using (Parallelisation)
-open import RoutingLib.Asynchronous.Theorems using (ACO; UltrametricConditions)
+open import RoutingLib.Asynchronous.Theorems.Core using (ACO; UltrametricConditions)
 open import RoutingLib.Function.Image using (FiniteImage)
 open import RoutingLib.Function.Distance using (IsUltrametric)
+open import RoutingLib.Function.Distance.Properties using (strContr⇒strContrOnOrbits)
+import RoutingLib.Function.Distance.MaxLift as MaxLift
 
 module RoutingLib.Asynchronous.Theorems.MetricToBox
   {a ℓ n} {S : Fin n → Setoid a ℓ} {P : Parallelisation S}
   (𝓤𝓒 : UltrametricConditions P) where
 
-    open Parallelisation P using (M; f; Pred; _⊂_; _⊆_; _≈_; _≉_; _∈_; Singleton-t; ≈-refl; ≈-sym; ≈ᵢ-refl; ≈ᵢ-sym)
+    open Parallelisation P using (M; f; Pred; _⊂_; _⊆_; _≈_; _≉_; _∈_; Singleton-t; ≈-refl; ≈-sym; ≈-isEquivalence; ≈ᵢ-refl; ≈ᵢ-sym; M-setoid)
     open UltrametricConditions 𝓤𝓒
+    ≈-isDecEquivalence : IsDecEquivalence _≈_
+    ≈-isDecEquivalence = record
+      { isEquivalence = ≈-isEquivalence
+      ; _≟_           = _≟_
+      }
 
+    M-decSetoid : DecSetoid _ _
+    M-decSetoid = record
+      { Carrier          = M
+      ; _≈_              = _≈_
+      ; isDecEquivalence = ≈-isDecEquivalence
+      }
+    
+    --f-cong = {!!}
+    
     module _ {i} where
 
-      open IsUltrametric (d-isUltrametric i) renaming
-        ( sym to dᵢ-sym
+      open IsUltrametric (dᵢ-isUltrametric {i}) renaming
+        ( sym  to dᵢ-sym
         ; eq⇒0 to x≈y⇒dᵢ≡0
         ; 0⇒eq to dᵢ≡0⇒x≈y
         ; cong to dᵢ-cong
         ) public
 
 
-    d-sym : ∀ x y → d x y ≡ d y x
-    d-sym = {!!}
-
-    d-cong : ∀ {m n p q} → m ≈ n → p ≈ q → d m p ≡ d n q
-    d-cong = {!!}
-
-    d≡0⇒x≈y : ∀ {x y} → d x y ≡ 0 → x ≈ y
-    d≡0⇒x≈y = {!!}
-
-    x≈y⇒d≡0 : ∀ {x y} → x ≈ y → d x y ≡ 0
-    x≈y⇒d≡0 x≈y = {!!}
+    -- Properties of d
     
-    f-cong : ∀ {x y} → x ≈ y → f x ≈ f y
-    f-cong = {!!}
+    d-isUltrametric : IsUltrametric M-setoid d
+    d-isUltrametric = MaxLift.isUltrametric S dᵢ (λ _ → dᵢ-isUltrametric)
+
+    open IsUltrametric d-isUltrametric using () renaming
+      ( cong to d-cong
+      ; sym to d-sym
+      ; 0⇒eq to d≡0⇒x≈y
+      ; eq⇒0 to x≈y⇒d≡0
+      )
 
     dᵢ≤d : ∀ x y i → dᵢ (x i) (y i) ≤ d x y
-    dᵢ≤d = {!!}
+    dᵢ≤d = MaxLift.dᵢ≤d S dᵢ
 
-
-    postulate x* : M
-
-    postulate fx*≈x* : f x* ≈ x*
-
+    open import RoutingLib.Function.Distance M-setoid using (_StrContrOnOrbitsOver_)
     
-    open FiniteImage (d-finiteImage x*)
-    --open FiniteImage (d-finiteImage x*)
+    f-strContrOnOrbits : f StrContrOnOrbitsOver d
+    f-strContrOnOrbits = f-strContrOver-d -- strContr⇒strContrOnOrbits
 
-{-
-    allDistances : List ℕ
-    allDistances = concat (tabulate (λ i → FiniteImage.image (d-finiteImage i (x* i))))
+    -- Fixed points exist
 
-    allDistances-complete : ∀ i m → dᵢ (x* i) m ∈ℕ allDistances
-    allDistances-complete i m = {!∈-concat⁺ ?!}
--}
+    import RoutingLib.Function.Distance.FixedPoint M-decSetoid as FixedPoints
 
-    -- Radii in list form
-{-
-    radii : List ℕ
-    radii = mergesort (deduplicate allDistances)
-
-    radii↗ : Sorted radii
-    radii↗ = mergesort↗ (deduplicate allDistances)
+    x* : M
+    x* = FixedPoints.x* d f-strContrOnOrbits element
     
-    radii! : Unique radii
-    radii! = mergesort!⁺ (deduplicate!⁺ _≟ℕ_ allDistances)
-
-    radii-complete : ∀ i m → dᵢ (x* i) m ∈ℕ radii
-    radii-complete x i = {!!} --∈-mergesort⁺ (∈-deduplicate⁺ _≟ℕ_ (complete x))
--}
-{-
-    radiiₗ-sound : ∀ {r} → r ∈ℕ radiiₗ → ∃ λ x → d x* x ≡ r
-    radiiₗ-sound r∈radii = sound (∈-deduplicate⁻ _≟ℕ_ (∈-mergesort⁻ r∈radii))
--}
-
-    -- Total number of radii
+    fx*≈x* : f x* ≈ x*
+    fx*≈x* = FixedPoints.x*-fixed d f-strContrOnOrbits element
 
     --------------------
     -- Non zero radii --
     --------------------
-    
+
+    open FiniteImage (d-finiteImage x*)
+
     nonZeroRadii : List ℕ
     nonZeroRadii = mergesort (deduplicate (dfilter (¬? ∘ (0 ≟ℕ_)) image))
 
@@ -139,6 +131,7 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
       where
       0≢dx*m : 0 ≢ d x* m
       0≢dx*m 0≡dx*m = x*≉m (d≡0⇒x≈y (sym 0≡dx*m))
+
 
     -----------
     -- Radii --
@@ -182,9 +175,6 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
     T-1∸T+K≡T-1∸T K = trans (m≤n⇒m∸n≡0 (T-1≤T+K K)) (sym T-1∸T≡0)
 
     
-
-
-
     -----------------------------
     -- Radii indexing function --
     -----------------------------
@@ -214,7 +204,8 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
       fromℕ≤ (s≤s (prop-toℕ-≤′ t))   ≡⟨ fromℕ≤-toℕ t _ ⟩
       t                              ∎
       where open ≡-Reasoning
-    
+
+
     ---------------------
     -- Radii functions --
     ---------------------

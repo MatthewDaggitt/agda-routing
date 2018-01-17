@@ -5,6 +5,8 @@ open import Data.List using (List; length)
 
 open import RoutingLib.Data.Matrix using (fold⁺)
 open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
+open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (deduplicate!⁺)
+open import RoutingLib.Data.List.Membership.DecSetoid.Properties using (∈-deduplicate⁺)
 
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions
@@ -51,33 +53,21 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Prelude
 
   open import RoutingLib.Data.List.Uniset DS using (Enumeration)
   open Enumeration routes-enumerable renaming (X to R-uniset; isEnumeration to R-isEnumeration)
-  open import RoutingLib.Data.List.Sorting ≤-decTotalOrder using (Sorted; sort; sort-↗; _↗_; sort-Sorted)
-  open import RoutingLib.Data.List.Sorting.Properties ≤-decTotalOrder using (↗-unique; ↗-∈ˡ; ↗-indexOf-mono-<; ↗-indexOf-revMono-≤; ↗-indexOf-⊤)
+  open import RoutingLib.Data.List.Sorting ≥-decTotalOrder using (Sorted)
+  open import RoutingLib.Data.List.Sorting.Mergesort ≥-decTotalOrder using (mergesort; mergesort!⁺; ∈-mergesort⁺; mergesort↗)
+  open import RoutingLib.Data.List.Membership.DecSetoid DS using (deduplicate)
   
   routes : List Route
-  routes = proj₁ R-uniset
+  routes = mergesort (deduplicate (proj₁ R-uniset))
 
   routes! : Unique S routes
-  routes! = proj₂ R-uniset
+  routes! = mergesort!⁺ (deduplicate!⁺ DS (proj₁ R-uniset))
 
   ∈-routes : ∀ x → x ∈ routes
-  ∈-routes = R-isEnumeration
+  ∈-routes x = ∈-mergesort⁺ (∈-deduplicate⁺ DS (R-isEnumeration x))
 
-  -- We can then sort this, preserving the completeness and uniqueness
-  
-  ↗routes : List Route
-  ↗routes = sort routes
-    
-  ↗routes! : Unique S ↗routes
-  ↗routes! = ↗-unique routes! (sort-↗ routes)
-
-  ∈-↗routes : ∀ x → x ∈ ↗routes
-  ∈-↗routes x = ↗-∈ˡ (∈-routes x) (sort-↗ routes)
-
-  ↗-↗routes : Sorted ↗routes
-  ↗-↗routes = sort-Sorted routes
-
-  -- The maximum size of the set
-
+  routes↗ : Sorted routes
+  routes↗ = mergesort↗ (deduplicate (proj₁ R-uniset))
+ 
   H : ℕ
-  H = length ↗routes
+  H = length routes

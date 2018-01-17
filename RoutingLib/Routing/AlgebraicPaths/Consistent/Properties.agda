@@ -21,13 +21,13 @@ open import RoutingLib.Data.Graph.SimplePath.Enumeration using (allPaths; ∈-al
 open import RoutingLib.Data.Maybe.Properties using (just-injective)
 open import RoutingLib.Data.List.All using (_∷_)
 open import RoutingLib.Data.List.All.Properties using (All-gfilter⁺₂)
-open import RoutingLib.Data.List.Uniqueness using (Unique)
-open import RoutingLib.Data.List.Uniqueness.Properties using (gfilter!⁺)
-open import RoutingLib.Data.List.Any.Membership.Properties using (∈-map⁺; ∈-resp-≈; ∈-gfilter)
+open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
+open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (gfilter!⁺)
+open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-map⁺; ∈-resp-≈; ∈-gfilter)
 open import RoutingLib.Data.List.Uniset using (Uniset; IsEnumeration; Enumeration)
 open import RoutingLib.Data.List.Properties using (foldr-map-commute)
-open import RoutingLib.Routing.BellmanFord.GeneralConvergence.SufficientConditions using () renaming (SufficientConditions to GeneralSufficientConditions)
-open import RoutingLib.Routing.BellmanFord.PathsConvergence.SufficientConditions using () renaming (SufficientConditions to PathsSufficientConditions)
+open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions using () renaming (SufficientConditions to SufficientConditions)
+open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions using (PathSufficientConditions)
 
 module RoutingLib.Routing.AlgebraicPaths.Consistent.Properties
   {a b ℓ}
@@ -312,17 +312,30 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent.Properties
 
   abstract
 
-    convertSufficientConditions : PathsSufficientConditions 𝓡𝓐 → GeneralSufficientConditions 𝓡𝓐ᶜ
-    convertSufficientConditions psc = record 
+    convertSufficientConditions : PathSufficientConditions 𝓡𝓟ᶜ → SufficientConditions 𝓡𝓐ᶜ
+    convertSufficientConditions psc = record
+      { ⊕-assoc                     = ⊕ᶜ-assoc {!⊕-comm!} {!!}
+      ; ⊕-sel                       = {!!}
+      ; ⊕-comm                      = {!!}
+      ; ⊕-almost-strictly-absorbs-▷ = {!!}
+      ; 0#-idᵣ-⊕                    = {!!}
+      ; 0#-an-▷                     = {!!}
+      ; 1#-anᵣ-⊕                    = {!!}
+      ; routes-enumerable           = ℂ-enumeration
+      }
+      where open PathSufficientConditions psc
+{-
+      record 
       { ⊕-assoc                     = ⊕ᶜ-assoc ⊕-comm ⊕-assoc
       ; ⊕-sel                       = ⊕ᶜ-sel
       ; ⊕-comm                      = ⊕ᶜ-comm ⊕-comm
-      ; ⊕-almost-strictly-absorbs-▷ = ⊕ᶜ-almost-strictly-absorbs-▷ᶜ ⊕-absorbs-▷
+      ; ⊕-almost-strictly-absorbs-▷ = ⊕ᶜ-almost-strictly-absorbs-▷ᶜ {!!} --⊕-absorbs-▷
 
       ; 0#-idᵣ-⊕ = cnull-idᵣ-⊕ᶜ
-      ; 0#-an-▷ = cnull-anᵣ-▷ᶜ
+      ; 0#-an-▷  = cnull-anᵣ-▷ᶜ
       ; 1#-anᵣ-⊕ = 1[]-anᵣ-⊕ᶜ 1#-anᵣ-⊕
 
       ; routes-enumerable = ℂ-enumeration
       }
-      where open PathsSufficientConditions psc
+      where open PathSufficientConditions psc
+-}

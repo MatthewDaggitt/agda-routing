@@ -66,14 +66,6 @@ module RoutingLib.Data.List.Any.Properties where
     lookup-index (there pxs) = lookup-index pxs
     
 {-
-    index-cong : ∀ {x y xs} → x ≈ y → (x∈xs : x ∈ xs) (y∈xs : y ∈ xs) → Unique S xs → indexOf x∈xs ≡ indexOf y∈xs
-    index-cong x≈y (here x≈z)   (here y≈z)   _            = refl
-    index-cong x≈y (here x≈z)   (there y∈xs) (z≉xs ∷ xs!) = contradiction (∈-resp-≈ y∈xs (trans (sym x≈y) x≈z)) (All¬⇒¬Any z≉xs)
-    index-cong x≈y (there x∈xs) (here y≈z)   (z≉xs ∷ xs!) = contradiction (∈-resp-≈ x∈xs (trans x≈y y≈z)) (All¬⇒¬Any z≉xs)
-    index-cong x≈y (there x∈xs) (there y∈xs) (_ ∷ xs!)    = cong suc (indexOf-cong x≈y x∈xs y∈xs xs!)
--}
-
-{-
     index-lookup : ∀ {xs} (pxs₁ pxs₂ : Any P xs) → index pxs₁ ≡ index pys₁ → x ≡ y
     index-lookup (here x≈z)   (here y≈z)   refl    = trans x≈z (sym y≈z)
     index-lookup (here x≈z)   (there y∈xs) ()

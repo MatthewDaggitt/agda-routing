@@ -28,32 +28,23 @@ open import RoutingLib.Data.Vec.Properties using (∈-lookup; ∈-fromList⁻; �
 open import RoutingLib.Data.Vec.All.Properties using (AllPairs-lookup; AllPairs-fromList⁺)
 open import RoutingLib.Function.Image using (FiniteImage)
 
-module RoutingLib.Asynchronous.Theorems {a ℓ n}
-                                        {S : Table (Setoid a ℓ) n} (p : Parallelisation S) where
+module RoutingLib.Asynchronous.Theorems {a ℓ n} {S : Table (Setoid a ℓ) n}
+                                        (P : Parallelisation S) where
 
-  open Parallelisation p
+  open Parallelisation P
   open import RoutingLib.Function.Distance using (IsUltrametric)
   open import RoutingLib.Function.Distance M-setoid using (_StrContrOver_)
+  open import RoutingLib.Asynchronous.Theorems.Core using (ACO; UltrametricConditions)
   
-  record ACO p : Set (lsuc (lsuc (a ⊔ p ⊔ ℓ))) where
-    field
-      T            : ℕ
-      D            : ℕ → Pred p
-      D-subst      : ∀ K {x y} → x ≈ y → x ∈ D K → y ∈ D K
-      D-decreasing : ∀ K → D (suc K) ⊆ D K
-      D-finish     : ∃ λ ξ → ∀ K → Singleton-t ξ (D (T + K))
-      f-monotonic  : ∀ K {t} → t ∈ D K → f t ∈ D (suc K)
+  postulate aco⇒safe : ∀ {p} → ACO P p → IsAsynchronouslySafe P
+  {-
+  aco⇒safe = {!!}
+    where open import RoutingLib.Asynchronous.Theorems.UresinDubois1 using ()
+  -}
+  
+  ultra⇒aco : UltrametricConditions P → ACO P _
+  ultra⇒aco ultra = aco
+    where open import RoutingLib.Asynchronous.Theorems.MetricToBox ultra using (aco)
 
-  record UltrametricConditions : Set (a ⊔ ℓ) where
-    field
-      dᵢ                 : ∀ {i} → Mᵢ i → Mᵢ i → ℕ
-
-    d : M → M → ℕ
-    d m n = max 0 (λ i → dᵢ {i} (m i) (n i))
-
-    field
-      d-isUltrametric    : ∀ i → IsUltrametric (S i) dᵢ
-      d-finiteImage      : ∀ (m : M) → FiniteImage ℕₛ (d m)
-      f-contrOn          : ∀ i m → dᵢ (f (f m) i) (f m i) ≤ dᵢ (f m i) (m i)
-      f-strContrOver-d   : f StrContrOver d
-      _≟_                : Decidable _≈_
+  ultra⇒safe : UltrametricConditions P → IsAsynchronouslySafe P
+  ultra⇒safe ultra = aco⇒safe (ultra⇒aco ultra)

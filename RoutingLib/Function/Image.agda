@@ -16,4 +16,3 @@ module RoutingLib.Function.Image where
     field
       image    : List (Carrier S)
       complete : ∀ a → f a ∈ image
-      sound    : ∀ {b} → b ∈ image → ∃ λ a → f a ≈ b

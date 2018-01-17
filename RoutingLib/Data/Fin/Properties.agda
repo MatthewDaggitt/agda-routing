@@ -50,6 +50,10 @@ module RoutingLib.Data.Fin.Properties where
   -- Ordering properties --
   -------------------------
 
+  postulate toℕ-cancel-< : ∀ {n} {i j : Fin n} → toℕ i <ℕ toℕ j → i < j
+  
+  postulate toℕ-mono-< : ∀ {n} {i j : Fin n} → i < j → toℕ i <ℕ toℕ j
+  
   <⇒≤pred : ∀ {n} {i j : Fin n} → j < i → j ≤ pred i
   <⇒≤pred {_} {fzero} {_} ()
   <⇒≤pred {_} {fsuc i} {fzero} j<i = z≤n

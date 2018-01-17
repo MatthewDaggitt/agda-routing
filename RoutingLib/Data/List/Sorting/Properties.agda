@@ -3,7 +3,7 @@ open import Data.Nat.Properties using (≤+≢⇒<)
 open import Data.Fin using (zero; suc) renaming (_≤_ to _≤𝔽_; _<_ to _<𝔽_)
 open import Data.List using (_∷_; length)
 open import Data.List.All as All using (All; []; _∷_)
-open import Data.List.Any using (here; there)
+open import Data.List.Any using (here; there; index)
 open import Data.Product using (_,_; proj₁; proj₂; uncurry′)
 open import Relation.Binary using (DecTotalOrder)
 open import Relation.Binary.PropositionalEquality using (_≡_; cong) renaming (setoid to ≡-setoid; refl to ≡-refl)
@@ -49,9 +49,11 @@ module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTot
 
   postulate lookup-mono-≤ : ∀ {xs} → Sorted xs → ∀ {i j} → i ≤𝔽 j → lookup xs i ≤ lookup xs j
   
-  postulate index-mono⁻¹-< : ∀ {xs} → Sorted xs → Unique S xs →
-                           ∀ {i j} → lookup xs i < lookup xs j → i <𝔽 j
-                           
+  postulate lookup-mono⁻¹-< : ∀ {xs} → Sorted xs → Unique S xs →
+                              ∀ {i j} → lookup xs i < lookup xs j → i <𝔽 j
+
+  postulate index-mono-< : ∀ {xs} → Sorted xs → ∀ {x y} (x∈xs : x ∈ xs) (y∈xs : y ∈ xs) → x < y → index x∈xs <𝔽 index y∈xs
+  
   {-
   lookup-mono-≤ []         {()}
   lookup-mono-≤ (x↗ ∷ xs↗) {zero}  i≤j = All.lookup {!!} {!!}

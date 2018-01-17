@@ -43,5 +43,4 @@ module RoutingLib.Routing.BellmanFord
   σ∥ : Parallelisation (λ _ → ℝ𝕋ₛ)
   σ∥ = record { f = σ }
 
-  open Parallelisation σ∥ using (δ)
-    renaming (async-iter to δ') public
+  open Parallelisation σ∥ using () renaming (async-iter to δ) public

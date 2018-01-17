@@ -7,8 +7,9 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Function using (_∘_; id)
 open import Data.List.All using (All; _∷_; [])
 open import Data.List.All.Properties using (All¬⇒¬Any)
+open import Data.List.Any using (index)
 open import Data.Nat using (_≤_; _<_; zero; suc; s≤s; z≤n)
-open import Data.Nat.Properties using (suc-injective; <⇒≤)
+open import Data.Nat.Properties using (suc-injective; <⇒≤; ≤-trans; n≤1+n)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Maybe using (nothing; just; Maybe; Eq; Eq-refl; Eq-sym; Eq-trans; drop-just)
 open import Data.Empty using (⊥-elim)
@@ -181,16 +182,20 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     ∈-perm : ∀ {x xs ys} → x ∈ xs → xs ⇿ ys → x ∈ ys
     ∈-perm = Any-⇿
 
-    ∈-length : ∀ {x xs} → x ∈ xs → ∃ λ n → length xs ≡ suc n
-    ∈-length {_} {_ ∷ xs} (here px)    = length xs , refl
-    ∈-length {_} {_ ∷ _}  (there x∈xs) = mapₚ suc (cong suc) (∈-length x∈xs)
-
+    ∈-length : ∀ {x xs} → x ∈ xs → 1 ≤ length xs
+    ∈-length {_} {_ ∷ xs} (here px)    = s≤s z≤n
+    ∈-length {_} {_ ∷ xs} (there x∈xs) = ≤-trans (∈-length x∈xs) (n≤1+n (length xs))
+    
     ∈-lookup : ∀ xs i → lookup xs i ∈ xs
     ∈-lookup []       ()
     ∈-lookup (x ∷ xs) fzero    = here ≈-refl
     ∈-lookup (x ∷ xs) (fsuc i) = there (∈-lookup xs i)
 
-
+    index-cong : ∀ {x y xs} → x ≈ y → (x∈xs : x ∈ xs) (y∈xs : y ∈ xs) → Unique S xs → index x∈xs ≡ index y∈xs
+    index-cong x≈y (here x≈z)   (here y≈z)   _            = refl
+    index-cong x≈y (here x≈z)   (there y∈xs) (z≉xs ∷ xs!) = contradiction (∈-resp-≈ y∈xs (trans (sym x≈y) x≈z)) (All¬⇒¬Any z≉xs)
+    index-cong x≈y (there x∈xs) (here y≈z)   (z≉xs ∷ xs!) = contradiction (∈-resp-≈ x∈xs (trans x≈y y≈z)) (All¬⇒¬Any z≉xs)
+    index-cong x≈y (there x∈xs) (there y∈xs) (_ ∷ xs!)    = cong fsuc (index-cong x≈y x∈xs y∈xs xs!)
     
 
     

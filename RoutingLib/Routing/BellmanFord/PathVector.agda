@@ -10,16 +10,15 @@ open import Relation.Unary using (Decidable)
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Data.Graph
-open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions using (SufficientConditions)
+open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions using (PathSufficientConditions)
 open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions using () renaming (SufficientConditions to GeneralSufficientConditions)
 open import RoutingLib.Asynchronous
-open import RoutingLib.Data.Nat.Properties using (suc-injective; ≰⇒≥; +-comm; +-assoc)
 open import RoutingLib.Data.List using (max)
 
 module RoutingLib.Routing.BellmanFord.PathVector
   {a b ℓ}
   (𝓡𝓐 : RoutingAlgebra a b ℓ)
-  (sc : SufficientConditions 𝓡𝓐)
+  (sc : PathSufficientConditions 𝓡𝓐)
   {n-1 : ℕ} 
   (G : Graph (RoutingAlgebra.Step 𝓡𝓐) (suc n-1))
   where
@@ -35,7 +34,7 @@ module RoutingLib.Routing.BellmanFord.PathVector
   -- structure (A,⊕,▷,0,1) when consistent paths are added to it 
   -- as long as ⊕ is associative, commutative, selective and ⊕ absorbs ▷.
 
-  open SufficientConditions sc
+  open PathSufficientConditions sc
   open import RoutingLib.Routing.AlgebraicPaths.Consistent 𝓡𝓐 ⊕-sel G using (𝓡𝓟ᶜ; 𝓡𝓐ᶜ)
   open import RoutingLib.Routing.AlgebraicPaths.Consistent.Properties 𝓡𝓐 ⊕-sel G using (convertSufficientConditions)
   open import RoutingLib.Routing.BellmanFord 𝓡𝓟ᶜ  using () renaming (I to Iᶜ; σ∥ to σ∥ᶜ)

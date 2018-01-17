@@ -1,45 +1,39 @@
-open import Data.Product using (∃; _,_)
-open import Data.Nat using (ℕ; zero; suc; _+_; s≤s; _<_; _≤_; _≤?_; _∸_)
-open import Data.Nat.Properties using (m≤m+n; m+n∸m≡n)
-open import Data.Fin using (Fin)
-open import Relation.Nullary using (yes; no)
+open import Data.Nat using (ℕ; zero; suc)
 
 open import RoutingLib.Routing.Definitions
-open import RoutingLib.Algebra.FunctionProperties
-open import RoutingLib.Data.Graph
 open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions
-open import RoutingLib.Asynchronous
-open import RoutingLib.Asynchronous.Theorems using (module Guerney)
-open import RoutingLib.Data.Nat.Properties using (suc-injective; m≤n⇨m+o≡n; ≰⇒≥; +-comm; +-assoc)
+open import RoutingLib.Asynchronous using (IsAsynchronouslySafe)
+open import RoutingLib.Asynchronous.Theorems.Core using (UltrametricConditions)
+open import RoutingLib.Asynchronous.Theorems using (ultra⇒safe)
 
 module RoutingLib.Routing.BellmanFord.DistanceVector
-  {a b ℓ n-1} 
-  (𝓡𝓟 : RoutingProblem a b ℓ (suc n-1)) 
-  (sc : SufficientConditions (RoutingProblem.ra 𝓡𝓟))
+  {a b ℓ n-1}
+  (𝓡𝓐 : RoutingAlgebra a b ℓ)
+  (𝓡𝓟 : RoutingProblem 𝓡𝓐 (suc n-1))
+  (𝓢𝓒 : SufficientConditions 𝓡𝓐)
   where
-
-  open RoutingProblem 𝓡𝓟
 
   ------------------------------------------------------------------------
   -- Theorem
   --
-  -- Distributed Bellman Ford over any RoutingAlgebra converges from 
-  -- any state when it is possible to enumerate all values of Route
+  -- Distributed Bellman Ford used as a distance vector algorithm converges
+  -- from any state when it is possible to enumerate all values of Route
 
+  open RoutingProblem 𝓡𝓟 using (_≟ₘ_)
   open import RoutingLib.Routing.BellmanFord 𝓡𝓟
+  open import RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StateMetric 𝓡𝓟 𝓢𝓒
+    using (dᵢ; dᵢ-isUltrametric; D-image; σ-strictlyContracting)
 
-  open import RoutingLib.Routing.BellmanFord.DistanceVector.Step2_Ultrametric 𝓡𝓟 sc using (d; dₘₐₓ; d-isUltrametric) public
-  open import RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StrictlyContracting 𝓡𝓟 sc using (σ-strictlyContractingOnOrbits)
-  
-  postulate d-satisfiesUltrametricConditions : Guerney.UltrametricConditions σ∥ d
-{-
-  d-satisfiesUltrametricConditions = record
-    { isUltrametric               = {!!} --d-isUltrametric
-    ; strictlyContractingOnOrbits = σ-strictlyContractingOnOrbits
-    ; finiteImage                 = suc hₘₐₓ , d≤H
-    }
--}
+  ultrametricConditions : UltrametricConditions σ∥
+  ultrametricConditions = record
+    { dᵢ               = dᵢ
+    ; dᵢ-isUltrametric = dᵢ-isUltrametric
+    ; f-strContrOver-d = σ-strictlyContracting
+    ; f-cong           = σ-cong
+    ; _≟_              = _≟ₘ_
+    ; d-finiteImage    = D-image
+    ; element          = I
+    } 
 
   σ-isAsynchronouslySafe : IsAsynchronouslySafe σ∥
-  σ-isAsynchronouslySafe = Guerney.StrictlyContractingUltrametric⇒AsynchronouslySafe σ∥ (d , d-satisfiesUltrametricConditions)
-
+  σ-isAsynchronouslySafe = ultra⇒safe σ∥ ultrametricConditions

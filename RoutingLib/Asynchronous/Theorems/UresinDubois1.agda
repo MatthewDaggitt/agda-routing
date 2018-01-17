@@ -1,5 +1,3 @@
--- imports
-
 open import Data.Nat
   using (ℕ; _+_; _≤_; zero; suc; _<_; _≟_; s≤s; z≤n; _∸_; _≤?_; pred)
 open import Data.Fin
@@ -40,7 +38,7 @@ open import RoutingLib.Asynchronous.Schedule using (Schedule; 𝕋)
 open import RoutingLib.Asynchronous using (Parallelisation)
 import RoutingLib.Asynchronous.Schedule.Times as Times
 import RoutingLib.Asynchronous.Schedule.Times.Properties as TimesProperties
-open import RoutingLib.Asynchronous.Theorems using (ACO)
+open import RoutingLib.Asynchronous.Theorems.Core using (ACO)
 
 module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a ℓ n} {S : Fin n → Setoid a ℓ}
   (𝕤 : Schedule n)(𝕡 : Parallelisation S) where
@@ -52,7 +50,7 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a ℓ n} {S : Fin n → S
   open TimesProperties 𝕤
 
   φsK≤sk⇒τK≤βsK : ∀ k K i j → φ (suc K) ≤ suc k → τ K j ≤ β (suc k) i j
-  φsK≤sk⇒τK≤βsK k K i j p = subst ((τ K j) ≤_)
+  φsK≤sk⇒τK≤βsK k K i j p = subst (τ K j ≤_)
           (cong (λ x → β x i j) (m+n∸m≡n p))
           (proj₂ (prop1-iii K i j (suc k ∸ (φ (suc K)))))
 
@@ -94,9 +92,7 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a ℓ n} {S : Fin n → S
                async∈DK : ∀ j → async-iter' 𝕤 x₀ (accβ j) j ∈ᵤ D K j
                async∈DK j = τK≤k⇒xₖ'∈DK (accβ j) K j (φsK≤sk⇒τK≤βsK k K i j (≤-trans (φ≤τ (suc K) i) τ≤sk))
     τK≤k⇒xₖ'∈DK {suc k} (acc rs) zero    i τ≤sk | yes i∈α with T ≟ 0
-    ... | no  T≢0 = D-decreasing 0
-          (f (λ j → async-iter' 𝕤 x₀ (rs (β (suc k) i j) (s≤s (causality k i j))) j) )
-          (f-monotonic 0 (λ j → τK≤k⇒xₖ'∈DK (rs (β (suc k) i j) (s≤s (causality k i j))) 0 j z≤n)) i
+    ... | no  T≢0 = D-decreasing 0 (f-monotonic 0 (λ j → τK≤k⇒xₖ'∈DK (rs (β (suc k) i j) (s≤s (causality k i j))) 0 j z≤n)) i
     ... | yes T≡0 = D-subst 0 {x = ξ}
           {y = f[newState]}
           (λ l → proj₂ (D-T+K≡ξ 1) f[newState] (subst (λ v → f[newState] ∈ D v) {x = 1} {y = T + 1}

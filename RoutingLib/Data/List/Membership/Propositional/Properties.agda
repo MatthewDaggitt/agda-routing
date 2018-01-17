@@ -83,7 +83,7 @@ module RoutingLib.Data.List.Membership.Propositional.Properties where
   ∈-perm : ∀ {a} {A : Set a} {x : A} {xs ys} → x ∈ xs → xs ⇿ ys → x ∈ ys
   ∈-perm = GM.∈-perm (setoid _)
 
-  ∈-length : ∀ {a} {A : Set a} {x : A} {xs} → x ∈ xs → ∃ λ n → length xs ≡ suc n
+  ∈-length : ∀ {a} {A : Set a} {x : A} {xs} → x ∈ xs → 1 ≤ length xs
   ∈-length x∈xs = GM.∈-length (setoid _) x∈xs
 
   ∈-dfilter⁺ : ∀ {a p} {A : Set a} {P : A → Set p} (P? : Decidableᵤ P) →

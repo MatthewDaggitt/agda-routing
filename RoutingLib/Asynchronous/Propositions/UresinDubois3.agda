@@ -16,7 +16,7 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3 {a ℓ n}
   where
 
   open Parallelisation 𝕡 using (f)
-  open import RoutingLib.Asynchronous.Theorems 𝕡 using (ACO)
+  open import RoutingLib.Asynchronous.Theorems.Core 𝕡 using (ACO)
   open import RoutingLib.Data.Table.IndexedTypes S
 
   iter : M → ℕ → M
@@ -76,8 +76,8 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3 {a ℓ n}
                                 D₀-subst x≈y (λ j → proj₂ (x∈DK j)) i
 
     D-decreasing : ∀ K → D (suc K) ⊆ D K
-    D-decreasing K x x∈DsK i with x∈DsK i
-    ... | ((ξ≼x , x≼iterK ), x∈D₀) = (ξ≼x , ≼-trans x≼iterK (iter-dec K i)) , x∈D₀
+    D-decreasing K x∈DK i with x∈DK i
+    ... | ((ξ≼x , x≼iterK), x∈D₀) = (ξ≼x , ≼-trans x≼iterK (iter-dec K i)) , x∈D₀
 
     closed-trans : ∀ K → iter x₀ K ∈ D₀
     closed-trans zero    i = x₀∈D₀ i

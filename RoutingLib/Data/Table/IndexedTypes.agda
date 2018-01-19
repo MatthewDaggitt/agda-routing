@@ -1,5 +1,7 @@
 open import Data.Fin using (Fin)
 open import Data.Product using (∃; _×_)
+open import Data.List using (List)
+import Data.List.Any.Membership as Memb
 open import Level using (Level; _⊔_) renaming (suc to lsuc)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
@@ -17,7 +19,6 @@ module RoutingLib.Data.Table.IndexedTypes {a ℓ n} (S : Table (Setoid a ℓ) n)
   
   M : Set a
   M = ∀ i → Mᵢ i
-
   -- Equality
 
   module _ {i : Fin n} where
@@ -46,7 +47,7 @@ module RoutingLib.Data.Table.IndexedTypes {a ℓ n} (S : Table (Setoid a ℓ) n)
   ≈-trans r≈s s≈t i = ≈ᵢ-trans (r≈s i) (s≈t i)
 
   ≈-cong : ∀ {b} {A : Set b} (f : A → M) {x y} → x ≡ y → f x ≈ f y
-  ≈-cong g refl i = ≈ᵢ-refl
+  ≈-cong f refl i = ≈ᵢ-refl
   
   ≈-isEquivalence : IsEquivalence _≈_
   ≈-isEquivalence = record
@@ -61,6 +62,7 @@ module RoutingLib.Data.Table.IndexedTypes {a ℓ n} (S : Table (Setoid a ℓ) n)
     ; _≈_           = _≈_
     ; isEquivalence = ≈-isEquivalence
     }
+  open Memb M-setoid using () renaming (_∈_ to _∈L_)
   
   -- Predicates and relations over predicates
 
@@ -85,3 +87,5 @@ module RoutingLib.Data.Table.IndexedTypes {a ℓ n} (S : Table (Setoid a ℓ) n)
   Singleton-t : ∀ {p} → M → Predᵤ (Pred p) (a ⊔ p ⊔ ℓ)
   Singleton-t t P = t ∈ P × ∀ s → s ∈ P → t ≈ s
   
+  Finite-Pred : ∀ {p} (P : Pred p) → Set (a ⊔ p ⊔ ℓ)
+  Finite-Pred P = ∃ λ (xs : List M) → ∀ {x} → x ∈ P → x ∈L xs

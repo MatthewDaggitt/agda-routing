@@ -73,9 +73,10 @@ module RoutingLib.Asynchronous.Schedule.Times {n}(𝕤 : Schedule n) where
     
     -- Definition of τ
     τ : 𝕋 → Fin n → 𝕋
-    τ zero    i = zero
+    τ t i = nextActive (φ t) i
+  {-  τ zero    i = zero
     τ (suc t) i = nextActive (φ (suc t)) i
-
+-}
 {-
     module ActivationTimes {α : 𝔸 n} (sf : StarvationFree α) where
 

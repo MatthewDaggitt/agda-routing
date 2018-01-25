@@ -132,13 +132,11 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a ℓ n} {S : Fin n → S
     accTᶜ+K K = <-well-founded (φ (suc T) + K)
 
     τ≤Tᶜ+K : ∀ K j → τ (T + 0) j ≤ Tᶜ + K
-    τ≤Tᶜ+K K j with T
-    ... | zero = {!!}
-    ... | suc t = begin 
-      τ (suc t + 0) j      ≡⟨ cong₂ τ (+-identityʳ (suc t)) refl ⟩
-      τ (suc t) j          ≤⟨ <⇒≤ (nextActiveφ<φs (suc t) j) ⟩
-      φ (suc (suc t))      ≤⟨ m≤m+n (φ (suc (suc t))) K ⟩
-      φ (suc (suc t)) + K  ∎
+    τ≤Tᶜ+K K j = begin 
+      τ (T + 0) j    ≡⟨ cong₂ τ (+-identityʳ T) refl ⟩
+      τ T j          ≤⟨ <⇒≤ (nextActiveφ<φs T j) ⟩
+      φ (suc T)      ≤⟨ m≤m+n (φ (suc T)) K ⟩
+      φ (suc T) + K  ∎
 
     theorem1-proof : ∀ K → async-iter 𝕤 x₀ (Tᶜ + K) ≈ ξ
     theorem1-proof K i = ≈ᵢ-sym (proj₂ (D-T+K≡ξ 0) (async-iter 𝕤 x₀ (Tᶜ + K)) async∈DT i)

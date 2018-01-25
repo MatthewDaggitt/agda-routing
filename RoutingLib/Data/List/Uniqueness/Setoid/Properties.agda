@@ -140,11 +140,3 @@ module RoutingLib.Data.List.Uniqueness.Setoid.Properties where
       ... | (c , _ , v≈fxc) | (a , b , a∈xs , _ , v≈fab) = contradiction (trans (sym v≈fxc) v≈fab) (f-inj (inj₁ (All-∈ S₁ pres x∉xs a∈xs)))
  
   open TripleSetoid public
-
-  
-
-  upTo!⁺ : ∀ n → Unique ℕₛ (upTo n)
-  upTo!⁺ n = AllPairs-applyUpTo⁺₁ id n (λ i<j _ → <⇒≢ i<j)
-
-  between!⁺ : ∀ s e → Unique ℕₛ (between s e)
-  between!⁺ s e = AllPairs-applyBetween⁺₁ id s e (λ _ i<j _ → <⇒≢ i<j)

@@ -38,7 +38,7 @@ module RoutingLib.Asynchronous where
       open Schedule 𝕤
 
       async-iter' : ∀ {t} → Acc _<_ t → M
-      async-iter' {zero} _ i = x₀ i
+      async-iter' {zero}  _        i = x₀ i
       async-iter' {suc t} (acc rs) i with i ∈? α (suc t)
       ... | yes _ = f (λ j → async-iter' (rs (β (suc t) i j) (s≤s (causality t i j))) j) i
       ... | no  _ = async-iter' (rs t ≤-refl) i
@@ -49,7 +49,8 @@ module RoutingLib.Asynchronous where
 
 
   -- A record encapsulating the idea that p is a well behaved parallelisation
-  record IsAsynchronouslySafe {a ℓ n} {S : Fin n → Setoid a ℓ} (p : Parallelisation S) : Set (lsuc (a ⊔ ℓ)) where
+  record IsAsynchronouslySafe {a ℓ n} {S : Fin n → Setoid a ℓ}
+                              (p : Parallelisation S) : Set (lsuc (a ⊔ ℓ)) where
   
     open Parallelisation p
     

@@ -1,4 +1,4 @@
-open import Data.Nat using (ℕ; suc)
+open import Data.Nat using (ℕ; suc) renaming (_≤_ to _≤ℕ_)
 open import Data.Product using (∃; proj₁; proj₂)
 open import Data.Sum using (_⊎_)
 open import Data.List using (List; length)
@@ -7,6 +7,7 @@ open import RoutingLib.Data.Matrix using (fold⁺)
 open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
 open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (deduplicate!⁺)
 open import RoutingLib.Data.List.Membership.DecSetoid.Properties using (∈-deduplicate⁺)
+open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-length)
 
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions
@@ -52,22 +53,26 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Prelude
   -- We have a unique complete list of routes
 
   open import RoutingLib.Data.List.Uniset DS using (Enumeration)
-  open Enumeration routes-enumerable renaming (X to R-uniset; isEnumeration to R-isEnumeration)
   open import RoutingLib.Data.List.Sorting ≥-decTotalOrder using (Sorted)
   open import RoutingLib.Data.List.Sorting.Mergesort ≥-decTotalOrder using (mergesort; mergesort!⁺; ∈-mergesort⁺; mergesort↗)
   open import RoutingLib.Data.List.Membership.DecSetoid DS using (deduplicate)
+
+  abstract
   
-  routes : List Route
-  routes = mergesort (deduplicate (proj₁ R-uniset))
+    routes : List Route
+    routes = mergesort (deduplicate allRoutes)
 
-  routes! : Unique S routes
-  routes! = mergesort!⁺ (deduplicate!⁺ DS (proj₁ R-uniset))
+    routes! : Unique S routes
+    routes! = mergesort!⁺ (deduplicate!⁺ DS allRoutes)
+  
+    ∈-routes : ∀ x → x ∈ routes
+    ∈-routes x = ∈-mergesort⁺ (∈-deduplicate⁺ DS (∈-allRoutes x))
 
-  ∈-routes : ∀ x → x ∈ routes
-  ∈-routes x = ∈-mergesort⁺ (∈-deduplicate⁺ DS (R-isEnumeration x))
-
-  routes↗ : Sorted routes
-  routes↗ = mergesort↗ (deduplicate (proj₁ R-uniset))
+    routes↗ : Sorted routes
+    routes↗ = mergesort↗ (deduplicate allRoutes)
  
   H : ℕ
   H = length routes
+
+  1≤H : 1 ≤ℕ H
+  1≤H = ∈-length S (∈-routes 0#)

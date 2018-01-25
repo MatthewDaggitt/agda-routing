@@ -27,7 +27,9 @@ module RoutingLib.Function.Distance {a} {ℓ} (S : Setoid a ℓ) where
     
   MaxTriangleIneq : Pred DistanceFunction a
   MaxTriangleIneq d = ∀ x y z → d x z ≤ d x y ⊔ d y z
-  
+
+  Bounded : Pred DistanceFunction a
+  Bounded d = ∃ λ n → ∀ x y → d x y ≤ n
 
   -- Contractions
     

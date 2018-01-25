@@ -3,7 +3,7 @@ open import Data.Fin using (Fin)
 open import Data.List using (List)
 import Data.List.Any.Membership as Membership
 open import Data.Nat using (ℕ)
-open import Data.Product using (∃; _×_; Σ)
+open import Data.Product using (∃; _,_; _×_; Σ)
 open import Data.Maybe
 open import Function.Equality using (_⟶_; Π)
 open import Level using (_⊔_) renaming (zero to lzero; suc to lsuc)
@@ -15,7 +15,8 @@ open import RoutingLib.Algebra.FunctionProperties using (_Preservesₗ_)
 open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-concat⁺; ∈-tabulate⁺)
 open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
 open import RoutingLib.Data.Matrix using (SquareMatrix; Matrix)
-open import RoutingLib.Data.Graph.SimplePath using (SimplePath; []; [_]; _∺_; _∷_; _∺_∣_; _∷_∣_; source) renaming (_≈_ to _≈ₚ_)
+open import RoutingLib.Data.Table using (Table)
+open import RoutingLib.Data.Graph.SimplePath2 using (SimplePath; valid; invalid; []; _∷_; _∷_∣_∣_) renaming (_≈_ to _≈ₚ_)
 open import RoutingLib.Data.Graph.SimplePath.Properties using (p≈q⇒p₀≡q₀)
 
 module RoutingLib.Routing.Definitions where
@@ -84,46 +85,27 @@ module RoutingLib.Routing.Definitions where
 
     open RoutingAlgebra 𝓡𝓐 public
 
+    RTable : Set b
+    RTable = Table Route n
+    
     RMatrix : Set b
     RMatrix = SquareMatrix Route n
 
     open import RoutingLib.Data.Matrix.Relation.DecidableEquality DS public
-    open import RoutingLib.Data.Table.Relation.DecidableEquality DS using (𝕋ₛ)
+    open import RoutingLib.Data.Table.Relation.DecidableEquality DS public
 
     ℝ𝕋ₛ : Setoid b ℓ
     ℝ𝕋ₛ = 𝕋ₛ n
     
     ℝ𝕄ₛ : Setoid b ℓ
     ℝ𝕄ₛ = 𝕄ₛ n n
-
-    weight : SimplePath n → Route
-    weight []            = 1#
-    weight [ i ∺ j ∣ _ ] = A i j ▷ 1#
-    weight [ i ∷ p ∣ _ ] = A i (source p) ▷ weight [ p ]
-
-    weight-cong : ∀ {p q : SimplePath n} → p ≈ₚ q → weight p ≈ weight q
-    weight-cong []              = ≈-refl
-    weight-cong [ refl ∺ refl ] = ≈-refl
-    weight-cong [ refl ∷ p≈q  ] rewrite p≈q⇒p₀≡q₀ p≈q =
-      ▷-cong _ (weight-cong [ p≈q ])
-
-  -----------
-  -- Other --
-  -----------
-{-
-  record HasFiniteImage {a b ℓ₁ ℓ₂} (F : Setoid a ℓ₁) (T : Setoid b ℓ₂) (fun : F ⟶ T) : Set _ where
-
-    open Setoid F using () renaming (Carrier to A)
-    open Setoid T using () renaming (Carrier to B)
-    open Membership T using (_∈_)
-    open Π fun using () renaming (_⟨$⟩_ to f)
     
-    field
-      image    : List B
-      unique   : Unique T image
-      complete : ∀ a → f a ∈ image
-      sound    : ∀ {b} → b ∈ image → ∃ λ a → f a ≡ b
-      {-
-      sorted   : Sortedℕ h-image
-      -}
--}
+    weight : SimplePath n → Route
+    weight invalid                       = 0#
+    weight (valid [])                    = 1#
+    weight (valid ((i , j) ∷ p ∣ _ ∣ _)) = A i j ▷ weight (valid p)
+    
+    weight-cong : ∀ {p q : SimplePath n} → p ≈ₚ q → weight p ≈ weight q
+    weight-cong invalid              = ≈-refl
+    weight-cong (valid [])           = ≈-refl
+    weight-cong (valid (refl ∷ p≈q)) = ▷-cong _ (weight-cong (valid p≈q))

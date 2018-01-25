@@ -23,35 +23,37 @@ module RoutingLib.Data.Matrix.Relation.Pointwise where
 
   -- Pointwise properties
   module _ {a ℓ} {A : Set a} {_~_ : Rel A ℓ} where
-  
-   reflexive : _≡_ ⇒ _~_ → ∀ {m n} → _≡_ ⇒ Pointwise _~_ {m} {n}
-   reflexive reflexive ≡-refl = Table.reflexive (Table.reflexive reflexive) ≡-refl
 
-   refl : Reflexive _~_ → ∀ {m n} → Reflexive (Pointwise _~_ {m} {n})
-   refl reflexive i j = reflexive
+    abstract
+    
+      reflexive : _≡_ ⇒ _~_ → ∀ {m n} → _≡_ ⇒ Pointwise _~_ {m} {n}
+      reflexive reflexive ≡-refl = Table.reflexive (Table.reflexive reflexive) ≡-refl
 
-   sym : Symmetric _~_ → ∀ {m n} → Symmetric (Pointwise _~_ {m} {n})
-   sym sym M~N i j = sym (M~N i j)
+      refl : Reflexive _~_ → ∀ {m n} → Reflexive (Pointwise _~_ {m} {n})
+      refl reflexive i j = reflexive
 
-   trans : Transitive _~_ → ∀ {m n} → Transitive (Pointwise _~_ {m} {n})
-   trans trans M~N N~P i j = trans (M~N i j) (N~P i j)
+      sym : Symmetric _~_ → ∀ {m n} → Symmetric (Pointwise _~_ {m} {n})
+      sym sym M~N i j = sym (M~N i j)
 
-   dec : Decidable _~_ → ∀ {m n} → Decidable (Pointwise _~_ {m} {n})
-   dec dec M N = all? (λ i → all? (λ j → dec (M i j) (N i j)))
+      trans : Transitive _~_ → ∀ {m n} → Transitive (Pointwise _~_ {m} {n})
+      trans trans M~N N~P i j = trans (M~N i j) (N~P i j)
+
+      dec : Decidable _~_ → ∀ {m n} → Decidable (Pointwise _~_ {m} {n})
+      dec dec M N = all? (λ i → all? (λ j → dec (M i j) (N i j)))
    
-   isEquivalence : IsEquivalence _~_ → ∀ {m n} → IsEquivalence (Pointwise _~_ {m} {n})
-   isEquivalence isEq = record
-     { refl  = refl  (IsEquivalence.refl  isEq)
-     ; sym   = sym   (IsEquivalence.sym   isEq)
-     ; trans = trans (IsEquivalence.trans isEq)
-     }
+      isEquivalence : IsEquivalence _~_ → ∀ {m n} → IsEquivalence (Pointwise _~_ {m} {n})
+      isEquivalence isEq = record
+        { refl  = refl  (IsEquivalence.refl  isEq)
+        ; sym   = sym   (IsEquivalence.sym   isEq)
+        ; trans = trans (IsEquivalence.trans isEq)
+        }
 
-   isDecEquivalence : IsDecEquivalence _~_ →
-                        ∀ {m} {n} → IsDecEquivalence (Pointwise _~_ {m} {n})
-   isDecEquivalence isDecEq = record
-     { isEquivalence = isEquivalence (IsDecEquivalence.isEquivalence isDecEq)
-     ; _≟_           = dec           (IsDecEquivalence._≟_           isDecEq)
-     }
+      isDecEquivalence : IsDecEquivalence _~_ →
+                         ∀ {m} {n} → IsDecEquivalence (Pointwise _~_ {m} {n})
+      isDecEquivalence isDecEq = record
+        { isEquivalence = isEquivalence (IsDecEquivalence.isEquivalence isDecEq)
+        ; _≟_           = dec           (IsDecEquivalence._≟_           isDecEq)
+        }
 
   setoid : ∀ {a ℓ} → Setoid a ℓ → ℕ → ℕ → Setoid a ℓ
   setoid S m n = record

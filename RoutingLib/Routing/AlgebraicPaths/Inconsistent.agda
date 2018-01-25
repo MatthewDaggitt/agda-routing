@@ -77,6 +77,7 @@ module RoutingLib.Routing.AlgebraicPaths.Inconsistent
 
   _▷ⁱ_ : IStep → IRoute → IRoute
   _       ▷ⁱ inull = inull
+  (i , j) ▷ⁱ (iroute x ∅) = {!iroute x ∅!}
   (i , j) ▷ⁱ (iroute x []) with i ≟𝔽 j | (i , j) ∈? G
   ... | yes _  | _           = inull
   ... | _      | no  _       = inull

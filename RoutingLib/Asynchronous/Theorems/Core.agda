@@ -6,16 +6,15 @@ open import Relation.Binary using (Setoid; Decidable)
 open import RoutingLib.Asynchronous
 open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 open import RoutingLib.Data.Table using (Table; max)
-open import RoutingLib.Function.Image using (FiniteImage)
 
 module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {S : Table (Setoid a ℓ) n}
                                         (P : Parallelisation S) where
 
   open Parallelisation P
   open import RoutingLib.Function.Distance using (IsUltrametric)
-  open import RoutingLib.Function.Distance M-setoid using (_StrContrOver_)
+  open import RoutingLib.Function.Distance M-setoid using (_StrContrOver_; Bounded)
   
-  record ACO p : Set (lsuc (lsuc (a ⊔ p ⊔ ℓ))) where
+  record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
     field
       T            : ℕ
       D            : ℕ → Pred p
@@ -24,6 +23,13 @@ module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {S : Table (Setoid a ℓ)
       D-finish     : ∃ λ ξ → ∀ K → Singleton-t ξ (D (T + K))
       f-monotonic  : ∀ K {t} → t ∈ D K → f t ∈ D (suc K)
 
+  -- A version of ACO where the first box contains every element
+  record TotalACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
+    field
+      aco   : ACO p
+      total : ∀ x → x ∈ ACO.D aco zero
+
+    open ACO aco public
 
   record UltrametricConditions : Set (a ⊔ ℓ) where
     field
@@ -33,10 +39,10 @@ module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {S : Table (Setoid a ℓ)
     d m n = max 0 (λ i → dᵢ {i} (m i) (n i))
 
     field
-      element           : M
       dᵢ-isUltrametric  : ∀ {i} → IsUltrametric (S i) dᵢ
       f-strContrOver-d  : f StrContrOver d
+      d-bounded         : Bounded d
       
+      element           : M
       f-cong            : ∀ {x y} → x ≈ y → f x ≈ f y
       _≟_               : Decidable _≈_
-      d-finiteImage     : ∀ (m : M) → FiniteImage ℕₛ (d m)

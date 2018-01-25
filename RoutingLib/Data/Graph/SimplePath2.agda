@@ -3,8 +3,7 @@ open import Data.Fin using (Fin; _<_; _≤_) renaming (zero to fzero; suc to fsu
 open import Data.Fin.Properties using (_≟_)
 open import Data.Nat using (ℕ; zero; suc; _≤?_; z≤n; s≤s) renaming (_<_ to _<ℕ_)
 open import Data.Nat.Properties using (≰⇒>)
-open import Data.Product using (_,_)
-open import Data.List using (List; []; _∷_; map)
+open import Data.Product using (_,_; _×_)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary using (Decidable; Rel)
@@ -12,42 +11,55 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym
 open import Function using (_∘_)
 
 open import RoutingLib.Data.Graph using (Graph)
-open import RoutingLib.Data.Graph.SimplePath.NonEmpty as NT using (SimplePathⁿᵗ; _≤ₗₑₓ_)
+open import RoutingLib.Data.Graph.SimplePath2.NonEmpty as NT using (SimplePathⁿᵗ; _≤ₗₑₓ_)
+import RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties as NTP
 
-module RoutingLib.Data.Graph.SimplePath where
+module RoutingLib.Data.Graph.SimplePath2 where
 
-  open import RoutingLib.Data.Graph.SimplePath.NonEmpty using (_∺_∣_; _∷_∣_; _∷_; _∺_; stopFirst; stopSecond; stepUnequal; stepEqual; edge-∺; edge-∷; source; destination) public
+  open import RoutingLib.Data.Graph.SimplePath2.NonEmpty using ([]; _∷_; _∷_∣_∣_; stop; here₁; here₂; step) public
 
-  infix 4 _∉_ _≈_ _≉_
+  infix 4 _≈_ _≉_ _∉_ _∈_ _⇿_
 
   -- Data type
 
   data SimplePath (n : ℕ) : Set lzero where
-    ∅   : SimplePath n
-    []  : SimplePath n
-    [_] : SimplePathⁿᵗ n → SimplePath n
+    invalid : SimplePath n
+    valid   : SimplePathⁿᵗ n → SimplePath n
 
+  infixr 5 _∷ₐ_
+  
+  _∷ₐ_ : ∀ {n} → Fin n × Fin n → SimplePath n → SimplePath n
+  _       ∷ₐ invalid = invalid
+  (i , j) ∷ₐ valid p with (i , j) NTP.⇿? p | i NTP.∉? p
+  ... | no _     | _       = invalid
+  ... | _        | no  _   = invalid
+  ... | yes ij⇿p | yes i∉p = valid ((i , j) ∷ p ∣ ij⇿p ∣ i∉p)
+
+
+  -- Linkage
+
+  data _⇿_ {n : ℕ} : Fin n × Fin n → SimplePath n → Set lzero where
+    valid : ∀ {e p} → e NT.⇿ p → e ⇿ valid p
 
   -- Membership
-
   data _∉_ {n : ℕ} : Fin n → SimplePath n → Set lzero where
-    ∅   : ∀ {i} → i ∉ ∅
-    []  : ∀ {i} → i ∉ []
-    [_] : ∀ {i p} → i NT.∉ p → i ∉ [ p ]
+    invalid : ∀ {i} → i ∉ invalid
+    valid   : ∀ {i p} → i NT.∉ p → i ∉ valid p
 
   _∈_ : ∀ {n} → Fin n → SimplePath n → Set lzero
   i ∈ p = ¬ (i ∉ p)
 
-
   -- Equality
 
   data _≈_ {n : ℕ} : Rel (SimplePath n) lzero where
-    ∅   : ∅  ≈ ∅
-    []  : [] ≈ []
-    [_] : ∀ {p q} → p NT.≈ q → [ p ] ≈ [ q ]
+    invalid : invalid  ≈ invalid
+    valid   : ∀ {p q} → p NT.≈ q → valid p ≈ valid q
 
   _≉_ : ∀ {n} → Rel (SimplePath n) lzero
   xs ≉ ys = ¬ (xs ≈ ys)
+  
+{-
+  
 
 
   -- Orderings
@@ -78,11 +90,13 @@ module RoutingLib.Data.Graph.SimplePath where
   -- Operations --
   ----------------
 
+-}
   length : ∀ {n} → SimplePath n → ℕ
-  length ∅     = 0
-  length []    = 0
-  length [ p ] = NT.length p
+  length invalid   = 0
+  length (valid p) = NT.length p
 
+{-
   weight : ∀ {a b} {A : Set a} {B : Set b} → (A → B → B) → B → ∀ {n} {G : Graph A n} {p} → p ∈𝔾 G → B
   weight _▷_ 1# []      = 1#
   weight _▷_ 1# [ p∈G ] = NT.weight _▷_ 1# p∈G
+-}

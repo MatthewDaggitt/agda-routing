@@ -24,13 +24,13 @@ open import RoutingLib.Data.Matrix using (Matrix)
 open import RoutingLib.Data.Matrix.Properties using (max⁺-cong; M≤max⁺[M]; max⁺[M]≡x; max⁺[M]≤x; max⁺-constant; zipWith-sym)
 open import RoutingLib.Data.Matrix.Membership.Propositional.Properties using (max⁺[M]∈M)
 open import RoutingLib.Data.Matrix.Relation.Pointwise using (zipWith-cong)
+import RoutingLib.Function.Distance.MaxLift as MaxLift
 
 open import RoutingLib.Routing.Definitions using (RoutingProblem; RoutingAlgebra)
 open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions
-open import RoutingLib.Function.Distance using (Ultrametric)
+open import RoutingLib.Function.Distance using (Ultrametric; Bounded)
 import RoutingLib.Routing.BellmanFord.DistanceVector.Prelude as Prelude
 import RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric as Step2
-import RoutingLib.Function.Distance.MaxLift as MaxLift
 open import RoutingLib.Function.Image using (FiniteImage)
 
 module RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StateMetric
@@ -48,10 +48,12 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StateMetric
     ; d≡0⇒x≈y
     ; d-sym
     ; d-maxTriIneq
-    ; d-strContr
-    ; d-mono
     ; d≤H
     ; d-ultrametric
+    ; d-bounded
+    
+    ; d-strContr
+    ; d-mono
     )
 
 
@@ -65,11 +67,16 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StateMetric
   open Ultrametric dᵢ-ultrametric public using ()
     renaming
     ( d to dᵢ
+    ; cong to dᵢ-cong
+    ; sym  to dᵢ-sym
+    ; eq⇒0 to x≈y⇒dᵢ≡0
+    ; 0⇒eq to dᵢ≡0⇒x≈y
+    ; maxTriangle to dᵢ-maxTriIneq 
     ; isUltrametric to dᵢ-isUltrametric
     )
 
-  dᵢ≤H : ∀ X Y → dᵢ X Y ≤ℕ H
-  dᵢ≤H = MaxLift.bounded (λ _ → S) _ H d≤H
+  dᵢ-bounded : Bounded ℝ𝕋ₛ dᵢ
+  dᵢ-bounded = MaxLift.bounded (λ _ → S) d d-bounded
 
   -------------------------------------
   -- Ultrametric over routing states --
@@ -86,8 +93,8 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StateMetric
     ; sym to D-sym
     )
 
-  D≤H : ∀ X Y → D X Y ≤ℕ H
-  D≤H = MaxLift.bounded (λ _ → ℝ𝕋ₛ) _ H dᵢ≤H
+  D-bounded : Bounded ℝ𝕄ₛ D
+  D-bounded = MaxLift.bounded (λ _ → ℝ𝕋ₛ) _ dᵢ-bounded
 
   d≤D : ∀ X Y i j → d (X i j) (Y i j) ≤ℕ D X Y
   d≤D X Y i j = ≤ℕ-trans (MaxLift.dᵢ≤d (λ _ → S) (λ {i} → d) (X i) (Y i) j) (MaxLift.dᵢ≤d (λ _ → ℝ𝕋ₛ) (λ {i} → dᵢ) X Y i)
@@ -95,11 +102,6 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StateMetric
   postulate D-witness : ∀ {X Y} → X ≉ₘ Y → ∃₂ λ i j → D X Y ≡ d (X i j) (Y i j) × X i j ≉ Y i j
   --D-witness X≉Y = {!!}
   
-  D-image : ∀ X → FiniteImage ℕₛ (D X)
-  D-image X = record
-    { image    = upTo (suc H)
-    ; complete = λ Y → ∈-upTo⁺ (s≤s (D≤H X Y))
-    }
 
 
 

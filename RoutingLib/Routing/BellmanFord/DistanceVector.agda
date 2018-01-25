@@ -22,18 +22,18 @@ module RoutingLib.Routing.BellmanFord.DistanceVector
   open RoutingProblem 𝓡𝓟 using (_≟ₘ_)
   open import RoutingLib.Routing.BellmanFord 𝓡𝓟
   open import RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StateMetric 𝓡𝓟 𝓢𝓒
-    using (dᵢ; dᵢ-isUltrametric; D-image; σ-strictlyContracting)
+    using (dᵢ; dᵢ-isUltrametric; D-bounded; σ-strictlyContracting)
 
-  ultrametricConditions : UltrametricConditions σ∥
-  ultrametricConditions = record
+  σ-ultrametricConditions : UltrametricConditions σ∥
+  σ-ultrametricConditions = record
     { dᵢ               = dᵢ
     ; dᵢ-isUltrametric = dᵢ-isUltrametric
     ; f-strContrOver-d = σ-strictlyContracting
     ; f-cong           = σ-cong
     ; _≟_              = _≟ₘ_
-    ; d-finiteImage    = D-image
+    ; d-bounded        = D-bounded
     ; element          = I
     } 
 
   σ-isAsynchronouslySafe : IsAsynchronouslySafe σ∥
-  σ-isAsynchronouslySafe = ultra⇒safe σ∥ ultrametricConditions
+  σ-isAsynchronouslySafe = ultra⇒safe σ-ultrametricConditions

@@ -1,6 +1,6 @@
 open import Level using () renaming (zero to lzero)
 open import Data.Nat
-open import Data.Nat.Properties hiding (module ≤-Reasoning)
+open import Data.Nat.Properties hiding (module ≤-Reasoning; +-monoʳ-<)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (∃; _,_; _×_; proj₁)
 open import Relation.Binary
@@ -138,7 +138,9 @@ module RoutingLib.Data.Nat.Properties where
     +-monoʳ-≤ : ∀ n → (n +_) Preserves _≤_ ⟶ _≤_
     +-monoʳ-≤ n m≤o = +-mono-≤ (≤-refl {n}) m≤o
     
-    
+    +-monoʳ-< : ∀ n → (n +_) Preserves _<_ ⟶ _<_
+    +-monoʳ-< zero    m≤o = m≤o
+    +-monoʳ-< (suc n) m≤o = s≤s (+-monoʳ-< n m≤o)
     --+-incrˡ :
     
     ---------------------------------
@@ -334,9 +336,9 @@ module RoutingLib.Data.Nat.Properties where
     ∸-monoˡ-≤ m≤n       z≤n       = m≤n
     ∸-monoˡ-≤ (s≤s m≤n) (s≤s o≤n) = ∸-monoˡ-≤ m≤n o≤n
 
-    ∸-monoˡ-< : ∀ {m n o} → o < n → n ≤ m → m ∸ n < m ∸ o
-    ∸-monoˡ-< {_} {suc n} {zero}  (s≤s o<n) (s≤s n<m) = s≤s (n∸m≤n n _)
-    ∸-monoˡ-< {_} {suc n} {suc o} (s≤s o<n) (s≤s n<m) = ∸-monoˡ-< o<n n<m
+    ∸-monoʳ-< : ∀ {m n o} → o < n → n ≤ m → m ∸ n < m ∸ o
+    ∸-monoʳ-< {_} {suc n} {zero}  (s≤s o<n) (s≤s n<m) = s≤s (n∸m≤n n _)
+    ∸-monoʳ-< {_} {suc n} {suc o} (s≤s o<n) (s≤s n<m) = ∸-monoʳ-< o<n n<m
 
     m∸n≡0⇒m≤n : ∀ {m n} → m ∸ n ≡ 0 → m ≤ n
     m∸n≡0⇒m≤n {zero}  {_}    _   = z≤n

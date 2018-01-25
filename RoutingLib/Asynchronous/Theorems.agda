@@ -29,22 +29,21 @@ open import RoutingLib.Data.Vec.All.Properties using (AllPairs-lookup; AllPairs-
 open import RoutingLib.Function.Image using (FiniteImage)
 
 module RoutingLib.Asynchronous.Theorems {a ℓ n} {S : Table (Setoid a ℓ) n}
-                                        (P : Parallelisation S) where
+                                        {P : Parallelisation S} where
 
-  open Parallelisation P
-  open import RoutingLib.Function.Distance using (IsUltrametric)
-  open import RoutingLib.Function.Distance M-setoid using (_StrContrOver_)
-  open import RoutingLib.Asynchronous.Theorems.Core using (ACO; UltrametricConditions)
+  -- Export core publically
   
-  postulate aco⇒safe : ∀ {p} → ACO P p → IsAsynchronouslySafe P
-  {-
-  aco⇒safe = {!!}
-    where open import RoutingLib.Asynchronous.Theorems.UresinDubois1 using ()
-  -}
+  open import RoutingLib.Asynchronous.Theorems.Core public
+
+  -- Theorems
   
-  ultra⇒aco : UltrametricConditions P → ACO P _
-  ultra⇒aco ultra = aco
-    where open import RoutingLib.Asynchronous.Theorems.MetricToBox ultra using (aco)
+  totalACO⇒safe : ∀ {p} → TotalACO P p → IsAsynchronouslySafe P
+  totalACO⇒safe = isAsynchronouslySafe
+    where open import RoutingLib.Asynchronous.Theorems.UresinDubois1 P using (isAsynchronouslySafe)
+
+  ultra⇒totalACO : UltrametricConditions P → TotalACO P _
+  ultra⇒totalACO ultra = totalACO
+    where open import RoutingLib.Asynchronous.Theorems.MetricToBox ultra using (totalACO)
 
   ultra⇒safe : UltrametricConditions P → IsAsynchronouslySafe P
-  ultra⇒safe ultra = aco⇒safe (ultra⇒aco ultra)
+  ultra⇒safe ultra = totalACO⇒safe (ultra⇒totalACO ultra)

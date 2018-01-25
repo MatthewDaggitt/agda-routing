@@ -14,12 +14,9 @@ open import Function using (_∘_)
 open import RoutingLib.Data.Fin.Properties using (toℕ-mono-<)
 open import RoutingLib.Data.List using (between)
 open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
-open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (between!⁺)
 open import RoutingLib.Data.List.Membership.Setoid.Properties using (index-cong; ∈-length)
-open import RoutingLib.Data.List.Sorting.Nat using (↗-between)
 open import RoutingLib.Data.List.Membership.Setoid.Properties using ()
-open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-between⁺; ∈-between⁻)
-open import RoutingLib.Data.Nat.Properties using (ℕₛ; ∸-cancelˡ-≡; ∸-monoˡ-<; ∸-cancelʳ-≤; m<n⇒0<n∸m; n∸1+m<n; m∸[m∸n]≡n; suc∘pred[n]≡n)
+open import RoutingLib.Data.Nat.Properties using (ℕₛ; ∸-cancelˡ-≡; ∸-cancelʳ-≤; m<n⇒0<n∸m; n∸1+m<n; m∸[m∸n]≡n; suc∘pred[n]≡n)
 
 open import RoutingLib.Routing.Definitions using (RoutingProblem; RoutingAlgebra)
 open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions using (SufficientConditions)
@@ -56,9 +53,6 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step1_HeightFunction
     1≤h : ∀ x → 1 ≤ℕ h x
     1≤h x = s≤s z≤n
 
-    1≤H : 1 ≤ℕ H
-    1≤H = ∈-length S (∈-routes 0#)
-    
     h≤H : ∀ x → h x ≤ℕ H
     h≤H x = subst (h x ≤ℕ_) (suc∘pred[n]≡n 1≤H) (s≤s (prop-toℕ-≤ (index (∈-routes x))))
       

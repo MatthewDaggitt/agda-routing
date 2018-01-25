@@ -28,7 +28,7 @@ module RoutingLib.Relation.Binary.StrictReasoning
   begin_ : ∀ {x y} (p : x ≲ y) → ⟦ p ⟧
   begin strict    p = p
   begin nonstrict p = p
-    
+   
   _≡⟨_⟩_ : ∀ (x : A) {y z} → x ≡ y → y ≲ z → x ≲ z
   x ≡⟨ x=y ⟩ strict    y<z = strict    (case x=y of λ where refl → y<z)
   x ≡⟨ x=y ⟩ nonstrict y≤z = nonstrict (case x=y of λ where refl → y≤z)

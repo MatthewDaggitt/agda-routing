@@ -312,7 +312,7 @@ module RoutingLib.Routing.AlgebraicPaths.Consistent.Properties
 
   abstract
 
-    convertSufficientConditions : PathSufficientConditions 𝓡𝓟ᶜ → SufficientConditions 𝓡𝓐ᶜ
+    convertSufficientConditions : PathSufficientConditions ? → SufficientConditions 𝓡𝓐ᶜ
     convertSufficientConditions psc = record
       { ⊕-assoc                     = ⊕ᶜ-assoc {!⊕-comm!} {!!}
       ; ⊕-sel                       = {!!}

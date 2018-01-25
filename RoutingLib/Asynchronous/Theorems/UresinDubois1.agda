@@ -35,29 +35,28 @@ open Setoid
 open Data.Nat.Properties.≤-Reasoning
 
 open import RoutingLib.Asynchronous.Schedule using (Schedule; 𝕋)
-open import RoutingLib.Asynchronous using (Parallelisation)
+open import RoutingLib.Asynchronous using (Parallelisation; IsAsynchronouslySafe)
 import RoutingLib.Asynchronous.Schedule.Times as Times
 import RoutingLib.Asynchronous.Schedule.Times.Properties as TimesProperties
-open import RoutingLib.Asynchronous.Theorems.Core using (ACO)
+open import RoutingLib.Asynchronous.Theorems.Core using (TotalACO; ACO)
 
-module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a ℓ n} {S : Fin n → Setoid a ℓ}
-  (𝕤 : Schedule n)(𝕡 : Parallelisation S) where
+module RoutingLib.Asynchronous.Theorems.UresinDubois1
+  {a ℓ n} {S : Fin n → Setoid a ℓ} (𝕡 : Parallelisation S) where
 
-  open Schedule 𝕤
   open Parallelisation 𝕡
 
-  open Times 𝕤
-  open TimesProperties 𝕤
-
-  φsK≤sk⇒τK≤βsK : ∀ k K i j → φ (suc K) ≤ suc k → τ K j ≤ β (suc k) i j
-  φsK≤sk⇒τK≤βsK k K i j p = subst (τ K j ≤_)
-          (cong (λ x → β x i j) (m+n∸m≡n p))
-          (proj₂ (prop1-iii K i j (suc k ∸ (φ (suc K)))))
-
-
-  module Theorem1 {p} {x₀ : M} (aco : ACO 𝕡 p) (x₀∈D₀ : x₀ ∈ (ACO.D aco 0)) where
+  module _ {p} {x₀ : M} (aco : ACO 𝕡 p) (𝕤 : Schedule n) (x₀∈D₀ : x₀ ∈ (ACO.D aco 0)) where
     open ACO aco
 
+    open Schedule 𝕤
+    open Times 𝕤
+    open TimesProperties 𝕤
+
+    φsK≤sk⇒τK≤βsK : ∀ k K i j → φ (suc K) ≤ suc k → τ K j ≤ β (suc k) i j
+    φsK≤sk⇒τK≤βsK k K i j p = subst (τ K j ≤_)
+          (cong (λ x → β x i j) (m+n∸m≡n p))
+          (proj₂ (prop1-iii K i j (suc k ∸ (φ (suc K)))))
+          
     -- Extract the fixed point
     ξ : M
     ξ = proj₁ D-finish
@@ -139,3 +138,15 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a ℓ n} {S : Fin n → S
       
     theorem1 : ∃ λ K → ∀ K₁ → async-iter 𝕤 x₀ (K + K₁) ≈ ξ
     theorem1 = Tᶜ , theorem1-proof
+
+
+
+  module _ {p} (totalACO : TotalACO 𝕡 p) where
+
+    open TotalACO totalACO
+    
+    isAsynchronouslySafe : IsAsynchronouslySafe 𝕡
+    isAsynchronouslySafe = record
+      { m*         = proj₁ D-finish
+      ; m*-reached = λ 𝕤 X → theorem1 aco 𝕤 (total X)
+      }

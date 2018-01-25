@@ -1,5 +1,5 @@
 open import Data.Nat using (zero; suc; z≤n; s≤s; _≤_; _<_; _⊔_; _+_)
-open import Data.Nat.Properties using (≤-step; ≤-antisym; ⊓-sel; ⊔-sel; m≤m⊔n; ⊔-mono-≤; +-suc; ⊔-identityʳ; n≤m⊔n; ⊓-mono-≤; ≤-refl; ≤-trans; <-transʳ; <-transˡ; m⊓n≤n; <⇒≢)
+open import Data.Nat.Properties using (≤-step; ≤-antisym; ⊓-sel; ⊔-sel; m≤m⊔n; ⊔-mono-≤; +-suc; ⊔-identityʳ; n≤m⊔n; ⊓-mono-≤; ≤-refl; ≤-trans; <-transʳ; <-transˡ; m⊓n≤n; <⇒≢; ≤+≢⇒<)
 open import Data.List
 open import Data.List.All using (All; []; _∷_)
 open import Data.List.Any using (Any; here; there)
@@ -14,6 +14,7 @@ open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; cong; cong₂; trans)
 open import Relation.Binary.List.Pointwise using ([]; _∷_) renaming (Rel to ListRel)
+open import Relation.Nullary using (¬_)
 open import Function using (id; _∘_)
 open import Algebra.FunctionProperties using (Op₂; Idempotent; Associative; Commutative; Congruent₂)
 
@@ -50,6 +51,16 @@ module RoutingLib.Data.List.Properties where
     |dfilter[xs]|≤|xs| (x ∷ xs) with P? x
     ... | no  _ = ≤-step (|dfilter[xs]|≤|xs| xs)
     ... | yes _ = s≤s (|dfilter[xs]|≤|xs| xs)
+
+    |dfilter[xs]|<|xs| : ∀ xs → Any (λ x → ¬ (P x)) xs → length (dfilter P? xs) < length xs
+    |dfilter[xs]|<|xs| [] ()
+    |dfilter[xs]|<|xs| (x ∷ xs) (here ¬px) with P? x
+    ... | no  _  = s≤s (|dfilter[xs]|≤|xs| xs)
+    ... | yes px = contradiction px ¬px
+    |dfilter[xs]|<|xs| (x ∷ xs) (there any) with P? x
+    ... | no  _ = ≤-step (|dfilter[xs]|<|xs| xs any)
+    ... | yes _ = s≤s (|dfilter[xs]|<|xs| xs any)
+
 
     dfilter-length₂ : ∀ xs → length (dfilter (P?⇒¬P? P?) xs) + length (dfilter P? xs) ≡ length xs
     dfilter-length₂ [] = refl

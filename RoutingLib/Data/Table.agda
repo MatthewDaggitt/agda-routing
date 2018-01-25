@@ -1,5 +1,5 @@
 open import Data.Nat using (ℕ; zero; suc; _⊔_; _⊓_)
-open import Data.Fin using (Fin; toℕ; fromℕ; inject₁) renaming (zero to fzero; suc to fsuc)
+open import Data.Fin using (Fin; toℕ; fromℕ; inject₁; compare; equal) renaming (zero to fzero; suc to fsuc)
 open import Relation.Binary using (Rel; REL)
 open import Relation.Unary using (Pred)
 open import Data.Product using (∃; _×_; _,_)
@@ -71,3 +71,4 @@ module RoutingLib.Data.Table where
   
   min∞⁺ : ∀ {n} → Table ℕ∞ (suc n) → ℕ∞
   min∞⁺ t = foldr⁺ _⊓∞_ t
+

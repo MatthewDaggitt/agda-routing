@@ -7,6 +7,8 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; setoid)
 
 open import RoutingLib.Data.Nat.Properties using (ℕₛ)
+open import RoutingLib.Data.NatInf using (ℕ∞)
+open import RoutingLib.Data.NatInf.Properties using () renaming (⊓-sel to ⊓∞-sel)
 open import RoutingLib.Data.Table
 import RoutingLib.Data.Table.Membership.Properties as Prop
 open import RoutingLib.Data.Table.Membership.Propositional
@@ -27,6 +29,9 @@ module RoutingLib.Data.Table.Membership.Propositional.Properties where
 
   min[t]∈t : ∀ ⊤ {n} (t : Table ℕ n) → min ⊤ t ≡ ⊤ ⊎ min ⊤ t ∈ t
   min[t]∈t = sel⇒foldr[t]∈t ⊓-sel
+
+  min∞[t]∈t : ∀ ⊤ {n} (t : Table ℕ∞ n) → min∞ ⊤ t ≡ ⊤ ⊎ min∞ ⊤ t ∈ t
+  min∞[t]∈t = sel⇒foldr[t]∈t ⊓∞-sel
   
   max⁺[t]∈t : ∀ {n} (t : Table ℕ (suc n)) → max⁺ t ∈ t
   max⁺[t]∈t = sel⇒foldr⁺[t]∈t ⊔-sel

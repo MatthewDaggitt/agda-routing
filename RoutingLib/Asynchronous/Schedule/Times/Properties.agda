@@ -188,11 +188,8 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
                  nextActiveφ<φs t i
 
   prop1-iii : ∀ t i j k  → (φ t ≤ τ t j) × (τ t j ≤ β (φ (suc t) + k) i j)
-  prop1-iii zero    i j k = z≤n , z≤n
-  prop1-iii (suc t) i j k = φ≤τ (suc t) j , (expiryₜ≤k⇒t≤βk
-    (nextActive (φ (suc t)) j) (φ (suc (suc t)) + k) i j
-    (begin
-       expiry (nextActive (φ (suc t)) j)      ≤⟨ expiry-monotone (t≤max[t] (φ (suc t)) (nextActive (φ (suc t))) j) ⟩
-       expiry (max (φ (suc t)) (nextActive (φ (suc t))))  ≤⟨ n≤1+n (expiry (max (φ (suc t)) (nextActive (φ (suc t))))) ⟩
-       φ (suc (suc t))                        ≤⟨ m≤m+n (φ (suc (suc t))) k ⟩
-       φ (suc (suc t)) + k                    ∎))
+  prop1-iii t i j k = φ≤τ t j , expiryₜ≤k⇒t≤βk (nextActive (φ t) j) (φ (suc t) + k) i j (begin
+            expiry (nextActive (φ t) j) ≤⟨ expiry-monotone (t≤max[t] (φ t) (nextActive (φ t)) j) ⟩
+            expiry (max (φ t) (nextActive (φ t))) ≤⟨ n≤1+n (expiry (max (φ t) (nextActive (φ t)))) ⟩
+            φ (suc t) ≤⟨ m≤m+n (φ (suc t)) k ⟩
+            φ (suc t) + k ∎)

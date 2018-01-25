@@ -15,14 +15,14 @@ open import Function using (_∘_; _on_)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; trans; cong; inspect; [_])
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; trans; cong; inspect; [_]; module ≡-Reasoning)
 open import Relation.Binary.List.Pointwise using ([]; _∷_) renaming (Rel to ListRel)
 open import Relation.Unary using () renaming (Decidable to DecidableU)
 import Relation.Binary.On as On
 import Relation.Binary.EqReasoning as EqReasoning
 
 open import RoutingLib.Data.Graph.SimplePath2 using (SimplePath; valid; invalid; []; _∷ₐ_; _∷_∣_∣_; length; _⇿_; _∈_) renaming (_≈_ to _≈ₚ_)
-open import RoutingLib.Data.Graph.SimplePath2.Properties using (ℙₛ; length-cong; ∷ₐ-accept; ∷ₐ-reject; ∷ₐ-cong) renaming (≈-sym to ≈ₚ-sym; ≈-trans to ≈ₚ-trans; ≈-reflexive to ≈ₚ-reflexive)
+open import RoutingLib.Data.Graph.SimplePath2.Properties using (ℙₛ; length-cong; length<n; ∷ₐ-accept; ∷ₐ-reject; ∷ₐ-cong; ∷ₐ-length) renaming (≈-sym to ≈ₚ-sym; ≈-trans to ≈ₚ-trans; ≈-reflexive to ≈ₚ-reflexive)
 open import RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties using (_⇿?_; _∉?_)
 open import RoutingLib.Data.Graph.SimplePath2.Enumeration
 open import RoutingLib.Routing.Definitions
@@ -34,6 +34,7 @@ open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (deduplicate
 import RoutingLib.Data.List.Relation.Pointwise as PW
 import RoutingLib.Data.List.Membership.DecSetoid as RMembership
 open import RoutingLib.Data.List.Membership.DecSetoid.Properties using (∈-deduplicate⁺; ∈-resp-≈)
+open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
 import RoutingLib.Routing.BellmanFord as BellmanFord
 --open import RoutingLib.Routing.BellmanFord.Properties
 open import RoutingLib.Algebra.FunctionProperties using (_Preservesₗ_)
@@ -121,7 +122,10 @@ module RoutingLib.Routing.BellmanFord.PathVector.Prelude
 
     𝑪ₘ-cong : ∀ {X Y} → X ≈ₘ Y → 𝑪ₘ X → 𝑪ₘ Y
     𝑪ₘ-cong X≈Y Xᶜ i j = 𝑪-cong (X≈Y i j) (Xᶜ i j)
-    
+
+    𝑰-cong : ∀ {r s} → r ≈ s → 𝑰 r → 𝑰 s
+    𝑰-cong r≈s rⁱ sᶜ = rⁱ (𝑪-cong (≈-sym r≈s) sᶜ)
+
     -- We can create a witness for 𝑰ₜ and 𝑰ₘ
 
     𝑰ₜ-witness : ∀ {x} → 𝑰ₜ x → ∃ λ i → 𝑰 (x i)
@@ -157,8 +161,6 @@ module RoutingLib.Routing.BellmanFord.PathVector.Prelude
     ... | inj₁ r⊕s≈r = 𝑪-cong (≈-sym r⊕s≈r) rᶜ
     ... | inj₂ r⊕s≈s = 𝑪-cong (≈-sym r⊕s≈s) sᶜ
 
-
-
     rejectExtension : ∀ i j p r → ¬ ((i , j) ⇿ p) ⊎ i ∈ p → path r ≈ₚ p  → A i j ▷ r ≈ 0#
     rejectExtension i j p r neg p≈pᵣ = path[r]≈∅⇒r≈0 (begin
       path (A i j ▷ r)  ≈⟨ path-extension i j r ⟩
@@ -172,43 +174,40 @@ module RoutingLib.Routing.BellmanFord.PathVector.Prelude
     ... | invalid | _ = ≈-sym (≈-trans (▷-cong (A i j) (≈-sym rᶜ)) (0#-an-▷ (A i j)))
     ... | valid p | [ pᵣ≡vₚ ] with (i , j) ⇿? p | i ∉? p
     ...   | no ¬ij⇿p | _       = ≈-sym (rejectExtension i j (valid p) r (inj₁ λ {(valid ij⇿pᵣ) → ¬ij⇿p ij⇿pᵣ}) (≈ₚ-reflexive pᵣ≡vₚ))
-    ...   | yes _    | no  i∈p = ≈-sym (rejectExtension i j (valid p) r (inj₂ λ {(valid i∉p) → i∈p i∉p}) (≈ₚ-reflexive pᵣ≡vₚ)) --(inj₂ λ {(valid i∉p) → i∈p i∉p}))
+    ...   | yes _    | no  i∈p = ≈-sym (rejectExtension i j (valid p) r (inj₂ λ {(valid i∉p) → i∈p i∉p}) (≈ₚ-reflexive pᵣ≡vₚ))
     ...   | yes _    | yes _   = ▷-cong (A i j) rᶜ
     
-
     ▷-pres-𝑪 : ∀ i j {r} → 𝑪 r → 𝑪 (A i j ▷ r)
     ▷-pres-𝑪 i j {r} rᶜ = ≈-trans (weight-cong (path-extension i j r)) (∷ₐ-pres-𝑪 i j rᶜ)
+
+    ▷-forces-𝑰 : ∀ {i j r} → 𝑰 (A i j ▷ r) → 𝑰 r
+    ▷-forces-𝑰 Aᵢⱼrⁱ rᶜ = Aᵢⱼrⁱ (▷-pres-𝑪 _ _ rᶜ)
+
+    --𝑰-valid : ∀ r → 𝑰 r → ∃ λ p → path r
+
 
   -----------
   -- Other --
   -----------
 
-  
-  
   size : Route → ℕ
   size r = length (path r)
 
-{-
   size<n : ∀ r → size r < n
   size<n r = length<n (path _)
--}
 
   size-cong : ∀ {r s} → r ≈ s → size r ≡ size s
   size-cong {r} {s} r≈s = length-cong (path-cong r≈s)
 
-{-
-  size-incr : ∀ {f r} → f ▷ r ≉ 0# → size r < size (f ▷ r)
-  size-incr {f} {r} f▷r≉0 with path r | inspect path r
-  ... | ∅     | [ pᵣ≡∅   ] = contradiction (proj₂ r≈0⇔path[r]≈∅ (p[r]≈∅⇒p[fr]≈∅ f (≈ₚ-reflexive pᵣ≡∅))) f▷r≉0
-  ... | []    | [ pᵣ≡[]  ] = {!!}
-  ... | [ p ] | [ pᵣ≡[p] ] = {!!}
-  
-  ▷-size : ∀ {i j r} → A i j ▷ r ≉ 0# → size (A i j ▷ r) ≡ suc (size r)
-  ▷-size {i} {j} {r} Aᵢⱼ▷r≉0 with path r | inspect path r
-  ...   | ∅     | [ p[r]≡∅  ]  = contradiction (proj₂ r≈0⇔path[r]≈∅ (p[r]≈∅⇒p[fr]≈∅ _ (≈ₚ-reflexive p[r]≡∅))) Aᵢⱼ▷r≉0
-  ...   | []    | [ p[r]≡[] ]  = p≈q⇒|p|≡|q| (path-extension₁ (≈ₚ-reflexive p[r]≡[]) {!!})
-  ...   | [ p ] | [ p[r]≡[p] ] = p≈q⇒|p|≡|q| (path-extension₂ {i} {j} (≈ₚ-reflexive p[r]≡[p]) {!!} {!!})
--}
+  size-incr : ∀ {i j r} → 𝑰 (A i j ▷ r) → suc (size r) ≡ size (A i j ▷ r)
+  size-incr {i} {j} {r} Aᵢⱼrⁱ with path (A i j ▷ r) | inspect path (A i j ▷ r)
+  ...   | invalid | [ pₐᵣ≡∅ ] = contradiction (≈-sym (path[r]≈∅⇒r≈0 (≈ₚ-reflexive pₐᵣ≡∅))) Aᵢⱼrⁱ
+  ...   | valid q | [ pₐᵣ≡q ] = begin
+    suc (length (path r))      ≡⟨ sym (∷ₐ-length i j (path r) (≈ₚ-trans (≈ₚ-sym (path-extension i j r)) (≈ₚ-reflexive pₐᵣ≡q))) ⟩
+    length ((i , j) ∷ₐ path r) ≡⟨ length-cong (≈ₚ-sym (path-extension i j r)) ⟩
+    length (path (A i j ▷ r))  ≡⟨ length-cong (≈ₚ-reflexive pₐᵣ≡q) ⟩
+    length (valid q)           ∎
+    where open ≡-Reasoning
 
   weight-path : ∀ p → path (weight p) ≈ₚ p
   weight-path invalid                     = p₀≈∅
@@ -222,22 +221,10 @@ module RoutingLib.Routing.BellmanFord.PathVector.Prelude
     
   weightᶜ : ∀ p → 𝑪 (weight p)
   weightᶜ p = weight-cong (weight-path p)
-
-  {-
-  Aᵢⱼ▷r≉0⇒i≢j : ∀ i j r → A i j ▷ r ≉ 0# → i ≢ j
-  Aᵢⱼ▷r≉0⇒i≢j i j r Aᵢⱼ▷r≉0 with r ≟ 0#
-  ... | yes r≈0 = contradiction (r≈0⇒e▷r≈0 r≈0) Aᵢⱼ▷r≉0
-  ... | no  r≉0 with path r≉0 | inspect path r≉0
-  ...   | []    | [ p[r]≡[] ] = proj₁ (path-extension₁ r≉0 Aᵢⱼ▷r≉0 (≈ₚ-reflexive p[r]≡[]))
-  ...   | [ p ] | [ p[r]≡[p] ] with path-extension₂ r≉0 Aᵢⱼ▷r≉0 (≈ₚ-reflexive p[r]≡[p])
-  ...     | (j≡p₀ , i∉p , _) = λ i≡j → i∉p⇒i≢p₀ i∉p (trans i≡j j≡p₀)
-  -}
   
   ----------------------------------------------------------------------------
   -- All paths operations preserve consistency
 
-  
-  
   Iᶜ : 𝑪ₘ I
   Iᶜ i j with j ≟𝔽 i
   ... | yes _ = 1ᶜ

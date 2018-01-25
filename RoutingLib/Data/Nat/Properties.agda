@@ -328,17 +328,17 @@ module RoutingLib.Data.Nat.Properties where
     -- Subtraction --
     -----------------
 
-    ∸-monoʳ-≤ : ∀ {m n o} → m ≤ n → o ∸ n ≤ o ∸ m
-    ∸-monoʳ-≤ m≤n = ∸-mono ≤-refl m≤n 
+    ∸-monoʳ-≤ : ∀ {m n} o → m ≤ n → o ∸ n ≤ o ∸ m
+    ∸-monoʳ-≤ _ m≤n = ∸-mono ≤-refl m≤n 
+
+    ∸-monoʳ-< : ∀ {m n o} → o < n → n ≤ m → m ∸ n < m ∸ o
+    ∸-monoʳ-< {_} {suc n} {zero}  (s≤s o<n) (s≤s n<m) = s≤s (n∸m≤n n _)
+    ∸-monoʳ-< {_} {suc n} {suc o} (s≤s o<n) (s≤s n<m) = ∸-monoʳ-< o<n n<m
     
     ∸-monoˡ-≤ : ∀ {m n o} → m ≤ n → o ≤ n → m ∸ o ≤ n ∸ o
     ∸-monoˡ-≤ z≤n       (s≤s o≤n) = z≤n
     ∸-monoˡ-≤ m≤n       z≤n       = m≤n
     ∸-monoˡ-≤ (s≤s m≤n) (s≤s o≤n) = ∸-monoˡ-≤ m≤n o≤n
-
-    ∸-monoʳ-< : ∀ {m n o} → o < n → n ≤ m → m ∸ n < m ∸ o
-    ∸-monoʳ-< {_} {suc n} {zero}  (s≤s o<n) (s≤s n<m) = s≤s (n∸m≤n n _)
-    ∸-monoʳ-< {_} {suc n} {suc o} (s≤s o<n) (s≤s n<m) = ∸-monoʳ-< o<n n<m
 
     m∸n≡0⇒m≤n : ∀ {m n} → m ∸ n ≡ 0 → m ≤ n
     m∸n≡0⇒m≤n {zero}  {_}    _   = z≤n

@@ -237,6 +237,14 @@ module RoutingLib.Data.Graph.SimplePath2.Properties {n : ℕ} where
     ... | yes ij⇿p | yes i∉p   with ¬ij⇿p⊎i∈p
     ...   | inj₁ ¬ij⇿p = contradiction (valid ij⇿p) ¬ij⇿p
     ...   | inj₂ i∈p   = contradiction (valid i∉p) i∈p
+
+    ∷ₐ-length : ∀ (i j : Fin n) p {q} → (i , j) ∷ₐ p ≈ valid q →
+                length ((i , j) ∷ₐ p) ≡ suc (length p)
+    ∷ₐ-length i j invalid   ()
+    ∷ₐ-length i j (valid p) ij∷p≈q with (i , j) NEP.⇿? p | i NEP.∉? p
+    ... | no  _ | _     = contradiction ij∷p≈q λ()
+    ... | yes _ | no  _ = contradiction ij∷p≈q λ()
+    ... | yes _ | yes _ = refl
 {-
     weight-cong : ∀ {a b} {A : Set a} {B : Set b} _▷_ (1# : B) {p q : SimplePath n} {G : Graph A n} (p≈q : p ≈ q) (p∈G : p ∈𝔾 G) (q∈G : q ∈𝔾 G) → weight _▷_ 1# p∈G ≡ weight _▷_ 1# q∈G
     weight-cong _▷_ 1# valid p      valid p      valid p      = refl

@@ -59,11 +59,14 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a ℓ n} {S : Fin n → S
     open ACO aco
 
     -- Extract the fixed point
+    T : 𝕋
+    T = proj₁ D-finish
+
     ξ : M
-    ξ = proj₁ D-finish
+    ξ = proj₁ (proj₂ D-finish)
 
     D-T+K≡ξ : ∀ K → Singleton-t ξ (D (T + K))
-    D-T+K≡ξ = proj₂ D-finish
+    D-T+K≡ξ = proj₂ (proj₂ D-finish)
 
 
     async'ₖ∈D₀ : ∀ {k} (accₖ : Acc _<_ k) → async-iter' 𝕤 x₀ accₖ ∈ D 0

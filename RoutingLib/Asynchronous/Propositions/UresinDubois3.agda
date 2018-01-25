@@ -104,8 +104,8 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3 {a ℓ n}
     ... | yes K≤T = (≼-refl , iter-decreasing K≤T i) , closed-trans T i
     ... | no  K≰T = (≼-refl , ≼-reflexive (T≤K⇒ξ≈iterK (≰⇒≥ K≰T) i)) , closed-trans T i
 
-    D-finish : ∃ λ ξ → ∀ K → Singleton-t ξ (D (T + K))
-    D-finish = ξ , λ K → ξ∈DK (T + K) ,
+    D-finish : ∃ λ T → ∃ λ ξ → ∀ K → Singleton-t ξ (D (T + K))
+    D-finish = T , ξ , λ K → ξ∈DK (T + K) ,
                λ t t∈D[T+K] i → ≼-antisym (proj₁ (proj₁ (t∈D[T+K] i)))
                (≼-trans (proj₂ (proj₁ (t∈D[T+K] i))) (iter-decreasing (m≤m+n T K) i)) 
 
@@ -126,7 +126,6 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3 {a ℓ n}
  
     aco : ACO p
     aco = record {
-      T            = T            ;
       D            = D            ;
       D-subst      = D-subst      ;
       D-decreasing = D-decreasing ;

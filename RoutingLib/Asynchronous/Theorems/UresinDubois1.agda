@@ -49,10 +49,10 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a ℓ n} {S : Fin n → S
   open Times 𝕤
   open TimesProperties 𝕤
 
-  φsK≤sk⇒τK≤βsK : ∀ k K i j → φ (suc K) ≤ suc k → τ K j ≤ β (suc k) i j
-  φsK≤sk⇒τK≤βsK k K i j p = subst (τ K j ≤_)
-          (cong (λ x → β x i j) (m+n∸m≡n p))
-          (proj₂ (prop1-iii K i j (suc k ∸ (φ (suc K)))))
+  φsK≤k⇒τK≤βk : ∀ {k K i j} → φ (suc K) ≤ k → τ K j ≤ β k i j
+  φsK≤k⇒τK≤βk {k} {K} {i} {j} φsK≤k = subst (τ K j ≤_)
+          (cong (λ x → β x i j) (m+n∸m≡n φsK≤k))
+          (proj₂ (prop1-iii K i j (k ∸ (φ (suc K)))))
 
 
   module Theorem1 {p} {x₀ : M} (aco : ACO 𝕡 p) (x₀∈D₀ : x₀ ∈ (ACO.D aco 0)) where
@@ -101,7 +101,7 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a ℓ n} {S : Fin n → S
                accβ j = (rs (β (suc k) i j) (s≤s (causality k i j)))
               
                async∈DK : ∀ j → async-iter' 𝕤 x₀ (accβ j) j ∈ᵤ D K j
-               async∈DK j = τK≤k⇒xₖ'∈DK (accβ j) K j (φsK≤sk⇒τK≤βsK k K i j (≤-trans (φ≤τ (suc K) i) τ≤sk))
+               async∈DK j = τK≤k⇒xₖ'∈DK (accβ j) K j (φsK≤k⇒τK≤βk (≤-trans (φ≤τ (suc K) i) τ≤sk))
     τK≤k⇒xₖ'∈DK {suc k} (acc rs) zero    i τ≤sk | yes i∈α with T ≟ 0
     ... | no  T≢0 = D-decreasing 0 (f-monotonic 0
         (λ j → async'ₖ∈D₀ (rs (β (suc k) i j) (s≤s (causality k i j))) j)) i

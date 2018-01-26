@@ -1,6 +1,6 @@
 open import Data.Product using (∃; ∃₂; Σ; _×_; _,_; proj₁; proj₂)
 open import Data.Nat using (ℕ; zero; suc; _+_; z≤n; s≤s; _<_; _≤_; _≤?_; _∸_; _⊔_; _⊓_; ≤-pred) renaming (_≟_ to _≟ℕ_)
-open import Data.Nat.Properties using (≤-trans; ≤-refl; ≤-reflexive; m≤m+n; n≤1+n; m+n∸m≡n; n≤m+n; +-mono-≤; ∸-mono;  ⊓-mono-<; m≤m⊔n; m⊓n≤m; ≰⇒≥; n≤m⊔n; m⊓n≤n; <-transˡ; <-transʳ; +-distribˡ-⊔; <⇒≤)
+open import Data.Nat.Properties using (≤-trans; ≤-refl; ≤-reflexive; m≤m+n; n≤1+n; m+n∸m≡n; n≤m+n; +-mono-≤; ∸-mono;  ⊓-mono-<;+-cancelˡ-≤;  m≤m⊔n; m⊓n≤m; ≰⇒≥; n≤m⊔n; m⊓n≤n; <-transˡ; <-transʳ; +-distribˡ-⊔; <⇒≤)
 open import Data.Fin using (Fin)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; trans; cong; subst; subst₂; cong₂)
@@ -44,7 +44,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step5_TableMetric
 
   dₜᶜ<Hᶜ+x : ∀ {x y} (xᶜ : 𝑪ₜ x) (yᶜ : 𝑪ₜ y) z → dₜᶜ xᶜ yᶜ < Hᶜ + z
   dₜᶜ<Hᶜ+x xᶜ yᶜ z = s≤s (≤-trans (proj₂ dₜᶜ-bounded xᶜ yᶜ) (m≤m+n _ z))
-
+  
   --------------------------------
   -- An ultrametric over tables --
   --------------------------------
@@ -128,11 +128,25 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step5_TableMetric
   ... | no  _  | no  _  | yes _  = dₜ-maxTriIneq-lemma X Y Z
   ... | no  _  | no  _  | no  _  = dₜ-maxTriIneq-lemma X Y Z
 
+
+  Hᶜ+dₜⁱ≤dₜ : ∀ {x y} → 𝑰ₜ x ⊎ 𝑰ₜ y → Hᶜ + dₜⁱ x y ≤ dₜ x y
+  Hᶜ+dₜⁱ≤dₜ {x} {y} xⁱ⊎yⁱ with x ≟ₜ y
+  ... | yes _ = ?
+  ... | no  _ with 𝑪ₜ? x | 𝑪ₜ? y
+  ...   | yes xᶜ | yes yᶜ = ?
+  ...   | no  _  | no  _  = ?
+  ...   | no  _  | yes _  = ?
+  ...   | yes _  | no  _  = ?
+  
   postulate dₜ-force-𝑪 : ∀ {k} {X Y : RMatrix} (Xₖᶜ : 𝑪ₜ (X k)) (Yₖᶜ : 𝑪ₜ (Y k)) →
                 (∀ i → dₜ (X i) (Y i) ≤ dₜᶜ Xₖᶜ Yₖᶜ) →
                 Σ (𝑪ₘ X) (λ Xᶜ → Σ (𝑪ₘ Y) (λ Yᶜ → (∀ i → dₜᶜ (Xᶜ i) (Yᶜ i) ≤ dₜᶜ (Xᶜ k) (Yᶜ k))))
-                
 
+  dₜ-force-dₜⁱ : ∀ {X Y : RMatrix} {l} → 
+                 (∀ i → dₜ (X i) (Y i) ≤ Hᶜ + dₜⁱ (X l) (Y l)) →
+                 (∀ i → 𝑰ₜ (X i) ⊎ 𝑰ₜ (Y i) → dₜⁱ (X i) (Y i) ≤ dₜⁱ (X l) (Y l))
+  dₜ-force-dₜⁱ {X} {Y} {l} dₜ≤Hᶜ+dₜⁱXₗYₗ i Xᵢⁱ⊎Yᵢⁱ = +-cancelˡ-≤ Hᶜ (≤-trans (Hᶜ+dₜⁱ≤dₜ Xᵢⁱ⊎Yᵢⁱ) (dₜ≤Hᶜ+dₜⁱXₗYₗ i))
+    
   dₜ-strContr-XᶜYᶜ : ∀ {k l X Y} → X l ≉ₜ Y l →
                     (Xᶜ : 𝑪ₘ X) (Yᶜ : 𝑪ₘ Y) → 
                     (∀ i → dₜ (σ X i) (σ Y i) ≤ dₜ (σ X k) (σ Y k)) →
@@ -150,17 +164,16 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step5_TableMetric
     dₜᶜ (Xᶜ l)  (Yᶜ l)  ∎
     where open ≤-Reasoning
     
-  dₜ-strContr-XYⁱ : ∀ {k l X Y} → X l ≉ₜ Y l → 𝑰ₜ (X l) ⊎ 𝑰ₜ (Y l) → 
-                    (∀ i → dₜ (σ X i) (σ Y i) ≤ dₜ (σ X k) (σ Y k)) →
+  dₜ-strContr-XYⁱ : ∀ {k l X Y} →
                     (∀ i → dₜ (X i) (Y i) ≤ Hᶜ + dₜⁱ (X l) (Y l)) →
                     dₜ (σ X k) (σ Y k) < Hᶜ + dₜⁱ (X l) (Y l)
-  dₜ-strContr-XYⁱ {k} {l} {X} {Y} Xₗ≉Yₗ Xₗⁱ⊎Yₗⁱ dₜ≤dₜσXₖσYₖ dₜ≤dₜXₗYₗ with σ X k ≟ₜ σ Y k
+  dₜ-strContr-XYⁱ {k} {l} {X} {Y} dₜ≤dₜXₗYₗ with σ X k ≟ₜ σ Y k
   ... | yes σXₖ≈σYₖ = s≤s z≤n
   ... | no  σXₖ≉σYₖ with 𝑪ₜ? (σ X k) | 𝑪ₜ? (σ Y k)
   ...   | yes σXₖᶜ | yes σYₖᶜ = dₜᶜ<Hᶜ+x σXₖᶜ σYₖᶜ _
-  ...   | yes _    | no  σYₖⁱ = +-monoʳ-< Hᶜ (dₜⁱ-strContr {X = X} {Y} Xₗ≉Yₗ σXₖ≉σYₖ Xₗⁱ⊎Yₗⁱ (inj₂ σYₖⁱ))
-  ...   | no  σXₖⁱ | yes _    = +-monoʳ-< Hᶜ (dₜⁱ-strContr {X = X} {Y} Xₗ≉Yₗ σXₖ≉σYₖ Xₗⁱ⊎Yₗⁱ (inj₁ σXₖⁱ))
-  ...   | no  σXₖⁱ | no  _    = +-monoʳ-< Hᶜ (dₜⁱ-strContr {X = X} {Y} Xₗ≉Yₗ σXₖ≉σYₖ Xₗⁱ⊎Yₗⁱ (inj₁ σXₖⁱ))
+  ...   | yes _    | no  σYₖⁱ = +-monoʳ-< Hᶜ (dₜⁱ-strContr (inj₂ σYₖⁱ) (dₜ-force-dₜⁱ dₜ≤dₜXₗYₗ))
+  ...   | no  σXₖⁱ | yes _    = +-monoʳ-< Hᶜ (dₜⁱ-strContr (inj₁ σXₖⁱ) (dₜ-force-dₜⁱ dₜ≤dₜXₗYₗ))
+  ...   | no  σXₖⁱ | no  _    = +-monoʳ-< Hᶜ (dₜⁱ-strContr (inj₁ σXₖⁱ) (dₜ-force-dₜⁱ dₜ≤dₜXₗYₗ))
 
   dₜ-strContracting : ∀ {k l X Y} → X l ≉ₜ Y l → 
                       (∀ i → dₜ (σ X i) (σ Y i) ≤ dₜ (σ X k) (σ Y k)) →
@@ -169,12 +182,12 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step5_TableMetric
   dₜ-strContracting {k} {l} {X} {Y} Xₗ≉Yₗ dₜ≤dₜσXₖσYₖ dₜ≤dₜXₗYₗ with X l ≟ₜ Y l
   ... | yes Xₗ≈Yₗ = contradiction Xₗ≈Yₗ Xₗ≉Yₗ
   ... | no  _     with 𝑪ₜ? (X l) | 𝑪ₜ? (Y l)
-  ...   | no  Xₗⁱ | yes _   = dₜ-strContr-XYⁱ Xₗ≉Yₗ (inj₁ Xₗⁱ) dₜ≤dₜσXₖσYₖ dₜ≤dₜXₗYₗ
-  ...   | yes _   | no  Yₗⁱ = dₜ-strContr-XYⁱ Xₗ≉Yₗ (inj₂ Yₗⁱ) dₜ≤dₜσXₖσYₖ dₜ≤dₜXₗYₗ
-  ...   | no  Xₗⁱ | no  _   = dₜ-strContr-XYⁱ Xₗ≉Yₗ (inj₁ Xₗⁱ) dₜ≤dₜσXₖσYₖ dₜ≤dₜXₗYₗ
-  ...   | yes Xₗᶜ  | yes Yₗᶜ with dₜ-force-𝑪 Xₗᶜ Yₗᶜ dₜ≤dₜXₗYₗ
+  ...   | no  _   | yes _   = dₜ-strContr-XYⁱ dₜ≤dₜXₗYₗ
+  ...   | yes _   | no  _   = dₜ-strContr-XYⁱ dₜ≤dₜXₗYₗ
+  ...   | no  _   | no  _   = dₜ-strContr-XYⁱ dₜ≤dₜXₗYₗ
+  ...   | yes Xₗᶜ | yes Yₗᶜ with dₜ-force-𝑪 Xₗᶜ Yₗᶜ dₜ≤dₜXₗYₗ
   ...     | Xᶜ , Yᶜ , dₜᶜ≤dₜᶜXₖYₖ = begin
-    dₜ (σ X k) (σ Y k) <⟨ dₜ-strContr-XᶜYᶜ Xₗ≉Yₗ Xᶜ Yᶜ dₜ≤dₜσXₖσYₖ dₜᶜ≤dₜᶜXₖYₖ ⟩
+    dₜ (σ X k) (σ Y k)  <⟨ dₜ-strContr-XᶜYᶜ Xₗ≉Yₗ Xᶜ Yᶜ dₜ≤dₜσXₖσYₖ dₜᶜ≤dₜᶜXₖYₖ ⟩
     dₜᶜ (Xᶜ l) (Yᶜ l)   ≡⟨ dₜᶜ-cong (Xᶜ l) (Yᶜ l) Xₗᶜ Yₗᶜ ≈ₜ-refl ≈ₜ-refl ⟩
     dₜᶜ Xₗᶜ Yₗᶜ         ∎
     where open ≤-Reasoning

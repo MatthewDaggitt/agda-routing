@@ -93,7 +93,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.Prelude
 
   𝑰ₜ : RTable → Set _
   𝑰ₜ t = ¬ 𝑪ₜ t
-  
+
   𝑰ₘ : RMatrix → Set _
   𝑰ₘ X = ¬ 𝑪ₘ X
 
@@ -128,6 +128,9 @@ module RoutingLib.Routing.BellmanFord.PathVector.Prelude
 
     -- We can create a witness for 𝑰ₜ and 𝑰ₘ
 
+    𝑰⇒𝑰ₜ : ∀ {x i} → 𝑰 (x i) → 𝑰ₜ x
+    𝑰⇒𝑰ₜ xᵢⁱ xᶜ = xᵢⁱ (xᶜ _)
+    
     𝑰ₜ-witness : ∀ {x} → 𝑰ₜ x → ∃ λ i → 𝑰 (x i)
     𝑰ₜ-witness {x} xⁱ = ¬∀⟶∃¬ n _ (λ j → 𝑪? (x j)) xⁱ
     

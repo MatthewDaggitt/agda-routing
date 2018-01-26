@@ -121,6 +121,8 @@ module RoutingLib.Data.Table.Properties where
   postulate max⁺-cong : ∀ {n} {t s : Table ℕ (suc n)} → Pointwise _≡_ t s → max⁺ t ≡ max⁺ s
 
   postulate t≤max⁺[t] : ∀ {n} (t : Table ℕ (suc n)) → All (_≤ max⁺ t) t
+
+  postulate max⁺[t]≤x : ∀ {n} {t : Table ℕ (suc n)} {x} → All (_≤ x) t → max⁺ t ≤ x
   
   postulate max-constant : ∀ {n} {⊥} {t : Table ℕ n} →
                  ∀ {x} → ⊥ ≡ x → All (_≡ x) t → max ⊥ t ≡ x

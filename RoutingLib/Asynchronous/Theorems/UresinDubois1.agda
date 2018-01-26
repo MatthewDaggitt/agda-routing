@@ -49,21 +49,24 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a ℓ n} {S : Fin n → S
   open Times 𝕤
   open TimesProperties 𝕤
 
-  φsK≤sk⇒τK≤βsK : ∀ k K i j → φ (suc K) ≤ suc k → τ K j ≤ β (suc k) i j
-  φsK≤sk⇒τK≤βsK k K i j p = subst (τ K j ≤_)
-          (cong (λ x → β x i j) (m+n∸m≡n p))
-          (proj₂ (prop1-iii K i j (suc k ∸ (φ (suc K)))))
+  φsK≤k⇒τK≤βk : ∀ {k K i j} → φ (suc K) ≤ k → τ K j ≤ β k i j
+  φsK≤k⇒τK≤βk {k} {K} {i} {j} φsK≤k = subst (τ K j ≤_)
+          (cong (λ x → β x i j) (m+n∸m≡n φsK≤k))
+          (proj₂ (prop1-iii K i j (k ∸ (φ (suc K)))))
 
 
   module Theorem1 {p} {x₀ : M} (aco : ACO 𝕡 p) (x₀∈D₀ : x₀ ∈ (ACO.D aco 0)) where
     open ACO aco
 
     -- Extract the fixed point
+    T : 𝕋
+    T = proj₁ D-finish
+
     ξ : M
-    ξ = proj₁ D-finish
+    ξ = proj₁ (proj₂ D-finish)
 
     D-T+K≡ξ : ∀ K → Singleton-t ξ (D (T + K))
-    D-T+K≡ξ = proj₂ D-finish
+    D-T+K≡ξ = proj₂ (proj₂ D-finish)
 
 
     async'ₖ∈D₀ : ∀ {k} (accₖ : Acc _<_ k) → async-iter' 𝕤 x₀ accₖ ∈ D 0
@@ -98,7 +101,7 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a ℓ n} {S : Fin n → S
                accβ j = (rs (β (suc k) i j) (s≤s (causality k i j)))
               
                async∈DK : ∀ j → async-iter' 𝕤 x₀ (accβ j) j ∈ᵤ D K j
-               async∈DK j = τK≤k⇒xₖ'∈DK (accβ j) K j (φsK≤sk⇒τK≤βsK k K i j (≤-trans (φ≤τ (suc K) i) τ≤sk))
+               async∈DK j = τK≤k⇒xₖ'∈DK (accβ j) K j (φsK≤k⇒τK≤βk (≤-trans (φ≤τ (suc K) i) τ≤sk))
     τK≤k⇒xₖ'∈DK {suc k} (acc rs) zero    i τ≤sk | yes i∈α with T ≟ 0
     ... | no  T≢0 = D-decreasing 0 (f-monotonic 0
         (λ j → async'ₖ∈D₀ (rs (β (suc k) i j) (s≤s (causality k i j))) j)) i
@@ -132,13 +135,11 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a ℓ n} {S : Fin n → S
     accTᶜ+K K = <-well-founded (φ (suc T) + K)
 
     τ≤Tᶜ+K : ∀ K j → τ (T + 0) j ≤ Tᶜ + K
-    τ≤Tᶜ+K K j with T
-    ... | zero = {!!}
-    ... | suc t = begin 
-      τ (suc t + 0) j      ≡⟨ cong₂ τ (+-identityʳ (suc t)) refl ⟩
-      τ (suc t) j          ≤⟨ <⇒≤ (nextActiveφ<φs (suc t) j) ⟩
-      φ (suc (suc t))      ≤⟨ m≤m+n (φ (suc (suc t))) K ⟩
-      φ (suc (suc t)) + K  ∎
+    τ≤Tᶜ+K K j = begin 
+      τ (T + 0) j    ≡⟨ cong₂ τ (+-identityʳ T) refl ⟩
+      τ T j          ≤⟨ <⇒≤ (nextActiveφ<φs T j) ⟩
+      φ (suc T)      ≤⟨ m≤m+n (φ (suc T)) K ⟩
+      φ (suc T) + K  ∎
 
     theorem1-proof : ∀ K → async-iter 𝕤 x₀ (Tᶜ + K) ≈ ξ
     theorem1-proof K i = ≈ᵢ-sym (proj₂ (D-T+K≡ξ 0) (async-iter 𝕤 x₀ (Tᶜ + K)) async∈DT i)

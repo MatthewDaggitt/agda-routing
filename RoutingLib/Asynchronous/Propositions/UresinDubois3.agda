@@ -23,12 +23,12 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3 {a ℓ n}
   iter x₀ zero = x₀
   iter x₀ (suc K) = f (iter x₀ K)
 
-  module proof {p}
+  module Proof {p}
                (x₀ : M)
                (D₀ : Pred p)
                (x₀∈D₀ : x₀ ∈ D₀)
                (D₀-subst : ∀ {x y} → x ≈ y → x ∈ D₀ → y ∈ D₀)
-               (_≼_ : ∀ {i} → Rel (Setoid.Carrier (S i)) p)
+               (_≼_ : ∀ {i} → Rel (Mᵢ i) p)
                (≼-refl : ∀ {i} → Reflexive (_≼_ {i}))
                (≼-reflexive : ∀ {i} → _≈ᵢ_ {i} ⇒ _≼_ {i})
                (≼-antisym : ∀ {i} → Antisymmetric (_≈ᵢ_ {i}) (_≼_ {i}))
@@ -69,12 +69,14 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3 {a ℓ n}
     D : ℕ → Pred p
     D K i = (λ x → (ξ i ≼ x) × (x ≼ iter x₀ K i)) ∩ D₀ i 
 
+    -- Substitutive Property on D
     D-subst : ∀ K {x y} → x ≈ y → x ∈ D K → y ∈ D K
     D-subst K x≈y x∈DK i with proj₁ (x∈DK i)
     ... | ξ≼x , x≼iterK =  (≼-trans ξ≼x (≼-reflexive (x≈y i))             ,
                                 ≼-trans (≼-reflexive (≈ᵢ-sym (x≈y i))) x≼iterK) ,
                                 D₀-subst x≈y (λ j → proj₂ (x∈DK j)) i
 
+    -- Sequence D(K) is decreasing
     D-decreasing : ∀ K → D (suc K) ⊆ D K
     D-decreasing K x∈DK i with x∈DK i
     ... | ((ξ≼x , x≼iterK), x∈D₀) = (ξ≼x , ≼-trans x≼iterK (iter-dec K i)) , x∈D₀

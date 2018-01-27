@@ -65,9 +65,7 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
       ; _≈_              = _≈_
       ; isDecEquivalence = ≈-isDecEquivalence
       }
-    
-    --f-cong = {!!}
-    
+        
     module _ {i} where
 
       open IsUltrametric (dᵢ-isUltrametric {i}) renaming
@@ -271,8 +269,8 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
     x*∈D[T+K] : ∀ K → x* ∈ D (T + K)
     x*∈D[T+K] K i = subst (_≤ r[ T + K ]) (sym (x≈y⇒dᵢ≡0 ≈ᵢ-refl)) z≤n
 
-    D-finish : ∃ λ ξ → ∀ K → Singleton-t ξ (D (T + K))
-    D-finish = x* , λ K → (x*∈D[T+K] K , m∈D[T+K]⇒x*≈m K)
+    D-finish : ∃ λ T → ∃ λ ξ → ∀ K → Singleton-t ξ (D (T + K))
+    D-finish = T , x* , λ K → (x*∈D[T+K] K , m∈D[T+K]⇒x*≈m K)
 
     test : ∀ K (x : M) → d x* x < r[ K ] → x ∈ D (suc K)
     test K x d[x*,x]<radiiᵢ[K] j with r≡dx*m x
@@ -323,8 +321,7 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
 
     aco : ACO P _
     aco = record
-      { T            = T
-      ; D            = D
+      { D            = D
       ; D-decreasing = D-decreasing
       ; D-finish     = D-finish
       ; f-monotonic  = f-monotonic

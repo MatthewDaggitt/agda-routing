@@ -26,18 +26,18 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois4 {a ℓ n}
   where
 
   open Parallelisation 𝕡 using (f)
-  open import RoutingLib.Asynchronous.Propositions.UresinDubois3 𝕡 using (iter) renaming (module proof to Prop3-proof)
+  open import RoutingLib.Asynchronous.Propositions.UresinDubois3 𝕡 using (iter) renaming (module Proof to Prop3-proof)
   open import RoutingLib.Asynchronous.Theorems.Core 𝕡 using (ACO)
   open import RoutingLib.Data.Table.IndexedTypes S
   open Memb M-setoid using () renaming (_∈_ to _∈L_; _⊆_ to _⊆L_)
 
-  module proof {p}
+  module Proof {p}
                (x₀ : M)
                (D₀ : Pred p)
                (x₀∈D₀ : x₀ ∈ D₀)
                (D₀-finite : Finite-Pred D₀)
                (D₀-subst : ∀ {x y} → x ≈ y → x ∈ D₀ → y ∈ D₀)
-               (_≼_ : ∀ {i} → Rel (Setoid.Carrier (S i)) p)
+               (_≼_ : ∀ {i} → Rel (Mᵢ i) p)
                (≼-refl : ∀ {i} → Reflexive (_≼_ {i}))
                (≼-reflexive : ∀ {i} → _≈ᵢ_ {i} ⇒ _≼_ {i})
                (≼-antisym : ∀ {i} → Antisymmetric (_≈ᵢ_ {i}) (_≼_ {i}))

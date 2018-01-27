@@ -2,7 +2,7 @@ open import Data.Fin using (Fin) renaming (_≤_ to _≤F_)
 open import Data.Fin.Subset using (Subset; ⊥; _∪_; ⁅_⁆) renaming (_⊆_ to _⊆ₛ_; _∈_ to _∈ₛ_; _∉_ to _∉ₛ_)
 open import Data.Fin.Subset.Properties using (∉⊥; ⊥⊆; p⊆p∪q; q⊆p∪q; x∈⁅x⁆)
 open import Data.Nat using (ℕ; zero; suc) renaming (_+_ to _+ℕ_; _<_ to _<ℕ_; _≤_ to _≤ℕ_; z≤n to z≤ℕn; s≤s to s≤ℕs)
-open import Data.Nat.Properties using (1+n≰n) renaming (+-identityʳ to +-idʳℕ; +-suc to +ℕ-suc; ≤-reflexive to ≤ℕ-reflexive; ≤-trans to ≤ℕ-trans; n≤1+n to n≤ℕ1+n; ≤+≢⇒< to ≤+≢⇒ℕ<)
+open import Data.Nat.Properties using (1+n≰n) renaming (+-identityʳ to +-idʳℕ; +-suc to +ℕ-suc; ≤-reflexive to ≤ℕ-reflexive; ≤-trans to ≤ℕ-trans; n≤1+n to n≤ℕ1+n; ≤+≢⇒< to ≤+≢⇒ℕ<; ≤-refl to ≤ℕ-refl; n≤m+n to n≤ℕm+n)
 open import Data.Sum using (inj₁; inj₂; _⊎_)
 open import Data.Product using (_×_; ∃; _,_; proj₁; proj₂; Σ)
 open import Function using (_∘_)
@@ -21,13 +21,13 @@ import RoutingLib.Asynchronous.Applications.AllPairs as AllPairs
 open import RoutingLib.Asynchronous.Schedule using (Schedule; 𝕋)
 open import RoutingLib.Data.NatInf
 open import RoutingLib.Data.NatInf.Properties
-open import RoutingLib.Data.Table using (Table; min∞; sum)
+open import RoutingLib.Data.Table using (Table; min∞; sum; max)
 open import RoutingLib.Data.Table.All using (All)
 open import RoutingLib.Data.Table.Any using (Any)
 open import RoutingLib.Data.Table.Iterative using (k-min∞)
 open import RoutingLib.Data.Table.Iterative.Membership.Properties
 open import RoutingLib.Data.Table.Iterative.Properties
-open import RoutingLib.Data.Table.Properties using (min∞[s]≤min∞[t]; min∞[t]≤x)
+open import RoutingLib.Data.Table.Properties using (min∞[s]≤min∞[t]; min∞[t]≤x; t≤max[t])
 
 module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Schedule n)(x₀ : AllPairs.Matrix n)(Cᵢ,ᵢ : ∀ i → x₀ i i ≡ N 0) where
 
@@ -70,7 +70,30 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
              (cong (λ x → iter x₀ x i j) (sym (+ℕ-suc t K)))
              (iter-fixed (suc t) (f-cong iter≡) K i j)) 
 
-  changed : ∀ K i j → ℕ
+  x₀-max : ℕ
+  x₀-max = suc (max 0 (λ i → max 0 (λ j → extractℕ (x₀ i j))))
+
+  iter-max : ℕ → ℕ
+  iter-max zero    = x₀-max
+  iter-max (suc K) = (iter-max K) +ℕ (iter-max K)
+
+  iter-max-inc : ∀ K → iter-max K <ℕ iter-max (suc K)
+  iter-max-inc zero = s≤ℕs (n≤ℕm+n (max 0 (λ i → max 0 (λ j → extractℕ (x₀ i j)))) x₀-max)
+  iter-max-inc (suc K) = ≤ℕ-trans {!!} (n≤ℕm+n (iter-max (suc K)) (iter-max (suc K)))
+
+  0<iter-max : ∀ K → 0 <ℕ iter-max K
+  0<iter-max zero = s≤ℕs z≤ℕn
+  0<iter-max (suc K) = ≤ℕ-trans (0<iter-max K) (n≤ℕm+n (iter-max K) (iter-max K))
+
+  P : ∀ K i j → extractℕ (iter x₀ K i j) <ℕ iter-max K
+  P zero i j = s≤ℕs (≤ℕ-trans
+         (t≤max[t] 0 (λ j₁ → extractℕ (x₀ i j₁)) j)
+         (t≤max[t] 0 (λ i₁ → max 0 (λ j₁ → extractℕ (x₀ i₁ j₁))) i))
+  P (suc K) i j with iter x₀ (suc K) i j ≟ ∞
+  P (suc K) i j | yes p rewrite p = 0<iter-max (suc K)
+  P (suc K) i j | no ¬p with ≢∞⇒≡N ¬p
+  ... | x , p = {!!}
+ {- changed : ∀ K i j → ℕ
   changed K i j with iter x₀ K i j ≟ iter x₀ (suc K) i j
   ... | yes _ = 1
   ... | no  _ with iter x₀ K i j
@@ -94,7 +117,7 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
   iter≢⇒dis≢ : ∀ K → iter x₀ (suc K) ≢ₘ iter x₀ K → distance (suc K) ≢ distance K
   iter≢⇒dis≢ K iter≢ with iter x₀ (suc K) ≟ₘ iter x₀ (suc (suc K))
   ... | yes iterS≡ = {!!}
-  ... | no  iterS≢ = {!!}
+  ... | no  iterS≢ = {!!}-}
 
   -- postulate Z : ∀ i t → (∀ j → iter x₀ t i j ≡ ∞) ⊎ (∃ λ j → ∀ k → k ≤F j → iter x₀ t i k ≡ iter x₀ (suc t) i k)
 {-
@@ -133,7 +156,7 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
   ...   | inj₁ ≡∞ = inj₁ (trans {!c!} {!!})
   ...   | inj₂ (k , _) = inj₂ (j , q⊆p∪q (fixed-nodes (suc K) i) ⁅ j ⁆ (x∈⁅x⁆ j) , {!!})
 -}
-
+{-
   iter≢⇒dis< : ∀ K → iter x₀ (suc K) ≢ₘ iter x₀ K → distance (suc K) <ℕ distance K
   iter≢⇒dis< K iter≢ = ≤+≢⇒ℕ< (distance-dec K) (iter≢⇒dis≢ K iter≢)
   
@@ -141,9 +164,9 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
   iter-fixed-point {t} (acc rs) with iter x₀ (suc t) ≟ₘ iter x₀ t
   ... | yes iter≡ = t , iter-fixed t iter≡
   ... | no  iter≢ = iter-fixed-point (rs (distance (suc t)) (iter≢⇒dis< t iter≢))
-
-  iter-converge : ∃ λ T → ∀ t → iter x₀ T ≈ iter x₀ (T +ℕ t)
-  iter-converge = iter-fixed-point (<-well-founded (distance 0))
+-}
+  postulate iter-converge : ∃ λ T → ∀ t → iter x₀ T ≈ iter x₀ (T +ℕ t)
+  -- iter-converge = iter-fixed-point (<-well-founded (distance 0))
                  
   open proof x₀ D₀ x₀∈D₀ D₀-subst _≼_ ≼-refl ≼-reflexive ≼-antisym ≼-trans closed f-monotone iter-dec iter-converge hiding (ξ)
 

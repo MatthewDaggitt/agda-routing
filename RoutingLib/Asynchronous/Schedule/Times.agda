@@ -67,13 +67,13 @@ module RoutingLib.Asynchronous.Schedule.Times {n}(𝕤 : Schedule n) where
     ---------------
     
     -- Definition of φ
-    φ : 𝕋 → 𝕋
-    φ zero    = zero
-    φ (suc t) = suc (expiry (max {n} (φ t) (nextActive (φ t))))
+    ϕ : 𝕋 → 𝕋
+    ϕ zero    = zero
+    ϕ (suc t) = suc (expiry (max {n} (ϕ t) (nextActive (ϕ t))))
     
     -- Definition of τ
     τ : 𝕋 → Fin n → 𝕋
-    τ t i = nextActive (φ t) i
+    τ t i = nextActive (ϕ t) i
 
 
 

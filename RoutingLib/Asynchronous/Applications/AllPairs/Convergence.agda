@@ -87,13 +87,7 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
   iter∞-chain : ∀ K → iter∞-dependent K → iter∞-dependent (suc K)
   iter∞-chain K ⇒∞ i j iterᵢⱼsK≡∞ with iter x₀ (suc (suc K)) i j ≟ ∞
   ... | yes iterᵢⱼssK≡∞ = iterᵢⱼssK≡∞
-  ... | no  iterᵢⱼssK≢∞ = {!!}
-    where
-    iterₛₖ-contradiction : ∀ {i j} → iter x₀ K i j ≡ ∞ →
-                           iter x₀ (suc K) i j ≢ ∞ → iter x₀ (suc K) i j ≡ ∞
-    iterₛₖ-contradiction {i} {j} iterₖ≡∞ iterₛₖ≢∞ =
-      contradiction (⇒∞ i j iterₖ≡∞) iterₛₖ≢∞
-  {- with min∞[t]∈t (iter x₀ (suc K) i j) (path-cost (iter x₀ (suc K)) i j)
+  ... | no  iterᵢⱼssK≢∞  with min∞[t]∈t (iter x₀ (suc K) i j) (path-cost (iter x₀ (suc K)) i j)
   ...   | inj₁ iterᵢⱼ≡ = contradiction (trans iterᵢⱼ≡ iterᵢⱼsK≡∞) iterᵢⱼssK≢∞
   ...   | inj₂ (k , p) rewrite p with iter x₀ (suc K) i k ≟ ∞ | iter x₀ (suc K) k j ≟ ∞
   ...     | yes iterᵢₖsK≡∞ | _ rewrite iterᵢₖsK≡∞ = contradiction refl iterᵢⱼssK≢∞
@@ -102,8 +96,18 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
   ...       | yes iterᵢₖK≡∞ | _            = contradiction (⇒∞ i k iterᵢₖK≡∞) iterᵢₖsK≢∞
   ...       | no  _        | yes iterₖⱼK≡∞ = contradiction (⇒∞ k j iterₖⱼK≡∞) iterₖⱼsK≢∞
   ...       | no  iterᵢₖK≢∞ | no  iterₖⱼK≢∞ with ≢∞⇒≡N iterᵢₖK≢∞ | ≢∞⇒≡N iterₖⱼK≢∞
-  ...         | xᵢₖ , pᵢₖ | xₖⱼ , pₖⱼ rewrite pᵢₖ | pₖⱼ = contradiction (min∞[t]≤x (iter x₀ K i j) (path-cost (iter x₀ K) i j) {(N xᵢₖ) + (N xₖⱼ)} (inj₂ (k , ≤-reflexive (trans (cong (iter x₀ K i k +_) pₖⱼ) (cong (_+ N xₖⱼ) pᵢₖ))))) (subst (_≰ N (xᵢₖ +ℕ xₖⱼ)) (sym iterᵢⱼsK≡∞) ∞≰)
--}
+  ...         | xᵢₖ , pᵢₖ | xₖⱼ , pₖⱼ rewrite pᵢₖ | pₖⱼ = contradiction
+                (min∞[t]≤x (iter x₀ K i j) (path-cost (iter x₀ K) i j)
+                  (inj₂ (k , path-cost≤xᵢₖ+xₖⱼ)))
+                iterᵢⱼsK≰xᵢₖ+xₖⱼ
+                where
+                iterᵢⱼsK≰xᵢₖ+xₖⱼ : iter x₀ (suc K) i j ≰ N (xᵢₖ +ℕ xₖⱼ)
+                iterᵢⱼsK≰xᵢₖ+xₖⱼ = subst (_≰ N (xᵢₖ +ℕ xₖⱼ)) (sym iterᵢⱼsK≡∞) ∞≰
+
+                path-cost≤xᵢₖ+xₖⱼ : path-cost (iter x₀ K) i j k ≤ N (xᵢₖ +ℕ xₖⱼ)
+                path-cost≤xᵢₖ+xₖⱼ = ≤-reflexive (trans (cong (iter x₀ K i k +_) pₖⱼ)
+                  (cong (_+ N xₖⱼ) pᵢₖ))
+
 
   FinPair : Setoid lzero lzero
   FinPair = setoid (Fin n × Fin n)

@@ -42,7 +42,7 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
   open import RoutingLib.Asynchronous.Applications.AllPairs.Properties n
   open Schedule 𝕤
   open Parallelisation all-pairs-parallelisation
-  open import RoutingLib.Asynchronous.Propositions.UresinDubois3 all-pairs-parallelisation
+  open import RoutingLib.Asynchronous.Propositions.UresinDubois3 all-pairs-parallelisation renaming (module Proof to ProofProp)
   open import RoutingLib.Asynchronous.Theorems.UresinDubois1 𝕤 all-pairs-parallelisation
   
   D₀ : Pred lzero
@@ -246,12 +246,12 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
   ... | T∞ , ∞-conv = iter-fixed-point (T∞ , ∞-conv) (≤ℕ-refl)
                       (<-well-founded (score T∞))
                  
-  open proof x₀ D₀ x₀∈D₀ D₀-subst _≼_ ≼-refl ≼-reflexive ≼-antisym ≼-trans closed f-monotone iter-dec iter-converge hiding (ξ)
+  open ProofProp x₀ D₀ x₀∈D₀ D₀-subst _≼_ ≼-refl ≼-reflexive ≼-antisym ≼-trans closed f-monotone iter-dec iter-converge hiding (ξ)
 
-  open Theorem1 aco x₀∈D0
+  open Proof aco x₀∈D0
 
   converging-time : 𝕋
-  converging-time = proj₁ theorem1
+  converging-time = proj₁ async-converge
 
   converging-state : Matrix
   converging-state = ξ

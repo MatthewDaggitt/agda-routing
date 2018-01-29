@@ -8,18 +8,16 @@ open import Data.Product using (∃; _,_; _×_)
 open import Relation.Binary using (_Preserves_⟶_; _⇒_; Reflexive; Symmetric; Transitive; Decidable; IsEquivalence; Setoid)
 open import Relation.Binary.PropositionalEquality using (_≡_; cong; refl; sym; trans; _≗_; subst; module ≡-Reasoning)
 open import Relation.Nullary using (¬_; yes; no)
-open import Relation.Nullary.Negation using (contradiction; ¬∀⟶∃¬)
+open import Relation.Nullary.Negation using (contradiction)
 open import Induction.WellFounded using (Acc; acc)
 
 open import RoutingLib.Asynchronous
-open import RoutingLib.Asynchronous.Schedule using (Schedule; 𝕤-sync; _⟦_⟧≈⟦_⟧_)
-open import RoutingLib.Asynchronous.Schedule.Properties using (⟦⟧≈⟦⟧-fastForward)
-open import RoutingLib.Induction.Nat using () renaming (<-well-founded to <-wf)
-open import RoutingLib.Data.Nat.Properties using (≤-refl; ≤-antisym; ≤+≢⇒<; ≤-reflexive; ≤-trans; m≤n⇒m∸n≡0; m>n⇒m∸n≢0; m≤n⇨m+o≡n; _<?_; ≮⇒≥; <⇒≤; cancel-+-right; w∸x≡y∸z⇒v+x≡w∧v+y≡z)
+open import RoutingLib.Asynchronous.Schedule using (Schedule)
+open import RoutingLib.Data.Table using (Table)
 
 
-module RoutingLib.Asynchronous.Snapshot.Properties {a ℓ n} (p : Parallelisation a ℓ n) where
-
+module RoutingLib.Asynchronous.Snapshot.Properties {a ℓ n} {S : Table (Setoid a ℓ) n}(p : Parallelisation S) where
+{-
   open Parallelisation p
   open Schedule
   open import RoutingLib.Asynchronous.Properties p using (≈ₘ-trans; δ'-timeCong)
@@ -48,3 +46,4 @@ module RoutingLib.Asynchronous.Snapshot.Properties {a ℓ n} (p : Parallelisatio
 
 
 
+-}

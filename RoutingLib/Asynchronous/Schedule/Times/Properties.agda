@@ -178,17 +178,17 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
   τ-inc zero    i = z≤n
   τ-inc (suc t) i = ≤-trans (φ-inc (suc t)) (nextActive-inc (φ (suc t)) i)
 
-  prop1-i : φ zero ≡ zero
-  prop1-i = refl
+  φ₀≡0 : φ zero ≡ zero
+  φ₀≡0 = refl
 
-  prop1-ii : ∀ t i → ∃ λ k → (i ∈ α k) × (φ t ≤ k) × (k < φ (suc t))
-  prop1-ii t i = nextActive (φ t) i ,
+  active-in-φ : ∀ t i → ∃ λ k → (i ∈ α k) × (φ t ≤ k) × (k < φ (suc t))
+  active-in-φ t i = nextActive (φ t) i ,
                  nextActive-active (φ t) i ,
                  nextActive-inc (φ t) i ,
                  nextActiveφ<φs t i
 
-  prop1-iii : ∀ t i j k  → (φ t ≤ τ t j) × (τ t j ≤ β (φ (suc t) + k) i j)
-  prop1-iii t i j k = φ≤τ t j , expiryₜ≤k⇒t≤βk (nextActive (φ t) j) (φ (suc t) + k) i j (begin
+  φ≤τ≤βφs+k : ∀ t i j k  → (φ t ≤ τ t j) × (τ t j ≤ β (φ (suc t) + k) i j)
+  φ≤τ≤βφs+k t i j k = φ≤τ t j , expiryₜ≤k⇒t≤βk (nextActive (φ t) j) (φ (suc t) + k) i j (begin
             expiry (nextActive (φ t) j) ≤⟨ expiry-monotone (t≤max[t] (φ t) (nextActive (φ t)) j) ⟩
             expiry (max (φ t) (nextActive (φ t))) ≤⟨ n≤1+n (expiry (max (φ t) (nextActive (φ t)))) ⟩
             φ (suc t) ≤⟨ m≤m+n (φ (suc t)) k ⟩

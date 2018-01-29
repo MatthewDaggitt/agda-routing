@@ -52,10 +52,10 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a ℓ n} {S : Fin n → S
   φsK≤k⇒τK≤βk : ∀ {k K i j} → φ (suc K) ≤ k → τ K j ≤ β k i j
   φsK≤k⇒τK≤βk {k} {K} {i} {j} φsK≤k = subst (τ K j ≤_)
           (cong (λ x → β x i j) (m+n∸m≡n φsK≤k))
-          (proj₂ (prop1-iii K i j (k ∸ (φ (suc K)))))
+          (proj₂ (φ≤τ≤βφs+k K i j (k ∸ (φ (suc K)))))
 
 
-  module Theorem1 {p} {x₀ : M} (aco : ACO 𝕡 p) (x₀∈D₀ : x₀ ∈ (ACO.D aco 0)) where
+  module Proof {p} {x₀ : M} (aco : ACO 𝕡 p) (x₀∈D₀ : x₀ ∈ (ACO.D aco 0)) where
     open ACO aco
 
     -- Extract the fixed point
@@ -132,20 +132,20 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1 {a ℓ n} {S : Fin n → S
     Tᶜ = φ (suc T)
 
     accTᶜ+K : ∀ K → Acc _<_ (Tᶜ + K)
-    accTᶜ+K K = <-well-founded (φ (suc T) + K)
+    accTᶜ+K K = <-well-founded (Tᶜ + K)
 
     τ≤Tᶜ+K : ∀ K j → τ (T + 0) j ≤ Tᶜ + K
     τ≤Tᶜ+K K j = begin 
-      τ (T + 0) j    ≡⟨ cong₂ τ (+-identityʳ T) refl ⟩
-      τ T j          ≤⟨ <⇒≤ (nextActiveφ<φs T j) ⟩
-      φ (suc T)      ≤⟨ m≤m+n (φ (suc T)) K ⟩
-      φ (suc T) + K  ∎
+      τ (T + 0) j ≡⟨ cong₂ τ (+-identityʳ T) refl ⟩
+      τ T j       ≤⟨ <⇒≤ (nextActiveφ<φs T j) ⟩
+      Tᶜ          ≤⟨ m≤m+n (φ (suc T)) K ⟩
+      Tᶜ + K      ∎
 
-    theorem1-proof : ∀ K → async-iter 𝕤 x₀ (Tᶜ + K) ≈ ξ
-    theorem1-proof K i = ≈ᵢ-sym (proj₂ (D-T+K≡ξ 0) (async-iter 𝕤 x₀ (Tᶜ + K)) async∈DT i)
+    async-converge-proof : ∀ K → async-iter 𝕤 x₀ (Tᶜ + K) ≈ ξ
+    async-converge-proof K i = ≈ᵢ-sym (proj₂ (D-T+K≡ξ 0) (async-iter 𝕤 x₀ (Tᶜ + K)) async∈DT i)
       where
       async∈DT : async-iter 𝕤 x₀ (Tᶜ + K) ∈ D (T + 0)
       async∈DT j = τK≤k⇒xₖ∈DK (Tᶜ + K) (T + 0) j (τ≤Tᶜ+K K j)
       
-    theorem1 : ∃ λ K → ∀ K₁ → async-iter 𝕤 x₀ (K + K₁) ≈ ξ
-    theorem1 = Tᶜ , theorem1-proof
+    async-converge : ∃ λ K → ∀ K₁ → async-iter 𝕤 x₀ (K + K₁) ≈ ξ
+    async-converge = Tᶜ , async-converge-proof

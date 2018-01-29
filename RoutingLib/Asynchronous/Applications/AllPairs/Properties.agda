@@ -2,7 +2,7 @@ open import Data.Fin.Dec using (all?; ¬∀⟶∃¬)
 open import Data.Nat using (ℕ)
 open import Data.Product using (∃; _,_)
 open import Data.Sum using (inj₁; inj₂)
-open import Relation.Binary using (Reflexive; Antisymmetric; Transitive; Symmetric; IsPreorder; _⇒_)
+open import Relation.Binary using (Reflexive; Antisymmetric; Transitive; Symmetric; IsPreorder; _⇒_; IsPartialOrder)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; _≢_; sym)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
@@ -32,6 +32,23 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Properties (n : ℕ) where
 
   ≼-trans : Transitive _≼_
   ≼-trans x≼y y≼z i = ≤-trans (x≼y i) (y≼z i)
+
+  isPreorder : IsPreorder _≡ᵣ_ _≼_
+  isPreorder = record {
+    isEquivalence = record {
+      refl = reflᵣ ;
+      sym = symᵣ ;
+      trans = transᵣ
+      } ;
+    reflexive = ≼-reflexive ;
+    trans = ≼-trans
+    }
+
+  ≼-isPartialOrder : IsPartialOrder _≡ᵣ_ _≼_
+  ≼-isPartialOrder = record {
+    isPreorder = isPreorder ;
+    antisym = ≼-antisym
+    }
 
   ≼ₘ-refl : Reflexive _≼ₘ_
   ≼ₘ-refl i = ≼-refl
@@ -66,8 +83,8 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Properties (n : ℕ) where
   ≡ᵣ⇒≼ : ∀ {x y} → x ≡ᵣ y → x ≼ y
   ≡ᵣ⇒≼ x≡y i = ≤-reflexive (x≡y i)
 
-  isPreorder : IsPreorder _≡ₘ_ _≼ₘ_
-  isPreorder = record {
+  isPreorderₘ : IsPreorder _≡ₘ_ _≼ₘ_
+  isPreorderₘ = record {
     isEquivalence = record {
       refl = reflₘ ;
       sym = symₘ ;

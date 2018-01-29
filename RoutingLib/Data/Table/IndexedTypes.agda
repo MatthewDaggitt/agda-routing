@@ -62,6 +62,45 @@ module RoutingLib.Data.Table.IndexedTypes {a ℓ n} (S : Table (Setoid a ℓ) n)
     ; _≈_           = _≈_
     ; isEquivalence = ≈-isEquivalence
     }
+
+  -- Ordering Relation
+  record M-poset p : Set (lsuc (a ⊔ ℓ ⊔ p)) where
+    field
+      _≼ᵢ_ : ∀ {i} → Rel (Mᵢ i) p
+      isPartialOrderᵢ : ∀ i → IsPartialOrder (_≈ᵢ_ {i}) _≼ᵢ_
+
+    module _ {i : Fin n} where
+      open IsPartialOrder (isPartialOrderᵢ i)
+        renaming
+        ( isPreorder to ≼ᵢ-isPreorder
+        ; antisym    to ≼ᵢ-antisym
+        ) public
+      open IsPreorder ≼ᵢ-isPreorder
+        using ()
+        renaming
+        ( reflexive to ≼ᵢ-reflexive
+        ; trans     to ≼ᵢ-trans
+        ) public
+
+    ≼ᵢ-refl : ∀ {i} → Reflexive (_≼ᵢ_ {i})
+    ≼ᵢ-refl {i} = ≼ᵢ-reflexive ≈ᵢ-refl
+
+    _≼_ : Rel M p
+    _≼_ x y = ∀ i → x i ≼ᵢ y i
+
+    ≼-refl : Reflexive _≼_
+    ≼-refl i = ≼ᵢ-refl
+
+    ≼-reflexive : _≈_ ⇒ _≼_
+    ≼-reflexive x≈y i = ≼ᵢ-reflexive (x≈y i)
+
+    ≼-trans : Transitive _≼_
+    ≼-trans x≼y y≼z i = ≼ᵢ-trans (x≼y i) (y≼z i)
+
+    ≼-antisym : Antisymmetric _≈_ _≼_
+    ≼-antisym x≼y y≼x i = ≼ᵢ-antisym (x≼y i) (y≼x i)
+  
+
   open Memb M-setoid using () renaming (_∈_ to _∈L_)
   
   -- Predicates and relations over predicates

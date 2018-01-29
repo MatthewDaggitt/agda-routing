@@ -26,41 +26,29 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois4 {a ℓ n}
   where
 
   open Parallelisation 𝕡 using (f)
-  open import RoutingLib.Asynchronous.Propositions.UresinDubois3 𝕡 using (iter) renaming (module Proof to Prop3-proof)
-  open import RoutingLib.Asynchronous.Theorems.Core 𝕡 using (ACO)
+  open import RoutingLib.Asynchronous.Propositions.UresinDubois3 𝕡 using () renaming (module Proof to Prop3-proof)
+  open import RoutingLib.Asynchronous.Theorems.Core 𝕡 using (ACO; Start; SynchronousConditions; FiniteConditions; iter)
   open import RoutingLib.Data.Table.IndexedTypes S
   open Memb M-setoid using () renaming (_∈_ to _∈L_; _⊆_ to _⊆L_)
 
-  module Proof {p}
-               (x₀ : M)
-               (D₀ : Pred p)
-               (x₀∈D₀ : x₀ ∈ D₀)
-               (D₀-finite : Finite-Pred D₀)
-               (D₀-subst : ∀ {x y} → x ≈ y → x ∈ D₀ → y ∈ D₀)
-               (_≼_ : ∀ {i} → Rel (Mᵢ i) p)
-               (≼-refl : ∀ {i} → Reflexive (_≼_ {i}))
-               (≼-reflexive : ∀ {i} → _≈ᵢ_ {i} ⇒ _≼_ {i})
-               (≼-antisym : ∀ {i} → Antisymmetric (_≈ᵢ_ {i}) (_≼_ {i}))
-               (≼-trans : ∀ {i} → Transitive (_≼_ {i}))
-               (_≟_ : Decidable _≈_)
-               (f-cong : ∀ {x y} → x ≈ y → f x ≈ f y)
-               (closed : ∀ x → x ∈ D₀ → f x ∈ D₀)
-               (nonexpansive : ∀ {x} → x ∈ D₀ → ∀ i → f x i ≼ x i)
-               (monotone : ∀ {x y} → x ∈ D₀ × y ∈ D₀ → (∀ i → x i ≼ y i) → ∀ i → f x i ≼ f y i)
-    where
+  module Proof {p} (finiteCond : FiniteConditions p) where
+
+    open FiniteConditions finiteCond
+    open Start start
+    open M-poset poset hiding (trans)
 
     closed-trans : ∀ K → iter x₀ K ∈ D₀
     closed-trans zero    i = x₀∈D₀ i
-    closed-trans (suc K) i = closed (iter x₀ K) (closed-trans K) i
+    closed-trans (suc K) i = D₀-closed (iter x₀ K) (closed-trans K) i
 
-    iter-dec : ∀ K i → iter x₀ (suc K) i ≼ iter x₀ K i
-    iter-dec K i = nonexpansive (closed-trans K) i
+    iter-decreasing : ∀ K → iter x₀ (suc K) ≼ iter x₀ K
+    iter-decreasing K i = f-nonexpansive (closed-trans K) i
 
-    iter-decreasing : ∀ {k t} → k ≤ t → ∀ i → iter x₀ t i ≼ iter x₀ k i
-    iter-decreasing {.0} {zero} z≤n i = ≼-refl
-    iter-decreasing {k} {suc t} k≤t i with k ≟ℕ suc t
+    iter-decreasing-full : ∀ {k t} → k ≤ t → iter x₀ t ≼ iter x₀ k
+    iter-decreasing-full {.0} {zero} z≤n = ≼-refl
+    iter-decreasing-full {k} {suc t} k≤t with k ≟ℕ suc t
     ... | yes refl = ≼-refl
-    ... | no  k≢st = ≼-trans (iter-dec t i) (iter-decreasing {k} {t} (pred-mono (≤+≢⇒< k≤t k≢st)) i)
+    ... | no  k≢st = ≼-trans (iter-decreasing t) (iter-decreasing-full {k} {t} (pred-mono (≤+≢⇒< k≤t k≢st)))
 
     D₀-list : List M
     D₀-list = proj₁ D₀-finite
@@ -88,16 +76,18 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois4 {a ℓ n}
                (iter-fixed (suc K) (f-cong iter≈) t))
 
 
-    x≼y≼z∧x≉y⇒x≉z : ∀ {x y z} → (∀ i → x i ≼ y i) → (∀ i → y i ≼ z i) → x ≉ y → x ≉ z
+    x≼y≼z∧x≉y⇒x≉z : ∀ {x y z} → x ≼ y → y ≼ z → x ≉ y → x ≉ z
     x≼y≼z∧x≉y⇒x≉z x≼y y≼z x≉y x≈z = contradiction
-          (λ i → ≼-antisym (x≼y i) (≼-trans (y≼z i) (≼-reflexive ((≈-sym x≈z) i))))
+          (≼-antisym x≼y (≼-trans y≼z (≼-reflexive (≈-sym x≈z))))
           x≉y
 
-    iterK∈D₀-fixedt : ∀ K → iter x₀ K ≉ iter x₀ (suc K) → ∀ {t} → t ≤ K → iter x₀ (suc K) ∈L D₀-fixed t
+    iterK∈D₀-fixedt : ∀ K → iter x₀ K ≉ iter x₀ (suc K) → ∀ {t} → t ≤ K →
+                      iter x₀ (suc K) ∈L D₀-fixed t
     iterK∈D₀-fixedt K iter≉ {zero} t≤K = iterK∈D₀-list (suc K)
     iterK∈D₀-fixedt K iter≉ {suc t} t≤K = ∈-dfilter⁺ M-setoid (P?⇒¬P? (iter x₀ t ≟_))
               (λ x≈y x≉iterK → x≉iterK ∘ λ iterK≈y → ≈-trans iterK≈y (≈-sym x≈y))
-              ((x≼y≼z∧x≉y⇒x≉z (iter-dec K) (iter-decreasing (<⇒≤ t≤K)) (iter≉ ∘ ≈-sym)) ∘ ≈-sym)
+              ((x≼y≼z∧x≉y⇒x≉z (iter-decreasing K)
+                (iter-decreasing-full (<⇒≤ t≤K)) (iter≉ ∘ ≈-sym)) ∘ ≈-sym)
               (iterK∈D₀-fixedt K iter≉ (<⇒≤ t≤K))
 
     iter≉⇒iter∈D₀-fixed : ∀ K → iter x₀ K ≉ iter x₀ (suc K) → iter x₀ K ∈L D₀-fixed K
@@ -134,9 +124,16 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois4 {a ℓ n}
     iter-converge : ∃ λ T → ∀ t → iter x₀ T ≈ iter x₀ (T + t)
     iter-converge = iter-fixed-point {0} (<-well-founded (length (D₀-list)))
 
-    open Prop3-proof x₀ D₀ x₀∈D₀ D₀-subst _≼_ ≼-refl ≼-reflexive ≼-antisym ≼-trans
-                     closed monotone iter-dec iter-converge
-                     using () renaming (aco to Prop3-aco)
+    syncCond : SynchronousConditions p
+    syncCond = record {
+      start           = start ;
+      poset           = poset ;
+      f-monotone      = f-monotone ;
+      iter-decreasing = iter-decreasing ;
+      iter-converge   = iter-converge 
+      }
+
+    open Prop3-proof syncCond using () renaming (aco to Prop3-aco)
 
     aco : ACO p
     aco = Prop3-aco

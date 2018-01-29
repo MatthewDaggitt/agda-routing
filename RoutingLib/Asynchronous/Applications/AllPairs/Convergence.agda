@@ -43,6 +43,7 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
   open Schedule 𝕤
   open Parallelisation all-pairs-parallelisation
   open import RoutingLib.Asynchronous.Propositions.UresinDubois3 all-pairs-parallelisation renaming (module Proof to ProofProp)
+  open import RoutingLib.Asynchronous.Theorems.Core all-pairs-parallelisation using (iter; SynchronousConditions; Start)
   open import RoutingLib.Asynchronous.Theorems.UresinDubois1 𝕤 all-pairs-parallelisation
   
   D₀ : Pred lzero
@@ -54,24 +55,24 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
   D₀-subst : ∀ {x y} → x ≈ y → x ∈ D₀ → y ∈ D₀
   D₀-subst {_} {y} _ _ i = U-Universal (y i)
 
-  closed : ∀ x → x ∈ D₀ → f x ∈ D₀
-  closed x _ i = U-Universal (f x i)
+  D₀-closed : ∀ x → x ∈ D₀ → f x ∈ D₀
+  D₀-closed x _ i = U-Universal (f x i)
 
-  f-monotone : ∀ {x y} → x ∈ D₀ × y ∈ D₀ → (∀ i → x i ≼ y i) →
+  f-monotone : ∀ {x y} → x ∈ D₀ →  y ∈ D₀ → (∀ i → x i ≼ y i) →
                ∀ i → f x i ≼ f y i
-  f-monotone {x} {y} ∈D x≼y i j =
+  f-monotone {x} {y} x∈D₀ y∈D₀ x≼y i j =
     min∞[s]≤min∞[t] (x i j) (inj₁ (x≼y i j)) ≤-path-cost
     where
     ≤-path-cost : ∀ k → x i j ≤ path-cost y i j k ⊎
                          Σ (Fin n) (λ v → path-cost x i j v ≤ path-cost y i j k)
     ≤-path-cost k = inj₂ (k , path-cost-monotone x≼y i j k)
 
-  iter-dec : ∀ K → iter x₀ (suc K) ≼ₘ iter x₀ K
-  iter-dec zero i j = min∞[t]≤x (x₀ i j) (path-cost x₀ i j) (inj₁ ≤-refl)
-  iter-dec (suc K) i = f-monotone
-    ((λ l → U-Universal (iter x₀ (suc K))) ,
-      λ l → U-Universal (iter x₀ K))
-    (λ j → iter-dec K j) i
+  iter-decreasing : ∀ K → iter x₀ (suc K) ≼ₘ iter x₀ K
+  iter-decreasing zero i j = min∞[t]≤x (x₀ i j) (path-cost x₀ i j) (inj₁ ≤-refl)
+  iter-decreasing (suc K) i = f-monotone
+    (λ j → U-Universal (iter x₀ (suc K)))
+    (λ j → U-Universal (iter x₀ K))
+    (λ j → iter-decreasing K j) i
 
   iter-fixed : ∀ t → iter x₀ (suc t) ≡ₘ iter x₀ t → ∀ K →
                iter x₀ t ≈ iter x₀ (t +ℕ K)
@@ -135,7 +136,7 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
     (node≡∞⇒node∈∞-nodes K i j ≡∞)
   ... | no  ≢∞ with ≢∞⇒≡N ≢∞
   ...   | _ , p = contradiction
-    (iter-dec K i j)
+    (iter-decreasing K i j)
     (subst₂ _≰_ (sym iter≡∞) (sym p) ∞≰)
 
   ∞-nodes-dec : ∀ K → ∞-nodes (suc K) ⊆L ∞-nodes K
@@ -197,10 +198,10 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
     ... | no  iterₛₖ≢∞ | yes iterₖ≡∞ = contradiction
       (∞-nodes≡⇒iterₖ≡∞⇒iterₛₖ≡∞ K (proj₂ ∞-conv T≤K) i j iterₖ≡∞) iterₛₖ≢∞
     ... | no  iterₛₖ≢∞ | no  iterₖ≢∞ =
-                 ≤⇒extractℕ≤ iterₛₖ≢∞ iterₖ≢∞ (iter-dec K i j)
+                 ≤⇒extractℕ≤ iterₛₖ≢∞ iterₖ≢∞ (iter-decreasing K i j)
     ... | yes iterₛₖ≡∞ | no  iterₖ≢∞ with ≢∞⇒≡N iterₖ≢∞
     ...   | _ , p = contradiction
-      (iter-dec K i j)
+      (iter-decreasing K i j)
       (subst₂ _≰_ (sym iterₛₖ≡∞) (sym p) ∞≰)
 
     score-dec : ∀ {K} → proj₁ ∞-conv ≤ℕ K → score (suc K) ≤ℕ score K
@@ -217,7 +218,7 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
       extractℕ≢ with iter x₀ (suc K) i j ≟ ∞ | iter x₀ K i j ≟ ∞
       extractℕ≢ | yes iterₛₖ≡∞ | yes iterₖ≡∞ = contradiction (trans iterₛₖ≡∞ (sym iterₖ≡∞)) iter≢
       extractℕ≢ | yes iterₛₖ≡∞ | no  iterₖ≢∞ with ≢∞⇒≡N iterₖ≢∞
-      ... | x , p = contradiction (iter-dec K i j) (subst₂ _≰_ (sym iterₛₖ≡∞) (sym p) ∞≰)
+      ... | x , p = contradiction (iter-decreasing K i j) (subst₂ _≰_ (sym iterₛₖ≡∞) (sym p) ∞≰)
       extractℕ≢ | no  iterₛₖ≢∞ | yes iterₖ≡∞ = contradiction
                   (∞-nodes≡⇒iterₖ≡∞⇒iterₛₖ≡∞ K (proj₂ ∞-conv T≤K) i j iterₖ≡∞)
                   iterₛₖ≢∞
@@ -245,8 +246,32 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
   iter-converge with ∞-nodes-converge {0} (<-well-founded (length (∞-nodes 0)))
   ... | T∞ , ∞-conv = iter-fixed-point (T∞ , ∞-conv) (≤ℕ-refl)
                       (<-well-founded (score T∞))
-                 
-  open ProofProp x₀ D₀ x₀∈D₀ D₀-subst _≼_ ≼-refl ≼-reflexive ≼-antisym ≼-trans closed f-monotone iter-dec iter-converge hiding (ξ)
+
+  start : Start lzero
+  start = record {
+    x₀ = x₀ ;
+    D₀ = D₀ ;
+    x₀∈D₀ = x₀∈D₀ ;
+    D₀-subst = D₀-subst ;
+    D₀-closed = D₀-closed
+    }
+
+  poset : M-poset lzero
+  poset = record {
+    _≼ᵢ_ = λ {i} → _≼_ ;
+    isPartialOrderᵢ = λ i → ≼-isPartialOrder
+    }
+
+  syncCond : SynchronousConditions lzero
+  syncCond = record {
+    start           = start ;
+    poset           = poset ;
+    f-monotone      = f-monotone ;
+    iter-decreasing = iter-decreasing ;
+    iter-converge   = iter-converge 
+    }
+
+  open ProofProp syncCond hiding (ξ)
 
   open Proof aco x₀∈D0
 

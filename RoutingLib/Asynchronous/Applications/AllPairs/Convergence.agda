@@ -57,29 +57,43 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
   closed : ∀ x → x ∈ D₀ → f x ∈ D₀
   closed x _ i = U-Universal (f x i)
 
-  f-monotone : ∀ {x y} → x ∈ D₀ × y ∈ D₀ → (∀ i → x i ≼ y i) → ∀ i → f x i ≼ f y i
-  f-monotone {x} {y} ∈D x≼y i j = min∞[s]≤min∞[t] (x i j) (inj₁ (x≼y i j)) ≤-path-cost
-      where
-      ≤-path-cost : ∀ k → x i j ≤ path-cost y i j k ⊎
-                           Σ (Fin n) (λ v → path-cost x i j v ≤ path-cost y i j k)
-      ≤-path-cost k = inj₂ (k , path-cost-monotone x≼y i j k)
+  f-monotone : ∀ {x y} → x ∈ D₀ × y ∈ D₀ → (∀ i → x i ≼ y i) →
+               ∀ i → f x i ≼ f y i
+  f-monotone {x} {y} ∈D x≼y i j =
+    min∞[s]≤min∞[t] (x i j) (inj₁ (x≼y i j)) ≤-path-cost
+    where
+    ≤-path-cost : ∀ k → x i j ≤ path-cost y i j k ⊎
+                         Σ (Fin n) (λ v → path-cost x i j v ≤ path-cost y i j k)
+    ≤-path-cost k = inj₂ (k , path-cost-monotone x≼y i j k)
 
   iter-dec : ∀ K → iter x₀ (suc K) ≼ₘ iter x₀ K
   iter-dec zero i j = min∞[t]≤x (x₀ i j) (path-cost x₀ i j) (inj₁ ≤-refl)
   iter-dec (suc K) i = f-monotone
-           ((λ l → U-Universal (iter x₀ (suc K))) , λ l → U-Universal (iter x₀ K))
-           (λ j → iter-dec K j) i
+    ((λ l → U-Universal (iter x₀ (suc K))) ,
+      λ l → U-Universal (iter x₀ K))
+    (λ j → iter-dec K j) i
 
-  iter-fixed : ∀ t → iter x₀ (suc t) ≡ₘ iter x₀ t → ∀ K → iter x₀ t ≡ₘ iter x₀ (t +ℕ K)
+  iter-fixed : ∀ t → iter x₀ (suc t) ≡ₘ iter x₀ t → ∀ K →
+               iter x₀ t ≈ iter x₀ (t +ℕ K)
   iter-fixed t iter≡ zero i j = cong (λ x → iter x₀ x i j) (sym (+-idʳℕ t))
-  iter-fixed t iter≡ (suc K) i j = trans (sym (iter≡ i j)) (subst (iter x₀ (suc t) i j ≡_)
-             (cong (λ x → iter x₀ x i j) (sym (+ℕ-suc t K)))
-             (iter-fixed (suc t) (f-cong iter≡) K i j)) 
+  iter-fixed t iter≡ (suc K) i j = trans (sym (iter≡ i j))
+    (subst (iter x₀ (suc t) i j ≡_)
+      (cong (λ x → iter x₀ x i j) (sym (+ℕ-suc t K)))
+      (iter-fixed (suc t) (f-cong iter≡) K i j)) 
 
-  iter∞-chain : ∀ K → (∀ i j → iter x₀ K i j ≡ ∞ → iter x₀ (suc K) i j ≡ ∞) → ∀ i j → iter x₀ (suc K) i j ≡ ∞ → iter x₀ (suc (suc K)) i j ≡ ∞
+  iter∞-dependent : ℕ → Set
+  iter∞-dependent K = ∀ i j → iter x₀ K i j ≡ ∞ → iter x₀ (suc K) i j ≡ ∞
+
+  iter∞-chain : ∀ K → iter∞-dependent K → iter∞-dependent (suc K)
   iter∞-chain K ⇒∞ i j iterᵢⱼsK≡∞ with iter x₀ (suc (suc K)) i j ≟ ∞
   ... | yes iterᵢⱼssK≡∞ = iterᵢⱼssK≡∞
-  ... | no  iterᵢⱼssK≢∞ with min∞[t]∈t (iter x₀ (suc K) i j) (path-cost (iter x₀ (suc K)) i j)
+  ... | no  iterᵢⱼssK≢∞ = {!!}
+    where
+    iterₛₖ-contradiction : ∀ {i j} → iter x₀ K i j ≡ ∞ →
+                           iter x₀ (suc K) i j ≢ ∞ → iter x₀ (suc K) i j ≡ ∞
+    iterₛₖ-contradiction {i} {j} iterₖ≡∞ iterₛₖ≢∞ =
+      contradiction (⇒∞ i j iterₖ≡∞) iterₛₖ≢∞
+  {- with min∞[t]∈t (iter x₀ (suc K) i j) (path-cost (iter x₀ (suc K)) i j)
   ...   | inj₁ iterᵢⱼ≡ = contradiction (trans iterᵢⱼ≡ iterᵢⱼsK≡∞) iterᵢⱼssK≢∞
   ...   | inj₂ (k , p) rewrite p with iter x₀ (suc K) i k ≟ ∞ | iter x₀ (suc K) k j ≟ ∞
   ...     | yes iterᵢₖsK≡∞ | _ rewrite iterᵢₖsK≡∞ = contradiction refl iterᵢⱼssK≢∞
@@ -89,7 +103,7 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
   ...       | no  _        | yes iterₖⱼK≡∞ = contradiction (⇒∞ k j iterₖⱼK≡∞) iterₖⱼsK≢∞
   ...       | no  iterᵢₖK≢∞ | no  iterₖⱼK≢∞ with ≢∞⇒≡N iterᵢₖK≢∞ | ≢∞⇒≡N iterₖⱼK≢∞
   ...         | xᵢₖ , pᵢₖ | xₖⱼ , pₖⱼ rewrite pᵢₖ | pₖⱼ = contradiction (min∞[t]≤x (iter x₀ K i j) (path-cost (iter x₀ K) i j) {(N xᵢₖ) + (N xₖⱼ)} (inj₂ (k , ≤-reflexive (trans (cong (iter x₀ K i k +_) pₖⱼ) (cong (_+ N xₖⱼ) pᵢₖ))))) (subst (_≰ N (xᵢₖ +ℕ xₖⱼ)) (sym iterᵢⱼsK≡∞) ∞≰)
-
+-}
 
   FinPair : Setoid lzero lzero
   FinPair = setoid (Fin n × Fin n)
@@ -104,44 +118,69 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
   ∞-nodes (suc K) = dfilter (is∞? (suc K)) (∞-nodes K)
 
   node∈∞-nodes⇒node≡∞ : ∀ K i j → (i , j) ∈L ∞-nodes K → iter x₀ K i j ≡ ∞
-  node∈∞-nodes⇒node≡∞ zero i j node∈ = proj₂ (∈-dfilter⁻ (is∞? 0) {i , j} {allFinPairs n} node∈)
-  node∈∞-nodes⇒node≡∞ (suc K) i j node∈ = proj₂ (∈-dfilter⁻ (is∞? (suc K)) {i , j} {∞-nodes K} node∈)
+  node∈∞-nodes⇒node≡∞ zero i j node∈ = proj₂ (∈-dfilter⁻ (is∞? 0)
+    {i , j} {allFinPairs n} node∈)
+  node∈∞-nodes⇒node≡∞ (suc K) i j node∈ = proj₂ (∈-dfilter⁻ (is∞? (suc K))
+    {i , j} {∞-nodes K} node∈)
 
   node≡∞⇒node∈∞-nodes : ∀ K i j → iter x₀ K i j ≡ ∞ → (i , j) ∈L ∞-nodes K
-  node≡∞⇒node∈∞-nodes zero i j iter≡∞ = ∈-dfilter⁺ (is∞? 0) iter≡∞ (∈-allFinPairs⁺ i j)
+  node≡∞⇒node∈∞-nodes zero i j iter≡∞ = ∈-dfilter⁺ (is∞? 0) iter≡∞
+    (∈-allFinPairs⁺ i j)
   node≡∞⇒node∈∞-nodes (suc K) i j iter≡∞ with iter x₀ K i j ≟ ∞
-  ... | yes ≡∞ =  ∈-dfilter⁺ (is∞? (suc K)) iter≡∞ (node≡∞⇒node∈∞-nodes K i j ≡∞)
+  ... | yes ≡∞ =  ∈-dfilter⁺ (is∞? (suc K)) iter≡∞
+    (node≡∞⇒node∈∞-nodes K i j ≡∞)
   ... | no  ≢∞ with ≢∞⇒≡N ≢∞
-  ...   | _ , p = contradiction (iter-dec K i j) (subst₂ _≰_ (sym iter≡∞) (sym p) ∞≰)
+  ...   | _ , p = contradiction
+    (iter-dec K i j)
+    (subst₂ _≰_ (sym iter≡∞) (sym p) ∞≰)
 
   ∞-nodes-dec : ∀ K → ∞-nodes (suc K) ⊆L ∞-nodes K
   ∞-nodes-dec K x∈∞-nodes = proj₁ (∈-dfilter⁻ (is∞? (suc K)) x∈∞-nodes)
 
-  ∞-nodes-length≡⇒∞-nodes≡ : ∀ K → length (∞-nodes K) ≡ length (∞-nodes (suc K)) → ∞-nodes K ≡ ∞-nodes (suc K)
-  ∞-nodes-length≡⇒∞-nodes≡ K length≡ = sym ( |dfilter[xs]|≡|xs|⇒dfilter[xs]≡xs  (is∞? (suc K)) (sym length≡))
+  ∞-nodes-length≡⇒∞-nodes≡ : ∀ K → length (∞-nodes K) ≡ length (∞-nodes (suc K)) →
+                               ∞-nodes K ≡ ∞-nodes (suc K)
+  ∞-nodes-length≡⇒∞-nodes≡ K length≡ = sym (|dfilter[xs]|≡|xs|⇒dfilter[xs]≡xs
+    (is∞? (suc K)) (sym length≡))
 
-  ∞-nodes≡⇒iterₖ≡∞⇒iterₛₖ≡∞ : ∀ K → ∞-nodes K ≡ ∞-nodes (suc K) → ∀ i j → iter x₀ K i j ≡ ∞ → iter x₀ (suc K) i j ≡ ∞
-  ∞-nodes≡⇒iterₖ≡∞⇒iterₛₖ≡∞ K ∞-nodes≡ i j iterₖ≡∞ = node∈∞-nodes⇒node≡∞ (suc K) i j (subst ((i , j) ∈L_) ∞-nodes≡ (node≡∞⇒node∈∞-nodes K i j iterₖ≡∞))
+  ∞-nodes≡⇒iterₖ≡∞⇒iterₛₖ≡∞ : ∀ K → ∞-nodes K ≡ ∞-nodes (suc K) →
+                                iter∞-dependent K
+  ∞-nodes≡⇒iterₖ≡∞⇒iterₛₖ≡∞ K ∞-nodes≡ i j iterₖ≡∞ =
+    node∈∞-nodes⇒node≡∞ (suc K) i j (subst ((i , j) ∈L_) ∞-nodes≡
+      (node≡∞⇒node∈∞-nodes K i j iterₖ≡∞))
 
-  ∞-nodes-fixed-range : ∀ K → ∞-nodes K ≡ ∞-nodes (suc K) → ∀ t → ∞-nodes K ≡ ∞-nodes (K +ℕ t)
+  ∞-nodes≡+∈∞-nodes⇒iter≡∞ : ∀ K → ∞-nodes K ≡ ∞-nodes (suc K) →
+                               {node : Fin n × Fin n} → node ∈L ∞-nodes (suc K) →
+                               iter x₀ (suc (suc K)) (proj₁ node) (proj₂ node) ≡ ∞
+  ∞-nodes≡+∈∞-nodes⇒iter≡∞ K ∞-nodes≡ {i , j} node∈ =
+    iter∞-chain K (∞-nodes≡⇒iterₖ≡∞⇒iterₛₖ≡∞ K ∞-nodes≡) i j
+      (node∈∞-nodes⇒node≡∞ (suc K) i j node∈)
+
+  ∞-nodes-fixed-range : ∀ K → ∞-nodes K ≡ ∞-nodes (suc K) → ∀ t →
+                        ∞-nodes K ≡ ∞-nodes (K +ℕ t)
   ∞-nodes-fixed-range K ∞-nodes≡ zero = cong ∞-nodes (sym (+-idʳℕ K))
   ∞-nodes-fixed-range K ∞-nodes≡ (suc t) = trans ∞-nodes≡
-    (subst (∞-nodes (suc K) ≡_)
-      (cong ∞-nodes (sym (+ℕ-suc K t))) (∞-nodes-fixed-range (suc K)
-        (sym (dfilter[xs]≡xs (is∞? (suc (suc K))) (tabulateAll (λ {node} node∈ → iter∞-chain K (∞-nodes≡⇒iterₖ≡∞⇒iterₛₖ≡∞ K ∞-nodes≡) (proj₁ node) (proj₂ node) (node∈∞-nodes⇒node≡∞ (suc K) (proj₁ node) (proj₂ node) node∈)))))
-        t))
+    (subst (∞-nodes (suc K) ≡_) (cong ∞-nodes (sym (+ℕ-suc K t)))
+      (∞-nodes-fixed-range (suc K) ∞-nodesₛ≡ t))
+    where
+    ∞-nodesₛ≡ : ∞-nodes (suc K) ≡ ∞-nodes (suc (suc K))
+    ∞-nodesₛ≡ = sym (dfilter[xs]≡xs (is∞? (suc (suc K)))
+      (tabulateAll (∞-nodes≡+∈∞-nodes⇒iter≡∞ K ∞-nodes≡)))
 
-  ∞-nodes-fixed : ∀ K → ∞-nodes K ≡ ∞-nodes (suc K) → ∀ {t} → K ≤ℕ t → ∞-nodes t ≡ ∞-nodes (suc t)
+  ∞-nodes-fixed : ∀ K → ∞-nodes K ≡ ∞-nodes (suc K) → ∀ {t} → K ≤ℕ t →
+                  ∞-nodes t ≡ ∞-nodes (suc t)
   ∞-nodes-fixed K ∞-nodes≡ {t} K≤t = trans (sym (trans (∞-nodes-fixed-range K ∞-nodes≡ (t ∸ K)) (cong ∞-nodes (m+n∸m≡n K≤t))))
     (trans (∞-nodes-fixed-range K ∞-nodes≡ (suc t ∸ K)) (cong ∞-nodes (m+n∸m≡n {K} {suc t} (≤ℕ-step K≤t))))
 
   ∞-nodes-length-dec : ∀ K → length (∞-nodes (suc K)) ≤ℕ length (∞-nodes K)
   ∞-nodes-length-dec K = |dfilter[xs]|≤|xs| (is∞? (suc K)) (∞-nodes K)
   
-  ∞-nodes-converge : ∀ {K} → Acc _<ℕ_ (length (∞-nodes K)) → ∃ λ T → ∀ {t} → T ≤ℕ t → ∞-nodes t ≡ ∞-nodes (suc t)
+  ∞-nodes-converge : ∀ {K} → Acc _<ℕ_ (length (∞-nodes K)) → ∃ λ T → ∀ {t} →
+                     T ≤ℕ t → ∞-nodes t ≡ ∞-nodes (suc t)
   ∞-nodes-converge {K} (acc rs) with length (∞-nodes K) ≟ℕ length (∞-nodes (suc K))
-  ... | yes ∞-nodes-length≡ = K , ∞-nodes-fixed K (∞-nodes-length≡⇒∞-nodes≡ K ∞-nodes-length≡)
-  ... | no  ∞-nodes-length≢ = ∞-nodes-converge {suc K} (rs (length (∞-nodes (suc K))) (≤+≢⇒ℕ< (∞-nodes-length-dec K) (∞-nodes-length≢ ∘ sym)))
+  ... | yes ∞-nodes-length≡ = K ,
+    ∞-nodes-fixed K (∞-nodes-length≡⇒∞-nodes≡ K ∞-nodes-length≡)
+  ... | no  ∞-nodes-length≢ = ∞-nodes-converge {suc K} (rs (length (∞-nodes (suc K)))
+    (≤+≢⇒ℕ< (∞-nodes-length-dec K) (∞-nodes-length≢ ∘ sym)))
   
   score : ℕ → ℕ
   score K = sum {n} (λ i → sum {n} (λ j → extractℕ (iter x₀ K i j)))
@@ -151,21 +190,23 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
                    extractℕ (iter x₀ (suc K) i j) ≤ℕ extractℕ (iter x₀ K i j)
     extractℕ-dec {K} T≤K i j with iter x₀ (suc K) i j ≟ ∞ | iter x₀ K i j ≟ ∞
     ... | yes iterₛₖ≡∞ | yes iterₖ≡∞ rewrite iterₛₖ≡∞ | iterₖ≡∞ = ≤ℕ-refl
-    ... | yes iterₛₖ≡∞ | no  iterₖ≢∞ with ≢∞⇒≡N iterₖ≢∞
-    ...   | _ , p = contradiction (iter-dec K i j) (subst₂ _≰_ (sym iterₛₖ≡∞) (sym p) ∞≰)
-    extractℕ-dec {K} T≤K i j | no  iterₛₖ≢∞ | yes iterₖ≡∞ =
-                 contradiction
-                   (∞-nodes≡⇒iterₖ≡∞⇒iterₛₖ≡∞ K (proj₂ ∞-conv T≤K) i j iterₖ≡∞)
-                   iterₛₖ≢∞
-    extractℕ-dec {K} T≤K i j | no  iterₛₖ≢∞ | no  iterₖ≢∞ =
+    ... | no  iterₛₖ≢∞ | yes iterₖ≡∞ = contradiction
+      (∞-nodes≡⇒iterₖ≡∞⇒iterₛₖ≡∞ K (proj₂ ∞-conv T≤K) i j iterₖ≡∞) iterₛₖ≢∞
+    ... | no  iterₛₖ≢∞ | no  iterₖ≢∞ =
                  ≤⇒extractℕ≤ iterₛₖ≢∞ iterₖ≢∞ (iter-dec K i j)
+    ... | yes iterₛₖ≡∞ | no  iterₖ≢∞ with ≢∞⇒≡N iterₖ≢∞
+    ...   | _ , p = contradiction
+      (iter-dec K i j)
+      (subst₂ _≰_ (sym iterₛₖ≡∞) (sym p) ∞≰)
 
     score-dec : ∀ {K} → proj₁ ∞-conv ≤ℕ K → score (suc K) ≤ℕ score K
     score-dec {K} T≤K = sum[s]≤sum[t]
               (λ i → sum[s]≤sum[t]
                 (λ j → extractℕ-dec T≤K i j))
 
-    extractℕ-dec-strict : ∀ {K} → proj₁ ∞-conv ≤ℕ K → ∀ i j → iter x₀ (suc K) i j ≢ iter x₀ K i j →  extractℕ (iter x₀ (suc K) i j) <ℕ extractℕ (iter x₀ K i j)
+    extractℕ-dec-strict : ∀ {K} → proj₁ ∞-conv ≤ℕ K → ∀ i j →
+                          iter x₀ (suc K) i j ≢ iter x₀ K i j →
+                          extractℕ (iter x₀ (suc K) i j) <ℕ extractℕ (iter x₀ K i j)
     extractℕ-dec-strict {K} T≤K i j iter≢ = ≤+≢⇒ℕ< (extractℕ-dec T≤K i j) extractℕ≢
       where
       extractℕ≢ : extractℕ (iter x₀ (suc K) i j) ≢ extractℕ (iter x₀ K i j)
@@ -178,7 +219,8 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
                   iterₛₖ≢∞
       extractℕ≢ | no  iterₛₖ≢∞ | no  iterₖ≢∞ = ≢⇒extractℕ≢ iterₛₖ≢∞ iterₖ≢∞ iter≢
 
-    iter≉⇒score< : ∀ {t} → proj₁ (∞-conv) ≤ℕ t → iter x₀ (suc t) ≉ iter x₀ t → score (suc t) <ℕ score t
+    iter≉⇒score< : ∀ {t} → proj₁ (∞-conv) ≤ℕ t → iter x₀ (suc t) ≉ iter x₀ t →
+                    score (suc t) <ℕ score t
     iter≉⇒score< {t} T≤t iter≉ with ≢ₘ-witness iter≉
     ... | i , j , iterᵢⱼ≢ = sum[s]<sum[t]
       ((λ i → sum[s]≤sum[t] (λ j → extractℕ-dec T≤t i j)))
@@ -186,7 +228,8 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
         (λ j → extractℕ-dec T≤t i j)
         (j , extractℕ-dec-strict T≤t i j iterᵢⱼ≢))
 
-    iter-fixed-point : ∀ {t} → proj₁ (∞-conv) ≤ℕ t → Acc _<ℕ_ (score t) → ∃ λ T → ∀ K → iter x₀ T ≈ iter x₀ (T +ℕ K)
+    iter-fixed-point : ∀ {t} → proj₁ (∞-conv) ≤ℕ t → Acc _<ℕ_ (score t) →
+                       ∃ λ T → ∀ K → iter x₀ T ≈ iter x₀ (T +ℕ K)
     iter-fixed-point {t} T≤t accₜ with iter x₀ (suc t) ≟ₘ iter x₀ t
     ... | yes iter≈ = t , iter-fixed t iter≈
     iter-fixed-point {t} T≤t (acc rs) | no iter≉ =

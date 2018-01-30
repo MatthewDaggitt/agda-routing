@@ -1,4 +1,4 @@
-open import Data.Product using (_×_; ∃; proj₁; proj₂; _,_)
+open import Data.Product using (_×_; ∃; proj₁; proj₂; _,_; ∃₂)
 open import Data.Nat using (ℕ; zero; suc; _+_; _≤_; _<_; z≤n; s≤s; _≟_; _≤?_; _∸_)
 open import Data.Nat.Properties using (≤-antisym; pred-mono; ≤+≢⇒<; ≰⇒≥; +-suc; +-identityʳ; m+n∸m≡n; m≤m+n; ≤-refl; ≤-step)
 open import Relation.Binary using (Setoid; Rel; Reflexive; Antisymmetric; Transitive; _⇒_)
@@ -74,7 +74,7 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3 {a ℓ n}
     ... | yes K≤T = (≼ᵢ-refl , iter-decreasing-full K≤T i) , closed-trans T i
     ... | no  K≰T = (≼ᵢ-refl , ≼ᵢ-reflexive (T≤K⇒ξ≈iterK (≰⇒≥ K≰T) i)) , closed-trans T i
 
-    D-finish : ∃ λ T → ∃ λ ξ → ∀ K → isSingleton ξ (D (T + K))
+    D-finish : ∃₂ λ T ξ → ∀ K → isSingleton ξ (D (T + K))
     D-finish = T , ξ , λ K → ξ∈DK (T + K) ,
                λ t t∈D[T+K] i → ≼ᵢ-antisym (proj₁ (proj₁ (t∈D[T+K] i)))
                (≼ᵢ-trans (proj₂ (proj₁ (t∈D[T+K] i))) (iter-decreasing-full (m≤m+n T K) i)) 

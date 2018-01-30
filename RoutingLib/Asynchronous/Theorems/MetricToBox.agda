@@ -269,7 +269,7 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
     x*∈D[T+K] : ∀ K → x* ∈ D (T + K)
     x*∈D[T+K] K i = subst (_≤ r[ T + K ]) (sym (x≈y⇒dᵢ≡0 ≈ᵢ-refl)) z≤n
 
-    D-finish : ∃ λ T → ∃ λ ξ → ∀ K → isSingleton ξ (D (T + K))
+    D-finish : ∃₂ λ T ξ → ∀ K → isSingleton ξ (D (T + K))
     D-finish = T , x* , λ K → (x*∈D[T+K] K , m∈D[T+K]⇒x*≈m K)
 
     test : ∀ K (x : M) → d x* x < r[ K ] → x ∈ D (suc K)

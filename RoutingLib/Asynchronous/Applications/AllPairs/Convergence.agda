@@ -29,9 +29,6 @@ open import RoutingLib.Data.NatInf
 open import RoutingLib.Data.NatInf.Properties
 open import RoutingLib.Data.Table using (Table; min∞; sum; max)
 open import RoutingLib.Data.Table.Any using (Any)
-open import RoutingLib.Data.Table.Iterative using (k-min∞)
-open import RoutingLib.Data.Table.Iterative.Membership.Properties
-open import RoutingLib.Data.Table.Iterative.Properties
 open import RoutingLib.Data.Table.Properties using (min∞[s]≤min∞[t]; min∞[t]≤x; t≤max[t]; sum[s]≤sum[t]; sum[s]<sum[t])
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (min∞[t]∈t)
 

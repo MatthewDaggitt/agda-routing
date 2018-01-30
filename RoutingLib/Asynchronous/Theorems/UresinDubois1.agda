@@ -52,15 +52,8 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1
     open Times 𝕤
     open TimesProperties 𝕤
 
-{-
-    φsK≤sk⇒τK≤βsK : ∀ k K i j → φ (suc K) ≤ suc k → τ K j ≤ β (suc k) i j
-    φsK≤sk⇒τK≤βsK k K i j p = subst (τ K j ≤_)
-          (cong (λ x → β x i j) (m+n∸m≡n p))
-          (proj₂ (prop1-iii K i j (suc k ∸ (φ (suc K)))))
--}
-
-    φsK≤t⇒τK≤βt : ∀ {t K i j} → ϕ (suc K) ≤ t → τ K j ≤ β t i j
-    φsK≤t⇒τK≤βt {t} {K} {i} {j} ϕsK≤t = subst (τ K j ≤_)
+    ϕsK≤t⇒τK≤βt : ∀ {t K i j} → ϕ (suc K) ≤ t → τ K j ≤ β t i j
+    ϕsK≤t⇒τK≤βt {t} {K} {i} {j} ϕsK≤t = subst (τ K j ≤_)
           (cong (λ x → β x i j) (m+n∸m≡n ϕsK≤t))
           (proj₂ (ϕ≤τ≤βϕs+t K i j (t ∸ (ϕ (suc K)))))
     -- Extract the fixed point
@@ -105,7 +98,7 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1
                accβ j = (rs (β (suc t) i j) (s≤s (causality t i j)))
               
                async∈DK : ∀ j → async-iter' 𝕤 x₀ (accβ j) j ∈ᵤ D K j
-               async∈DK j = τK≤t⇒xₜ'∈DK (accβ j) K j (φsK≤t⇒τK≤βt (≤-trans (ϕ≤τ (suc K) i) τ≤st))
+               async∈DK j = τK≤t⇒xₜ'∈DK (accβ j) K j (ϕsK≤t⇒τK≤βt (≤-trans (ϕ≤τ (suc K) i) τ≤st))
     τK≤t⇒xₜ'∈DK {suc t} (acc rs) zero    i τ≤st | yes i∈α with T ≟ 0
     ... | no  T≢0 = D-decreasing 0 (f-monotonic 0
         (λ j → async'ₜ∈D₀ (rs (β (suc t) i j) (s≤s (causality t i j))) j)) i

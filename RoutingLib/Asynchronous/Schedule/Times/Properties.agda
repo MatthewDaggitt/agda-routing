@@ -34,10 +34,6 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
   -----------------
   -- Finite --
   -----------------
- {- finite-inc : ∀ t i j → t ≤ proj₁ (finite t i j)
-  finite-inc t i j = {!!}
-  -- m≤m+n t (proj₁ (finite t i j))
--}
   finite-fin : ∀ {t} k i j (t' : Fin (suc t)) →
               proj₁ (finite (toℕ t') i j) ≤ k →
               β k i j ≢ toℕ t'

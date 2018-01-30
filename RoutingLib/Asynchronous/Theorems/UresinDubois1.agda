@@ -52,25 +52,35 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1
     open Times 𝕤
     open TimesProperties 𝕤
 
+{-
     φsK≤sk⇒τK≤βsK : ∀ k K i j → φ (suc K) ≤ suc k → τ K j ≤ β (suc k) i j
     φsK≤sk⇒τK≤βsK k K i j p = subst (τ K j ≤_)
           (cong (λ x → β x i j) (m+n∸m≡n p))
           (proj₂ (prop1-iii K i j (suc k ∸ (φ (suc K)))))
-          
+-}
+
+    φsK≤t⇒τK≤βt : ∀ {t K i j} → ϕ (suc K) ≤ t → τ K j ≤ β t i j
+    φsK≤t⇒τK≤βt {t} {K} {i} {j} ϕsK≤t = subst (τ K j ≤_)
+          (cong (λ x → β x i j) (m+n∸m≡n ϕsK≤t))
+          (proj₂ (ϕ≤τ≤βϕs+t K i j (t ∸ (ϕ (suc K)))))
     -- Extract the fixed point
+
+    T : 𝕋
+    T = proj₁ D-finish
+
     ξ : M
-    ξ = proj₁ D-finish
+    ξ = proj₁ (proj₂ D-finish)
 
-    D-T+K≡ξ : ∀ K → Singleton-t ξ (D (T + K))
-    D-T+K≡ξ = proj₂ D-finish
+    D-T+K≡ξ : ∀ K → isSingleton ξ (D (T + K))
+    D-T+K≡ξ = proj₂ (proj₂ D-finish)
 
 
-    async'ₖ∈D₀ : ∀ {k} (accₖ : Acc _<_ k) → async-iter' 𝕤 x₀ accₖ ∈ D 0
-    async'ₖ∈D₀ {zero} accₖ = x₀∈D₀
-    async'ₖ∈D₀ {suc k} (acc rs) i with i ∈? α (suc k)
+    async'ₜ∈D₀ : ∀ {t} (accₜ : Acc _<_ t) → async-iter' 𝕤 x₀ accₜ ∈ D 0
+    async'ₜ∈D₀ {zero}  _ = x₀∈D₀
+    async'ₜ∈D₀ {suc t} (acc rs) i with i ∈? α (suc t)
     ... | yes i∈α = D-decreasing 0 (f-monotonic 0 (λ j →
-          async'ₖ∈D₀ (rs (β (suc k) i j) (s≤s (causality k i j))) j)) i
-    ... | no  i∉α = async'ₖ∈D₀ (rs k (s≤s ≤-refl)) i
+          async'ₜ∈D₀ (rs (β (suc t) i j) (s≤s (causality t i j))) j)) i
+    ... | no  i∉α = async'ₜ∈D₀ (rs t (s≤s ≤-refl)) i
 
     -- Case lemmas
     
@@ -81,36 +91,33 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1
       0≡k = (≤-antisym z≤n (subst (K ≤_) (≤-antisym τ≤0 z≤n) (τ-inc K i)))
 
 
-    τK≤k⇒xₖ'∈DK : ∀ {k} (accₖ : Acc _<_ k) → ∀ K i → τ K i ≤ k → async-iter' 𝕤 x₀ accₖ i ∈ᵤ D K i
-    τK≤k⇒xₖ'∈DK {zero}  acc₀ K i τ≤0 = lemma₁ acc₀ K i τ≤0
-    τK≤k⇒xₖ'∈DK {suc k} (acc rs) K i τ≤sk with i ∈? α (suc k)
-    τK≤k⇒xₖ'∈DK {suc k} (acc rs) K i τ≤sk | no  i∉α with τ K i ≟ suc k
-    ...   | no  τ≢sk = τK≤k⇒xₖ'∈DK (rs k ≤-refl) K i (<⇒≤pred (≤+≢⇒< τ≤sk τ≢sk))
-    τK≤k⇒xₖ'∈DK {suc k} (acc rs) zero    i τ≤sk | no i∉α | yes τ≡sk =
-      async'ₖ∈D₀ (rs k (s≤s (≤-refl))) i
-      
-
-    τK≤k⇒xₖ'∈DK {suc k} (acc rs) (suc K) i τ≤sk | no i∉α | yes τ≡sk = contradiction (subst (i ∈ₛ_) (cong α τ≡sk) (nextActive-active (φ (suc K)) i)) i∉α
-    τK≤k⇒xₖ'∈DK {suc k} (acc rs) (suc K) i τ≤sk | yes i∈α = f-monotonic K async∈DK i
+    τK≤t⇒xₜ'∈DK : ∀ {t} (accₜ : Acc _<_ t) → ∀ K i → τ K i ≤ t → async-iter' 𝕤 x₀ accₜ i ∈ᵤ D K i
+    τK≤t⇒xₜ'∈DK {zero}  acc₀ K i τ≤0 = lemma₁ acc₀ K i τ≤0
+    τK≤t⇒xₜ'∈DK {suc t} (acc rs) K i τ≤st with i ∈? α (suc t)
+    ...  | no  i∉α with τ K i ≟ suc t
+    ...    | no  τ≢st = τK≤t⇒xₜ'∈DK (rs t ≤-refl) K i (<⇒≤pred (≤+≢⇒< τ≤st τ≢st))
+    τK≤t⇒xₜ'∈DK {suc t} (acc rs) zero i τ≤st | no i∉α | yes τ≡st =
+      async'ₜ∈D₀ (rs t (s≤s (≤-refl))) i
+    τK≤t⇒xₜ'∈DK {suc t} (acc rs) (suc K) i τ≤st | no i∉α | yes τ≡st = contradiction (subst (i ∈ₛ_) (cong α τ≡st) (nextActive-active (ϕ (suc K)) i)) i∉α
+    τK≤t⇒xₜ'∈DK {suc t} (acc rs) (suc K) i τ≤st | yes i∈α = f-monotonic K async∈DK i
                where
-               accβ : ∀ j → Acc _<_ (β (suc k) i j)
-               accβ j = (rs (β (suc k) i j) (s≤s (causality k i j)))
+               accβ : ∀ j → Acc _<_ (β (suc t) i j)
+               accβ j = (rs (β (suc t) i j) (s≤s (causality t i j)))
               
                async∈DK : ∀ j → async-iter' 𝕤 x₀ (accβ j) j ∈ᵤ D K j
-               async∈DK j = τK≤k⇒xₖ'∈DK (accβ j) K j (φsK≤sk⇒τK≤βsK k K i j (≤-trans (φ≤τ (suc K) i) τ≤sk))
-    τK≤k⇒xₖ'∈DK {suc k} (acc rs) zero    i τ≤sk | yes i∈α with T ≟ 0
+               async∈DK j = τK≤t⇒xₜ'∈DK (accβ j) K j (φsK≤t⇒τK≤βt (≤-trans (ϕ≤τ (suc K) i) τ≤st))
+    τK≤t⇒xₜ'∈DK {suc t} (acc rs) zero    i τ≤st | yes i∈α with T ≟ 0
     ... | no  T≢0 = D-decreasing 0 (f-monotonic 0
-        (λ j → async'ₖ∈D₀ (rs (β (suc k) i j) (s≤s (causality k i j))) j)) i
+        (λ j → async'ₜ∈D₀ (rs (β (suc t) i j) (s≤s (causality t i j))) j)) i
     ... | yes T≡0 = D-subst 0 {x = ξ}
           {y = f[newState]}
           (λ l → proj₂ (D-T+K≡ξ 1) f[newState] (subst (λ v → f[newState] ∈ D v) {x = 1} {y = T + 1}
           (≡sym (cong (_+ 1) T≡0))
-          (f-monotonic 0 λ j → async'ₖ∈D₀ (rs (β (suc k) i j) (s≤s (causality k i j))) j)) l)
+          (f-monotonic 0 λ j → async'ₜ∈D₀ (rs (β (suc t) i j) (s≤s (causality t i j))) j)) l)
           (subst (λ v → ξ ∈ D v) (cong (_+ 0) T≡0) (proj₁ (D-T+K≡ξ 0))) i
           where
-
-          accβ : ∀ j → Acc _<_ (β (suc k) i j)
-          accβ j = rs (β (suc k) i j) (s≤s (causality k i j))
+          accβ : ∀ j → Acc _<_ (β (suc t) i j)
+          accβ j = rs (β (suc t) i j) (s≤s (causality t i j))
           
           newState : M
           newState = (λ j → async-iter' 𝕤 x₀ (accβ j) j)
@@ -119,33 +126,30 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1
           f[newState] = f newState
 
  
-    τK≤k⇒xₖ∈DK : ∀ k K i → τ K i ≤ k → async-iter 𝕤 x₀ k i ∈ᵤ D K i
-    τK≤k⇒xₖ∈DK k K i τK≤k = τK≤k⇒xₖ'∈DK (<-well-founded k) K i τK≤k
+    τK≤t⇒xₜ∈DK : ∀ t K i → τ K i ≤ t → async-iter 𝕤 x₀ t i ∈ᵤ D K i
+    τK≤t⇒xₜ∈DK t K i τK≤k = τK≤t⇒xₜ'∈DK (<-well-founded t) K i τK≤k
 
     -- Theorem 1
 
     Tᶜ : 𝕋
-    Tᶜ = φ (suc T)
+    Tᶜ = ϕ (suc T)
 
     accTᶜ+K : ∀ K → Acc _<_ (Tᶜ + K)
-    accTᶜ+K K = <-well-founded (φ (suc T) + K)
+    accTᶜ+K K = <-well-founded (Tᶜ + K)
 
     τ≤Tᶜ+K : ∀ K j → τ (T + 0) j ≤ Tᶜ + K
     τ≤Tᶜ+K K j = begin 
-      τ (T + 0) j    ≡⟨ cong₂ τ (+-identityʳ T) refl ⟩
-      τ T j          ≤⟨ <⇒≤ (nextActiveφ<φs T j) ⟩
-      φ (suc T)      ≤⟨ m≤m+n (φ (suc T)) K ⟩
-      φ (suc T) + K  ∎
+      τ (T + 0) j ≡⟨ cong₂ τ (+-identityʳ T) refl ⟩
+      τ T j       ≤⟨ <⇒≤ (nextActiveϕ<ϕs T j) ⟩
+      Tᶜ          ≤⟨ m≤m+n Tᶜ K ⟩
+      Tᶜ + K      ∎
 
-    theorem1-proof : ∀ K → async-iter 𝕤 x₀ (Tᶜ + K) ≈ ξ
-    theorem1-proof K i = ≈ᵢ-sym (proj₂ (D-T+K≡ξ 0) (async-iter 𝕤 x₀ (Tᶜ + K)) async∈DT i)
-      where
-      async∈DT : async-iter 𝕤 x₀ (Tᶜ + K) ∈ D (T + 0)
-      async∈DT j = τK≤k⇒xₖ∈DK (Tᶜ + K) (T + 0) j (τ≤Tᶜ+K K j)
-      
-    theorem1 : ∃ λ K → ∀ K₁ → async-iter 𝕤 x₀ (K + K₁) ≈ ξ
-    theorem1 = Tᶜ , theorem1-proof
+    async∈DT : ∀ K → async-iter 𝕤 x₀ (Tᶜ + K) ∈ D (T + 0)
+    async∈DT K j = τK≤t⇒xₜ∈DK (Tᶜ + K) (T + 0) j (τ≤Tᶜ+K K j)
 
+    async-converge : ∃ λ T → ∀ K → async-iter 𝕤 x₀ (T + K) ≈ ξ
+    async-converge = Tᶜ ,
+      (λ K → ≈-sym (proj₂ (D-T+K≡ξ 0) (async-iter 𝕤 x₀ (Tᶜ + K)) (async∈DT K)))
 
 
   module _ {p} (totalACO : TotalACO 𝕡 p) where
@@ -154,6 +158,6 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1
     
     isAsynchronouslySafe : IsAsynchronouslySafe 𝕡
     isAsynchronouslySafe = record
-      { m*         = proj₁ D-finish
-      ; m*-reached = λ 𝕤 X → theorem1 aco 𝕤 (total X)
+      { m*         = proj₁ (proj₂ D-finish)
+      ; m*-reached = λ 𝕤 X → async-converge aco 𝕤 (total X)
       }

@@ -38,8 +38,8 @@ module RoutingLib.Asynchronous.Schedule.Synchronous where
     suc (t + suc k) ≡⟨ cong suc (+-suc t k) ⟩
     suc (suc (t + k)) ∎
 
-  finite : {n : ℕ} → ∀ t (i j : Fin n)→ ∃ λ k → ∀ k₁ → β (t + k + k₁) i j ≢ t
-  finite {n} t i j = 2 , λ k → subst (_≢ t)
+  finite : {n : ℕ} → ∀ t (i j : Fin n)→ ∃ λ k → ∀ l → β (k + l) i j ≢ t
+  finite {n} t i j = t + 2 , λ k → subst (_≢ t)
          (sym (cong (λ x → β x i j) (t+2+k≡ss-t+k t k)))
          ((m≢1+m+n t) ∘ sym)
 

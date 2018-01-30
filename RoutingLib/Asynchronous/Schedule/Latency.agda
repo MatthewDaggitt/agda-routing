@@ -20,8 +20,8 @@ module RoutingLib.Asynchronous.Schedule.Latency (l : ℕ) where
   causality : {n : ℕ} → ∀ t (i j : Fin n) → β (suc t) i j ≤ t
   causality t i j = n∸m≤n l t
 
-  finite : {n : ℕ} → ∀ t (i j : Fin n) → ∃ λ k → ∀ k₁ → β (t + k + k₁) i j ≢ t
-  finite t i j = suc (suc l) , λ k → subst (_≢ t)
+  finite : {n : ℕ} → ∀ t (i j : Fin n) → ∃ λ k → ∀ k' → β (k + k') i j ≢ t
+  finite t i j = t + suc (suc l) , λ k → subst (_≢ t)
            (sym (trans
              (cong (λ x → β x i j)
              (begin

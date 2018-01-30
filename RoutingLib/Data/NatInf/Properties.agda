@@ -1,7 +1,8 @@
 open import Data.Nat using (zero; suc) renaming (_+_ to _+ℕ_; _≤_ to _≤ℕ_; z≤n to z≤ℕn; s≤s to s≤ℕs; _≤′_ to _≤'ℕ_; ≤′-refl to ≤'ℕ-refl; ≤′-step to ≤'ℕ-step)
-open import Data.Nat.Properties using (+-suc; n≤1+n; <⇒≢) renaming (+-identityʳ to +-idʳℕ; +-comm to +-commℕ) renaming (⊓-sel to ⊓ℕ-sel; m⊓n≤n to m⊓n≤ℕn; m⊓n≤m to m⊓n≤ℕm)
+open import Data.Nat.Properties using (+-suc; n≤1+n; <⇒≢) renaming (+-identityʳ to +-idʳℕ; +-comm to +-commℕ; +-mono-≤ to +ℕ-mono-≤ℕ) renaming (⊓-sel to ⊓ℕ-sel; m⊓n≤n to m⊓n≤ℕn; m⊓n≤m to m⊓n≤ℕm)
 open import Data.Product using (∃; _,_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Function using (_∘_)
 open import Level using () renaming (zero to lzero)
 open import Relation.Binary using (_⇒_; Reflexive; Antisymmetric; Transitive; _Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; subst; sym; cong; _≢_; setoid)
@@ -39,6 +40,13 @@ module RoutingLib.Data.NatInf.Properties where
   ≡-suc (suc x) zero ()
   ≡-suc (suc x) (suc .x) refl = cong N (cong suc refl)
 
+  ≡ℕ⇒≡ : ∀ {m n} → m ≡ n → N m ≡ N n
+  ≡ℕ⇒≡ refl = refl
+
+  ≢⇒extractℕ≢ : ∀ {m n} → m ≢ ∞ → n ≢ ∞ → m ≢ n → extractℕ m ≢ extractℕ n
+  ≢⇒extractℕ≢ m≢∞ n≢∞ m≢n with ≢∞⇒≡N m≢∞ | ≢∞⇒≡N n≢∞
+  ... | m₁ , p | n₁ , q rewrite p | q = ≢⇒≢ℕ m≢n
+
   -- Properties of ≤
   ≤-reflexive : _≡_ ⇒ _≤_
   ≤-reflexive {∞} refl = n≤∞
@@ -59,6 +67,10 @@ module RoutingLib.Data.NatInf.Properties where
   ≤-trans (s≤s m≤n) (s≤s n≤o) = s≤s (≤-trans m≤n n≤o)
   ≤-trans _ n≤∞ = n≤∞
 
+  ≤-step : ∀ {m n} → m ≤ N n → m ≤ (N 1) + (N n)
+  ≤-step z≤n = z≤n
+  ≤-step (s≤s m≤n) = s≤s (≤-step m≤n)
+
   ∞≰ : ∀ {m} → ∞ ≰ N m
   ∞≰ ()
 
@@ -72,6 +84,10 @@ module RoutingLib.Data.NatInf.Properties where
 
   n≤0⇒n≡0 : ∀ n → n ≤ N 0 → n ≡ N 0
   n≤0⇒n≡0 n n≤0 = ≤-antisym n≤0 z≤n
+
+  ≤⇒extractℕ≤ : ∀ {m n} → m ≢ ∞ → n ≢ ∞ → m ≤ n → extractℕ m ≤ℕ extractℕ n
+  ≤⇒extractℕ≤ m≢∞ n≢∞ m≤n with ≢∞⇒≡N m≢∞ | ≢∞⇒≡N n≢∞
+  ... | m₁ , p | n₁ , q rewrite p | q = ≤⇒≤ℕ m≤n
 
   -- Properties of <
   <⇒≤ : ∀ {m n} → m < n → m ≤ n
@@ -182,6 +198,13 @@ module RoutingLib.Data.NatInf.Properties where
   +-mono-≤ (s≤s m≤n) (s≤s o≤p) = s≤s (+-mono-≤ m≤n (s≤s o≤p))
   +-mono-≤ (s≤s m≤n) n≤∞ = n≤∞
   +-mono-≤ {n} {_} {o} n≤∞ o≤p = subst (n + o ≤_) (sym refl) n≤∞
+
+  m<o×n<o⇒m+n<o+o : ∀ {m n o} → m < N o → n < N o → (m + n) < N (o +ℕ o)
+  m<o×n<o⇒m+n<o+o {∞} {∞} {o} () n<o
+  m<o×n<o⇒m+n<o+o {∞} {N x} {o} () n<o
+  m<o×n<o⇒m+n<o+o {N m} {∞} {.(suc _)} (s≤s m<o) ()
+  m<o×n<o⇒m+n<o+o {N m} {N n} {(suc o)} (s≤s m<o) (s≤s n<o) = ≤ℕ⇒≤ (s≤ℕs
+                  (+ℕ-mono-≤ℕ {m} {o} {n} {suc o} (≤⇒≤ℕ m<o) (≤⇒≤ℕ (≤-step n<o))))
 
   +-mono : ∀ {a b c d} → a ≡ c → b ≡ d → a + b ≡ c + d
   +-mono refl refl = refl

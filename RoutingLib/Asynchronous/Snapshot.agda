@@ -10,18 +10,19 @@ open import Relation.Nullary using (yes; no)
 open import RoutingLib.Asynchronous
 open import RoutingLib.Asynchronous.Schedule using (Schedule; 𝕋; 𝔹; Dynamic)
 open import RoutingLib.Asynchronous.Schedule.Times using (expiryᵢⱼ)
+open import RoutingLib.Data.Table using (Table)
 
-module RoutingLib.Asynchronous.Snapshot {a ℓ n} {S : Setoid a ℓ} (p : Parallelisation S n) where
-  
+module RoutingLib.Asynchronous.Snapshot {a ℓ n} {S : Table (Setoid a ℓ) n} (p : Parallelisation S) where
+{-  
     open Schedule
     open Parallelisation p
 
     -- Snapshot
     Snapshot : 𝔹 n → ℕ → Set a
-    Snapshot β t = ∀ {t'} i j → t ≤ t' → β t' i j ≤ t → Mᵢ
+    Snapshot β t = ∀ {t'} i j → t ≤ t' → β t' i j ≤ t → Mᵢ i
 
     snapshot : ∀ 𝕤 t → M → Snapshot (β 𝕤) t
-    snapshot 𝕤 t X {t'} i j _ _ = δ 𝕤 (β 𝕤 t' i j) X j
+    snapshot 𝕤 t X {t'} i j _ _ = async-iter 𝕤 ? ? ?
 
 
 
@@ -54,3 +55,4 @@ module RoutingLib.Asynchronous.Snapshot {a ℓ n} {S : Setoid a ℓ} (p : Parall
 
 
     
+-}

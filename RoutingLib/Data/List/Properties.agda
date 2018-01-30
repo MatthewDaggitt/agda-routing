@@ -1,5 +1,5 @@
 open import Data.Nat using (zero; suc; z≤n; s≤s; _≤_; _<_; _⊔_; _+_)
-open import Data.Nat.Properties using (≤-step; ≤-antisym; ⊓-sel; ⊔-sel; m≤m⊔n; ⊔-mono-≤; +-suc; ⊔-identityʳ; n≤m⊔n; ⊓-mono-≤; ≤-refl; ≤-trans; <-transʳ; <-transˡ; m⊓n≤n; <⇒≢; ≤+≢⇒<)
+open import Data.Nat.Properties using (≤-step; ≤-antisym; ⊓-sel; ⊔-sel; m≤m⊔n; ⊔-mono-≤; +-suc; ⊔-identityʳ; n≤m⊔n; ⊓-mono-≤; ≤-refl; ≤-trans; <-transʳ; <-transˡ; m⊓n≤n; <⇒≢; ≤+≢⇒<; suc-injective)
 open import Data.List
 open import Data.List.All using (All; []; _∷_)
 open import Data.List.Any using (Any; here; there)
@@ -38,6 +38,7 @@ module RoutingLib.Data.List.Properties where
     ... | no  ¬px = contradiction px ¬px
     ... | yes _   = cong (x ∷_) (dfilter[xs]≡xs pxs)
 
+
     -- stdlib
     dfilter[xs]≡[] : ∀ {xs} → All (∁ P) xs → dfilter P? xs ≡ []
     dfilter[xs]≡[] {[]} [] = refl
@@ -60,6 +61,13 @@ module RoutingLib.Data.List.Properties where
     |dfilter[xs]|<|xs| (x ∷ xs) (there any) with P? x
     ... | no  _ = ≤-step (|dfilter[xs]|<|xs| xs any)
     ... | yes _ = s≤s (|dfilter[xs]|<|xs| xs any)
+
+    |dfilter[xs]|≡|xs|⇒dfilter[xs]≡xs : ∀ {xs} → length (dfilter P? xs) ≡ length xs →
+                                          dfilter P? xs ≡ xs
+    |dfilter[xs]|≡|xs|⇒dfilter[xs]≡xs {[]} length≡ = refl
+    |dfilter[xs]|≡|xs|⇒dfilter[xs]≡xs {x ∷ xs} length≡ with P? x
+    ... | no ¬px = contradiction length≡ (<⇒≢ (s≤s (|dfilter[xs]|≤|xs| xs)))
+    ... | yes px = cong (x ∷_) (|dfilter[xs]|≡|xs|⇒dfilter[xs]≡xs {xs} (suc-injective length≡))
 
 
     dfilter-length₂ : ∀ xs → length (dfilter (P?⇒¬P? P?) xs) + length (dfilter P? xs) ≡ length xs
@@ -157,7 +165,7 @@ module RoutingLib.Data.List.Properties where
   lookup∈xs (x ∷ xs) (fsuc i) = there (lookup∈xs xs i)
 
   -- Properties of min
-  
+
   min[xs]≤x : ∀ {x xs} ⊤ → Any (_≤ x) xs → min ⊤ xs ≤ x
   min[xs]≤x = foldr-⊎pres n≤m⊎o≤m⇒n⊓o≤m
 

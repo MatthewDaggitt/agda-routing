@@ -34,16 +34,13 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
   -----------------
   -- Finite --
   -----------------
-  finite-inc : ∀ t i j → t ≤ t + proj₁ (finite t i j)
-  finite-inc t i j = m≤m+n t (proj₁ (finite t i j))
-
   finite-fin : ∀ {t} k i j (t' : Fin (suc t)) →
-              (toℕ t') + proj₁ (finite (toℕ t') i j) ≤ k →
+              proj₁ (finite (toℕ t') i j) ≤ k →
               β k i j ≢ toℕ t'
   finite-fin {t} k i j t' p  with finite (toℕ t') i j
   ... | (m , q) = subst (_≢ toℕ t')
-        (cong (λ x → β x i j) (m+n∸m≡n p))
-        (q (k ∸ (toℕ t' + m)))
+    (cong (λ x → β x i j) (m+n∸m≡n p))
+    (q (k ∸ m)) 
 
   -----------------
   -- Activations --
@@ -72,37 +69,33 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
   ---------------
   -- Properties of expiryᵢⱼ
   expiryᵢⱼ-inc : ∀ t i j → t ≤ expiryᵢⱼ t i j
-  expiryᵢⱼ-inc t i j = ⊥≤max[t] {suc t} t ((λ x → (toℕ x) + proj₁ (finite (toℕ x) i j)))
+  expiryᵢⱼ-inc t i j = ⊥≤max[t] {suc t} t ((λ x → proj₁ (finite (toℕ x) i j)))
 
   expiryᵢⱼ-monotone : ∀ {t k} → t ≤ k → ∀ i j → expiryᵢⱼ t i j ≤ expiryᵢⱼ k i j
   expiryᵢⱼ-monotone {t} {k} t≤k i j = max[s]≤max[t] t {k} {suc t} {suc k}
-                    {(λ x → (toℕ x) + proj₁ (finite (toℕ x) i j))}
-                    {(λ x → (toℕ x) + proj₁ (finite (toℕ x) i j))}
+                    {(λ x → proj₁ (finite (toℕ x) i j))}
+                    {(λ x → proj₁ (finite (toℕ x) i j))}
                     (inj₁ t≤k) λ x → inj₂ (inject≤ x (s≤s t≤k) , ≤-reflexive (inject-x x))
                     where
-                    inject-x : ∀ x → toℕ x + proj₁ (finite (toℕ x) i j) ≡
-                               toℕ (inject≤ x (s≤s t≤k)) +
+                    inject-x : ∀ x → proj₁ (finite (toℕ x) i j) ≡
                                proj₁ (finite (toℕ (inject≤ x (s≤s t≤k))) i j)
-                    inject-x x = trans
-                      (cong (_+ proj₁ (finite (toℕ x) i j)) (sym (inject≤-lemma x (s≤s t≤k))))
-                      (cong (toℕ (inject≤ x (s≤s t≤k)) +_) (cong (λ y → proj₁ (finite y i j))
-                          (sym (inject≤-lemma x (s≤s t≤k)))))
+                    inject-x x = cong (λ y → proj₁ (finite y i j))
+                      (sym (inject≤-lemma x (s≤s t≤k)))
 
 
-  expiryᵢⱼt≤k⇒t≤βk : ∀ t k i j → expiryᵢⱼ t i j ≤ k → t ≤ β k i j
-  expiryᵢⱼt≤k⇒t≤βk t k i j expiryᵢⱼt≤k = <⇒≤ (∀x≤m:n≢x⇒m<n t (β k i j)
+  expiryᵢⱼt≤k⇒t≤βk : ∀ {t k i j} → expiryᵢⱼ t i j ≤ k → t ≤ β k i j
+  expiryᵢⱼt≤k⇒t≤βk {t} {k} {i} {j} expiryᵢⱼt≤k = <⇒≤ (∀x≤m:n≢x⇒m<n t (β k i j)
                    (λ {x} x≤t → subst (β k i j ≢_) (x'≡x x x≤t) (β≢t' (x' x x≤t))))
                    where
                    x' : ∀ x x≤t → Fin (suc t)
                    x' x x≤t = inject≤ (fromℕ x) (s≤s x≤t)
                    x'≡x : ∀ x x≤t → toℕ (x' x x≤t) ≡ x
                    x'≡x x x≤t = trans (inject≤-lemma (fromℕ x) (s≤s x≤t)) (to-from x)
-                   t'≤expiry : ∀ (t' : Fin (suc t)) →
-                               toℕ t' + proj₁ (finite (toℕ t') i j) ≤ expiryᵢⱼ t i j
-                   t'≤expiry t' = t≤max[t] {suc t} t
-                               ((λ x → (toℕ x) + proj₁ (finite (toℕ x) i j))) t'
+                   finite[t']≤expiry : ∀ (t' : Fin (suc t)) →
+                               proj₁ (finite (toℕ t') i j) ≤ expiryᵢⱼ t i j
+                   finite[t']≤expiry t' = t≤max[t] t (λ x → proj₁ (finite (toℕ x) i j)) t'
                    β≢t' : ∀ (t' : Fin (suc t)) → β k i j ≢ toℕ t'
-                   β≢t' t' = finite-fin k i j t' (≤-trans (t'≤expiry t') expiryᵢⱼt≤k)
+                   β≢t' t' = finite-fin k i j t' (≤-trans (finite[t']≤expiry t') expiryᵢⱼt≤k)
 
   -- Properties of expiryᵢ
   expiryᵢⱼ≤expiryᵢ : ∀ t i j → expiryᵢⱼ t i j ≤ expiryᵢ t i
@@ -115,8 +108,8 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
   expiryᵢ-monotone {t} {k} t≤k i = max[s]≤max[t] t (inj₁ t≤k)
                    (λ j → inj₂ (j , expiryᵢⱼ-monotone t≤k i j))
 
-  expiryᵢt≤k⇒t≤βk : ∀ t k i j → expiryᵢ t i ≤ k → t ≤ β k i j
-  expiryᵢt≤k⇒t≤βk t k i j expiryᵢt≤k = expiryᵢⱼt≤k⇒t≤βk t k i j
+  expiryᵢt≤k⇒t≤βk : ∀ {t k i} → expiryᵢ t i ≤ k → ∀ j → t ≤ β k i j
+  expiryᵢt≤k⇒t≤βk {t} {k} {i} expiryᵢt≤k j = expiryᵢⱼt≤k⇒t≤βk
                   (≤-trans (expiryᵢⱼ≤expiryᵢ t i j) expiryᵢt≤k)
 
   -- Properties of expiry
@@ -126,9 +119,9 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
   expiry-inc : ∀ t → t ≤ expiry t
   expiry-inc t = ⊥≤max[t] t (expiryᵢ t)
 
-  expiryₜ≤k⇒t≤βk : ∀ t k i j → expiry t ≤ k → t ≤ β k i j
-  expiryₜ≤k⇒t≤βk t k i j expiryₜ≤k = expiryᵢt≤k⇒t≤βk t k i j
-                 (≤-trans (expiryᵢ≤expiry t i) expiryₜ≤k)
+  expiryₜ≤k⇒t≤βk : ∀ {t k} → expiry t ≤ k → ∀ i j → t ≤ β k i j
+  expiryₜ≤k⇒t≤βk {t} {k} expiryₜ≤k i j = expiryᵢt≤k⇒t≤βk
+    (≤-trans (expiryᵢ≤expiry t i) expiryₜ≤k) j
 
   expiry-monotone : ∀ {t k} → t ≤ k → expiry t ≤ expiry k
   expiry-monotone {t} {k} t≤k = max[s]≤max[t] t {k} (inj₁ t≤k) (λ i → inj₂ (i , expiryᵢ-monotone t≤k i))
@@ -139,57 +132,63 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
 
   open ≤-Reasoning
   
-  -- Properties of φ
-  φ≤expiry-nextActive-φ : ∀ t i → φ t ≤ expiry (nextActive (φ t) i )
-  φ≤expiry-nextActive-φ t i = begin
-    φ t                         ≤⟨ nextActive-inc (φ t) i ⟩
-    nextActive (φ t) i          ≤⟨ expiry-inc (nextActive (φ t) i) ⟩
-    expiry (nextActive (φ t) i) ∎
+  -- Properties of ϕ
+  ϕ≤expiry-nextActive-ϕ : ∀ K i → ϕ K ≤ expiry (nextActive (ϕ K) i )
+  ϕ≤expiry-nextActive-ϕ K i = begin
+    ϕ K                         ≤⟨ nextActive-inc (ϕ K) i ⟩
+    nextActive (ϕ K) i          ≤⟨ expiry-inc (nextActive (ϕ K) i) ⟩
+    expiry (nextActive (ϕ K) i) ∎
    
 
   
-  φ<φs : ∀ t → φ t < φ (suc t)
-  φ<φs t = s≤s (begin
-       φ t                                   ≤⟨ ⊥≤max[t] (φ t) (nextActive (φ t)) ⟩ 
-       max (φ t) (nextActive (φ t))          ≤⟨ expiry-inc (max (φ t) (nextActive (φ t))) ⟩
-       expiry (max (φ t) (nextActive (φ t))) ∎)
+  ϕ<ϕs : ∀ K → ϕ K < ϕ (suc K)
+  ϕ<ϕs K = s≤s (begin
+       ϕ K                                   ≤⟨ ⊥≤max[t] (ϕ K) (nextActive (ϕ K)) ⟩ 
+       max (ϕ K) (nextActive (ϕ K))          ≤⟨ expiry-inc (max (ϕ K) (nextActive (ϕ K))) ⟩
+       expiry (max (ϕ K) (nextActive (ϕ K))) ∎)
        
-  φ-inc : ∀ t → t ≤ φ t
-  φ-inc zero = z≤n
-  φ-inc (suc t) = s≤s (begin
-        t                                     ≤⟨ φ-inc t ⟩
-        φ t                                   ≤⟨ ⊥≤max[t] (φ t) (nextActive (φ t)) ⟩
-        max (φ t) (nextActive (φ t))          ≤⟨ expiry-inc (max (φ t) (nextActive (φ t))) ⟩
-        expiry (max (φ t) (nextActive (φ t))) ∎)
+  ϕ-inc : ∀ K → K ≤ ϕ K
+  ϕ-inc zero = z≤n
+  ϕ-inc (suc K) = s≤s (begin
+        K                                     ≤⟨ ϕ-inc K ⟩
+        ϕ K                                   ≤⟨ ⊥≤max[t] (ϕ K) (nextActive (ϕ K)) ⟩
+        max (ϕ K) (nextActive (ϕ K))          ≤⟨ expiry-inc (max (ϕ K) (nextActive (ϕ K))) ⟩
+        expiry (max (ϕ K) (nextActive (ϕ K))) ∎)
 
-  nextActiveφ<φs : ∀ t i → nextActive (φ t) i < φ (suc t)
-  nextActiveφ<φs t i = s≤s (begin
-      nextActive (φ t) i              ≤⟨ t≤max[t] (φ t) (nextActive (φ t)) i ⟩
-      max (φ t) (nextActive (φ t))          ≤⟨ expiry-inc (max (φ t) (nextActive (φ t))) ⟩
-      expiry (max (φ t) (nextActive (φ t))) ∎
+  nextActiveϕ<ϕs : ∀ K i → nextActive (ϕ K) i < ϕ (suc K)
+  nextActiveϕ<ϕs K i = s≤s (begin
+      nextActive (ϕ K) i                    ≤⟨ t≤max[t] (ϕ K) (nextActive (ϕ K)) i ⟩
+      max (ϕ K) (nextActive (ϕ K))          ≤⟨ expiry-inc (max (ϕ K) (nextActive (ϕ K))) ⟩
+      expiry (max (ϕ K) (nextActive (ϕ K))) ∎
       )
 
   -- Propeties of τ
-  φ≤τ : ∀ t i → φ t ≤ τ t i
-  φ≤τ zero    i = z≤n
-  φ≤τ (suc t) i = nextActive-inc (φ (suc t)) i
+  ϕ≤τ : ∀ K i → ϕ K ≤ τ K i
+  ϕ≤τ zero     i = z≤n
+  ϕ≤τ (suc K)  i = nextActive-inc (ϕ (suc K)) i
   
-  τ-inc : ∀ t i → t ≤ τ t i
-  τ-inc zero    i = z≤n
-  τ-inc (suc t) i = ≤-trans (φ-inc (suc t)) (nextActive-inc (φ (suc t)) i)
+  τ-inc : ∀ K i → K ≤ τ K i
+  τ-inc zero     i = z≤n
+  τ-inc (suc K)  i = ≤-trans (ϕ-inc (suc K)) (nextActive-inc (ϕ (suc K)) i)
 
-  prop1-i : φ zero ≡ zero
-  prop1-i = refl
+  ϕ₀≡0 : ϕ zero ≡ zero
+  ϕ₀≡0 = refl
 
-  prop1-ii : ∀ t i → ∃ λ k → (i ∈ α k) × (φ t ≤ k) × (k < φ (suc t))
-  prop1-ii t i = nextActive (φ t) i ,
-                 nextActive-active (φ t) i ,
-                 nextActive-inc (φ t) i ,
-                 nextActiveφ<φs t i
+  active-in-ϕ : ∀ K i → ∃ λ t → (i ∈ α t) × (ϕ K ≤ t) × (t < ϕ (suc K))
+  active-in-ϕ K i =  nextActive         (ϕ K)  i ,
+                     nextActive-active  (ϕ K)  i ,
+                     nextActive-inc     (ϕ K)  i ,
+                     nextActiveϕ<ϕs     K      i
 
-  prop1-iii : ∀ t i j k  → (φ t ≤ τ t j) × (τ t j ≤ β (φ (suc t) + k) i j)
-  prop1-iii t i j k = φ≤τ t j , expiryₜ≤k⇒t≤βk (nextActive (φ t) j) (φ (suc t) + k) i j (begin
-            expiry (nextActive (φ t) j) ≤⟨ expiry-monotone (t≤max[t] (φ t) (nextActive (φ t)) j) ⟩
-            expiry (max (φ t) (nextActive (φ t))) ≤⟨ n≤1+n (expiry (max (φ t) (nextActive (φ t)))) ⟩
-            φ (suc t) ≤⟨ m≤m+n (φ (suc t)) k ⟩
-            φ (suc t) + k ∎)
+  ϕ≤τ≤βϕs+t : ∀ K i j t  → (ϕ K ≤ τ K j) × (τ K j ≤ β (ϕ (suc K) + t) i j)
+  ϕ≤τ≤βϕs+t K i j t = ϕ≤τ K j , expiryₜ≤k⇒t≤βk expiry-nextϕⱼ≤ϕₛ+t i j
+    where
+    nextϕ : Fin n → 𝕋
+    nextϕ = nextActive (ϕ K)
+
+    expiry-nextϕⱼ≤ϕₛ+t : expiry (nextϕ j) ≤ ϕ (suc K) + t
+    expiry-nextϕⱼ≤ϕₛ+t = begin
+      expiry (nextϕ j)          ≤⟨ expiry-monotone (t≤max[t] (ϕ K) nextϕ j) ⟩
+      expiry (max (ϕ K) nextϕ)  ≤⟨ n≤1+n (expiry (max (ϕ K) nextϕ)) ⟩
+      ϕ (suc K)                 ≤⟨ m≤m+n (ϕ (suc K)) t ⟩
+      ϕ (suc K) + t             ∎

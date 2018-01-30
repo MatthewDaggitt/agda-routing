@@ -1,4 +1,4 @@
-open import Data.Nat using (suc; zero; _+_; _≤_)
+open import Data.Nat using (suc; zero; _+_)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Subset using (⊤; _∈_)
@@ -28,8 +28,7 @@ module RoutingLib.Routing.BellmanFord.Properties
   open RoutingProblem 𝓡𝓟
   open BellmanFord 𝓡𝓟
 
-  open import RoutingLib.Algebra.Selectivity.NaturalOrders S _⊕_ ⊕-cong using (_≤ᵣ_)
-  open import Algebra.FunctionProperties _≈_ using (RightIdentity; RightZero; Idempotent; Commutative; Associative; Selective; LeftZero)
+  open import Algebra.FunctionProperties _≈_
   
   abstract
 
@@ -58,18 +57,20 @@ module RoutingLib.Routing.BellmanFord.Properties
     ----------------------------
 
     -- σ either extends the route by going through some k or it chooses a trivial route from the identity matrix
-    σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ : Selective _⊕_ → ∀ X i j → (∃ λ k → σ X i j ≈ A i k ▷ X k j) ⊎ (σ X i j ≈ I i j)
+    σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ : Selective _⊕_ → ∀ X i j →
+                       (∃ λ k → σ X i j ≈ A i k ▷ X k j) ⊎ (σ X i j ≈ I i j)
     σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ ⊕-sel X i j with foldr-∈ S ⊕-sel (I i j) (tabulate (λ k → A i k ▷ X k j))
     ... | inj₁ σXᵢⱼ≈Iᵢⱼ  = inj₂ σXᵢⱼ≈Iᵢⱼ
     ... | inj₂ σXᵢⱼ∈extₖ = inj₁ (∈-tabulate⁻ S σXᵢⱼ∈extₖ)
 
     -- Under the following assumptions about ⊕, A▷ₘ always chooses the "best" option with respect to ⊕
-    σXᵢⱼ≤Aᵢₖ▷Xₖⱼ : Idempotent _⊕_ → Associative _⊕_ → Commutative _⊕_ → ∀ X i j k → σ X i j ≤ᵣ A i k ▷ X k j
+    σXᵢⱼ≤Aᵢₖ▷Xₖⱼ : Idempotent _⊕_ → Associative _⊕_ → Commutative _⊕_ →
+                   ∀ X i j k → σ X i j ≤₊ A i k ▷ X k j
     σXᵢⱼ≤Aᵢₖ▷Xₖⱼ ⊕-idem ⊕-assoc ⊕-comm X i j k = foldr≤ᵣxs S ⊕-cong ⊕-idem ⊕-assoc ⊕-comm (I i j) (∈-tabulate⁺ S (λ k → A i k ▷ X k j) k)
 
     -- After an iteration, the diagonal of the RMatrix is always the identity
     σXᵢᵢ≈Iᵢᵢ : Selective _⊕_ → Associative _⊕_ → Commutative _⊕_ →
-             RightZero 1# _⊕_ → ∀ X i → σ X i i ≈ I i i
+               RightZero 1# _⊕_ → ∀ X i → σ X i i ≈ I i i
     σXᵢᵢ≈Iᵢᵢ ⊕-sel ⊕-assoc ⊕-comm 1#-anᵣ-⊕ X i with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ ⊕-sel X i i
     ... | inj₂ σXᵢᵢ≈Iᵢᵢ           = σXᵢᵢ≈Iᵢᵢ
     ... | inj₁ (k , σXᵢᵢ≈AᵢₖXₖⱼ) =

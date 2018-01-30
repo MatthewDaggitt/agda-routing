@@ -12,7 +12,7 @@ module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {S : Table (Setoid a ℓ)
 
   open Parallelisation P
   open import RoutingLib.Function.Distance using (IsUltrametric)
-  open import RoutingLib.Function.Distance M-setoid using (_StrContrOver_; Bounded)
+  open import RoutingLib.Function.Distance M-setoid using (_StrContrOver_; _ContrOver_; Bounded)
   
   record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
     field
@@ -39,10 +39,10 @@ module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {S : Table (Setoid a ℓ)
     d m n = max 0 (λ i → dᵢ {i} (m i) (n i))
 
     field
-      dᵢ-isUltrametric  : ∀ {i} → IsUltrametric (S i) dᵢ
-      f-strContrOver-d  : f StrContrOver d
-      d-bounded         : Bounded d
+      dᵢ-isUltrametric   : ∀ {i} → IsUltrametric (S i) dᵢ
+      f-strContr         : f StrContrOver d
+      d-bounded          : Bounded d
       
-      element           : M
-      f-cong            : ∀ {x y} → x ≈ y → f x ≈ f y
-      _≟_               : Decidable _≈_
+      element            : M
+      f-cong             : ∀ {x y} → x ≈ y → f x ≈ f y
+      _≟_                : Decidable _≈_

@@ -32,7 +32,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions  where
       ⊕-assoc     : Associative _⊕_
       ⊕-sel       : Selective   _⊕_
       ⊕-comm      : Commutative _⊕_
-      ⊕-strictlyAbsorbs-▷ : ∀ s {r} → r ≉ 0# → ((s ▷ r) ⊕ r ≈ r) × (r ≉ s ▷ r)
+      ⊕-strictlyAbsorbs-▷ : ∀ f {x} → x ≉ 0# → x <₊ f ▷ x
 
       -- Element properties
       1#-anᵣ-⊕ : RightZero 1# _⊕_

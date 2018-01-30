@@ -18,6 +18,7 @@ open import RoutingLib.Data.Matrix using (SquareMatrix; Matrix)
 open import RoutingLib.Data.Table using (Table)
 open import RoutingLib.Data.Graph.SimplePath2 using (SimplePath; valid; invalid; []; _∷_; _∷_∣_∣_) renaming (_≈_ to _≈ₚ_)
 open import RoutingLib.Data.Graph.SimplePath.Properties using (p≈q⇒p₀≡q₀)
+import RoutingLib.Algebra.Selectivity.RightNaturalOrder as RightNaturalOrder
 
 module RoutingLib.Routing.Definitions where
 
@@ -52,16 +53,17 @@ module RoutingLib.Routing.Definitions where
     x ≉ y = ¬ (x ≈ y)
 
     open IsDecEquivalence ≈-isDecEquivalence renaming
-      ( refl      to ≈-refl
-      ; reflexive to ≈-reflexive
-      ; sym       to ≈-sym
-      ; trans     to ≈-trans
+      ( refl          to ≈-refl
+      ; reflexive     to ≈-reflexive
+      ; sym           to ≈-sym
+      ; trans         to ≈-trans
+      ; isEquivalence to ≈-isEquivalence
       ) public
 
     S : Setoid b ℓ
     S = record 
       { _≈_           = _≈_
-      ; isEquivalence = isEquivalence
+      ; isEquivalence = ≈-isEquivalence
       }
 
     DS : DecSetoid b ℓ
@@ -70,14 +72,24 @@ module RoutingLib.Routing.Definitions where
       ; _≈_ = _≈_ 
       ; isDecEquivalence = ≈-isDecEquivalence 
       }    
-
+    
+    open RightNaturalOrder _≈_ _⊕_ using () renaming
+      ( _≤_ to _≤₊_
+      ; _≰_ to _≰₊_
+      ; _<_ to _<₊_
+      )
+      public
+    
+  
   ---------------------
   -- Routing problem --
   ---------------------
   -- An instantiation of a specific routing problem for a routing algebra
   -- In particular we need an adjacency matrix (representing the topology)
 
-  record RoutingProblem {a b ℓ} (𝓡𝓐 : RoutingAlgebra a b ℓ) (n : ℕ) : Set (lsuc (a ⊔ b ⊔ ℓ)) where
+  record RoutingProblem
+    {a b ℓ} (𝓡𝓐 : RoutingAlgebra a b ℓ) (n : ℕ)
+    : Set (lsuc (a ⊔ b ⊔ ℓ)) where
     no-eta-equality -- Needed due to bug #2732 in Agda
     
     field

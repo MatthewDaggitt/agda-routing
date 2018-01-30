@@ -107,6 +107,8 @@ module RoutingLib.Data.Table.Properties where
   max[t]≤x : ∀ {n} {t : Table ℕ n} {x ⊥} → All (_≤ x) t → ⊥ ≤ x → max ⊥ t ≤ x
   max[t]≤x {x = x} xs≤x ⊥≤x = foldr-×pres (_≤ x) n≤m×o≤m⇒n⊔o≤m ⊥≤x xs≤x
 
+  postulate max[t]<x : ∀ {n} {t : Table ℕ n} {x ⊥} → All (_< x) t → ⊥ < x → max ⊥ t < x
+  
   x≤max[t] : ∀ {n x} {t : Table ℕ n} ⊥ → x ≤ ⊥ ⊎ Any (x ≤_) t → x ≤ max ⊥ t
   x≤max[t] {n} {x} {t} ⊥ (inj₁ x≤⊥) = foldr-⊎presʳ (_ ≤_) m≤o⇒m≤n⊔o x≤⊥ t
   x≤max[t] ⊥ (inj₂ x≤t) = foldr-⊎pres (_ ≤_) m≤n⊎m≤o⇒m≤n⊔o ⊥ x≤t

@@ -1,11 +1,11 @@
-open import Data.Nat using (suc)
+open import Data.Nat using (ℕ; zero; suc)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Vec
 open import Data.List using (List; []; _∷_) renaming (map to mapₗ)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Relation.Nullary using (¬_; yes; no)
-open import Relation.Binary using (Decidable)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
+open import Relation.Unary using (Pred; Decidable)
 
 module RoutingLib.Data.Vec where
 
@@ -22,7 +22,13 @@ module RoutingLib.Data.Vec where
   foldl₂ : ∀ {a} {A : Set a} {m} → (A → A → A) → A → Vec A m → A
   foldl₂ {A = A} _⊕_ e xs = foldl (λ _ → A) _⊕_ e xs
 
-
+  count : ∀ {a p} {A : Set a} {P : Pred A p} → Decidable P →
+          ∀ {n} → Vec A n → ℕ
+  count P? []       = zero
+  count P? (x ∷ xs) with P? x
+  ... | yes _ = suc (count P? xs)
+  ... | no  _ = count P? xs
+  
   ---------------------------
   -- Additional operations --
   ---------------------------
@@ -31,6 +37,7 @@ module RoutingLib.Data.Vec where
   ∉-extend v≢x v∉xs here         = v≢x refl
   ∉-extend _   v∉xs (there v∈xs) = v∉xs v∈xs
 
+{-
   find : ∀ {a n} {A : Set a} → Decidable (_≡_ {A = A}) → (v : A) (xs : Vec A n) → v ∈ xs ⊎ v ∉ xs
   find _   v [] = inj₂ λ()
   find _≟_ v (x ∷ xs) with v ≟ x | find _≟_ v xs
@@ -53,3 +60,4 @@ module RoutingLib.Data.Vec where
   deleteAt fzero (x ∷ xs) = xs
   deleteAt (fsuc ()) (_ ∷ [])
   deleteAt (fsuc i) (x ∷ y ∷ xs) = x ∷ deleteAt i (y ∷ xs)
+-}

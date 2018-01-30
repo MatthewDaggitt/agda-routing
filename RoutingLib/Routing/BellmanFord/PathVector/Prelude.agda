@@ -186,6 +186,9 @@ module RoutingLib.Routing.BellmanFord.PathVector.Prelude
     ▷-forces-𝑰 : ∀ {i j r} → 𝑰 (A i j ▷ r) → 𝑰 r
     ▷-forces-𝑰 Aᵢⱼrⁱ rᶜ = Aᵢⱼrⁱ (▷-pres-𝑪 _ _ rᶜ)
 
+
+    
+    
     --𝑰-valid : ∀ r → 𝑰 r → ∃ λ p → path r
 
 
@@ -361,7 +364,8 @@ module RoutingLib.Routing.BellmanFord.PathVector.Prelude
                         ListRel (λ x y → x ≈ proj₁ y) xs ys →
                         toCRoute foldrᶜ ≈ᶜ foldr _⊕ᶜ_ f ys
   foldr-toCRoute-commute eᶜ e≈f foldrᶜ []            = e≈f
-  foldr-toCRoute-commute eᶜ e≈f foldrᶜ (x≈y ∷ xs≈ys) = ⊕-cong x≈y (foldr-toCRoute-commute eᶜ e≈f (foldrᶜ-lemma eᶜ xs≈ys) xs≈ys)
+  foldr-toCRoute-commute eᶜ e≈f foldrᶜ (x≈y ∷ xs≈ys) =
+    ⊕-cong x≈y (foldr-toCRoute-commute eᶜ e≈f (foldrᶜ-lemma eᶜ xs≈ys) xs≈ys)
 
   σ-toCMatrix-commute : ∀ {X} (Xᶜ : 𝑪ₘ X) (σXᶜ : 𝑪ₘ (σ X)) → toCMatrix σXᶜ ≈ᶜₘ σᶜ (toCMatrix Xᶜ)
   σ-toCMatrix-commute {X} Xᶜ σXᶜ i j = foldr-toCRoute-commute (Iᶜ i j) (I≈toCI i j) (σXᶜ i j)
@@ -372,7 +376,11 @@ module RoutingLib.Routing.BellmanFord.PathVector.Prelude
   ⊕ᶜ-strictlyAbsorbs-▷ᶜ : ∀ (s : CStep) {r : CRoute} → r ≉ᶜ (0# , 0ᶜ) → ((s ▷ᶜ r) ⊕ᶜ r ≈ᶜ r) × (r ≉ᶜ (s ▷ᶜ r))
   ⊕ᶜ-strictlyAbsorbs-▷ᶜ (i , j) r≉0 = ⊕-strictlyAbsorbs-▷ (A i j) r≉0
 
-
+  σXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ : ∀ X i j → 𝑰 (σ X i j) → ∃ λ k → σ X i j ≈ A i k ▷ X k j × 𝑰 (X k j)
+  σXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ X i j σXᵢⱼⁱ with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
+  ... | inj₁ (k , σXᵢⱼ≈Aᵢₖ▷Xₖⱼ) = k , σXᵢⱼ≈Aᵢₖ▷Xₖⱼ , ▷-forces-𝑰 (𝑰-cong σXᵢⱼ≈Aᵢₖ▷Xₖⱼ σXᵢⱼⁱ)
+  ... | inj₂ σXᵢⱼ≈Iᵢⱼ           = contradiction (𝑪-cong (≈-sym σXᵢⱼ≈Iᵢⱼ) (Iᶜ i j)) σXᵢⱼⁱ
+    
 
   open Membership Sᶜ using () renaming (_∈_ to _∈ₗ_)
   open RMembership DSᶜ using (deduplicate)

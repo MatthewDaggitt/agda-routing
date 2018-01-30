@@ -43,6 +43,7 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
 
     open Parallelisation P using (M; f; Pred; _⊂_; _⊆_; _≈_; _≉_; _∈_; Singleton-t; ≈-refl; ≈-sym; ≈-isEquivalence; ≈ᵢ-refl; ≈ᵢ-sym; M-setoid)
     open UltrametricConditions 𝓤𝓒
+    
     ≈-isDecEquivalence : IsDecEquivalence _≈_
     ≈-isDecEquivalence = record
       { isEquivalence = ≈-isEquivalence
@@ -88,10 +89,10 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
     import RoutingLib.Function.Distance.FixedPoint M-decSetoid as FixedPoints
 
     x* : M
-    x* = FixedPoints.x* d f-strContrOver-d element
+    x* = FixedPoints.x* d f-strContr element
     
     fx*≈x* : f x* ≈ x*
-    fx*≈x* = FixedPoints.x*-fixed d f-strContrOver-d element
+    fx*≈x* = FixedPoints.x*-fixed d f-strContr element
 
     -----------
     -- Radii --
@@ -153,7 +154,7 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
     i[T]≡0 = fromℕ≤-cong (T-1∸t<T T) (s≤s z≤n) T-1∸T≡0
 
     i-mono-≤ : ∀ {s t} → s ≤ t → i[ t ] ≤𝔽 i[ s ]
-    i-mono-≤ {s} {t} s≤t = fromℕ≤-mono-≤ (T-1∸t<T t) (T-1∸t<T s) (∸-monoʳ-≤ s≤t)
+    i-mono-≤ {s} {t} s≤t = fromℕ≤-mono-≤ (T-1∸t<T t) (T-1∸t<T s) (∸-monoʳ-≤ _ s≤t)
 
     i-mono⁻¹-< : ∀ {s t} → i[ s ] <𝔽 i[ t ] → t < s
     i-mono⁻¹-< is<it = ∸-cancelʳ-< (fromℕ≤-mono⁻¹-< _ _ is<it)
@@ -267,7 +268,7 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
     ... | inj₁ d[x*,t]≡0 = contradiction (≈-sym (d≡0⇒x≈y d[x*,t]≡0)) t≉x*
     ... | inj₂ (j , d[x*,t]≡dⱼ[x*ⱼ,tⱼ]) = test K (f t) (begin
       d x*     (f t)           ≡⟨ d-cong (≈-sym fx*≈x*) ≈-refl ⟩
-      d (f x*) (f t)           <⟨ f-strContrOver-d t≉x* ⟩
+      d (f x*) (f t)           <⟨ f-strContr t≉x* ⟩
       d x*     t               ≡⟨ d[x*,t]≡dⱼ[x*ⱼ,tⱼ] ⟩
       dᵢ (x* j) (t j)          ≤⟨ t∈D[K] j ⟩
       r[ K ]                   ∎) i

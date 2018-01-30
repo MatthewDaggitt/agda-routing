@@ -110,10 +110,10 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StateMetric
 
   module PostDisagreementResult 
     {X Y i j} (D≡dᵢⱼ : D (σ X) (σ Y) ≡ d (σ X i j) (σ Y i j))
-    (σXᵢⱼ<σYᵢⱼ : σ X i j < σ Y i j) 
+    (σXᵢⱼ<σYᵢⱼ : σ X i j <₊ σ Y i j) 
     where 
 
-    σXᵢⱼ≤σYᵢⱼ : σ X i j ≤ σ Y i j
+    σXᵢⱼ≤σYᵢⱼ : σ X i j ≤₊ σ Y i j
     σXᵢⱼ≤σYᵢⱼ = proj₁ σXᵢⱼ<σYᵢⱼ
 
     σXᵢⱼ≉σYᵢⱼ : σ X i j ≉ σ Y i j
@@ -123,26 +123,26 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StateMetric
     i≢j refl = σXᵢⱼ≉σYᵢⱼ (σXᵢᵢ≈σYᵢᵢ X Y i)
 
     σXᵢⱼ≉Iᵢⱼ : σ X i j ≉ I i j
-    σXᵢⱼ≉Iᵢⱼ σXᵢⱼ≈Iᵢⱼ = σXᵢⱼ≉σYᵢⱼ (≤-antisym σXᵢⱼ≤σYᵢⱼ (begin
+    σXᵢⱼ≉Iᵢⱼ σXᵢⱼ≈Iᵢⱼ = σXᵢⱼ≉σYᵢⱼ (≤₊-antisym σXᵢⱼ≤σYᵢⱼ (begin
       σ Y i j   ≤⟨ 0#-idₗ-⊕ _ ⟩
       0#        ≈⟨ ≈-sym (≈-reflexive (Iᵢⱼ≡0# (i≢j ∘ sym))) ⟩
       I i j     ≈⟨ ≈-sym σXᵢⱼ≈Iᵢⱼ ⟩
       σ X i j   ∎))
-      where open PO-Reasoning ≤-poset
+      where open PO-Reasoning ≤₊-poset
 
     Xₖⱼ≉Yₖⱼ : ∀ {k} → σ X i j ≈ A i k ▷ X k j → X k j ≉ Y k j
-    Xₖⱼ≉Yₖⱼ {k} σXᵢⱼ≈Aᵢₖ▷Xₖⱼ Xₖⱼ≈Yₖⱼ = σXᵢⱼ≉σYᵢⱼ ( ≤-antisym σXᵢⱼ≤σYᵢⱼ (begin
+    Xₖⱼ≉Yₖⱼ {k} σXᵢⱼ≈Aᵢₖ▷Xₖⱼ Xₖⱼ≈Yₖⱼ = σXᵢⱼ≉σYᵢⱼ ( ≤₊-antisym σXᵢⱼ≤σYᵢⱼ (begin
       σ Y i j       ≤⟨ σXᵢⱼ≤Aᵢₖ▷Xₖⱼ Y i j k ⟩
       A i k ▷ Y k j ≈⟨ ▷-cong (A i k) (≈-sym Xₖⱼ≈Yₖⱼ) ⟩
       A i k ▷ X k j ≈⟨ ≈-sym σXᵢⱼ≈Aᵢₖ▷Xₖⱼ ⟩
       σ X i j       ∎))
-      where open PO-Reasoning ≤-poset
+      where open PO-Reasoning ≤₊-poset
 
-    σXᵢⱼ≤Aᵢₖ▷Yₖⱼ : ∀ k → σ X i j ≤ A i k ▷ Y k j
-    σXᵢⱼ≤Aᵢₖ▷Yₖⱼ k = ≤-trans σXᵢⱼ≤σYᵢⱼ (σXᵢⱼ≤Aᵢₖ▷Xₖⱼ Y i j k)
+    σXᵢⱼ≤Aᵢₖ▷Yₖⱼ : ∀ k → σ X i j ≤₊ A i k ▷ Y k j
+    σXᵢⱼ≤Aᵢₖ▷Yₖⱼ k = ≤₊-trans σXᵢⱼ≤σYᵢⱼ (σXᵢⱼ≤Aᵢₖ▷Xₖⱼ Y i j k)
     
     σXᵢⱼ≉Aᵢₖ▷Yₖⱼ : ∀ k → σ X i j ≉ A i k ▷ Y k j
-    σXᵢⱼ≉Aᵢₖ▷Yₖⱼ k σXᵢⱼ≈AᵢₖYₖⱼ = σXᵢⱼ≉σYᵢⱼ (≤-antisym σXᵢⱼ≤σYᵢⱼ (≤-trans (σXᵢⱼ≤Aᵢₖ▷Xₖⱼ Y i j k) (≤-reflexive (≈-sym σXᵢⱼ≈AᵢₖYₖⱼ))))
+    σXᵢⱼ≉Aᵢₖ▷Yₖⱼ k σXᵢⱼ≈AᵢₖYₖⱼ = σXᵢⱼ≉σYᵢⱼ (≤₊-antisym σXᵢⱼ≤σYᵢⱼ (≤₊-trans (σXᵢⱼ≤Aᵢₖ▷Xₖⱼ Y i j k) (≤₊-reflexive (≈-sym σXᵢⱼ≈AᵢₖYₖⱼ))))
 
 
     DσXσY<DXY : D (σ X) (σ Y) <ℕ D X Y
@@ -173,7 +173,7 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StateMetric
       D X Y         ∎
       where open Rℕₚ.≤-Reasoning
     ... | no  σX≉σY with D-witness σX≉σY
-    ...   | i , j , D≡dᵢⱼ , σXᵢⱼ≉σYᵢⱼ with ≤-total (σ X i j) (σ Y i j)
+    ...   | i , j , D≡dᵢⱼ , σXᵢⱼ≉σYᵢⱼ with ≤₊-total (σ X i j) (σ Y i j)
     ...     | inj₁ σXᵢⱼ≤σYᵢⱼ = DσXσY<DXY {X} {Y} D≡dᵢⱼ (σXᵢⱼ≤σYᵢⱼ , σXᵢⱼ≉σYᵢⱼ)
     ...     | inj₂ σYᵢⱼ≤σXᵢⱼ = begin
       D (σ X) (σ Y) ≡⟨ D-sym (σ X) (σ Y) ⟩

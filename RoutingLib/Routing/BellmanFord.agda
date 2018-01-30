@@ -36,7 +36,8 @@ module RoutingLib.Routing.BellmanFord
 
   -- σ respects the underlying matrix equality
   σ-cong : ∀ {X Y} → X ≈ₘ Y → σ X ≈ₘ σ Y
-  σ-cong X≈Y i j = foldr-All₂ _≈_ ⊕-cong ≈-refl (All₂-tabulate (λ k → ▷-cong (A i k) (X≈Y k j)))
+  σ-cong X≈Y i j = foldr-All₂
+    _≈_ ⊕-cong ≈-refl (All₂-tabulate (λ k → ▷-cong (A i k) (X≈Y k j)))
 
   -- A possible parallelisation of the algorithm where each 
   -- node is in charge of its own routes

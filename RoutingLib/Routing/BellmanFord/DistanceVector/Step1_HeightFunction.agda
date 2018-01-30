@@ -1,4 +1,4 @@
-open import Data.Nat using (ℕ; pred; suc; z≤n; s≤s; _∸_) renaming (_≤_ to _≤ℕ_; _≥_ to _≥ℕ_; _<_ to _<ℕ_)
+open import Data.Nat using (ℕ; pred; suc; z≤n; s≤s; _∸_; _≤_; _≥_; _<_)
 open import Data.Nat.Properties using (<⇒≤; n∸m≤n) renaming (≤-reflexive to ≤ℕ-reflexive; ≤-trans to ≤ℕ-trans; ≤-antisym to ≤ℕ-antisym; ≤-decTotalOrder to ≤ℕ-decTotalOrder)
 open import Data.Fin using (toℕ)
 open import Data.Fin.Properties using (prop-toℕ-≤)
@@ -34,7 +34,7 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step1_HeightFunction
   open import Data.List.Any.Membership ℕₛ using () renaming (_∈_ to _∈ℕ_)
 
   open import RoutingLib.Data.List.Membership.Setoid S using ()
-  open import RoutingLib.Data.List.Sorting.Properties ≥-decTotalOrder using (index-mono-<)
+  open import RoutingLib.Data.List.Sorting.Properties ≥₊-decTotalOrder using (index-mono-<)
 
 
   abstract
@@ -46,14 +46,17 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step1_HeightFunction
     
     h-resp-≈ : ∀ {u v} → u ≈ v → h u ≡ h v
     h-resp-≈ u≈v = cong (suc ∘ toℕ) (index-cong S u≈v (∈-routes _) (∈-routes _) routes!)
+
+    postulate h-cancel-≡ : ∀ {u v} → h u ≡ h v → u ≈ v
+    --h-cancel-≡ hᵤ≈hᵥ = ?
     
-    h-resp-< : ∀ {u v} → u < v → h v <ℕ h u
+    h-resp-< : ∀ {u v} → u <₊ v → h v < h u
     h-resp-< (u≤v , u≉v) = s≤s (toℕ-mono-< (index-mono-< routes↗ (∈-routes _) (∈-routes _) (u≤v , u≉v ∘ ≈-sym)))
       
-    1≤h : ∀ x → 1 ≤ℕ h x
+    1≤h : ∀ x → 1 ≤ h x
     1≤h x = s≤s z≤n
 
-    h≤H : ∀ x → h x ≤ℕ H
-    h≤H x = subst (h x ≤ℕ_) (suc∘pred[n]≡n 1≤H) (s≤s (prop-toℕ-≤ (index (∈-routes x))))
+    h≤H : ∀ x → h x ≤ H
+    h≤H x = subst (h x ≤_) (suc∘pred[n]≡n 1≤H) (s≤s (prop-toℕ-≤ (index (∈-routes x))))
       
     

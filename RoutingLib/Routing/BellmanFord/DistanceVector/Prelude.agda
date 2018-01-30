@@ -23,7 +23,7 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Prelude
   open SufficientConditions sc public
 
   open import RoutingLib.Routing.BellmanFord 𝓡𝓟 public
-  open import RoutingLib.Routing.BellmanFord.Properties 𝓡𝓟 as P public using (Iᵢⱼ≡0#)
+  import RoutingLib.Routing.BellmanFord.Properties 𝓡𝓟 as P
   open import Data.List.Any.Membership S using (_∈_)
 
   n : ℕ
@@ -34,7 +34,7 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Prelude
   σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ = P.σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ ⊕-sel
 
   -- A▷ₘ always chooses the "best" option with respect to ⊕
-  σXᵢⱼ≤Aᵢₖ▷Xₖⱼ : ∀ X i j k → σ X i j ≤ A i k ▷ X k j
+  σXᵢⱼ≤Aᵢₖ▷Xₖⱼ : ∀ X i j k → σ X i j ≤₊ A i k ▷ X k j
   σXᵢⱼ≤Aᵢₖ▷Xₖⱼ = P.σXᵢⱼ≤Aᵢₖ▷Xₖⱼ ⊕-idem ⊕-assoc ⊕-comm
 
   -- After an iteration, the diagonal of the RMatrix is always the identity
@@ -53,8 +53,8 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Prelude
   -- We have a unique complete list of routes
 
   open import RoutingLib.Data.List.Uniset DS using (Enumeration)
-  open import RoutingLib.Data.List.Sorting ≥-decTotalOrder using (Sorted)
-  open import RoutingLib.Data.List.Sorting.Mergesort ≥-decTotalOrder using (mergesort; mergesort!⁺; ∈-mergesort⁺; mergesort↗)
+  open import RoutingLib.Data.List.Sorting ≥₊-decTotalOrder using (Sorted)
+  open import RoutingLib.Data.List.Sorting.Mergesort ≥₊-decTotalOrder using (mergesort; mergesort!⁺; ∈-mergesort⁺; mergesort↗)
   open import RoutingLib.Data.List.Membership.DecSetoid DS using (deduplicate)
 
   abstract

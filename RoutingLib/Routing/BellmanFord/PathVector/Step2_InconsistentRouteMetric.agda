@@ -2,20 +2,26 @@ open import Data.Product using (∃; _,_; _×_)
 open import Data.Sum using (_⊎_; inj₁; inj₂; [_,_]′; map)
 open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _<_; _≤_; _⊔_)
 open import Data.Nat.Properties
-  using (≤-reflexive; ≤-total; ⊔-comm; ⊔-identityʳ; m≤m⊔n)
+  using (≤-refl; ≤-reflexive; ≤-total; <-transˡ; <-transʳ; ⊔-comm; ⊔-identityʳ; ⊔-idem; m≤m⊔n; <⇒≯; <⇒≤)
+open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
+open import Data.Fin.Subset using (Subset; _∈_; _∉_; ⁅_⁆; ⊤)
+open import Data.Fin.Subset.Properties using (x∈p∩q⁺; x∈⁅x⁆; ∈⊤)
+open import Data.Fin.Dec using (_∈?_)
 open import Relation.Binary using (_Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality
-  using (_≡_; refl; sym; trans; cong; cong₂; subst₂)
+  using (_≡_; refl; sym; trans; cong; cong₂; subst; subst₂)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Function using (_∘_; id)
+open import Induction.WellFounded using (Acc; acc)
+open import Induction.Nat using () renaming (<-well-founded to <-wellFounded)
 
+open import RoutingLib.Data.Fin.Subset using (_\\_; size[p\\q]<size[p]; i∉p\\q⇒i∉p; i∉⁅j⁆) renaming (size to sizeₛ)
 open import RoutingLib.Data.Nat.Properties
-  using (⊔-monoˡ-≤; ⊔-triangulate; m≤o⇒m≤n⊔o; m<n⇒n≢0; n≤m×o≤m⇒n⊔o≤m; m<n⊎m<o⇒m<n⊔o; n≤m⇒m⊔n≡m;
-        module ≤-Reasoning; ≤⇒≯)
+  using (⊔-monoˡ-≤; ⊔-triangulate; m≤o⇒m≤n⊔o; m<n⇒n≢0; n≤m×o≤m⇒n⊔o≤m; m<n⊎m<o⇒m<n⊔o; n≤m⇒m⊔n≡m; m≤n⇒m⊔n≡n; m≤n⇒m≤n⊔o; module ≤-Reasoning; ≤⇒≯)
 import RoutingLib.Function.Distance as Distance
-
 open import RoutingLib.Data.Sum using (flip)
+
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
 import RoutingLib.Routing.BellmanFord.PathVector.Prelude as Prelude
@@ -45,7 +51,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step2_InconsistentRouteMetric
     dᵣⁱ x y = hⁱ x ⊔ hⁱ y
 
     dᵣⁱ-cong : dᵣⁱ Preserves₂ _≈_ ⟶ _≈_ ⟶ _≡_
-    dᵣⁱ-cong {x} {y} {u} {v} x≈y u≈v = cong₂ _⊔_ (hⁱ-cong x≈y) (hⁱ-cong u≈v)
+    dᵣⁱ-cong x≈y u≈v = cong₂ _⊔_ (hⁱ-cong x≈y) (hⁱ-cong u≈v)
   
     dᵣⁱ-sym : ∀ x y → dᵣⁱ x y ≡ dᵣⁱ y x
     dᵣⁱ-sym x y = ⊔-comm (hⁱ x) (hⁱ y)
@@ -60,59 +66,91 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step2_InconsistentRouteMetric
       (hⁱ x ⊔ hⁱ y) ⊔ (hⁱ y ⊔ hⁱ z) ∎
       where open ≤-Reasoning
 
+    1≤dᵣⁱ : ∀ x y → 1 ≤ dᵣⁱ x y
+    1≤dᵣⁱ x y = m≤n⇒m≤n⊔o (hⁱ y) (1≤hⁱ x)
+    
     dᵣⁱ≤Hⁱ : ∀ x y → dᵣⁱ x y ≤ Hⁱ
     dᵣⁱ≤Hⁱ x y = n≤m×o≤m⇒n⊔o≤m (hⁱ≤Hⁱ x) (hⁱ≤Hⁱ y)
   
     dᵣⁱ-bounded : Bounded dᵣⁱ
     dᵣⁱ-bounded = Hⁱ , dᵣⁱ≤Hⁱ
-
-    dᵣⁱ-mono-𝑰𝑪 : ∀ {w x y z} → 𝑪 w → 𝑪 x → 𝑰 y ⊎ 𝑰 z → dᵣⁱ w x < dᵣⁱ y z
-    dᵣⁱ-mono-𝑰𝑪 {w} {x} {y} {z} wᶜ xᶜ yⁱ⊎zⁱ =
-      m<n⊎m<o⇒m<n⊔o (hⁱ y) (hⁱ z)
-        (map
-        (λ yⁱ → n≤m×o≤m⇒n⊔o≤m (h[sᶜ]<h[rⁱ] wᶜ yⁱ) (h[sᶜ]<h[rⁱ] xᶜ yⁱ))
-        (λ zⁱ → n≤m×o≤m⇒n⊔o≤m (h[sᶜ]<h[rⁱ] wᶜ zⁱ) (h[sᶜ]<h[rⁱ] xᶜ zⁱ))
-        yⁱ⊎zⁱ)
-      
-    flip-< : ∀ {w x y z} → dᵣⁱ w x < dᵣⁱ y z → dᵣⁱ x w < dᵣⁱ z y
-    flip-< dᵣⁱwx≤dᵣⁱyz = subst₂ _<_ (dᵣⁱ-sym _ _) (dᵣⁱ-sym _ _) dᵣⁱwx≤dᵣⁱyz 
-
-    flip-≤ : ∀ {w x y z} → dᵣⁱ w x ≤ dᵣⁱ y z → dᵣⁱ x w ≤ dᵣⁱ z y
-    flip-≤ dᵣⁱwx≤dᵣⁱyz = subst₂ _≤_ (dᵣⁱ-sym _ _) (dᵣⁱ-sym _ _) dᵣⁱwx≤dᵣⁱyz
-
     
-    
-    dᵣⁱ-strContr-lem : ∀ {i j r s} {X Y : RMatrix} → 𝑰 (σ X i j) →
-                        hⁱ (σ Y i j) ≤ hⁱ (σ X i j) →
-                        (∀ k l → 𝑰 (X k l) ⊎ 𝑰 (Y k l) → dᵣⁱ (X k l) (Y k l) ≤ dᵣⁱ (X r s) (Y r s)) →
-                        hⁱ (σ X i j) ⊔ hⁱ (σ Y i j) < hⁱ (X r s) ⊔ hⁱ (Y r s)
-    dᵣⁱ-strContr-lem {i} {j} {r} {s} {X} {Y} σXᵢⱼⁱ hσYᵢⱼ≤hσXᵢⱼ less
-      with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
-    ... | inj₂ σXᵢⱼ≈Iᵢⱼ          = contradiction (𝑪-cong (≈-sym σXᵢⱼ≈Iᵢⱼ) (Iᶜ i j)) σXᵢⱼⁱ
-    ... | inj₁ (k , σXᵢⱼ≈AᵢₖXₖⱼ) = begin
-      hⁱ (σ X i j) ⊔ hⁱ (σ Y i j) ≡⟨ n≤m⇒m⊔n≡m hσYᵢⱼ≤hσXᵢⱼ ⟩
-      hⁱ (σ X i j)                ≡⟨ hⁱ-cong σXᵢⱼ≈AᵢₖXₖⱼ ⟩
-      hⁱ (A i k ▷ X k j)          <⟨ hⁱ-decr (𝑰-cong σXᵢⱼ≈AᵢₖXₖⱼ σXᵢⱼⁱ) ⟩
-      hⁱ (X k j)                  ≤⟨ m≤m⊔n (hⁱ (X k j)) (hⁱ (Y k j)) ⟩
-      hⁱ (X k j) ⊔ hⁱ (Y k j)     ≤⟨ less k j (inj₁ (▷-forces-𝑰 (𝑰-cong σXᵢⱼ≈AᵢₖXₖⱼ σXᵢⱼⁱ))) ⟩
-      hⁱ (X r s) ⊔ hⁱ (Y r s)     ∎
-      where open ≤-Reasoning
 
-{-
-      D (σ X) (σ Y)                      ≡⟨ D≡dᵢⱼ ⟩ 
-      d (σ X i j) (σ Y i j)              ≤⟨ d-mono σXᵢⱼ≤σYᵢⱼ (σXᵢⱼ≤Aᵢₖ▷Yₖⱼ k , σXᵢⱼ≉Aᵢₖ▷Yₖⱼ k) ⟩
-      d (σ X i j) (A i k ▷ Y k j)        ≡⟨ d-cong σXᵢⱼ≈Aᵢₖ▷Xₖⱼ ≈-refl ⟩
-      d (A i k ▷ X k j) (A i k ▷ Y k j)  <⟨ d-strContr (A i k) (Xₖⱼ≉Yₖⱼ σXᵢⱼ≈Aᵢₖ▷Xₖⱼ) ⟩
-      d (X k j) (Y k j)                  ≤⟨ d≤D X Y k j ⟩
-      D X Y                              ∎
-      -}
+    private
+    
+      open ≤-Reasoning
+
+      chain₁ : ∀ X i j → 𝑰 (σ X i j) → ∃ λ k → 𝑰 (X k j) × hⁱ (σ X i j) < hⁱ (X k j) ⊔ hⁱ (σ X k j)
+      chain₁ X i j σXᵢⱼⁱ with σXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ X _ _ σXᵢⱼⁱ
+      ... | k , σXᵢⱼ≈Aᵢₖ▷Xₖⱼ , Xₖⱼⁱ = k , Xₖⱼⁱ , (begin
+        hⁱ (σ X i j)              ≡⟨ hⁱ-cong σXᵢⱼ≈Aᵢₖ▷Xₖⱼ ⟩
+        hⁱ (A i k ▷ X k j)        <⟨ hⁱ-decr (𝑰-cong σXᵢⱼ≈Aᵢₖ▷Xₖⱼ σXᵢⱼⁱ) ⟩
+        hⁱ (X k j)                ≤⟨ m≤m⊔n (hⁱ (X k j)) (hⁱ (σ X k j)) ⟩
+        hⁱ (X k j) ⊔ hⁱ (σ X k j) ∎)
+        
+      chain₂ : ∀ X i k j → hⁱ (σ X i j) < hⁱ (X k j) ⊔ hⁱ (σ X k j) → X k j ≈ σ X k j → hⁱ (σ X i j) < hⁱ (σ X k j)
+      chain₂ X i k j hσXᵢⱼ<hXₖⱼ⊔hσXₖⱼ Xₖⱼ≈σXₖⱼ = begin
+        hⁱ (σ X i j)                <⟨ hσXᵢⱼ<hXₖⱼ⊔hσXₖⱼ ⟩
+        hⁱ (X k j)   ⊔ hⁱ (σ X k j) ≡⟨ cong (_⊔ hⁱ (σ X k j)) (hⁱ-cong Xₖⱼ≈σXₖⱼ) ⟩
+        hⁱ (σ X k j) ⊔ hⁱ (σ X k j) ≡⟨ ⊔-idem (hⁱ (σ X k j)) ⟩
+        hⁱ (σ X k j)                ∎
       
-    dᵣⁱ-strContr : ∀ {i j r s X Y} → 𝑰 (σ X i j) ⊎ 𝑰 (σ Y i j) →
-                   (∀ k l → 𝑰 (X k l) ⊎ 𝑰 (Y k l) → dᵣⁱ (X k l) (Y k l) ≤ dᵣⁱ (X r s) (Y r s)) → 
-                   dᵣⁱ (σ X i j) (σ Y i j) < dᵣⁱ (X r s) (Y r s)
-    dᵣⁱ-strContr {i} {j} {r} {s} {X} {Y} σXᵢⱼⁱ⊎σYᵢⱼⁱ less
-      with ≤-total (hⁱ (σ X i j)) (hⁱ (σ Y i j))
-    ...   | inj₂ σYᵢⱼ≤σXᵢⱼ = dᵣⁱ-strContr-lem (h-force-𝑰 (flip σXᵢⱼⁱ⊎σYᵢⱼⁱ) σYᵢⱼ≤σXᵢⱼ) σYᵢⱼ≤σXᵢⱼ less
-    ...   | inj₁ σXᵢⱼ≤σYᵢⱼ =
-      flip-< (dᵣⁱ-strContr-lem (h-force-𝑰 σXᵢⱼⁱ⊎σYᵢⱼⁱ σXᵢⱼ≤σYᵢⱼ) σXᵢⱼ≤σYᵢⱼ λ k l v → flip-≤ (less k l (flip v)))
+      reduction : ∀ X {r s} →
+                  (∀ {u v} → X u v ≉ σ X u v → 𝑰 (X u v) ⊎ 𝑰 (σ X u v) → dᵣⁱ (X u v) (σ X u v) ≤ dᵣⁱ (X r s) (σ X r s)) →
+                  ∀ i j (L : Subset n) → Acc _<_ (sizeₛ L) → (∀ {l} → l ∉ L → hⁱ (σ X l j) ≤ hⁱ (σ X i j)) →
+                  𝑰 (σ X i j) → hⁱ (σ X i j) < hⁱ (X r s) ⊔ hⁱ (σ X r s)
+      reduction X {r} {s} dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ i j L (acc rec) L-less σXᵢⱼⁱ with chain₁ X _ _ σXᵢⱼⁱ
+      ... | k , Xₖⱼⁱ , hσXᵢⱼ<hXₖⱼ⊔hσXₖⱼ  with X k j ≟ σ X k j
+      ...   | no  Xₖⱼ≉σXₖⱼ = <-transˡ (hσXᵢⱼ<hXₖⱼ⊔hσXₖⱼ) (dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ Xₖⱼ≉σXₖⱼ (inj₁ Xₖⱼⁱ))
+      ...   | yes Xₖⱼ≈σXₖⱼ with chain₂ X i k j hσXᵢⱼ<hXₖⱼ⊔hσXₖⱼ Xₖⱼ≈σXₖⱼ | k ∈? L
+      ...     | hσXᵢⱼ<hσXₖⱼ | no  k∉L = contradiction hσXᵢⱼ<hσXₖⱼ (≤⇒≯ (L-less k∉L))
+      ...     | hσXᵢⱼ<hσXₖⱼ | yes k∈L = begin
+        hⁱ (σ X i j)                <⟨ hσXᵢⱼ<hσXₖⱼ ⟩
+        hⁱ (σ X k j)                <⟨ reduction X dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ k j (L \\ ⁅ k ⁆) (rec _ L\\k<L) L-exclude (𝑰-cong Xₖⱼ≈σXₖⱼ Xₖⱼⁱ) ⟩
+        hⁱ (X r s) ⊔ hⁱ (σ X r s) ∎
+
+        where
   
+        L\\k<L : sizeₛ (L \\ ⁅ k ⁆) < sizeₛ L
+        L\\k<L = size[p\\q]<size[p] {p = L} {⁅ k ⁆} (k , x∈p∩q⁺ (k∈L , x∈⁅x⁆ k))
+  
+        L-exclude : ∀ {l} → l ∉ (L \\ ⁅ k ⁆) → hⁱ (σ X l j) ≤ hⁱ (σ X k j)
+        L-exclude {l} l∉L\\k with l ≟𝔽 k
+        ... | yes refl = ≤-refl
+        ... | no  l≢k  = <⇒≤ (<-transʳ (L-less (i∉p\\q⇒i∉p l∉L\\k (i∉⁅j⁆ l≢k))) hσXᵢⱼ<hσXₖⱼ)
+
+
+
+    dᵣⁱ-strContrOrbits : ∀ X {r s} →
+                   (∀ {u v} → X u v ≉ σ X u v → 𝑰 (X u v) ⊎ 𝑰 (σ X u v) → dᵣⁱ (X u v) (σ X u v) ≤ dᵣⁱ (X r s) (σ X r s)) → 
+                   ∀ {i j} → 𝑰 (σ X i j) ⊎ 𝑰 (σ (σ X) i j) → dᵣⁱ (σ X i j) (σ (σ X) i j) < dᵣⁱ (X r s) (σ X r s)
+    dᵣⁱ-strContrOrbits X {r} {s} dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ {i} {j} σXᵢⱼⁱ⊎σ²Xᵢⱼⁱ with ≤-total (hⁱ (σ (σ X) i j)) (hⁱ (σ X i j))
+    ...   | inj₁ σ²Xᵢⱼ≤σXᵢⱼ = begin
+      hⁱ (σ X i j) ⊔ hⁱ (σ (σ X) i j) ≡⟨ n≤m⇒m⊔n≡m σ²Xᵢⱼ≤σXᵢⱼ ⟩
+      hⁱ (σ X i j)                    <⟨ reduction X dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ i j ⊤ (<-wellFounded (sizeₛ {n} ⊤)) (λ l∉⊤ → contradiction ∈⊤ l∉⊤) (h-force-𝑰 (flip σXᵢⱼⁱ⊎σ²Xᵢⱼⁱ) σ²Xᵢⱼ≤σXᵢⱼ) ⟩
+      hⁱ (X r s)   ⊔ hⁱ (σ X r s)     ∎
+    ...   | inj₂ σXᵢⱼ≤σ²Xᵢⱼ with σXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ (σ X) _ _ (h-force-𝑰 σXᵢⱼⁱ⊎σ²Xᵢⱼⁱ σXᵢⱼ≤σ²Xᵢⱼ)
+    ... | k , σ²Xᵢⱼ≈Aᵢₖ▷σXₖⱼ , σXₖⱼⁱ = begin
+      hⁱ (σ X i j) ⊔ hⁱ (σ (σ X) i j) ≡⟨ m≤n⇒m⊔n≡n σXᵢⱼ≤σ²Xᵢⱼ ⟩
+      hⁱ (σ (σ X) i j)                ≡⟨ hⁱ-cong σ²Xᵢⱼ≈Aᵢₖ▷σXₖⱼ ⟩
+      hⁱ (A i k ▷ σ X k j)            <⟨ hⁱ-decr (𝑰-cong σ²Xᵢⱼ≈Aᵢₖ▷σXₖⱼ (h-force-𝑰 σXᵢⱼⁱ⊎σ²Xᵢⱼⁱ σXᵢⱼ≤σ²Xᵢⱼ)) ⟩
+      hⁱ (σ X k j)                    <⟨ reduction X dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ k j ⊤ (<-wellFounded (sizeₛ {n} ⊤)) (λ l∉⊤ → contradiction ∈⊤ l∉⊤) σXₖⱼⁱ ⟩ 
+      hⁱ (X r s)   ⊔ hⁱ (σ X r s)     ∎
+
+
+
+    dᵣⁱxⁱyᶜ≡hⁱxⁱ : ∀ {x y} → 𝑰 x → 𝑪 y → dᵣⁱ x y ≡ hⁱ x
+    dᵣⁱxⁱyᶜ≡hⁱxⁱ {x} {y} xⁱ yᶜ with x ≟ y
+    ... | yes x≈y = contradiction (𝑪-cong (≈-sym x≈y) yᶜ) xⁱ
+    ... | no  _   with 𝑪? x | 𝑪? y
+    ...   | yes xᶜ | _      = contradiction xᶜ xⁱ
+    ...   | no  _  | no yⁱ = contradiction yᶜ yⁱ
+    ...   | no  _  | yes _ = n≤m⇒m⊔n≡m (<⇒≤ (h[sᶜ]<h[rⁱ] yᶜ xⁱ))
+    
+    xⁱyᶜzᶜ⇒dᵣⁱxz≤dᵣⁱxy : ∀ {x y z} → 𝑰 x → 𝑪 y → 𝑪 z → dᵣⁱ x z ≤ dᵣⁱ x y
+    xⁱyᶜzᶜ⇒dᵣⁱxz≤dᵣⁱxy xⁱ yᶜ zᶜ =
+      ≤-reflexive (trans (dᵣⁱxⁱyᶜ≡hⁱxⁱ xⁱ zᶜ) (sym (dᵣⁱxⁱyᶜ≡hⁱxⁱ xⁱ yᶜ)))
+    
+    xᶜyᶜzⁱ⇒dᵣⁱxz≤dᵣⁱyz : ∀ {x y z} → 𝑪 x → 𝑪 y → 𝑰 z → dᵣⁱ x z ≤ dᵣⁱ y z
+    xᶜyᶜzⁱ⇒dᵣⁱxz≤dᵣⁱyz {x} {y} {z} xᶜ yᶜ zⁱ =
+      subst₂ _≤_ (dᵣⁱ-sym z x) (dᵣⁱ-sym z y) (xⁱyᶜzᶜ⇒dᵣⁱxz≤dᵣⁱxy zⁱ yᶜ xᶜ)

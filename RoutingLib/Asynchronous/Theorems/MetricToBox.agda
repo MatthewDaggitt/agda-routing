@@ -51,7 +51,7 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
   {a ℓ n} {S : Fin n → Setoid a ℓ} {P : Parallelisation S}
   (𝓤𝓒 : UltrametricConditions P) where
 
-    open Parallelisation P using (M; f; Pred; _⊂_; _⊆_; _≈_; _≉_; _∈_; Singleton-t; ≈-refl; ≈-sym; ≈-isEquivalence; ≈ᵢ-refl; ≈ᵢ-sym; M-setoid)
+    open Parallelisation P using (M; f; Pred; _⊂_; _⊆_; _≈_; _≉_; _∈_; isSingleton; ≈-refl; ≈-sym; ≈-isEquivalence; ≈ᵢ-refl; ≈ᵢ-sym; M-setoid)
     open UltrametricConditions 𝓤𝓒
     ≈-isDecEquivalence : IsDecEquivalence _≈_
     ≈-isDecEquivalence = record
@@ -269,7 +269,7 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
     x*∈D[T+K] : ∀ K → x* ∈ D (T + K)
     x*∈D[T+K] K i = subst (_≤ r[ T + K ]) (sym (x≈y⇒dᵢ≡0 ≈ᵢ-refl)) z≤n
 
-    D-finish : ∃ λ T → ∃ λ ξ → ∀ K → Singleton-t ξ (D (T + K))
+    D-finish : ∃ λ T → ∃ λ ξ → ∀ K → isSingleton ξ (D (T + K))
     D-finish = T , x* , λ K → (x*∈D[T+K] K , m∈D[T+K]⇒x*≈m K)
 
     test : ∀ K (x : M) → d x* x < r[ K ] → x ∈ D (suc K)

@@ -74,7 +74,7 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3 {a ℓ n}
     ... | yes K≤T = (≼ᵢ-refl , iter-decreasing-full K≤T i) , closed-trans T i
     ... | no  K≰T = (≼ᵢ-refl , ≼ᵢ-reflexive (T≤K⇒ξ≈iterK (≰⇒≥ K≰T) i)) , closed-trans T i
 
-    D-finish : ∃ λ T → ∃ λ ξ → ∀ K → Singleton-t ξ (D (T + K))
+    D-finish : ∃ λ T → ∃ λ ξ → ∀ K → isSingleton ξ (D (T + K))
     D-finish = T , ξ , λ K → ξ∈DK (T + K) ,
                λ t t∈D[T+K] i → ≼ᵢ-antisym (proj₁ (proj₁ (t∈D[T+K] i)))
                (≼ᵢ-trans (proj₂ (proj₁ (t∈D[T+K] i))) (iter-decreasing-full (m≤m+n T K) i)) 

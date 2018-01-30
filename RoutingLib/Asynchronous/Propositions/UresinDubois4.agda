@@ -111,8 +111,10 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois4 {a ℓ n}
     y∈xs⇒¬¬y∈xs (x ∷ xs) y (here px) = here λ y≉x → contradiction px y≉x
     y∈xs⇒¬¬y∈xs (x ∷ xs) y (there y∈xs) = there (y∈xs⇒¬¬y∈xs xs y y∈xs)
 
-    D₀-fixed-length-dec : ∀ K  → iter x₀ K ≉ iter x₀ (suc K) → length (D₀-fixed (suc K)) < length (D₀-fixed K)
-    D₀-fixed-length-dec K iter≉ = |dfilter[xs]|<|xs| (P?⇒¬P? (iter x₀ K ≟_)) (D₀-fixed K) (y∈xs⇒¬¬y∈xs (D₀-fixed K) (iter x₀ K) (iter≉⇒iter∈D₀-fixed K iter≉))
+    D₀-fixed-length-dec : ∀ K  → iter x₀ K ≉ iter x₀ (suc K) →
+                          length (D₀-fixed (suc K)) < length (D₀-fixed K)
+    D₀-fixed-length-dec K iter≉ = |dfilter[xs]|<|xs| (P?⇒¬P? (iter x₀ K ≟_)) (D₀-fixed K)
+      (y∈xs⇒¬¬y∈xs (D₀-fixed K) (iter x₀ K) (iter≉⇒iter∈D₀-fixed K iter≉))
 
     iter-fixed-point : ∀ {K} → Acc _<_ (length (D₀-fixed K)) →
                                  ∃ λ T → ∀ t → iter x₀ T ≈ iter x₀ (T + t)

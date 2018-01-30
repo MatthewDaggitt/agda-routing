@@ -22,7 +22,7 @@ module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {S : Table (Setoid a ℓ)
       D            : ℕ → Pred p
       D-subst      : ∀ K {x y} → x ≈ y → x ∈ D K → y ∈ D K
       D-decreasing : ∀ K → D (suc K) ⊆ D K
-      D-finish     : ∃ λ T → ∃ λ ξ → ∀ K → Singleton-t ξ (D (T + K))
+      D-finish     : ∃ λ T → ∃ λ ξ → ∀ K → isSingleton ξ (D (T + K))
       f-monotonic  : ∀ K {t} → t ∈ D K → f t ∈ D (suc K)
 
 

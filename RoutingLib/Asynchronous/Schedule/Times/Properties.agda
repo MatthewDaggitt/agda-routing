@@ -34,16 +34,17 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
   -----------------
   -- Finite --
   -----------------
-  finite-inc : ∀ t i j → t ≤ t + proj₁ (finite t i j)
-  finite-inc t i j = m≤m+n t (proj₁ (finite t i j))
-
+ {- finite-inc : ∀ t i j → t ≤ proj₁ (finite t i j)
+  finite-inc t i j = {!!}
+  -- m≤m+n t (proj₁ (finite t i j))
+-}
   finite-fin : ∀ {t} k i j (t' : Fin (suc t)) →
-              (toℕ t') + proj₁ (finite (toℕ t') i j) ≤ k →
+              proj₁ (finite (toℕ t') i j) ≤ k →
               β k i j ≢ toℕ t'
   finite-fin {t} k i j t' p  with finite (toℕ t') i j
   ... | (m , q) = subst (_≢ toℕ t')
-        (cong (λ x → β x i j) (m+n∸m≡n p))
-        (q (k ∸ (toℕ t' + m)))
+    (cong (λ x → β x i j) (m+n∸m≡n p))
+    (q (k ∸ m)) 
 
   -----------------
   -- Activations --
@@ -72,21 +73,18 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
   ---------------
   -- Properties of expiryᵢⱼ
   expiryᵢⱼ-inc : ∀ t i j → t ≤ expiryᵢⱼ t i j
-  expiryᵢⱼ-inc t i j = ⊥≤max[t] {suc t} t ((λ x → (toℕ x) + proj₁ (finite (toℕ x) i j)))
+  expiryᵢⱼ-inc t i j = ⊥≤max[t] {suc t} t ((λ x → proj₁ (finite (toℕ x) i j)))
 
   expiryᵢⱼ-monotone : ∀ {t k} → t ≤ k → ∀ i j → expiryᵢⱼ t i j ≤ expiryᵢⱼ k i j
   expiryᵢⱼ-monotone {t} {k} t≤k i j = max[s]≤max[t] t {k} {suc t} {suc k}
-                    {(λ x → (toℕ x) + proj₁ (finite (toℕ x) i j))}
-                    {(λ x → (toℕ x) + proj₁ (finite (toℕ x) i j))}
+                    {(λ x → proj₁ (finite (toℕ x) i j))}
+                    {(λ x → proj₁ (finite (toℕ x) i j))}
                     (inj₁ t≤k) λ x → inj₂ (inject≤ x (s≤s t≤k) , ≤-reflexive (inject-x x))
                     where
-                    inject-x : ∀ x → toℕ x + proj₁ (finite (toℕ x) i j) ≡
-                               toℕ (inject≤ x (s≤s t≤k)) +
+                    inject-x : ∀ x → proj₁ (finite (toℕ x) i j) ≡
                                proj₁ (finite (toℕ (inject≤ x (s≤s t≤k))) i j)
-                    inject-x x = trans
-                      (cong (_+ proj₁ (finite (toℕ x) i j)) (sym (inject≤-lemma x (s≤s t≤k))))
-                      (cong (toℕ (inject≤ x (s≤s t≤k)) +_) (cong (λ y → proj₁ (finite y i j))
-                          (sym (inject≤-lemma x (s≤s t≤k)))))
+                    inject-x x = cong (λ y → proj₁ (finite y i j))
+                      (sym (inject≤-lemma x (s≤s t≤k)))
 
 
   expiryᵢⱼt≤k⇒t≤βk : ∀ {t k i j} → expiryᵢⱼ t i j ≤ k → t ≤ β k i j
@@ -97,12 +95,11 @@ module RoutingLib.Asynchronous.Schedule.Times.Properties {n} (𝕤 : Schedule n)
                    x' x x≤t = inject≤ (fromℕ x) (s≤s x≤t)
                    x'≡x : ∀ x x≤t → toℕ (x' x x≤t) ≡ x
                    x'≡x x x≤t = trans (inject≤-lemma (fromℕ x) (s≤s x≤t)) (to-from x)
-                   t'≤expiry : ∀ (t' : Fin (suc t)) →
-                               toℕ t' + proj₁ (finite (toℕ t') i j) ≤ expiryᵢⱼ t i j
-                   t'≤expiry t' = t≤max[t] {suc t} t
-                               ((λ x → (toℕ x) + proj₁ (finite (toℕ x) i j))) t'
+                   finite[t']≤expiry : ∀ (t' : Fin (suc t)) →
+                               proj₁ (finite (toℕ t') i j) ≤ expiryᵢⱼ t i j
+                   finite[t']≤expiry t' = t≤max[t] t (λ x → proj₁ (finite (toℕ x) i j)) t'
                    β≢t' : ∀ (t' : Fin (suc t)) → β k i j ≢ toℕ t'
-                   β≢t' t' = finite-fin k i j t' (≤-trans (t'≤expiry t') expiryᵢⱼt≤k)
+                   β≢t' t' = finite-fin k i j t' (≤-trans (finite[t']≤expiry t') expiryᵢⱼt≤k)
 
   -- Properties of expiryᵢ
   expiryᵢⱼ≤expiryᵢ : ∀ t i j → expiryᵢⱼ t i j ≤ expiryᵢ t i

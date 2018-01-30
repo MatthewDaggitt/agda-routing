@@ -28,8 +28,8 @@ module RoutingLib.Asynchronous.Schedule.Random {n}{l}(random : 𝕋 → Fin n �
               (y ∸ toℕ i) + x ≡⟨ +-comm (y ∸ toℕ i) x ⟩
               x + (y ∸ (toℕ i)) ∎
 
-  finite : ∀ t i j → ∃ (λ k → ∀ k₁ → β (t + k + k₁) i j ≢ t)
-  finite t i j = suc (suc l) , λ k → <⇒≢ (≤-trans
+  finite : ∀ t i j → ∃ (λ k → ∀ k' → β (k + k') i j ≢ t)
+  finite t i j = t + suc (suc l) , λ k → <⇒≢ (≤-trans
          (subst (suc t ≤_) (sym (+-suc t k)) (m≤m+n (suc t) k))
          (subst ((t + suc k) ≤_)
             (sym (trans

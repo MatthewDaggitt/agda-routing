@@ -73,7 +73,7 @@ module RoutingLib.Asynchronous.Schedule where
       {- A2: Each element gets updated infinitely often -}
       nonstarvation : ∀ t i → ∃ λ k → i ∈ α (t + suc k)
       {- A3: Each element will eventually not need its value at time t -}
-      finite        : ∀ t i j → ∃ λ k → ∀ k₁ → β (t + k + k₁) i j ≢ t
+      finite        : ∀ t i j → ∃ λ k → ∀ l → β (k + l) i j ≢ t
       
       
   -- Two schedules are considered equal if their activation and data flow functions are equal

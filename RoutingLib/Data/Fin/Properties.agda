@@ -7,7 +7,7 @@ open import Data.Nat.Properties using (1+n≰n; <⇒≢)  renaming (≤-total to
 open import Relation.Nullary using (¬_)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary using (_⇒_; _Respects₂_; _Respects_; Decidable; Reflexive; Irreflexive; Transitive; Total; Antisymmetric; IsDecTotalOrder; IsTotalOrder; IsPartialOrder; IsPreorder)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; subst; cong; isEquivalence; sym; trans)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; subst; cong; isEquivalence; sym; trans; subst₂)
 open import Relation.Binary.Consequences using (trans∧tri⟶resp≈)
 open import Function using (_on_; _∘_; flip)
 
@@ -50,9 +50,11 @@ module RoutingLib.Data.Fin.Properties where
   -- Ordering properties --
   -------------------------
 
-  postulate toℕ-cancel-< : ∀ {n} {i j : Fin n} → toℕ i <ℕ toℕ j → i < j
+  toℕ-cancel-< : ∀ {n} {i j : Fin n} → toℕ i <ℕ toℕ j → i < j
+  toℕ-cancel-< i<j = i<j
   
-  postulate toℕ-mono-< : ∀ {n} {i j : Fin n} → i < j → toℕ i <ℕ toℕ j
+  toℕ-mono-< : ∀ {n} {i j : Fin n} → i < j → toℕ i <ℕ toℕ j
+  toℕ-mono-< i<j = i<j
   
   <⇒≤pred : ∀ {n} {i j : Fin n} → j < i → j ≤ pred i
   <⇒≤pred {_} {fzero} {_} ()
@@ -104,13 +106,6 @@ module RoutingLib.Data.Fin.Properties where
   fromℕ≤-mono-≤ (s≤s (s≤s i<n)) (s≤s (s≤s j<n)) (s≤s i≤j) =
     s≤s (fromℕ≤-mono-≤ (s≤s i<n) (s≤s j<n) i≤j)
 
-  postulate fromℕ≤-mono⁻¹-< : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
-                              fromℕ≤ i<n < fromℕ≤ j<n → i <ℕ j 
-  --------------------
-  -- Absorbing _+↑_ --
-  --------------------
-
-  
-  postulate +↑-comm : ∀ {n} → Commutative {A = Fin n} _≡_ _+↑_
-
-  postulate i∔j≡n : ∀ {n} {i j : Fin (suc n)} → n ≤ℕ toℕ (i + j) → i +↑ j ≡ fromℕ n
+  fromℕ≤-mono⁻¹-< : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
+                    fromℕ≤ i<n < fromℕ≤ j<n → i <ℕ j 
+  fromℕ≤-mono⁻¹-< i<n j<n i<j = subst₂ _<ℕ_ (toℕ-fromℕ≤ i<n) (toℕ-fromℕ≤ j<n) i<j

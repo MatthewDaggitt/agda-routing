@@ -24,6 +24,7 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Prelude
 
   open import RoutingLib.Routing.BellmanFord 𝓡𝓟 public
   import RoutingLib.Routing.BellmanFord.Properties 𝓡𝓟 as P
+  open import RoutingLib.Routing.BellmanFord.Properties 𝓡𝓟 public using (Iᵢⱼ≡0#)
   open import Data.List.Any.Membership S using (_∈_)
 
   n : ℕ
@@ -45,7 +46,7 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Prelude
   σXᵢᵢ≈σYᵢᵢ : ∀ X Y i → σ X i i ≈ σ Y i i
   σXᵢᵢ≈σYᵢᵢ = P.σXᵢᵢ≈σYᵢᵢ ⊕-sel ⊕-assoc ⊕-comm 1#-anᵣ-⊕
 
-
+  
   -----------------------------
   -- A sorted list of routes --
   -----------------------------

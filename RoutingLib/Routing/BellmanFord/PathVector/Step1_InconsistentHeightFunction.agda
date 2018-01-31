@@ -20,7 +20,6 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step1_InconsistentHeightFunctio
   where
 
   open Prelude 𝓟𝓢𝓒
-  --open import RoutingLib.Routing.BellmanFord.DistanceVector.Step1_HeightFunction 𝓡𝓟ᶜ 𝓢𝓒 using () renaming (hₘₐₓ to Hᶜ)
   
   ------------------------------------------------------------------------------
   -- Inconsistent length

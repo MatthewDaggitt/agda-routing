@@ -77,27 +77,29 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step3_ConsistentRouteMetric
     dᵣᶜ-bounded : ∃ λ n → ∀ {x y} (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → dᵣᶜ xᶜ yᶜ ≤ n
     dᵣᶜ-bounded = Hᶜ , λ xᶜ yᶜ → d≤H (toCRoute xᶜ) (toCRoute yᶜ)
 
-    dᵣᶜ-strContrOrbits : ∀ {X r s} → X r s ≉ σ X r s →
-                        (Xᶜ : 𝑪ₘ X) (σXᶜ : 𝑪ₘ (σ X)) (σ²Xᶜ : 𝑪ₘ (σ (σ X))) →
-                        (∀ {u v} → X u v ≉ σ X u v → dᵣᶜ (Xᶜ u v) (σXᶜ u v) ≤ dᵣᶜ (Xᶜ r s) (σXᶜ r s)) →
-                        ∀ i j → dᵣᶜ (σXᶜ i j) (σ²Xᶜ i j) < dᵣᶜ (Xᶜ r s) (σXᶜ r s)
-    dᵣᶜ-strContrOrbits {X} {r} {s} Xᵣₛ≉σXᵣₛ Xᶜ σXᶜ σ²Xᶜ dᵣᶜ≤dᵣᶜXᵣₛσXᵣₛ i j = begin
-      d (toCMatrix σXᶜ i j) (toCMatrix σ²Xᶜ i j) ≡⟨ d-cong toMσXᶜᵢⱼ≈σᶜX'ᵢⱼ toMσ²Xᶜᵢⱼ≈σᶜσX'ᵢⱼ ⟩
-      d (σᶜ X' i j)         (σᶜ σX' i j)         <⟨ d-strContr Xᵣₛ≉σXᵣₛ less i j ⟩
-      d (X' r s)            (σX' r s)           ≡⟨⟩
-      d (toCMatrix Xᶜ r s)  (toCMatrix σXᶜ r s) ∎
+
+    dᵣᶜ-strContr : ∀ {X Y r s} → X r s ≉ Y r s →
+                        (Xᶜ : 𝑪ₘ X) (Yᶜ : 𝑪ₘ Y) (σXᶜ : 𝑪ₘ (σ X)) (σYᶜ : 𝑪ₘ (σ Y)) →
+                        (∀ {u v} → X u v ≉ Y u v →
+                          dᵣᶜ (Xᶜ u v) (Yᶜ u v) ≤ dᵣᶜ (Xᶜ r s) (Yᶜ r s)) →
+                        ∀ i j → dᵣᶜ (σXᶜ i j) (σYᶜ i j) < dᵣᶜ (Xᶜ r s) (Yᶜ r s)
+    dᵣᶜ-strContr {X} {Y} {r} {s} Xᵣₛ≉Yᵣₛ Xᶜ Yᶜ σXᶜ σYᶜ dᵣᶜ≤dᵣᶜXᵣₛYᵣₛ i j = begin
+      d (toCMatrix σXᶜ i j) (toCMatrix σYᶜ i j) ≡⟨ d-cong σXᶜᵢⱼ≈σᶜX'ᵢⱼ σYᶜᵢⱼ≈σᶜY'ᵢⱼ ⟩
+      d (σᶜ X' i j)         (σᶜ Y' i j)         <⟨ d-strContr Xᵣₛ≉Yᵣₛ less i j ⟩
+      d (X' r s)            (Y' r s)            ≡⟨⟩
+      d (toCMatrix Xᶜ r s)  (toCMatrix Yᶜ r s)  ∎
       where
       
       open ≤-Reasoning
       
-      X'  = toCMatrix Xᶜ
-      σX' = toCMatrix σXᶜ
+      X' = toCMatrix Xᶜ
+      Y' = toCMatrix Yᶜ
       
-      toMσXᶜᵢⱼ≈σᶜX'ᵢⱼ : toCMatrix σXᶜ i j ≈ᶜ σᶜ X' i j
-      toMσXᶜᵢⱼ≈σᶜX'ᵢⱼ = σ-toCMatrix-commute Xᶜ σXᶜ i j
+      σXᶜᵢⱼ≈σᶜX'ᵢⱼ : toCMatrix σXᶜ i j ≈ᶜ σᶜ X' i j
+      σXᶜᵢⱼ≈σᶜX'ᵢⱼ = σ-toCMatrix-commute Xᶜ σXᶜ i j
 
-      toMσ²Xᶜᵢⱼ≈σᶜσX'ᵢⱼ : toCMatrix σ²Xᶜ i j ≈ᶜ σᶜ σX' i j
-      toMσ²Xᶜᵢⱼ≈σᶜσX'ᵢⱼ = σ-toCMatrix-commute σXᶜ σ²Xᶜ i j
-      
-      less : ∀ u v → X' u v ≉ᶜ σX' u v → d (X' u v) (σX' u v) ≤ d (X' r s) (σX' r s)
-      less u v X'ᵤᵥ≉σX'ᵤᵥ = dᵣᶜ≤dᵣᶜXᵣₛσXᵣₛ X'ᵤᵥ≉σX'ᵤᵥ
+      σYᶜᵢⱼ≈σᶜY'ᵢⱼ : toCMatrix σYᶜ i j ≈ᶜ σᶜ Y' i j
+      σYᶜᵢⱼ≈σᶜY'ᵢⱼ = σ-toCMatrix-commute Yᶜ σYᶜ i j
+
+      less : ∀ u v → X' u v ≉ᶜ Y' u v → d (X' u v) (Y' u v) ≤ d (X' r s) (Y' r s)
+      less u v X'ᵤᵥ≉σX'ᵤᵥ = dᵣᶜ≤dᵣᶜXᵣₛYᵣₛ X'ᵤᵥ≉σX'ᵤᵥ

@@ -1,14 +1,16 @@
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary using (_Preserves_⟶_; _Preserves₂_⟶_⟶_)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst₂; module ≡-Reasoning)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; trans; cong; cong₂; subst₂; module ≡-Reasoning)
 open import Data.List using (List; _∷_)
 open import Data.List.Any.Membership.Propositional using (_∈_)
 open import Data.Nat using (ℕ; suc; zero; z≤n; s≤s; _⊔_; _≤_; _≥_; _<_)
 open import Data.Nat.Properties using (m≤m⊔n; n≤m⊔n; <⇒≢; <⇒≤; <⇒≱; ≤+≢⇒<; ⊔-comm; ⊔-identityʳ; ⊔-mono-≤; ⊔-mono-<; ≤-total; ≤-reflexive; ≤-refl; ≤-trans)
 open import Data.Product using (∃; _,_)
 open import Data.Sum using (inj₁; inj₂)
+open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
 open import Function using (_∘_)
+import Relation.Binary.PartialOrderReasoning as PO-Reasoning
 
 open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique)
 open import RoutingLib.Data.List.Sorting using (Sorted)
@@ -32,7 +34,7 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric
   open Step1 𝓡𝓟 𝓢𝓒 using
     ( h
     ; h-resp-≈
-    ; h-cancel-≡
+    --; h-cancel-≡
     ; h-resp-<
     ; 1≤h
     ; h≤H
@@ -91,65 +93,73 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric
       h x ⊔ h y     ≡⟨ sym (⊔-identityʳ _) ⟩
       h x ⊔ h y ⊔ 0 ∎     
       where open ≤-Reasoning
-{- 
-    strIncr-lemma : ∀ f {x y} → x ≉ 0# → y ≈ 0# → h (f ▷ x) ⊔ h (f ▷ y) < h x ⊔ h y
-    strIncr-lemma f {x} {y} x≉0 y≈0 = begin
-      suc (h (f ▷ x) ⊔ h (f ▷ y))  ≡⟨ cong (λ v → suc (h (f ▷ x) ⊔ v)) (h-resp-≈ (▷-cong f y≈0)) ⟩
-      suc (h (f ▷ x) ⊔ h (f ▷ 0#)) ≡⟨ cong (λ v → suc (h (f ▷ x) ⊔ v)) (h-resp-≈ (0#-an-▷ f)) ⟩
-      suc (h (f ▷ x) ⊔ h 0#)       ≡⟨ cong suc (n≤m⇒m⊔n≡m (h-resp-≤ (0#-idₗ-⊕ _))) ⟩
-      suc (h (f ▷ x))              ≤⟨ h[fx]<h[x] f x≉0 ⟩
-      h x                          ≡⟨ sym (n≤m⇒m⊔n≡m (h-resp-≤ (0#-idₗ-⊕ _))) ⟩
-      h x            ⊔ h 0#        ≡⟨ cong (h x ⊔_) (h-resp-≈ (≈-sym y≈0)) ⟩
-      h x            ⊔ h y         ∎
-      where open ≤-Reasoning
-
-    
-    d-strContr : ∀ f {x y} → x ≉ y → d (f ▷ x) (f ▷ y) < d x y
-    d-strContr f {x} {y} x≉y with x ≟ y | f ▷ x ≟ f ▷ y
-    ... | yes x≈y | _           = contradiction x≈y x≉y
-    ... | no  _   | yes e▷x≈e▷y = m≤n⇒m≤n⊔o (h y) (1≤h x)
-    ... | no  _   | no  _       with x ≟ 0# | y ≟ 0#
-    ...   | yes x≈0 | yes y≈0 = contradiction (≈-trans x≈0 (≈-sym y≈0)) x≉y
-    ...   | yes x≈0 | no  y≉0 = subst₂ _<_ (⊔-comm (h (f ▷ y)) (h (f ▷ x))) (⊔-comm (h y) (h x)) (strIncr-lemma f y≉0 x≈0)
-    ...   | no  x≉0 | yes y≈0 = strIncr-lemma f x≉0 y≈0
-    ...   | no  x≉0 | no  y≉0 = ⊔-mono-< (h[fx]<h[x] f x≉0) (h[fx]<h[x] f y≉0)
-
-    d-mono : ∀ {x a b} → x ≤₊ a → x <₊ b → d x a ≤ d x b
-    d-mono {x} {a} {b} x≤a (x≤b , x≉b) with x ≟ a | x ≟ b
-    ... | yes _ | _       = z≤n
-    ... | no  _ | yes x≈b = contradiction x≈b x≉b
-    ... | no  _ | no  _   = ≤ℕ-reflexive (trans (n≤m⇒m⊔n≡m (h-resp-≤ x≤a)) (sym (n≤m⇒m⊔n≡m (h-resp-≤ x≤b))))
-
--}
 
 
+    dxy≡hx⊔hy : ∀ {x y} → x ≉ y → d x y ≡ h x ⊔ h y
+    dxy≡hx⊔hy {x} {y} x≉y with x ≟ y
+    ... | yes x≈y = contradiction x≈y x≉y
+    ... | no  _   = refl
+
+    σXᵢⱼ≉Iᵢⱼ : ∀ X {i j} x → i ≢ j → σ X i j <₊ x → σ X i j ≉ I i j
+    σXᵢⱼ≉Iᵢⱼ X {i} {j} x i≢j (σXᵢⱼ≤x , σXᵢⱼ≉x) σXᵢⱼ≈Iᵢⱼ =
+      σXᵢⱼ≉x (≤₊-antisym σXᵢⱼ≤x (begin
+        x         ≤⟨ 0#-idₗ-⊕ _ ⟩
+        0#        ≈⟨ ≈-sym (≈-reflexive (Iᵢⱼ≡0# (i≢j ∘ sym))) ⟩
+        I i j     ≈⟨ ≈-sym σXᵢⱼ≈Iᵢⱼ ⟩
+        σ X i j   ∎))
+      where open PO-Reasoning ≤₊-poset
+      
     d-strContr2-lemma : ∀ {X Y r s} →
                         (∀ u v → X u v ≉ Y u v → d (X u v) (Y u v) ≤ h (X r s) ⊔ h (Y r s)) →
-                        ∀ {i j} → h (σ Y i j) < h (σ X i j) →
+                        ∀ {i j} → σ X i j <₊ σ Y i j →
                         h (σ X i j) ⊔ h (σ Y i j) < h (X r s) ⊔ h (Y r s)
-    d-strContr2-lemma {X} {Y} {r} {s} d≤hXᵣₛ⊔hYᵣₛ {i} {j} hσXᵢⱼ<hσYᵢⱼ with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
-    ... | inj₂ σXᵢⱼ≈Iᵢⱼ = contradiction (h-resp-≤ {!!}) (<⇒≱ hσXᵢⱼ<hσYᵢⱼ)
-    ... | inj₁ (k , σXᵢⱼ≈AᵢₖXₖⱼ) = begin
-      h (σ X i j) ⊔ h (σ Y i j)   ≡⟨ {!m≤n⇒n⊔m≡m ?!} ⟩
-      h (σ X i j)                 <⟨ {!!} ⟩
-      h (A i k ▷ X k j)           ≡⟨ {!!} ⟩
-      h (X k j)                   ≤⟨ {!!} ⟩
-      h (X k j)                   ≤⟨ {!!} ⟩
-      d (X k j) (Y k j)           ≤⟨ {!!} ⟩
-      h (X r s)   ⊔ h (Y r s)     ∎
-      where open ≤-Reasoning
-{-
+    d-strContr2-lemma {X} {Y} {r} {s} d≤hXᵣₛ⊔hYᵣₛ {i} {j} (σXᵢⱼ≤σYᵢⱼ , σXᵢⱼ≉σYᵢⱼ)
+      with i ≟𝔽 j
+    ... | yes refl = contradiction (σXᵢᵢ≈σYᵢᵢ X Y i) σXᵢⱼ≉σYᵢⱼ
+    ... | no  i≢j with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
+    ...   | inj₂ σXᵢⱼ≈Iᵢⱼ = contradiction σXᵢⱼ≈Iᵢⱼ (σXᵢⱼ≉Iᵢⱼ X (σ Y i j) i≢j ((σXᵢⱼ≤σYᵢⱼ , σXᵢⱼ≉σYᵢⱼ)))
+        where open PO-Reasoning ≤₊-poset
+    ...   | inj₁ (k , σXᵢⱼ≈AᵢₖXₖⱼ) = begin
+      h (σ X i j) ⊔ h (σ Y i j)   ≡⟨ n≤m⇒m⊔n≡m (h-resp-≤ σXᵢⱼ≤σYᵢⱼ) ⟩
+      h (σ X i j)                 ≡⟨ h-resp-≈ σXᵢⱼ≈AᵢₖXₖⱼ ⟩
+      h (A i k ▷ X k j)           <⟨ h-resp-< (⊕-almost-strictly-absorbs-▷ (A i k) Xₖⱼ≉0) ⟩
+      h (X k j)                   ≤⟨ m≤m⊔n (h (X k j)) (h (Y k j)) ⟩
+      h (X k j) ⊔ h (Y k j)       ≡⟨ sym (dxy≡hx⊔hy Xₖⱼ≉Yₖⱼ) ⟩
+      d (X k j) (Y k j)           ≤⟨ d≤hXᵣₛ⊔hYᵣₛ k j Xₖⱼ≉Yₖⱼ ⟩
+      h (X r s) ⊔ h (Y r s)     ∎
+      where
+
+      Xₖⱼ≉0 : X k j ≉ 0#
+      Xₖⱼ≉0 Xₖⱼ≈0# = σXᵢⱼ≉σYᵢⱼ (≤₊-antisym σXᵢⱼ≤σYᵢⱼ (begin
+        σ Y i j       ≤⟨ 0#-idₗ-⊕ _ ⟩
+        0#            ≈⟨ ≈-sym (0#-an-▷ (A i k)) ⟩
+        A i k ▷ 0#    ≈⟨ ▷-cong (A i k) (≈-sym Xₖⱼ≈0#) ⟩
+        A i k ▷ X k j ≈⟨ ≈-sym σXᵢⱼ≈AᵢₖXₖⱼ ⟩
+        σ X i j       ∎))
+        where open PO-Reasoning ≤₊-poset
+        
+      Xₖⱼ≉Yₖⱼ : X k j ≉ Y k j
+      Xₖⱼ≉Yₖⱼ Xₖⱼ≈Yₖⱼ = σXᵢⱼ≉σYᵢⱼ (≤₊-antisym σXᵢⱼ≤σYᵢⱼ (begin
+        σ Y i j       ≤⟨ σXᵢⱼ≤Aᵢₖ▷Xₖⱼ Y i j k ⟩
+        A i k ▷ Y k j ≈⟨ ▷-cong (A i k) (≈-sym Xₖⱼ≈Yₖⱼ) ⟩
+        A i k ▷ X k j ≈⟨ ≈-sym σXᵢⱼ≈AᵢₖXₖⱼ ⟩
+        σ X i j       ∎))
+        where open PO-Reasoning ≤₊-poset
+        
+      open ≤-Reasoning
+
+
     d-strContr : ∀ {X Y r s} → X r s ≉ Y r s →
                   (∀ u v → X u v ≉ Y u v → d (X u v) (Y u v) ≤ d (X r s) (Y r s)) →
-                  ∀ i j → d (σ X i j) (σ Y i j) < d (X r s) (Y r s) 
+                  ∀ i j → d (σ X i j) (σ Y i j) < d (X r s) (Y r s)
     d-strContr {X} {Y} {r} {s} Xᵣₛ≉Yᵣₛ d≤dXᵣₛYᵣₛ i j with X r s ≟ Y r s | σ X i j ≟ σ Y i j
     ... | yes Xᵣₛ≈Yᵣₛ | _            = contradiction Xᵣₛ≈Yᵣₛ Xᵣₛ≉Yᵣₛ
     ... | no  _      | yes σXᵢⱼ≈σYᵢⱼ = m≤n⇒m≤n⊔o (h (Y r s)) (1≤h (X r s))
-    ... | no  _      | no  σXᵢⱼ≉σYᵢⱼ with ≤-total (h (σ Y i j)) (h (σ X i j))
-    ...   | inj₁ hσYᵢⱼ≤hσXᵢⱼ = d-strContr2-lemma d≤dXᵣₛYᵣₛ (≤+≢⇒< hσYᵢⱼ≤hσXᵢⱼ (σXᵢⱼ≉σYᵢⱼ ∘ h-cancel-≡ ∘ sym))
-    ...   | inj₂ hσXᵢⱼ≤hσYᵢⱼ = begin
+    ... | no  _      | no  σXᵢⱼ≉σYᵢⱼ with ≤₊-total (σ X i j) (σ Y i j)
+    ...   | inj₁ σXᵢⱼ≤σYᵢⱼ = d-strContr2-lemma d≤dXᵣₛYᵣₛ (σXᵢⱼ≤σYᵢⱼ , σXᵢⱼ≉σYᵢⱼ)
+    ...   | inj₂ σXᵢⱼ≤σYᵢⱼ = begin
       h (σ X i j) ⊔ h (σ Y i j) ≡⟨ ⊔-comm (h (σ X i j)) (h (σ Y i j)) ⟩
-      h (σ Y i j) ⊔ h (σ X i j) <⟨ d-strContr2-lemma d≤dYᵣₛXᵣₛ (≤+≢⇒< hσXᵢⱼ≤hσYᵢⱼ (σXᵢⱼ≉σYᵢⱼ ∘ h-cancel-≡)) ⟩
+      h (σ Y i j) ⊔ h (σ X i j) <⟨ d-strContr2-lemma d≤dYᵣₛXᵣₛ (σXᵢⱼ≤σYᵢⱼ , (σXᵢⱼ≉σYᵢⱼ ∘ ≈-sym)) ⟩
       h (Y r s)   ⊔ h (X r s)   ≡⟨ ⊔-comm (h (Y r s)) (h (X r s)) ⟩
       h (X r s)   ⊔ h (Y r s)   ∎
       where
@@ -158,8 +168,7 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric
       d≤dYᵣₛXᵣₛ : ∀ u v → Y u v ≉ X u v → d (Y u v) (X u v) ≤ h (Y r s) ⊔ h (X r s)
       d≤dYᵣₛXᵣₛ u v Yᵤᵥ≉Xᵤᵥ
         rewrite d-sym (Y u v) (X u v) | ⊔-comm (h (Y r s)) (h (X r s))
-        = d≤dXᵣₛYᵣₛ u v (Yᵤᵥ≉Xᵤᵥ ∘ ≈-sym) 
-
+        = d≤dXᵣₛYᵣₛ u v (Yᵤᵥ≉Xᵤᵥ ∘ ≈-sym)
 
     d≤H : ∀ x y → d x y ≤ H
     d≤H x y with x ≟ y
@@ -183,4 +192,3 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric
     { d             = d
     ; isUltrametric = d-isUltrametric
     }
--}

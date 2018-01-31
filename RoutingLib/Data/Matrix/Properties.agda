@@ -118,12 +118,14 @@ module RoutingLib.Data.Matrix.Properties where
   max⁺[M]≡x {M = M} (i , j , x≈Mᵢⱼ) M≤x = ≤-antisym (max⁺[M]≤x M≤x) (x≤max⁺[M] M (i , j , ≤-reflexive x≈Mᵢⱼ))
 
 
+{-
   postulate max⁺[M]≤max⁺[N] : ∀ {m n} {M N : Matrix ℕ (suc m) (suc n)} → Pointwise _≤_ M N → max⁺ M ≤ max⁺ N
   --max⁺[M]≤max⁺[N] = {!!}
 
   postulate max⁺[M]-distrib-⊔ : ∀ {m n} (M N : Matrix ℕ (suc m) (suc n)) →
                                 max⁺ M ⊔ max⁺ N ≡ max⁺ (zipWith _⊔_ M N) 
-  
+-}
+
   zipWith-sym : ∀ {a b ℓ} {A : Set a} {B : Set b} (_≈_ : Rel B ℓ)
                 {f : A → A → B} → (∀ x y → f x y ≈ f y x) →
                 ∀ {m n} (s t : Matrix A m n) → Pointwise _≈_ (zipWith f s t) (zipWith f t s)

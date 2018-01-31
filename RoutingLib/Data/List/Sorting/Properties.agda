@@ -1,7 +1,7 @@
 open import Data.Nat using (ℕ; z≤n; s≤s; suc; ≤-pred) renaming (_<_ to _<ℕ_; _≤_ to _≤ℕ_)
 open import Data.Nat.Properties using (≤+≢⇒<)
 open import Data.Fin using (zero; suc) renaming (_≤_ to _≤𝔽_; _<_ to _<𝔽_)
-open import Data.List using (_∷_; length)
+open import Data.List using ([]; _∷_; length)
 open import Data.List.All as All using (All; []; _∷_)
 open import Data.List.Any using (here; there; index)
 open import Data.Product using (_,_; proj₁; proj₂; uncurry′)
@@ -15,7 +15,7 @@ open import RoutingLib.Data.List.All using (AllPairs; []; _∷_) using (allPairs
 open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
 open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (perm!)
 open import RoutingLib.Data.List.Permutation.Properties using (⇿-sym; ⇿-length)
-open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-perm)
+open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-perm; ∈-lookup)
 open import RoutingLib.Data.Nat.Properties using (≤⇒≯)
 
 module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTotalOrder a ℓ₁ ℓ₂) where
@@ -40,43 +40,24 @@ module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTot
   ↗-∈ʳ : ∀ {x xs ys} → x ∈ ys → xs ↗ ys → x ∈ xs
   ↗-∈ʳ x∈ys (sorting xs⇿ys _) = ∈-perm S x∈ys (⇿-sym xs⇿ys)
 
-  postulate ↗-All : ∀ {p} {P : Pred A p} {xs ys} → xs ↗ ys → All P xs → All P ys
+  private
+
+    lemma : ∀ {x y xs} → All (x ≤_) xs → y ∈ xs → x ≤ y
+    lemma [] ()
+    lemma (px ∷ xs) (here  x≈z)  = proj₁ ≤-resp-≈ (≈-sym x≈z) px
+    lemma (px ∷ xs) (there y∈xs) = lemma xs y∈xs
+    
+  lookup-mono-≤ : ∀ {xs} → Sorted xs → ∀ {i j} → i ≤𝔽 j → lookup xs i ≤ lookup xs j
+  lookup-mono-≤ {[]}     xs↗ {()}
+  lookup-mono-≤ {x ∷ xs} (x≤xs ∷ xs↗) {zero}  {zero}  z≤n = refl
+  lookup-mono-≤ {x ∷ xs} (x≤xs ∷ xs↗) {zero}  {suc j} z≤n = lemma x≤xs (∈-lookup S xs j)
+  lookup-mono-≤ {x ∷ xs} (x≤xs ∷ xs↗) {suc i} {zero}  ()
+  lookup-mono-≤ {x ∷ xs} (x≤xs ∷ xs↗) {suc i} {suc j} (s≤s i≤j) = lookup-mono-≤ xs↗ i≤j
   
-
-
-
-
-
-  postulate lookup-mono-≤ : ∀ {xs} → Sorted xs → ∀ {i j} → i ≤𝔽 j → lookup xs i ≤ lookup xs j
-  
-  postulate lookup-mono⁻¹-< : ∀ {xs} → Sorted xs → Unique S xs →
-                              ∀ {i j} → lookup xs i < lookup xs j → i <𝔽 j
-
-  postulate index-mono-< : ∀ {xs} → Sorted xs → ∀ {x y} (x∈xs : x ∈ xs) (y∈xs : y ∈ xs) → x < y → index x∈xs <𝔽 index y∈xs
-  
-  {-
-  lookup-mono-≤ []         {()}
-  lookup-mono-≤ (x↗ ∷ xs↗) {zero}  i≤j = All.lookup {!!} {!!}
-  lookup-mono-≤ (x↗ ∷ xs↗) {suc i} i≤j = {!lookup-mono-0!}
-  -}
-{-
-  ↗-indexOf-mono-< : ∀ {xs} → Sorted xs → ∀ {x y} (x∈xs : x ∈ xs) (y∈xs : y ∈ xs) → x < y → indexOf x∈xs <ℕ indexOf y∈xs
-  ↗-indexOf-mono-< ↗xs          (here x≈z)   (here y≈z)  x<y          = contradiction x<y (<-irrefl (≈-trans x≈z (≈-sym y≈z)))
-  ↗-indexOf-mono-< ↗xs          (here x≈z)    (there y∈xs) x<y         = s≤s z≤n
-  ↗-indexOf-mono-< (z≤xs ∷ ↗xs) (there x∈xs) (here  y≈z)  (x≤y , x≉y) = contradiction (antisym x≤y (proj₂ ≤-resp-≈ (≈-sym y≈z) (lookupₐ (proj₁ ≤-resp-≈) z≤xs x∈xs))) x≉y
-  ↗-indexOf-mono-< (_ ∷ ↗xs)    (there x∈xs) (there y∈xs) x<y         = s≤s (↗-indexOf-mono-< ↗xs x∈xs y∈xs x<y)
--}
-
-
-{-
-
-  indexOf-revMono-≤ _          (here x≈z)   (here y≈z)   _      = reflexive (≈-trans x≈z (≈-sym y≈z))
-  indexOf-revMono-≤ (z≤xs ∷ _) (here x≈z)   (there y∈xs) _      = lookupₐ (proj₁ ≤-resp-≈) (mapₐ (proj₂ ≤-resp-≈ (≈-sym x≈z)) z≤xs) y∈xs
-  index-revMono-≤ _          (there x∈xs) (here y≈z)   ()
-  indexOf-revMono-≤ (_ ∷ ↗xs)  (there x∈xs) (there y∈xs) index≤ = ↗-indexOf-revMono-≤ ↗xs x∈xs y∈xs (≤-pred index≤)
-
-  ↗-indexOf-⊤ : ∀ {xs} → Sorted xs → Unique S xs → ∀ {x} → (x∈xs : x ∈ xs) → All (_≤ x) xs → suc (indexOf x∈xs) ≡ length xs
-  ↗-indexOf-⊤ (_         ∷ [])  _                      (here _)     (_ ∷ [])        = ≡-refl
-  ↗-indexOf-⊤ ((z≤y ∷ _) ∷ _)   ((z≉y ∷ _) ∷ (_ ∷ _)) (here x≈z)   (_ ∷ (y≤x ∷ _)) = contradiction (antisym z≤y (proj₁ ≤-resp-≈ x≈z y≤x)) z≉y
-  ↗-indexOf-⊤ (_         ∷ ↗xs) (_ ∷ xs!)             (there x∈xs) (_ ∷ xs≤x)       = cong suc (↗-indexOf-⊤ ↗xs xs! x∈xs xs≤x)
--}
+  index-mono-< : ∀ {xs} → Sorted xs → ∀ {x y} (x∈xs : x ∈ xs) (y∈xs : y ∈ xs) →
+                 x < y → index x∈xs <𝔽 index y∈xs
+  index-mono-< []           ()
+  index-mono-< (x≤xs ∷ xs↗) (here x≈z)   (here y≈z) (x≤y , x≉y) = contradiction (≈-trans x≈z (≈-sym y≈z)) x≉y
+  index-mono-< (x≤xs ∷ xs↗) (here x≈z)   (there y∈xs) (x≤y , x≉y) = s≤s z≤n
+  index-mono-< (x≤xs ∷ xs↗) (there x∈xs) (here y≈z)    (x≤y , x≉y) = contradiction (antisym x≤y (proj₂ ≤-resp-≈ (≈-sym y≈z) (lemma x≤xs x∈xs))) x≉y
+  index-mono-< (x≤xs ∷ xs↗) (there x∈xs) (there y∈xs) x<y = s≤s (index-mono-< xs↗ x∈xs y∈xs x<y)

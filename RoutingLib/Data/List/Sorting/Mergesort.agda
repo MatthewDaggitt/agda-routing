@@ -29,12 +29,3 @@ module RoutingLib.Data.List.Sorting.Mergesort {a ℓ₁ ℓ₂} (DTO : DecTotalO
   postulate ∈-mergesort⁻ : ∀ {x xs} → x ∈ mergesort xs → x ∈ xs
 
   postulate All-mergesort⁺ : ∀ {p} (P : Pred A p) {xs} → All P xs → All P (mergesort xs)
-  
-  --postulate mergesort :
-
-
-  {-
-  mergesort []       = []
-  mergesort (x ∷ xs) with splitAt ⌈ length (x ∷ xs) /2⌉ (x ∷ xs)
-  ... | ls , rs = merge total {!mergesort ls!} {!!}
-  -}

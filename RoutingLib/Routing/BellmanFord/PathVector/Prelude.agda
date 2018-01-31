@@ -1,5 +1,6 @@
 open import Algebra.FunctionProperties using (Op₂; Selective; Congruent₂)
 open import Data.Nat using (ℕ; _<_; z≤n; s≤s; zero; suc)
+open import Data.Nat.Properties using (≤-reflexive)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Dec using (¬∀⟶∃¬; all?)
@@ -20,6 +21,8 @@ open import Relation.Binary.List.Pointwise using ([]; _∷_) renaming (Rel to Li
 open import Relation.Unary using () renaming (Decidable to DecidableU)
 import Relation.Binary.On as On
 import Relation.Binary.EqReasoning as EqReasoning
+open import Induction.WellFounded using (Acc; acc)
+open import Induction.Nat using () renaming (<-well-founded to <-wellFounded)
 
 open import RoutingLib.Data.Graph.SimplePath2 using (SimplePath; valid; invalid; []; _∷ₐ_; _∷_∣_∣_; length; _⇿_; _∈_) renaming (_≈_ to _≈ₚ_)
 open import RoutingLib.Data.Graph.SimplePath2.Properties using (ℙₛ; length-cong; length<n; ∷ₐ-accept; ∷ₐ-reject; ∷ₐ-cong; ∷ₐ-length) renaming (≈-sym to ≈ₚ-sym; ≈-trans to ≈ₚ-trans; ≈-reflexive to ≈ₚ-reflexive)
@@ -376,11 +379,40 @@ module RoutingLib.Routing.BellmanFord.PathVector.Prelude
   ⊕ᶜ-strictlyAbsorbs-▷ᶜ : ∀ (s : CStep) {r : CRoute} → r ≉ᶜ (0# , 0ᶜ) → ((s ▷ᶜ r) ⊕ᶜ r ≈ᶜ r) × (r ≉ᶜ (s ▷ᶜ r))
   ⊕ᶜ-strictlyAbsorbs-▷ᶜ (i , j) r≉0 = ⊕-strictlyAbsorbs-▷ (A i j) r≉0
 
+  -----------------------------
+  -- Inconsistent properties --
+  -----------------------------
+  
   σXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ : ∀ X i j → 𝑰 (σ X i j) → ∃ λ k → σ X i j ≈ A i k ▷ X k j × 𝑰 (X k j)
   σXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ X i j σXᵢⱼⁱ with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
   ... | inj₁ (k , σXᵢⱼ≈Aᵢₖ▷Xₖⱼ) = k , σXᵢⱼ≈Aᵢₖ▷Xₖⱼ , ▷-forces-𝑰 (𝑰-cong σXᵢⱼ≈Aᵢₖ▷Xₖⱼ σXᵢⱼⁱ)
   ... | inj₂ σXᵢⱼ≈Iᵢⱼ           = contradiction (𝑪-cong (≈-sym σXᵢⱼ≈Iᵢⱼ) (Iᶜ i j)) σXᵢⱼⁱ
-    
+
+  σXᵢⱼⁱ⇒Xₖⱼⁱ≉σXₖⱼ : ∀ X i j → 𝑰 (σ X i j) → ∃ λ k → X k j ≉ σ X k j × 𝑰 (X k j)
+  σXᵢⱼⁱ⇒Xₖⱼⁱ≉σXₖⱼ X i j σXᵢⱼⁱ = reduction i σXᵢⱼⁱ (<-wellFounded (size (σ X i j)))
+    where
+    open ≤-Reasoning
+    reduction : ∀ l → 𝑰 (σ X l j) → Acc _<_ (size (σ X l j)) →
+                ∃ λ k → X k j ≉ σ X k j × 𝑰 (X k j)
+    reduction l σXₗⱼⁱ (acc rec) with σXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ X _ _ σXₗⱼⁱ
+    ... | (k , σXₗⱼ≈AₗₖXₖⱼ , Xₖⱼⁱ) with X k j ≟ σ X k j
+    ...   | no  Xₖⱼ≉σXₖⱼ = k , Xₖⱼ≉σXₖⱼ , Xₖⱼⁱ
+    ...   | yes Xₖⱼ≈σXₖⱼ = reduction k (𝑰-cong Xₖⱼ≈σXₖⱼ Xₖⱼⁱ) (rec (size (σ X k j)) (begin
+      size (σ X k j)         ≡⟨ size-cong (≈-sym Xₖⱼ≈σXₖⱼ) ⟩
+      size (X k j)           <⟨ ≤-reflexive (size-incr (𝑰-cong σXₗⱼ≈AₗₖXₖⱼ σXₗⱼⁱ)) ⟩
+      size (A l k ▷ X k j)   ≡⟨ size-cong (≈-sym σXₗⱼ≈AₗₖXₖⱼ) ⟩
+      size (σ X l j)         ∎))
+        
+  fixedᶜ : ∀ {X} → σ X ≈ₘ X → 𝑪ₘ X
+  fixedᶜ {X} σX≈X with 𝑪ₘ? (σ X)
+  ... | yes σXᶜ = 𝑪ₘ-cong σX≈X σXᶜ
+  ... | no  σXⁱ with 𝑰ₘ-witness σXⁱ
+  ...   | i , j , σXᵢⱼⁱ with σXᵢⱼⁱ⇒Xₖⱼⁱ≉σXₖⱼ X _ _ σXᵢⱼⁱ
+  ...     | k , Xₖⱼ≉σXₖⱼ , _ = contradiction (≈-sym (σX≈X k j)) Xₖⱼ≉σXₖⱼ
+
+  
+          
+  
 
   open Membership Sᶜ using () renaming (_∈_ to _∈ₗ_)
   open RMembership DSᶜ using (deduplicate)

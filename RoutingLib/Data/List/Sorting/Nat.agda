@@ -28,5 +28,4 @@ module RoutingLib.Data.List.Sorting.Nat where
   between-↗ : ∀ e s → Sorted (between e s)
   between-↗ e s = AllPairs-applyBetween⁺₁ id e s (λ _ i<j _ → <⇒≤ i<j)
 
-  postulate index-mono⁻¹-< : ∀ {xs} → Sorted xs → Unique xs →
-                           ∀ {i j} → lookup xs i < lookup xs j → i <𝔽 j
+  postulate index-mono⁻¹-< : ∀ {xs} → Sorted xs → Unique xs → ∀ {i j} → lookup xs i < lookup xs j → i <𝔽 j

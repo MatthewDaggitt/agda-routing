@@ -2,7 +2,7 @@ open import Data.Product using (∃; _,_; _×_)
 open import Data.Sum using (_⊎_; inj₁; inj₂; [_,_]′; map)
 open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _<_; _≤_; _⊔_)
 open import Data.Nat.Properties
-  using (≤-refl; ≤-reflexive; ≤-total; <-transˡ; <-transʳ; ⊔-comm; ⊔-identityʳ; ⊔-idem; m≤m⊔n; <⇒≯; <⇒≤)
+  using (≤-refl; ≤-reflexive; ≤-total; <-transˡ; <-transʳ; ⊔-comm; ⊔-identityʳ; ⊔-idem; m≤m⊔n; <⇒≯; <⇒≤; n≤m⊔n)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Subset using (Subset; _∈_; _∉_; ⁅_⁆; ⊤)
 open import Data.Fin.Subset.Properties using (x∈p∩q⁺; x∈⁅x⁆; ∈⊤)
@@ -76,9 +76,11 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step2_InconsistentRouteMetric
     dᵣⁱ-bounded = Hⁱ , dᵣⁱ≤Hⁱ
     
 
+    open ≤-Reasoning
+    
     private
     
-      open ≤-Reasoning
+      
 
       chain₁ : ∀ X i j → 𝑰 (σ X i j) → ∃ λ k → 𝑰 (X k j) × hⁱ (σ X i j) < hⁱ (X k j) ⊔ hⁱ (σ X k j)
       chain₁ X i j σXᵢⱼⁱ with σXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ X _ _ σXᵢⱼⁱ
@@ -154,3 +156,20 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step2_InconsistentRouteMetric
     xᶜyᶜzⁱ⇒dᵣⁱxz≤dᵣⁱyz : ∀ {x y z} → 𝑪 x → 𝑪 y → 𝑰 z → dᵣⁱ x z ≤ dᵣⁱ y z
     xᶜyᶜzⁱ⇒dᵣⁱxz≤dᵣⁱyz {x} {y} {z} xᶜ yᶜ zⁱ =
       subst₂ _≤_ (dᵣⁱ-sym z x) (dᵣⁱ-sym z y) (xⁱyᶜzᶜ⇒dᵣⁱxz≤dᵣⁱxy zⁱ yᶜ xᶜ)
+
+
+
+
+
+
+    dᵣⁱ-strContrᶜ : ∀ X Y {r s} → 𝑪ₘ X →
+                   (∀ {u v} → X u v ≉ Y u v → 𝑰 (X u v) ⊎ 𝑰 (Y u v) → dᵣⁱ (X u v) (Y u v) ≤ dᵣⁱ (X r s) (Y r s)) → 
+                   ∀ {i j} → 𝑰 (σ Y i j) → dᵣⁱ (σ X i j) (σ Y i j) < dᵣⁱ (X r s) (Y r s)
+    dᵣⁱ-strContrᶜ X Y {r} {s} Xᶜ dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ {i} {j} σYᵢⱼⁱ with σXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ Y _ _ σYᵢⱼⁱ
+    ... | k , σYᵢⱼ≈Aᵢₖ▷Yₖⱼ , Yₖⱼⁱ = begin
+      hⁱ (σ X i j) ⊔ hⁱ (σ Y i j) ≡⟨ m≤n⇒m⊔n≡n (<⇒≤ (h[sᶜ]<h[rⁱ] (σ-pres-𝑪ₘ Xᶜ i j) σYᵢⱼⁱ)) ⟩
+      hⁱ (σ Y i j)            ≡⟨ hⁱ-cong σYᵢⱼ≈Aᵢₖ▷Yₖⱼ ⟩
+      hⁱ (A i k ▷ Y k j)      <⟨ hⁱ-decr (𝑰-cong σYᵢⱼ≈Aᵢₖ▷Yₖⱼ σYᵢⱼⁱ) ⟩
+      hⁱ (Y k j)              ≤⟨ n≤m⊔n (hⁱ (X k j)) (hⁱ (Y k j)) ⟩
+      hⁱ (X k j) ⊔ hⁱ (Y k j) ≤⟨ dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ (Yₖⱼⁱ ∘ (λ Xₖⱼ≈Yₖⱼ → 𝑪-cong Xₖⱼ≈Yₖⱼ (Xᶜ k j))) (inj₂ Yₖⱼⁱ) ⟩
+      hⁱ (X r s) ⊔ hⁱ (Y r s) ∎

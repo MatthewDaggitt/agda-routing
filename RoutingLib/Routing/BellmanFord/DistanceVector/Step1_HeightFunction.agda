@@ -46,9 +46,6 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step1_HeightFunction
     
     h-resp-≈ : ∀ {u v} → u ≈ v → h u ≡ h v
     h-resp-≈ u≈v = cong (suc ∘ toℕ) (index-cong S u≈v (∈-routes _) (∈-routes _) routes!)
-
-    postulate h-cancel-≡ : ∀ {u v} → h u ≡ h v → u ≈ v
-    --h-cancel-≡ hᵤ≈hᵥ = ?
     
     h-resp-< : ∀ {u v} → u <₊ v → h v < h u
     h-resp-< (u≤v , u≉v) = s≤s (toℕ-mono-< (index-mono-< routes↗ (∈-routes _) (∈-routes _) (u≤v , u≉v ∘ ≈-sym)))

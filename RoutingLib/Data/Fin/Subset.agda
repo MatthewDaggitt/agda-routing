@@ -1,9 +1,9 @@
 open import Data.Nat using (ℕ; zero; suc; _<_)
-open import Data.Fin using (Fin; zero)
+open import Data.Fin using (Fin; zero; suc)
 open import Data.Fin.Subset
 open import Data.Bool using (_≟_)
-open import Data.Vec using ([]; _∷_)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
+open import Data.Vec using ([]; _∷_; here; there)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 
 
 open import RoutingLib.Data.Vec using (count)
@@ -24,4 +24,4 @@ module RoutingLib.Data.Fin.Subset where
 
   postulate i∉p\\q⇒i∉p : ∀ {n} {p q : Subset n} {i} → i ∉ p \\ q → i ∉ q → i ∉ p
 
-  postulate i∉⁅j⁆ : ∀ {n} {i j : Fin n} → i ≢ j → i ∉ ⁅ j ⁆ 
+  postulate i∉⁅j⁆ : ∀ {n} {i j : Fin n} → i ≢ j → i ∉ ⁅ j ⁆

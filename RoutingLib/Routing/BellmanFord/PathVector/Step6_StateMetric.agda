@@ -46,7 +46,8 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step6_StateMetric
   open Ultrametric dₜ-ultrametric using () renaming
     ( d       to dₜ
     ; eq⇒0 to x≈y⇒dₜ≡0
-    )
+    ; isUltrametric to dₜ-isUltrametric
+    ) public
   
   dₜ-bounded : Bounded ℝ𝕋ₛ dₜ  
   dₜ-bounded = MaxLift.bounded (λ _ → S) dᵣ dᵣ-bounded
@@ -59,62 +60,97 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step6_StateMetric
   -- State metric --
   ------------------
   
-  dₛ-ultrametric : Ultrametric _
-  dₛ-ultrametric = MaxLift.ultrametric {n = n} (λ _ → _) (λ _ → dₜ-ultrametric)
+  D-ultrametric : Ultrametric _
+  D-ultrametric = MaxLift.ultrametric {n = n} (λ _ → _) (λ _ → dₜ-ultrametric)
 
-  open Ultrametric dₛ-ultrametric public using ()
+  open Ultrametric D-ultrametric public using ()
     renaming
-    ( d to dₛ
-    ; 0⇒eq to dₛ≡0⇒X≈Y
-    ; eq⇒0 to X≈Y⇒dₛ≡0
-    ; sym to dₛ-sym
+    ( d to D
+    ; cong to D-cong
+    ; 0⇒eq to D≡0⇒X≈Y
+    ; eq⇒0 to X≈Y⇒D≡0
+    ; sym to D-sym
     )
 
-  dₛ-bounded : Bounded ℝ𝕄ₛ dₛ  
-  dₛ-bounded = MaxLift.bounded (λ _ → ℝ𝕋ₛ) dₜ dₜ-bounded
+  D-bounded : Bounded ℝ𝕄ₛ D  
+  D-bounded = MaxLift.bounded (λ _ → ℝ𝕋ₛ) dₜ dₜ-bounded
 
 
 
   -- Strictly contracting
   
-  dₛ-eqStrContracting : ∀ {X Y} → Y ≉ₘ X → dₛ (σ X) (σ Y) ≡ 0 → dₛ (σ X) (σ Y) < dₛ X Y
-  dₛ-eqStrContracting {X} {Y} Y≉X d[σX,σY]≡0 = begin
-    dₛ (σ X) (σ Y) ≡⟨ d[σX,σY]≡0 ⟩
-    0              <⟨ n≢0⇒0<n (Y≉X ∘ ≈ₘ-sym ∘ dₛ≡0⇒X≈Y) ⟩
-    dₛ X Y         ∎
-    where open ≤-Reasoning
-    
-  dₘ-strContrOrbits : _StrContrOnOrbitsOver_ ℝ𝕄ₛ σ  dₛ
-  dₘ-strContrOrbits {X} σX≉X with max[t]∈t 0 (λ i → dₜ (X i) (σ X i))
-  ... | inj₁ dXσX≡0              = contradiction (≈ₘ-sym (dₛ≡0⇒X≈Y dXσX≡0)) σX≉X
-  ... | inj₂ (r , dₛXσX≡dₜXᵣσXᵣ) with max[t]∈t 0 (λ i → dᵣ (X r i) (σ X r i))
-  ...   | inj₁ dXᵣσXᵣ≡0               = contradiction (≈ₘ-sym (dₛ≡0⇒X≈Y (trans dₛXσX≡dₜXᵣσXᵣ dXᵣσXᵣ≡0))) σX≉X
+  D-strContrOrbits : _StrContrOnOrbitsOver_ ℝ𝕄ₛ σ  D
+  D-strContrOrbits {X} σX≉X with max[t]∈t 0 (λ i → dₜ (X i) (σ X i))
+  ... | inj₁ dXσX≡0              = contradiction (≈ₘ-sym (D≡0⇒X≈Y dXσX≡0)) σX≉X
+  ... | inj₂ (r , DXσX≡dₜXᵣσXᵣ) with max[t]∈t 0 (λ i → dᵣ (X r i) (σ X r i))
+  ...   | inj₁ dXᵣσXᵣ≡0               = contradiction (≈ₘ-sym (D≡0⇒X≈Y (trans DXσX≡dₜXᵣσXᵣ dXᵣσXᵣ≡0))) σX≉X
   ...   | inj₂ (s , dXᵣσXᵣ≡dᵣXᵣₛσXᵣₛ) = begin
-    dₛ (σ X) (σ (σ X))   <⟨ test ⟩
-    dᵣ (X r s) (σ X r s) ≡⟨ sym dₛXσX≈dᵣXᵣₛσXᵣₛ ⟩
-    dₛ X (σ X)           ∎
+    D (σ X) (σ (σ X))   <⟨ test ⟩
+    dᵣ (X r s) (σ X r s) ≡⟨ sym DXσX≈dᵣXᵣₛσXᵣₛ ⟩
+    D X (σ X)           ∎
     where
     open ≤-Reasoning
 
-    dₛXσX≈dᵣXᵣₛσXᵣₛ : dₛ X (σ X) ≡ dᵣ (X r s) (σ X r s)
-    dₛXσX≈dᵣXᵣₛσXᵣₛ = trans dₛXσX≡dₜXᵣσXᵣ dXᵣσXᵣ≡dᵣXᵣₛσXᵣₛ
+    DXσX≈dᵣXᵣₛσXᵣₛ : D X (σ X) ≡ dᵣ (X r s) (σ X r s)
+    DXσX≈dᵣXᵣₛσXᵣₛ = trans DXσX≡dₜXᵣσXᵣ dXᵣσXᵣ≡dᵣXᵣₛσXᵣₛ
     
     Xᵣₛ≉σXᵣₛ : X r s ≉ σ X r s
-    Xᵣₛ≉σXᵣₛ Xᵣₛ≈σXᵣₛ = σX≉X (≈ₘ-sym (dₛ≡0⇒X≈Y (trans dₛXσX≈dᵣXᵣₛσXᵣₛ (x≈y⇒dᵣ≡0 Xᵣₛ≈σXᵣₛ))))
+    Xᵣₛ≉σXᵣₛ Xᵣₛ≈σXᵣₛ = σX≉X (≈ₘ-sym (D≡0⇒X≈Y (trans DXσX≈dᵣXᵣₛσXᵣₛ (x≈y⇒dᵣ≡0 Xᵣₛ≈σXᵣₛ))))
 
     dᵣ≤dᵣXᵣₛσXᵣₛ : ∀ u v → dᵣ (X u v) (σ X u v) ≤ dᵣ (X r s) (σ X r s)
     dᵣ≤dᵣXᵣₛσXᵣₛ u v = begin
       dᵣ (X u v) (σ X u v) ≤⟨ MaxLift.dᵢ≤d (λ _ → S) dᵣ (X u) (σ X u) v ⟩
       dₜ (X u)   (σ X u)   ≤⟨ MaxLift.dᵢ≤d (λ _ → ℝ𝕋ₛ) dₜ X (σ X) u ⟩
-      dₛ X (σ X)           ≡⟨ dₛXσX≈dᵣXᵣₛσXᵣₛ ⟩
+      D X (σ X)           ≡⟨ DXσX≈dᵣXᵣₛσXᵣₛ ⟩
       dᵣ (X r s) (σ X r s) ∎
 
     0<dᵣXᵣₛσXᵣₛ : 0 < dᵣ (X r s) (σ X r s)
     0<dᵣXᵣₛσXᵣₛ = n≢0⇒0<n (Xᵣₛ≉σXᵣₛ ∘ dᵣ≡0⇒x≈y)
     
-    test : dₛ (σ X) (σ (σ X)) < dᵣ (X r s) (σ X r s)
+    test : D (σ X) (σ (σ X)) < dᵣ (X r s) (σ X r s)
     test = max[t]<x {t = zipWith dₜ (σ X) (σ (σ X))}
              (λ i → max[t]<x {t = zipWith dᵣ (σ X i) (σ (σ X) i)}
                (λ j → dᵣ-strContrOrbits Xᵣₛ≉σXᵣₛ dᵣ≤dᵣXᵣₛσXᵣₛ i j)
                0<dᵣXᵣₛσXᵣₛ)
              0<dᵣXᵣₛσXᵣₛ
+
+
+
+
+  -- Strictly contracting when one of the arguments is consistent
+  
+  D-strContrᶜ : ∀ {X Y} → 𝑪ₘ X → X ≉ₘ Y → D (σ X) (σ Y) < D X Y
+  D-strContrᶜ {X} {Y} Xᶜ X≉Y with max[t]∈t 0 (λ i → dₜ (X i) (Y i))
+  ... | inj₁ dXY≡0              = contradiction (D≡0⇒X≈Y dXY≡0) X≉Y
+  ... | inj₂ (r , DXY≡dₜXᵣYᵣ) with max[t]∈t 0 (λ i → dᵣ (X r i) (Y r i))
+  ...   | inj₁ dXᵣYᵣ≡0               = contradiction (D≡0⇒X≈Y (trans DXY≡dₜXᵣYᵣ dXᵣYᵣ≡0)) X≉Y
+  ...   | inj₂ (s , dXᵣYᵣ≡dᵣXᵣₛYᵣₛ) = begin
+    D  (σ X)   (σ Y)   <⟨ test ⟩
+    dᵣ (X r s) (Y r s) ≡⟨ sym DXY≈dᵣXᵣₛYᵣₛ ⟩
+    D  X       Y       ∎
+    where
+    open ≤-Reasoning
+
+    DXY≈dᵣXᵣₛYᵣₛ : D X Y ≡ dᵣ (X r s) (Y r s)
+    DXY≈dᵣXᵣₛYᵣₛ = trans DXY≡dₜXᵣYᵣ dXᵣYᵣ≡dᵣXᵣₛYᵣₛ
+    
+    Xᵣₛ≉Yᵣₛ : X r s ≉ Y r s
+    Xᵣₛ≉Yᵣₛ Xᵣₛ≈Yᵣₛ = X≉Y (D≡0⇒X≈Y (trans DXY≈dᵣXᵣₛYᵣₛ (x≈y⇒dᵣ≡0 Xᵣₛ≈Yᵣₛ)))
+
+    dᵣ≤dᵣXᵣₛYᵣₛ : ∀ u v → dᵣ (X u v) (Y u v) ≤ dᵣ (X r s) (Y r s)
+    dᵣ≤dᵣXᵣₛYᵣₛ u v = begin
+      dᵣ (X u v) (Y u v) ≤⟨ MaxLift.dᵢ≤d (λ _ → S) dᵣ (X u) (Y u) v ⟩
+      dₜ (X u)   (Y u)   ≤⟨ MaxLift.dᵢ≤d (λ _ → ℝ𝕋ₛ) dₜ X (Y) u ⟩
+      D X (Y)           ≡⟨ DXY≈dᵣXᵣₛYᵣₛ ⟩
+      dᵣ (X r s) (Y r s) ∎
+
+    0<dᵣXᵣₛYᵣₛ : 0 < dᵣ (X r s) (Y r s)
+    0<dᵣXᵣₛYᵣₛ = n≢0⇒0<n (Xᵣₛ≉Yᵣₛ ∘ dᵣ≡0⇒x≈y)
+    
+    test : D (σ X) (σ Y) < dᵣ (X r s) (Y r s)
+    test = max[t]<x {t = zipWith dₜ (σ X) (σ Y)}
+             (λ i → max[t]<x {t = zipWith dᵣ (σ X i) (σ Y i)}
+               (λ j → dᵣ-strContrᶜ Xᶜ Xᵣₛ≉Yᵣₛ dᵣ≤dᵣXᵣₛYᵣₛ i j)
+               0<dᵣXᵣₛYᵣₛ)
+             0<dᵣXᵣₛYᵣₛ
+  

@@ -9,6 +9,8 @@ open import Algebra.Structures using (IsSemigroup)
 import Algebra.FunctionProperties as FunctionProperties
 open import Function using (flip)
 import Relation.Binary.NonStrictToStrict as NonStrictToStrict
+import Relation.Binary.Flip as Flip
+open import Function using (_∘_)
 
 import RoutingLib.Algebra.Selectivity.RightNaturalOrder as RightNaturalOrder
 open import RoutingLib.Routing.Definitions
@@ -79,7 +81,22 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions  where
       ; ≤-resp-≈  to ≤₊-resp-≈
       )
 
-    postulate ≥₊-isDecTotalOrder : IsDecTotalOrder _≈_ (flip _≤₊_)
+    ≥₊-isDecTotalOrder : IsDecTotalOrder _≈_ (flip _≤₊_)
+    ≥₊-isDecTotalOrder = record
+      { isTotalOrder = record
+          { isPartialOrder = record
+            { isPreorder = record
+              { isEquivalence = ≈-isEquivalence
+              ; reflexive     = ≤₊-reflexive ∘ ≈-sym
+              ; trans         = Flip.transitive _≤₊_ ≤₊-trans
+              }
+            ; antisym    = λ y≤x x≤y → ≤₊-antisym x≤y y≤x
+            }
+          ; total        = Flip.total _ ≤₊-total
+          }
+      ; _≟_          = _≟_
+      ; _≤?_         = Flip.decidable _≤₊_ _≤₊?_
+      }
     
     ≥₊-decTotalOrder : DecTotalOrder _ _ _
     ≥₊-decTotalOrder = record

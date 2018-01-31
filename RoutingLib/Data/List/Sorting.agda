@@ -21,17 +21,3 @@ module RoutingLib.Data.List.Sorting {a ℓ₁ ℓ₂} (order : DecTotalOrder a �
     field
       perm   : xs ⇿ ys
       sorted : Sorted ys
-  
-
-
-
-  module _ where
-
-    postulate sort : List A → List A
-
-    postulate sort-Sorted : ∀ xs → Sorted (sort xs)
-
-    postulate sort-⇿ : ∀ xs → xs ⇿ sort xs
-
-    sort-↗ : ∀ xs → xs ↗ (sort xs)
-    sort-↗ xs = sorting (sort-⇿ xs) (sort-Sorted xs)

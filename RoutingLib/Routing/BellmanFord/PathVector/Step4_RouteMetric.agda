@@ -210,12 +210,12 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step4_RouteMetric
       ... | no  _  | _      | _       = ≤-refl
       ... | yes _  | no  _  | _       = ≤-refl
 
-      dᵣ-force-dᵣⁱ : ∀ X {r s} → 
-                    (∀ u v → dᵣ (X u v) (σ X u v) ≤ Hᶜ + dᵣⁱ (X r s) (σ X r s)) →
-                    (∀ {u v} → X u v ≉ σ X u v → 𝑰 (X u v) ⊎ 𝑰 (σ X u v) →
-                      dᵣⁱ (X u v) (σ X u v) ≤ dᵣⁱ (X r s) (σ X r s))
-      dᵣ-force-dᵣⁱ X {r} {s} dᵣ≤Hᶜ+dᵣⁱXₗYₗ {u} {v} Xᵤᵥ≉σXᵤᵥ Xᵤᵥⁱ⊎σXᵤᵥⁱ =
-        +-cancelˡ-≤ Hᶜ (≤-trans (H+dᵣⁱ≤dᵣ Xᵤᵥ≉σXᵤᵥ Xᵤᵥⁱ⊎σXᵤᵥⁱ) (dᵣ≤Hᶜ+dᵣⁱXₗYₗ u v))
+      dᵣ-force-dᵣⁱ : ∀ (X Y : RMatrix) {r s} → 
+                    (∀ u v → dᵣ (X u v) (Y u v) ≤ Hᶜ + dᵣⁱ (X r s) (Y r s)) →
+                    (∀ {u v} → X u v ≉ Y u v → 𝑰 (X u v) ⊎ 𝑰 (Y u v) →
+                      dᵣⁱ (X u v) (Y u v) ≤ dᵣⁱ (X r s) (Y r s))
+      dᵣ-force-dᵣⁱ X Y {r} {s} dᵣ≤Hᶜ+dᵣⁱXₗYₗ {u} {v} Xᵤᵥ≉Yᵤᵥ Xᵤᵥⁱ⊎Yᵤᵥⁱ =
+        +-cancelˡ-≤ Hᶜ (≤-trans (H+dᵣⁱ≤dᵣ Xᵤᵥ≉Yᵤᵥ Xᵤᵥⁱ⊎Yᵤᵥⁱ) (dᵣ≤Hᶜ+dᵣⁱXₗYₗ u v))
 
 
     dᵣ-strContrOrbitsⁱ : ∀ {X i j r s} →
@@ -225,8 +225,8 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step4_RouteMetric
     ... | yes σXₖ≈σYₖ = s≤s z≤n
     ... | no  σXₖ≉σYₖ with 𝑪? (σ X i j) | 𝑪? (σ (σ X) i j)
     ...   | yes σXᵢⱼᶜ | yes σ²Xᵢⱼᶜ = dᵣᶜ<Hᶜ+x σXᵢⱼᶜ σ²Xᵢⱼᶜ _
-    ...   | no  σXᵢⱼⁱ | _          = +-monoʳ-< Hᶜ (dᵣⁱ-strContrOrbits X (dᵣ-force-dᵣⁱ X dᵣ≤Hᶜ+dᵣⁱ) (inj₁ σXᵢⱼⁱ))
-    ...   | yes _     | no  σ²Xᵢⱼⁱ = +-monoʳ-< Hᶜ (dᵣⁱ-strContrOrbits X (dᵣ-force-dᵣⁱ X dᵣ≤Hᶜ+dᵣⁱ) (inj₂ σ²Xᵢⱼⁱ))
+    ...   | no  σXᵢⱼⁱ | _          = +-monoʳ-< Hᶜ (dᵣⁱ-strContrOrbits X (dᵣ-force-dᵣⁱ X (σ X) dᵣ≤Hᶜ+dᵣⁱ) (inj₁ σXᵢⱼⁱ))
+    ...   | yes _     | no  σ²Xᵢⱼⁱ = +-monoʳ-< Hᶜ (dᵣⁱ-strContrOrbits X (dᵣ-force-dᵣⁱ X (σ X) dᵣ≤Hᶜ+dᵣⁱ) (inj₂ σ²Xᵢⱼⁱ))
 
 
     chain₂ : ∀ X i j k → 𝑰 (σ X i j) → σ X i j ≈ A i k ▷ X k j →
@@ -256,7 +256,10 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step4_RouteMetric
     ...   | no  Xᵢⱼ≉σXᵢⱼ = contradiction (<⇒≤ (H<dᵣ Xᵢⱼ≉σXᵢⱼ (inj₁ Xᵢⱼⁱ))) (<⇒≱ (dᵣ<H i j))
     ...   | yes Xᵢⱼ≈σXᵢⱼ with reduction X i j (𝑰-cong Xᵢⱼ≈σXᵢⱼ Xᵢⱼⁱ) (<-wellFounded (size (σ X i j)))
     ...     | k , Hᶜ<dᵣXₖⱼσXₖⱼ = contradiction Hᶜ<dᵣXₖⱼσXₖⱼ (<⇒≯ (dᵣ<H k j))
-    
+
+
+
+
     dᵣ-strContrOrbitsᶜ : ∀ {X r s i j} → X r s ≉ σ X r s → (Xᵣₛᶜ : 𝑪 (X r s)) (σXᵣₛᶜ : 𝑪 (σ X r s)) → 
                          (∀ u v → dᵣ (X u v) (σ X u v) ≤ dᵣᶜ Xᵣₛᶜ σXᵣₛᶜ) →
                          dᵣ (σ X i j) (σ (σ X) i j) < dᵣᶜ Xᵣₛᶜ σXᵣₛᶜ
@@ -270,7 +273,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step4_RouteMetric
     ...         | yes _     | no  σ²Xᵢⱼⁱ  = contradiction (σ²Xᶜ i j) σ²Xᵢⱼⁱ
     ...         | yes σXᵢⱼᶜ  | yes σ²Xᵢⱼᶜ  = begin
       dᵣᶜ σXᵢⱼᶜ σ²Xᵢⱼᶜ          ≡⟨ dᵣᶜ-cong _ _ _ _ ≈-refl ≈-refl ⟩
-      dᵣᶜ (σXᶜ i j) (σ²Xᶜ i j) <⟨ dᵣᶜ-strContrOrbits Xᵣₛ≉σXᵣₛ Xᶜ σXᶜ σ²Xᶜ dᵣᶜ≤dᵣᶜXᵣₛσXᵣₛ i j ⟩
+      dᵣᶜ (σXᶜ i j) (σ²Xᶜ i j) <⟨ dᵣᶜ-strContr Xᵣₛ≉σXᵣₛ Xᶜ σXᶜ σXᶜ σ²Xᶜ dᵣᶜ≤dᵣᶜXᵣₛσXᵣₛ i j ⟩
       dᵣᶜ (Xᶜ r s) (σXᶜ r s)   ≡⟨ dᵣᶜ-cong _ _ _ _ ≈-refl ≈-refl ⟩
       dᵣᶜ Xᵣₛᶜ σXᵣₛᶜ           ∎
       where
@@ -293,3 +296,71 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step4_RouteMetric
     ...   | yes Xᵣₛᶜ | yes σXᵣₛᶜ = dᵣ-strContrOrbitsᶜ Xᵣₛ≉σXᵣₛ Xᵣₛᶜ σXᵣₛᶜ dᵣ≤dᵣXᵣₛσXᵣₛ
     ...   | no  _    | _        = dᵣ-strContrOrbitsⁱ dᵣ≤dᵣXᵣₛσXᵣₛ
     ...   | yes _    | no  _    = dᵣ-strContrOrbitsⁱ dᵣ≤dᵣXᵣₛσXᵣₛ
+
+
+
+
+  
+    -- Strictly contracting when one of the arguments is consistent
+
+
+    force-Yᶜ : ∀ {X Y r s} → 𝑪ₘ X →
+               (Xᵣₛᶜ : 𝑪 (X r s)) (Yᵣₛᶜ : 𝑪 (Y r s)) →
+               (∀ u v → dᵣ (X u v) (Y u v) ≤ dᵣᶜ Xᵣₛᶜ Yᵣₛᶜ)
+               → 𝑪ₘ Y
+    force-Yᶜ {X} {Y} Xᶜ Xᵣₛᶜ Yᵣₛᶜ dᵣ≤dᵣᶜXᵣₛYᵣₛ i j with X i j ≟ Y i j
+    ... | yes Xᵢⱼ≈Yᵢⱼ = 𝑪-cong Xᵢⱼ≈Yᵢⱼ (Xᶜ i j)
+    ... | no  Xᵢⱼ≉Yᵢⱼ with 𝑪? (Y i j)
+    ...   | yes Yᵢⱼᶜ = Yᵢⱼᶜ
+    ...   | no  Yᵢⱼⁱ = contradiction (dᵣ≤dᵣᶜXᵣₛYᵣₛ i j) (<⇒≱ (dᵣᶜ<dᵣ Xᵣₛᶜ Yᵣₛᶜ Xᵢⱼ≉Yᵢⱼ (inj₂ Yᵢⱼⁱ)))
+    
+    dᵣ-strContrᶜᶜ : ∀ {X Y r s} → X r s ≉ Y r s → 𝑪ₘ X →
+                    (Xᵣₛᶜ : 𝑪 (X r s)) (Yᵣₛᶜ : 𝑪 (Y r s)) → 
+                    (∀ u v → dᵣ (X u v) (Y u v) ≤ dᵣᶜ Xᵣₛᶜ Yᵣₛᶜ) →
+                    ∀ i j → dᵣ (σ X i j) (σ Y i j) < dᵣᶜ Xᵣₛᶜ Yᵣₛᶜ
+    dᵣ-strContrᶜᶜ {X} {Y} {r} {s}  Xᵣₛ≉Yᵣₛ Xᶜ Xᵣₛᶜ Yᵣₛᶜ dᵣ≤dᵣᶜXᵣₛYᵣₛ i j
+      with σ X i j ≟ σ Y i j
+    ... | yes σXᵢⱼ≈σYᵢⱼ = n≢0⇒0<n (Xᵣₛ≉Yᵣₛ ∘ dᵣᶜ≡0⇒x≈y Xᵣₛᶜ Yᵣₛᶜ)
+    ... | no  σXᵢⱼ≉σYᵢⱼ with force-Yᶜ Xᶜ Xᵣₛᶜ Yᵣₛᶜ dᵣ≤dᵣᶜXᵣₛYᵣₛ 
+    ...   | Yᶜ with σ-pres-𝑪ₘ Xᶜ |  σ-pres-𝑪ₘ Yᶜ
+    ...       | σXᶜ | σYᶜ with 𝑪? (σ X i j) | 𝑪? (σ Y i j)
+    ...         | no  σXᵢⱼⁱ | _         = contradiction (σXᶜ i j) σXᵢⱼⁱ 
+    ...         | yes _     | no  σYᵢⱼⁱ = contradiction (σYᶜ i j) σYᵢⱼⁱ
+    ...         | yes σXᵢⱼᶜ | yes σYᵢⱼᶜ = begin
+      dᵣᶜ σXᵢⱼᶜ σYᵢⱼᶜ         ≡⟨ dᵣᶜ-cong _ _ _ _ ≈-refl ≈-refl ⟩
+      dᵣᶜ (σXᶜ i j) (σYᶜ i j) <⟨ dᵣᶜ-strContr Xᵣₛ≉Yᵣₛ Xᶜ Yᶜ σXᶜ σYᶜ dᵣᶜ≤dᵣᶜXᵣₛσXᵣₛ i j ⟩
+      dᵣᶜ (Xᶜ r s) (Yᶜ r s)   ≡⟨ dᵣᶜ-cong _ _ _ _ ≈-refl ≈-refl ⟩
+      dᵣᶜ Xᵣₛᶜ Yᵣₛᶜ           ∎
+      where
+
+      open ≤-Reasoning
+
+      dᵣᶜ≤dᵣᶜXᵣₛσXᵣₛ : ∀ {u v} → X u v ≉ Y u v →
+                       dᵣᶜ (Xᶜ u v) (Yᶜ u v) ≤ dᵣᶜ (Xᶜ r s) (Yᶜ r s)
+      dᵣᶜ≤dᵣᶜXᵣₛσXᵣₛ {u} {v} Xᵤᵥ≉Yᵤᵥ = begin
+        dᵣᶜ (Xᶜ u v) (Yᶜ u v) ≤⟨ dᵣᶜ≤dᵣ Xᵤᵥ≉Yᵤᵥ _ _ ⟩
+        dᵣ  (X u v)  (Y u v)  ≤⟨ dᵣ≤dᵣᶜXᵣₛYᵣₛ u v ⟩
+        dᵣᶜ Xᵣₛᶜ     Yᵣₛᶜ     ≡⟨ dᵣᶜ-cong _ _ _ _ ≈-refl ≈-refl ⟩
+        dᵣᶜ (Xᶜ r s) (Yᶜ r s) ∎
+       
+    dᵣ-strContrᶜⁱ : ∀ {X Y : RMatrix} {r s} → 𝑪ₘ X → 𝑰 (Y r s)
+                    → (∀ u v → dᵣ (X u v) (Y u v) ≤ Hᶜ + dᵣⁱ (X r s) (Y r s))
+                    → ∀ i j → dᵣ (σ X i j) (σ Y i j) < Hᶜ + dᵣⁱ (X r s) (Y r s)
+    dᵣ-strContrᶜⁱ {X} {Y} {r} {s} Xᶜ Yᵣₛⁱ dᵣ≤Hᶜ+dᵣⁱ i j with σ X i j ≟ σ Y i j
+    ... | yes σXᵢⱼ≈σYᵢⱼ = s≤s z≤n
+    ... | no  σXᵢⱼ≉σYᵢⱼ with 𝑪? (σ X i j) | 𝑪? (σ Y i j)
+    ...   | yes σXᵢⱼᶜ | yes σYᵢⱼᶜ = dᵣᶜ<Hᶜ+x σXᵢⱼᶜ σYᵢⱼᶜ _
+    ...   | yes _     | no  σYᵢⱼⁱ = +-monoʳ-< Hᶜ (dᵣⁱ-strContrᶜ X Y Xᶜ (dᵣ-force-dᵣⁱ X Y dᵣ≤Hᶜ+dᵣⁱ) σYᵢⱼⁱ)
+    ...   | no  σXᵢⱼⁱ | _         = contradiction (σ-pres-𝑪ₘ Xᶜ i j) σXᵢⱼⁱ
+    
+      --(dᵣⁱ-strContrOrbits X (dᵣ-force-dᵣⁱ X dᵣ≤Hᶜ+dᵣⁱ) (inj₂ σ²Xᵢⱼⁱ))
+    
+    dᵣ-strContrᶜ : ∀ {X Y r s} → 𝑪ₘ X → X r s ≉ Y r s → 
+                  (∀ u v → dᵣ (X u v) (Y u v) ≤ dᵣ (X r s) (Y r s)) →
+                  ∀ i j → dᵣ (σ X i j) (σ Y i j) < dᵣ (X r s) (Y r s)
+    dᵣ-strContrᶜ {X} {Y} {r} {s} Xᶜ Xᵣₛ≉Yᵣₛ dᵣ≤dᵣXᵣₛYᵣₛ with X r s ≟ Y r s
+    ... | yes Xᵣₛ≈Yᵣₛ = contradiction Xᵣₛ≈Yᵣₛ Xᵣₛ≉Yᵣₛ
+    ... | no  _        with 𝑪? (X r s) | 𝑪? (Y r s)
+    ...   | yes Xᵣₛᶜ | yes Yᵣₛᶜ = dᵣ-strContrᶜᶜ Xᵣₛ≉Yᵣₛ Xᶜ Xᵣₛᶜ Yᵣₛᶜ dᵣ≤dᵣXᵣₛYᵣₛ
+    ...   | yes _    | no  Yᵣₛⁱ = dᵣ-strContrᶜⁱ Xᶜ Yᵣₛⁱ dᵣ≤dᵣXᵣₛYᵣₛ
+    ...   | no  Xᵣₛⁱ | _        = contradiction (Xᶜ r s) Xᵣₛⁱ

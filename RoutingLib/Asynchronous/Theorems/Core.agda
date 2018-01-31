@@ -1,21 +1,23 @@
 open import Level using (Level; _⊔_) renaming (zero to lzero; suc to lsuc)
 open import Data.Fin using (Fin)
-open import Data.Nat using (ℕ; zero; suc; _+_)
+open import Data.Nat using (ℕ; zero; suc; _+_; _<_)
 open import Data.Product using (∃; ∃₂)
-open import Relation.Binary using (Rel; Setoid; Decidable)
+open import Relation.Binary using (Rel; Setoid; Decidable; _Preserves_⟶_; IsDecEquivalence; DecSetoid)
 
 open import RoutingLib.Asynchronous
 open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 open import RoutingLib.Data.Table using (Table; max)
 open import RoutingLib.Data.Table.Relation.Pointwise using (Pointwise)
 open import RoutingLib.Function.Image using (FiniteImage)
+import RoutingLib.Function.Distance.FixedPoint as FixedPoints
+
 
 module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {S : Table (Setoid a ℓ) n}
                                         (P : Parallelisation S) where
 
   open Parallelisation P
   open import RoutingLib.Function.Distance using (IsUltrametric)
-  open import RoutingLib.Function.Distance M-setoid using (_StrContrOver_; _ContrOver_; Bounded)
+  open import RoutingLib.Function.Distance M-setoid using (_StrContrOver_; _ContrOver_; Bounded; _StrContrOnOrbitsOver_)
   
   record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
     field
@@ -42,9 +44,37 @@ module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {S : Table (Setoid a ℓ)
 
     field
       dᵢ-isUltrametric   : ∀ {i} → IsUltrametric (S i) dᵢ
-      f-strContr         : f StrContrOver d
+      f-strContrOrbits   : f StrContrOnOrbitsOver d
       d-bounded          : Bounded d
+
+      element : M
+      _≟_     : Decidable _≈_
+      f-cong  : f Preserves _≈_ ⟶ _≈_
+
+
+    ≈-isDecEquivalence : IsDecEquivalence _≈_
+    ≈-isDecEquivalence = record
+      { isEquivalence = ≈-isEquivalence
+      ; _≟_           = _≟_
+      }
+
+    M-decSetoid : DecSetoid _ _
+    M-decSetoid = record
+      { Carrier          = M
+      ; _≈_              = _≈_
+      ; isDecEquivalence = ≈-isDecEquivalence
+      }
       
+    x* : M
+    x* = FixedPoints.x*  M-decSetoid d f-strContrOrbits element
+    
+    fx*≈x* : f x* ≈ x*
+    fx*≈x* = FixedPoints.x*-fixed M-decSetoid d f-strContrOrbits element
+
+    field
+    
+      f-strContrIsh : ∀ {x} → x ≉ x* → d x* (f x) < d x* x
+
 
   record Start p : Set (lsuc (a ⊔ ℓ ⊔ p)) where
     field
@@ -84,4 +114,4 @@ module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {S : Table (Setoid a ℓ)
       D₀-finite       : Finite-Pred D₀
       f-nonexpansive  : ∀ {x} → x ∈ D₀ → f x ≼ x
       f-monotone      : ∀ {x y} → x ∈ D₀ → y ∈ D₀ → x ≼ y → f x ≼ f y
-      f-cong : ∀ {x y} → x ≈ y → f x ≈ f y
+      f-cong          : ∀ {x y} → x ≈ y → f x ≈ f y

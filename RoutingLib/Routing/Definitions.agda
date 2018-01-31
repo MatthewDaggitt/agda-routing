@@ -111,6 +111,9 @@ module RoutingLib.Routing.Definitions where
     
     ℝ𝕄ₛ : Setoid b ℓ
     ℝ𝕄ₛ = 𝕄ₛ n n
+
+    Decℝ𝕄ₛ : DecSetoid b ℓ
+    Decℝ𝕄ₛ = Dec𝕄ₛ n n
     
     weight : SimplePath n → Route
     weight invalid                       = 0#

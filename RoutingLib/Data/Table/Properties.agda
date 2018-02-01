@@ -1,6 +1,6 @@
 open import Algebra.FunctionProperties using (Op₂)
 open import Data.Nat using (ℕ; zero; suc; _<_; _≤_; _⊓_; _⊔_; z≤n)
-open import Data.Nat.Properties using (≤-refl; ≤-trans; ⊔-sel; ⊓-sel; ⊓-mono-<; module ≤-Reasoning; +-mono-≤; +-monoˡ-<; +-monoʳ-<; m≤m⊔n; n≤m⊔n)
+open import Data.Nat.Properties using (≤-refl; ≤-trans; ⊔-sel; ⊓-sel; ⊓-mono-<; module ≤-Reasoning; +-mono-≤; +-monoˡ-<; +-monoʳ-<; m≤m⊔n; n≤m⊔n; ⊔-mono-≤)
 open import Data.Fin using (Fin; inject₁; inject≤) renaming (zero to fzero; suc to fsuc)
 open import Data.Product using (_,_; proj₁; proj₂; ∃)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
@@ -153,6 +153,11 @@ module RoutingLib.Data.Table.Properties where
                 (x≤max[t] ⊥₂ (all fzero))
                 (max[s]≤max[t] ⊥₁ v (all ∘ fsuc))
 
+  max[s]≤max[t]₂ : ∀ {⊥₁ ⊥₂} {n} {s t : Table ℕ n} → ⊥₁ ≤ ⊥₂ →
+                   Pointwise _≤_ s t → max ⊥₁ s ≤ max ⊥₂ t
+  max[s]≤max[t]₂ {n = zero}  ⊥₁≤⊥₂ s≤t = ⊥₁≤⊥₂
+  max[s]≤max[t]₂ {n = suc n} ⊥₁≤⊥₂ s≤t = ⊔-mono-≤ (s≤t fzero) (max[s]≤max[t]₂ ⊥₁≤⊥₂ (s≤t ∘ fsuc))  
+  
   min∞[t]≤x : ∀ ⊤ {n} (t : Table ℕ∞ n) {x} → ⊤ ≤∞ x ⊎ Any (_≤∞ x) t → min∞ ⊤ t ≤∞ x
   min∞[t]≤x ⊤ t (inj₁ ⊤≤x) = foldr-⊎presʳ (_≤∞ _)  o≤∞m⇒n⊓o≤∞m ⊤≤x t
   min∞[t]≤x ⊤ t (inj₂ t≤x) = foldr-⊎pres (_≤∞ _) n≤∞m⊎o≤∞m⇒n⊓o≤∞m ⊤ t≤x

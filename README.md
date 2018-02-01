@@ -17,3 +17,7 @@ The core contributions of this library can be found in the `Asynchronous` and `R
 ## Requirements
 
 Requires Agda 2.5.3 and Standard Library 0.14
+
+## Postulates
+
+Currently the only postulates are in `Data.List.Sorting.Mergesort`. At some point I plan to get around to writing an implementation, but hopefully in the meantime it is obvious that they are fairly inoffensive.

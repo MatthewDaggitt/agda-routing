@@ -1,14 +1,14 @@
 open import Data.Fin using (Fin)
 open import Data.Nat using (ℕ; _≤_; z≤n; suc; _⊔_)
-open import Data.Nat.Properties using (≤-antisym; ⊔-mono-≤)
+open import Data.Nat.Properties using (≤-antisym; ⊔-mono-≤; ≤-refl)
 open import Data.Sum using (inj₁; inj₂)
-open import Data.Product using (∃; _,_)
+open import Data.Product using (∃; _,_; proj₁; proj₂)
 open import Relation.Binary using (Setoid; _Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst)
 
 open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
 open import RoutingLib.Data.Table using (Table; max; zipWith)
-open import RoutingLib.Data.Table.Properties using (max-cong; t≤max[t]; max-constant)
+open import RoutingLib.Data.Table.Properties using (max-cong; t≤max[t]; max-constant; max[s]≤max[t]₂)
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
 import RoutingLib.Data.Table.IndexedTypes as IndexedType
 open import RoutingLib.Function.Metric
@@ -46,9 +46,12 @@ module RoutingLib.Function.Metric.MaxLift {a ℓ n} (S : Fin n → Setoid a ℓ)
 
       x≈y⇒d≡0 : (∀ {i} {xᵢ yᵢ : Mᵢ i} → xᵢ ≈ᵢ yᵢ → dᵢ xᵢ yᵢ ≡ 0) → ∀ {x y} → x ≈ y → d x y ≡ 0
       x≈y⇒d≡0 x≈y⇒dᵢ≡0 x≈y = max-constant refl (λ i → x≈y⇒dᵢ≡0 (x≈y i))
-  
-      postulate bounded : (∀ {i} → Bounded (S i) dᵢ) → Bounded M-setoid d
-    
+
+      bounded : (∀ {i} → Bounded (S i) dᵢ) → Bounded M-setoid d
+      bounded dᵢ-bounded =
+        (max 0 (λ i → proj₁ (dᵢ-bounded {i}))) ,
+        (λ x y → max[s]≤max[t]₂ (≤-refl {0}) (λ i → proj₂ (dᵢ-bounded {i}) (x i) (y i)))
+      
       maxTriIneq : (∀ {i} → MaxTriangleIneq (S i) dᵢ) →
                    MaxTriangleIneq M-setoid d
       maxTriIneq dᵢ-ineq x y z with max[t]∈t 0 λ i → dᵢ (x i) (z i)

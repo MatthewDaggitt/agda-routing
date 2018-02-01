@@ -33,6 +33,7 @@ open import RoutingLib.Function.Image using (FiniteImage)
 open import RoutingLib.Function.Distance using (IsUltrametric)
 open import RoutingLib.Function.Distance.Properties using (strContr⇒strContrOnOrbits)
 import RoutingLib.Function.Distance.MaxLift as MaxLift
+import RoutingLib.Function.Distance.FixedPoint as FixedPoints
 
 open import RoutingLib.Asynchronous using (Parallelisation)
 open import RoutingLib.Asynchronous.Theorems.Core using (ACO; TotalACO; UltrametricConditions)
@@ -41,9 +42,23 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
   {a ℓ n} {S : Fin n → Setoid a ℓ} {P : Parallelisation S}
   (𝓤𝓒 : UltrametricConditions P) where
 
-    open Parallelisation P using (M; f; Pred; _⊂_; _⊆_; _≈_; _≉_; _∈_; isSingleton; ≈-refl; ≈-sym; ≈-trans; ≈-isEquivalence; ≈ᵢ-refl; ≈ᵢ-sym; M-setoid)
+    open Parallelisation P
     open UltrametricConditions 𝓤𝓒
-        
+
+    ----------------------------------------------
+    -- Export and define some useful properties --
+    ----------------------------------------------
+    
+    decSetoid : DecSetoid _ _
+    decSetoid = record
+      { Carrier          = M
+      ; _≈_              = _≈_
+      ; isDecEquivalence = record
+        { isEquivalence = ≈-isEquivalence
+        ; _≟_           = _≟_
+        }
+      }
+      
     module _ {i} where
 
       open IsUltrametric (dᵢ-isUltrametric {i}) renaming
@@ -52,9 +67,6 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
         ; 0⇒eq to dᵢ≡0⇒x≈y
         ; cong to dᵢ-cong
         ) public
-
-
-    -- Properties of d
     
     d-isUltrametric : IsUltrametric M-setoid d
     d-isUltrametric = MaxLift.isUltrametric S dᵢ (λ _ → dᵢ-isUltrametric)
@@ -70,12 +82,29 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
     dᵢ≤d : ∀ x y i → dᵢ (x i) (y i) ≤ d x y
     dᵢ≤d = MaxLift.dᵢ≤d S dᵢ
 
-    -- Fixed points exist
-    
+
+    ------------------------------
+    -- Existence of fixed point --
+    ------------------------------
+
+    x* : M
+    x* = FixedPoints.x* decSetoid d f-strContrOrbits element
+
+    fx*≈x* : f x* ≈ x*
+    fx*≈x* = FixedPoints.x*-fixed decSetoid d f-strContrOrbits element
+
+    f-strContrOn-x* : ∀ {x} → x ≉ x* → d (f x*) (f x) < d x* x
+    f-strContrOn-x* {x} x≉x* = begin
+      d (f x*) (f x) ≡⟨ d-cong fx*≈x* ≈-refl ⟩
+      d x*     (f x) <⟨ f-strContrIsh fx*≈x* x≉x* ⟩
+      d x*     x     ∎
+      where open ≤-Reasoning
+      
     x*-unique : ∀ {x} → f x ≈ x → x ≈ x*
     x*-unique {x} fx≈x with x ≟ x*
     ... | yes x≈x* = x≈x*
-    ... | no  x≉x* = contradiction (d-cong ≈-refl fx≈x) (<⇒≢ (f-strContrIsh x≉x*))
+    ... | no  x≉x* = contradiction (d-cong ≈-refl fx≈x) (<⇒≢ (f-strContrIsh fx*≈x* x≉x*))
+
     
     -----------
     -- Radii --
@@ -221,7 +250,7 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
     x*∈D[T+K] : ∀ K → x* ∈ D (T + K)
     x*∈D[T+K] K i = subst (_≤ r[ T + K ]) (sym (x≈y⇒dᵢ≡0 ≈ᵢ-refl)) z≤n
 
-    D-finish : ∃₂ λ T ξ → ∀ K → isSingleton ξ (D (T + K))
+    D-finish : ∃₂ λ T ξ → ∀ K → IsSingleton ξ (D (T + K))
     D-finish = T , x* , λ K → (x*∈D[T+K] K , m∈D[T+K]⇒x*≈m K)
 
     test : ∀ K (x : M) → d x* x < r[ K ] → x ∈ D (suc K)
@@ -249,7 +278,7 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
 
     lemma1 : ∀ x → x ≉ x* → d x* x ≤ d x (f x)
     lemma1 x x≉x* with ⊔-sel (d x* (f x)) (d (f x) x)
-    ... | inj₁ left = contradiction tv (<⇒≱ (f-strContrIsh x≉x*))
+    ... | inj₁ left = contradiction tv (<⇒≱ (f-strContrIsh fx*≈x* x≉x*))
       where
       open ≤-Reasoning
       
@@ -270,7 +299,7 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
     lemma2 x x≉x* = begin
       d x (f x)           ≤⟨ d-maxTriIneq x x* (f x) ⟩
       d x x* ⊔ d x* (f x) ≡⟨ cong (_⊔ d x* (f x)) (d-sym x x*) ⟩
-      d x* x ⊔ d x* (f x) ≡⟨ n≤m⇒m⊔n≡m (<⇒≤ (f-strContrIsh x≉x*)) ⟩
+      d x* x ⊔ d x* (f x) ≡⟨ n≤m⇒m⊔n≡m (<⇒≤ (f-strContrIsh fx*≈x* x≉x*)) ⟩
       d x* x              ∎
       where open ≤-Reasoning
       

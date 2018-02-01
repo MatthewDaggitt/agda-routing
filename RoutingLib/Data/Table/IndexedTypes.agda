@@ -123,8 +123,8 @@ module RoutingLib.Data.Table.IndexedTypes {a ℓ n} (S : Table (Setoid a ℓ) n)
   ｛_｝ : M → Predᵤ M ℓ
   ｛ t ｝ = t ≈_
 
-  isSingleton : ∀ {p} → M → Predᵤ (Pred p) (a ⊔ p ⊔ ℓ)
-  isSingleton t P = t ∈ P × ∀ s → s ∈ P → t ≈ s
+  IsSingleton : ∀ {p} → M → Predᵤ (Pred p) (a ⊔ p ⊔ ℓ)
+  IsSingleton t P = t ∈ P × ∀ s → s ∈ P → t ≈ s
   
   Finite-Pred : ∀ {p} (P : Pred p) → Set (a ⊔ p ⊔ ℓ)
   Finite-Pred P = ∃ λ (xs : List M) → ∀ {x} → x ∈ P → x ∈L xs

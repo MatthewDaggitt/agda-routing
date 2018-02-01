@@ -64,7 +64,7 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1
     ξ : M
     ξ = proj₁ (proj₂ D-finish)
 
-    D-T+K≡ξ : ∀ K → isSingleton ξ (D (T + K))
+    D-T+K≡ξ : ∀ K → IsSingleton ξ (D (T + K))
     D-T+K≡ξ = proj₂ (proj₂ D-finish)
 
 

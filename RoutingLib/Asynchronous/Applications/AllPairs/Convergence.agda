@@ -41,7 +41,7 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
   open Parallelisation all-pairs-parallelisation
   open import RoutingLib.Asynchronous.Propositions.UresinDubois3 all-pairs-parallelisation renaming (module Proof to ProofProp)
   open import RoutingLib.Asynchronous.Theorems.Core all-pairs-parallelisation using (iter; SynchronousConditions; Start)
-  open import RoutingLib.Asynchronous.Theorems.UresinDubois1 𝕤 all-pairs-parallelisation
+  open import RoutingLib.Asynchronous.Theorems.UresinDubois1 all-pairs-parallelisation
   
   D₀ : Pred lzero
   D₀ i = U
@@ -270,10 +270,8 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
 
   open ProofProp syncCond hiding (ξ)
 
-  open Proof aco x₀∈D0
+  convergence-time : 𝕋
+  convergence-time = proj₁ (async-converge aco 𝕤 x₀∈D0)
 
-  converging-time : 𝕋
-  converging-time = proj₁ async-converge
-
-  converging-state : Matrix
-  converging-state = ξ
+  convergence-state : Matrix
+  convergence-state = ξ aco 𝕤 x₀∈D0

@@ -9,22 +9,26 @@ open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 open import RoutingLib.Data.Table using (Table; max)
 open import RoutingLib.Data.Table.Relation.Pointwise using (Pointwise)
 open import RoutingLib.Function.Image using (FiniteImage)
+open import RoutingLib.Function.Distance using (IsUltrametric)
 import RoutingLib.Function.Distance.FixedPoint as FixedPoints
-
 
 module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {S : Table (Setoid a ℓ) n}
                                         (P : Parallelisation S) where
 
   open Parallelisation P
-  open import RoutingLib.Function.Distance using (IsUltrametric)
   open import RoutingLib.Function.Distance M-setoid using (_StrContrOver_; _ContrOver_; Bounded; _StrContrOnOrbitsOver_)
-  
+
+  -----------------------------------------
+  -- Asynchronously contracting operator --
+  -----------------------------------------
+  -- Sufficient (and necessary conditions) for convergence
+  -- as defined by Üresin and Dubois
   record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
     field
       D            : ℕ → Pred p
       D-subst      : ∀ K {x y} → x ≈ y → x ∈ D K → y ∈ D K
       D-decreasing : ∀ K → D (suc K) ⊆ D K
-      D-finish     : ∃₂ λ T ξ → ∀ K → isSingleton ξ (D (T + K))
+      D-finish     : ∃₂ λ T ξ → ∀ K → IsSingleton ξ (D (T + K))
       f-monotonic  : ∀ K {t} → t ∈ D K → f t ∈ D (suc K)
 
   -- A version of ACO where the first box contains every element
@@ -32,9 +36,14 @@ module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {S : Table (Setoid a ℓ)
     field
       aco   : ACO p
       total : ∀ x → x ∈ ACO.D aco zero
-
     open ACO aco public
 
+
+  ------------------------
+  -- Ultrametric spaces --
+  ------------------------
+  -- Ultrametic space conditions that are also sufficient (and necessary)
+  -- conditions as defined by Gurney
   record UltrametricConditions : Set (a ⊔ ℓ) where
     field
       dᵢ                 : ∀ {i} → Mᵢ i → Mᵢ i → ℕ
@@ -43,39 +52,22 @@ module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {S : Table (Setoid a ℓ)
     d m n = max 0 (λ i → dᵢ {i} (m i) (n i))
 
     field
-      dᵢ-isUltrametric   : ∀ {i} → IsUltrametric (S i) dᵢ
-      f-strContrOrbits   : f StrContrOnOrbitsOver d
-      d-bounded          : Bounded d
+      dᵢ-isUltrametric  : ∀ {i} → IsUltrametric (S i) dᵢ
+      f-strContrOrbits  : f StrContrOnOrbitsOver d
+      f-strContrIsh     : ∀ {x x*} → f x* ≈ x* → x ≉ x* → d x* (f x) < d x* x
+      d-bounded         : Bounded d
 
       element : M
       _≟_     : Decidable _≈_
       f-cong  : f Preserves _≈_ ⟶ _≈_
 
 
-    ≈-isDecEquivalence : IsDecEquivalence _≈_
-    ≈-isDecEquivalence = record
-      { isEquivalence = ≈-isEquivalence
-      ; _≟_           = _≟_
-      }
 
-    M-decSetoid : DecSetoid _ _
-    M-decSetoid = record
-      { Carrier          = M
-      ; _≈_              = _≈_
-      ; isDecEquivalence = ≈-isDecEquivalence
-      }
-      
-    x* : M
-    x* = FixedPoints.x*  M-decSetoid d f-strContrOrbits element
-    
-    fx*≈x* : f x* ≈ x*
-    fx*≈x* = FixedPoints.x*-fixed M-decSetoid d f-strContrOrbits element
-
-    field
-    
-      f-strContrIsh : ∀ {x} → x ≉ x* → d x* (f x) < d x* x
-
-
+  ---------------------------------
+  -- Other sufficient conditions --
+  ---------------------------------
+  -- Sufficient but not necessary conditions by Üresin and Dubois
+  
   record Start p : Set (lsuc (a ⊔ ℓ ⊔ p)) where
     field
       x₀ : M

@@ -33,7 +33,7 @@ module RoutingLib.Asynchronous where
     field
       f      : M → M
 
-    module _ (𝕤 : Schedule n)(x₀ : M) where
+    module _ (𝕤 : Schedule n) (x₀ : M) where
 
       open Schedule 𝕤
 

@@ -214,8 +214,9 @@ module RoutingLib.Data.Nat.Properties where
     m≤n⊎m≤o⇒m≤n⊔o _ o (inj₁ m≤n) = m≤n⇒m≤n⊔o o m≤n
     m≤n⊎m≤o⇒m≤n⊔o n _ (inj₂ m≤o) = m≤o⇒m≤n⊔o n m≤o
 
-    postulate m<n⊎m<o⇒m<n⊔o : ∀ {m} → _⊔_ ⊎-Preserves (m <_)
-    
+    m<n⊎m<o⇒m<n⊔o : ∀ {m} → _⊔_ ⊎-Preserves (m <_)
+    m<n⊎m<o⇒m<n⊔o n o m<n⊎m<o = m≤n⊎m≤o⇒m≤n⊔o n o m<n⊎m<o
+
     m≤n×m≤o⇒m≤n⊔o : ∀ {m} → _⊔_ ×-Preserves (m ≤_)
     m≤n×m≤o⇒m≤n⊔o m≤n _ = m≤n⇒m≤n⊔o _ m≤n
 

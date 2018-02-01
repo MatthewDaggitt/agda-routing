@@ -1,10 +1,11 @@
 open import Algebra.FunctionProperties using (Op₂)
 open import Data.Nat using (ℕ; zero; suc; _<_; _≤_; _⊓_; _⊔_; z≤n)
-open import Data.Nat.Properties using (≤-refl; ≤-trans; ⊔-sel; ⊓-sel; ⊓-mono-<; module ≤-Reasoning; +-mono-≤; +-monoˡ-<; +-monoʳ-<)
+open import Data.Nat.Properties using (≤-refl; ≤-trans; ⊔-sel; ⊓-sel; ⊓-mono-<; module ≤-Reasoning; +-mono-≤; +-monoˡ-<; +-monoʳ-<; m≤m⊔n; n≤m⊔n)
 open import Data.Fin using (Fin; inject₁; inject≤) renaming (zero to fzero; suc to fsuc)
 open import Data.Product using (_,_; proj₁; proj₂; ∃)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Function using (_∘_)
+open import Level using () renaming (zero to lzero)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; sym; cong₂; _≢_)
   renaming (refl to ≡-refl)
@@ -102,33 +103,38 @@ module RoutingLib.Data.Table.Properties where
                    All (λ y → Any (_< y) s) t → min⁺ s < min⁺ t
   min⁺[s]<min⁺[t] {n = zero}  {s} {t} all = min⁺[t]<x (all fzero)
   min⁺[s]<min⁺[t] {n = suc n} {s} {t} all = m<n×m<o⇒m<n⊓o (min⁺[t]<x (all fzero)) (min⁺[s]<min⁺[t] (all ∘ fsuc))
+    
+  max⁺-cong : ∀ {n} {s t : Table ℕ (suc n)} → Pointwise _≡_ s t → max⁺ s ≡ max⁺ t
+  max⁺-cong s≡t = foldr⁺-cong {_~_ = _≡_} (cong₂ _⊔_) s≡t
 
+  t≤max⁺[t] : ∀ {n} (t : Table ℕ (suc n)) → All (_≤ max⁺ t) t
+  t≤max⁺[t] {zero} t fzero = ≤-refl
+  t≤max⁺[t] {zero} t (fsuc ())
+  t≤max⁺[t] {suc n} t fzero = m≤m⊔n (t fzero) (max⁺ ((λ j → t j) ∘ fsuc))
+  t≤max⁺[t] {suc n} t (fsuc i) = ≤-trans (t≤max⁺[t] ((λ j → t j) ∘ fsuc) i)
+    (n≤m⊔n (t fzero) (max⁺ ((λ j → t j) ∘ fsuc)))
+
+  max⁺[t]≤x : ∀ {n} {t : Table ℕ (suc n)} {x} → All (_≤ x) t → max⁺ t ≤ x
+  max⁺[t]≤x {n} {t} {x} all = foldr⁺-×pres (_≤ x) n≤m×o≤m⇒n⊔o≤m all
 
   max[t]≤x : ∀ {n} {t : Table ℕ n} {x ⊥} → All (_≤ x) t → ⊥ ≤ x → max ⊥ t ≤ x
   max[t]≤x {x = x} xs≤x ⊥≤x = foldr-×pres (_≤ x) n≤m×o≤m⇒n⊔o≤m ⊥≤x xs≤x
 
-  postulate max[t]<x : ∀ {n} {t : Table ℕ n} {x ⊥} → All (_< x) t → ⊥ < x → max ⊥ t < x
-  
+  max[t]<x : ∀ {n} {t : Table ℕ n} {x ⊥} → All (_< x) t → ⊥ < x → max ⊥ t < x
+  max[t]<x {x = x} xs<x ⊥<x = foldr-×pres (_< x) n≤m×o≤m⇒n⊔o≤m ⊥<x xs<x
+
   x≤max[t] : ∀ {n x} {t : Table ℕ n} ⊥ → x ≤ ⊥ ⊎ Any (x ≤_) t → x ≤ max ⊥ t
   x≤max[t] {n} {x} {t} ⊥ (inj₁ x≤⊥) = foldr-⊎presʳ (_ ≤_) m≤o⇒m≤n⊔o x≤⊥ t
   x≤max[t] ⊥ (inj₂ x≤t) = foldr-⊎pres (_ ≤_) m≤n⊎m≤o⇒m≤n⊔o ⊥ x≤t
 
+  max-cong : ∀ {n} {⊥₁ ⊥₂} → ⊥₁ ≡ ⊥₂ → {s t : Table ℕ n} →
+             Pointwise _≡_ s t → max ⊥₁ s ≡ max ⊥₂ t
+  max-cong ⊥₁≡⊥₂ s≡t = foldr-cong {_~₁_ = _≡_} {_≡_}
+    (cong₂ _⊔_) ⊥₁≡⊥₂ s≡t
 
-
-
-  postulate max-cong : ∀ {n} {⊥₁ ⊥₂} → ⊥₁ ≡ ⊥₂ → {t s : Table ℕ n} →
-             Pointwise _≡_ t s → max ⊥₁ t ≡ max ⊥₂ s
-  --max-cong eq eq₂ = foldr-cong (cong₂ _⊔_) eq eq₂
-
-  postulate max⁺-cong : ∀ {n} {t s : Table ℕ (suc n)} → Pointwise _≡_ t s → max⁺ t ≡ max⁺ s
-
-  postulate t≤max⁺[t] : ∀ {n} (t : Table ℕ (suc n)) → All (_≤ max⁺ t) t
-
-  postulate max⁺[t]≤x : ∀ {n} {t : Table ℕ (suc n)} {x} → All (_≤ x) t → max⁺ t ≤ x
-  
-  postulate max-constant : ∀ {n} {⊥} {t : Table ℕ n} →
+  max-constant : ∀ {n} {⊥} {t : Table ℕ n} →
                  ∀ {x} → ⊥ ≡ x → All (_≡ x) t → max ⊥ t ≡ x
-  --max-constant {x = x} = foldr-×pres (_≡ x) ⊔-preserves-≡x
+  max-constant {x = x} ⊥≡x all = foldr-×pres (_≡ x) ⊔-preserves-≡x ⊥≡x all
   
   ⊥≤max[t] : ∀ {n} ⊥ (t : Table ℕ n)→ ⊥ ≤ max ⊥ t
   ⊥≤max[t] {n} ⊥ t = x≤max[t] {n} ⊥ (inj₁ ≤-refl)

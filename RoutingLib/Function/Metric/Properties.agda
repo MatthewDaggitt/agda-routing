@@ -4,10 +4,10 @@ open import Data.Product using (∃; _,_; proj₁; proj₂)
 open import Relation.Binary using (Setoid; Decidable)
 open import Relation.Nullary using (yes; no)
 
-module RoutingLib.Function.Distance.Properties {a} {ℓ} (S : Setoid a ℓ) where
+module RoutingLib.Function.Metric.Properties {a} {ℓ} (S : Setoid a ℓ) where
 
     open Setoid S renaming (Carrier to A)
-    open import RoutingLib.Function.Distance S
+    open import RoutingLib.Function.Metric S
     open import RoutingLib.Function.FixedPoint S
     
     -- Inequalities

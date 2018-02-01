@@ -20,8 +20,8 @@ open import RoutingLib.Data.Matrix.Properties using (min⁺[M]<min⁺[N])
 open import RoutingLib.Data.Table using (Table; zipWith)
 open import RoutingLib.Data.Table.Properties using (max[t]<x)
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
-open import RoutingLib.Function.Distance using (Ultrametric; IsUltrametric; Bounded; MaxTriangleIneq; _StrContrOnOrbitsOver_)
-import RoutingLib.Function.Distance.MaxLift as MaxLift
+open import RoutingLib.Function.Metric using (Ultrametric; IsUltrametric; Bounded; MaxTriangleIneq; _StrContrOnOrbitsOver_)
+import RoutingLib.Function.Metric.MaxLift as MaxLift
 open import RoutingLib.Function.Image using (FiniteImage)
 
 import RoutingLib.Routing.BellmanFord.PathVector.Prelude as Prelude

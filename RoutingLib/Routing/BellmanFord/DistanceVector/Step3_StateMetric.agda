@@ -21,16 +21,16 @@ open import RoutingLib.Data.Table using (Table; max⁺; zipWith)
 open import RoutingLib.Data.Table.Properties using (max[t]<x)
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
 open import RoutingLib.Data.Nat.Properties as Rℕₚ using (ℕₛ; n≢0⇒0<n; module ≤-Reasoning)
-open import RoutingLib.Function.Distance using (IsUltrametric; MaxTriangleIneq)
+open import RoutingLib.Function.Metric using (IsUltrametric; MaxTriangleIneq)
 open import RoutingLib.Data.Matrix using (Matrix)
 open import RoutingLib.Data.Matrix.Properties using (max⁺-cong; M≤max⁺[M]; max⁺[M]≡x; max⁺[M]≤x; max⁺-constant; zipWith-sym)
 open import RoutingLib.Data.Matrix.Membership.Propositional.Properties using (max⁺[M]∈M)
 open import RoutingLib.Data.Matrix.Relation.Pointwise using (zipWith-cong)
-import RoutingLib.Function.Distance.MaxLift as MaxLift
+import RoutingLib.Function.Metric.MaxLift as MaxLift
 
 open import RoutingLib.Routing.Definitions using (RoutingProblem; RoutingAlgebra)
 open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions
-open import RoutingLib.Function.Distance using (Ultrametric; Bounded)
+open import RoutingLib.Function.Metric using (Ultrametric; Bounded)
 import RoutingLib.Routing.BellmanFord.DistanceVector.Prelude as Prelude
 import RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric as Step2
 open import RoutingLib.Function.Image using (FiniteImage)
@@ -103,8 +103,8 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step3_StateMetric
 
 
 
-  open import RoutingLib.Function.Distance ℝ𝕄ₛ using (_StrContrOver_; _StrContrOnOrbitsOver_)
-  open import RoutingLib.Function.Distance.Properties using (strContr⇒strContrOnOrbits)
+  open import RoutingLib.Function.Metric ℝ𝕄ₛ using (_StrContrOver_; _StrContrOnOrbitsOver_)
+  open import RoutingLib.Function.Metric.Properties using (strContr⇒strContrOnOrbits)
 
   σ-strContr : σ StrContrOver D
   σ-strContr {X} {Y} Y≉X with max[t]∈t 0 (λ i → dᵢ (X i) (Y i))

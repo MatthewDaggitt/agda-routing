@@ -8,12 +8,12 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 
 open import RoutingLib.Data.Nat.Properties using (≤-trans; m⊔n≤m+n)
 
-module RoutingLib.Function.Distance.Ultrametric {a} {ℓ} (S : Setoid a ℓ) where
+module RoutingLib.Function.Metric.Ultrametric {a} {ℓ} (S : Setoid a ℓ) where
 
   --open Setoid S using (_≈_) renaming (Carrier to A)
   --open import RoutingLib.Function.Metric S using (TriIneq; IsMetric)
 
-  open import RoutingLib.Function.Distance
+  open import RoutingLib.Function.Metric
 
 
 

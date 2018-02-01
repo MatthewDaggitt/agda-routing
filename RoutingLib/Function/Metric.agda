@@ -9,54 +9,54 @@ open import Data.Product using (∃; _,_)
 open import Induction.WellFounded using (Acc; acc)
 open import Algebra.FunctionProperties using (Op₁)
 
-module RoutingLib.Function.Distance {a} {ℓ} (S : Setoid a ℓ) where
+module RoutingLib.Function.Metric {a} {ℓ} (S : Setoid a ℓ) where
 
   open Setoid S renaming (Carrier to A)
 
-  DistanceFunction : Set _
-  DistanceFunction = A → A → ℕ
+  MetricFunction : Set _
+  MetricFunction = A → A → ℕ
 
 
   -- Predicates over distance functions
 
-  Symmetric : Pred DistanceFunction a
+  Symmetric : Pred MetricFunction a
   Symmetric d = ∀ x y → d x y ≡ d y x
   
-  TriangleIneq : Pred DistanceFunction a
+  TriangleIneq : Pred MetricFunction a
   TriangleIneq d = ∀ x y z → d x z ≤ d x y + d y z
     
-  MaxTriangleIneq : Pred DistanceFunction a
+  MaxTriangleIneq : Pred MetricFunction a
   MaxTriangleIneq d = ∀ x y z → d x z ≤ d x y ⊔ d y z
 
-  Bounded : Pred DistanceFunction a
+  Bounded : Pred MetricFunction a
   Bounded d = ∃ λ n → ∀ x y → d x y ≤ n
 
   -- Contractions
     
-  _ContrOver_ : Op₁ A → DistanceFunction → Set _
+  _ContrOver_ : Op₁ A → MetricFunction → Set _
   f ContrOver d = ∀ x y → d (f x) (f y) ≤ d x y
 
-  _StrContrOver_ : Op₁ A → DistanceFunction → Set _
+  _StrContrOver_ : Op₁ A → MetricFunction → Set _
   f StrContrOver d = ∀ {x y} → ¬ (y ≈ x) → d (f x) (f y) < d x y
 
-  _ContrOnOrbitsOver_ : Op₁ A → DistanceFunction → Set _
+  _ContrOnOrbitsOver_ : Op₁ A → MetricFunction → Set _
   f ContrOnOrbitsOver d = ∀ x → d (f x) (f (f x)) ≤ d x (f x)
 
-  _StrContrOnOrbitsOver_ : Op₁ A → DistanceFunction → Set _
+  _StrContrOnOrbitsOver_ : Op₁ A → MetricFunction → Set _
   f StrContrOnOrbitsOver d = ∀ {x} → ¬ (f x ≈ x) → d (f x) (f (f x)) < d x (f x)
 
 
   -- Balls
 
   -- x is in the ball of radius r around point y
-  _∈[_∥_,_] : A → DistanceFunction → A → ℕ → Set _
+  _∈[_∥_,_] : A → MetricFunction → A → ℕ → Set _
   x ∈[ d ∥ y , r ] = d x y ≤ r
 
 
 
   -- Types of distance spaces
   
-  record IsMetric (d : DistanceFunction) : Set (a ⊔ₗ ℓ) where
+  record IsMetric (d : MetricFunction) : Set (a ⊔ₗ ℓ) where
     field
       cong     : d Preserves₂ _≈_ ⟶ _≈_ ⟶ _≡_
       eq⇒0     : ∀ {x y} → x ≈ y → d x y ≡ 0
@@ -66,7 +66,7 @@ module RoutingLib.Function.Distance {a} {ℓ} (S : Setoid a ℓ) where
 
   record Metric : Set (a ⊔ₗ ℓ) where
     field
-      d        : DistanceFunction
+      d        : MetricFunction
       isMetric : IsMetric d
 
     open IsMetric isMetric public

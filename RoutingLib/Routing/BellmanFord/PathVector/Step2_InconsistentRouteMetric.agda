@@ -19,7 +19,7 @@ open import Induction.Nat using () renaming (<-well-founded to <-wellFounded)
 open import RoutingLib.Data.Fin.Subset using (_\\_; size[p\\q]<size[p]; i∉p\\q⇒i∉p; i∉⁅j⁆) renaming (size to sizeₛ)
 open import RoutingLib.Data.Nat.Properties
   using (⊔-monoˡ-≤; ⊔-triangulate; m≤o⇒m≤n⊔o; m<n⇒n≢0; n≤m×o≤m⇒n⊔o≤m; m<n⊎m<o⇒m<n⊔o; n≤m⇒m⊔n≡m; m≤n⇒m⊔n≡n; m≤n⇒m≤n⊔o; module ≤-Reasoning; ≤⇒≯)
-import RoutingLib.Function.Distance as Distance
+import RoutingLib.Function.Metric as Metric
 open import RoutingLib.Data.Sum using (flip)
 
 open import RoutingLib.Routing.Definitions
@@ -37,7 +37,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step2_InconsistentRouteMetric
   open Step1 𝓟𝓢𝓒 using
     ( hⁱ ; Hⁱ ; hⁱ-cong ; 1≤hⁱ; hⁱ≤Hⁱ ; hⁱ-decr ; h[sᶜ]<h[rⁱ] )
  
-  open Distance S using (Ultrametric; IsUltrametric; MaxTriangleIneq; Bounded)
+  open Metric S using (Ultrametric; IsUltrametric; MaxTriangleIneq; Bounded)
 
   private
 

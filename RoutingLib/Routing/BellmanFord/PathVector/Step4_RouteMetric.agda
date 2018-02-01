@@ -26,8 +26,8 @@ open import RoutingLib.Data.Matrix.Properties using (min⁺[M]<min⁺[N])
 open import RoutingLib.Data.Table using (Table)
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
 open import RoutingLib.Data.Fin.Subset using (_\\_; size[p\\q]<size[p]; i∉p\\q⇒i∉p; i∉⁅j⁆) renaming (size to sizeₛ)
-import RoutingLib.Function.Distance as Distance
-import RoutingLib.Function.Distance.MaxLift as MaxLift
+import RoutingLib.Function.Metric as Metric
+import RoutingLib.Function.Metric.MaxLift as MaxLift
 
 import RoutingLib.Routing.BellmanFord.PathVector.Prelude as Prelude
 import RoutingLib.Routing.BellmanFord.PathVector.Step2_InconsistentRouteMetric as Step2
@@ -42,7 +42,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step4_RouteMetric
   open Prelude 𝓟𝓢𝓒
   open Step2 𝓟𝓢𝓒
   open Step3 𝓟𝓢𝓒
-  open Distance S using (Ultrametric; IsUltrametric; Bounded; MaxTriangleIneq)
+  open Metric S using (Ultrametric; IsUltrametric; Bounded; MaxTriangleIneq)
 
   abstract
   

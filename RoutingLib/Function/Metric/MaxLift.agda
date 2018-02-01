@@ -11,9 +11,9 @@ open import RoutingLib.Data.Table using (Table; max; zipWith)
 open import RoutingLib.Data.Table.Properties using (max-cong; t≤max[t]; max-constant)
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
 import RoutingLib.Data.Table.IndexedTypes as IndexedType
-open import RoutingLib.Function.Distance
+open import RoutingLib.Function.Metric
 
-module RoutingLib.Function.Distance.MaxLift {a ℓ n} (S : Fin n → Setoid a ℓ) where
+module RoutingLib.Function.Metric.MaxLift {a ℓ n} (S : Fin n → Setoid a ℓ) where
 
   open IndexedType S using (M; M-setoid; _≈_)
 

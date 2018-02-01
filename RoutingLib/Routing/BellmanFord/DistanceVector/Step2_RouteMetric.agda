@@ -16,7 +16,7 @@ open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique)
 open import RoutingLib.Data.List.Sorting using (Sorted)
 open import RoutingLib.Data.Matrix using (Matrix; zipWith; max⁺)
 open import RoutingLib.Data.Nat.Properties using (ℕₛ; m≤n⇒m≤n⊔o; n≤m⇒m⊔n≡m; n≤m×o≤m⇒n⊔o≤m; n≢0⇒0<n; module ≤-Reasoning)
-open import RoutingLib.Function.Distance using (Ultrametric; IsUltrametric; Bounded; MaxTriangleIneq)
+open import RoutingLib.Function.Metric using (Ultrametric; IsUltrametric; Bounded; MaxTriangleIneq)
 
 open import RoutingLib.Routing.Definitions using (RoutingProblem; RoutingAlgebra)
 open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions

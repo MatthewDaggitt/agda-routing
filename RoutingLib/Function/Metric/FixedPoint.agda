@@ -5,10 +5,10 @@ open import Induction.Nat using (<-well-founded)
 open import Relation.Binary using (DecSetoid)
 open import Relation.Nullary using (yes; no)
 
-module RoutingLib.Function.Distance.FixedPoint {a ℓ} (DS : DecSetoid a ℓ) where
+module RoutingLib.Function.Metric.FixedPoint {a ℓ} (DS : DecSetoid a ℓ) where
 
   open DecSetoid DS using (_≈_; _≟_) renaming (Carrier to A; setoid to S)
-  open import RoutingLib.Function.Distance S using (_StrContrOnOrbitsOver_)
+  open import RoutingLib.Function.Metric S using (_StrContrOnOrbitsOver_)
   open import RoutingLib.Function.FixedPoint S using (FixedPoint)
   
   module _ d {f} (strContrOnOrbits : f StrContrOnOrbitsOver d) where

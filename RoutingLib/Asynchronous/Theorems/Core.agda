@@ -9,14 +9,14 @@ open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 open import RoutingLib.Data.Table using (Table; max)
 open import RoutingLib.Data.Table.Relation.Pointwise using (Pointwise)
 open import RoutingLib.Function.Image using (FiniteImage)
-open import RoutingLib.Function.Distance using (IsUltrametric)
-import RoutingLib.Function.Distance.FixedPoint as FixedPoints
+open import RoutingLib.Function.Metric using (IsUltrametric)
+import RoutingLib.Function.Metric.FixedPoint as FixedPoints
 
 module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {S : Table (Setoid a ℓ) n}
                                         (P : Parallelisation S) where
 
   open Parallelisation P
-  open import RoutingLib.Function.Distance M-setoid using (_StrContrOver_; _ContrOver_; Bounded; _StrContrOnOrbitsOver_)
+  open import RoutingLib.Function.Metric M-setoid using (_StrContrOver_; _ContrOver_; Bounded; _StrContrOnOrbitsOver_)
 
   -----------------------------------------
   -- Asynchronously contracting operator --

@@ -1,4 +1,19 @@
 # agda-routing
-An Agda library for reasoning about network routing problems. The library is laid out similarly to the Agda standard library and contains extensions of several of the Agda standard library modules. The core contribution of this library can be found in `RoutingLib.Data.Graph` and `RoutingLib.Routing`.
+
+An Agda library for reasoning about asynchronous processes and network routing problems. The library is laid out similarly to the Agda standard library and contains extensions of several of the Agda standard library modules. 
+
+The core contributions of this library can be found in the `Asynchronous` and `Routing` directories.
+
+	* `RoutingLib.Asynchronous` contains the formalisation of Uresin & Dubois of asynchronous processes.
+	
+	* `RoutingLib.Asynchronous.Theorems` contains various very general results about the convergence of asynchronous processes.
+	
+	* `RoutingLib.Routing.BellmanFord` contains an implementation of generalised distributed Bellman Ford-based routing algorithms.
+	
+	* `RoutingLib.Routing.BellmanFord.DistanceVector` contains a proof that distance-vector protocols converge with strictly increasing algebras and a finite set of routes.
+	
+	* `RoutingLib.Routing.BellmanFord.PathVector` contains a proof that path-vector protocols converge with strictly increasing algebras.
+
+## Requirements
 
 Requires Agda 2.5.3 and Standard Library 0.14

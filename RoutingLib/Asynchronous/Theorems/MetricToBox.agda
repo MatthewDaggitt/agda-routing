@@ -30,10 +30,10 @@ open import RoutingLib.Data.List.Sorting.Nat using (index-mono⁻¹-<; upTo-↗)
 open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique)
 open import RoutingLib.Data.List.Uniqueness.Propositional.Properties using (upTo!⁺)
 open import RoutingLib.Function.Image using (FiniteImage)
-open import RoutingLib.Function.Distance using (IsUltrametric)
-open import RoutingLib.Function.Distance.Properties using (strContr⇒strContrOnOrbits)
-import RoutingLib.Function.Distance.MaxLift as MaxLift
-import RoutingLib.Function.Distance.FixedPoint as FixedPoints
+open import RoutingLib.Function.Metric using (IsUltrametric)
+open import RoutingLib.Function.Metric.Properties using (strContr⇒strContrOnOrbits)
+import RoutingLib.Function.Metric.MaxLift as MaxLift
+import RoutingLib.Function.Metric.FixedPoint as FixedPoints
 
 open import RoutingLib.Asynchronous using (Parallelisation)
 open import RoutingLib.Asynchronous.Theorems.Core using (ACO; TotalACO; UltrametricConditions)

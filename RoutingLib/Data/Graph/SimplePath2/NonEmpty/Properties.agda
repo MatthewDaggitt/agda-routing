@@ -41,7 +41,7 @@ module RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties {n} where
     ≈-trans : Transitive (_≈_ {n})
     ≈-trans []            []           = []
     ≈-trans (refl ∷ p≈q)  (refl ∷ q≈r) = refl ∷ (≈-trans p≈q q≈r)
-{-
+
     _≟_ : Decidable (_≈_ {n})
     [] ≟ [] = yes []
     [] ≟ (k ∷ q ∣ _ ∣ _) = no λ()
@@ -96,11 +96,11 @@ module RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties {n} where
     ⇿-resp-≈ : ∀ {e : Fin n × Fin n} → (e ⇿_) Respects _≈_
     ⇿-resp-≈ []           (start i≢j)    = start i≢j
     ⇿-resp-≈ (refl ∷ p≈q) (continue i≢j) = continue i≢j
--}  
+
     ij⇿p⇒i≢j : ∀ {n} {i j : Fin n} {p} → (i , j) ⇿ p → i ≢ j
     ij⇿p⇒i≢j (start    i≢j) = i≢j
     ij⇿p⇒i≢j (continue i≢j) = i≢j
-{-
+
   ----------------------
   -- Membership
   
@@ -187,24 +187,44 @@ module RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties {n} where
     p≉i∷p : ∀ {e} {p : SimplePathⁿᵗ n} {e⇿p e∉p} → ¬ (p ≈ e ∷ p ∣ e⇿p ∣ e∉p)
     p≉i∷p {p = []}            ()
     p≉i∷p {p = _ ∷ _ ∣ _ ∣ _} (_ ∷ p≈i∷p) = p≉i∷p p≈i∷p
--}
+
 
     ∉-lookup : ∀ {p : SimplePathⁿᵗ n} (p⁺ : NonEmpty p) →
-               ∀ e → e ∉ p → ∀ i → e ≢ lookupᵥ p⁺ i
-    ∉-lookup = {!!}
+               ∀ {i} → i ∉ p → ∀ k → lookupᵥ p⁺ k ≢ i
+    ∉-lookup (nonEmpty .(_ , _) [] e⇿p e∉p) (notHere x x₁ i∉p) fzero = x ∘ sym
+    ∉-lookup (nonEmpty .(_ , _) [] e⇿p e∉p) (notHere x x₁ i∉p) (fsuc fzero) = x₁ ∘ sym
+    ∉-lookup (nonEmpty .(_ , _) [] e⇿p e∉p) (notHere x x₁ i∉p) (fsuc (fsuc ()))
+    ∉-lookup (nonEmpty .(_ , _) (e ∷ p ∣ e⇿p₁ ∣ e∉p₁) e⇿p e∉p) (notHere x x₁ i∉p) fzero = x ∘ sym
+    ∉-lookup (nonEmpty .(_ , _) (e ∷ p ∣ e⇿p₁ ∣ e∉p₁) e⇿p e∉p) (notHere x x₁ i∉p) (fsuc fzero) = x₁ ∘ sym
+    ∉-lookup (nonEmpty .(_ , _) (e ∷ p ∣ e⇿p₁ ∣ e∉p₁) e⇿p e∉p) (notHere x x₁ i∉p) (fsuc (fsuc k)) =
+      ∉-lookup (nonEmpty e p e⇿p₁ e∉p₁) i∉p (fsuc k)
 
+    ∉-lookup₂ : ∀ {p : SimplePathⁿᵗ n} (p⁺ : NonEmpty p) →
+                ∀ {i j} → (i , j) ⇿ p → ∀ k → lookupᵥ p⁺ (fsuc k) ≢ j
+    ∉-lookup₂ (nonEmpty (j , l) p e⇿p e∉p) {i} {j} (continue x) fzero    = ij⇿p⇒i≢j e⇿p ∘ sym
+    ∉-lookup₂ (nonEmpty (j , l) [] e⇿p e∉p) {i} {.j} (continue x) (fsuc ())
+    ∉-lookup₂ (nonEmpty (j , l) (.(_ , _) ∷ p ∣ e⇿p₁ ∣ e∉p₁) e⇿p (notHere x₁ x₂ e∉p)) {i} {.j} (continue x) (fsuc fzero) = x₂ ∘ sym
+    ∉-lookup₂ (nonEmpty (j , l) (e ∷ p ∣ e⇿p₁ ∣ e∉p₁) e⇿p e∉p) {i} {.j} (continue x) (fsuc (fsuc k)) = 
+      ∉-lookup (nonEmpty e p e⇿p₁ e∉p₁) e∉p (fsuc (fsuc k))
+    
     lookup! : ∀ {p : SimplePathⁿᵗ n} (p⁺ : NonEmpty p) → ∀ k l → k ≢ l → lookupᵥ p⁺ k ≢ lookupᵥ p⁺ l
     lookup! (nonEmpty e p e⇿p e∉p)               fzero           fzero           0≢0 = contradiction refl 0≢0
-    lookup! (nonEmpty e p e⇿p e∉p)               fzero           (fsuc fzero)    _   = ij⇿p⇒i≢j e⇿p ∘ sym
+    lookup! (nonEmpty e p e⇿p e∉p)               fzero           (fsuc fzero)    _   = ij⇿p⇒i≢j e⇿p
     lookup! (nonEmpty e [] e⇿p e∉p)              fzero           (fsuc (fsuc ()))
-    lookup! (nonEmpty e (_ ∷ _ ∣ _ ∣ _) e⇿p e∉p) fzero           (fsuc (fsuc l)) _   = ∉-lookup {!!} (proj₂ e) {!!} l
-    lookup! (nonEmpty e p e⇿p e∉p)               (fsuc fzero)    fzero           _   = ij⇿p⇒i≢j e⇿p
+    lookup! (nonEmpty e p e⇿p e∉p)               (fsuc fzero)    fzero           _   = ij⇿p⇒i≢j e⇿p ∘ sym
     lookup! (nonEmpty e [] e⇿p e∉p)              (fsuc (fsuc ())) _      
-    lookup! (nonEmpty e (_ ∷ _ ∣ _ ∣ _) e⇿p e∉p) (fsuc (fsuc k)) fzero           _   = {!!}
     lookup! (nonEmpty e p e⇿p e∉p)               (fsuc fzero)    (fsuc fzero)    1≢1 = contradiction refl 1≢1
-    lookup! (nonEmpty e p e⇿p e∉p)               (fsuc fzero)    (fsuc (fsuc l)) _   = {!!}
-    lookup! (nonEmpty e p e⇿p e∉p)               (fsuc (fsuc k)) (fsuc fzero)    _   = {!!}
-    lookup! (nonEmpty e (_ ∷ _ ∣ _ ∣ _) e⇿p e∉p) (fsuc (fsuc k)) (fsuc (fsuc l)) k≢l = lookup! (nonEmpty _ _ _ _) (fsuc k) (fsuc l) (k≢l ∘ cong fsuc)
+    lookup! (nonEmpty e [] e⇿p e∉p)              (fsuc fzero)    (fsuc (fsuc ()))
+    lookup! (nonEmpty e (f ∷ p ∣ a ∣ b) e⇿p e∉p) fzero           (fsuc (fsuc l)) _   =
+      (∉-lookup (nonEmpty f p a b) e∉p (fsuc l)) ∘ sym
+    lookup! (nonEmpty e (f ∷ p ∣ a ∣ b) e⇿p e∉p) (fsuc (fsuc k)) fzero           _   =
+      (∉-lookup (nonEmpty f p a b) e∉p (fsuc k))
+    lookup! (nonEmpty e (f ∷ p ∣ a ∣ b) e⇿p e∉p) (fsuc fzero)    (fsuc (fsuc l)) _   =
+      ∉-lookup₂ (nonEmpty f p a b) e⇿p l ∘ sym
+    lookup! (nonEmpty e (f ∷ p ∣ a ∣ b) e⇿p e∉p) (fsuc (fsuc k)) (fsuc fzero)    _   =
+      ∉-lookup₂ (nonEmpty f p a b) e⇿p k
+    lookup! (nonEmpty e (_ ∷ _ ∣ _ ∣ _) e⇿p e∉p) (fsuc (fsuc k)) (fsuc (fsuc l)) k≢l =
+      lookup! (nonEmpty _ _ _ _) (fsuc k) (fsuc l) (k≢l ∘ cong fsuc)
 
     |p|<n : ∀ {p : SimplePathⁿᵗ n} → NonEmpty p → length p <ℕ n
     |p|<n q@(nonEmpty e p e⇿p e∉p) with suc (length p) <? n

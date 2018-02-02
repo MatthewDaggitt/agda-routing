@@ -64,8 +64,8 @@ module RoutingLib.Data.Graph.SimplePath2.NonEmpty where
     nonEmpty : ∀ e p e⇿p e∉p → NonEmpty (e ∷ p ∣ e⇿p ∣ e∉p)
     
   lookupᵥ : ∀ {n} {p : SimplePathⁿᵗ n} → NonEmpty p → Fin (suc (length p)) → Fin n
-  lookupᵥ (nonEmpty e p e⇿p e∉p) fzero           = proj₂ e
-  lookupᵥ (nonEmpty e p e⇿p e∉p) (fsuc fzero)    = proj₁ e
+  lookupᵥ (nonEmpty e p e⇿p e∉p) fzero           = proj₁ e
+  lookupᵥ (nonEmpty e p e⇿p e∉p) (fsuc fzero)    = proj₂ e
   lookupᵥ (nonEmpty e [] e⇿p e∉p) (fsuc (fsuc ()))
   lookupᵥ (nonEmpty e (f ∷ p ∣ f⇿p ∣ f∉p) e⇿p e∉p) (fsuc (fsuc i)) = lookupᵥ (nonEmpty f p f⇿p f∉p) (fsuc i)
   

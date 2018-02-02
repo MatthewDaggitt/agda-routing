@@ -5,11 +5,11 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary.List.Pointwise using ([]; _∷_) renaming (setoid to listSetoid)
 open import Data.Nat using (ℕ; suc) renaming (_≟_ to _≟ℕ_; _≤?_ to _≤ℕ?_; _<_ to _<ℕ_)
-open import Data.Nat.Properties using (<-trans; ≰⇒>; <⇒≢; <⇒≯; ≤-refl; 1+n≰n)
+open import Data.Nat.Properties using (<-trans; ≰⇒>; <⇒≢; <⇒≯; ≤-refl; 1+n≰n; _<?_; ≰⇒≥)
 open import Data.Fin using (Fin; _<_; _≤?_) renaming (zero to fzero; suc to fsuc)
-open import Data.Fin.Properties using (cmp; ≤-trans; ≤-antisym; ≤-total; _<?_) renaming (_≟_ to _≟𝔽_)
+open import Data.Fin.Properties using (cmp; ≤-trans; ≤-antisym; ≤-total) renaming (_≟_ to _≟𝔽_)
 open import Data.Sum using (inj₁; inj₂)
-open import Data.Product using (_,_; _×_)
+open import Data.Product using (_,_; _×_; proj₁; proj₂)
 open import Relation.Binary.Product.Pointwise using (_×-≟_)
 open import Function using (_∘_)
 
@@ -41,7 +41,7 @@ module RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties {n} where
     ≈-trans : Transitive (_≈_ {n})
     ≈-trans []            []           = []
     ≈-trans (refl ∷ p≈q)  (refl ∷ q≈r) = refl ∷ (≈-trans p≈q q≈r)
-
+{-
     _≟_ : Decidable (_≈_ {n})
     [] ≟ [] = yes []
     [] ≟ (k ∷ q ∣ _ ∣ _) = no λ()
@@ -96,7 +96,11 @@ module RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties {n} where
     ⇿-resp-≈ : ∀ {e : Fin n × Fin n} → (e ⇿_) Respects _≈_
     ⇿-resp-≈ []           (start i≢j)    = start i≢j
     ⇿-resp-≈ (refl ∷ p≈q) (continue i≢j) = continue i≢j
-    
+-}  
+    ij⇿p⇒i≢j : ∀ {n} {i j : Fin n} {p} → (i , j) ⇿ p → i ≢ j
+    ij⇿p⇒i≢j (start    i≢j) = i≢j
+    ij⇿p⇒i≢j (continue i≢j) = i≢j
+{-
   ----------------------
   -- Membership
   
@@ -183,54 +187,27 @@ module RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties {n} where
     p≉i∷p : ∀ {e} {p : SimplePathⁿᵗ n} {e⇿p e∉p} → ¬ (p ≈ e ∷ p ∣ e⇿p ∣ e∉p)
     p≉i∷p {p = []}            ()
     p≉i∷p {p = _ ∷ _ ∣ _ ∣ _} (_ ∷ p≈i∷p) = p≉i∷p p≈i∷p
-
-
-{-
-    lookup-∈ : (p : SimplePathⁿᵗ n) → ∀ i {k} → p ⟦ i ⟧ ≡ k → ¬ (k ∉ p)
-    lookup-∈ (i ∺ j ∣ _) fzero            refl (notThere i≢i _) = i≢i refl
-    lookup-∈ (i ∺ j ∣ _) (fsuc fzero)     refl (notThere _ j≢j) = j≢j refl
-    lookup-∈ (i ∺ j ∣ _) (fsuc (fsuc ()))
-    lookup-∈ (i ∷ p ∣ _) fzero            refl (notHere i≢i _)  = i≢i refl
-    lookup-∈ (i ∷ p ∣ _) (fsuc k)         pᵢ≡k  (notHere _ i∉p)  = lookup-∈ p k pᵢ≡k i∉p
-
-    lookup! : ∀ (p : SimplePathⁿᵗ n) {k l} → k ≢ l → p ⟦ k ⟧ ≢ p ⟦ l ⟧
-    lookup! _             {fzero}          {fzero}          0≢0 _ = 0≢0 refl
-    lookup! (i ∺ j ∣ i≢j) {fzero}          {fsuc fzero}     _     = i≢j
-    lookup! (i ∺ j ∣ i≢j) {fsuc fzero}     {fzero}          _     = i≢j ∘ sym
-    lookup! (i ∺ j ∣ x)   {_}              {fsuc (fsuc ())} _
-    lookup! (i ∺ j ∣ x)   {fsuc (fsuc ())} {_}
-    lookup! (i ∺ j ∣ x)   {fsuc fzero}     {fsuc fzero}     1≢1 _ = 1≢1 refl
-    lookup! (i ∷ p ∣ i∉p) {fzero}          {fsuc j}         i≢j i≡pⱼ = contradiction i∉p (lookup-∈ p j (sym i≡pⱼ))
-    lookup! (i ∷ p ∣ i∉p) {fsuc k}         {fzero}          i≢j pₖ≡i = contradiction i∉p (lookup-∈ p k pₖ≡i)
-    lookup! (i ∷ p ∣ x)   {fsuc k}         {fsuc l}         k+1≢l+1 pₖ≡pₗ = lookup! p (k+1≢l+1 ∘ cong fsuc) pₖ≡pₗ
-
-    |p|<n : ∀ (p : SimplePathⁿᵗ n) → length p <ℕ n
-    |p|<n p with suc (length p) ≤ℕ? n
-    ... | yes |p|<n = |p|<n
-    ... | no  |p|≮n with pigeonhole (≰⇒> |p|≮n) (p ⟦_⟧)
-    ...   | i , j , i≢j , pᵢ≡pⱼ = contradiction pᵢ≡pⱼ (lookup! p i≢j)
-  
-
-    ---------------------
-    -- Graph membership
-
-    ∈𝔾-resp-≈ : ∀ {a} {A : Set a} {G : Graph A n} → (_∈𝔾 G) Respects _≈_
-    ∈𝔾-resp-≈ (refl ∺ refl) (edge-∺ ij∈G)     = edge-∺ ij∈G
-    ∈𝔾-resp-≈ {G = G} {i ∷ _ ∣ _} (refl ∷ p≈q)  (edge-∷ ip∈G p∈G) = edge-∷ (∈-resp-≡ₗ {i = i} {G = G} ip∈G (p≈q⇒p₀≡q₀ p≈q)) (∈𝔾-resp-≈ p≈q p∈G)
-
-    ∉𝔾-resp-≈ : ∀ {a} {A : Set a} {G : Graph A n} → (_∉𝔾 G) Respects _≈_
-    ∉𝔾-resp-≈ p≈q p∉G q∈G = contradiction (∈𝔾-resp-≈ (≈-sym p≈q) q∈G) p∉G
-    
-    _∈𝔾?_ : ∀ {a} {A : Set a} → Decidable (_∈𝔾_ {n = n} {A})
-    (i ∺ j ∣ x) ∈𝔾? G with (i , j) ∈? G
-    ... | yes ij∈G = yes (edge-∺ ij∈G)
-    ... | no  ij∉G = no (λ {(edge-∺ ij∈G) → ij∉G ij∈G})
-    (i ∷ p ∣ x) ∈𝔾? G with (i , source p) ∈? G | p ∈𝔾? G
-    ... | yes ip₀∈G | yes p∈G = yes (edge-∷ ip₀∈G p∈G)
-    ... | no  ip₀∉G | _       = no (λ {(edge-∷ ip₀∈G _) → ip₀∉G ip₀∈G})
-    ... | _         | no  p∉G = no (λ {(edge-∷ _ p∈G) → p∉G p∈G})
-    
-    weight-cong : ∀ {a b} {A : Set a} {B : Set b} _▷_ (1# : B) {p q : SimplePathⁿᵗ n} {G : Graph A n} → p ≈ q → (p∈G : p ∈𝔾 G) (q∈G : q ∈𝔾 G) → weight _▷_ 1# p∈G ≡ weight _▷_ 1# q∈G
-    weight-cong _▷_ 1# {G = G} (refl ∺ refl) (edge-∺ (v , Gᵢⱼ≈v))     (edge-∺ (w , Gᵢⱼ≈w))     = cong (_▷ 1#) (just-injective (trans (sym Gᵢⱼ≈v) Gᵢⱼ≈w))
-    weight-cong _▷_ 1# {G = G} (refl ∷ p≈q)  (edge-∷ (v , Gᵢⱼ≈v) p∈G) (edge-∷ (w , Gᵢⱼ≈w) q∈G) = cong₂ _▷_ (just-injective (trans (sym Gᵢⱼ≈v) (trans (cong (G _) (p≈q⇒p₀≡q₀ p≈q)) Gᵢⱼ≈w))) (weight-cong _▷_ 1# p≈q p∈G q∈G)
 -}
+
+    ∉-lookup : ∀ {p : SimplePathⁿᵗ n} (p⁺ : NonEmpty p) →
+               ∀ e → e ∉ p → ∀ i → e ≢ lookupᵥ p⁺ i
+    ∉-lookup = {!!}
+
+    lookup! : ∀ {p : SimplePathⁿᵗ n} (p⁺ : NonEmpty p) → ∀ k l → k ≢ l → lookupᵥ p⁺ k ≢ lookupᵥ p⁺ l
+    lookup! (nonEmpty e p e⇿p e∉p)               fzero           fzero           0≢0 = contradiction refl 0≢0
+    lookup! (nonEmpty e p e⇿p e∉p)               fzero           (fsuc fzero)    _   = ij⇿p⇒i≢j e⇿p ∘ sym
+    lookup! (nonEmpty e [] e⇿p e∉p)              fzero           (fsuc (fsuc ()))
+    lookup! (nonEmpty e (_ ∷ _ ∣ _ ∣ _) e⇿p e∉p) fzero           (fsuc (fsuc l)) _   = ∉-lookup {!!} (proj₂ e) {!!} l
+    lookup! (nonEmpty e p e⇿p e∉p)               (fsuc fzero)    fzero           _   = ij⇿p⇒i≢j e⇿p
+    lookup! (nonEmpty e [] e⇿p e∉p)              (fsuc (fsuc ())) _      
+    lookup! (nonEmpty e (_ ∷ _ ∣ _ ∣ _) e⇿p e∉p) (fsuc (fsuc k)) fzero           _   = {!!}
+    lookup! (nonEmpty e p e⇿p e∉p)               (fsuc fzero)    (fsuc fzero)    1≢1 = contradiction refl 1≢1
+    lookup! (nonEmpty e p e⇿p e∉p)               (fsuc fzero)    (fsuc (fsuc l)) _   = {!!}
+    lookup! (nonEmpty e p e⇿p e∉p)               (fsuc (fsuc k)) (fsuc fzero)    _   = {!!}
+    lookup! (nonEmpty e (_ ∷ _ ∣ _ ∣ _) e⇿p e∉p) (fsuc (fsuc k)) (fsuc (fsuc l)) k≢l = lookup! (nonEmpty _ _ _ _) (fsuc k) (fsuc l) (k≢l ∘ cong fsuc)
+
+    |p|<n : ∀ {p : SimplePathⁿᵗ n} → NonEmpty p → length p <ℕ n
+    |p|<n q@(nonEmpty e p e⇿p e∉p) with suc (length p) <? n
+    ... | yes |q|<n = |q|<n
+    ... | no  |q|≮n with pigeonhole (≰⇒> |q|≮n) (lookupᵥ q)
+    ...   | i , j , i≢j , pᵢ≡pⱼ = contradiction pᵢ≡pⱼ (lookup! q i j i≢j)

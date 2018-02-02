@@ -21,7 +21,7 @@ module RoutingLib.Data.Graph.SimplePath2.NonEmpty where
 
   mutual
 
-    infix 4 _∉_ _⇿_
+    infix 4 _∈_ _∉_ _⇿_
     
     data SimplePathⁿᵗ (n : ℕ) : Set lzero where
       []      : SimplePathⁿᵗ n
@@ -35,6 +35,9 @@ module RoutingLib.Data.Graph.SimplePath2.NonEmpty where
       notThere : ∀ {k}                  → k ∉ []
       notHere  : ∀ {i j k p ij⇿p i∉p} → k ≢ i → k ≢ j → k ∉ p → k ∉ (i , j) ∷ p ∣ ij⇿p ∣ i∉p
 
+  _∈_ : ∀ {n : ℕ} → Fin n → SimplePathⁿᵗ n → Set lzero
+  i ∈ p = ¬ (i ∉ p)
+  
   -- Equality
   
   infix 4 _≈_ _≉_
@@ -49,18 +52,23 @@ module RoutingLib.Data.Graph.SimplePath2.NonEmpty where
   -- Operations
 
   length : ∀ {n} → SimplePathⁿᵗ n → ℕ
-  length []              = 1
+  length []              = 0
   length (_ ∷ p ∣ _ ∣ _) = suc (length p)
-  
- {-
-  _⟦_⟧ : ∀ {n} → (p : SimplePathⁿᵗ n) → Fin (suc (length p)) → Fin n
-  (i ∺ _ ∣ _) ⟦ fzero ⟧          = i
-  (_ ∺ j ∣ _) ⟦ fsuc fzero ⟧     = j
-  (_ ∺ _ ∣ _) ⟦ fsuc (fsuc ()) ⟧ 
-  (i ∷ _ ∣ _) ⟦ fzero ⟧          = i
-  (_ ∷ p ∣ _) ⟦ fsuc k ⟧         = p ⟦ k ⟧
--}
 
+  lookupₑ : ∀ {n} → (p : SimplePathⁿᵗ n) → Fin (length p) → Fin n × Fin n
+  lookupₑ []              ()
+  lookupₑ (e ∷ _ ∣ _ ∣ _) fzero    = e
+  lookupₑ (_ ∷ p ∣ _ ∣ _) (fsuc i) = lookupₑ p i
+
+  data NonEmpty {n} : SimplePathⁿᵗ n → Set where
+    nonEmpty : ∀ e p e⇿p e∉p → NonEmpty (e ∷ p ∣ e⇿p ∣ e∉p)
+    
+  lookupᵥ : ∀ {n} {p : SimplePathⁿᵗ n} → NonEmpty p → Fin (suc (length p)) → Fin n
+  lookupᵥ (nonEmpty e p e⇿p e∉p) fzero           = proj₂ e
+  lookupᵥ (nonEmpty e p e⇿p e∉p) (fsuc fzero)    = proj₁ e
+  lookupᵥ (nonEmpty e [] e⇿p e∉p) (fsuc (fsuc ()))
+  lookupᵥ (nonEmpty e (f ∷ p ∣ f⇿p ∣ f∉p) e⇿p e∉p) (fsuc (fsuc i)) = lookupᵥ (nonEmpty f p f⇿p f∉p) (fsuc i)
+  
   ----------------------------------------------------------------------------------------------
   -- Orders
 

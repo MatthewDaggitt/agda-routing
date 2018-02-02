@@ -199,13 +199,10 @@ module RoutingLib.Data.Graph.SimplePath2.Properties {n : ℕ} where
 -}
 
     -- Length
-
-    postulate length<n : (p : SimplePath (suc n)) → length p <ℕ (suc n)
-    {-
-    length<n invalid  = s≤s z≤n
-    length<n valid p  = s≤s z≤n
-    length<n [ p ]    = NEP.|p|<n p
-    -}
+    length<n : (p : SimplePath (suc n)) → length p <ℕ suc n
+    length<n invalid                     = s≤s z≤n
+    length<n (valid [])                  = s≤s z≤n
+    length<n (valid (e ∷ p ∣ e⇿p ∣ e∉p)) = NEP.|p|<n (NE.nonEmpty e p e⇿p e∉p)
     
     length-cong : ∀ {p q : SimplePath n} → p ≈ q → length p ≡ length q
     length-cong invalid     = refl

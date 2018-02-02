@@ -15,26 +15,15 @@ open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
 
 module RoutingLib.Data.Graph.SimplePath2.Enumeration where
 
-  --import RoutingLib.Data.Graph.SimplePath2.NonEmpty.Enumeration as Eⁿᵗ
+  import RoutingLib.Data.Graph.SimplePath2.NonEmpty.Enumeration as Eⁿᵗ
 
   private
     module _ {n : ℕ} where
       open import Data.List.Any.Membership (ℙₛ {n}) using (_∈_) public
 
-  postulate allPaths : ∀ n → List (SimplePath n)
-    {-
-    allPaths n = ∅ ∷ [] ∷ map [_] (Eⁿᵗ.allPaths n)
-
-    allPaths! : ∀ n → Unique ℙₛ (allPaths n)
-    allPaths! n =
-      ((λ()) ∷ All-map⁺₂ (λ _ ()) (Eⁿᵗ.allPaths n))
-      ∷ All-map⁺₂ (λ _ ()) (Eⁿᵗ.allPaths n)
-      ∷ AllPairs-map⁺₂ (_∘ [-]-injective ) (Eⁿᵗ.allPaths! n)
-    -}
+  allPaths : ∀ n → List (SimplePath n)
+  allPaths n = invalid ∷ map valid (Eⁿᵗ.allPaths n)
     
-  postulate ∈-allPaths : ∀ {n} (p : SimplePath n) → p ∈ allPaths n
-    {-
-    ∈-allPaths {_} ∅     = here ∅
-    ∈-allPaths {_} []    = there (here [])
-    ∈-allPaths {n} [ x ] = there (there (∈-map⁺ NEPₛ ℙₛ [_] (Eⁿᵗ.∈-allPaths n x)))
-    -}
+  ∈-allPaths : ∀ {n} (p : SimplePath n) → p ∈ allPaths n
+  ∈-allPaths {_} invalid   = here invalid
+  ∈-allPaths {n} (valid p) = there (∈-map⁺ NEPₛ ℙₛ valid (Eⁿᵗ.∈-allPaths n p))

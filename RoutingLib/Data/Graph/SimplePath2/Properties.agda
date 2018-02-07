@@ -19,8 +19,6 @@ open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_)
 
 module RoutingLib.Data.Graph.SimplePath2.Properties {n : ℕ} where
 
-  open import RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties using (p≈q⇒p₀≡q₀; p≉i∷p) public
-
   abstract
 
     --------------
@@ -77,12 +75,23 @@ module RoutingLib.Data.Graph.SimplePath2.Properties {n : ℕ} where
     ; isDecEquivalence = ≈-isDecEquivalence 
     }
 
-
-  -- Membership
-
   abstract
 
-{-
+  
+    -- Linkage
+
+    _⇿?_ : Decidable (_⇿_ {n})
+    e ⇿? invalid = no λ()
+    e ⇿? valid p with e NEP.⇿? p
+    ... | yes e⇿p = yes (valid e⇿p)
+    ... | no ¬e⇿p = no λ{(valid e⇿p) → ¬e⇿p e⇿p}
+
+    ⇿-resp-≈ : ∀ {e} {p q : SimplePath n} → p ≈ q → e ⇿ p → e ⇿ q
+    ⇿-resp-≈ invalid     e⇿p         = e⇿p
+    ⇿-resp-≈ (valid p≈q) (valid e⇿p) = valid (NEP.⇿-resp-≈ p≈q e⇿p)
+    
+    -- Membership
+
     _∉?_ : Decidable (_∉_ {n})
     k ∉? invalid     = yes invalid
     k ∉? valid p with k NEP.∉? p
@@ -90,10 +99,10 @@ module RoutingLib.Data.Graph.SimplePath2.Properties {n : ℕ} where
     ... | no  k∈p = no λ{(valid k∉p) → k∈p k∉p}
 
     ∉-resp-≈ : ∀ {k : Fin n} → (k ∉_) Respects _≈_
-    ∉-resp-≈ invalid       invalid       = invalid
-    ∉-resp-≈ (valid p) (valid p      = valid p
-    ∉-resp-≈ [ p≈q ] [ k∉p ] = [ NEP.∉-resp-≈ p≈q k∉p ]
+    ∉-resp-≈ invalid     invalid     = invalid
+    ∉-resp-≈ (valid p≈q) (valid k∉p) = valid (NEP.∉-resp-≈ p≈q k∉p)
 
+{-
     ∈-resp-≈ : ∀ {k : Fin n} → (k ∈_) Respects _≈_
     ∈-resp-≈ x≈y k∈x k∉y = k∈x (∉-resp-≈ (≈-sym x≈y) k∉y)
  -}
@@ -206,7 +215,7 @@ module RoutingLib.Data.Graph.SimplePath2.Properties {n : ℕ} where
     
     length-cong : ∀ {p q : SimplePath n} → p ≈ q → length p ≡ length q
     length-cong invalid     = refl
-    length-cong (valid p≈q) = NEP.p≈q⇒|p|≡|q| p≈q
+    length-cong (valid p≈q) = NEP.length-cong p≈q
 
     ∷ₐ-cong : ∀ (e : Fin n × Fin n) → (e ∷ₐ_) Preserves _≈_ ⟶ _≈_
     ∷ₐ-cong (i , j) invalid     = invalid

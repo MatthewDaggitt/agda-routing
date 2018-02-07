@@ -6,9 +6,17 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong)
 
 module RoutingLib.Function where
 
+  -- Double composition
+  
+  _∘₂_ : ∀ {a b c d} → {A : Set a} {B : Set b} {C : Set c} {D : Set d} →
+         (f : C → D) → (g : A → B → C) → (A → B → D) 
+  f ∘₂ g = λ x y → f (g x y)
+
+
+  -- Repeated application
+  
   infix 7 _^ˡ_ _^ʳ_
 
-  
   _^ˡ_ : ∀ {a} {A : Set a} → (A → A) → ℕ → (A → A)
   f ^ˡ zero    = id
   f ^ˡ (suc n) = f ∘ (f ^ˡ n)
@@ -17,15 +25,13 @@ module RoutingLib.Function where
   f ^ʳ zero    = id
   f ^ʳ (suc n) = (f ^ˡ n) ∘ f
 
-  _∘₂_ : ∀ {a b c d} → {A : Set a} {B : Set b} {C : Set c} {D : Set d} → (f : C → D) → (g : A → B → C) → (A → B → D) 
-  f ∘₂ g = λ x y → f (g x y)
-  
-{-
-  eq : ∀ {a} {A : Set a} (f : A → A) n → (f ^ˡ n) ≡ (f ^ʳ n)
-  eq f zero    = refl
-  eq f (suc n) = {!!}
 
-  ff^≡f^f : ∀ {a} {A : Set a} (f : A → A) n x → f ((f ^ n) x) ≡ (f ^ n) (f x)
-  ff^≡f^f f zero x    = refl
-  ff^≡f^f f (suc n) x = cong f (ff^≡f^f f n x)
--}
+  -- Pipelining
+  
+  infixl 0 _∣>_ _∣>′_
+
+  _∣>_ : ∀ {a b} {A : Set a} {B : A → Set b} (x : A) (f : ∀ x → B x) → B x
+  x ∣> f = f x
+ 
+  _∣>′_ : ∀ {a b} {A : Set a} {B : Set b} (x : A) (f : A → B) → B
+  _∣>′_ = _∣>_

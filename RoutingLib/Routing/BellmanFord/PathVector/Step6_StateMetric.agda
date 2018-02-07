@@ -1,28 +1,19 @@
-open import Data.Product using (∃; ∃₂; Σ; _×_; _,_; proj₁; proj₂)
-open import Data.Nat using (ℕ; zero; suc; _+_; z≤n; s≤s; _<_; _≤_; _≤?_; _∸_; _⊔_; _⊓_; ≤-pred) renaming (_≟_ to _≟ℕ_)
-open import Data.Nat.Properties using (≤-trans; ≤-refl; ≤-reflexive; m≤m+n; m+n∸m≡n; +-mono-≤; ∸-mono;  ⊓-mono-<; m≤m⊔n; m⊓n≤m; ≰⇒≥)
-open import Data.Fin using (Fin)
+open import Data.Product using (_×_; _,_; proj₁; proj₂)
+open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _<_; _≤_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; subst; subst₂; cong₂)
-open import Relation.Binary using (_Preserves₂_⟶_⟶_)
-open import Relation.Nullary using (¬_; yes; no)
+open import Relation.Binary.PropositionalEquality
+  using (_≡_; refl; sym; trans; cong; subst; subst₂; cong₂)
 open import Relation.Nullary.Negation using (contradiction)
 open import Function using (_∘_)
 
 open import RoutingLib.Routing.Definitions
-open import RoutingLib.Algebra.FunctionProperties
-open import RoutingLib.Data.Graph
 open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
-open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions using () renaming (SufficientConditions to GeneralSufficientConditions)
-open import RoutingLib.Data.Nat.Properties using (ℕₛ; m≤n⇒m≤n⊔o; m≤o⇒m≤n⊔o; n<m⇒n⊓o<m; n≤m⇒n⊓o≤m; m<n⇒n≢0; ≤-stepsʳ; +-monoʳ-≤; +-monoʳ-<; n≢0⇒0<n; n≤0⇒n≡0; module ≤-Reasoning)
-open import RoutingLib.Data.Matrix using (Any; map; min⁺)
-open import RoutingLib.Data.Matrix.Properties using (min⁺[M]<min⁺[N])
-open import RoutingLib.Data.Table using (Table; zipWith)
+open import RoutingLib.Data.Nat.Properties using (m<n⇒n≢0; n≢0⇒0<n; n≤0⇒n≡0; module ≤-Reasoning)
+open import RoutingLib.Data.Table using (Table; zipWith; max)
 open import RoutingLib.Data.Table.Properties using (max[t]<x)
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
-open import RoutingLib.Function.Metric using (Ultrametric; IsUltrametric; Bounded; MaxTriangleIneq; _StrContrOnOrbitsOver_)
+open import RoutingLib.Function.Metric as Metric using (IsUltrametric; Bounded)
 import RoutingLib.Function.Metric.MaxLift as MaxLift
-open import RoutingLib.Function.Image using (FiniteImage)
 
 import RoutingLib.Routing.BellmanFord.PathVector.Prelude as Prelude
 import RoutingLib.Routing.BellmanFord.PathVector.Step4_RouteMetric as Step4
@@ -40,54 +31,49 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step6_StateMetric
   -- Table metric --
   ------------------
 
-  dₜ-ultrametric : Ultrametric _
-  dₜ-ultrametric = MaxLift.ultrametric {n = n} (λ _ → S) (λ _ → dᵣ-ultrametric)
-
-  open Ultrametric dₜ-ultrametric using () renaming
-    ( d       to dₜ
-    ; eq⇒0 to x≈y⇒dₜ≡0
-    ; isUltrametric to dₜ-isUltrametric
-    ) public
+  dₜ : RTable → RTable → ℕ
+  dₜ x y = max 0 (zipWith dᵣ x y)
   
+  dₜ-isUltrametric : IsUltrametric _ dₜ
+  dₜ-isUltrametric = MaxLift.isUltrametric {n = n} (λ _ → S) dᵣ-isUltrametric
+
   dₜ-bounded : Bounded ℝ𝕋ₛ dₜ  
-  dₜ-bounded = MaxLift.bounded (λ _ → S) dᵣ dᵣ-bounded
-  
-
-
-
+  dₜ-bounded = MaxLift.bounded (λ _ → S) dᵣ-bounded
 
   ------------------
   -- State metric --
   ------------------
-  
-  D-ultrametric : Ultrametric _
-  D-ultrametric = MaxLift.ultrametric {n = n} (λ _ → _) (λ _ → dₜ-ultrametric)
 
-  open Ultrametric D-ultrametric public using ()
+  D : RMatrix → RMatrix → ℕ
+  D X Y = max 0 (zipWith dₜ X Y)
+  
+  D-isUltrametric : IsUltrametric _ D
+  D-isUltrametric = MaxLift.isUltrametric {n = n} (λ _ → _) dₜ-isUltrametric
+
+  D-bounded : Bounded ℝ𝕄ₛ D  
+  D-bounded = MaxLift.bounded (λ _ → ℝ𝕋ₛ) dₜ-bounded
+
+  open IsUltrametric D-isUltrametric public using ()
     renaming
-    ( d to D
-    ; cong to D-cong
+    ( cong to D-cong
     ; 0⇒eq to D≡0⇒X≈Y
     ; eq⇒0 to X≈Y⇒D≡0
     ; sym to D-sym
     )
 
-  D-bounded : Bounded ℝ𝕄ₛ D  
-  D-bounded = MaxLift.bounded (λ _ → ℝ𝕋ₛ) dₜ dₜ-bounded
-
-
-
   -- Strictly contracting
+
+  open Metric ℝ𝕄ₛ using (_StrContrOnOrbitsOver_; _StrContrOnFixedPointOver_)
   
-  D-strContrOrbits : _StrContrOnOrbitsOver_ ℝ𝕄ₛ σ  D
-  D-strContrOrbits {X} σX≉X with max[t]∈t 0 (λ i → dₜ (X i) (σ X i))
+  σ-strContrOrbits : σ StrContrOnOrbitsOver D
+  σ-strContrOrbits {X} σX≉X with max[t]∈t 0 (λ i → dₜ (X i) (σ X i))
   ... | inj₁ dXσX≡0              = contradiction (≈ₘ-sym (D≡0⇒X≈Y dXσX≡0)) σX≉X
   ... | inj₂ (r , DXσX≡dₜXᵣσXᵣ) with max[t]∈t 0 (λ i → dᵣ (X r i) (σ X r i))
   ...   | inj₁ dXᵣσXᵣ≡0               = contradiction (≈ₘ-sym (D≡0⇒X≈Y (trans DXσX≡dₜXᵣσXᵣ dXᵣσXᵣ≡0))) σX≉X
   ...   | inj₂ (s , dXᵣσXᵣ≡dᵣXᵣₛσXᵣₛ) = begin
     D (σ X) (σ (σ X))   <⟨ test ⟩
     dᵣ (X r s) (σ X r s) ≡⟨ sym DXσX≈dᵣXᵣₛσXᵣₛ ⟩
-    D X (σ X)           ∎
+    D X (σ X)            ∎
     where
     open ≤-Reasoning
 
@@ -119,8 +105,8 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step6_StateMetric
 
   -- Strictly contracting when one of the arguments is consistent
   
-  D-strContrᶜ : ∀ {X Y} → 𝑪ₘ X → X ≉ₘ Y → D (σ X) (σ Y) < D X Y
-  D-strContrᶜ {X} {Y} Xᶜ X≉Y with max[t]∈t 0 (λ i → dₜ (X i) (Y i))
+  σ-strContrᶜ : ∀ {X Y} → 𝑪ₘ X → X ≉ₘ Y → D (σ X) (σ Y) < D X Y
+  σ-strContrᶜ {X} {Y} Xᶜ X≉Y with max[t]∈t 0 (λ i → dₜ (X i) (Y i))
   ... | inj₁ dXY≡0              = contradiction (D≡0⇒X≈Y dXY≡0) X≉Y
   ... | inj₂ (r , DXY≡dₜXᵣYᵣ) with max[t]∈t 0 (λ i → dᵣ (X r i) (Y r i))
   ...   | inj₁ dXᵣYᵣ≡0               = contradiction (D≡0⇒X≈Y (trans DXY≡dₜXᵣYᵣ dXᵣYᵣ≡0)) X≉Y
@@ -154,3 +140,9 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step6_StateMetric
                0<dᵣXᵣₛYᵣₛ)
              0<dᵣXᵣₛYᵣₛ
   
+  σ-strContrOnFP : σ StrContrOnFixedPointOver D
+  σ-strContrOnFP {X} {X*} σX*≈X* X≉X* = begin
+    D X*     (σ X) ≡⟨ D-cong (≈ₘ-sym σX*≈X*) (≈ₘ-refl {x = σ X}) ⟩
+    D (σ X*) (σ X) <⟨ σ-strContrᶜ (fixedᶜ σX*≈X*) (X≉X* ∘ ≈ₘ-sym) ⟩
+    D X*     X     ∎
+    where open ≤-Reasoning

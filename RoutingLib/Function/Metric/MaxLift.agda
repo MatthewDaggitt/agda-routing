@@ -47,10 +47,7 @@ module RoutingLib.Function.Metric.MaxLift {a ℓ n} (S : Fin n → Setoid a ℓ)
       x≈y⇒d≡0 : (∀ {i} {xᵢ yᵢ : Mᵢ i} → xᵢ ≈ᵢ yᵢ → dᵢ xᵢ yᵢ ≡ 0) → ∀ {x y} → x ≈ y → d x y ≡ 0
       x≈y⇒d≡0 x≈y⇒dᵢ≡0 x≈y = max-constant refl (λ i → x≈y⇒dᵢ≡0 (x≈y i))
 
-      bounded : (∀ {i} → Bounded (S i) dᵢ) → Bounded M-setoid d
-      bounded dᵢ-bounded =
-        (max 0 (λ i → proj₁ (dᵢ-bounded {i}))) ,
-        (λ x y → max[s]≤max[t]₂ (≤-refl {0}) (λ i → proj₂ (dᵢ-bounded {i}) (x i) (y i)))
+      
       
       maxTriIneq : (∀ {i} → MaxTriangleIneq (S i) dᵢ) →
                    MaxTriangleIneq M-setoid d
@@ -63,17 +60,24 @@ module RoutingLib.Function.Metric.MaxLift {a ℓ n} (S : Fin n → Setoid a ℓ)
         d x y ⊔ d y z                   ∎
         where open ≤-Reasoning
 
-      isUltrametric : (∀ i → IsUltrametric (S i) dᵢ) → IsUltrametric M-setoid d
-      isUltrametric um = record
-        { cong        = d-cong λ {i} → IsUltrametric.cong (um i)
-        ; eq⇒0        = x≈y⇒d≡0 λ {i} → IsUltrametric.eq⇒0 (um i)
-        ; 0⇒eq        = d≡0⇒x≈y (λ {i} → IsUltrametric.0⇒eq (um i))
-        ; sym         = d-sym λ {i} → IsUltrametric.sym (um i)
-        ; maxTriangle = maxTriIneq λ {i} → IsUltrametric.maxTriangle (um i)
-        }
+  bounded : {dᵢ : ∀ {i} → Mᵢ i → Mᵢ i → ℕ} →
+            (∀ {i} → Bounded (S i) dᵢ) → Bounded M-setoid (d dᵢ)
+  bounded dᵢ-bounded =
+      (max 0 (λ i → proj₁ (dᵢ-bounded {i}))) ,
+      (λ x y → max[s]≤max[t]₂ (≤-refl {0}) (λ i → proj₂ (dᵢ-bounded {i}) (x i) (y i)))
+        
+  isUltrametric : {dᵢ : ∀ {i} → Mᵢ i → Mᵢ i → ℕ} → (∀ {i} → IsUltrametric (S i) dᵢ) →
+                  IsUltrametric M-setoid (d dᵢ)
+  isUltrametric {dᵢ} um = record
+    { cong        = d-cong    dᵢ λ {i} → IsUltrametric.cong (um {i})
+    ; eq⇒0        = x≈y⇒d≡0   dᵢ λ {i} → IsUltrametric.eq⇒0 (um {i})
+    ; 0⇒eq        = d≡0⇒x≈y   dᵢ (λ {i} → IsUltrametric.0⇒eq (um {i}))
+    ; sym         = d-sym      dᵢ λ {i} → IsUltrametric.sym (um {i})
+    ; maxTriangle = maxTriIneq dᵢ λ {i} → IsUltrametric.maxTriangle (um {i})
+    }
 
   ultrametric : (∀ i → Ultrametric (S i)) → Ultrametric M-setoid
   ultrametric um = record
     { d             = d (λ {i} → Ultrametric.d (um i))
-    ; isUltrametric = isUltrametric (λ {i} → Ultrametric.d (um i)) (λ i → Ultrametric.isUltrametric (um i))
+    ; isUltrametric = isUltrametric (λ {i} → Ultrametric.isUltrametric (um i))
     }

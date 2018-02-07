@@ -24,27 +24,20 @@ import RoutingLib.Routing.BellmanFord.DistanceVector.Prelude as Prelude
 import RoutingLib.Routing.BellmanFord.DistanceVector.Step1_HeightFunction as Step1
 
 module RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric
-  {a b ℓ n-1}
+  {a b ℓ n}
   {𝓡𝓐 : RoutingAlgebra a b ℓ}
-  (𝓡𝓟 : RoutingProblem 𝓡𝓐 (suc n-1)) 
+  (𝓡𝓟 : RoutingProblem 𝓡𝓐 n) 
   (𝓢𝓒 : SufficientConditions 𝓡𝓐)
   where
   
   open Prelude 𝓡𝓟 𝓢𝓒
-  open Step1 𝓡𝓟 𝓢𝓒 using
-    ( h
-    ; h-resp-≈
-    --; h-cancel-≡
-    ; h-resp-<
-    ; 1≤h
-    ; h≤H
-    )
+  open Step1 𝓡𝓟 𝓢𝓒
 
   abstract
 
     h-resp-≤ : h Preserves _≤₊_ ⟶ _≥_
     h-resp-≤ {u} {v} u≤v with u ≟ v
-    ... | yes u≈v = ≤-reflexive (h-resp-≈ (≈-sym u≈v))
+    ... | yes u≈v = ≤-reflexive (h-cong (≈-sym u≈v))
     ... | no  u≉v = <⇒≤ (h-resp-< (u≤v , u≉v))
     
     h[fx]<h[x] : ∀ e {x} → x ≉ 0# → h (e ▷ x) < h x
@@ -63,7 +56,7 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric
     ... | yes _   | yes _   = refl
     ... | yes x≈u | no  y≉v = contradiction (≈-trans (≈-trans (≈-sym x≈y) x≈u) u≈v) y≉v
     ... | no  x≉u | yes y≈v = contradiction (≈-trans (≈-trans x≈y y≈v) (≈-sym u≈v)) x≉u
-    ... | no  _   | no  _   = cong₂ _⊔_ (h-resp-≈ x≈y) (h-resp-≈ u≈v)
+    ... | no  _   | no  _   = cong₂ _⊔_ (h-cong x≈y) (h-cong u≈v)
 
     x≈y⇒d≡0 : ∀ {x y} → x ≈ y → d x y ≡ 0
     x≈y⇒d≡0 {x} {y} x≈y with x ≟ y
@@ -86,10 +79,10 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric
     d-maxTriIneq x y z with x ≟ y | y ≟ z | x ≟ z
     ... | _       | _       | yes _  = z≤n
     ... | yes x≈y | yes y≈z | no x≉z = contradiction (≈-trans x≈y y≈z) x≉z
-    ... | yes x≈y | no  _   | no _   = ≤-reflexive (cong₂ _⊔_ (h-resp-≈ x≈y) (refl {x = h z}))
+    ... | yes x≈y | no  _   | no _   = ≤-reflexive (cong₂ _⊔_ (h-cong x≈y) (refl {x = h z}))
     ... | no  _   | no  _   | no _   = ⊔-mono-≤ (m≤m⊔n (h x) (h y)) (n≤m⊔n (h y) (h z))
     ... | no  _   | yes y≈z | no _   = begin
-      h x ⊔ h z     ≡⟨ cong (h x ⊔_) (h-resp-≈ (≈-sym y≈z)) ⟩
+      h x ⊔ h z     ≡⟨ cong (h x ⊔_) (h-cong (≈-sym y≈z)) ⟩
       h x ⊔ h y     ≡⟨ sym (⊔-identityʳ _) ⟩
       h x ⊔ h y ⊔ 0 ∎     
       where open ≤-Reasoning
@@ -103,7 +96,7 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric
     σXᵢⱼ≉Iᵢⱼ : ∀ X {i j} x → i ≢ j → σ X i j <₊ x → σ X i j ≉ I i j
     σXᵢⱼ≉Iᵢⱼ X {i} {j} x i≢j (σXᵢⱼ≤x , σXᵢⱼ≉x) σXᵢⱼ≈Iᵢⱼ =
       σXᵢⱼ≉x (≤₊-antisym σXᵢⱼ≤x (begin
-        x         ≤⟨ 0#-idₗ-⊕ _ ⟩
+        x         ≤⟨ ⊕-identityˡ _ ⟩
         0#        ≈⟨ ≈-sym (≈-reflexive (Iᵢⱼ≡0# (i≢j ∘ sym))) ⟩
         I i j     ≈⟨ ≈-sym σXᵢⱼ≈Iᵢⱼ ⟩
         σ X i j   ∎))
@@ -121,7 +114,7 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric
         where open PO-Reasoning ≤₊-poset
     ...   | inj₁ (k , σXᵢⱼ≈AᵢₖXₖⱼ) = begin
       h (σ X i j) ⊔ h (σ Y i j)   ≡⟨ n≤m⇒m⊔n≡m (h-resp-≤ σXᵢⱼ≤σYᵢⱼ) ⟩
-      h (σ X i j)                 ≡⟨ h-resp-≈ σXᵢⱼ≈AᵢₖXₖⱼ ⟩
+      h (σ X i j)                 ≡⟨ h-cong σXᵢⱼ≈AᵢₖXₖⱼ ⟩
       h (A i k ▷ X k j)           <⟨ h-resp-< (⊕-almost-strictly-absorbs-▷ (A i k) Xₖⱼ≉0) ⟩
       h (X k j)                   ≤⟨ m≤m⊔n (h (X k j)) (h (Y k j)) ⟩
       h (X k j) ⊔ h (Y k j)       ≡⟨ sym (dxy≡hx⊔hy Xₖⱼ≉Yₖⱼ) ⟩
@@ -131,8 +124,8 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric
 
       Xₖⱼ≉0 : X k j ≉ 0#
       Xₖⱼ≉0 Xₖⱼ≈0# = σXᵢⱼ≉σYᵢⱼ (≤₊-antisym σXᵢⱼ≤σYᵢⱼ (begin
-        σ Y i j       ≤⟨ 0#-idₗ-⊕ _ ⟩
-        0#            ≈⟨ ≈-sym (0#-an-▷ (A i k)) ⟩
+        σ Y i j       ≤⟨ ⊕-identityˡ _ ⟩
+        0#            ≈⟨ ≈-sym (▷-zero (A i k)) ⟩
         A i k ▷ 0#    ≈⟨ ▷-cong (A i k) (≈-sym Xₖⱼ≈0#) ⟩
         A i k ▷ X k j ≈⟨ ≈-sym σXᵢⱼ≈AᵢₖXₖⱼ ⟩
         σ X i j       ∎))

@@ -12,8 +12,9 @@ open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (_,_; _×_; proj₁; proj₂)
 open import Relation.Binary.Product.Pointwise using (_×-≟_)
 open import Function using (_∘_)
+open import Relation.Nullary.Negation using (¬?)
 
-open import RoutingLib.Data.Graph using (Graph; ∈-resp-≡ₗ; _∈?_)
+open import RoutingLib.Data.Graph using (Graph)
 open import RoutingLib.Data.Graph.SimplePath2.NonEmpty
 open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_)
 open import RoutingLib.Data.Fin.Pigeonhole using (pigeonhole)
@@ -104,7 +105,6 @@ module RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties {n} where
   ----------------------
   -- Membership
   
-
     _∉?_ : Decidable (_∉_ {n})
     k ∉? [] = yes notThere
     k ∉? ((i , j) ∷ p ∣ _ ∣ _) with k ≟𝔽 i | k ≟𝔽 j | k ∉? p
@@ -113,6 +113,9 @@ module RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties {n} where
     ... | _       | _       | no  i∈p = no  λ{(notHere _ _ i∉p) → i∈p i∉p}
     ... | no  k≢i | no  k≢j | yes i∉p = yes (notHere k≢i k≢j i∉p)
 
+    _∈?_ : Decidable (_∈_ {n})
+    k ∈? p = ¬? (k ∉? p)
+    
     ∉-resp-≈ : ∀ {k : Fin n} → (k ∉_) Respects _≈_
     ∉-resp-≈ []            notThere             = notThere
     ∉-resp-≈ (refl ∷ p≈q) (notHere k≢i k≢j k∉p) = notHere k≢i k≢j (∉-resp-≈ p≈q k∉p)
@@ -180,9 +183,9 @@ module RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties {n} where
     --------------------
     -- Operations
 
-    p≈q⇒|p|≡|q| : ∀ {p q : SimplePathⁿᵗ n} → p ≈ q → length p ≡ length q
-    p≈q⇒|p|≡|q| []        = refl
-    p≈q⇒|p|≡|q| (_ ∷ p≈q) = cong suc (p≈q⇒|p|≡|q| p≈q)
+    length-cong : ∀ {p q : SimplePathⁿᵗ n} → p ≈ q → length p ≡ length q
+    length-cong []        = refl
+    length-cong (_ ∷ p≈q) = cong suc (length-cong p≈q)
 
     p≉i∷p : ∀ {e} {p : SimplePathⁿᵗ n} {e⇿p e∉p} → ¬ (p ≈ e ∷ p ∣ e⇿p ∣ e∉p)
     p≉i∷p {p = []}            ()

@@ -16,7 +16,8 @@ module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {S : Table (Setoid a ℓ)
                                         (P : Parallelisation S) where
 
   open Parallelisation P
-  open import RoutingLib.Function.Metric M-setoid using (_StrContrOver_; _ContrOver_; Bounded; _StrContrOnOrbitsOver_)
+  open import RoutingLib.Function.Metric M-setoid
+    using (Bounded; _StrContrOnOrbitsOver_; _StrContrOnFixedPointOver_)
 
   -----------------------------------------
   -- Asynchronously contracting operator --
@@ -52,9 +53,9 @@ module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {S : Table (Setoid a ℓ)
     d m n = max 0 (λ i → dᵢ {i} (m i) (n i))
 
     field
-      dᵢ-isUltrametric  : ∀ {i} → IsUltrametric (S i) dᵢ
+      dᵢ-isUltrametric   : ∀ {i} → IsUltrametric (S i) dᵢ
       f-strContrOrbits  : f StrContrOnOrbitsOver d
-      f-strContrIsh     : ∀ {x x*} → f x* ≈ x* → x ≉ x* → d x* (f x) < d x* x
+      f-strContrOnFP    : f StrContrOnFixedPointOver d
       d-bounded         : Bounded d
 
       element : M

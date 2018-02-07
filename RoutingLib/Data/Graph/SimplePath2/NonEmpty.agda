@@ -7,11 +7,12 @@ open import Data.Product using (_×_; _,_; proj₁; proj₂)
 open import Data.List using (List; []; _∷_; map)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Binary using (Decidable; Rel)
+open import Relation.Binary hiding (NonEmpty)
+open import Relation.Binary.Lattice using (Minimum)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; cong)
 open import Function using (_∘_)
 
-open import RoutingLib.Data.Graph renaming (_∈_ to _∈𝔼_)
+--open import RoutingLib.Data.Graph renaming (_∈_ to _∈𝔼_)
 
 module RoutingLib.Data.Graph.SimplePath2.NonEmpty where
 
@@ -94,7 +95,26 @@ module RoutingLib.Data.Graph.SimplePath2.NonEmpty where
     stop₁ : ∀ {q}     → [] ≤ₚ q
     len   : ∀ {p} {q} → length p <ℕ length q → p ≤ₚ q
     lex   : ∀ {p} {q} → length p ≡ length q → p ≤ₗₑₓ q → p ≤ₚ q
-    
+
+  postulate _<ₗₑₓ_ : ∀ {n} → Rel (SimplePathⁿᵗ n) lzero
+
+  postulate <ₗₑₓ-cmp : ∀ {n} → Trichotomous (_≈_ {n}) _<ₗₑₓ_
+
+  postulate <ₗₑₓ-trans : ∀ {n} → Transitive (_<ₗₑₓ_ {n})
+
+  postulate <ₗₑₓ-resp-≈ : ∀ {n} → (_<ₗₑₓ_ {n}) Respects₂ _≈_
+
+  postulate <ₗₑₓ-asym : ∀ {n} → Asymmetric (_<ₗₑₓ_ {n})
+  
+  postulate <ₗₑₓ-irrefl : ∀ {n} → Irreflexive _≈_ (_<ₗₑₓ_ {n})
+
+  postulate <ₗₑₓ-minimum : ∀ {n} → Minimum (_<ₗₑₓ_ {n}) []
+
+  postulate <ₗₑₓ-respˡ-≈ : ∀ {n} {p : SimplePathⁿᵗ n} → (p <ₗₑₓ_) Respects _≈_
+
+  postulate <ₗₑₓ-respʳ-≈ : ∀ {n} {p : SimplePathⁿᵗ n} → (_<ₗₑₓ p) Respects _≈_
+  
+  
   -- Exists in graph
   
 {-

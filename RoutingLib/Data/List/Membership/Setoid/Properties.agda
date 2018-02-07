@@ -191,11 +191,11 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     ∈-lookup (x ∷ xs) fzero    = here ≈-refl
     ∈-lookup (x ∷ xs) (fsuc i) = there (∈-lookup xs i)
 
-    index-cong : ∀ {x y xs} → x ≈ y → (x∈xs : x ∈ xs) (y∈xs : y ∈ xs) → Unique S xs → index x∈xs ≡ index y∈xs
-    index-cong x≈y (here x≈z)   (here y≈z)   _            = refl
-    index-cong x≈y (here x≈z)   (there y∈xs) (z≉xs ∷ xs!) = contradiction (∈-resp-≈ y∈xs (trans (sym x≈y) x≈z)) (All¬⇒¬Any z≉xs)
-    index-cong x≈y (there x∈xs) (here y≈z)   (z≉xs ∷ xs!) = contradiction (∈-resp-≈ x∈xs (trans x≈y y≈z)) (All¬⇒¬Any z≉xs)
-    index-cong x≈y (there x∈xs) (there y∈xs) (_ ∷ xs!)    = cong fsuc (index-cong x≈y x∈xs y∈xs xs!)
+    index-cong : ∀ {x y xs} → (x∈xs : x ∈ xs) (y∈xs : y ∈ xs) → Unique S xs → x ≈ y → index x∈xs ≡ index y∈xs
+    index-cong (here x≈z)   (here y≈z)   _            x≈y = refl
+    index-cong (here x≈z)   (there y∈xs) (z≉xs ∷ xs!) x≈y = contradiction (∈-resp-≈ y∈xs (trans (sym x≈y) x≈z)) (All¬⇒¬Any z≉xs)
+    index-cong (there x∈xs) (here y≈z)   (z≉xs ∷ xs!) x≈y = contradiction (∈-resp-≈ x∈xs (trans x≈y y≈z)) (All¬⇒¬Any z≉xs)
+    index-cong (there x∈xs) (there y∈xs) (_ ∷ xs!)    x≈y = cong fsuc (index-cong x∈xs y∈xs xs! x≈y)
     
 
     

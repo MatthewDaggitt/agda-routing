@@ -1,21 +1,12 @@
-open import Level using (_⊔_)
-open import Data.Nat using (ℕ; zero; suc; _<_)
-open import Data.Fin using (Fin)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟ᶠ_)
-open import Data.Fin.Dec using (_∈?_)
-open import Data.Vec using (Vec; []; _∷_)
 open import Data.List using (foldr; tabulate)
-open import Induction.WellFounded using (Acc; acc)
-open import Algebra.FunctionProperties using (Op₂)
-open import Relation.Binary using (Rel)
-open import Relation.Nullary using (¬_; yes; no)
+open import Relation.Nullary using (yes; no)
 
-open import RoutingLib.Routing.Definitions using (RoutingProblem; RoutingAlgebra)
+open import RoutingLib.Routing.Definitions
 open import RoutingLib.Asynchronous using (Parallelisation)
-open import RoutingLib.Asynchronous.Schedule using (Schedule)
-open import RoutingLib.Data.List.All.Properties using (foldr-All₂; All₂-tabulate)
+open import RoutingLib.Data.List.All.Properties
+  using (foldr-All₂; All₂-tabulate)
 
--- Distributed BellmanFord
 module RoutingLib.Routing.BellmanFord
   {a b ℓ n}
   {𝓡𝓐 : RoutingAlgebra a b ℓ}
@@ -23,8 +14,8 @@ module RoutingLib.Routing.BellmanFord
   where
   
   open RoutingProblem 𝓡𝓟
-  --open RoutingTables 𝓡𝓟 using (ℝ𝕋ₛ)
-  
+
+  -- Identity matrix
   I : RMatrix
   I i j with j ≟ᶠ i
   ... | yes _ = 1#

@@ -41,9 +41,9 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions  where
       ⊕-almost-strictly-absorbs-▷ : ∀ f {x} → x ≉ 0# → x <₊ (f ▷ x)
 
       -- Special element properties
-      0#-idᵣ-⊕ : RightIdentity 0# _⊕_
-      0#-an-▷  : ∀ s → s ▷ 0# ≈ 0#
-      1#-anᵣ-⊕ : RightZero 1# _⊕_
+      ▷-zero     : ∀ f → f ▷ 0# ≈ 0#
+      ⊕-zeroʳ     : RightZero 1# _⊕_
+      ⊕-identityʳ : RightIdentity 0# _⊕_
 
       -- Finiteness of routes
       allRoutes   : List Route
@@ -114,5 +114,5 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions  where
     <₊-resp-≈ₗ : _
     <₊-resp-≈ₗ = proj₂ (<-resp-≈' ≈-isEquivalence ≤₊-resp-≈)
     
-    0#-idₗ-⊕ : LeftIdentity 0# _⊕_
-    0#-idₗ-⊕ x = ≈-trans (⊕-comm 0# x) (0#-idᵣ-⊕ x)
+    ⊕-identityˡ : LeftIdentity 0# _⊕_
+    ⊕-identityˡ x = ≈-trans (⊕-comm 0# x) (⊕-identityʳ x)

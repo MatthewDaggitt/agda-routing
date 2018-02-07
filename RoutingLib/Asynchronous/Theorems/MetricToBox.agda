@@ -1,12 +1,17 @@
-open import Data.Fin using (Fin; zero; suc; toℕ; fromℕ≤) renaming (_≤_ to _≤𝔽_; _<_ to _<𝔽_)
-open import Data.Fin.Properties using (fromℕ≤-toℕ; prop-toℕ-≤′)
-open import Data.Nat using (ℕ; _≤_; _<_; z≤n; s≤s; zero; suc; _+_; _∸_; _⊔_) renaming (_≟_ to _≟ℕ_)
-open import Data.Nat.Properties using (≤-decTotalOrder; <⇒≢; _<?_; ≤-refl; ≤-antisym; <-transʳ; ≤-trans; n≤1+n; n∸m≤n; <⇒≤; ≮⇒≥; m≤m+n; ⊔-sel; <⇒≱) renaming ()
-open import Data.List using (List; []; _∷_; length; upTo; applyUpTo)
-open import Data.List.Any using (here; there; index)
-open import Data.List.Any.Properties using (lift-resp)
+open import Data.Fin
+  using (Fin; zero; suc; toℕ; fromℕ≤) renaming (_≤_ to _≤𝔽_; _<_ to _<𝔽_)
+open import Data.Fin.Properties
+  using (fromℕ≤-toℕ; prop-toℕ-≤′)
+open import Data.Nat
+  using (ℕ; _≤_; _<_; z≤n; s≤s; zero; suc; _+_; _∸_; _⊔_) renaming (_≟_ to _≟ℕ_)
+open import Data.Nat.Properties
+  using (≤-decTotalOrder; <⇒≢; _<?_; ≤-refl; ≤-antisym; <-transʳ; ≤-trans;
+        n≤1+n; n∸m≤n; <⇒≤; ≮⇒≥; m≤m+n; ⊔-sel; <⇒≱)
+open import Data.List
+  using (List; []; _∷_; length; upTo; applyUpTo)
+open import Data.List.Any
+  using (here; there; index)
 open import Data.List.Any.Membership.Propositional using () renaming (_∈_ to _∈ℕ_)
-open import Data.Vec using (Vec; _∷_; fromList)
 open import Data.Product using (∃; ∃₂; _,_; proj₁; proj₂)
 open import Data.Sum using (inj₁; inj₂)
 open import Relation.Binary using (Setoid; Decidable; IsDecEquivalence; DecSetoid)
@@ -22,16 +27,14 @@ open import RoutingLib.Data.Fin.Properties
   using (fromℕ≤-cong; fromℕ≤-mono-≤; fromℕ≤-mono⁻¹-<)
 open import RoutingLib.Data.List using (lookup)
 open import RoutingLib.Data.List.Any.Properties using (lookup-index)
-open import RoutingLib.Data.List.Membership.DecPropositional.Properties using (∈-resp-≡; ∈-upTo⁺)
+open import RoutingLib.Data.List.Membership.DecPropositional.Properties using (∈-upTo⁺)
 open import RoutingLib.Data.List.Sorting ≤-decTotalOrder using (Sorted)
 open import RoutingLib.Data.List.Sorting.Properties ≤-decTotalOrder
   using (lookup-mono-≤)
 open import RoutingLib.Data.List.Sorting.Nat using (index-mono⁻¹-<; upTo-↗)
 open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique)
 open import RoutingLib.Data.List.Uniqueness.Propositional.Properties using (upTo!⁺)
-open import RoutingLib.Function.Image using (FiniteImage)
 open import RoutingLib.Function.Metric using (IsUltrametric)
-open import RoutingLib.Function.Metric.Properties using (strContr⇒strContrOnOrbits)
 import RoutingLib.Function.Metric.MaxLift as MaxLift
 import RoutingLib.Function.Metric.FixedPoint as FixedPoints
 
@@ -69,7 +72,7 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
         ) public
     
     d-isUltrametric : IsUltrametric M-setoid d
-    d-isUltrametric = MaxLift.isUltrametric S dᵢ (λ _ → dᵢ-isUltrametric)
+    d-isUltrametric = MaxLift.isUltrametric S dᵢ-isUltrametric
 
     open IsUltrametric d-isUltrametric using () renaming
       ( cong to d-cong
@@ -92,18 +95,11 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
 
     fx*≈x* : f x* ≈ x*
     fx*≈x* = FixedPoints.x*-fixed decSetoid d f-strContrOrbits element
-
-    f-strContrOn-x* : ∀ {x} → x ≉ x* → d (f x*) (f x) < d x* x
-    f-strContrOn-x* {x} x≉x* = begin
-      d (f x*) (f x) ≡⟨ d-cong fx*≈x* ≈-refl ⟩
-      d x*     (f x) <⟨ f-strContrIsh fx*≈x* x≉x* ⟩
-      d x*     x     ∎
-      where open ≤-Reasoning
       
     x*-unique : ∀ {x} → f x ≈ x → x ≈ x*
     x*-unique {x} fx≈x with x ≟ x*
     ... | yes x≈x* = x≈x*
-    ... | no  x≉x* = contradiction (d-cong ≈-refl fx≈x) (<⇒≢ (f-strContrIsh fx*≈x* x≉x*))
+    ... | no  x≉x* = contradiction (d-cong ≈-refl fx≈x) (<⇒≢ (f-strContrOnFP fx*≈x* x≉x*))
 
     
     -----------
@@ -278,7 +274,7 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
 
     lemma1 : ∀ x → x ≉ x* → d x* x ≤ d x (f x)
     lemma1 x x≉x* with ⊔-sel (d x* (f x)) (d (f x) x)
-    ... | inj₁ left = contradiction tv (<⇒≱ (f-strContrIsh fx*≈x* x≉x*))
+    ... | inj₁ left = contradiction tv (<⇒≱ (f-strContrOnFP fx*≈x* x≉x*))
       where
       open ≤-Reasoning
       
@@ -299,7 +295,7 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
     lemma2 x x≉x* = begin
       d x (f x)           ≤⟨ d-maxTriIneq x x* (f x) ⟩
       d x x* ⊔ d x* (f x) ≡⟨ cong (_⊔ d x* (f x)) (d-sym x x*) ⟩
-      d x* x ⊔ d x* (f x) ≡⟨ n≤m⇒m⊔n≡m (<⇒≤ (f-strContrIsh fx*≈x* x≉x*)) ⟩
+      d x* x ⊔ d x* (f x) ≡⟨ n≤m⇒m⊔n≡m (<⇒≤ (f-strContrOnFP fx*≈x* x≉x*)) ⟩
       d x* x              ∎
       where open ≤-Reasoning
       

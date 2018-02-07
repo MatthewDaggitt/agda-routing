@@ -4,6 +4,8 @@ open import Data.Product using (∃; _,_; proj₁; proj₂)
 open import Relation.Binary using (Setoid; Decidable)
 open import Relation.Nullary using (yes; no)
 
+open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
+
 module RoutingLib.Function.Metric.Properties {a} {ℓ} (S : Setoid a ℓ) where
 
     open Setoid S renaming (Carrier to A)
@@ -17,11 +19,20 @@ module RoutingLib.Function.Metric.Properties {a} {ℓ} (S : Setoid a ℓ) where
   
     -- Contractions
     
-    contr⇒contrOnOrbits : ∀ {d f} → f ContrOver d → f ContrOnOrbitsOver d
-    contr⇒contrOnOrbits {_} {f} c x = c x (f x)
+    contr⇒contrOrbits : ∀ {d f} → f ContrOver d → f ContrOnOrbitsOver d
+    contr⇒contrOrbits {_} {f} c x = c x (f x)
 
-    strContr⇒strContrOnOrbits : ∀ {d f} → f StrContrOver d → f StrContrOnOrbitsOver d
-    strContr⇒strContrOnOrbits sc = sc
+    strContr⇒strContrOrbits : ∀ {d f} → f StrContrOver d → f StrContrOnOrbitsOver d
+    strContr⇒strContrOrbits sc = sc
+
+{-
+    strContr⇒strContrOnFP : ∀ {d f} → f StrContrOver d → f StrContrOnFixedPointOver d
+    strContr⇒strContrOnFP {d} {f} sc {x*} {x} fx*≈x* x≉x* = begin
+      d x*     (f x) ≡⟨ d-cong (sym fx*≈x*) (≈ₘ-refl {x = σ X}) ⟩
+      d (f x*) (f x) <⟨ sc X≉X* ⟩
+      d x*     x     ∎
+      where open ≤-Reasoning
+-}
 
     -- Balls
 

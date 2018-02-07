@@ -42,6 +42,7 @@ module RoutingLib.Data.Graph.SimplePath2 where
     valid : ∀ {e p} → e NT.⇿ p → e ⇿ valid p
 
   -- Membership
+  
   data _∉_ {n : ℕ} : Fin n → SimplePath n → Set lzero where
     invalid : ∀ {i} → i ∉ invalid
     valid   : ∀ {i p} → i NT.∉ p → i ∉ valid p
@@ -94,9 +95,3 @@ module RoutingLib.Data.Graph.SimplePath2 where
   length : ∀ {n} → SimplePath n → ℕ
   length invalid   = 0
   length (valid p) = NT.length p
-
-{-
-  weight : ∀ {a b} {A : Set a} {B : Set b} → (A → B → B) → B → ∀ {n} {G : Graph A n} {p} → p ∈𝔾 G → B
-  weight _▷_ 1# []      = 1#
-  weight _▷_ 1# [ p∈G ] = NT.weight _▷_ 1# p∈G
--}

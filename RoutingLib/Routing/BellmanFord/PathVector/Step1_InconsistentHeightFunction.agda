@@ -5,7 +5,6 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Data.Graph.SimplePath using (SimplePath; length)
 open import RoutingLib.Data.Nat.Properties using (∸-monoʳ-<; ∸-monoʳ-≤; m<n⇒0<n∸m; module ≤-Reasoning)
 
 open import RoutingLib.Routing.Definitions

@@ -40,6 +40,7 @@ module RoutingLib.Data.Graph where
   edges {n = n} G = filter (λ {(i , j) → is-just (G i j)}) (allEdges n)
 
 
+{-
   -- Membership
 
   _∈_ : ∀ {a} {A : Set a} {n : ℕ} → Edge n → Graph A n → Set a
@@ -52,3 +53,4 @@ module RoutingLib.Data.Graph where
 
   ∈-resp-≡ₗ : ∀ {a} {A : Set a} {n : ℕ} {i j k} {G : Graph A n} → (i , j) ∈ G → j ≡ k → (i , k) ∈ G
   ∈-resp-≡ₗ ij∈G refl = ij∈G
+-}

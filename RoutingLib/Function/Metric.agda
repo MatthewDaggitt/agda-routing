@@ -45,6 +45,8 @@ module RoutingLib.Function.Metric {a} {ℓ} (S : Setoid a ℓ) where
   _StrContrOnOrbitsOver_ : Op₁ A → MetricFunction → Set _
   f StrContrOnOrbitsOver d = ∀ {x} → ¬ (f x ≈ x) → d (f x) (f (f x)) < d x (f x)
 
+  _StrContrOnFixedPointOver_ : Op₁ A → MetricFunction → Set _
+  f StrContrOnFixedPointOver d = ∀ {x x*} → f x* ≈ x* → ¬ (x ≈ x*) → d x* (f x) < d x* x
 
   -- Balls
 

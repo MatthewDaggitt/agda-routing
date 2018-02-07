@@ -11,7 +11,6 @@ open import Relation.Binary using (Decidable; Rel)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; cong)
 open import Function using (_∘_)
 
-open import RoutingLib.Data.Graph renaming (_∈_ to _∈𝔼_)
 
 module RoutingLib.Data.Graph.SimplePath.NonEmpty where
 
@@ -83,6 +82,7 @@ module RoutingLib.Data.Graph.SimplePath.NonEmpty where
   
   -- Exists in graph
 
+{-
   infix 4 _∈𝔾_ _∉𝔾_
 
   data _∈𝔾_ {a n} {A : Set a} : SimplePathⁿᵗ n → Graph A n → Set a where
@@ -95,3 +95,4 @@ module RoutingLib.Data.Graph.SimplePath.NonEmpty where
   weight : ∀ {a b} {A : Set a} {B : Set b} → (A → B → B) → B → ∀ {n} {G : Graph A n} {p} → p ∈𝔾 G → B
   weight _▷_ 1# (edge-∺ (v , _))     = v ▷ 1#
   weight _▷_ 1# (edge-∷ (v , _) p∈G) = v ▷ weight _▷_ 1# p∈G
+-}

@@ -6,12 +6,6 @@ open import Relation.Binary using (Rel; _Preserves₂_⟶_⟶_; _Preserves_⟶_)
 
 module RoutingLib.Algebra.FunctionProperties.Core {a} {A : Set a} where
 
-  _Preservesₗ_ : ∀ {b ℓ} {B : Set b} → (B → A → A) → Rel A ℓ → Set _
-  _▷_ Preservesₗ _≈_  = ∀ b {x y} → x ≈ y → (b ▷ x) ≈ (b ▷ y)
-
-
-
-
 
   _⊎-Preservesˡ_ : Op₂ A → ∀ {p} → Pred A p → Set _
   _•_ ⊎-Preservesˡ P = ∀ {a} b → P a → P (a • b)

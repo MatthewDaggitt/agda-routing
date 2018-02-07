@@ -150,9 +150,9 @@ module RoutingLib.Data.Graph.SimplePath.NonEmpty.Properties {n} where
     --------------------
     -- Operations
 
-    p≈q⇒|p|≡|q| : ∀ {p q : SimplePathⁿᵗ n} → p ≈ q → length p ≡ length q
-    p≈q⇒|p|≡|q| (_ ∺ _) = refl
-    p≈q⇒|p|≡|q| (_ ∷ p≈q) = cong suc (p≈q⇒|p|≡|q| p≈q)
+    length-cong : ∀ {p q : SimplePathⁿᵗ n} → p ≈ q → length p ≡ length q
+    length-cong (_ ∺ _) = refl
+    length-cong (_ ∷ p≈q) = cong suc (p≈q⇒|p|≡|q| p≈q)
 
     p≈q⇒p₀≡q₀ : ∀ {p q : SimplePathⁿᵗ n} → p ≈ q → source p ≡ source q
     p≈q⇒p₀≡q₀ (refl ∺ _) = refl

@@ -43,6 +43,9 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric
     h[fx]<h[x] : ∀ e {x} → x ≉ 0# → h (e ▷ x) < h x
     h[fx]<h[x] e x≉0 = h-resp-< (⊕-almost-strictly-absorbs-▷ e x≉0)
 
+    h[x]≤h[0] : ∀ x → h 0# ≤ h x 
+    h[x]≤h[0] x = h-resp-≤ (⊕-identityˡ x)
+    
     ----------------------------
     -- distance between two routes
     

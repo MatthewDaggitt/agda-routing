@@ -96,11 +96,17 @@ module RoutingLib.Routing.BellmanFord.Properties
         (σXᵢᵢ≈Iᵢᵢ ⊕-sel ⊕-assoc ⊕-comm 1#-anᵣ-⊕ X i)
         (≈-sym (σXᵢᵢ≈Iᵢᵢ ⊕-sel ⊕-assoc ⊕-comm 1#-anᵣ-⊕ Y i))
 
-    {-
+     {-
     -- A sufficient (but not necessary condition) for σXᵢⱼ ≈ σYᵢⱼ
-    σXᵢⱼ≈σYᵢⱼ : Selective _≈_ _⊕_ → Associative _≈_ _⊕_ → Commutative _≈_ _⊕_ → ∀ X Y i j
-              → (∀ k → (A i k ▷ X k j ≈ A i k ▷ Y k j) ⊎ ((∃ λ l → (A i l ▷ X l j) <ᵣ (A i k ▷ X k j)) × (∃ λ m → (A i m ▷ Y m j) <ᵣ (A i k ▷ Y k j)))) → σ X i j ≈ σ Y i j
-    σXᵢⱼ≈σYᵢⱼ ⊕-sel ⊕-assoc ⊕-comm X Y i j eqCon = foldrₓₛ≈foldrᵥₛ ⊕-sel ⊕-comm ⊕-assoc (I i j) (extensions X i j) (extensions Y i j) adjust
+    σXᵢⱼ≈σYᵢⱼ : Selective _⊕_ → Associative _⊕_ → Commutative _⊕_ →
+                ∀ X Y i j → (∀ k →
+                  (A i k ▷ X k j ≈ A i k ▷ Y k j) ⊎
+                    ((∃ λ l → (A i l ▷ X l j) <₊ (A i k ▷ X k j)) ×
+                    (∃ λ m → (A i m ▷ Y m j) <₊ (A i k ▷ Y k j)))) →
+                σ X i j ≈ σ Y i j
+    σXᵢⱼ≈σYᵢⱼ ⊕-sel ⊕-assoc ⊕-comm X Y i j eqCon = ?
+ 
+      foldrₓₛ≈foldrᵥₛ ⊕-sel ⊕-comm ⊕-assoc (I i j) (extensions X i j) (extensions Y i j) adjust
       where
       adjust : ∀ k → (lookup k (extensions X i j) ≈ lookup k (extensions Y i j))
         ⊎ ∃ (λ l → (lookup l (extensions X i j)) <ᵣ (lookup k (extensions X i j)))

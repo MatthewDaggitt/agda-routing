@@ -6,7 +6,10 @@ open import Relation.Binary using (Rel; Transitive; Symmetric; Decidable)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
-module RoutingLib.Algebra.Selectivity.Properties {a ℓ} {A : Set a} (_≈_ : Rel A ℓ) (_•_ : Op₂ A) (sel : Selective _≈_ _•_) where
+module RoutingLib.Algebra.Selectivity.Properties
+  {a ℓ} {A : Set a} (_≈_ : Rel A ℓ) (_•_ : Op₂ A)
+  (sel : Selective _≈_ _•_)
+  where
 
   private
     infix 4 _≉_

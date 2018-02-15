@@ -204,7 +204,7 @@ module RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties {n} where
 
     ∉-lookup₂ : ∀ {p : SimplePathⁿᵗ n} (p⁺ : NonEmpty p) →
                 ∀ {i j} → (i , j) ⇿ p → ∀ k → lookupᵥ p⁺ (fsuc k) ≢ j
-    ∉-lookup₂ (nonEmpty (j , l) p e⇿p e∉p) {i} {j} (continue x) fzero    = ij⇿p⇒i≢j e⇿p ∘ sym
+    ∉-lookup₂ (nonEmpty (j , l) p e⇿p e∉p) {i} {.j} (continue x) fzero    = ij⇿p⇒i≢j e⇿p ∘ sym
     ∉-lookup₂ (nonEmpty (j , l) [] e⇿p e∉p) {i} {.j} (continue x) (fsuc ())
     ∉-lookup₂ (nonEmpty (j , l) (.(_ , _) ∷ p ∣ e⇿p₁ ∣ e∉p₁) e⇿p (notHere x₁ x₂ e∉p)) {i} {.j} (continue x) (fsuc fzero) = x₂ ∘ sym
     ∉-lookup₂ (nonEmpty (j , l) (e ∷ p ∣ e⇿p₁ ∣ e∉p₁) e⇿p e∉p) {i} {.j} (continue x) (fsuc (fsuc k)) = 

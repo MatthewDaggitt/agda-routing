@@ -104,7 +104,6 @@ module RoutingLib.Routing.Models.BGPLite (n : ℕ) where
     ; ≈-isDecEquivalence = ≈ᵣ-isDecEquivalence
     ; ⊕-cong = ⊕-cong
     ; ▷-cong = ▷-cong
-    ; 1≉0    = λ()
     }
     
   ---------------------
@@ -153,8 +152,6 @@ module RoutingLib.Routing.Models.BGPLite (n : ℕ) where
   -- A specific routing problem --
   --------------------------------
 
-  
-  
   postulate topology : Fin n → Fin n → Policy
   
   A : Fin n → Fin n → Step
@@ -212,9 +209,9 @@ module RoutingLib.Routing.Models.BGPLite (n : ℕ) where
     ; ⊕-sel               = ⊕-sel
     ; ⊕-comm              = ⊕-comm
     ; ⊕-strictlyAbsorbs-▷ = ⊕-strictlyAbsorbs-▷
-    ; 1#-anᵣ-⊕             = ⊕-zeroʳ
-    ; 0#-an-▷              = ▷-zero
-    ; 0#-idᵣ-⊕             = ⊕-identityʳ
+    ; ⊕-zeroʳ             = ⊕-zeroʳ
+    ; ▷-zero              = ▷-zero
+    ; ⊕-identityʳ         = ⊕-identityʳ
     
     ; path           = path
     ; path-cong      = path-cong

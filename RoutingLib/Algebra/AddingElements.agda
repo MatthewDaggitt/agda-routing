@@ -62,7 +62,7 @@ module RoutingLib.Algebra.AddingElements {a} (A : Set a) where
     e-id-⊕ₑ : ∀ {ℓ} {_≈_ : Rel A ℓ} → Reflexive _≈_ → Identity (Eq _≈_) e _⊕ₑ_
     e-id-⊕ₑ refl = e-idₗ-⊕ₑ refl , e-idᵣ-⊕ₑ refl
 
-    ⊕ₑ-pres-≈ₑ : ∀ {ℓ} {_≈_ : Rel A ℓ} → _⊕_ Preserves _≈_ → _⊕ₑ_ Preserves (Eq _≈_)
+    ⊕ₑ-pres-≈ₑ : ∀ {ℓ} {_≈_ : Rel A ℓ} → Congruent₂ _≈_ _⊕_ → Congruent₂ (Eq _≈_) _⊕ₑ_
     ⊕ₑ-pres-≈ₑ resp Eq.nothing    Eq.nothing    = Eq.nothing
     ⊕ₑ-pres-≈ₑ pres Eq.nothing    (Eq.just w≈x) = Eq.just w≈x
     ⊕ₑ-pres-≈ₑ pres (Eq.just u≈v) Eq.nothing    = Eq.just u≈v
@@ -114,31 +114,8 @@ module RoutingLib.Algebra.AddingElements {a} (A : Set a) where
     e-ze-⊕ₑ : ∀ {ℓ} {_≈_ : Rel A ℓ} → Zero (Eq _≈_) e _⊕ₑ_
     e-ze-⊕ₑ = e-zeₗ-⊕ₑ , e-zeᵣ-⊕ₑ
 
-    ⊕ₑ-pres-≈ₑ : ∀ {ℓ} {_≈_ : Rel A ℓ} → _⊕_ Preserves _≈_ → _⊕ₑ_ Preserves (Eq _≈_)
+    ⊕ₑ-pres-≈ₑ : ∀ {ℓ} {_≈_ : Rel A ℓ} → Congruent₂ _≈_ _⊕_ → Congruent₂ (Eq _≈_) _⊕ₑ_
     ⊕ₑ-pres-≈ₑ _    Eq.nothing    Eq.nothing    = Eq.nothing
     ⊕ₑ-pres-≈ₑ _    Eq.nothing    (Eq.just w≈x) = Eq.nothing
     ⊕ₑ-pres-≈ₑ _    (Eq.just u≈v) e             = Eq.nothing
     ⊕ₑ-pres-≈ₑ pres (Eq.just u≈v) (Eq.just w≈x) = Eq.just (pres u≈v w≈x)
-
-
-
-  module RightZero {b} {B : Set b} (_▷_ : B → A → A) where
-
-    infix 7 _▷ₑ_
-
-    _▷ₑ_ : B → Aₑ → Aₑ
-    b ▷ₑ e  = e
-    b ▷ₑ val w = val (b ▷ w)
-
-    ▷ₑ-pres-≈ₑ : ∀ {ℓ} {_≈_ : Rel A ℓ} → _▷_ Preservesₗ _≈_ → _▷ₑ_ Preservesₗ (Eq _≈_)
-    ▷ₑ-pres-≈ₑ _    b Eq.nothing = Eq.nothing
-    ▷ₑ-pres-≈ₑ pres b (Eq.just x≈y) = Eq.just (pres b x≈y)
-
-
-  module LeftZero {b} {B : Set b} (_▷_ : B → A → A) where
-
-    infix 7 _▷ₑ_
-
-    _▷ₑ_ : B → Aₑ → Aₑ
-    b ▷ₑ e = e
-    b ▷ₑ val w = val (b ▷ w)

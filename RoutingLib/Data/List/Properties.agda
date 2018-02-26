@@ -77,7 +77,8 @@ module RoutingLib.Data.List.Properties where
 
   module _ {a} {A : Set a} where
   
-    tabulate-cong : ∀ {n ℓ} {_≈_ : Rel A ℓ} (f g : Fin n → A) → (∀ i → f i ≈ g i) → ListRel _≈_ (tabulate f) (tabulate g)
+    tabulate-cong : ∀ {n ℓ} {_≈_ : Rel A ℓ} (f g : Fin n → A) →
+                    (∀ i → f i ≈ g i) → ListRel _≈_ (tabulate f) (tabulate g)
     tabulate-cong {zero}  f g f≈g = []
     tabulate-cong {suc n} f g f≈g = f≈g fzero ∷ tabulate-cong (f ∘ fsuc) (g ∘ fsuc) (f≈g ∘ fsuc)
 
@@ -210,7 +211,7 @@ module RoutingLib.Data.List.Properties where
 
 
 
-  module _ {a ℓ} (S : Setoid a ℓ) where
+  module _ {a ℓ} (S : Setoid a ℓ)  where
 
     open Setoid S renaming (Carrier to A; refl to ≈-refl; sym to ≈-sym; trans to ≈-trans)
     open import Data.List.Any.Membership S using () renaming (_∈_ to _∈ₛ_)
@@ -231,31 +232,33 @@ module RoutingLib.Data.List.Properties where
           x • (e • foldr _•_ e xs) ≈⟨ •-cong ≈-refl (foldr≤ᵣe e xs) ⟩
           x • foldr _•_ e xs
         ∎
+      
+      open import RoutingLib.Relation.Binary.NaturalOrder.Right _≈_ _•_
+        using (≤-isTotalOrder) renaming (_≤_ to _≤ᵣ_)
+      --open IsTotalOrder ? ?
 
       foldr≤ₗe : ∀ e xs → foldr _•_ e xs • e ≈ foldr _•_ e xs
       foldr≤ₗe e xs = ≈-trans (•-comm _ e) (foldr≤ᵣe e xs)
-      
 
-      foldr≤ᵣxs : ∀ e {x xs} → x ∈ₛ xs → x • foldr _•_ e xs ≈ foldr _•_ e xs
-      foldr≤ᵣxs e {x} {y ∷ xs} (here x≈y) =
-        begin
-          x • (y • foldr _•_ e xs) ≈⟨ ≈-sym (•-assoc x y _) ⟩
-          (x • y) • foldr _•_ e xs ≈⟨ •-cong (•-cong x≈y ≈-refl) ≈-refl ⟩
-          (y • y) • foldr _•_ e xs ≈⟨ •-cong (•-idem y) ≈-refl ⟩
-          y • foldr _•_ e xs
-        ∎
-      foldr≤ᵣxs e {x} {y ∷ xs} (there x∈xs) =
-        begin
-          x • (y • foldr _•_ e xs) ≈⟨ ≈-sym (•-assoc x y _) ⟩
-          (x • y) • foldr _•_ e xs ≈⟨ •-cong (•-comm x y) ≈-refl ⟩
-          (y • x) • foldr _•_ e xs ≈⟨ •-assoc y x _ ⟩
-          y • (x • foldr _•_ e xs) ≈⟨ •-cong ≈-refl (foldr≤ᵣxs e x∈xs) ⟩
-          y • foldr _•_ e xs
-        ∎
+      foldr≤ᵣxs : ∀ e {x xs} → x ∈ₛ xs → foldr _•_ e xs ≤ᵣ x
+      foldr≤ᵣxs e {x} {y ∷ xs} (here x≈y) = begin
+        x • (y • foldr _•_ e xs) ≈⟨ ≈-sym (•-assoc x y _) ⟩
+        (x • y) • foldr _•_ e xs ≈⟨ •-cong (•-cong x≈y ≈-refl) ≈-refl ⟩
+        (y • y) • foldr _•_ e xs ≈⟨ •-cong (•-idem y) ≈-refl ⟩
+        y • foldr _•_ e xs       ∎
+      foldr≤ᵣxs e {x} {y ∷ xs} (there x∈xs) = begin
+        x • (y • foldr _•_ e xs) ≈⟨ ≈-sym (•-assoc x y _) ⟩
+        (x • y) • foldr _•_ e xs ≈⟨ •-cong (•-comm x y) ≈-refl ⟩
+        (y • x) • foldr _•_ e xs ≈⟨ •-assoc y x _ ⟩
+        y • (x • foldr _•_ e xs) ≈⟨ •-cong ≈-refl (foldr≤ᵣxs e x∈xs) ⟩
+        y • foldr _•_ e xs       ∎
 
       foldr≤ₗxs : ∀ e {x xs} → x ∈ₛ xs → foldr _•_ e xs • x ≈ foldr _•_ e xs
       foldr≤ₗxs e x∈xs = ≈-trans (•-comm _ _) (foldr≤ᵣxs e x∈xs)
 
-    foldr-map-commute : ∀ {b} {B : Set b} {_•ᵃ_ _•ᵇ_} {f : B → A} → Congruent₂ _≈_ _•ᵃ_ → (∀ x y → f x •ᵃ f y ≈ f (x •ᵇ y)) → ∀ {e d} → e ≈ f d → ∀ xs → foldr _•ᵃ_ e (map f xs) ≈  f (foldr _•ᵇ_ d xs)
+    foldr-map-commute : ∀ {b} {B : Set b} {_•ᵃ_ _•ᵇ_} {f : B → A} →
+                        Congruent₂ _≈_ _•ᵃ_ →
+                        (∀ x y → f x •ᵃ f y ≈ f (x •ᵇ y)) →
+                        ∀ {e d} → e ≈ f d → ∀ xs → foldr _•ᵃ_ e (map f xs) ≈  f (foldr _•ᵇ_ d xs)
     foldr-map-commute _       _      e≈fd []       = e≈fd
     foldr-map-commute •ᵃ-cong f-cong e≈fd (x ∷ xs) = ≈-trans (•ᵃ-cong ≈-refl (foldr-map-commute •ᵃ-cong f-cong e≈fd xs)) (f-cong x _)

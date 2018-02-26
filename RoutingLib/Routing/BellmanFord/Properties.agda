@@ -38,22 +38,28 @@ module RoutingLib.Routing.BellmanFord.Properties
     -- Identity matrix --
     ---------------------
 
+    Iᵢⱼ≈0⊎1 : ∀ i j → I i j ≈ 0# ⊎ I i j ≈ 1#
+    Iᵢⱼ≈0⊎1 i j with j ≟𝔽 i
+    ... | yes _ = inj₂ ≈-refl
+    ... | no  _ = inj₁ ≈-refl
+    
     Iᵢᵢ≡1# : ∀ i → I i i ≡ 1#
     Iᵢᵢ≡1# i with i ≟𝔽 i
     ... | yes _   = refl
     ... | no  i≢i = contradiction refl i≢i
-
-    Iᵢᵢ-idᵣ-⊕ : RightZero 1# _⊕_ → ∀ i → RightZero (I i i) _⊕_
-    Iᵢᵢ-idᵣ-⊕ 1#-anᵣ-⊕ i x rewrite Iᵢᵢ≡1# i = 1#-anᵣ-⊕ x
     
     Iᵢⱼ≡0# : ∀ {i j} → j ≢ i → I i j ≡ 0#
     Iᵢⱼ≡0# {i} {j} i≢j with j ≟𝔽 i
     ... | yes i≡j = contradiction i≡j i≢j
     ... | no  _   = refl
 
+    Iᵢᵢ-idᵣ-⊕ : RightZero 1# _⊕_ → ∀ i → RightZero (I i i) _⊕_
+    Iᵢᵢ-idᵣ-⊕ 1#-anᵣ-⊕ i x rewrite Iᵢᵢ≡1# i = 1#-anᵣ-⊕ x
+
     Iᵢⱼ≡Iₖₗ : ∀ {i j k l} → j ≢ i → l ≢ k → I i j ≡ I k l
     Iᵢⱼ≡Iₖₗ j≢i l≢k = trans (Iᵢⱼ≡0# j≢i) (sym (Iᵢⱼ≡0# l≢k))
 
+    
     ----------------------------
     -- Synchronous properties --
     ----------------------------
@@ -94,7 +100,7 @@ module RoutingLib.Routing.BellmanFord.Properties
         (σXᵢᵢ≈Iᵢᵢ ⊕-sel ⊕-assoc ⊕-comm 1#-anᵣ-⊕ X i)
         (≈-sym (σXᵢᵢ≈Iᵢᵢ ⊕-sel ⊕-assoc ⊕-comm 1#-anᵣ-⊕ Y i))
 
-     {-
+{-
     -- A sufficient (but not necessary condition) for σXᵢⱼ ≈ σYᵢⱼ
     σXᵢⱼ≈σYᵢⱼ : Selective _⊕_ → Associative _⊕_ → Commutative _⊕_ →
                 ∀ X Y i j → (∀ k →
@@ -103,7 +109,6 @@ module RoutingLib.Routing.BellmanFord.Properties
                     (∃ λ m → (A i m ▷ Y m j) <₊ (A i k ▷ Y k j)))) →
                 σ X i j ≈ σ Y i j
     σXᵢⱼ≈σYᵢⱼ ⊕-sel ⊕-assoc ⊕-comm X Y i j eqCon = ?
- 
       foldrₓₛ≈foldrᵥₛ ⊕-sel ⊕-comm ⊕-assoc (I i j) (extensions X i j) (extensions Y i j) adjust
       where
       adjust : ∀ k → (lookup k (extensions X i j) ≈ lookup k (extensions Y i j))
@@ -112,4 +117,4 @@ module RoutingLib.Routing.BellmanFord.Properties
       adjust k rewrite lookup-extensions X i j k | lookup-extensions Y i j k with eqCon k
       ... | inj₁ AᵢₖXₖⱼ≈AᵢₖYₖⱼ                           = inj₁ AᵢₖXₖⱼ≈AᵢₖYₖⱼ
       ... | inj₂ ((l , AᵢₗXₗⱼ<AₖⱼXₖⱼ) , (m , AᵢₘYₘⱼ<AᵢₖYₖⱼ)) = inj₂ ((l , subst₂ _<ᵣ_ (≡-sym (lookup-extensions X i j l)) ≡-refl AᵢₗXₗⱼ<AₖⱼXₖⱼ) , (m , subst₂ _<ᵣ_ (≡-sym (lookup-extensions Y i j m)) ≡-refl AᵢₘYₘⱼ<AᵢₖYₖⱼ))
-    -}
+-}

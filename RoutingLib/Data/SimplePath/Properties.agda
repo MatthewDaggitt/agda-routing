@@ -10,73 +10,18 @@ open import Data.Fin.Properties using (cmp; ≤-trans; ≤-antisym; ≤-total; _
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_,_; _×_)
 
-open import RoutingLib.Data.Graph.SimplePath2
-open import RoutingLib.Data.Graph.SimplePath2.NonEmpty as NE using ()
-open import RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties as NEP using ()
+open import RoutingLib.Data.SimplePath
+open import RoutingLib.Data.SimplePath.Relation.Equality
+open import RoutingLib.Data.SimplePath.NonEmpty as NE using (SimplePathⁿᵗ)
+open import RoutingLib.Data.SimplePath.NonEmpty.Properties as NEP using ()
 open import RoutingLib.Data.Nat.Properties using (n≢1+n)
 open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_)
 
-module RoutingLib.Data.Graph.SimplePath2.Properties {n : ℕ} where
+module RoutingLib.Data.SimplePath.Properties {n : ℕ} where
 
   abstract
-
-    --------------
-    -- Equality --
-    --------------
-
-    ≈-refl : Reflexive (_≈_ {n})
-    ≈-refl {invalid} = invalid
-    ≈-refl {valid p} = valid NEP.≈-refl
-
-    ≈-reflexive : _≡_ ⇒ (_≈_ {n})
-    ≈-reflexive refl = ≈-refl
-
-    ≈-sym : Symmetric (_≈_ {n})
-    ≈-sym invalid     = invalid
-    ≈-sym (valid p≈q) = valid (NEP.≈-sym p≈q)
-
-    ≈-trans : Transitive (_≈_ {n})
-    ≈-trans invalid     invalid     = invalid
-    ≈-trans (valid p≈q) (valid q≈r) = valid (NEP.≈-trans p≈q q≈r)
-
-    _≟_ : Decidable (_≈_ {n})
-    invalid ≟ invalid = yes invalid
-    invalid ≟ valid q = no λ()
-    valid p ≟ invalid  = no λ()
-    valid p ≟ valid q with p NEP.≟ q
-    ... | no  p≉q = no (λ{(valid p≈q) → p≉q p≈q})
-    ... | yes p≈q = yes (valid p≈q)
-
-    ≈-isEquivalence : IsEquivalence (_≈_ {n})
-    ≈-isEquivalence = record
-      { refl  = ≈-refl
-      ; sym   = ≈-sym
-      ; trans = ≈-trans
-      }
-
-    ≈-isDecEquivalence : IsDecEquivalence (_≈_ {n})
-    ≈-isDecEquivalence = record
-      { isEquivalence = ≈-isEquivalence
-      ; _≟_           = _≟_
-      }
-
-  ℙₛ : Setoid lzero lzero
-  ℙₛ = record 
-    { Carrier       = SimplePath n 
-    ; _≈_           = _≈_ 
-    ; isEquivalence = ≈-isEquivalence 
-    }
-
-  Decℙₛ : DecSetoid lzero lzero
-  Decℙₛ = record 
-    { Carrier          = SimplePath n 
-    ; _≈_              = _≈_ 
-    ; isDecEquivalence = ≈-isDecEquivalence 
-    }
-
-  abstract
-
   
+    ----------------------------------------------------------------------------
     -- Linkage
 
     _⇿?_ : Decidable (_⇿_ {n})
@@ -85,10 +30,11 @@ module RoutingLib.Data.Graph.SimplePath2.Properties {n : ℕ} where
     ... | yes e⇿p = yes (valid e⇿p)
     ... | no ¬e⇿p = no λ{(valid e⇿p) → ¬e⇿p e⇿p}
 
-    ⇿-resp-≈ : ∀ {e} {p q : SimplePath n} → p ≈ q → e ⇿ p → e ⇿ q
-    ⇿-resp-≈ invalid     e⇿p         = e⇿p
-    ⇿-resp-≈ (valid p≈q) (valid e⇿p) = valid (NEP.⇿-resp-≈ p≈q e⇿p)
-    
+    ⇿-resp-≈ₚ : ∀ {e : Fin n × Fin n} → (e ⇿_) Respects _≈ₚ_
+    ⇿-resp-≈ₚ invalid     e⇿p         = e⇿p
+    ⇿-resp-≈ₚ (valid p≈q) (valid e⇿p) = valid (NEP.⇿-resp-≈ₚ p≈q e⇿p)
+
+    ----------------------------------------------------------------------------
     -- Membership
 
     _∉?_ : Decidable (_∉_ {n})
@@ -97,37 +43,26 @@ module RoutingLib.Data.Graph.SimplePath2.Properties {n : ℕ} where
     ... | yes k∉p = yes (valid k∉p)
     ... | no  k∈p = no λ{(valid k∉p) → k∈p k∉p}
 
-    ∉-resp-≈ : ∀ {k : Fin n} → (k ∉_) Respects _≈_
-    ∉-resp-≈ invalid     invalid     = invalid
-    ∉-resp-≈ (valid p≈q) (valid k∉p) = valid (NEP.∉-resp-≈ p≈q k∉p)
+    ∉-resp-≈ₚ : ∀ {k : Fin n} → (k ∉_) Respects _≈ₚ_
+    ∉-resp-≈ₚ invalid     invalid     = invalid
+    ∉-resp-≈ₚ (valid p≈q) (valid k∉p) = valid (NEP.∉-resp-≈ₚ p≈q k∉p)
 
-{-
-    ∈-resp-≈ : ∀ {k : Fin n} → (k ∈_) Respects _≈_
-    ∈-resp-≈ x≈y k∈x k∉y = k∈x (∉-resp-≈ (≈-sym x≈y) k∉y)
- -}
- 
-    -- Graph membership
-{-
-    _∈𝔾?_ : ∀ {a} {A : Set a} → Decidable (_∈𝔾_ {a} {n} {A})
-    invalid     ∈𝔾? G = no λ()
-    valid p    ∈𝔾? G = yes valid p
-    [ p ] ∈𝔾? G with p NEP.∈𝔾? G
-    ... | yes p∈G = yes [ p∈G ]
-    ... | no  p∉G = no (λ {[ p∈G ] → p∉G p∈G})
+    ∈-resp-≈ₚ : ∀ {k : Fin n} → (k ∈_) Respects _≈ₚ_
+    ∈-resp-≈ₚ x≈y k∈x k∉y = k∈x (∉-resp-≈ₚ (≈ₚ-sym x≈y) k∉y)
 
-    _∉𝔾?_ : ∀ {a} {A : Set a} → Decidable (_∉𝔾_ {a} {n} {A})
-    p ∉𝔾? G with p ∈𝔾? G
-    ... | yes p∈G = no (λ p∉G → p∉G p∈G)
-    ... | no  p∉G = yes p∉G
-
-    ∈𝔾-resp-≈ : ∀ {a} {A : Set a} {G : Graph A n} → (_∈𝔾 G) Respects _≈_
-    ∈𝔾-resp-≈ valid p      valid p      = valid p
-    ∈𝔾-resp-≈ [ p≈q ] [ p∈G ] = [ NEP.∈𝔾-resp-≈ p≈q p∈G ]
-
-    ∉𝔾-resp-≈ : ∀ {a} {A : Set a} {G : Graph A n} → (_∉𝔾 G) Respects _≈_
-    ∉𝔾-resp-≈ p≈q p∉G q∈G = contradiction (∈𝔾-resp-≈ (≈-sym p≈q) q∈G) p∉G
+    ----------------------------------------------------------------------------
+    -- Length
     
--}
+    length<n : (p : SimplePath (suc n)) → length p <ℕ suc n
+    length<n invalid                     = s≤s z≤n
+    length<n (valid [])                  = s≤s z≤n
+    length<n (valid (e ∷ p ∣ e⇿p ∣ e∉p)) = NEP.|p|<n (NE.nonEmpty e p e⇿p e∉p)
+    
+    length-cong : ∀ {p q : SimplePath n} → p ≈ₚ q → length p ≡ length q
+    length-cong invalid     = refl
+    length-cong (valid p≈q) = NEP.length-cong p≈q
+
+
     -- Ordering
 {-
     ≤ₚ-refl : Reflexive (_≤ₚ_ {n})
@@ -205,36 +140,30 @@ module RoutingLib.Data.Graph.SimplePath2.Properties {n : ℕ} where
     i∷p≰p (len 1+|p|<|p|)   = contradiction 1+|p|<|p| (m+n≮n 1 _)
     i∷p≰p (lex 1+|p|≡|p| _) = contradiction (sym 1+|p|≡|p|) (n≢1+n _)
 -}
-
-    -- Length
-    length<n : (p : SimplePath (suc n)) → length p <ℕ suc n
-    length<n invalid                     = s≤s z≤n
-    length<n (valid [])                  = s≤s z≤n
-    length<n (valid (e ∷ p ∣ e⇿p ∣ e∉p)) = NEP.|p|<n (NE.nonEmpty e p e⇿p e∉p)
     
-    length-cong : ∀ {p q : SimplePath n} → p ≈ q → length p ≡ length q
-    length-cong invalid     = refl
-    length-cong (valid p≈q) = NEP.length-cong p≈q
+    
 
-    ∷ₐ-cong : ∀ (e : Fin n × Fin n) → (e ∷ₐ_) Preserves _≈_ ⟶ _≈_
+
+{-
+    ∷ₐ-cong : ∀ (e : Fin n × Fin n) → (e ∷ₐ_) Preserves _≈ₚ_ ⟶ _≈ₚ_
     ∷ₐ-cong (i , j) invalid     = invalid
     ∷ₐ-cong (i , j) {valid p} {valid q} (valid p≈q) with (i , j) NEP.⇿? p | (i , j) NEP.⇿? q | i NEP.∉? p | i NEP.∉? q
     ... | no _     | no _     | _       | _       = invalid
-    ... | no ¬ij⇿p | yes ij⇿q | _       | _       = contradiction (NEP.⇿-resp-≈ (NEP.≈-sym p≈q) ij⇿q) ¬ij⇿p
-    ... | yes ij⇿p | no ¬ij⇿q | _       | _       = contradiction (NEP.⇿-resp-≈ p≈q ij⇿p) ¬ij⇿q
+    ... | no ¬ij⇿p | yes ij⇿q | _       | _       = contradiction (NEP.⇿-resp-≈ₚ (NEP.≈ₚ-sym p≈q) ij⇿q) ¬ij⇿p
+    ... | yes ij⇿p | no ¬ij⇿q | _       | _       = contradiction (NEP.⇿-resp-≈ₚ p≈q ij⇿p) ¬ij⇿q
     ... | yes _    | yes _    | no _    | no _    = invalid
-    ... | yes _    | yes _    | no  i∈p | yes i∉q = contradiction (NEP.∉-resp-≈ (NEP.≈-sym p≈q) i∉q) i∈p
-    ... | yes _    | yes _    | yes i∉p | no  i∈p = contradiction (NEP.∉-resp-≈ p≈q i∉p) i∈p
+    ... | yes _    | yes _    | no  i∈p | yes i∉q = contradiction (NEP.∉-resp-≈ₚ (NEP.≈ₚ-sym p≈q) i∉q) i∈p
+    ... | yes _    | yes _    | yes i∉p | no  i∈p = contradiction (NEP.∉-resp-≈ₚ p≈q i∉p) i∈p
     ... | yes _    | yes _    | yes _   | yes _   = valid (refl ∷ p≈q)
     
     ∷ₐ-accept : ∀ {i j : Fin n} {p} (ij⇿p : (i , j) NE.⇿ p) (i∉p : i NE.∉ p) →
-                (i , j) ∷ₐ valid p ≈ valid ((i , j) ∷ p ∣ ij⇿p ∣ i∉p)
+                (i , j) ∷ₐ valid p ≈ₚ valid ((i , j) ∷ p ∣ ij⇿p ∣ i∉p)
     ∷ₐ-accept {i} {j} {p} il⇿p i∉p with (i , j) NEP.⇿? p | i NEP.∉? p
     ... | no ¬ij⇿p | _       = contradiction il⇿p ¬ij⇿p
     ... | _        | no  i∈p = contradiction i∉p i∈p
-    ... | yes ij⇿p | yes _   = valid (refl ∷ NEP.≈-refl)
+    ... | yes ij⇿p | yes _   = valid (refl ∷ NEP.≈ₚ-refl)
 
-    ∷ₐ-reject : ∀ {i j : Fin n} {p} → ¬ ((i , j) ⇿ p) ⊎ i ∈ p → (i , j) ∷ₐ p ≈ invalid
+    ∷ₐ-reject : ∀ {i j : Fin n} {p} → ¬ ((i , j) ⇿ p) ⊎ i ∈ p → (i , j) ∷ₐ p ≈ₚ invalid
     ∷ₐ-reject {p = invalid} _            = invalid
     ∷ₐ-reject {i} {j} {p = valid p} ¬ij⇿p⊎i∈p  with (i , j) NEP.⇿? p | i NEP.∉? p
     ... | no  _    | _       = invalid
@@ -243,15 +172,11 @@ module RoutingLib.Data.Graph.SimplePath2.Properties {n : ℕ} where
     ...   | inj₁ ¬ij⇿p = contradiction (valid ij⇿p) ¬ij⇿p
     ...   | inj₂ i∈p   = contradiction (valid i∉p) i∈p
 
-    ∷ₐ-length : ∀ (i j : Fin n) p {q} → (i , j) ∷ₐ p ≈ valid q →
+    ∷ₐ-length : ∀ (i j : Fin n) p {q} → (i , j) ∷ₐ p ≈ₚ valid q →
                 length ((i , j) ∷ₐ p) ≡ suc (length p)
     ∷ₐ-length i j invalid   ()
     ∷ₐ-length i j (valid p) ij∷p≈q with (i , j) NEP.⇿? p | i NEP.∉? p
     ... | no  _ | _     = contradiction ij∷p≈q λ()
     ... | yes _ | no  _ = contradiction ij∷p≈q λ()
     ... | yes _ | yes _ = refl
-{-
-    weight-cong : ∀ {a b} {A : Set a} {B : Set b} _▷_ (1# : B) {p q : SimplePath n} {G : Graph A n} (p≈q : p ≈ q) (p∈G : p ∈𝔾 G) (q∈G : q ∈𝔾 G) → weight _▷_ 1# p∈G ≡ weight _▷_ 1# q∈G
-    weight-cong _▷_ 1# valid p      valid p      valid p      = refl
-    weight-cong _▷_ 1# [ p≈q ] [ p∈G ] [ q∈G ] = NEP.weight-cong _▷_ 1# p≈q p∈G q∈G
 -}

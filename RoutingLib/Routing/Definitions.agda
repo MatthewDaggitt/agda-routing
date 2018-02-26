@@ -12,8 +12,9 @@ open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.Table using (Table)
 import RoutingLib.Data.Matrix.Relation.DecidableEquality as MatrixDecEquality
 import RoutingLib.Data.Table.Relation.DecidableEquality as TableDecEquality
-open import RoutingLib.Data.Graph.SimplePath2
-  using (SimplePath; valid; invalid; []; _∷_; _∷_∣_∣_) renaming (_≈_ to _≈ₚ_)
+open import RoutingLib.Data.SimplePath
+  using (SimplePath; valid; invalid; []; _∷_∣_∣_)
+open import RoutingLib.Data.SimplePath.Relation.Equality
 import RoutingLib.Relation.Binary.NaturalOrder.Right as RightNaturalOrder
 
 module RoutingLib.Routing.Definitions where

@@ -1,3 +1,4 @@
+open import Data.Nat using (ℕ; zero; suc)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟ᶠ_)
 open import Data.List using (foldr; tabulate)
 open import Data.List.Relation.Pointwise using (tabulate⁺)
@@ -26,10 +27,10 @@ module RoutingLib.Routing.BellmanFord
   σ : RMatrix → RMatrix
   σ X i j = foldr _⊕_ (I i j) (tabulate (λ k → A i k ▷ X k j))
 
-  -- σ respects the underlying matrix equality
-  σ-cong : ∀ {X Y} → X ≈ₘ Y → σ X ≈ₘ σ Y
-  σ-cong X≈Y i j = foldr-All₂
-    _≈_ ⊕-cong ≈-refl (tabulate⁺ (λ k → ▷-cong (A i k) (X≈Y k j)))
+  -- Algorithm for multiple iterations
+  σ^ : ℕ → RMatrix → RMatrix
+  σ^ zero    X = X
+  σ^ (suc t) X = σ (σ^ t X)
 
   -- A possible parallelisation of the algorithm where each 
   -- node is in charge of its own routes
@@ -37,3 +38,9 @@ module RoutingLib.Routing.BellmanFord
   σ∥ = record { f = σ }
 
   open Parallelisation σ∥ using () renaming (async-iter to δ) public
+
+  
+  -- σ respects the underlying matrix equality
+  σ-cong : ∀ {X Y} → X ≈ₘ Y → σ X ≈ₘ σ Y
+  σ-cong X≈Y i j = foldr-All₂
+    _≈_ ⊕-cong ≈-refl (tabulate⁺ (λ k → ▷-cong (A i k) (X≈Y k j)))

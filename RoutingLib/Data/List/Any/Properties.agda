@@ -45,11 +45,13 @@ module RoutingLib.Data.List.Any.Properties where
     Any-⇿ (there pxs) (x◂zs≡ys ∷ xs⇿zs) = Any-◂≡ (there (Any-⇿ pxs xs⇿zs)) x◂zs≡ys
 
 
-    Any-applyBetween⁺ : ∀ f {s e i} → s ≤ i → i < e → P (f i) → Any P (applyBetween f s e)
+    Any-applyBetween⁺ : ∀ f {s e i} → s ≤ i → i < e → P (f i) →
+                        Any P (applyBetween f s e)
     Any-applyBetween⁺ f z≤n       (s≤s i<e) Pf₀ = applyUpTo⁺ f Pf₀ (s≤s i<e)
     Any-applyBetween⁺ f (s≤s s≤i) (s≤s i<e) Pfᵢ = Any-applyBetween⁺ (f ∘ suc) s≤i i<e Pfᵢ
 
-    Any-applyBetween⁻ : ∀ f s e → Any P (applyBetween f s e) → ∃ λ i → s ≤ i × i < e × P (f i)
+    Any-applyBetween⁻ : ∀ f s e → Any P (applyBetween f s e) →
+                        ∃ λ i → s ≤ i × i < e × P (f i)
     Any-applyBetween⁻ f zero    _       pxs = mapₚ id (z≤n ,_) (applyUpTo⁻ f pxs)
     Any-applyBetween⁻ f (suc s) zero    ()
     Any-applyBetween⁻ f (suc s) (suc e) pxs with Any-applyBetween⁻ (f ∘ suc) s e pxs

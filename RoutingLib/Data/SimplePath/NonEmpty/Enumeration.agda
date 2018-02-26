@@ -24,11 +24,18 @@ open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique)
 open import RoutingLib.Data.List.Uniqueness.Propositional.Properties using (allFin!⁺; combine!⁺)
 open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-allFin⁺; ∈-combine⁺)
 open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-map⁺; ∈-concat⁺; ∈-applyUpTo⁺)
+<<<<<<< HEAD:RoutingLib/Data/Graph/SimplePath2/NonEmpty/Enumeration.agda
 open import RoutingLib.Data.Graph.SimplePath2.NonEmpty hiding (_∈_)
 open import RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties
+=======
+open import RoutingLib.Data.List.Uniset using (Uniset; Enumeration; IsEnumeration)
+open import RoutingLib.Data.SimplePath.NonEmpty hiding (_∈_)
+open import RoutingLib.Data.SimplePath.NonEmpty.Properties
+open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Equality
+>>>>>>> master:RoutingLib/Data/SimplePath/NonEmpty/Enumeration.agda
 
 
-module RoutingLib.Data.Graph.SimplePath2.NonEmpty.Enumeration (n : ℕ) where
+module RoutingLib.Data.SimplePath.NonEmpty.Enumeration (n : ℕ) where
 
   -- Enumerating paths
 
@@ -41,10 +48,10 @@ module RoutingLib.Data.Graph.SimplePath2.NonEmpty.Enumeration (n : ℕ) where
     F×Fₛ = ≡-setoid (Fin n × Fin n)
     
     Pₛ : Setoid _ _
-    Pₛ = ≈-setoid {n}
+    Pₛ = ℙₛ n
 
     DPₛ : DecSetoid _ _
-    DPₛ = ≈-decSetoid {n}
+    DPₛ = ℙₛ? n
 
     LPₛ : Setoid _ _
     LPₛ = listSetoid Pₛ
@@ -84,15 +91,15 @@ module RoutingLib.Data.Graph.SimplePath2.NonEmpty.Enumeration (n : ℕ) where
 
     ∈-extendAll : ∀ {e q e⇿q e∉q ps} → q ∈ₚ ps → e ∷ q ∣ e⇿q ∣ e∉q ∈ₚ extendAll ps e
     ∈-extendAll {i , j} {_} {e⇿q} {i∉q} {p ∷ _} (here q≈p) with (i , j) ⇿? p | i ∉? p
-    ... | no ¬e⇿p | _       = contradiction (⇿-resp-≈ q≈p e⇿q) ¬e⇿p
-    ... | yes e⇿p | no  i∈p = contradiction (∉-resp-≈ q≈p i∉q) i∈p
+    ... | no ¬e⇿p | _       = contradiction (⇿-resp-≈ₚ q≈p e⇿q) ¬e⇿p
+    ... | yes e⇿p | no  i∈p = contradiction (∉-resp-≈ₚ q≈p i∉q) i∈p
     ... | yes e⇿p | yes i∉p = here (≡-refl ∷ q≈p)
     ∈-extendAll {i , j} {ps = p ∷ _} (there q∈ps) with (i , j) ⇿? p | i ∉? p
     ... | no  _   | _       = ∈-extendAll q∈ps
     ... | yes e⇿p | no  i∈p = ∈-extendAll q∈ps
     ... | yes e⇿p | yes i∉p = there (∈-extendAll q∈ps)
 
-    extendAll-∈ : ∀ {e v} ps → v ∈ₚ extendAll ps e → ∃ λ q → ∃₂ λ e⇿q e∉q → v ≈ e ∷ q ∣ e⇿q ∣ e∉q
+    extendAll-∈ : ∀ {e v} ps → v ∈ₚ extendAll ps e → ∃ λ q → ∃₂ λ e⇿q e∉q → v ≈ₚ e ∷ q ∣ e⇿q ∣ e∉q
     extendAll-∈ []  ()
     extendAll-∈ {i , j} (p ∷ ps) v∈e[p∷ps] with (i , j) ⇿? p | i ∉? p
     ... | no  _   | _       = extendAll-∈ ps v∈e[p∷ps]
@@ -135,7 +142,7 @@ module RoutingLib.Data.Graph.SimplePath2.NonEmpty.Enumeration (n : ℕ) where
     allPathsOfLength (suc l) = concat (map (extendAll (allPathsOfLength l)) allSrcDst)
 
     ∈-allPathsOfLength : ∀ p → p ∈ₚ (allPathsOfLength (length p))
-    ∈-allPathsOfLength []                  = here ≈-refl
+    ∈-allPathsOfLength []                  = here ≈ₚ-refl
     ∈-allPathsOfLength (e ∷ p ∣ e⇿p ∣ e∉p) = 
       ∈-concat⁺ Pₛ
         (∈-extendAll (∈-allPathsOfLength p))
@@ -175,7 +182,7 @@ module RoutingLib.Data.Graph.SimplePath2.NonEmpty.Enumeration (n : ℕ) where
     allPaths = [] ∷ concat (applyUpTo allPathsOfLength n)
     
     ∈-allPaths : ∀ p → p ∈ₚ allPaths
-    ∈-allPaths []                  = here ≈-refl
+    ∈-allPaths []                  = here ≈ₚ-refl
     ∈-allPaths (e ∷ p ∣ e⇿p ∣ e∉p) =
       there (∈-concat⁺ Pₛ
         (∈-allPathsOfLength (e ∷ p ∣ e⇿p ∣ e∉p))

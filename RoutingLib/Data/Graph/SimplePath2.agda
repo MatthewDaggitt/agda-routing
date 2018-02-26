@@ -10,7 +10,6 @@ open import Relation.Binary using (Decidable; Rel)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; cong)
 open import Function using (_∘_)
 
-open import RoutingLib.Data.Graph using (Graph)
 open import RoutingLib.Data.Graph.SimplePath2.NonEmpty as NT using (SimplePathⁿᵗ; _≤ₗₑₓ_)
 import RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties as NTP
 

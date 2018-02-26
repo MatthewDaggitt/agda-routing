@@ -10,7 +10,6 @@ open import Data.Fin.Properties using (cmp; ≤-trans; ≤-antisym; ≤-total; _
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_,_; _×_)
 
-open import RoutingLib.Data.Graph using (Graph)
 open import RoutingLib.Data.Graph.SimplePath2
 open import RoutingLib.Data.Graph.SimplePath2.NonEmpty as NE using ()
 open import RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties as NEP using ()

@@ -2,7 +2,7 @@ open import Level using (_⊔_)
 open import Data.Nat using (zero; suc; z≤n; s≤s; _≤_; _<_)
 open import Data.Nat.Properties using (≤-antisym; <⇒≢)
 open import Data.Bool using (true; false)
-open import Data.Maybe using (Maybe; just; nothing; Eq)
+open import Data.Maybe using (Maybe; just; nothing; Eq; just-injective)
 open import Data.List using (List; []; _∷_; length; gfilter; filter; map; concat; tabulate; upTo; _++_; drop; take)
 open import Data.List.Any using (here; there; any)
 open import Data.List.All using (All; []; _∷_; lookup) renaming (map to mapₐ; tabulate to tabulateₐ)
@@ -25,7 +25,6 @@ open import RoutingLib.Data.List.All using (AllPairs; []; _∷_)
 open import RoutingLib.Data.List.All.Properties
 open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 open import RoutingLib.Data.Fin.Properties using (suc≢zero)
-open import RoutingLib.Data.Maybe.Properties using (just-injective)
 open import RoutingLib.Data.List.Uniqueness.Setoid as Uniqueness using (Unique)
 import RoutingLib.Data.List.Disjoint as Disjoint
 import RoutingLib.Data.List.Disjoint.Properties as DisjointProperties
@@ -39,18 +38,9 @@ module RoutingLib.Data.List.Uniqueness.Setoid.Properties where
     open import Data.List.Any.Membership S using (_∈_; _∉_; _⊆_)
     open Disjoint S using (_#_; ∈ₗ⇒∉ᵣ; contractₗ)
     open DisjointProperties S using (#-concat; #⇒AllAll≉) 
-{-
-    filter! : ∀ P {xs} → Unique S xs → Unique S (filter P xs)
-    filter! _ [] = []
-    filter! P {x ∷ xs} (x∉xs ∷ xs!) with predBoolToMaybe P x | inspect (predBoolToMaybe P) x
-    ... | nothing | _  = filter! P xs!
-    ... | just v  | [ t ] with P x
-    ...   | false = contradiction t λ()
-    ...   | true  = ¬Any→All¬ (∉-filter₁ S P (∉-resp-≈ S (All¬→¬Any x∉xs) (reflexive (just-injective t)))) ∷ filter! P xs!
--}
 
-    dfilter!⁺ : ∀ {b} {P : A → Set b} (P? : Decidable P) → ∀ {xs} → Unique S xs → Unique S (dfilter P? xs)
-    dfilter!⁺ P? xs! = AllPairs-dfilter⁺ P? xs!
+    filter!⁺ : ∀ {b} {P : A → Set b} (P? : Decidable P) → ∀ {xs} → Unique S xs → Unique S (filter P? xs)
+    filter!⁺ P? xs! = AllPairs-filter⁺ P? xs!
 
     ++!⁺ : ∀ {xs ys} → Unique S xs → Unique S ys → xs # ys → Unique S (xs ++ ys)
     ++!⁺ xs! ys! xs#ys = AllPairs-++⁺ xs! ys! (#⇒AllAll≉ xs#ys)

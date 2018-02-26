@@ -13,7 +13,7 @@ open import Relation.Nullary using (yes; no)
 open import Relation.Unary using () renaming (Decidable to Decidableᵤ)
 open import Function using (_∘_; id)
 
-open import RoutingLib.Data.List using (lookup; combine; dfilter; applyBetween; between; allFinPairs)
+open import RoutingLib.Data.List using (combine; applyBetween; between; allFinPairs)
 open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 open import RoutingLib.Data.List.Permutation using (_⇿_)
 import RoutingLib.Data.List.Membership.Setoid as SetoidMembership
@@ -86,13 +86,13 @@ module RoutingLib.Data.List.Membership.Propositional.Properties where
   ∈-length : ∀ {a} {A : Set a} {x : A} {xs} → x ∈ xs → 1 ≤ length xs
   ∈-length x∈xs = GM.∈-length (setoid _) x∈xs
 
-  ∈-dfilter⁺ : ∀ {a p} {A : Set a} {P : A → Set p} (P? : Decidableᵤ P) →
-               ∀ {v} → P v → ∀ {xs} → v ∈ xs → v ∈ dfilter P? xs
-  ∈-dfilter⁺ P? = GM.∈-dfilter⁺ (setoid _) P? λ {refl → id}
+  ∈-filter⁺ : ∀ {a p} {A : Set a} {P : A → Set p} (P? : Decidableᵤ P) →
+               ∀ {v} → P v → ∀ {xs} → v ∈ xs → v ∈ filter P? xs
+  ∈-filter⁺ P? = GM.∈-filter⁺ (setoid _) P? λ {refl → id}
 
-  ∈-dfilter⁻ : ∀ {a p} {A : Set a} {P : A → Set p} (P? : Decidableᵤ P)  →
-               ∀ {v xs} → v ∈ dfilter P? xs → v ∈ xs × P v
-  ∈-dfilter⁻ P? = GM.∈-dfilter⁻ (setoid _) P? λ {refl → id}
+  ∈-filter⁻ : ∀ {a p} {A : Set a} {P : A → Set p} (P? : Decidableᵤ P)  →
+               ∀ {v xs} → v ∈ filter P? xs → v ∈ xs × P v
+  ∈-filter⁻ P? = GM.∈-filter⁻ (setoid _) P? λ {refl → id}
 
   ∈-lookup : ∀ {a} {A : Set a} (xs : List A) i → lookup xs i ∈ xs
   ∈-lookup = GM.∈-lookup (setoid _)

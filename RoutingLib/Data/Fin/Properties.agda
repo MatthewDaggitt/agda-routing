@@ -12,28 +12,8 @@ open import Relation.Binary.Consequences using (trans∧tri⟶resp≈)
 open import Function using (_on_; _∘_; flip)
 
 open import RoutingLib.Data.Fin
-open import RoutingLib.Data.Nat.Properties using (≤-cardinality)
 
 module RoutingLib.Data.Fin.Properties where
-
-  ------------------------------------------------------------------------------
-  -- Properties of _≤_
-
-  ≤-isDecTotalOrder : ∀ {n} → IsDecTotalOrder _≡_ (_≤_ {n})
-  ≤-isDecTotalOrder = record {
-      isTotalOrder = ≤-isTotalOrder ;
-      _≟_ = _≟_ ;
-      _≤?_ = _≤?_
-    }
-    
-  ------------------------------------------------------------------------------
-  -- Properties of _<_
-  
-  <-irrefl : ∀ {n} → Irreflexive _≡_ (_<_ {n})
-  <-irrefl refl x<x = 1+n≰n x<x
-  
-  ------------------------------------------------------------------------------
-  -- Punchout
 
   -----------------------
   -- To push to stdlib --
@@ -96,8 +76,8 @@ module RoutingLib.Data.Fin.Properties where
   ≤fromℕ zero    (fsuc ())
   ≤fromℕ (suc k) (fsuc i) = s≤s (≤fromℕ k i)
 
-  fromℕ≤-cong : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) → i ≡ j → fromℕ≤ i<n ≡ fromℕ≤ j<n
-  fromℕ≤-cong i<n j<n refl = cong fromℕ≤ (≤-cardinality i<n j<n)
+  postulate fromℕ≤-cong : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) → i ≡ j → fromℕ≤ i<n ≡ fromℕ≤ j<n
+  --fromℕ≤-cong i<n j<n refl = cong fromℕ≤ (≤-cardinality i<n j<n)
 
   fromℕ≤-mono-≤ : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
                    i ≤ℕ j → fromℕ≤ i<n ≤ fromℕ≤ j<n

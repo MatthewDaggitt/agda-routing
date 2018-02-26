@@ -14,11 +14,9 @@ open import Relation.Binary.Product.Pointwise using (_×-≟_)
 open import Function using (_∘_)
 open import Relation.Nullary.Negation using (¬?)
 
-open import RoutingLib.Data.Graph using (Graph)
 open import RoutingLib.Data.Graph.SimplePath2.NonEmpty
 open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_)
 open import RoutingLib.Data.Fin.Pigeonhole using (pigeonhole)
-open import RoutingLib.Data.Maybe.Properties using (just-injective)
 
 module RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties {n} where
 

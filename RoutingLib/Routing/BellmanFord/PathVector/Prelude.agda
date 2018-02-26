@@ -7,6 +7,7 @@ open import Data.Fin.Dec using (¬∀⟶∃¬; all?)
 open import Data.List using (List; tabulate; _∷_; map; foldr)
 open import Data.List.All.Properties using (tabulate⁺)
 open import Data.List.Any using (here; there)
+import Data.List.Relation.Pointwise as Pointwise
 import Data.List.Any.Membership as Membership
 open import Data.List.Any.Membership.Properties using (∈-map⁺)
 open import Data.Product using (Σ; ∃; ∃₂; _,_; _×_; proj₁; proj₂)
@@ -32,15 +33,14 @@ open import RoutingLib.Data.Graph.SimplePath2
 open import RoutingLib.Data.Graph.SimplePath2.Properties
   using (ℙₛ; length-cong; length<n)
   renaming (≈-sym to ≈ₚ-sym; ≈-trans to ≈ₚ-trans; ≈-reflexive to ≈ₚ-reflexive)
-open import RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties using (⇿-resp-≈; ∉-resp-≈; _⇿?_; _∉?_)
-open import RoutingLib.Data.Graph.SimplePath2.Enumeration
+open import RoutingLib.Data.SimplePath.NonEmpty.Properties using (⇿-resp-≈; ∉-resp-≈; _⇿?_; _∉?_)
+open import RoutingLib.Data.SimplePath.Enumeration
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
 open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions
 open import RoutingLib.Data.List.Properties using (foldr-×pres)
 open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique; []; _∷_)
 open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (deduplicate!⁺)
-import RoutingLib.Data.List.Relation.Pointwise as PW
 import RoutingLib.Data.List.Membership.DecSetoid as RMembership
 open import RoutingLib.Data.List.Membership.DecSetoid.Properties using (∈-deduplicate⁺; ∈-resp-≈)
 open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
@@ -355,7 +355,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.Prelude
                         toCMatrix σXᶜ ≈ᶜₘ σᶜ (toCMatrix Xᶜ)
   σ-toCMatrix-commute {X} Xᶜ σXᶜ i j =
     foldr-toCRoute-commute (Iᶜ i j) (I≈toCI i j) (σXᶜ i j)
-      (PW.tabulate⁺ {g = λ k → A i k ▷ X k j , ▷-pres-𝑪 i k (Xᶜ k j)} (λ k → ≈-refl))
+      (Pointwise.tabulate⁺ {g = λ k → A i k ▷ X k j , ▷-pres-𝑪 i k (Xᶜ k j)} (λ k → ≈-refl))
     
   ⊕ᶜ-strictlyAbsorbs-▷ᶜ : ∀ (s : CStep) {r : CRoute} → r ≉ᶜ (0# , 0ᶜ) →
                           ((s ▷ᶜ r) ⊕ᶜ r ≈ᶜ r) × (r ≉ᶜ (s ▷ᶜ r))

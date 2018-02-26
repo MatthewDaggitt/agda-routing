@@ -6,9 +6,9 @@ open import Data.Nat
   using (ℕ; _≤_; _<_; z≤n; s≤s; zero; suc; _+_; _∸_; _⊔_) renaming (_≟_ to _≟ℕ_)
 open import Data.Nat.Properties
   using (≤-decTotalOrder; <⇒≢; _<?_; ≤-refl; ≤-antisym; <-transʳ; ≤-trans;
-        n≤1+n; n∸m≤n; <⇒≤; ≮⇒≥; m≤m+n; ⊔-sel; <⇒≱)
+        n≤1+n; n∸m≤n; <⇒≤; ≮⇒≥; m≤m+n; ⊔-sel; <⇒≱; m∸[m∸n]≡n)
 open import Data.List
-  using (List; []; _∷_; length; upTo; applyUpTo)
+  using (List; []; _∷_; length; upTo; applyUpTo; lookup)
 open import Data.List.Any
   using (here; there; index)
 open import Data.List.Any.Membership.Propositional using () renaming (_∈_ to _∈ℕ_)
@@ -22,10 +22,9 @@ open import Function using (_∘_)
 
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
 open import RoutingLib.Data.Nat.Properties
-  using (ℕₛ; n≤0⇒n≡0; m≤n⇒m∸n≡0; m∸[m∸n]≡n; ∸-monoʳ-≤; ∸-cancelʳ-<; n≤m⇒m⊔n≡m; module ≤-Reasoning; ℕᵈˢ)
+  using (ℕₛ; n≤0⇒n≡0; m≤n⇒m∸n≡0; ∸-monoʳ-≤; ∸-cancelʳ-<; n≤m⇒m⊔n≡m; module ≤-Reasoning; ℕᵈˢ)
 open import RoutingLib.Data.Fin.Properties
   using (fromℕ≤-cong; fromℕ≤-mono-≤; fromℕ≤-mono⁻¹-<)
-open import RoutingLib.Data.List using (lookup)
 open import RoutingLib.Data.List.Any.Properties using (lookup-index)
 open import RoutingLib.Data.List.Membership.DecPropositional.Properties using (∈-upTo⁺)
 open import RoutingLib.Data.List.Sorting ≤-decTotalOrder using (Sorted)

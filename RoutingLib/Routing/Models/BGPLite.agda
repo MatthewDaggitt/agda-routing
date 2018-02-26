@@ -28,7 +28,7 @@ module RoutingLib.Routing.Models.BGPLite (n : ℕ) where
   open import RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties
     using (_⇿?_; ⇿-resp-≈; ∉-resp-≈; length-cong; p≉i∷p)
     renaming (_∈?_ to _∈ₚ?_; _∉?_ to _∉ₚ?_; ≈-refl to ≈ₚ-refl; ≈-trans to ≈ₚ-trans; ≈-sym to ≈ₚ-sym; _≟_ to _≟ₚ_)
-  import RoutingLib.Algebra.Selectivity.RightNaturalOrder as RightNaturalOrder
+  import RoutingLib.Relation.Binary.NaturalOrder.Right as RightNaturalOrder
   open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
   open import RoutingLib.Routing.Definitions
   import RoutingLib.Algebra.Selectivity.NaturalChoice as NaturalChoice

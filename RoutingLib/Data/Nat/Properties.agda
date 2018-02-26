@@ -66,27 +66,10 @@ module RoutingLib.Data.Nat.Properties where
   ≥-decTotalOrder = Flip.decTotalOrder ≤-decTotalOrder
   
   abstract
-
-    -- stdlib
-    ≤-stepsˡ = ≤-steps
     
-    -- stdlib
-    ≤-stepsʳ : ∀ {m n} k → m ≤ n → m ≤ n + k
-    ≤-stepsʳ {m} {n} k m≤n = subst (m ≤_) (+-comm k n) (≤-steps k m≤n)
-
-    -- stdlib
-    ≤⇒≯ : _≤_ ⇒ _≯_
-    ≤⇒≯ z≤n       ()
-    ≤⇒≯ (s≤s m≤n) (s≤s n≤m) = ≤⇒≯ m≤n n≤m
-
     >⇒≰ : _>_ ⇒ _≰_
     >⇒≰ = <⇒≱
 
-    -- stdlib
-    ≤-cardinality : ∀ {m n} (≤₁ : m ≤ n) (≤₂ : m ≤ n) → ≤₁ ≡ ≤₂
-    ≤-cardinality z≤n      z≤n      = refl
-    ≤-cardinality (s≤s ≤₁) (s≤s ≤₂) = cong s≤s (≤-cardinality ≤₁ ≤₂)
-    
     ∀x≤m:n≢x⇒m<n : ∀ m n → (∀ {x} → x ≤ m → n ≢ x) → m < n
     ∀x≤m:n≢x⇒m<n _ zero    x≤m⇒n≢x = contradiction refl (x≤m⇒n≢x z≤n)
     ∀x≤m:n≢x⇒m<n zero (suc n) x≤0⇒n≢x = s≤s z≤n
@@ -115,10 +98,6 @@ module RoutingLib.Data.Nat.Properties where
         ; _∎
         )
 
-    -- stdlib
-    n≮n : ∀ n → n ≮ n
-    n≮n n = <-irrefl (refl {x = n})
-
     n<1+n : ∀ n → n < suc n
     n<1+n n = ≤-refl
 
@@ -129,15 +108,6 @@ module RoutingLib.Data.Nat.Properties where
     m<n⇒n≡1+o {_} {zero} ()
     m<n⇒n≡1+o {_} {suc o} m<n = o , refl
 
-
-    -- stdlib
-    +-monoˡ-≤ : ∀ n → (_+ n) Preserves _≤_ ⟶ _≤_
-    +-monoˡ-≤ n m≤o = +-mono-≤ m≤o (≤-refl {n})
-
-    -- stdlib
-    +-monoʳ-≤ : ∀ n → (n +_) Preserves _≤_ ⟶ _≤_
-    +-monoʳ-≤ n m≤o = +-mono-≤ (≤-refl {n}) m≤o
-    
     +-monoʳ-< : ∀ n → (n +_) Preserves _<_ ⟶ _<_
     +-monoʳ-< zero    m≤o = m≤o
     +-monoʳ-< (suc n) m≤o = s≤s (+-monoʳ-< n m≤o)
@@ -180,26 +150,9 @@ module RoutingLib.Data.Nat.Properties where
 
     -- _⊔_ and _≤_
 
-    -- stdlib
-    ⊔-monoʳ-≤ : ∀ n → (n ⊔_) Preserves _≤_ ⟶ _≤_
-    ⊔-monoʳ-≤ n m≤o = ⊔-mono-≤ (≤-refl {n}) m≤o
-
-    -- stdlib
-    ⊔-monoˡ-≤ : ∀ n → (_⊔ n) Preserves _≤_ ⟶ _≤_
-    ⊔-monoˡ-≤ n m≤o = ⊔-mono-≤ m≤o ≤-refl
-
-    
     n≤m⇒m⊔n≡m : ∀ {m n} → n ≤ m → m ⊔ n ≡ m
     n≤m⇒m⊔n≡m z≤n       = ⊔-identityʳ _
     n≤m⇒m⊔n≡m (s≤s n≤m) = cong suc (n≤m⇒m⊔n≡m n≤m)
-
-    -- stdlib
-    m≤n⇒m⊔n≡n : ∀ {m n} → m ≤ n → m ⊔ n ≡ n
-    m≤n⇒m⊔n≡n {m} m≤n = trans (⊔-comm m _) (n≤m⇒m⊔n≡m m≤n)
-
-    -- stdlib
-    m⊔n≡m⇒n≤m : ∀ {m n} → m ⊔ n ≡ m → n ≤ m
-    m⊔n≡m⇒n≤m {m} {n} m⊔n≡m rewrite sym m⊔n≡m = n≤m⊔n m n
 
     n⊔m≡m⇒n≤m : ∀ {m n} → n ⊔ m ≡ m → n ≤ m
     n⊔m≡m⇒n≤m n⊔m≡m = subst (_ ≤_) n⊔m≡m (m≤m⊔n _ _)
@@ -238,19 +191,6 @@ module RoutingLib.Data.Nat.Properties where
     
 
     -- _⊓_ and _≤_
-
-    -- stdlib
-    ⊓-monoʳ-≤ : ∀ n → (n ⊓_) Preserves _≤_ ⟶ _≤_
-    ⊓-monoʳ-≤ n m≤o = ⊓-mono-≤ (≤-refl {n}) m≤o
-
-    -- stdlib
-    ⊓-monoˡ-≤ : ∀ n → (_⊓ n) Preserves _≤_ ⟶ _≤_
-    ⊓-monoˡ-≤ n m≤o = ⊓-mono-≤ m≤o ≤-refl
-
-    -- stdlib
-    m≤n⇒m⊓n≡m : ∀ {m n} → m ≤ n → m ⊓ n ≡ m
-    m≤n⇒m⊓n≡m z≤n       = refl
-    m≤n⇒m⊓n≡m (s≤s m≤n) = cong suc (m≤n⇒m⊓n≡m m≤n)
 
     n≤m⇒m⊓n≡n : ∀ {m n} → n ≤ m → m ⊓ n ≡ n
     n≤m⇒m⊓n≡n {m} n≤m = trans (⊓-comm m _) (m≤n⇒m⊓n≡m n≤m)
@@ -382,16 +322,7 @@ module RoutingLib.Data.Nat.Properties where
     m<n≤o⇒o∸n<o∸m : ∀ {m n o} → m < n → n ≤ o → o ∸ n < o ∸ m
     m<n≤o⇒o∸n<o∸m {zero}  {suc n} (s≤s m<n) (s≤s n≤o) = s≤s (n∸m≤n n _)
     m<n≤o⇒o∸n<o∸m {suc m} {_}     (s≤s m<n) (s≤s n≤o) = m<n≤o⇒o∸n<o∸m m<n n≤o
-
-    -- stdlib
-    m∸[m∸n]≡n : ∀ {m n} → n ≤ m → m ∸ (m ∸ n) ≡ n
-    m∸[m∸n]≡n {m}     {_}     z≤n       = n∸n≡0 m
-    m∸[m∸n]≡n {suc m} {suc n} (s≤s n≤m) = begin
-      suc m ∸ (m ∸ n)   ≡⟨ +-∸-assoc 1 (n∸m≤n n m) ⟩
-      suc (m ∸ (m ∸ n)) ≡⟨ cong suc (m∸[m∸n]≡n n≤m) ⟩
-      suc n             ∎
-      where open ≡-Reasoning
-      
+  
     -- _∸_ distributes over _⊓_ (sort of)
     
     ∸-distribˡ-⊓-⊔ : ∀ x y z → x ∸ (y ⊓ z) ≡ (x ∸ y) ⊔ (x ∸ z)
@@ -430,7 +361,8 @@ module RoutingLib.Data.Nat.Properties where
     ∸-cancelʳ-< {suc m} {zero}  {_}    o∸n<o∸m = s≤s z≤n
     ∸-cancelʳ-< {suc m} {suc n} {zero} ()
     ∸-cancelʳ-< {suc m} {suc n} {suc o} o∸n<o∸m = s≤s (∸-cancelʳ-< o∸n<o∸m)
-    
+
+  {-
     ≤-move-+ʳ : ∀ {m} n {o} → m + n ≤ o → m ≤ o ∸ n
     ≤-move-+ʳ {m} n {o} m+n≤o = begin
         m         ≡⟨ sym (m+n∸n≡m m n) ⟩
@@ -492,7 +424,8 @@ module RoutingLib.Data.Nat.Properties where
   
     ≡-move-+-∸ʳ : ∀ {m n} o {p} → m ∸ n + o ≡ p → n ≤ m → m ≡ p ∸ o + n
     ≡-move-+-∸ʳ o m∸n+o≤p n≤m = ≡-move-∸ʳ (≡-move-+ʳ m∸n+o≤p) n≤m
-
+  
+  
     w∸x≡y∸z⇒v+x≡w∧v+y≡z : ∀ {w x y z} → w ∸ x ≡ y ∸ z → x ≤ w → z ≤ y → ∃ λ v → (v + x ≡ w) × (v + z ≡ y)
     w∸x≡y∸z⇒v+x≡w∧v+y≡z {w} {x} {y} {z} x+o∸x≡y∸z x≤w z≤y with m≤n⇒m+o≡n x≤w
     ... | (o , refl) = o , +-comm o x , ≡-move-∸ˡ (
@@ -503,5 +436,5 @@ module RoutingLib.Data.Nat.Properties where
         y ∸ z
       ∎) z≤y
       where open ≡-Reasoning
-
+  -}
 

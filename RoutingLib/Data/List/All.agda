@@ -6,11 +6,6 @@ open import Relation.Binary using (Rel; REL; _⇒_)
 open import Relation.Unary using (_∩_) renaming (_⊆_ to _⋐_)
 
 module RoutingLib.Data.List.All where
-  
-
-  data All₂ {a b ℓ} {A : Set a} {B : Set b} (_~_ : REL A B ℓ) : REL (List A) (List B) (a ⊔ b ⊔ ℓ) where
-    []  : All₂ _~_ [] []
-    _∷_ : ∀ {x y xs ys} → x ~ y → All₂ _~_ xs ys → All₂ _~_ (x ∷ xs) (y ∷ ys) 
 
   data AllPairs {a ℓ} {A : Set a} (_~_ : Rel A ℓ) : List A → Set (a ⊔ ℓ) where
     []  : AllPairs _~_ []

@@ -49,10 +49,3 @@ module RoutingLib.Algebra.FunctionProperties.Core {a} {A : Set a} where
   forces×⇒forces×ʳ : ∀ {_•_} {p} {P : Pred A p} →
                      _•_ Forces-× P → _•_ Forces-×ʳ P
   forces×⇒forces×ʳ forces a b P = proj₂ (forces a b P)
-{-
-  ⊎Preserves⇨×Preserves : ∀ (_•_ : Op₂ A) {p} (P : Pred A p) → _•_ ⊎-Preserves P → _•_ ×-Preserves P
-  ⊎Preserves⇨×Preserves _ _ ⊎pres pa _ = ⊎pres (inj₁ pa)
-
-  Forces×⇨Forces⊎ : ∀ (_•_ : Op₂ A) {p} (P : A → Set p) → _•_ Forces-× P → _•_ Forces-⊎ P
-  Forces×⇨Forces⊎ _ _ forces× pa•b = inj₁ (proj₁ (forces× pa•b))
--}

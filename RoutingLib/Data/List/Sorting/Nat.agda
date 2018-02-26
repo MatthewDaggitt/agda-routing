@@ -1,5 +1,5 @@
 open import Data.Nat using (ℕ; _<_; z≤n; s≤s)
-open import Data.Nat.Properties using (≤+≢⇒<; <⇒≯; <⇒≤; ≤-decTotalOrder)
+open import Data.Nat.Properties using (≤+≢⇒<; <⇒≯; <⇒≤; ≤-decTotalOrder; n≮n)
 open import Data.Fin using (zero; suc) renaming (_<_ to _<𝔽_)
 open import Data.List
 open import Data.List.All using () renaming (map to mapₐ; lookup to lookupₐ)
@@ -15,7 +15,6 @@ open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique)
 open import RoutingLib.Data.List.All using (AllPairs; []; _∷_) using (allPairs-product; allPairs-map)
 open import RoutingLib.Data.List.All.Properties using (AllPairs-applyUpTo⁺₁; AllPairs-applyBetween⁺₁)
 open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-lookup)
-open import RoutingLib.Data.Nat.Properties
 
 module RoutingLib.Data.List.Sorting.Nat where
 

@@ -14,17 +14,3 @@ module RoutingLib.Relation.Unary {a} {A : Set a} where
 
   _Forces_ : ∀ {a p} {A : Set a} → (A → A) → Pred A p → Set _
   f Forces P = ∀ {a} → P (f a) → P a
-
-
-
-  -----------
-  -- Other --
-  -----------
-
-  infix 4 _⊈_ _⊂_
-  
-  _⊈_ : ∀ {ℓ₁ ℓ₂} → Pred A ℓ₁ → Pred A ℓ₂ → Set _
-  P ⊈ Q = ¬ (P ⊆ Q)
-
-  _⊂_ : ∀ {ℓ₁ ℓ₂} → Pred A ℓ₁ → Pred A ℓ₂ → Set _
-  P ⊂ Q = P ⊆ Q × Q ⊈ P

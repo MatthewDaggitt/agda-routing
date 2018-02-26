@@ -3,7 +3,8 @@ open import Data.List using (List; []; _∷_; _++_; reverse; filter; drop; take;
 open import Data.List.All using (All; []; _∷_) renaming (map to mapₐ)
 open import Data.List.All.Properties
 open import Data.List.Any using (Any; here; there; any)
-open import Data.Maybe using (Maybe; just; nothing; Eq; drop-just)
+open import Data.List.Relation.Pointwise using (Pointwise; []; _∷_)
+open import Data.Maybe using (Maybe; just; nothing; Eq; drop-just; just-injective)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Nat using (ℕ; suc; zero; z≤n; s≤s; _≤_; _<_)
 open import Data.Nat.Properties using (⊔-sel; ≤-trans)
@@ -22,7 +23,6 @@ open import Relation.Unary using () renaming (_⊆_ to _⋐_)
 open import RoutingLib.Data.List
 open import RoutingLib.Data.List.All
 open import RoutingLib.Data.List.Properties
-open import RoutingLib.Data.Maybe.Properties using (just-injective)
 open import RoutingLib.Data.List.Permutation using (_⇿_; _◂_≡_; here; there; []; _∷_)
 
 module RoutingLib.Data.List.All.Properties where
@@ -54,24 +54,6 @@ module RoutingLib.Data.List.All.Properties where
     -- Other --
     -----------
 
-{-
-    reverse⁺ : ∀ {xs} → All P xs → All P (reverse xs)
-    reverse⁺ pxs = foldl-×pres {_•_ = λ rev x → x ∷ rev} {!!} {!!} []
-    -- reverse xs ≡ foldl (λ rev x → x ∷ rev) [] xs
--}
-
-    All-dfilter⁺₁ : ∀ (P? : Decidable P) xs → All P (dfilter P? xs)
-    All-dfilter⁺₁ P? []       = []
-    All-dfilter⁺₁ P? (x ∷ xs) with P? x
-    ... | yes Px = Px ∷ All-dfilter⁺₁ P? xs
-    ... | no  _  = All-dfilter⁺₁ P? xs
-
-    All-dfilter⁺₂ : ∀ {q} {Q : A → Set q} (P? : Decidable P) 
-                   {xs} → All Q xs → All Q (dfilter P? xs)
-    All-dfilter⁺₂ P? {_} [] = []
-    All-dfilter⁺₂ P? {x ∷ xs} (Qx ∷ Qxs) with P? x
-    ... | no  _ = All-dfilter⁺₂ P? Qxs
-    ... | yes _ = Qx ∷ All-dfilter⁺₂ P? Qxs
 
     All-applyBetween⁺₁ : ∀ f s e → (∀ {i} → s ≤ i → i < e → P (f i)) → All P (applyBetween f s e)
     All-applyBetween⁺₁ f zero    e       Pf = applyUpTo⁺₁ f e (Pf z≤n)
@@ -106,7 +88,8 @@ module RoutingLib.Data.List.All.Properties where
   All-gfilter⁺₂ {P = P} f-inj xs = All-gfilter⁺₃ P (All-universal (λ x → inj₂ (λ {y} t → f-inj {x} {y} t)) xs)
 
 
-  All-zipWith⁺ : ∀ {a b c p} {A : Set a} {B : Set b} {C : Set c} (P : C → Set p) (f : A → B → C) {xs ys} → All₂ (λ x y → P (f x y)) xs ys → All P (zipWith f xs ys)
+  All-zipWith⁺ : ∀ {a b c p} {A : Set a} {B : Set b} {C : Set c} (P : C → Set p) (f : A → B → C) {xs ys} →
+                 Pointwise (λ x y → P (f x y)) xs ys → All P (zipWith f xs ys)
   All-zipWith⁺ P f []              = []
   All-zipWith⁺ P f (Pfxy ∷ Pfxsys) = Pfxy ∷ All-zipWith⁺ P f Pfxsys
 
@@ -210,12 +193,12 @@ module RoutingLib.Data.List.All.Properties where
     AllPairs-⇿ sym (x~xs ∷ pxs) (x◂zs≡ys ∷ xs⇿zs) = AllPairs-◂≡ sym (All-⇿ x~xs xs⇿zs ∷ AllPairs-⇿ sym pxs xs⇿zs) x◂zs≡ys
 
 
-    AllPairs-dfilter⁺ : ∀ {p} {P : A → Set p} (P? : Decidable P)
-                     → ∀ {xs} → AllPairs _~_ xs → AllPairs _~_ (dfilter P? xs)
-    AllPairs-dfilter⁺ P? {_}      []           = []
-    AllPairs-dfilter⁺ P? {xs = x ∷ xs} (x∉xs ∷ xs!) with P? x
-    ... | no  _ = AllPairs-dfilter⁺ P? xs!
-    ... | yes _ = All-dfilter⁺₂ P? x∉xs ∷ AllPairs-dfilter⁺ P? xs!
+    AllPairs-filter⁺ : ∀ {p} {P : A → Set p} (P? : Decidable P)
+                     → ∀ {xs} → AllPairs _~_ xs → AllPairs _~_ (filter P? xs)
+    AllPairs-filter⁺ P? {_}      []           = []
+    AllPairs-filter⁺ P? {xs = x ∷ xs} (x∉xs ∷ xs!) with P? x
+    ... | no  _ = AllPairs-filter⁺ P? xs!
+    ... | yes _ = filter⁺₂ P? x∉xs ∷ AllPairs-filter⁺ P? xs!
     
     AllPairs-++⁺ : ∀ {xs ys} → AllPairs _~_ xs → AllPairs _~_ ys 
                  → All (λ x → All (x ~_) ys) xs → AllPairs _~_ (xs ++ ys)
@@ -267,32 +250,6 @@ module RoutingLib.Data.List.All.Properties where
     ... | no  _ = deduplicate⁺ _ px ∷ AllPairs-deduplicate⁺ pxs
 
   open AllPairsDecSetoidProperties public
-  
-
-
-  module _ {a b ℓ} {A : Set a} {B : Set b} {_~_ : REL A B ℓ} where
-
-
-    All₂-tabulate : ∀ {n} {f : Fin n → A} {g : Fin n → B} → (∀ i → f i ~ g i) → All₂ _~_ (tabulate f) (tabulate g)
-    All₂-tabulate {n = zero} f~g = []
-    All₂-tabulate {n = suc n} f~g = f~g fzero ∷ All₂-tabulate (f~g ∘ fsuc)
-
-    All₂-++ : ∀ {ws xs ys zs} → All₂ _~_ ws xs → All₂ _~_ ys zs → All₂ _~_ (ws ++ ys) (xs ++ zs)
-    All₂-++ [] ys~zs = ys~zs
-    All₂-++ (w~x ∷ ws~xs) ys~zs = w~x ∷ All₂-++ ws~xs ys~zs
-  
-    All₂-concat : ∀ {xss yss} → All₂ (All₂ _~_) xss yss → All₂ _~_ (concat xss) (concat yss)
-    All₂-concat [] = []
-    All₂-concat (xs~ys ∷ xss~yss) = All₂-++ xs~ys (All₂-concat xss~yss)
-
-  foldr-All₂ : ∀ {a b ℓ} {A : Set a} {B : Set b} (_~_ : REL A B ℓ)
-             {_⊕ᵃ_ : Op₂ A} {_⊕ᵇ_ : Op₂ B} → 
-             (∀ {w x y z} → w ~ x → y ~ z → (w ⊕ᵃ y) ~ (x ⊕ᵇ z)) →
-             ∀ {xs ys e f} → e ~ f → All₂ _~_ xs ys →
-             foldr _⊕ᵃ_ e xs ~ foldr _⊕ᵇ_ f ys
-  foldr-All₂ _ _    e~f []            = e~f
-  foldr-All₂ _ pres e~f (x~y ∷ xs~ys) = pres x~y (foldr-All₂ _ pres e~f xs~ys)
-
 
 
 

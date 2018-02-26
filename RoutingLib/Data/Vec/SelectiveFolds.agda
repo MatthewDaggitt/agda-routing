@@ -19,7 +19,7 @@ module RoutingLib.Data.Vec.SelectiveFolds
 
   open Setoid S renaming (Carrier to A)
   open import RoutingLib.Algebra.Selectivity.Properties _≈_ _•_ sel using (idem)
-  open import RoutingLib.Algebra.Selectivity.NaturalOrders S _•_ pres using (_≤ᵣ_; _≤ₗ_; ≤ᵣ-resp-≈) renaming (≤ᵣ-antisym to ≤ᵣ-antisym'; ≤ᵣ-absᵣ to ≤ᵣ-absᵣ'; ≤ᵣ-absₗ to ≤ᵣ-absₗ; ≤ᵣ-trans to ≤ᵣ-trans'; ≤ᵣ-isPartialOrder to ≤ᵣ-isPartialOrder'; ≤ᵣ-total to ≤ᵣ-total')
+  open import RoutingLib.Relation.Binary.NaturalOrder.Left S _•_ pres using (_≤ᵣ_; _≤ₗ_; ≤ᵣ-resp-≈) renaming (≤ᵣ-antisym to ≤ᵣ-antisym'; ≤ᵣ-absᵣ to ≤ᵣ-absᵣ'; ≤ᵣ-absₗ to ≤ᵣ-absₗ; ≤ᵣ-trans to ≤ᵣ-trans'; ≤ᵣ-isPartialOrder to ≤ᵣ-isPartialOrder'; ≤ᵣ-total to ≤ᵣ-total')
   open import Relation.Binary.NonStrictToStrict _≈_ _≤ᵣ_ using () renaming (_<_ to _<ᵣ_; trans to ass⇨<ᵣ-trans; irrefl to <ᵣ-irrefl)
 
   ∃-foldr₁ : ∀ {n} → (xs : Vec A (suc n)) → ∃ λ i → foldr₁ _•_ xs ≈ lookup i xs

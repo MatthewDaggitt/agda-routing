@@ -24,7 +24,7 @@ module RoutingLib.Algebra.FunctionProperties.Consequences {a ℓ} (S : Setoid a 
 
 
   idˡ+zeˡ⇒singleton : ∀ {_•_ e} → LeftIdentity e _•_ → LeftZero e _•_ → 
-                      ∀ x y → x ≈ y
+                     ∀ x y → x ≈ y
   idˡ+zeˡ⇒singleton {_•_} {e} id ze x y = begin
     x     ≈⟨ sym (id x) ⟩
     e • x ≈⟨ ze x ⟩

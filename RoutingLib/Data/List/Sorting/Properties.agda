@@ -1,7 +1,7 @@
 open import Data.Nat using (ℕ; z≤n; s≤s; suc; ≤-pred) renaming (_<_ to _<ℕ_; _≤_ to _≤ℕ_)
-open import Data.Nat.Properties using (≤+≢⇒<)
+open import Data.Nat.Properties using (≤+≢⇒<; ≤⇒≯)
 open import Data.Fin using (zero; suc) renaming (_≤_ to _≤𝔽_; _<_ to _<𝔽_)
-open import Data.List using ([]; _∷_; length)
+open import Data.List using ([]; _∷_; length; lookup)
 open import Data.List.All as All using (All; []; _∷_)
 open import Data.List.Any using (here; there; index)
 open import Data.Product using (_,_; proj₁; proj₂; uncurry′)
@@ -10,13 +10,11 @@ open import Relation.Binary.PropositionalEquality using (_≡_; cong) renaming (
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Pred)
 
-open import RoutingLib.Data.List using (lookup)
 open import RoutingLib.Data.List.All using (AllPairs; []; _∷_) using (allPairs-product; allPairs-map)
 open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
 open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (perm!)
 open import RoutingLib.Data.List.Permutation.Properties using (⇿-sym; ⇿-length)
 open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-perm; ∈-lookup)
-open import RoutingLib.Data.Nat.Properties using (≤⇒≯)
 
 module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTotalOrder a ℓ₁ ℓ₂) where
 

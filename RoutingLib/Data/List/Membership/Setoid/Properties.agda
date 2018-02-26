@@ -11,7 +11,7 @@ open import Data.List.Any using (index)
 open import Data.Nat using (_≤_; _<_; zero; suc; s≤s; z≤n)
 open import Data.Nat.Properties using (suc-injective; <⇒≤; ≤-trans; n≤1+n)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
-open import Data.Maybe using (nothing; just; Maybe; Eq; Eq-refl; Eq-sym; Eq-trans; drop-just)
+open import Data.Maybe using (nothing; just; Maybe; Eq; Eq-refl; Eq-sym; Eq-trans; drop-just; just-injective)
 open import Data.Empty using (⊥-elim)
 open import Data.List hiding (any)
 open import Data.List.Any using (here; there; any) renaming (map to mapₐ)
@@ -25,7 +25,6 @@ open import Algebra.FunctionProperties using (Op₂; RightIdentity; Selective)
 
 open import RoutingLib.Data.List
 open import RoutingLib.Data.Maybe using (Eq-reflexive)
-open import RoutingLib.Data.Maybe.Properties using (just-injective)
 import RoutingLib.Data.List.Membership.Setoid as Membership
 open import RoutingLib.Data.List.Any.Properties
 open import RoutingLib.Data.List.Permutation using (_⇿_; _◂_≡_; _∷_; []; here; there)
@@ -124,52 +123,52 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     ∈-applyBetween⁻ f s e v∈ = Any-applyBetween⁻ f s e v∈
     
 
-    -- dfilter
+    -- filter
 
-    ∈-dfilter⁺ : ∀ {p} {P : A → Set p} (P? : Decidable P) → P Respects _≈_ →
-                 ∀ {v} → P v → ∀ {xs} → v ∈ xs → v ∈ dfilter P? xs
-    ∈-dfilter⁺ P? resp Pv {x ∷ _} (here v≈x)   with P? x
+    ∈-filter⁺ : ∀ {p} {P : A → Set p} (P? : Decidable P) → P Respects _≈_ →
+                 ∀ {v} → P v → ∀ {xs} → v ∈ xs → v ∈ filter P? xs
+    ∈-filter⁺ P? resp Pv {x ∷ _} (here v≈x)   with P? x
     ... | yes _   = here v≈x
     ... | no  ¬Px = contradiction (resp v≈x Pv) ¬Px
-    ∈-dfilter⁺ P? resp Pv {x ∷ _} (there v∈xs) with P? x
-    ... | yes _ = there (∈-dfilter⁺ P? resp Pv v∈xs)
-    ... | no  _ = ∈-dfilter⁺ P? resp Pv v∈xs
+    ∈-filter⁺ P? resp Pv {x ∷ _} (there v∈xs) with P? x
+    ... | yes _ = there (∈-filter⁺ P? resp Pv v∈xs)
+    ... | no  _ = ∈-filter⁺ P? resp Pv v∈xs
 
-    ∈-dfilter⁻ : ∀ {p} {P : A → Set p} (P? : Decidable P) → P Respects _≈_ →
-                 ∀ {v xs} → v ∈ dfilter P? xs → v ∈ xs × P v
-    ∈-dfilter⁻ P? resp {v} {[]}     ()
-    ∈-dfilter⁻ P? resp {v} {x ∷ xs} v∈dfilter with P? x | v∈dfilter
-    ... | no  _  | v∈df       = mapₚ there id (∈-dfilter⁻ P? resp v∈df)
+    ∈-filter⁻ : ∀ {p} {P : A → Set p} (P? : Decidable P) → P Respects _≈_ →
+                 ∀ {v xs} → v ∈ filter P? xs → v ∈ xs × P v
+    ∈-filter⁻ P? resp {v} {[]}     ()
+    ∈-filter⁻ P? resp {v} {x ∷ xs} v∈filter with P? x | v∈filter
+    ... | no  _  | v∈df       = mapₚ there id (∈-filter⁻ P? resp v∈df)
     ... | yes Px | here  v≈x  = here v≈x , resp (sym v≈x) Px
-    ... | yes Px | there v∈df = mapₚ there id (∈-dfilter⁻ P? resp v∈df)
+    ... | yes Px | there v∈df = mapₚ there id (∈-filter⁻ P? resp v∈df)
 
-    ∉-dfilter₁ : ∀ {p} {P : A → Set p} (P? : Decidable P) {v} {xs} → v ∉ xs → v ∉ dfilter P? xs
-    ∉-dfilter₁ P? {_} {[]}     _      ()
-    ∉-dfilter₁ P? {v} {x ∷ xs} v∉x∷xs v∈f[x∷xs] with P? x | v∈f[x∷xs]
-    ... | no  _ | v∈f[xs]       = ∉-dfilter₁ P? (v∉x∷xs ∘ there) v∈f[xs]
+    ∉-filter₁ : ∀ {p} {P : A → Set p} (P? : Decidable P) {v} {xs} → v ∉ xs → v ∉ filter P? xs
+    ∉-filter₁ P? {_} {[]}     _      ()
+    ∉-filter₁ P? {v} {x ∷ xs} v∉x∷xs v∈f[x∷xs] with P? x | v∈f[x∷xs]
+    ... | no  _ | v∈f[xs]       = ∉-filter₁ P? (v∉x∷xs ∘ there) v∈f[xs]
     ... | yes _ | here  v≈x     = v∉x∷xs (here v≈x)
-    ... | yes _ | there v∈f[xs] = ∉-dfilter₁ P? (v∉x∷xs ∘ there) v∈f[xs]
+    ... | yes _ | there v∈f[xs] = ∉-filter₁ P? (v∉x∷xs ∘ there) v∈f[xs]
 
-    ∉-dfilter₂ : ∀ {p} {P : A → Set p} (P? : Decidable P) → P Respects _≈_ → ∀ {v} → ¬ P v → ∀ xs → v ∉ dfilter P? xs
-    ∉-dfilter₂ P? resp ¬Pv [] ()
-    ∉-dfilter₂ P? resp ¬Pv (x ∷ xs) v∈f[x∷xs] with P? x | v∈f[x∷xs]
-    ... | no  _  | v∈f[xs]       = ∉-dfilter₂ P? resp ¬Pv xs v∈f[xs]
+    ∉-filter₂ : ∀ {p} {P : A → Set p} (P? : Decidable P) → P Respects _≈_ → ∀ {v} → ¬ P v → ∀ xs → v ∉ filter P? xs
+    ∉-filter₂ P? resp ¬Pv [] ()
+    ∉-filter₂ P? resp ¬Pv (x ∷ xs) v∈f[x∷xs] with P? x | v∈f[x∷xs]
+    ... | no  _  | v∈f[xs]       = ∉-filter₂ P? resp ¬Pv xs v∈f[xs]
     ... | yes Px | here  v≈x     = ¬Pv (resp (sym v≈x) Px)
-    ... | yes _  | there v∈f[xs] = ∉-dfilter₂ P? resp ¬Pv xs v∈f[xs]
+    ... | yes _  | there v∈f[xs] = ∉-filter₂ P? resp ¬Pv xs v∈f[xs]
 
     
-    ⊆-dfilter : ∀ {p} {P : A → Set p} (P? : Decidable P)
+    ⊆-filter : ∀ {p} {P : A → Set p} (P? : Decidable P)
                   {q} {Q : A → Set q} (Q? : Decidable Q) → 
                   P ⋐ Q → 
-                  ∀ xs → dfilter P? xs ⊆ dfilter Q? xs
-    ⊆-dfilter P? Q? P⋐Q [] ()
-    ⊆-dfilter P? Q? P⋐Q (x ∷ xs) v∈f[x∷xs] with P? x | Q? x
-    ... | no  _  | no  _  = ⊆-dfilter P? Q? P⋐Q xs v∈f[x∷xs]
+                  ∀ xs → filter P? xs ⊆ filter Q? xs
+    ⊆-filter P? Q? P⋐Q [] ()
+    ⊆-filter P? Q? P⋐Q (x ∷ xs) v∈f[x∷xs] with P? x | Q? x
+    ... | no  _  | no  _  = ⊆-filter P? Q? P⋐Q xs v∈f[x∷xs]
     ... | yes Px | no ¬Qx = contradiction (P⋐Q Px) ¬Qx
-    ... | no  _  | yes _  = there (⊆-dfilter P? Q? P⋐Q xs v∈f[x∷xs])
+    ... | no  _  | yes _  = there (⊆-filter P? Q? P⋐Q xs v∈f[x∷xs])
     ... | yes _  | yes _  with v∈f[x∷xs]
     ...   | here  v≈x     = here v≈x
-    ...   | there v∈f[xs] = there (⊆-dfilter P? Q? P⋐Q xs v∈f[xs])
+    ...   | there v∈f[xs] = there (⊆-filter P? Q? P⋐Q xs v∈f[xs])
 
     foldr-∈ : ∀ {_•_} → Selective _≈_ _•_ → ∀ e xs → foldr _•_ e xs ≈ e ⊎ foldr _•_ e xs ∈ xs 
     foldr-∈ {_}   •-sel i [] = inj₁ ≈-refl
@@ -220,13 +219,13 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     ∈-map⁻ {xs = x ∷ xs} (there v∈mapfxs) with ∈-map⁻ v∈mapfxs
     ... | a , a∈xs , v≈fa = a , there a∈xs , v≈fa
 
-    ∈-gfilter : ∀ P {v xs a} → v ∈₁ xs → Eq _≈₂_ (P v) (just a) → (∀ {x y} → x ≈₁ y → Eq _≈₂_ (P x) (P y)) → a ∈₂ gfilter P xs
-    ∈-gfilter _ {_} {[]}     ()
-    ∈-gfilter P {v} {x ∷ xs} v∈xs Pᵥ≈justₐ P-resp-≈ with P x | inspect P x | v∈xs
+    ∈-mapMaybe : ∀ P {v xs a} → v ∈₁ xs → Eq _≈₂_ (P v) (just a) → (∀ {x y} → x ≈₁ y → Eq _≈₂_ (P x) (P y)) → a ∈₂ mapMaybe P xs
+    ∈-mapMaybe _ {_} {[]}     ()
+    ∈-mapMaybe P {v} {x ∷ xs} v∈xs Pᵥ≈justₐ P-resp-≈ with P x | inspect P x | v∈xs
     ... | nothing | [ Px≡nothing ] | here v≈x    = contradiction (Eq-trans trans₂ (Eq-trans trans₂ (Eq-reflexive reflexive₂ (≡-sym Px≡nothing)) (P-resp-≈ (sym₁ v≈x))) Pᵥ≈justₐ) λ()
-    ... | nothing | [ _ ]          | there v∈xs₂ = ∈-gfilter P v∈xs₂ Pᵥ≈justₐ P-resp-≈
+    ... | nothing | [ _ ]          | there v∈xs₂ = ∈-mapMaybe P v∈xs₂ Pᵥ≈justₐ P-resp-≈
     ... | just b  | [ Px≡justb ]   | here v≈x    = here (drop-just (Eq-trans trans₂ (Eq-trans trans₂ (Eq-sym sym₂ Pᵥ≈justₐ) (P-resp-≈ v≈x)) (Eq-reflexive reflexive₂ Px≡justb)))
-    ... | just b  | _              | there v∈xs₂ = there (∈-gfilter P v∈xs₂ Pᵥ≈justₐ P-resp-≈)
+    ... | just b  | _              | there v∈xs₂ = there (∈-mapMaybe P v∈xs₂ Pᵥ≈justₐ P-resp-≈)
 
 
 

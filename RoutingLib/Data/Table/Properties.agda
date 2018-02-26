@@ -1,6 +1,6 @@
 open import Algebra.FunctionProperties using (Op₂)
 open import Data.Nat using (ℕ; zero; suc; _<_; _≤_; _⊓_; _⊔_; z≤n)
-open import Data.Nat.Properties using (≤-refl; ≤-trans; ⊔-sel; ⊓-sel; ⊓-mono-<; module ≤-Reasoning; +-mono-≤; +-monoˡ-<; +-monoʳ-<; m≤m⊔n; n≤m⊔n; ⊔-mono-≤)
+open import Data.Nat.Properties using (≤-refl; ≤-trans; ⊔-sel; ⊓-sel; ⊓-mono-<; module ≤-Reasoning; +-mono-≤; +-mono-<-≤; +-mono-≤-<; m≤m⊔n; n≤m⊔n; ⊔-mono-≤)
 open import Data.Fin using (Fin; inject₁; inject≤) renaming (zero to fzero; suc to fsuc)
 open import Data.Product using (_,_; proj₁; proj₂; ∃)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
@@ -184,7 +184,7 @@ module RoutingLib.Data.Table.Properties where
   sum[s]<sum[t] : ∀ {n} {s t : Table ℕ n} → Pointwise _≤_ s t →
                   (∃ λ i → s i < t i) → sum s < sum t
   sum[s]<sum[t] {zero} {s} {t} _ (() , _)
-  sum[s]<sum[t] {suc n} {s} {t} s≤t (fzero , sᵢ<tᵢ)  = +-monoˡ-< sᵢ<tᵢ (sum[s]≤sum[t] {n} (λ i → s≤t (fsuc i))) 
-  sum[s]<sum[t] {suc n} {s} {t} s≤t (fsuc i , sᵢ<tᵢ) = +-monoʳ-< (s≤t fzero)
+  sum[s]<sum[t] {suc n} {s} {t} s≤t (fzero , sᵢ<tᵢ)  = +-mono-<-≤ sᵢ<tᵢ (sum[s]≤sum[t] {n} (λ i → s≤t (fsuc i))) 
+  sum[s]<sum[t] {suc n} {s} {t} s≤t (fsuc i , sᵢ<tᵢ) = +-mono-≤-< (s≤t fzero)
                 (sum[s]<sum[t] (λ j → s≤t (fsuc j)) (i , sᵢ<tᵢ))
 

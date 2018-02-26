@@ -7,27 +7,26 @@ open import Data.List
 open import Data.List.Any as Any using (Any; here; there; index)
 open import Data.List.Any.Properties
 open import Data.List.Any.Membership.Propositional using (_∈_)
-open import Data.Maybe using (Maybe; just; nothing)
+open import Data.Maybe using (Maybe; just; nothing; just-injective)
 open import Function using (id; _∘_)
 open import Relation.Binary using (REL)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong; subst)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Pred)
 
-open import RoutingLib.Data.List using (applyBetween; lookup)
-open import RoutingLib.Data.List.Any
-open import RoutingLib.Data.Maybe.Properties using (just-injective)
+open import RoutingLib.Data.List using (applyBetween)
 open import RoutingLib.Data.List.Permutation using (_⇿_; _◂_≡_; here; there; []; _∷_)
 
 module RoutingLib.Data.List.Any.Properties where
 
-  Any-gfilter : ∀ {a b p} {A : Set a} {B : Set b} {P : B → Set p} (Q : A → Maybe B) → ∀ xs → Any (λ x → ∃ λ y → Q x ≡ just y × P y) xs → Any P (gfilter Q xs)
-  Any-gfilter Q (x ∷ xs) (here (y , Qx≡y , Py)) with Q x
+  Any-mapMaybe : ∀ {a b p} {A : Set a} {B : Set b} {P : B → Set p} (Q : A → Maybe B) →
+                ∀ xs → Any (λ x → ∃ λ y → Q x ≡ just y × P y) xs → Any P (mapMaybe Q xs)
+  Any-mapMaybe Q (x ∷ xs) (here (y , Qx≡y , Py)) with Q x
   ... | nothing = contradiction Qx≡y λ()
   ... | just z  = here (subst _ (just-injective (sym Qx≡y)) Py)
-  Any-gfilter Q (x ∷ xs) (there Pxs) with Q x
-  ... | nothing = Any-gfilter Q xs Pxs
-  ... | just z  = there (Any-gfilter Q xs Pxs)
+  Any-mapMaybe Q (x ∷ xs) (there Pxs) with Q x
+  ... | nothing = Any-mapMaybe Q xs Pxs
+  ... | just z  = there (Any-mapMaybe Q xs Pxs)
 
 
 

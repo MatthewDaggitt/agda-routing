@@ -12,10 +12,10 @@ open import Relation.Binary using (Setoid; Decidable; _Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality using (_≡_; subst; cong; module ≡-Reasoning) renaming (refl to ≡-refl; sym to ≡-sym; trans to ≡-trans; setoid to ≡-setoid)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
+open import Relation.Unary using () renaming (_⊈_ to _⊈ᵤ_)
 open import Function using (_∘_)
 
 open import RoutingLib.Asynchronous
-open import RoutingLib.Relation.Unary using () renaming (_⊈_ to _⊈ᵤ_)
 open import RoutingLib.Data.Nat.Properties using (n≤0⇒n≡0; ℕₛ)
 open import RoutingLib.Data.Fin.Properties using (≤fromℕ; ≤+≢⇒<; <⇒≤pred)
 open import RoutingLib.Data.List.All using (AllPairs)

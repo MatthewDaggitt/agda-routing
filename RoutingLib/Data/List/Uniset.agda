@@ -3,14 +3,13 @@ open import Relation.Binary using (DecSetoid; Rel; Decidable)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Unary using () renaming (Decidable to Decidableᵤ)
 open import Data.Product using (Σ; ∃; _,_; _×_; proj₁)
-open import Data.List using (List; []; _∷_; length)
+open import Data.List using (List; []; _∷_; length; filter)
 open import Data.Nat using (ℕ)
 open import Algebra.FunctionProperties using (Op₂)
 open import Data.List.All using ([]; _∷_)
 open import Data.List.All.Properties using (¬Any⇒All¬)
 open import Function using (_∘_)
 
-open import RoutingLib.Data.List using (dfilter)
 open import RoutingLib.Data.List.All using ([]; _∷_)
 open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
 
@@ -19,7 +18,7 @@ module RoutingLib.Data.List.Uniset {c ℓ} (DS : DecSetoid c ℓ) where
   open DecSetoid DS renaming (Carrier to A; setoid to S)
   open import Data.List.Any.Membership S using () renaming (_∈_ to _∈ₗ_)
   open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-dec)
-  open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (dfilter!⁺)
+  open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (filter!⁺)
 
   private
 
@@ -71,12 +70,13 @@ module RoutingLib.Data.List.Uniset {c ℓ} (DS : DecSetoid c ℓ) where
   _⊄_ : Rel Uniset _
   X ⊄ Y = ¬ (X ⊂ Y)
 
-
+{-
   -- Mutable operations
 
   filter : ∀ {p} {P : A → Set p} → Decidableᵤ P → Uniset → Uniset
-  filter P? (xs , xs!) = dfilter P? xs , dfilter!⁺ S P? xs! 
-  
+  filter P? (xs , xs!) = filter P? xs , dfilter!⁺ S P? xs! 
+
+
   add : A → Uniset → Uniset
   add x (xs , xs!) with x ∈ₗ? xs
   ... | yes _    = xs , xs!
@@ -109,3 +109,4 @@ module RoutingLib.Data.List.Uniset {c ℓ} (DS : DecSetoid c ℓ) where
     field
       X : Uniset
       isEnumeration : IsEnumeration X
+-}

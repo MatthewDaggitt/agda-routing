@@ -7,7 +7,7 @@ open import Algebra.Structures
 
 open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_; Respects₂⇨RespectedBy)
 
-module RoutingLib.Algebra.Selectivity.LeftNaturalOrder
+module RoutingLib.Relation.Binary.NaturalOrder.Left
   {a ℓ} (S : Setoid a ℓ) (_•_ : Op₂ (Setoid.Carrier S))
   where
 

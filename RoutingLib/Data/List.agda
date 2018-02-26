@@ -11,15 +11,6 @@ open import Relation.Nullary using (yes; no)
 
 module RoutingLib.Data.List where
 
-
-  -- stdlib
-  dfilter : ∀ {a p} {A : Set a} {P : A → Set p} → Decidable P → List A → List A
-  dfilter dec [] = []
-  dfilter dec (x ∷ xs) with dec x
-  ... | no  _ = dfilter dec xs
-  ... | yes _ = x ∷ dfilter dec xs
-
-
   -----------
   -- Other --
   -----------
@@ -51,8 +42,3 @@ module RoutingLib.Data.List where
 
   allFinPairs : ∀ n → List (Fin n × Fin n)
   allFinPairs n = combine _,_ (allFin n) (allFin n)
-
-  lookup : ∀ {a} {A : Set a} (xs : List A) (i : Fin (length xs)) → A
-  lookup []       ()
-  lookup (x ∷ xs) fzero    = x
-  lookup (x ∷ xs) (fsuc i) = lookup xs i

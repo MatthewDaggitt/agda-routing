@@ -13,7 +13,6 @@ open import Relation.Binary using (Decidable)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym)
 
 open import RoutingLib.Data.Vec
-open import RoutingLib.Data.List.SucMap using (0∉mapₛ; ∈-mapₛ; mapₛ-∈)
 open import RoutingLib.Algebra.FunctionProperties using (_×-Preserves_)
 
 module RoutingLib.Data.Vec.Properties where
@@ -103,47 +102,6 @@ module RoutingLib.Data.Vec.Properties where
   ∉-tabulate {n = zero}  _ _   ()
   ∉-tabulate {n = suc n} _ v∉f here           = v∉f fzero refl
   ∉-tabulate {n = suc n} f v∉f (there v∈tabᶠ) = ∉-tabulate (f ∘ fsuc) (v∉f ∘ fsuc) v∈tabᶠ
-
-
-  --- RoutingLib operation properties
-
-  deleteAt-∈ₗ : ∀ {a n i j} {A : Set a} (xs : Vec A (suc n)) → inject₁ j  < i → lookup j (deleteAt i xs) ≡ lookup (inject₁ j) xs
-  deleteAt-∈ₗ {i = fzero}               _            ()
-  deleteAt-∈ₗ {i = fsuc i} {j = fzero}  (x ∷ y ∷ xs) _         = refl
-  deleteAt-∈ₗ {i = fsuc i} {j = fsuc j} (x ∷ y ∷ xs) (s≤s j<i) = deleteAt-∈ₗ (y ∷ xs) j<i
-
-  deleteAt-∈ᵣ : ∀ {a n} {i : Fin (suc n)} {j : Fin n} {A : Set a} (xs : Vec A (suc n)) → i ≤ inject₁ j → lookup j (deleteAt i xs) ≡ lookup (fsuc j) xs
-  deleteAt-∈ᵣ {i = fsuc i} {j = fzero}  (x ∷ y ∷ xs) ()
-  deleteAt-∈ᵣ {i = fzero}               (x ∷ xs)      _        = refl
-  deleteAt-∈ᵣ {i = fsuc i} {j = fsuc j} (x ∷ y ∷ xs) (s≤s i≤j) = deleteAt-∈ᵣ (y ∷ xs) i≤j
-
-{-
-  findAll-hit : ∀ {a n} {A : Set a} {_≟_ : Decidable _≡_} {xs : Vec A n} {v} i → i ∈ₗ findAll _≟_ v xs → lookup i xs ≡ v
-  findAll-hit {_≟_ = _≟_} {xs = x ∷ xs} {v = v} fzero i∈find with v ≟ x
-  ... | yes v≡x = sym v≡x
-  ... | no  v≢x = contradiction i∈find 0∉mapₛ
-  findAll-hit {_≟_ = _≟_} {xs = x ∷ xs} {v = v} (fsuc i) i∈find with v ≟ x
-  ... | no  v≢x = findAll-hit i (∈-mapₛ i∈find)
-  ... | yes v≡x with i∈find
-  ...   | here ()
-  ...   | there i∈findAll = findAll-hit i (∈-mapₛ i∈findAll)
-
-  findAll-hit₂ : ∀ {a n} {A : Set a} (_≟_ : Decidable _≡_) (xs : Vec A n) v i → lookup i xs ≡ v → i ∈ₗ findAll _≟_ v xs
-  findAll-hit₂ _≟_ (x ∷ xs) v fzero v≡xs₀ with v ≟ x
-  ... | yes v≡x = here refl
-  ... | no  v≢x = contradiction (sym (v≡xs₀)) v≢x
-  findAll-hit₂ _≟_ (x ∷ xs) v (fsuc i) v≡xsᵢ with v ≟ x
-  ... | yes v≡x = there (mapₛ-∈ (findAll-hit₂ _≟_ xs v i v≡xsᵢ))
-  ... | no  v≢x = mapₛ-∈ (findAll-hit₂ _≟_ xs v i v≡xsᵢ)
-
-  findAll-miss : ∀ {a n} {A : Set a} (_≟_ : Decidable _≡_) (xs : Vec A n) v i → i ∉ₗ findAll _≟_ v xs → lookup i xs ≢ v
-  findAll-miss _≟_ (x ∷ xs) v fzero i∉find with v ≟ x
-  ... | no  v≢x = λ x≡v → v≢x (sym x≡v)
-  ... | yes v≡x = λ _ → i∉find (here refl)
-  findAll-miss _≟_ (x ∷ xs) v (fsuc i) i∉find with v ≟ x
-  ... | no  v≢x = findAll-miss _≟_ xs v i (λ i∈f → i∉find (mapₛ-∈ i∈f))
-  ... | yes v≡x = findAll-miss _≟_ xs v i (λ i∈f → i∉find (there (mapₛ-∈ i∈f)))
--}
 
   allPairs-∃-∈ : ∀ {a} {A : Set a} {m n : ℕ} {xs : Vec A m} {ys : Vec A n} {v} → v ∈ allPairs xs ys → ∃₂ λ x y → v ≡ (x , y)
   allPairs-∃-∈ {v = (x , y)} xy∈allPairs = x , y , refl

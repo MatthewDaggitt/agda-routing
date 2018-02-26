@@ -8,7 +8,7 @@ import Relation.Binary.EqReasoning as EqReasoning
 
 open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_; Respects₂⇨RespectedBy)
 
-module RoutingLib.Algebra.Selectivity.RightNaturalOrder
+module RoutingLib.Relation.Binary.NaturalOrder.Right
   {a ℓ} {A : Set a} (_≈_ : Rel A ℓ) (_∙_ : Op₂ A) where
 
   --open Setoid S renaming (Carrier to A)

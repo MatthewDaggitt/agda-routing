@@ -16,8 +16,6 @@ open import RoutingLib.Routing.Definitions
 open import RoutingLib.Data.List.Properties using (foldr≤ₗe; foldr≤ᵣxs)
 open import RoutingLib.Data.List.Membership.Setoid.Properties
   using (foldr-∈; ∈-tabulate⁻; ∈-tabulate⁺)
-open import RoutingLib.Data.List.All.Properties
-  using (foldr-All₂; All₂-tabulate)
 import RoutingLib.Routing.BellmanFord as BellmanFord
 
 module RoutingLib.Routing.BellmanFord.Properties

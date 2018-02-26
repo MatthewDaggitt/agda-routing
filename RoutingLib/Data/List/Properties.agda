@@ -1,15 +1,17 @@
 open import Data.Nat using (zero; suc; z≤n; s≤s; _≤_; _<_; _⊔_; _+_)
 open import Data.Nat.Properties using (≤-step; ≤-antisym; ⊓-sel; ⊔-sel; m≤m⊔n; ⊔-mono-≤; +-suc; ⊔-identityʳ; n≤m⊔n; ⊓-mono-≤; ≤-refl; ≤-trans; <-transʳ; <-transˡ; m⊓n≤n; <⇒≢; ≤+≢⇒<; suc-injective)
 open import Data.List
+open import Data.List.Properties using (length-filter)
 open import Data.List.All using (All; []; _∷_)
 open import Data.List.Any using (Any; here; there)
 open import Data.List.Any.Membership.Propositional using (_∈_; lose)
+open import Data.List.Relation.Pointwise using (Pointwise; []; _∷_)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
-open import Data.Maybe using (Maybe; just; nothing)
+open import Data.Maybe using (Maybe; just; nothing; just-injective)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_,_)
 open import Relation.Binary using (Rel; Setoid)
-open import Relation.Unary using (Decidable; Pred; ∁)
+open import Relation.Unary using (Decidable; Pred; ∁; ∁?)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; cong; cong₂; trans)
@@ -19,10 +21,8 @@ open import Function using (id; _∘_)
 open import Algebra.FunctionProperties using (Op₂; Idempotent; Associative; Commutative; Congruent₂)
 
 open import RoutingLib.Data.List
-open import RoutingLib.Data.List.All using (All₂; []; _∷_)
+open import RoutingLib.Data.List.All using ([]; _∷_)
 open import RoutingLib.Data.Nat.Properties
-open import RoutingLib.Data.Maybe.Properties using (just-injective)
-open import RoutingLib.Relation.Unary.Consequences using (P?⇒¬P?)
 open import RoutingLib.Algebra.FunctionProperties
 
 module RoutingLib.Data.List.Properties where
@@ -31,69 +31,46 @@ module RoutingLib.Data.List.Properties where
 
   module _ {a p} {A : Set a} {P : A → Set p} (P? : Decidable P) where
 
-    -- stdlib
-    dfilter[xs]≡xs : ∀ {xs} → All P xs → dfilter P? xs ≡ xs
-    dfilter[xs]≡xs {[]}     [] = refl
-    dfilter[xs]≡xs {x ∷ xs} (px ∷ pxs) with P? x
-    ... | no  ¬px = contradiction px ¬px
-    ... | yes _   = cong (x ∷_) (dfilter[xs]≡xs pxs)
-
-
-    -- stdlib
-    dfilter[xs]≡[] : ∀ {xs} → All (∁ P) xs → dfilter P? xs ≡ []
-    dfilter[xs]≡[] {[]} [] = refl
-    dfilter[xs]≡[] {x ∷ xs} (¬px ∷ ¬pxs) with P? x
-    ... | no  _  = dfilter[xs]≡[] ¬pxs
+    |filter[xs]|<|xs| : ∀ xs → Any (λ x → ¬ (P x)) xs → length (filter P? xs) < length xs
+    |filter[xs]|<|xs| [] ()
+    |filter[xs]|<|xs| (x ∷ xs) (here ¬px) with P? x
+    ... | no  _  = s≤s (length-filter P? xs) --(|filter[xs]|≤|xs| xs)
     ... | yes px = contradiction px ¬px
+    |filter[xs]|<|xs| (x ∷ xs) (there any) with P? x
+    ... | no  _ = ≤-step (|filter[xs]|<|xs| xs any)
+    ... | yes _ = s≤s (|filter[xs]|<|xs| xs any)
 
-    -- stdlib
-    |dfilter[xs]|≤|xs| : ∀ xs → length (dfilter P? xs) ≤ length xs
-    |dfilter[xs]|≤|xs| [] = z≤n
-    |dfilter[xs]|≤|xs| (x ∷ xs) with P? x
-    ... | no  _ = ≤-step (|dfilter[xs]|≤|xs| xs)
-    ... | yes _ = s≤s (|dfilter[xs]|≤|xs| xs)
+    |filter[xs]|≡|xs|⇒filter[xs]≡xs : ∀ {xs} → length (filter P? xs) ≡ length xs →
+                                          filter P? xs ≡ xs
+    |filter[xs]|≡|xs|⇒filter[xs]≡xs {[]} length≡ = refl
+    |filter[xs]|≡|xs|⇒filter[xs]≡xs {x ∷ xs} length≡ with P? x
+    ... | no ¬px = contradiction length≡ (<⇒≢ (s≤s (length-filter P? xs)))
+    ... | yes px = cong (x ∷_) (|filter[xs]|≡|xs|⇒filter[xs]≡xs {xs} (suc-injective length≡))
 
-    |dfilter[xs]|<|xs| : ∀ xs → Any (λ x → ¬ (P x)) xs → length (dfilter P? xs) < length xs
-    |dfilter[xs]|<|xs| [] ()
-    |dfilter[xs]|<|xs| (x ∷ xs) (here ¬px) with P? x
-    ... | no  _  = s≤s (|dfilter[xs]|≤|xs| xs)
-    ... | yes px = contradiction px ¬px
-    |dfilter[xs]|<|xs| (x ∷ xs) (there any) with P? x
-    ... | no  _ = ≤-step (|dfilter[xs]|<|xs| xs any)
-    ... | yes _ = s≤s (|dfilter[xs]|<|xs| xs any)
-
-    |dfilter[xs]|≡|xs|⇒dfilter[xs]≡xs : ∀ {xs} → length (dfilter P? xs) ≡ length xs →
-                                          dfilter P? xs ≡ xs
-    |dfilter[xs]|≡|xs|⇒dfilter[xs]≡xs {[]} length≡ = refl
-    |dfilter[xs]|≡|xs|⇒dfilter[xs]≡xs {x ∷ xs} length≡ with P? x
-    ... | no ¬px = contradiction length≡ (<⇒≢ (s≤s (|dfilter[xs]|≤|xs| xs)))
-    ... | yes px = cong (x ∷_) (|dfilter[xs]|≡|xs|⇒dfilter[xs]≡xs {xs} (suc-injective length≡))
-
-
-    dfilter-length₂ : ∀ xs → length (dfilter (P?⇒¬P? P?) xs) + length (dfilter P? xs) ≡ length xs
-    dfilter-length₂ [] = refl
-    dfilter-length₂ (x ∷ xs) with P? x
-    ... | no  _ = cong suc (dfilter-length₂ xs)
-    ... | yes _ = trans (+-suc (length (dfilter (P?⇒¬P? P?) xs)) (length (dfilter P? xs))) (cong suc (dfilter-length₂ xs))
-
+    filter-length₂ : ∀ xs → length (filter (∁? P?) xs) + length (filter P? xs) ≡ length xs
+    filter-length₂ [] = refl
+    filter-length₂ (x ∷ xs) with P? x
+    ... | no  _ = cong suc (filter-length₂ xs)
+    ... | yes _ = trans (+-suc (length (filter (∁? P?) xs)) (length (filter P? xs))) (cong suc (filter-length₂ xs))
 
   -- Properties of gfilter
 
   module _ {a b} {A : Set a} {B : Set b} (P : A → Maybe B) where
   
-    gfilter≡[] : ∀ {xs} → All (λ x → P x ≡ nothing) xs → gfilter P xs ≡ []
-    gfilter≡[] {_}     [] = refl
-    gfilter≡[] {x ∷ _} (Px≡nothing ∷ Pxs) with P x
-    ... | nothing = gfilter≡[] Pxs
+    mapMaybe≡[] : ∀ {xs} → All (λ x → P x ≡ nothing) xs → mapMaybe P xs ≡ []
+    mapMaybe≡[] {_}     [] = refl
+    mapMaybe≡[] {x ∷ _} (Px≡nothing ∷ Pxs) with P x
+    ... | nothing = mapMaybe≡[] Pxs
     ... | just _  = contradiction Px≡nothing λ()
 
-    gfilter-cong : ∀ {xs ys} → All₂ (λ x y → P x ≡ P y) xs ys → gfilter P xs ≡ gfilter P ys
-    gfilter-cong [] = refl
-    gfilter-cong {x ∷ _} {y ∷ _} (Px≡Py ∷ Pxsys) with P x | P y
-    ... | nothing | nothing = gfilter-cong Pxsys
+    mapMaybe-cong : ∀ {xs ys} → Pointwise (λ x y → P x ≡ P y) xs ys →
+                    mapMaybe P xs ≡ mapMaybe P ys
+    mapMaybe-cong [] = refl
+    mapMaybe-cong {x ∷ _} {y ∷ _} (Px≡Py ∷ Pxsys) with P x | P y
+    ... | nothing | nothing = mapMaybe-cong Pxsys
     ... | nothing | just _  = contradiction Px≡Py λ()
     ... | just _  | nothing = contradiction Px≡Py λ()
-    ... | just _  | just _  = cong₂ _∷_ (just-injective Px≡Py) (gfilter-cong Pxsys)
+    ... | just _  | just _  = cong₂ _∷_ (just-injective Px≡Py) (mapMaybe-cong Pxsys)
 
 
   -- Properties of tabulate
@@ -125,6 +102,7 @@ module RoutingLib.Data.List.Properties where
     foldr-⊎pres : _•_ ⊎-Preserves P → ∀ {xs} e → Any P xs → P (foldr _•_ e xs)
     foldr-⊎pres pres e (here px)   = pres _ _ (inj₁ px)
     foldr-⊎pres pres e (there pxs) = pres _ _ (inj₂ (foldr-⊎pres pres e pxs))
+
 
   -- Properties of foldl
 
@@ -237,43 +215,47 @@ module RoutingLib.Data.List.Properties where
     open Setoid S renaming (Carrier to A; refl to ≈-refl; sym to ≈-sym; trans to ≈-trans)
     open import Data.List.Any.Membership S using () renaming (_∈_ to _∈ₛ_)
     open import Relation.Binary.EqReasoning S
-    
-    foldr≤ᵣe : ∀ {_•_ : Op₂ A} → Congruent₂ _≈_ _•_ → Idempotent _≈_ _•_ → Associative _≈_ _•_ → Commutative _≈_ _•_ → ∀ e xs → e • foldr _•_ e xs ≈ foldr _•_ e xs
-    foldr≤ᵣe {_}   •-cong •-idem •-assoc •-comm e [] = •-idem e
-    foldr≤ᵣe {_•_} •-cong •-idem •-assoc •-comm e (x ∷ xs) = 
-      begin
-        e • (x • foldr _•_ e xs) ≈⟨ ≈-sym (•-assoc e x _) ⟩
-        (e • x) • foldr _•_ e xs ≈⟨ •-cong (•-comm e x) ≈-refl ⟩
-        (x • e) • foldr _•_ e xs ≈⟨ •-assoc x e _ ⟩
-        x • (e • foldr _•_ e xs) ≈⟨ •-cong ≈-refl (foldr≤ᵣe •-cong •-idem •-assoc •-comm e xs) ⟩
-        x • foldr _•_ e xs
-      ∎
 
-    foldr≤ₗe : ∀ {_•_ : Op₂ A} → Congruent₂ _≈_ _•_ → Idempotent _≈_ _•_ → Associative _≈_ _•_ → Commutative _≈_ _•_ → ∀ e xs → foldr _•_ e xs • e ≈ foldr _•_ e xs
-    foldr≤ₗe •-cong •-idem •-assoc •-comm e xs = ≈-trans (•-comm _ e) (foldr≤ᵣe •-cong •-idem •-assoc •-comm e xs)
+    module _ {_•_ : Op₂ A}
+             (•-cong : Congruent₂ _≈_ _•_) (•-idem : Idempotent _≈_ _•_)
+             (•-assoc : Associative _≈_ _•_) (•-comm : Commutative _≈_ _•_)
+             where
+             
+      foldr≤ᵣe : ∀ e xs → e • foldr _•_ e xs ≈ foldr _•_ e xs
+      foldr≤ᵣe e [] = •-idem e
+      foldr≤ᵣe e (x ∷ xs) = 
+        begin
+          e • (x • foldr _•_ e xs) ≈⟨ ≈-sym (•-assoc e x _) ⟩
+          (e • x) • foldr _•_ e xs ≈⟨ •-cong (•-comm e x) ≈-refl ⟩
+          (x • e) • foldr _•_ e xs ≈⟨ •-assoc x e _ ⟩
+          x • (e • foldr _•_ e xs) ≈⟨ •-cong ≈-refl (foldr≤ᵣe e xs) ⟩
+          x • foldr _•_ e xs
+        ∎
+
+      foldr≤ₗe : ∀ e xs → foldr _•_ e xs • e ≈ foldr _•_ e xs
+      foldr≤ₗe e xs = ≈-trans (•-comm _ e) (foldr≤ᵣe e xs)
       
 
-    foldr≤ᵣxs : ∀ {_•_ : Op₂ A} → Congruent₂ _≈_ _•_ → Idempotent _≈_ _•_ → Associative _≈_ _•_ → Commutative _≈_ _•_ → ∀ e {x xs} → x ∈ₛ xs → x • foldr _•_ e xs ≈ foldr _•_ e xs
-    foldr≤ᵣxs {_•_} •-cong •-idem •-assoc •-comm e {x} {y ∷ xs} (here x≈y) =
-      begin
-        x • (y • foldr _•_ e xs) ≈⟨ ≈-sym (•-assoc x y _) ⟩
-        (x • y) • foldr _•_ e xs ≈⟨ •-cong (•-cong x≈y ≈-refl) ≈-refl ⟩
-        (y • y) • foldr _•_ e xs ≈⟨ •-cong (•-idem y) ≈-refl ⟩
-        y • foldr _•_ e xs
-      ∎
-    foldr≤ᵣxs {_•_} •-cong •-idem •-assoc •-comm e {x} {y ∷ xs} (there x∈xs) =
-      begin
-        x • (y • foldr _•_ e xs) ≈⟨ ≈-sym (•-assoc x y _) ⟩
-        (x • y) • foldr _•_ e xs ≈⟨ •-cong (•-comm x y) ≈-refl ⟩
-        (y • x) • foldr _•_ e xs ≈⟨ •-assoc y x _ ⟩
-        y • (x • foldr _•_ e xs) ≈⟨ •-cong ≈-refl (foldr≤ᵣxs •-cong •-idem •-assoc •-comm e x∈xs) ⟩
-        y • foldr _•_ e xs
-      ∎
+      foldr≤ᵣxs : ∀ e {x xs} → x ∈ₛ xs → x • foldr _•_ e xs ≈ foldr _•_ e xs
+      foldr≤ᵣxs e {x} {y ∷ xs} (here x≈y) =
+        begin
+          x • (y • foldr _•_ e xs) ≈⟨ ≈-sym (•-assoc x y _) ⟩
+          (x • y) • foldr _•_ e xs ≈⟨ •-cong (•-cong x≈y ≈-refl) ≈-refl ⟩
+          (y • y) • foldr _•_ e xs ≈⟨ •-cong (•-idem y) ≈-refl ⟩
+          y • foldr _•_ e xs
+        ∎
+      foldr≤ᵣxs e {x} {y ∷ xs} (there x∈xs) =
+        begin
+          x • (y • foldr _•_ e xs) ≈⟨ ≈-sym (•-assoc x y _) ⟩
+          (x • y) • foldr _•_ e xs ≈⟨ •-cong (•-comm x y) ≈-refl ⟩
+          (y • x) • foldr _•_ e xs ≈⟨ •-assoc y x _ ⟩
+          y • (x • foldr _•_ e xs) ≈⟨ •-cong ≈-refl (foldr≤ᵣxs e x∈xs) ⟩
+          y • foldr _•_ e xs
+        ∎
 
-    foldr≤ₗxs : ∀ {_•_ : Op₂ A} → Congruent₂ _≈_ _•_ → Idempotent _≈_ _•_ → Associative _≈_ _•_ → Commutative _≈_ _•_ → ∀ e {x xs} → x ∈ₛ xs → foldr _•_ e xs • x ≈ foldr _•_ e xs
-    foldr≤ₗxs •-cong •-idem •-assoc •-comm e x∈xs = ≈-trans (•-comm _ _) (foldr≤ᵣxs •-cong •-idem •-assoc •-comm e x∈xs)
+      foldr≤ₗxs : ∀ e {x xs} → x ∈ₛ xs → foldr _•_ e xs • x ≈ foldr _•_ e xs
+      foldr≤ₗxs e x∈xs = ≈-trans (•-comm _ _) (foldr≤ᵣxs e x∈xs)
 
     foldr-map-commute : ∀ {b} {B : Set b} {_•ᵃ_ _•ᵇ_} {f : B → A} → Congruent₂ _≈_ _•ᵃ_ → (∀ x y → f x •ᵃ f y ≈ f (x •ᵇ y)) → ∀ {e d} → e ≈ f d → ∀ xs → foldr _•ᵃ_ e (map f xs) ≈  f (foldr _•ᵇ_ d xs)
     foldr-map-commute _       _      e≈fd []       = e≈fd
     foldr-map-commute •ᵃ-cong f-cong e≈fd (x ∷ xs) = ≈-trans (•ᵃ-cong ≈-refl (foldr-map-commute •ᵃ-cong f-cong e≈fd xs)) (f-cong x _)
-

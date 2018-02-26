@@ -12,10 +12,8 @@ import Relation.Binary.NonStrictToStrict as NonStrictToStrict
 import Relation.Binary.Flip as Flip
 open import Function using (_∘_)
 
-import RoutingLib.Algebra.Selectivity.RightNaturalOrder as RightNaturalOrder
+import RoutingLib.Relation.Binary.NaturalOrder.Right as RightNaturalOrder
 open import RoutingLib.Routing.Definitions
-open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_)
-open import RoutingLib.Data.List.Uniset using (Enumeration)
 open import RoutingLib.Algebra.Selectivity.Properties using (idem)
 
 module RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions  where

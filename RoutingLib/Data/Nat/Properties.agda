@@ -141,7 +141,6 @@ module RoutingLib.Data.Nat.Properties where
     +-monoʳ-< : ∀ n → (n +_) Preserves _<_ ⟶ _<_
     +-monoʳ-< zero    m≤o = m≤o
     +-monoʳ-< (suc n) m≤o = s≤s (+-monoʳ-< n m≤o)
-    --+-incrˡ :
     
     ---------------------------------
     -- Addition and multiplication --

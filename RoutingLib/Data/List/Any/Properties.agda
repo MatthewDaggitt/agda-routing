@@ -15,13 +15,14 @@ open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Pred)
 
 open import RoutingLib.Data.List using (applyBetween; lookup)
-open import RoutingLib.Data.List.Any
 open import RoutingLib.Data.Maybe.Properties using (just-injective)
 open import RoutingLib.Data.List.Permutation using (_⇿_; _◂_≡_; here; there; []; _∷_)
 
 module RoutingLib.Data.List.Any.Properties where
 
-  Any-gfilter : ∀ {a b p} {A : Set a} {B : Set b} {P : B → Set p} (Q : A → Maybe B) → ∀ xs → Any (λ x → ∃ λ y → Q x ≡ just y × P y) xs → Any P (gfilter Q xs)
+  Any-gfilter : ∀ {a b p} {A : Set a} {B : Set b} {P : B → Set p}
+                (Q : A → Maybe B) → ∀ xs →
+                Any (λ x → ∃ λ y → Q x ≡ just y × P y) xs → Any P (gfilter Q xs)
   Any-gfilter Q (x ∷ xs) (here (y , Qx≡y , Py)) with Q x
   ... | nothing = contradiction Qx≡y λ()
   ... | just z  = here (subst _ (just-injective (sym Qx≡y)) Py)
@@ -46,11 +47,13 @@ module RoutingLib.Data.List.Any.Properties where
     Any-⇿ (there pxs) (x◂zs≡ys ∷ xs⇿zs) = Any-◂≡ (there (Any-⇿ pxs xs⇿zs)) x◂zs≡ys
 
 
-    Any-applyBetween⁺ : ∀ f {s e i} → s ≤ i → i < e → P (f i) → Any P (applyBetween f s e)
+    Any-applyBetween⁺ : ∀ f {s e i} → s ≤ i → i < e → P (f i) →
+                        Any P (applyBetween f s e)
     Any-applyBetween⁺ f z≤n       (s≤s i<e) Pf₀ = applyUpTo⁺ f Pf₀ (s≤s i<e)
     Any-applyBetween⁺ f (s≤s s≤i) (s≤s i<e) Pfᵢ = Any-applyBetween⁺ (f ∘ suc) s≤i i<e Pfᵢ
 
-    Any-applyBetween⁻ : ∀ f s e → Any P (applyBetween f s e) → ∃ λ i → s ≤ i × i < e × P (f i)
+    Any-applyBetween⁻ : ∀ f s e → Any P (applyBetween f s e) →
+                        ∃ λ i → s ≤ i × i < e × P (f i)
     Any-applyBetween⁻ f zero    _       pxs = mapₚ id (z≤n ,_) (applyUpTo⁻ f pxs)
     Any-applyBetween⁻ f (suc s) zero    ()
     Any-applyBetween⁻ f (suc s) (suc e) pxs with Any-applyBetween⁻ (f ∘ suc) s e pxs

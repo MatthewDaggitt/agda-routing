@@ -272,15 +272,17 @@ module RoutingLib.Data.List.All.Properties where
 
   module _ {a b ℓ} {A : Set a} {B : Set b} {_~_ : REL A B ℓ} where
 
-
+    -- stdlib
     All₂-tabulate : ∀ {n} {f : Fin n → A} {g : Fin n → B} → (∀ i → f i ~ g i) → All₂ _~_ (tabulate f) (tabulate g)
     All₂-tabulate {n = zero} f~g = []
     All₂-tabulate {n = suc n} f~g = f~g fzero ∷ All₂-tabulate (f~g ∘ fsuc)
 
+    -- stdlib
     All₂-++ : ∀ {ws xs ys zs} → All₂ _~_ ws xs → All₂ _~_ ys zs → All₂ _~_ (ws ++ ys) (xs ++ zs)
     All₂-++ [] ys~zs = ys~zs
     All₂-++ (w~x ∷ ws~xs) ys~zs = w~x ∷ All₂-++ ws~xs ys~zs
-  
+
+    -- stdlib
     All₂-concat : ∀ {xss yss} → All₂ (All₂ _~_) xss yss → All₂ _~_ (concat xss) (concat yss)
     All₂-concat [] = []
     All₂-concat (xs~ys ∷ xss~yss) = All₂-++ xs~ys (All₂-concat xss~yss)

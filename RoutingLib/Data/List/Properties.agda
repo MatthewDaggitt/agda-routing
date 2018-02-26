@@ -53,7 +53,8 @@ module RoutingLib.Data.List.Properties where
     ... | no  _ = ≤-step (|dfilter[xs]|≤|xs| xs)
     ... | yes _ = s≤s (|dfilter[xs]|≤|xs| xs)
 
-    |dfilter[xs]|<|xs| : ∀ xs → Any (λ x → ¬ (P x)) xs → length (dfilter P? xs) < length xs
+    |dfilter[xs]|<|xs| : ∀ xs → Any (λ x → ¬ (P x)) xs →
+                         length (dfilter P? xs) < length xs
     |dfilter[xs]|<|xs| [] ()
     |dfilter[xs]|<|xs| (x ∷ xs) (here ¬px) with P? x
     ... | no  _  = s≤s (|dfilter[xs]|≤|xs| xs)
@@ -100,7 +101,8 @@ module RoutingLib.Data.List.Properties where
 
   module _ {a} {A : Set a} where
   
-    tabulate-cong : ∀ {n ℓ} {_≈_ : Rel A ℓ} (f g : Fin n → A) → (∀ i → f i ≈ g i) → ListRel _≈_ (tabulate f) (tabulate g)
+    tabulate-cong : ∀ {n ℓ} {_≈_ : Rel A ℓ} (f g : Fin n → A) →
+                    (∀ i → f i ≈ g i) → ListRel _≈_ (tabulate f) (tabulate g)
     tabulate-cong {zero}  f g f≈g = []
     tabulate-cong {suc n} f g f≈g = f≈g fzero ∷ tabulate-cong (f ∘ fsuc) (g ∘ fsuc) (f≈g ∘ fsuc)
 
@@ -232,48 +234,67 @@ module RoutingLib.Data.List.Properties where
 
 
 
-  module _ {a ℓ} (S : Setoid a ℓ) where
+  module _ {a ℓ} (S : Setoid a ℓ)  where
 
     open Setoid S renaming (Carrier to A; refl to ≈-refl; sym to ≈-sym; trans to ≈-trans)
     open import Data.List.Any.Membership S using () renaming (_∈_ to _∈ₛ_)
     open import Relation.Binary.EqReasoning S
-    
-    foldr≤ᵣe : ∀ {_•_ : Op₂ A} → Congruent₂ _≈_ _•_ → Idempotent _≈_ _•_ → Associative _≈_ _•_ → Commutative _≈_ _•_ → ∀ e xs → e • foldr _•_ e xs ≈ foldr _•_ e xs
-    foldr≤ᵣe {_}   •-cong •-idem •-assoc •-comm e [] = •-idem e
-    foldr≤ᵣe {_•_} •-cong •-idem •-assoc •-comm e (x ∷ xs) = 
-      begin
+
+    module _ {_•_ : Op₂ A}
+             (•-cong : Congruent₂ _≈_ _•_)
+             (•-idem : Idempotent _≈_ _•_)
+             (•-assoc : Associative _≈_ _•_)
+             (•-comm : Commutative _≈_ _•_)
+             where
+           
+      open import RoutingLib.Algebra.Selectivity.RightNaturalOrder _≈_ _•_
+        using (≤-isTotalOrder) renaming (_≤_ to _≤ᵣ_)
+      --open IsTotalOrder ? ?
+
+
+      foldr≤ᵣe : ∀ e xs → e • foldr _•_ e xs ≈ foldr _•_ e xs
+      foldr≤ᵣe e [] = •-idem e
+      foldr≤ᵣe e (x ∷ xs) = begin
         e • (x • foldr _•_ e xs) ≈⟨ ≈-sym (•-assoc e x _) ⟩
         (e • x) • foldr _•_ e xs ≈⟨ •-cong (•-comm e x) ≈-refl ⟩
         (x • e) • foldr _•_ e xs ≈⟨ •-assoc x e _ ⟩
-        x • (e • foldr _•_ e xs) ≈⟨ •-cong ≈-refl (foldr≤ᵣe •-cong •-idem •-assoc •-comm e xs) ⟩
-        x • foldr _•_ e xs
-      ∎
+        x • (e • foldr _•_ e xs) ≈⟨ •-cong ≈-refl (foldr≤ᵣe e xs) ⟩
+        x • foldr _•_ e xs ∎
 
-    foldr≤ₗe : ∀ {_•_ : Op₂ A} → Congruent₂ _≈_ _•_ → Idempotent _≈_ _•_ → Associative _≈_ _•_ → Commutative _≈_ _•_ → ∀ e xs → foldr _•_ e xs • e ≈ foldr _•_ e xs
-    foldr≤ₗe •-cong •-idem •-assoc •-comm e xs = ≈-trans (•-comm _ e) (foldr≤ᵣe •-cong •-idem •-assoc •-comm e xs)
+      foldr≤ₗe : ∀ e xs → foldr _•_ e xs • e ≈ foldr _•_ e xs
+      foldr≤ₗe e xs = ≈-trans (•-comm _ e) (foldr≤ᵣe e xs)
       
-
-    foldr≤ᵣxs : ∀ {_•_ : Op₂ A} → Congruent₂ _≈_ _•_ → Idempotent _≈_ _•_ → Associative _≈_ _•_ → Commutative _≈_ _•_ → ∀ e {x xs} → x ∈ₛ xs → x • foldr _•_ e xs ≈ foldr _•_ e xs
-    foldr≤ᵣxs {_•_} •-cong •-idem •-assoc •-comm e {x} {y ∷ xs} (here x≈y) =
-      begin
+      foldr≤ᵣxs : ∀ e {x xs} → x ∈ₛ xs → foldr _•_ e xs ≤ᵣ x
+      foldr≤ᵣxs e {x} {y ∷ xs} (here x≈y) = begin
         x • (y • foldr _•_ e xs) ≈⟨ ≈-sym (•-assoc x y _) ⟩
         (x • y) • foldr _•_ e xs ≈⟨ •-cong (•-cong x≈y ≈-refl) ≈-refl ⟩
         (y • y) • foldr _•_ e xs ≈⟨ •-cong (•-idem y) ≈-refl ⟩
-        y • foldr _•_ e xs
-      ∎
-    foldr≤ᵣxs {_•_} •-cong •-idem •-assoc •-comm e {x} {y ∷ xs} (there x∈xs) =
-      begin
+        y • foldr _•_ e xs       ∎
+      foldr≤ᵣxs e {x} {y ∷ xs} (there x∈xs) = begin
         x • (y • foldr _•_ e xs) ≈⟨ ≈-sym (•-assoc x y _) ⟩
         (x • y) • foldr _•_ e xs ≈⟨ •-cong (•-comm x y) ≈-refl ⟩
         (y • x) • foldr _•_ e xs ≈⟨ •-assoc y x _ ⟩
-        y • (x • foldr _•_ e xs) ≈⟨ •-cong ≈-refl (foldr≤ᵣxs •-cong •-idem •-assoc •-comm e x∈xs) ⟩
-        y • foldr _•_ e xs
-      ∎
+        y • (x • foldr _•_ e xs) ≈⟨ •-cong ≈-refl (foldr≤ᵣxs e x∈xs) ⟩
+        y • foldr _•_ e xs       ∎
 
-    foldr≤ₗxs : ∀ {_•_ : Op₂ A} → Congruent₂ _≈_ _•_ → Idempotent _≈_ _•_ → Associative _≈_ _•_ → Commutative _≈_ _•_ → ∀ e {x xs} → x ∈ₛ xs → foldr _•_ e xs • x ≈ foldr _•_ e xs
-    foldr≤ₗxs •-cong •-idem •-assoc •-comm e x∈xs = ≈-trans (•-comm _ _) (foldr≤ᵣxs •-cong •-idem •-assoc •-comm e x∈xs)
+      foldr≤ₗxs : ∀ e {x xs} → x ∈ₛ xs → foldr _•_ e xs • x ≈ foldr _•_ e xs
+      foldr≤ₗxs e x∈xs = ≈-trans (•-comm _ _) (foldr≤ᵣxs e x∈xs)
 
-    foldr-map-commute : ∀ {b} {B : Set b} {_•ᵃ_ _•ᵇ_} {f : B → A} → Congruent₂ _≈_ _•ᵃ_ → (∀ x y → f x •ᵃ f y ≈ f (x •ᵇ y)) → ∀ {e d} → e ≈ f d → ∀ xs → foldr _•ᵃ_ e (map f xs) ≈  f (foldr _•ᵇ_ d xs)
+{-
+      foldr[xs]≈foldr[ys] : ∀ {e f xs ys} → e ≈ f →
+                            (foldr _•_ e xs ≈ f) ⊎ (foldr _•_ e xs ∈ ys) →
+                            All (foldr _•_ e xs ≤ᵣ_) ys →
+                            foldr _•_ e xs ≈ foldr _•_ f ys
+      foldr[xs]≈foldr[ys] {e} {f} {xs} {[]}     e≈f (inj₁ fold≈f)  fold≤ys = fold≈f
+      foldr[xs]≈foldr[ys] {e} {f} {xs} {[]}     e≈f (inj₂ fold∈ys) fold≤ys = {!!}
+      foldr[xs]≈foldr[ys] {e} {f} {xs} {y ∷ ys} e≈f (inj₁ fold≈f)  fold≤ys = {!!}
+      foldr[xs]≈foldr[ys] {e} {f} {xs} {y ∷ ys} e≈f (inj₂ fold∈ys) fold≤ys = {!!}
+-}
+
+    foldr-map-commute : ∀ {b} {B : Set b} {_•ᵃ_ _•ᵇ_} {f : B → A} →
+                        Congruent₂ _≈_ _•ᵃ_ →
+                        (∀ x y → f x •ᵃ f y ≈ f (x •ᵇ y)) →
+                        ∀ {e d} → e ≈ f d → ∀ xs → foldr _•ᵃ_ e (map f xs) ≈  f (foldr _•ᵇ_ d xs)
     foldr-map-commute _       _      e≈fd []       = e≈fd
     foldr-map-commute •ᵃ-cong f-cong e≈fd (x ∷ xs) = ≈-trans (•ᵃ-cong ≈-refl (foldr-map-commute •ᵃ-cong f-cong e≈fd xs)) (f-cong x _)
 

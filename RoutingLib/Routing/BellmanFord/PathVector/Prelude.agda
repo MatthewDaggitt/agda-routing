@@ -26,14 +26,14 @@ import Relation.Binary.EqReasoning as EqReasoning
 open import Induction.WellFounded using (Acc; acc)
 open import Induction.Nat using () renaming (<-well-founded to <-wellFounded)
 
-open import RoutingLib.Data.Graph.SimplePath2
-  using (SimplePath; valid; invalid; []; _∷_∣_∣_; length; _⇿_; _∈_)
-  renaming (_≈_ to _≈ₚ_)
-open import RoutingLib.Data.Graph.SimplePath2.Properties
-  using (ℙₛ; length-cong; length<n)
-  renaming (≈-sym to ≈ₚ-sym; ≈-trans to ≈ₚ-trans; ≈-reflexive to ≈ₚ-reflexive)
-open import RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties using (⇿-resp-≈; ∉-resp-≈; _⇿?_; _∉?_)
-open import RoutingLib.Data.Graph.SimplePath2.Enumeration
+open import RoutingLib.Data.SimplePath
+  using (SimplePath; valid; invalid; []; _∷_∣_∣_; length; _⇿_; _∈_; _∉_; notThere)
+open import RoutingLib.Data.SimplePath.Relation.Equality
+open import RoutingLib.Data.SimplePath.Properties
+  using (length-cong; length<n; ∉-resp-≈ₚ)
+open import RoutingLib.Data.SimplePath.NonEmpty.Properties
+  using (_⇿?_; _∉?_)
+open import RoutingLib.Data.SimplePath.Enumeration
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
 open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions
@@ -61,15 +61,22 @@ module RoutingLib.Routing.BellmanFord.PathVector.Prelude
   n = suc n-1
 
   abstract
-  
+
+    σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ : ∀ X i j → (∃ λ k → σ X i j ≈ A i k ▷ X k j) ⊎ (σ X i j ≈ I i j)
+    σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ = P.σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ ⊕-sel
+
+    σXᵢᵢ≈Iᵢᵢ : ∀ X i → σ X i i ≈ I i i
+    σXᵢᵢ≈Iᵢᵢ = P.σXᵢᵢ≈Iᵢᵢ ⊕-sel ⊕-assoc ⊕-comm ⊕-zeroʳ
+    
+    σXᵢᵢ≈σYᵢᵢ : ∀ X Y i → σ X i i ≈ σ Y i i
+    σXᵢᵢ≈σYᵢᵢ = P.σXᵢᵢ≈σYᵢᵢ ⊕-sel ⊕-assoc ⊕-comm ⊕-zeroʳ
+
     r≈0⇒e▷r≈0 : ∀ {e r} → r ≈ 0# → e ▷ r ≈ 0#
     r≈0⇒e▷r≈0 {e} {r} r≈0 = ≈-trans (▷-cong _ r≈0) (▷-zero e)
 
     e▷r≉0⇒r≉0 : ∀ {e r} → e ▷ r ≉ 0# → r ≉ 0#
     e▷r≉0⇒r≉0 e▷r≉0 r≈0 = e▷r≉0 (r≈0⇒e▷r≈0 r≈0)
 
-    σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ : ∀ X i j → (∃ λ k → σ X i j ≈ A i k ▷ X k j) ⊎ (σ X i j ≈ I i j)
-    σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ = P.σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ ⊕-sel
 
     p₀≈∅ : path 0# ≈ₚ invalid
     p₀≈∅ = r≈0⇒path[r]≈∅ ≈-refl
@@ -79,7 +86,55 @@ module RoutingLib.Routing.BellmanFord.PathVector.Prelude
 
     pᵣ≡∅⇒Aᵢⱼr≈0 : ∀ {i j r} → path r ≡ invalid → A i j ▷ r ≈ 0#
     pᵣ≡∅⇒Aᵢⱼr≈0 {i} {j} {r} pᵣ≡∅ = r≈0⇒e▷r≈0 (path[r]≈∅⇒r≈0 (≈ₚ-reflexive pᵣ≡∅))
+
+    p[Iᵢᵢ]≈[] : ∀ i → path (I i i) ≈ₚ valid []
+    p[Iᵢᵢ]≈[] i = r≈1⇒path[r]≈[] (≈-reflexive (P.Iᵢᵢ≡1# i))
     
+    p[Iᵢⱼ]≈invalid : ∀ {i j} → j ≢ i → path (I i j) ≈ₚ invalid
+    p[Iᵢⱼ]≈invalid j≢i = r≈0⇒path[r]≈∅ (≈-reflexive (P.Iᵢⱼ≡0# j≢i))
+    
+    p[σXᵢᵢ]≈[] : ∀ X i → path (σ X i i) ≈ₚ valid []
+    p[σXᵢᵢ]≈[] X i = ≈ₚ-trans (path-cong (σXᵢᵢ≈Iᵢᵢ X i)) (p[Iᵢᵢ]≈[] i)
+
+    alignPathExtension : ∀ (X : RMatrix) i j k {u v p e⇿p i∉p} →
+              path (A i k ▷ X k j) ≈ₚ valid ((u , v) ∷ p ∣ e⇿p ∣ i∉p) →
+              i ≡ u × v ≡ k × path (X k j) ≈ₚ valid p
+    alignPathExtension X i j k p[AᵢₖXₖⱼ]≈uv∷p with A i k ▷ X k j ≟ 0#
+    ...     | yes AᵢₖXₖⱼ≈0# = contradiction (
+      ≈ₚ-trans (≈ₚ-sym p[AᵢₖXₖⱼ]≈uv∷p) (
+        ≈ₚ-trans (path-cong AᵢₖXₖⱼ≈0#) p₀≈∅)) λ()
+    ...     | no  AᵢₖXₖⱼ≉0# with path (X k j) | inspect path (X k j)
+    ...       | invalid | [ p[Xₖⱼ]≡∅ ] = contradiction (pᵣ≡∅⇒Aᵢⱼr≈0 p[Xₖⱼ]≡∅) AᵢₖXₖⱼ≉0#
+    ...       | valid q | [ p[Xₖⱼ]≡q ] with ≈ₚ-reflexive p[Xₖⱼ]≡q | (i , k) ⇿? q | i ∉? q
+    ...         | pᵣ≈q | no ¬ik⇿q | _       = contradiction (
+      ≈ₚ-trans (≈ₚ-sym p[AᵢₖXₖⱼ]≈uv∷p)
+        (≈ₚ-trans (path-cong (path-reject pᵣ≈q (inj₁ ¬ik⇿q))) p₀≈∅)) λ()
+    ...         | pᵣ≈q | _        | no  i∈q = contradiction (
+      ≈ₚ-trans (≈ₚ-sym p[AᵢₖXₖⱼ]≈uv∷p)
+        (≈ₚ-trans (path-cong (path-reject pᵣ≈q (inj₂ i∈q))) p₀≈∅)) λ()
+    ...         | pᵣ≈q | yes ik⇿q | yes i∉q with
+      ≈ₚ-trans (≈ₚ-sym p[AᵢₖXₖⱼ]≈uv∷p)
+        (path-accept pᵣ≈q AᵢₖXₖⱼ≉0# ik⇿q i∉q)
+    ...           | valid (refl ∷ p≈q) = refl , refl , ≈ₚ-sym (valid p≈q)
+    
+    p[σXᵢⱼ]⇒σXᵢⱼ≈AᵢₖXₖⱼ : ∀ X i j {k l p e⇿p i∉p} →
+                path (σ X i j) ≈ₚ valid ((l , k) ∷ p ∣ e⇿p ∣ i∉p) →
+                i ≡ l × σ X i j ≈ A i k ▷ X k j × path (X k j) ≈ₚ valid p
+    p[σXᵢⱼ]⇒σXᵢⱼ≈AᵢₖXₖⱼ X i j p[σXᵢⱼ]≈uv∷p with i ≟𝔽 j
+    ... | yes refl = contradiction (≈ₚ-trans (≈ₚ-sym p[σXᵢⱼ]≈uv∷p) (p[σXᵢᵢ]≈[] X j)) λ{(valid ())}
+    ... | no  i≢j with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
+    ...   | inj₂ σXᵢⱼ≈Iᵢⱼ           = contradiction (
+      ≈ₚ-trans (≈ₚ-sym p[σXᵢⱼ]≈uv∷p) (
+        ≈ₚ-trans (path-cong σXᵢⱼ≈Iᵢⱼ) (p[Iᵢⱼ]≈invalid (i≢j ∘ sym)))) λ()
+    ...   | inj₁ (m , σXᵢⱼ≈AᵢₘXₘⱼ) with alignPathExtension X i j m
+      (≈ₚ-trans (≈ₚ-sym (path-cong σXᵢⱼ≈AᵢₘXₘⱼ)) p[σXᵢⱼ]≈uv∷p)
+    ...     | refl , refl , p[Xₖⱼ]≈p = refl , σXᵢⱼ≈AᵢₘXₘⱼ , p[Xₖⱼ]≈p
+    
+    k∉p[Iᵢⱼ] : ∀ i j k → k ∉ path (I i j)
+    k∉p[Iᵢⱼ] i j k with j ≟𝔽 i
+    ... | yes refl = ∉-resp-≈ₚ (≈ₚ-sym p₁≈[]) (valid notThere)
+    ... | no  j≢i  = ∉-resp-≈ₚ (≈ₚ-sym p₀≈∅) invalid
+
   -----------------
   -- Consistency --
   -----------------
@@ -378,7 +433,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.Prelude
  
     ∈-allCRoutes : ∀ r → r ∈ₗ allCRoutes
     ∈-allCRoutes (r , rᶜ) = ∈-resp-≈ Sᶜ {v = pathToCRoute (path r)} {w = r , rᶜ}
-      (∈-map⁺ ℙₛ Sᶜ weight-cong (∈-allPaths (path r))) rᶜ
+      (∈-map⁺ (ℙₛ n) Sᶜ weight-cong (∈-allPaths (path r))) rᶜ
 
   𝓢𝓒 : SufficientConditions 𝓡𝓐ᶜ
   𝓢𝓒 = record

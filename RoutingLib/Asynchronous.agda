@@ -11,7 +11,7 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Pred) renaming (_∈_ to _∈ᵤ_)
 open import Induction.WellFounded using (Acc; acc)
-open import Induction.Nat using (<-well-founded)
+open import Induction.Nat using (<-wellFounded)
 
 open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 open import RoutingLib.Data.Fin.Properties using ()
@@ -44,7 +44,7 @@ module RoutingLib.Asynchronous where
       ... | no  _ = async-iter' (rs t ≤-refl) i
 
       async-iter : 𝕋 → M
-      async-iter t = async-iter' (<-well-founded t)
+      async-iter t = async-iter' (<-wellFounded t)
 
 
 

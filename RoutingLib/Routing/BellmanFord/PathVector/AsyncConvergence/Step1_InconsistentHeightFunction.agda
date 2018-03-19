@@ -9,10 +9,10 @@ open import RoutingLib.Data.Nat.Properties using (∸-monoʳ-<; ∸-monoʳ-≤; 
 
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
-import RoutingLib.Routing.BellmanFord.PathVector.Prelude as Prelude
+import RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Prelude as Prelude
 import RoutingLib.Routing.BellmanFord.DistanceVector.Step1_HeightFunction as Step1ᶜ
 
-module RoutingLib.Routing.BellmanFord.PathVector.Step1_InconsistentHeightFunction
+module RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Step1_InconsistentHeightFunction
   {a b ℓ} {𝓡𝓐 : RoutingAlgebra a b ℓ}
   {n-1} {𝓡𝓟 : RoutingProblem 𝓡𝓐 (suc n-1)}
   (𝓟𝓢𝓒 : PathSufficientConditions 𝓡𝓟)
@@ -75,5 +75,3 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step1_InconsistentHeightFunctio
     hⁱ≤Hⁱ r with 𝑪? r
     ... | yes _ = s≤s z≤n
     ... | no  _ = n∸m≤n (size r) Hⁱ
-
-

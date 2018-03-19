@@ -26,32 +26,32 @@ module RoutingLib.Data.Table.Properties where
 
   module _ {a p} {A : Set a} (P : Pred A p) {_•_ : Op₂ A} where
 
-    foldr-forces×ʳ : _•_ Forces-×ʳ P → ∀ e {n} (t : Table A n) →
+    foldr-forces×ʳ : _•_ Forcesʳ P → ∀ e {n} (t : Table A n) →
                     P (foldr _•_ e t) → P e
     foldr-forces×ʳ forces _ {zero}  t Pe = Pe
     foldr-forces×ʳ forces e {suc n} t Pf =
       foldr-forces×ʳ forces e (t ∘ fsuc) (forces _ _ Pf)
       
-    foldr-forces× : _•_ Forces-× P → ∀ e {n} (t : Table A n) →
+    foldr-forces× : _•_ Forcesᵇ P → ∀ e {n} (t : Table A n) →
                     P (foldr _•_ e t) → All P t
     foldr-forces× forces _ _ Pfold fzero    = proj₁ (forces _ _ Pfold)
     foldr-forces× forces _ _ Pfold (fsuc i) =
       foldr-forces× forces _ _ (proj₂ (forces _ _ Pfold)) i
     
-    foldr-×pres : _•_ ×-Preserves P → ∀ {e} → P e →
+    foldr-×pres : _•_ Preservesᵇ P → ∀ {e} → P e →
                   ∀ {n} {t : Table A n} → All P t →
                   P (foldr _•_ e t)
     foldr-×pres pres Pe {zero}  PM = Pe
     foldr-×pres pres Pe {suc n} PM =
       pres (PM fzero) (foldr-×pres pres Pe (PM ∘ fsuc))
 
-    foldr-⊎presʳ : _•_ ⊎-Preservesʳ P → ∀ {e} → P e →
+    foldr-⊎presʳ : _•_ Preservesʳ P → ∀ {e} → P e →
                         ∀ {n} (t : Table A n) → P (foldr _•_ e t)
     foldr-⊎presʳ pres Pe {zero}  t = Pe
     foldr-⊎presʳ pres Pe {suc n} t =
       pres _ (foldr-⊎presʳ pres Pe (t ∘ fsuc))
 
-    foldr-⊎pres : _•_ ⊎-Preserves P → ∀ e {n} {t : Table A n} →
+    foldr-⊎pres : _•_ Preservesᵒ P → ∀ e {n} {t : Table A n} →
                        Any P t → P (foldr _•_ e t)
     foldr-⊎pres pres e (fzero  , Pt₀) = pres _ _ (inj₁ Pt₀)
     foldr-⊎pres pres e (fsuc i , Ptᵢ) =
@@ -62,19 +62,19 @@ module RoutingLib.Data.Table.Properties where
   
   module _ {a p} {A : Set a} (P : Pred A p) {_•_ : Op₂ A} where
 
-    foldr⁺-forces× : _•_ Forces-× P → ∀ {n} (t : Table A (suc n)) →
+    foldr⁺-forces× : _•_ Forcesᵇ P → ∀ {n} (t : Table A (suc n)) →
                     P (foldr⁺ _•_ t) → All P t
     foldr⁺-forces× forces {zero}  t Pt₀ fzero     = Pt₀
     foldr⁺-forces× forces {zero}  t Pft (fsuc ()) 
     foldr⁺-forces× forces {suc n} t Pft (fzero)   = proj₁ (forces (t fzero) _ Pft)
     foldr⁺-forces× forces {suc n} t Pft (fsuc i)  = foldr⁺-forces× forces (t ∘ fsuc) (proj₂ (forces _ _ Pft)) i
     
-    foldr⁺-×pres : _•_ ×-Preserves P → ∀ {n} {t : Table A (suc n)} →
+    foldr⁺-×pres : _•_ Preservesᵇ P → ∀ {n} {t : Table A (suc n)} →
                    All P t → P (foldr⁺ _•_ t)
     foldr⁺-×pres pres {zero}  Pt = Pt fzero
     foldr⁺-×pres pres {suc n} Pt = pres (Pt _) (foldr⁺-×pres pres (Pt ∘ fsuc))
     
-    foldr⁺-⊎pres : _•_ ⊎-Preserves P → ∀ {n} {t : Table A (suc n)} →
+    foldr⁺-⊎pres : _•_ Preservesᵒ P → ∀ {n} {t : Table A (suc n)} →
                        Any P t → P (foldr⁺ _•_ t)
     foldr⁺-⊎pres pres {zero}  (fzero , Pt₀) = Pt₀
     foldr⁺-⊎pres pres {suc n} (fzero , Pt₀) = pres _ _ (inj₁ Pt₀)

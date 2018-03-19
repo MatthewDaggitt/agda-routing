@@ -17,6 +17,7 @@ open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; cong; cong₂; trans)
 open import Relation.Binary.List.Pointwise using ([]; _∷_) renaming (Rel to ListRel)
 open import Relation.Nullary using (¬_)
+open import Relation.Unary using (∁)
 open import Function using (id; _∘_)
 open import Algebra.FunctionProperties using (Op₂; Idempotent; Associative; Commutative; Congruent₂)
 
@@ -27,50 +28,34 @@ open import RoutingLib.Algebra.FunctionProperties
 
 module RoutingLib.Data.List.Properties where
 
-  -- Properties of dfilter
+  -- Properties of filter
 
   module _ {a p} {A : Set a} {P : A → Set p} (P? : Decidable P) where
-
-    |filter[xs]|<|xs| : ∀ xs → Any (λ x → ¬ (P x)) xs → length (filter P? xs) < length xs
-    |filter[xs]|<|xs| [] ()
-    |filter[xs]|<|xs| (x ∷ xs) (here ¬px) with P? x
-    ... | no  _  = s≤s (length-filter P? xs) --(|filter[xs]|≤|xs| xs)
-    ... | yes px = contradiction px ¬px
-    |filter[xs]|<|xs| (x ∷ xs) (there any) with P? x
-    ... | no  _ = ≤-step (|filter[xs]|<|xs| xs any)
-    ... | yes _ = s≤s (|filter[xs]|<|xs| xs any)
-
-    |filter[xs]|≡|xs|⇒filter[xs]≡xs : ∀ {xs} → length (filter P? xs) ≡ length xs →
-                                          filter P? xs ≡ xs
-    |filter[xs]|≡|xs|⇒filter[xs]≡xs {[]} length≡ = refl
-    |filter[xs]|≡|xs|⇒filter[xs]≡xs {x ∷ xs} length≡ with P? x
-    ... | no ¬px = contradiction length≡ (<⇒≢ (s≤s (length-filter P? xs)))
-    ... | yes px = cong (x ∷_) (|filter[xs]|≡|xs|⇒filter[xs]≡xs {xs} (suc-injective length≡))
-
+ 
     filter-length₂ : ∀ xs → length (filter (∁? P?) xs) + length (filter P? xs) ≡ length xs
     filter-length₂ [] = refl
     filter-length₂ (x ∷ xs) with P? x
     ... | no  _ = cong suc (filter-length₂ xs)
     ... | yes _ = trans (+-suc (length (filter (∁? P?) xs)) (length (filter P? xs))) (cong suc (filter-length₂ xs))
 
-  -- Properties of gfilter
+  -- Properties of mapMaybe
 
-  module _ {a b} {A : Set a} {B : Set b} (P : A → Maybe B) where
+  module _ {a b} {A : Set a} {B : Set b} (f : A → Maybe B) where
   
-    mapMaybe≡[] : ∀ {xs} → All (λ x → P x ≡ nothing) xs → mapMaybe P xs ≡ []
+    mapMaybe≡[] : ∀ {xs} → All (λ x → f x ≡ nothing) xs → mapMaybe f xs ≡ []
     mapMaybe≡[] {_}     [] = refl
-    mapMaybe≡[] {x ∷ _} (Px≡nothing ∷ Pxs) with P x
-    ... | nothing = mapMaybe≡[] Pxs
-    ... | just _  = contradiction Px≡nothing λ()
+    mapMaybe≡[] {x ∷ _} (fx≡nothing ∷ fxs) with f x
+    ... | nothing = mapMaybe≡[] fxs
+    ... | just _  = contradiction fx≡nothing λ()
 
-    mapMaybe-cong : ∀ {xs ys} → Pointwise (λ x y → P x ≡ P y) xs ys →
-                    mapMaybe P xs ≡ mapMaybe P ys
+    mapMaybe-cong : ∀ {xs ys} → Pointwise (λ x y → f x ≡ f y) xs ys →
+                    mapMaybe f xs ≡ mapMaybe f ys
     mapMaybe-cong [] = refl
-    mapMaybe-cong {x ∷ _} {y ∷ _} (Px≡Py ∷ Pxsys) with P x | P y
-    ... | nothing | nothing = mapMaybe-cong Pxsys
-    ... | nothing | just _  = contradiction Px≡Py λ()
-    ... | just _  | nothing = contradiction Px≡Py λ()
-    ... | just _  | just _  = cong₂ _∷_ (just-injective Px≡Py) (mapMaybe-cong Pxsys)
+    mapMaybe-cong {x ∷ _} {y ∷ _} (fx≡fy ∷ fxsys) with f x | f y
+    ... | nothing | nothing = mapMaybe-cong fxsys
+    ... | nothing | just _  = contradiction fx≡fy λ()
+    ... | just _  | nothing = contradiction fx≡fy λ()
+    ... | just _  | just _  = cong₂ _∷_ (just-injective fx≡fy) (mapMaybe-cong fxsys)
 
 
   -- Properties of tabulate
@@ -87,23 +72,25 @@ module RoutingLib.Data.List.Properties where
 
   module _ {a p} {A : Set a} {P : Pred A p} {_•_ : Op₂ A} where
   
-    foldr-forces× : _•_ Forces-× P → ∀ e xs → P (foldr _•_ e xs) → All P xs
-    foldr-forces× _          _ []       _     = []
-    foldr-forces× forces _ (x ∷ xs) Pfold with forces _ _ Pfold
-    ... | (px , pfxs) = px ∷ foldr-forces× forces _ xs pfxs
+    foldr-forcesᵇ : _•_ Forcesᵇ P → ∀ e xs → P (foldr _•_ e xs) → All P xs
+    foldr-forcesᵇ _          _ []       _     = []
+    foldr-forcesᵇ forces _ (x ∷ xs) Pfold with forces _ _ Pfold
+    ... | (px , pfxs) = px ∷ foldr-forcesᵇ forces _ xs pfxs
 
-    foldr-×pres : _•_ ×-Preserves P → ∀ {e xs} → All P xs → P e → P (foldr _•_ e xs)
-    foldr-×pres _    []         pe = pe
-    foldr-×pres pres (px ∷ pxs) pe = pres px (foldr-×pres pres pxs pe)
+    foldr-presᵇ : _•_ Preservesᵇ P → ∀ {e xs} → P e → All P xs → P (foldr _•_ e xs)
+    foldr-presᵇ _    pe []         = pe
+    foldr-presᵇ pres pe (px ∷ pxs) = pres px (foldr-presᵇ pres pe pxs)
 
-    foldr-⊎presʳ : _•_ ⊎-Preservesʳ P → ∀ {e} xs → P e → P (foldr _•_ e xs)
-    foldr-⊎presʳ pres []       Pe = Pe
-    foldr-⊎presʳ pres (_ ∷ xs) Pe = pres _ (foldr-⊎presʳ pres xs Pe)
+    foldr-presʳ : _•_ Preservesʳ P → ∀ {e} → P e → ∀ xs → P (foldr _•_ e xs)
+    foldr-presʳ pres pe []       = pe
+    foldr-presʳ pres pe (_ ∷ xs) = pres _ (foldr-presʳ pres pe xs)
 
-    foldr-⊎pres : _•_ ⊎-Preserves P → ∀ {xs} e → Any P xs → P (foldr _•_ e xs)
-    foldr-⊎pres pres e (here px)   = pres _ _ (inj₁ px)
-    foldr-⊎pres pres e (there pxs) = pres _ _ (inj₂ (foldr-⊎pres pres e pxs))
-
+    foldr-presᵒ : _•_ Preservesᵒ P → ∀ e xs → P e ⊎ Any P xs → P (foldr _•_ e xs)
+    foldr-presᵒ pres e []       (inj₁ pe) = pe
+    foldr-presᵒ pres e []       (inj₂ ())
+    foldr-presᵒ pres e (x ∷ xs) (inj₁ pe) = pres _ _ (inj₂ (foldr-presᵒ pres e xs (inj₁ pe)))
+    foldr-presᵒ pres e (x ∷ xs) (inj₂ (here px))   = pres _ _ (inj₁ px)
+    foldr-presᵒ pres e (x ∷ xs) (inj₂ (there pxs)) = pres _ _ (inj₂ (foldr-presᵒ pres e xs (inj₂ pxs)))
 
   -- Properties of foldl
 
@@ -116,99 +103,25 @@ module RoutingLib.Data.List.Properties where
     ... | (px , pfxs) = {!!} --px ∷ foldl-forces× •-forces-P _ xs pfxs
 -}
 
-    foldl-×pres : _•_ ×-Preserves P → ∀ {e xs} → All P xs → P e → P (foldl _•_ e xs)
-    foldl-×pres _    []         pe = pe
-    foldl-×pres pres (px ∷ pxs) pe = foldl-×pres pres pxs (pres pe px)
+    foldl-×pres : _•_ Preservesᵇ P → ∀ {e xs} → P e → All P xs → P (foldl _•_ e xs)
+    foldl-×pres _    pe []         = pe
+    foldl-×pres pres pe (px ∷ pxs) = foldl-×pres pres (pres pe px) pxs
     
-    foldl-⊎presˡ : _•_ ⊎-Preservesˡ P → ∀ {e} xs → P e → P (foldl _•_ e xs)
-    foldl-⊎presˡ pres []       Pe = Pe
-    foldl-⊎presˡ pres (x ∷ xs) Pe = foldl-⊎presˡ pres xs (pres x Pe)
+    foldl-⊎presˡ : _•_ Preservesˡ P → ∀ {e} → P e → ∀ xs → P (foldl _•_ e xs)
+    foldl-⊎presˡ pres pe []       = pe
+    foldl-⊎presˡ pres pe (x ∷ xs) = foldl-⊎presˡ pres (pres x pe) xs
     
-    foldl-⊎pres : _•_ ⊎-Preserves P → ∀ {xs} e → Any P xs → P (foldl _•_ e xs)
-    foldl-⊎pres pres {x ∷ xs} e (here px)   = foldl-⊎presˡ (⊎pres⇒⊎presˡ pres) xs (pres e _ (inj₂ px))
+    foldl-⊎pres : _•_ Preservesᵒ P → ∀ {xs} e → Any P xs → P (foldl _•_ e xs)
+    foldl-⊎pres pres {x ∷ xs} e (here px)   = foldl-⊎presˡ (presᵒ⇒presˡ pres) (pres e _ (inj₂ px)) xs
     foldl-⊎pres pres {x ∷ xs} e (there pxs) = foldl-⊎pres pres _ pxs
-    
-  -- Properties of zipWith
-  
-  zipWith-comm : ∀ {a b} {A : Set a} {B : Set b} {f : A → A → B} → (∀ x y → f x y ≡ f y x) → ∀ xs ys → zipWith f xs ys ≡ zipWith f ys xs
-  zipWith-comm f-comm (x ∷ xs) (y ∷ ys) = cong₂ _∷_ (f-comm x y) (zipWith-comm f-comm xs ys)
-  zipWith-comm f-comm []       []       = refl
-  zipWith-comm f-comm []       (x ∷ ys) = refl
-  zipWith-comm f-comm (x ∷ xs) []       = refl
   
   -- Properties of index
   
-  lookup∈xs : ∀ {a} {A : Set a} (xs : List A) (i : Fin (length xs)) → lookup xs i ∈ xs
+  lookup∈xs : ∀ {a} {A : Set a} (xs : List A) (i : Fin (length xs)) →
+              lookup xs i ∈ xs
   lookup∈xs []       ()     
   lookup∈xs (x ∷ xs) fzero    = here refl
   lookup∈xs (x ∷ xs) (fsuc i) = there (lookup∈xs xs i)
-
-  -- Properties of min
-
-  min[xs]≤x : ∀ {x xs} ⊤ → Any (_≤ x) xs → min ⊤ xs ≤ x
-  min[xs]≤x = foldr-⊎pres n≤m⊎o≤m⇒n⊓o≤m
-
-  min[xs]<x : ∀ {x xs} ⊤ → Any (_< x) xs → min ⊤ xs < x
-  min[xs]<x = foldr-⊎pres n<m⊎o<m⇒n⊓o<m
-  
-  min[xs]≤⊤ : ∀ ⊤ xs → min ⊤ xs ≤ ⊤
-  min[xs]≤⊤ ⊤ xs = foldr-⊎presʳ o≤m⇒n⊓o≤m xs ≤-refl
-
-  x≤min[xs] : ∀ {x xs ⊤} → All (x ≤_) xs → x ≤ ⊤ → x ≤ min ⊤ xs
-  x≤min[xs] = foldr-×pres m≤n×m≤o⇒m≤n⊓o
-
-  x<min[xs] : ∀ {x xs ⊤} → All (x <_) xs → x < ⊤ → x < min ⊤ xs
-  x<min[xs] = foldr-×pres m≤n×m≤o⇒m≤n⊓o
-
-  min[xs]≡x : ∀ {x xs ⊤} → x ∈ xs → All (x ≤_) xs → x ≤ ⊤ → min ⊤ xs ≡ x
-  min[xs]≡x x∈xs x≤xs x≤⊤ = ≤-antisym (min[xs]≤x _ (lose x∈xs ≤-refl)) (x≤min[xs] x≤xs x≤⊤)
-  
-  min[xs]∈xs : ∀ {⊤ xs} → min ⊤ xs ≢ ⊤ → min ⊤ xs ∈ xs
-  min[xs]∈xs {⊤} {[]}     ⊤≢⊤ = contradiction refl ⊤≢⊤
-  min[xs]∈xs {⊤} {x ∷ xs} m≢⊤ with ⊓-sel x (min ⊤ xs)
-  ... | inj₁ y⊓m≡y rewrite y⊓m≡y = here refl
-  ... | inj₂ y⊓m≡m rewrite y⊓m≡m = there (min[xs]∈xs m≢⊤)
-  
-  min[xs]<min[ys]₁ : ∀ {xs ys ⊤₁ ⊤₂} → ⊤₁ < ⊤₂ → All (λ y → Any (_< y) xs) ys → min ⊤₁ xs < min ⊤₂ ys
-  min[xs]<min[ys]₁ {xs} {[]}     {_}  {_}  ⊤₁<⊤₂ [] = <-transʳ (min[xs]≤⊤ _ xs) ⊤₁<⊤₂
-  min[xs]<min[ys]₁ {xs} {y ∷ ys} {⊤₁} {⊤₂} ⊤₁<⊤₂ (xs<y  ∷ pxs) with ⊓-sel y (min ⊤₂ ys)
-  ... | inj₁ y⊓m≡y rewrite y⊓m≡y = min[xs]<x ⊤₁ xs<y
-  ... | inj₂ y⊓m≡m rewrite y⊓m≡m = min[xs]<min[ys]₁ ⊤₁<⊤₂ pxs
-
-  min[xs]<min[ys]₃ : ∀ {xs ys} ⊤₁ {⊤₂} → Any (_< ⊤₂) xs → All (λ y → Any (_< y) xs) ys → min ⊤₁ xs < min ⊤₂ ys
-  min[xs]<min[ys]₃ {_} {[]}     ⊤₁ {⊤₂} xs<⊤₂ [] = min[xs]<x ⊤₁ xs<⊤₂
-  min[xs]<min[ys]₃ {_} {y ∷ ys} ⊤₁ {⊤₂} xs<⊤₂ (xs<y ∷ pys) with ⊓-sel y (min ⊤₂ ys)
-  ... | inj₁ y⊓m≡y rewrite y⊓m≡y = min[xs]<x ⊤₁ xs<y
-  ... | inj₂ y⊓m≡m rewrite y⊓m≡m = min[xs]<min[ys]₃ ⊤₁ xs<⊤₂ pys
-
-
-
-  -- Properties of max
-
-  max[xs]≤x : ∀ {x xs ⊥} → All (_≤ x) xs → ⊥ ≤ x → max ⊥ xs ≤ x
-  max[xs]≤x = foldr-×pres n≤m×o≤m⇒n⊔o≤m
-
-  max[xs]<x : ∀ {x xs ⊥} → All (_< x) xs → ⊥ < x → max ⊥ xs < x
-  max[xs]<x = foldr-×pres n≤m×o≤m⇒n⊔o≤m
-
-  x≤max[xs] : ∀ {x xs} ⊥ → Any (x ≤_) xs → x ≤ max ⊥ xs
-  x≤max[xs] = foldr-⊎pres m≤n⊎m≤o⇒m≤n⊔o
-  
-  x<max[xs] : ∀ {x xs} ⊥ → Any (x <_) xs → x < max ⊥ xs
-  x<max[xs] = foldr-⊎pres m≤n⊎m≤o⇒m≤n⊔o
-
-  ⊥≤max[xs] : ∀ ⊥ xs → ⊥ ≤ max ⊥ xs
-  ⊥≤max[xs] ⊥ xs = foldr-⊎presʳ m≤o⇒m≤n⊔o xs ≤-refl
-  
-  max[xs]≡x : ∀ {x xs ⊥} → x ∈ xs → All (_≤ x) xs → ⊥ ≤ x → max ⊥ xs ≡ x
-  max[xs]≡x x∈xs xs≤x ⊥≤x = ≤-antisym (max[xs]≤x xs≤x ⊥≤x) (x≤max[xs] _ (lose x∈xs ≤-refl))
-  
-  max[xs]∈xs : ∀ {⊥ xs} → max ⊥ xs ≢ ⊥ → max ⊥ xs ∈ xs
-  max[xs]∈xs {⊥} {[]}     ⊥≢⊥ = contradiction refl ⊥≢⊥
-  max[xs]∈xs {⊥} {x ∷ xs} m≢⊥ with ⊔-sel x (max ⊥ xs)
-  ... | inj₁ x⊔r≡x rewrite x⊔r≡x = here refl
-  ... | inj₂ x⊔r≡r rewrite x⊔r≡r = there (max[xs]∈xs m≢⊥)
-
 
 
   module _ {a ℓ} (S : Setoid a ℓ)  where

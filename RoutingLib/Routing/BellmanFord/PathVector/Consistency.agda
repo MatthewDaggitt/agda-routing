@@ -35,105 +35,30 @@ open import RoutingLib.Data.SimplePath.Properties
 open import RoutingLib.Data.SimplePath.NonEmpty.Properties
   using (_⇿?_; _∉?_)
 open import RoutingLib.Data.SimplePath.Enumeration
-open import RoutingLib.Routing.Definitions
-open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
-open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions
-open import RoutingLib.Data.List.Properties using (foldr-×pres)
+open import RoutingLib.Data.List.Properties using (foldr-presᵇ)
 open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique; []; _∷_)
 open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (deduplicate!⁺)
 import RoutingLib.Data.List.Membership.DecSetoid as RMembership
 open import RoutingLib.Data.List.Membership.DecSetoid.Properties using (∈-deduplicate⁺; ∈-resp-≈)
 open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
-import RoutingLib.Routing.BellmanFord as BellmanFord
 
-module RoutingLib.Routing.BellmanFord.PathVector.Prelude
+open import RoutingLib.Routing.Definitions
+import RoutingLib.Routing.BellmanFord as BellmanFord
+open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
+open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions
+import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions.Properties
+  as SufficientConditionsProperties
+
+module RoutingLib.Routing.BellmanFord.PathVector.Consistency
   {a b ℓ} {𝓡𝓐 : RoutingAlgebra a b ℓ}
-  {n-1} {𝓡𝓟 : RoutingProblem 𝓡𝓐 (suc n-1)}
+  {n-1} {𝓡𝓟 : RoutingProblem 𝓡𝓐 n-1}
   (𝓟𝓢𝓒 : PathSufficientConditions 𝓡𝓟)
   where
-  
-  open RoutingProblem 𝓡𝓟 public
-  open BellmanFord 𝓡𝓟 public
-  open PathSufficientConditions 𝓟𝓢𝓒 public
-  import RoutingLib.Routing.BellmanFord.Properties 𝓡𝓟 as P
 
-  n : ℕ
-  n = suc n-1
-
-  abstract
-
-    σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ : ∀ X i j → (∃ λ k → σ X i j ≈ A i k ▷ X k j) ⊎ (σ X i j ≈ I i j)
-    σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ = P.σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ ⊕-sel
-
-    σXᵢᵢ≈Iᵢᵢ : ∀ X i → σ X i i ≈ I i i
-    σXᵢᵢ≈Iᵢᵢ = P.σXᵢᵢ≈Iᵢᵢ ⊕-sel ⊕-assoc ⊕-comm ⊕-zeroʳ
-    
-    σXᵢᵢ≈σYᵢᵢ : ∀ X Y i → σ X i i ≈ σ Y i i
-    σXᵢᵢ≈σYᵢᵢ = P.σXᵢᵢ≈σYᵢᵢ ⊕-sel ⊕-assoc ⊕-comm ⊕-zeroʳ
-
-    r≈0⇒e▷r≈0 : ∀ {e r} → r ≈ 0# → e ▷ r ≈ 0#
-    r≈0⇒e▷r≈0 {e} {r} r≈0 = ≈-trans (▷-cong _ r≈0) (▷-zero e)
-
-    e▷r≉0⇒r≉0 : ∀ {e r} → e ▷ r ≉ 0# → r ≉ 0#
-    e▷r≉0⇒r≉0 e▷r≉0 r≈0 = e▷r≉0 (r≈0⇒e▷r≈0 r≈0)
-
-
-    p₀≈∅ : path 0# ≈ₚ invalid
-    p₀≈∅ = r≈0⇒path[r]≈∅ ≈-refl
-
-    p₁≈[] : path 1# ≈ₚ valid []
-    p₁≈[] = r≈1⇒path[r]≈[] ≈-refl
-
-    pᵣ≡∅⇒Aᵢⱼr≈0 : ∀ {i j r} → path r ≡ invalid → A i j ▷ r ≈ 0#
-    pᵣ≡∅⇒Aᵢⱼr≈0 {i} {j} {r} pᵣ≡∅ = r≈0⇒e▷r≈0 (path[r]≈∅⇒r≈0 (≈ₚ-reflexive pᵣ≡∅))
-
-    p[Iᵢᵢ]≈[] : ∀ i → path (I i i) ≈ₚ valid []
-    p[Iᵢᵢ]≈[] i = r≈1⇒path[r]≈[] (≈-reflexive (P.Iᵢᵢ≡1# i))
-    
-    p[Iᵢⱼ]≈invalid : ∀ {i j} → j ≢ i → path (I i j) ≈ₚ invalid
-    p[Iᵢⱼ]≈invalid j≢i = r≈0⇒path[r]≈∅ (≈-reflexive (P.Iᵢⱼ≡0# j≢i))
-    
-    p[σXᵢᵢ]≈[] : ∀ X i → path (σ X i i) ≈ₚ valid []
-    p[σXᵢᵢ]≈[] X i = ≈ₚ-trans (path-cong (σXᵢᵢ≈Iᵢᵢ X i)) (p[Iᵢᵢ]≈[] i)
-
-    alignPathExtension : ∀ (X : RMatrix) i j k {u v p e⇿p i∉p} →
-              path (A i k ▷ X k j) ≈ₚ valid ((u , v) ∷ p ∣ e⇿p ∣ i∉p) →
-              i ≡ u × v ≡ k × path (X k j) ≈ₚ valid p
-    alignPathExtension X i j k p[AᵢₖXₖⱼ]≈uv∷p with A i k ▷ X k j ≟ 0#
-    ...     | yes AᵢₖXₖⱼ≈0# = contradiction (
-      ≈ₚ-trans (≈ₚ-sym p[AᵢₖXₖⱼ]≈uv∷p) (
-        ≈ₚ-trans (path-cong AᵢₖXₖⱼ≈0#) p₀≈∅)) λ()
-    ...     | no  AᵢₖXₖⱼ≉0# with path (X k j) | inspect path (X k j)
-    ...       | invalid | [ p[Xₖⱼ]≡∅ ] = contradiction (pᵣ≡∅⇒Aᵢⱼr≈0 p[Xₖⱼ]≡∅) AᵢₖXₖⱼ≉0#
-    ...       | valid q | [ p[Xₖⱼ]≡q ] with ≈ₚ-reflexive p[Xₖⱼ]≡q | (i , k) ⇿? q | i ∉? q
-    ...         | pᵣ≈q | no ¬ik⇿q | _       = contradiction (
-      ≈ₚ-trans (≈ₚ-sym p[AᵢₖXₖⱼ]≈uv∷p)
-        (≈ₚ-trans (path-cong (path-reject pᵣ≈q (inj₁ ¬ik⇿q))) p₀≈∅)) λ()
-    ...         | pᵣ≈q | _        | no  i∈q = contradiction (
-      ≈ₚ-trans (≈ₚ-sym p[AᵢₖXₖⱼ]≈uv∷p)
-        (≈ₚ-trans (path-cong (path-reject pᵣ≈q (inj₂ i∈q))) p₀≈∅)) λ()
-    ...         | pᵣ≈q | yes ik⇿q | yes i∉q with
-      ≈ₚ-trans (≈ₚ-sym p[AᵢₖXₖⱼ]≈uv∷p)
-        (path-accept pᵣ≈q AᵢₖXₖⱼ≉0# ik⇿q i∉q)
-    ...           | valid (refl ∷ p≈q) = refl , refl , ≈ₚ-sym (valid p≈q)
-    
-    p[σXᵢⱼ]⇒σXᵢⱼ≈AᵢₖXₖⱼ : ∀ X i j {k l p e⇿p i∉p} →
-                path (σ X i j) ≈ₚ valid ((l , k) ∷ p ∣ e⇿p ∣ i∉p) →
-                i ≡ l × σ X i j ≈ A i k ▷ X k j × path (X k j) ≈ₚ valid p
-    p[σXᵢⱼ]⇒σXᵢⱼ≈AᵢₖXₖⱼ X i j p[σXᵢⱼ]≈uv∷p with i ≟𝔽 j
-    ... | yes refl = contradiction (≈ₚ-trans (≈ₚ-sym p[σXᵢⱼ]≈uv∷p) (p[σXᵢᵢ]≈[] X j)) λ{(valid ())}
-    ... | no  i≢j with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
-    ...   | inj₂ σXᵢⱼ≈Iᵢⱼ           = contradiction (
-      ≈ₚ-trans (≈ₚ-sym p[σXᵢⱼ]≈uv∷p) (
-        ≈ₚ-trans (path-cong σXᵢⱼ≈Iᵢⱼ) (p[Iᵢⱼ]≈invalid (i≢j ∘ sym)))) λ()
-    ...   | inj₁ (m , σXᵢⱼ≈AᵢₘXₘⱼ) with alignPathExtension X i j m
-      (≈ₚ-trans (≈ₚ-sym (path-cong σXᵢⱼ≈AᵢₘXₘⱼ)) p[σXᵢⱼ]≈uv∷p)
-    ...     | refl , refl , p[Xₖⱼ]≈p = refl , σXᵢⱼ≈AᵢₘXₘⱼ , p[Xₖⱼ]≈p
-    
-    k∉p[Iᵢⱼ] : ∀ i j k → k ∉ path (I i j)
-    k∉p[Iᵢⱼ] i j k with j ≟𝔽 i
-    ... | yes refl = ∉-resp-≈ₚ (≈ₚ-sym p₁≈[]) (valid notThere)
-    ... | no  j≢i  = ∉-resp-≈ₚ (≈ₚ-sym p₀≈∅) invalid
+  open BellmanFord 𝓡𝓟
+  open RoutingProblem 𝓡𝓟
+  open PathSufficientConditions 𝓟𝓢𝓒
+  open SufficientConditionsProperties 𝓟𝓢𝓒
 
   -----------------
   -- Consistency --
@@ -224,21 +149,11 @@ module RoutingLib.Routing.BellmanFord.PathVector.Prelude
     ▷-forces-𝑰 Aᵢⱼrⁱ rᶜ = Aᵢⱼrⁱ (▷-pres-𝑪 _ _ rᶜ)
 
     σ-pres-𝑪ₘ : ∀ {X} → 𝑪ₘ X → 𝑪ₘ (σ X)
-    σ-pres-𝑪ₘ Xᶜ i j = foldr-×pres {P = 𝑪} ⊕-pres-𝑪
+    σ-pres-𝑪ₘ Xᶜ i j = foldr-presᵇ {P = 𝑪} ⊕-pres-𝑪
        (tabulate⁺ (λ k → ▷-pres-𝑪 i k (Xᶜ k j))) (Iᶜ i j)
-       
-    --------------------
-    -- Size of routes --
-    --------------------
-
-    size : Route → ℕ
-    size r = length (path r)
-
-    size<n : ∀ r → size r < n
-    size<n r = length<n (path _)
-
-    size-cong : ∀ {r s} → r ≈ s → size r ≡ size s
-    size-cong {r} {s} r≈s = length-cong (path-cong r≈s)
+           
+    ----------------------------------------------------------------------------
+    -- A few more non-obvious properties relating to consistency
 
     size-incr : ∀ {i j r} → 𝑰 (A i j ▷ r) → suc (size r) ≡ size (A i j ▷ r)
     size-incr {i} {j} {r} Aᵢⱼ▷rⁱ with A i j ▷ r ≟ 0#
@@ -249,9 +164,6 @@ module RoutingLib.Routing.BellmanFord.PathVector.Prelude
     ...     | pᵣ≈q | no ¬ij⇿q | _       = contradiction (path-reject pᵣ≈q (inj₁ ¬ij⇿q)) Aᵢⱼ▷r≉0#
     ...     | pᵣ≈q | _        | no  i∈q = contradiction (path-reject pᵣ≈q (inj₂ i∈q)) Aᵢⱼ▷r≉0#
     ...     | pᵣ≈q | yes ij⇿q | yes i∉q = sym (length-cong (path-accept pᵣ≈q Aᵢⱼ▷r≉0# ij⇿q i∉q))
-  
-    ----------------------------------------------------------------------------
-    -- A few more non-obvious properties relating to consistency
     
     σXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ : ∀ X i j → 𝑰 (σ X i j) → ∃ λ k → σ X i j ≈ A i k ▷ X k j × 𝑰 (X k j)
     σXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ X i j σXᵢⱼⁱ with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
@@ -272,7 +184,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.Prelude
         size (X k j)           <⟨ ≤-reflexive (size-incr (𝑰-cong σXₗⱼ≈AₗₖXₖⱼ σXₗⱼⁱ)) ⟩
         size (A l k ▷ X k j)   ≡⟨ size-cong (≈-sym σXₗⱼ≈AₗₖXₖⱼ) ⟩
         size (σ X l j)         ∎))
-  
+
     weightᶜ : ∀ p → 𝑪 (weight p)
     weightᶜ invalid                            = 0ᶜ
     weightᶜ (valid [])                         = 1ᶜ
@@ -356,7 +268,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.Prelude
     ; ▷-cong             = ▷ᶜ-cong
     }
 
-  𝓡𝓟ᶜ : RoutingProblem 𝓡𝓐ᶜ n
+  𝓡𝓟ᶜ : RoutingProblem 𝓡𝓐ᶜ n-1
   𝓡𝓟ᶜ = record { A = _,_ }
 
   open RoutingProblem 𝓡𝓟ᶜ using ()
@@ -390,7 +302,6 @@ module RoutingLib.Routing.BellmanFord.PathVector.Prelude
   ... | yes _ = ≈-refl
   ... | no  _ = ≈-refl
 
-
   foldrᶜ-lemma : ∀ {e xs} {ys : List CRoute} → 𝑪 e →
                    ListRel (λ x y → x ≈ proj₁ y) xs ys →
                    𝑪 (foldr _⊕_ e xs)
@@ -416,10 +327,6 @@ module RoutingLib.Routing.BellmanFord.PathVector.Prelude
                           ((s ▷ᶜ r) ⊕ᶜ r ≈ᶜ r) × (r ≉ᶜ (s ▷ᶜ r))
   ⊕ᶜ-strictlyAbsorbs-▷ᶜ (i , j) r≉0 = ⊕-strictlyAbsorbs-▷ (A i j) r≉0
 
-  -----------------------------
-  -- Inconsistent properties --
-  -----------------------------
-  
   open Membership Sᶜ using () renaming (_∈_ to _∈ₗ_)
   open RMembership DSᶜ using (deduplicate)
   

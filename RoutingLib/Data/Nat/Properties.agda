@@ -86,7 +86,7 @@ module RoutingLib.Data.Nat.Properties where
     n≤0⇒n≡0 z≤n = refl
 
     
-    -- Equality reasoning --
+    -- Equality reasoning
 
     module ≤-Reasoning where
       open StrictReasoning ≤-trans ≤-reflexive <-trans <-transˡ <-transʳ public using
@@ -101,6 +101,7 @@ module RoutingLib.Data.Nat.Properties where
     n<1+n : ∀ n → n < suc n
     n<1+n n = ≤-refl
 
+    -- stdlib
     m+n≮m : ∀ m n → m + n ≮ m
     m+n≮m m n = subst (_≮ m) (+-comm n m) (m+n≮n n m)
     
@@ -108,9 +109,6 @@ module RoutingLib.Data.Nat.Properties where
     m<n⇒n≡1+o {_} {zero} ()
     m<n⇒n≡1+o {_} {suc o} m<n = o , refl
 
-    +-monoʳ-< : ∀ n → (n +_) Preserves _<_ ⟶ _<_
-    +-monoʳ-< zero    m≤o = m≤o
-    +-monoʳ-< (suc n) m≤o = s≤s (+-monoʳ-< n m≤o)
     
     ---------------------------------
     -- Addition and multiplication --
@@ -132,122 +130,114 @@ module RoutingLib.Data.Nat.Properties where
 
     -- _⊔_ and _≡_
 
-    ⊔-preserves-≡x : ∀ {x} → _⊔_ ×-Preserves (_≡ x)
+    ⊔-preserves-≡x : ∀ {x} → _⊔_ Preservesᵇ (_≡ x)
     ⊔-preserves-≡x refl refl = ⊔-idem _
 
-    ⊔-preserves-x≡ : ∀ {x} → _⊔_ ×-Preserves (x ≡_)
+    ⊔-preserves-x≡ : ∀ {x} → _⊔_ Preservesᵇ (x ≡_)
     ⊔-preserves-x≡ refl refl = sym (⊔-idem _)
 
 
     -- _⊓_ and _≡_
     
-    ⊓-preserves-≡x : ∀ {x} → _⊓_ ×-Preserves (_≡ x)
+    ⊓-preserves-≡x : ∀ {x} → _⊓_ Preservesᵇ (_≡ x)
     ⊓-preserves-≡x refl refl = ⊓-idem _
 
-    ⊓-preserves-x≡ : ∀ {x} → _⊓_ ×-Preserves (x ≡_)
+    ⊓-preserves-x≡ : ∀ {x} → _⊓_ Preservesᵇ (x ≡_)
     ⊓-preserves-x≡ refl refl = sym (⊓-idem _)
 
     -- _⊔_ and _≤_
-
-    n≤m⇒m⊔n≡m : ∀ {m n} → n ≤ m → m ⊔ n ≡ m
-    n≤m⇒m⊔n≡m z≤n       = ⊔-identityʳ _
-    n≤m⇒m⊔n≡m (s≤s n≤m) = cong suc (n≤m⇒m⊔n≡m n≤m)
-
+    
     n⊔m≡m⇒n≤m : ∀ {m n} → n ⊔ m ≡ m → n ≤ m
     n⊔m≡m⇒n≤m n⊔m≡m = subst (_ ≤_) n⊔m≡m (m≤m⊔n _ _)
     
-    m≤n⇒m≤n⊔o : ∀ {m} → _⊔_ ⊎-Preservesˡ (m ≤_)
+    m≤n⇒m≤n⊔o : ∀ {m} → _⊔_ Preservesˡ (m ≤_)
     m≤n⇒m≤n⊔o o m≤n = ≤-trans m≤n (m≤m⊔n _ o)
     
-    m≤o⇒m≤n⊔o : ∀ {m} → _⊔_ ⊎-Preservesʳ (m ≤_)
+    m≤o⇒m≤n⊔o : ∀ {m} → _⊔_ Preservesʳ (m ≤_)
     m≤o⇒m≤n⊔o n m≤o = ≤-trans m≤o (n≤m⊔n n _)
 
-    m≤n⊎m≤o⇒m≤n⊔o : ∀ {m} → _⊔_ ⊎-Preserves (m ≤_)
+    m≤n⊎m≤o⇒m≤n⊔o : ∀ {m} → _⊔_ Preservesᵒ (m ≤_)
     m≤n⊎m≤o⇒m≤n⊔o _ o (inj₁ m≤n) = m≤n⇒m≤n⊔o o m≤n
     m≤n⊎m≤o⇒m≤n⊔o n _ (inj₂ m≤o) = m≤o⇒m≤n⊔o n m≤o
 
-    m<n⊎m<o⇒m<n⊔o : ∀ {m} → _⊔_ ⊎-Preserves (m <_)
+    m<n⊎m<o⇒m<n⊔o : ∀ {m} → _⊔_ Preservesᵒ (m <_)
     m<n⊎m<o⇒m<n⊔o n o m<n⊎m<o = m≤n⊎m≤o⇒m≤n⊔o n o m<n⊎m<o
 
-    m≤n×m≤o⇒m≤n⊔o : ∀ {m} → _⊔_ ×-Preserves (m ≤_)
+    m≤n×m≤o⇒m≤n⊔o : ∀ {m} → _⊔_ Preservesᵇ (m ≤_)
     m≤n×m≤o⇒m≤n⊔o m≤n _ = m≤n⇒m≤n⊔o _ m≤n
 
-    n≤m×o≤m⇒n⊔o≤m : ∀ {m} → _⊔_ ×-Preserves (_≤ m)
+    n≤m×o≤m⇒n⊔o≤m : ∀ {m} → _⊔_ Preservesᵇ (_≤ m)
     n≤m×o≤m⇒n⊔o≤m n≤m o≤m = subst (_ ≤_) (⊔-idem _) (⊔-mono-≤ n≤m o≤m)
 
 
-    n⊔o≤m⇒n≤m : ∀ {m} → _⊔_ Forces-×ˡ (_≤ m)
+    n⊔o≤m⇒n≤m : ∀ {m} → _⊔_ Forcesˡ (_≤ m)
     n⊔o≤m⇒n≤m n o n⊔o≤m = ≤-trans (m≤m⊔n n o) n⊔o≤m
 
-    n⊔o≤m⇒o≤m : ∀ {m} → _⊔_ Forces-×ʳ (_≤ m)
+    n⊔o≤m⇒o≤m : ∀ {m} → _⊔_ Forcesʳ (_≤ m)
     n⊔o≤m⇒o≤m n o n⊔o≤m = ≤-trans (n≤m⊔n n o) n⊔o≤m
 
-    n⊔o≤m⇒n≤m×o≤m : ∀ {m} → _⊔_ Forces-× (_≤ m)
+    n⊔o≤m⇒n≤m×o≤m : ∀ {m} → _⊔_ Forcesᵇ (_≤ m)
     n⊔o≤m⇒n≤m×o≤m n o n⊔o≤m = n⊔o≤m⇒n≤m n o n⊔o≤m , n⊔o≤m⇒o≤m n o n⊔o≤m
     
-    n⊔o≤m⇒n≤m⊎o≤m : ∀ {m} → _⊔_ Forces-⊎ (_≤ m)
+    n⊔o≤m⇒n≤m⊎o≤m : ∀ {m} → _⊔_ Forcesᵒ (_≤ m)
     n⊔o≤m⇒n≤m⊎o≤m n o n⊔o≤m = inj₁ (n⊔o≤m⇒n≤m n o n⊔o≤m)
     
 
     -- _⊓_ and _≤_
 
-    n≤m⇒m⊓n≡n : ∀ {m n} → n ≤ m → m ⊓ n ≡ n
-    n≤m⇒m⊓n≡n {m} n≤m = trans (⊓-comm m _) (m≤n⇒m⊓n≡m n≤m)
-    
     m⊓n≡n⇒n≤m : ∀ {m n} → m ⊓ n ≡ n → n ≤ m
     m⊓n≡n⇒n≤m m⊓n≡n = subst (_≤ _) m⊓n≡n (m⊓n≤m _ _)
 
     m⊔n≤o⇒m≤o : ∀ {m n o} → m ⊔ n ≤ o → m ≤ o
     m⊔n≤o⇒m≤o m⊔n≤o = ≤-trans (m≤m⊔n _ _) m⊔n≤o
 
-    n≤m⇒n⊓o≤m : ∀ {m} → _⊓_ ⊎-Preservesˡ (_≤ m)
+    n≤m⇒n⊓o≤m : ∀ {m} → _⊓_ Preservesˡ (_≤ m)
     n≤m⇒n⊓o≤m o m≤n = ≤-trans (m⊓n≤m _ o) m≤n
 
-    o≤m⇒n⊓o≤m : ∀ {m} → _⊓_ ⊎-Preservesʳ (_≤ m)
+    o≤m⇒n⊓o≤m : ∀ {m} → _⊓_ Preservesʳ (_≤ m)
     o≤m⇒n⊓o≤m n o≤m = ≤-trans (m⊓n≤n n _) o≤m
     
-    n≤m⊎o≤m⇒n⊓o≤m : ∀ {m} → _⊓_ ⊎-Preserves (_≤ m)
+    n≤m⊎o≤m⇒n⊓o≤m : ∀ {m} → _⊓_ Preservesᵒ (_≤ m)
     n≤m⊎o≤m⇒n⊓o≤m _ o (inj₁ n≤m) = n≤m⇒n⊓o≤m o n≤m
     n≤m⊎o≤m⇒n⊓o≤m n _ (inj₂ o≤m) = o≤m⇒n⊓o≤m n o≤m
 
-    n≤m×o≤m⇒n⊓o≤m : ∀ {m} → _⊓_ ×-Preserves (_≤ m)
+    n≤m×o≤m⇒n⊓o≤m : ∀ {m} → _⊓_ Preservesᵇ (_≤ m)
     n≤m×o≤m⇒n⊓o≤m n≤m o≤m = n≤m⇒n⊓o≤m _ n≤m
 
-    m≤n×m≤o⇒m≤n⊓o : ∀ {m} → _⊓_ ×-Preserves (m ≤_)
+    m≤n×m≤o⇒m≤n⊓o : ∀ {m} → _⊓_ Preservesᵇ (m ≤_)
     m≤n×m≤o⇒m≤n⊓o m≤n m≤o = subst (_≤ _) (⊓-idem _) (⊓-mono-≤ m≤n m≤o)
 
 
-    m≤n⊓o⇒m≤n : ∀ {m} → _⊓_ Forces-×ˡ (m ≤_)
+    m≤n⊓o⇒m≤n : ∀ {m} → _⊓_ Forcesˡ (m ≤_)
     m≤n⊓o⇒m≤n n o m≤n⊓o = ≤-trans m≤n⊓o (m⊓n≤m n o)
 
-    m≤n⊓o⇒m≤o : ∀ {m} → _⊓_ Forces-×ʳ (m ≤_)
+    m≤n⊓o⇒m≤o : ∀ {m} → _⊓_ Forcesʳ (m ≤_)
     m≤n⊓o⇒m≤o n o m≤n⊓o = ≤-trans m≤n⊓o (m⊓n≤n n o)
 
-    m≤n⊓o⇒m≤n×m≤o : ∀ {m} → _⊓_ Forces-× (m ≤_)
+    m≤n⊓o⇒m≤n×m≤o : ∀ {m} → _⊓_ Forcesᵇ (m ≤_)
     m≤n⊓o⇒m≤n×m≤o n o m≤n⊓o = m≤n⊓o⇒m≤n n o m≤n⊓o , m≤n⊓o⇒m≤o n o m≤n⊓o
 
-    m≤n⊓o⇒m≤n⊎m≤o : ∀ {m} → _⊓_ Forces-⊎ (m ≤_)
+    m≤n⊓o⇒m≤n⊎m≤o : ∀ {m} → _⊓_ Forcesᵒ (m ≤_)
     m≤n⊓o⇒m≤n⊎m≤o n o m≤n⊓o = inj₁ (m≤n⊓o⇒m≤n n o m≤n⊓o)
 
 
 
 
 
-    n<m⇒n⊓o<m : ∀ {m} → _⊓_ ⊎-Preservesˡ (_< m)
+    n<m⇒n⊓o<m : ∀ {m} → _⊓_ Preservesˡ (_< m)
     n<m⇒n⊓o<m o n<m = ≤-trans (s≤s (m⊓n≤m _ o)) n<m
 
-    o<m⇒n⊓o<m : ∀ {m} → _⊓_ ⊎-Preservesʳ (_< m)
+    o<m⇒n⊓o<m : ∀ {m} → _⊓_ Preservesʳ (_< m)
     o<m⇒n⊓o<m n o<m = ≤-trans (s≤s (m⊓n≤n n _)) o<m
 
-    n<m⊎o<m⇒n⊓o<m : ∀ {m} → _⊓_ ⊎-Preserves (_< m)
+    n<m⊎o<m⇒n⊓o<m : ∀ {m} → _⊓_ Preservesᵒ (_< m)
     n<m⊎o<m⇒n⊓o<m n o (inj₁ n<m) = n<m⇒n⊓o<m o n<m
     n<m⊎o<m⇒n⊓o<m n o (inj₂ o<m) = o<m⇒n⊓o<m n o<m
 
-    m<n×m<o⇒m<n⊓o : ∀ {m} → _⊓_ ×-Preserves (m <_)
+    m<n×m<o⇒m<n⊓o : ∀ {m} → _⊓_ Preservesᵇ (m <_)
     m<n×m<o⇒m<n⊓o m<n m<o = subst (_< _) (⊓-idem _) (⊓-mono-< m<n m<o)
-    
 
-    
+    -- stdlib
     ⊓-triangulate : ∀ x y z → x ⊓ y ⊓ z ≡ (x ⊓ y) ⊓ (y ⊓ z)
     ⊓-triangulate x y z = begin
       x ⊓ y ⊓ z           ≡⟨ cong (λ v → x ⊓ v ⊓ z) (sym (⊓-idem y)) ⟩
@@ -257,6 +247,7 @@ module RoutingLib.Data.Nat.Properties where
       (x ⊓ y) ⊓ (y ⊓ z)   ∎
       where open ≡-Reasoning
 
+    -- stdlib
     ⊔-triangulate : ∀ x y z → x ⊔ y ⊔ z ≡ (x ⊔ y) ⊔ (y ⊔ z)
     ⊔-triangulate x y z = begin
       x ⊔ y ⊔ z           ≡⟨ cong (λ v → x ⊔ v ⊔ z) (sym (⊔-idem y)) ⟩
@@ -270,23 +261,25 @@ module RoutingLib.Data.Nat.Properties where
     -- Subtraction --
     -----------------
 
-    ∸-monoʳ-≤ : ∀ {m n} o → m ≤ n → o ∸ n ≤ o ∸ m
-    ∸-monoʳ-≤ _ m≤n = ∸-mono ≤-refl m≤n 
+    -- stdlib
+    ∸-monoˡ-≤ : ∀ {m n} → m ≤ n → ∀ o → m ∸ o ≤ n ∸ o
+    ∸-monoˡ-≤ m≤n o = ∸-mono {u = o} m≤n ≤-refl
+
+    -- stdlib
+    ∸-monoʳ-≤ : ∀ {m n} → m ≤ n → ∀ o → o ∸ n ≤ o ∸ m
+    ∸-monoʳ-≤ m≤n _ = ∸-mono ≤-refl m≤n
 
     ∸-monoʳ-< : ∀ {m n o} → o < n → n ≤ m → m ∸ n < m ∸ o
     ∸-monoʳ-< {_} {suc n} {zero}  (s≤s o<n) (s≤s n<m) = s≤s (n∸m≤n n _)
     ∸-monoʳ-< {_} {suc n} {suc o} (s≤s o<n) (s≤s n<m) = ∸-monoʳ-< o<n n<m
     
-    ∸-monoˡ-≤ : ∀ {m n o} → m ≤ n → o ≤ n → m ∸ o ≤ n ∸ o
-    ∸-monoˡ-≤ z≤n       (s≤s o≤n) = z≤n
-    ∸-monoˡ-≤ m≤n       z≤n       = m≤n
-    ∸-monoˡ-≤ (s≤s m≤n) (s≤s o≤n) = ∸-monoˡ-≤ m≤n o≤n
-
+    -- stdlib
     m∸n≡0⇒m≤n : ∀ {m n} → m ∸ n ≡ 0 → m ≤ n
     m∸n≡0⇒m≤n {zero}  {_}    _   = z≤n
     m∸n≡0⇒m≤n {suc m} {zero} ()
     m∸n≡0⇒m≤n {suc m} {suc n} eq = s≤s (m∸n≡0⇒m≤n eq)
 
+    -- stdlib
     m≤n⇒m∸n≡0 : ∀ {m n} → m ≤ n → m ∸ n ≡ 0
     m≤n⇒m∸n≡0 {n = n} z≤n = 0∸n≡0 n
     m≤n⇒m∸n≡0 (s≤s m≤n)   = m≤n⇒m∸n≡0 m≤n
@@ -295,11 +288,12 @@ module RoutingLib.Data.Nat.Properties where
     m>n⇒m∸n≢0 {n = zero}  (s≤s m>n) = λ()
     m>n⇒m∸n≢0 {n = suc n} (s≤s m>n) = m>n⇒m∸n≢0 m>n
 
+    -- stdlib
     m≮m∸n : ∀ m n → m ≮ m ∸ n
     m≮m∸n zero    (suc n) ()
     m≮m∸n m       zero    = n≮n m
-    m≮m∸n (suc m) (suc n) m<m∸n = m≮m∸n m n (≤-trans (n≤1+n (suc m)) m<m∸n)
-    
+    m≮m∸n (suc m) (suc n) = m≮m∸n m n ∘ ≤-trans (n≤1+n (suc m))
+
     n∸1+m<n : ∀ m {n} → 1 ≤ n → n ∸ suc m < n
     n∸1+m<n m (s≤s z≤n) = s≤s (n∸m≤n m _)
     
@@ -313,36 +307,28 @@ module RoutingLib.Data.Nat.Properties where
     m<n⇒n∸m≡1+o {zero}  {suc n} (s≤s m<n) = n , refl
     m<n⇒n∸m≡1+o {suc m} {suc n} (s≤s m<n) = m<n⇒n∸m≡1+o m<n
 
-    m≤n⇒o∸n≤o∸m : ∀ {m n} o → m ≤ n → o ∸ n ≤ o ∸ m
-    m≤n⇒o∸n≤o∸m {_} {n} zero m≤n rewrite 0∸n≡0 n = z≤n
-    m≤n⇒o∸n≤o∸m {_} {n} (suc o) z≤n = n∸m≤n n (suc o)
-    m≤n⇒o∸n≤o∸m {_} {_} (suc o) (s≤s m≤n) = m≤n⇒o∸n≤o∸m o m≤n
-
-    m<n≤o⇒o∸n<o∸m : ∀ {m n o} → m < n → n ≤ o → o ∸ n < o ∸ m
-    m<n≤o⇒o∸n<o∸m {zero}  {suc n} (s≤s m<n) (s≤s n≤o) = s≤s (n∸m≤n n _)
-    m<n≤o⇒o∸n<o∸m {suc m} {_}     (s≤s m<n) (s≤s n≤o) = m<n≤o⇒o∸n<o∸m m<n n≤o
-  
-    -- _∸_ distributes over _⊓_ (sort of)
     
+  
+    -- stdlib
     ∸-distribˡ-⊓-⊔ : ∀ x y z → x ∸ (y ⊓ z) ≡ (x ∸ y) ⊔ (x ∸ z)
     ∸-distribˡ-⊓-⊔ x       zero    zero    = sym (⊔-idem x)
     ∸-distribˡ-⊓-⊔ zero    zero    (suc z) = refl
     ∸-distribˡ-⊓-⊔ zero    (suc y) zero    = refl
     ∸-distribˡ-⊓-⊔ zero    (suc y) (suc z) = refl
-    ∸-distribˡ-⊓-⊔ (suc x) zero    (suc z) = sym (n≤m⇒m⊔n≡m (≤-step (n∸m≤n z x)))
-    ∸-distribˡ-⊓-⊔ (suc x) (suc y) zero    = sym (trans (⊔-comm (x ∸ y) (suc x)) (n≤m⇒m⊔n≡m (≤-step (n∸m≤n y x))))
+    ∸-distribˡ-⊓-⊔ (suc x) (suc y) zero    = sym (m≤n⇒m⊔n≡n (≤-step (n∸m≤n y x)))
+    ∸-distribˡ-⊓-⊔ (suc x) zero    (suc z) = sym (m≤n⇒n⊔m≡n (≤-step (n∸m≤n z x)))
     ∸-distribˡ-⊓-⊔ (suc x) (suc y) (suc z) = ∸-distribˡ-⊓-⊔ x y z
-
-    -- _∸_ distributes over _⊔_ (sort of)
     
+    -- stdlib
     ∸-distribˡ-⊔-⊓ : ∀ x y z → x ∸ (y ⊔ z) ≡ (x ∸ y) ⊓ (x ∸ z)
     ∸-distribˡ-⊔-⊓ x       zero    zero    = sym (⊓-idem x)
     ∸-distribˡ-⊔-⊓ zero    zero    z       = 0∸n≡0 z
     ∸-distribˡ-⊔-⊓ zero    (suc y) z       = 0∸n≡0 (suc y ⊔ z)
-    ∸-distribˡ-⊔-⊓ (suc x) zero    (suc z) = sym (trans (⊓-comm (suc x) (x ∸ z)) (m≤n⇒m⊓n≡m (≤-step (n∸m≤n z x))))
     ∸-distribˡ-⊔-⊓ (suc x) (suc y) zero    = sym (m≤n⇒m⊓n≡m (≤-step (n∸m≤n y x)))
+    ∸-distribˡ-⊔-⊓ (suc x) zero    (suc z) = sym (m≤n⇒n⊓m≡m (≤-step (n∸m≤n z x)))
     ∸-distribˡ-⊔-⊓ (suc x) (suc y) (suc z) = ∸-distribˡ-⊔-⊓ x y z
-
+    
+      
     ∸-cancelˡ-≡ :  ∀ {x y z} → y ≤ x → z ≤ x → x ∸ y ≡ x ∸ z → y ≡ z
     ∸-cancelˡ-≡ {_} {_}     {_}     z≤n       z≤n       _       = refl
     ∸-cancelˡ-≡ {x} {_}     {suc z} z≤n       (s≤s z≤x) 1+x≡x∸z = contradiction (sym 1+x≡x∸z) (<⇒≢ (s≤s (n∸m≤n z _)))
@@ -360,80 +346,3 @@ module RoutingLib.Data.Nat.Properties where
     ∸-cancelʳ-< {suc m} {zero}  {_}    o∸n<o∸m = s≤s z≤n
     ∸-cancelʳ-< {suc m} {suc n} {zero} ()
     ∸-cancelʳ-< {suc m} {suc n} {suc o} o∸n<o∸m = s≤s (∸-cancelʳ-< o∸n<o∸m)
-
-  {-
-    ≤-move-+ʳ : ∀ {m} n {o} → m + n ≤ o → m ≤ o ∸ n
-    ≤-move-+ʳ {m} n {o} m+n≤o = begin
-        m         ≡⟨ sym (m+n∸n≡m m n) ⟩
-        m + n ∸ n ≤⟨ ∸-monoˡ-≤ m+n≤o (m+n≤o⇒n≤o m m+n≤o) ⟩
-        o ∸ n     ∎
-      where open ≤-Reasoning
-
-    <-move-+ʳ : ∀ {m} n {o} → m + n < o → m < o ∸ n
-    <-move-+ʳ {m} n {o} m+n<o = ≤-move-+ʳ n m+n<o
-      
-    ≤-move-+ˡ : ∀ {m} n {o} → m ≤ n + o → m ∸ n ≤ o
-    ≤-move-+ˡ {m} n {o} m≤n+o = begin
-        m ∸ n     ≤⟨ ∸-monoˡ-≤ m≤n+o (m≤m+n n o) ⟩
-        n + o ∸ n ≡⟨ cong (_∸ n) (+-comm n _) ⟩
-        o + n ∸ n ≡⟨ m+n∸n≡m o n ⟩
-        o         ∎
-      where open ≤-Reasoning
-
-    <-move-+ˡ : ∀ {m n o} → n ≤ m → m < n + o → m ∸ n < o
-    <-move-+ˡ {m} {n} {o} n≤m m<n+o = begin
-      suc (m ∸ n) ≡⟨ sym (+-∸-assoc 1 n≤m) ⟩
-      suc m ∸ n   ≤⟨ ≤-move-+ˡ n m<n+o ⟩
-      o           ∎
-      where open ≤-Reasoning
-
-    ≤-move-∸ʳ : ∀ {m n o} → n ≤ m → m ∸ n ≤ o → m ≤ o + n
-    ≤-move-∸ʳ {m} {n} {o} n≤m m∸n≤o = begin
-        m           ≡⟨ sym (m+n∸m≡n n≤m) ⟩
-        n + (m ∸ n) ≡⟨ +-comm n _ ⟩
-        m ∸ n + n   ≤⟨ +-mono-≤ m∸n≤o (≤-refl {n}) ⟩
-        o + n       ∎
-      where open ≤-Reasoning
-
-    <-move-∸ʳ : ∀ {m} n {o} → m ∸ n < o → m < o + n
-    <-move-∸ʳ {_}     zero    {o}     m∸n<o       = ≤-stepsʳ 0 m∸n<o
-    <-move-∸ʳ {zero}  (suc n) {o}     m∸n<o       = ≤-stepsʳ (suc n) m∸n<o
-    <-move-∸ʳ {suc m} (suc n) {suc o} (s≤s m∸n<o) = ≤-trans (s≤s (<-move-∸ʳ n (s≤s m∸n<o))) (s≤s (≤-reflexive ((sym (+-suc o n)))))
-      
-    m∸n≤o⇒m∸o≤n : ∀ {m n o} → n ≤ m → m ∸ n ≤ o → m ∸ o ≤ n
-    m∸n≤o⇒m∸o≤n {o = o} n≤m m∸n≤o = ≤-move-+ˡ o (≤-move-∸ʳ n≤m m∸n≤o)
-
-    m∸n<o⇒m∸o<n : ∀ {m n o} → o ≤ m → m ∸ n < o → m ∸ o < n
-    m∸n<o⇒m∸o<n {o = o} o≤m m∸n<o = <-move-+ˡ o≤m (<-move-∸ʳ _ m∸n<o)
-    
-    ≤-move-+-∸ʳ : ∀ {m n} o {p} → m ∸ n + o ≤ p → n ≤ m → m ≤ p ∸ o + n
-    ≤-move-+-∸ʳ o m∸n+o≤p n≤m = ≤-move-∸ʳ n≤m (≤-move-+ʳ o m∸n+o≤p)
-
-    ≡-move-∸ʳ : ∀ {m n o} → m ∸ n ≡ o → n ≤ m → m ≡ o + n
-    ≡-move-∸ʳ {m} {n} {o} refl n≤m = trans (sym (m+n∸n≡m m n)) (+-∸-comm n n≤m)
-
-    ≡-move-∸ˡ : ∀ {m n o} → m ≡ n ∸ o → o ≤ n → m + o ≡ n
-    ≡-move-∸ˡ {m} {n} {o} refl o≤n = trans (+-comm m o) (m+n∸m≡n o≤n)
-
-    ≡-move-+ʳ : ∀ {m n o} → m + o ≡ n → m ≡ n ∸ o
-    ≡-move-+ʳ {m} {n} {o} refl = sym (m+n∸n≡m m o)
-
-    ≡-move-+ˡ : ∀ {m n o} → m ≡ n + o → m ∸ o ≡ n
-    ≡-move-+ˡ {m} {n} {o} refl = m+n∸n≡m n o
-  
-    ≡-move-+-∸ʳ : ∀ {m n} o {p} → m ∸ n + o ≡ p → n ≤ m → m ≡ p ∸ o + n
-    ≡-move-+-∸ʳ o m∸n+o≤p n≤m = ≡-move-∸ʳ (≡-move-+ʳ m∸n+o≤p) n≤m
-  
-  
-    w∸x≡y∸z⇒v+x≡w∧v+y≡z : ∀ {w x y z} → w ∸ x ≡ y ∸ z → x ≤ w → z ≤ y → ∃ λ v → (v + x ≡ w) × (v + z ≡ y)
-    w∸x≡y∸z⇒v+x≡w∧v+y≡z {w} {x} {y} {z} x+o∸x≡y∸z x≤w z≤y with m≤n⇒m+o≡n x≤w
-    ... | (o , refl) = o , +-comm o x , ≡-move-∸ˡ (
-      begin
-        o           ≡⟨ sym (m+n∸n≡m o x) ⟩
-        o + x ∸ x   ≡⟨ cong (_∸ x) (+-comm o x) ⟩
-        x + o ∸ x   ≡⟨ x+o∸x≡y∸z ⟩
-        y ∸ z
-      ∎) z≤y
-      where open ≡-Reasoning
-  -}
-

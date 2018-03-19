@@ -240,16 +240,16 @@ module RoutingLib.Data.NatInf.Properties where
   ... | inj₁ y⊓v≡y rewrite y⊓v≡y = ≤-trans (m⊓n≤m x u) x≤y
   ... | inj₂ y⊓v≡v rewrite y⊓v≡v = ≤-trans (m⊓n≤n x u) u≤v
 
-  o≤m⇒n⊓o≤m : ∀ {m} → _⊓_ ⊎-Preservesʳ (_≤ m)
+  o≤m⇒n⊓o≤m : ∀ {m} → _⊓_ Preservesʳ (_≤ m)
   o≤m⇒n⊓o≤m n o≤m = ≤-trans (m⊓n≤n n _) o≤m
 
-  n≤m⇒n⊓o≤m : ∀ {m} → _⊓_ ⊎-Preservesˡ (_≤ m)
+  n≤m⇒n⊓o≤m : ∀ {m} → _⊓_ Preservesˡ (_≤ m)
   n≤m⇒n⊓o≤m o n≤m = ≤-trans (m⊓n≤m _ o) n≤m
 
-  n≤m⊎o≤m⇒n⊓o≤m : ∀ {m} → _⊓_ ⊎-Preserves (_≤ m)
+  n≤m⊎o≤m⇒n⊓o≤m : ∀ {m} → _⊓_ Preservesᵒ (_≤ m)
   n≤m⊎o≤m⇒n⊓o≤m n o (inj₁ n≤m) = n≤m⇒n⊓o≤m o n≤m
   n≤m⊎o≤m⇒n⊓o≤m n o (inj₂ o≤m) = o≤m⇒n⊓o≤m n o≤m
 
-  m≤n×m≤o⇒m≤n⊓o : ∀ {m} → _⊓_ ×-Preserves (m ≤_)
+  m≤n×m≤o⇒m≤n⊓o : ∀ {m} → _⊓_ Preservesᵇ (m ≤_)
   m≤n×m≤o⇒m≤n⊓o m≤n m≤o = subst (_≤ _) (⊓-idem _) (⊓-mono-≤ m≤n m≤o)
 

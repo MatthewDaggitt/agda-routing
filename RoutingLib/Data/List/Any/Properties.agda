@@ -7,7 +7,7 @@ open import Data.List
 open import Data.List.Any as Any using (Any; here; there; index)
 open import Data.List.Any.Properties
 open import Data.List.Any.Membership.Propositional using (_∈_)
-open import Data.Maybe using (Maybe; just; nothing; just-injective)
+open import Data.Maybe as Maybe using (Maybe; just; nothing; just-injective)
 open import Function using (id; _∘_)
 open import Relation.Binary using (REL)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong; subst)
@@ -18,16 +18,6 @@ open import RoutingLib.Data.List using (applyBetween)
 open import RoutingLib.Data.List.Permutation using (_⇿_; _◂_≡_; here; there; []; _∷_)
 
 module RoutingLib.Data.List.Any.Properties where
-
-  Any-mapMaybe : ∀ {a b p} {A : Set a} {B : Set b} {P : B → Set p} (Q : A → Maybe B) →
-                ∀ xs → Any (λ x → ∃ λ y → Q x ≡ just y × P y) xs → Any P (mapMaybe Q xs)
-  Any-mapMaybe Q (x ∷ xs) (here (y , Qx≡y , Py)) with Q x
-  ... | nothing = contradiction Qx≡y λ()
-  ... | just z  = here (subst _ (just-injective (sym Qx≡y)) Py)
-  Any-mapMaybe Q (x ∷ xs) (there Pxs) with Q x
-  ... | nothing = Any-mapMaybe Q xs Pxs
-  ... | just z  = there (Any-mapMaybe Q xs Pxs)
-
 
 
   module _ {a p} {A : Set a} {P : A → Set p} where
@@ -65,18 +55,3 @@ module RoutingLib.Data.List.Any.Properties where
     lookup-index : ∀ {xs} (p : Any P xs) → P (lookup xs (index p))
     lookup-index (here px)   = px
     lookup-index (there pxs) = lookup-index pxs
-    
-{-
-    index-lookup : ∀ {xs} (pxs₁ pxs₂ : Any P xs) → index pxs₁ ≡ index pys₁ → x ≡ y
-    index-lookup (here x≈z)   (here y≈z)   refl    = trans x≈z (sym y≈z)
-    index-lookup (here x≈z)   (there y∈xs) ()
-    index-lookup (there x∈xs) (here y≈z)   ()
-    index (there x∈xs) (there y∈xs) indexEq = indexOf-revCong x∈xs y∈xs (suc-injective indexEq)
-
-    index-lookup : ∀ {i xs} → Unique S xs → (i<|xs| : i < length xs) (xsᵢ∈xs : (lookup xs i<|xs|) ∈ xs) → indexOf xsᵢ∈xs ≡ i
-    index-lookup {_}     []           ()     
-    index-lookup {zero}  (_    ∷ _)   (s≤s i<|xs|) (here xsᵢ≈x)   = refl
-    index-lookup {zero}  (x≉xs ∷ _)   (s≤s i<|xs|) (there x∈xs)  = contradiction x∈xs (All¬⇒¬Any x≉xs)
-    index-lookup {suc i} (x≉xs ∷ _)   (s≤s i<|xs|) (here xsᵢ≈x)   = contradiction (∈-resp-≈ (∈-lookup i<|xs|) xsᵢ≈x) (All¬⇒¬Any x≉xs)
-    index-lookup {suc i} (_    ∷ xs!) (s≤s i<|xs|) (there xsᵢ∈xs) = cong suc (indexOf-lookup xs! i<|xs| xsᵢ∈xs)
--}

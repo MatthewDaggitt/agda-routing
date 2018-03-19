@@ -6,46 +6,48 @@ open import Relation.Binary using (Rel; _Preserves₂_⟶_⟶_; _Preserves_⟶_)
 
 module RoutingLib.Algebra.FunctionProperties.Core {a} {A : Set a} where
 
+  _Preservesˡ_ : Op₂ A → ∀ {p} → Pred A p → Set _
+  _•_ Preservesˡ P = ∀ {a} b → P a → P (a • b)
 
-  _⊎-Preservesˡ_ : Op₂ A → ∀ {p} → Pred A p → Set _
-  _•_ ⊎-Preservesˡ P = ∀ {a} b → P a → P (a • b)
+  _Preservesʳ_ : Op₂ A → ∀ {p} → Pred A p → Set _
+  _•_ Preservesʳ P = ∀ a {b} → P b → P (a • b)
 
-  _⊎-Preservesʳ_ : Op₂ A → ∀ {p} → Pred A p → Set _
-  _•_ ⊎-Preservesʳ P = ∀ a {b} → P b → P (a • b)
-
-  _⊎-Preserves_ : Op₂ A → ∀ {p} → Pred A p → Set _
-  _•_ ⊎-Preserves P = ∀ a b → P a ⊎ P b → P (a • b)
+  _Preservesᵒ_ : Op₂ A → ∀ {p} → Pred A p → Set _
+  _•_ Preservesᵒ P = ∀ a b → P a ⊎ P b → P (a • b)
   
-  _×-Preserves_ : Op₂ A → ∀ {p} → Pred A p → Set _
-  _•_ ×-Preserves P = ∀ {a b} → P a → P b → P (a • b)
+  _Preservesᵇ_ : Op₂ A → ∀ {p} → Pred A p → Set _
+  _•_ Preservesᵇ P = ∀ {a b} → P a → P b → P (a • b)
 
 
-  _Forces-×ˡ_ : Op₂ A → ∀ {p} → Pred A p → Set _
-  _•_ Forces-×ˡ P = ∀ a b → P (a • b) → P a
+  _Forcesˡ_ : Op₂ A → ∀ {p} → Pred A p → Set _
+  _•_ Forcesˡ P = ∀ a b → P (a • b) → P a
 
-  _Forces-×ʳ_ : Op₂ A → ∀ {p} → Pred A p → Set _
-  _•_ Forces-×ʳ P = ∀ a b → P (a • b) → P b
+  _Forcesʳ_ : Op₂ A → ∀ {p} → Pred A p → Set _
+  _•_ Forcesʳ P = ∀ a b → P (a • b) → P b
   
-  _Forces-×_ : Op₂ A → ∀ {p} → Pred A p → Set _
-  _•_ Forces-× P = ∀ a b → P (a • b) → P a × P b
+  _Forcesᵇ_ : Op₂ A → ∀ {p} → Pred A p → Set _
+  _•_ Forcesᵇ P = ∀ a b → P (a • b) → P a × P b
 
-  _Forces-⊎_ : Op₂ A → ∀ {p} → Pred A p → Set _
-  _•_ Forces-⊎ P = ∀ a b → P (a • b) → P a ⊎ P b
+  _Forcesᵒ_ : Op₂ A → ∀ {p} → Pred A p → Set _
+  _•_ Forcesᵒ P = ∀ a b → P (a • b) → P a ⊎ P b
 
 
 
-  ⊎pres⇒⊎presˡ : ∀ {_•_} {p} {P : Pred A p} →
-                     _•_ ⊎-Preserves P → _•_ ⊎-Preservesˡ P
-  ⊎pres⇒⊎presˡ pres b Pa = pres _ b (inj₁ Pa)
+  ------------------------------------------------------------------------------
+  -- Properties
 
-  ⊎pres⇒⊎presʳ : ∀ {_•_} {p} {P : Pred A p} →
-                     _•_ ⊎-Preserves P → _•_ ⊎-Preservesʳ P
-  ⊎pres⇒⊎presʳ pres a Pb = pres a _ (inj₂ Pb)
+  presᵒ⇒presˡ : ∀ {_•_} {p} {P : Pred A p} →
+                 _•_ Preservesᵒ P → _•_ Preservesˡ P
+  presᵒ⇒presˡ pres b Pa = pres _ b (inj₁ Pa)
 
-  forces×⇒forces×ˡ : ∀ {_•_} {p} {P : Pred A p} →
-                     _•_ Forces-× P → _•_ Forces-×ˡ P
-  forces×⇒forces×ˡ forces a b P = proj₁ (forces a b P)
-  
-  forces×⇒forces×ʳ : ∀ {_•_} {p} {P : Pred A p} →
-                     _•_ Forces-× P → _•_ Forces-×ʳ P
-  forces×⇒forces×ʳ forces a b P = proj₂ (forces a b P)
+  presᵒ⇒presʳ : ∀ {_•_} {p} {P : Pred A p} →
+                 _•_ Preservesᵒ P → _•_ Preservesʳ P
+  presᵒ⇒presʳ pres a Pb = pres a _ (inj₂ Pb)
+
+  forcesᵇ⇒forcesˡ : ∀ {_•_} {p} {P : Pred A p} →
+                    _•_ Forcesᵇ P → _•_ Forcesˡ P
+  forcesᵇ⇒forcesˡ forces a b P = proj₁ (forces a b P)
+
+  forcesᵇ⇒forcesʳ : ∀ {_•_} {p} {P : Pred A p} →
+                    _•_ Forcesᵇ P → _•_ Forcesʳ P
+  forcesᵇ⇒forcesʳ forces a b P = proj₂ (forces a b P)

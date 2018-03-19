@@ -7,12 +7,12 @@ open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
 open import Algebra.Structures using (IsSemigroup)
 import Algebra.FunctionProperties as FunctionProperties
-open import Function using (flip)
 import Relation.Binary.NonStrictToStrict as NonStrictToStrict
-import Relation.Binary.Flip as Flip
+
 open import Function using (_∘_)
 
 import RoutingLib.Relation.Binary.NaturalOrder.Right as RightNaturalOrder
+import RoutingLib.Relation.Binary.Flip as Flip
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Algebra.Selectivity.Properties using (idem)
 
@@ -79,30 +79,8 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions  where
       ; ≤-resp-≈  to ≤₊-resp-≈
       )
 
-    ≥₊-isDecTotalOrder : IsDecTotalOrder _≈_ (flip _≤₊_)
-    ≥₊-isDecTotalOrder = record
-      { isTotalOrder = record
-          { isPartialOrder = record
-            { isPreorder = record
-              { isEquivalence = ≈-isEquivalence
-              ; reflexive     = ≤₊-reflexive ∘ ≈-sym
-              ; trans         = Flip.transitive _≤₊_ ≤₊-trans
-              }
-            ; antisym    = λ y≤x x≤y → ≤₊-antisym x≤y y≤x
-            }
-          ; total        = Flip.total _ ≤₊-total
-          }
-      ; _≟_          = _≟_
-      ; _≤?_         = Flip.decidable _≤₊_ _≤₊?_
-      }
-    
     ≥₊-decTotalOrder : DecTotalOrder _ _ _
-    ≥₊-decTotalOrder = record
-      { Carrier         = Route
-      ; _≈_             = _≈_
-      ; _≤_             = flip _≤₊_
-      ; isDecTotalOrder = ≥₊-isDecTotalOrder
-      }
+    ≥₊-decTotalOrder = Flip.decTotalOrderᵘ ≤₊-decTotalOrder
 
     open NonStrictToStrict _≈_ _≤₊_ using () renaming (<-resp-≈ to <-resp-≈')
 

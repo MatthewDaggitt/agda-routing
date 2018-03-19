@@ -1,7 +1,7 @@
 open import Data.Product using (∃; ∃₂; Σ; _×_; _,_; proj₁; proj₂)
 open import Data.Nat using (ℕ; zero; suc; _+_; z≤n; s≤s; _<_; _≮_; _≤_; _≤?_; _∸_; _⊔_; _⊓_; ≤-pred) renaming (_≟_ to _≟ℕ_)
 open import Data.Nat.Properties
-  using (≤-trans; ≤-refl; ≤-reflexive; m≤m+n; n≤1+n; m+n∸m≡n; n≤m+n; +-mono-≤; ∸-mono;  ⊓-mono-<;+-cancelˡ-≤;  m≤m⊔n; m⊓n≤m; ≰⇒≥; <⇒≱; <⇒≯; n≤m⊔n; m⊓n≤n; <-transˡ; <-transʳ; +-distribˡ-⊔; <⇒≤; +-comm)
+  using (≤-trans; ≤-refl; ≤-reflexive; m≤m+n; n≤1+n; m+n∸m≡n; n≤m+n; +-mono-≤; ∸-mono;  ⊓-mono-<;+-cancelˡ-≤;  m≤m⊔n; m⊓n≤m; ≰⇒≥; <⇒≱; <⇒≯; n≤m⊔n; m⊓n≤n; <-transˡ; <-transʳ; +-distribˡ-⊔; <⇒≤; +-comm; ≤-stepsʳ; +-monoʳ-≤)
 open import Data.Fin using (Fin)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Subset using (Subset; _∈_; _∉_; ⊤; ⁅_⁆)
@@ -14,13 +14,13 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Function using (_∘_)
 open import Induction.WellFounded using (Acc; acc)
-open import Induction.Nat using () renaming (<-well-founded to <-wellFounded)
+open import Induction.Nat using (<-wellFounded)
 
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
 open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions using () renaming (SufficientConditions to GeneralSufficientConditions)
-open import RoutingLib.Data.Nat.Properties using (m≤n⇒m≤n⊔o; m≤o⇒m≤n⊔o; n<m⇒n⊓o<m; n≤m⇒n⊓o≤m; m<n⇒n≢0; ≤-stepsʳ; +-monoʳ-≤; +-monoʳ-<; n≢0⇒0<n; module ≤-Reasoning)
+open import RoutingLib.Data.Nat.Properties using (m≤n⇒m≤n⊔o; m≤o⇒m≤n⊔o; n<m⇒n⊓o<m; n≤m⇒n⊓o≤m; m<n⇒n≢0; +-monoʳ-<; n≢0⇒0<n; module ≤-Reasoning)
 open import RoutingLib.Data.Matrix using (Any; map; min⁺)
 open import RoutingLib.Data.Matrix.Properties using (min⁺[M]<min⁺[N])
 open import RoutingLib.Data.Table using (Table)

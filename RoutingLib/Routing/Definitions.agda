@@ -1,7 +1,7 @@
 open import Algebra.FunctionProperties using (Op₂; Congruent₂; Congruent₁)
 open import Data.Fin using (Fin)
-open import Data.Nat using (ℕ)
-open import Data.Product using (_,_)
+open import Data.Nat using (ℕ; suc)
+open import Data.Product using (_×_; _,_)
 open import Data.Maybe
 open import Level using (_⊔_) renaming (zero to lzero; suc to lsuc)
 open import Relation.Nullary using (¬_; yes; no)
@@ -44,7 +44,7 @@ module RoutingLib.Routing.Definitions where
       ≈-isDecEquivalence : IsDecEquivalence _≈_
       ⊕-cong             : Congruent₂ _≈_ _⊕_
       ▷-cong             : ∀ e → Congruent₁ _≈_ (e ▷_)
-      
+
     -- A few useful consequences of equality to export
     _≉_ : Rel Route ℓ
     x ≉ y = ¬ (x ≈ y)
@@ -79,13 +79,22 @@ module RoutingLib.Routing.Definitions where
   -- In particular we need an adjacency matrix (representing the topology)
 
   record RoutingProblem
-    {a b ℓ} (𝓡𝓐 : RoutingAlgebra a b ℓ) (n : ℕ)
+    {a b ℓ} (𝓡𝓐 : RoutingAlgebra a b ℓ) (n-1 : ℕ)
     : Set (lsuc (a ⊔ b ⊔ ℓ)) where
     no-eta-equality -- Needed due to bug #2732 in Agda
     
     field
-      A  : SquareMatrix (RoutingAlgebra.Step 𝓡𝓐) n
+      A  : SquareMatrix (RoutingAlgebra.Step 𝓡𝓐) (suc n-1)
 
+    n : ℕ
+    n = suc n-1
+    
+    Node : Set
+    Node = Fin n
+
+    Edge : Set
+    Edge = Fin n × Fin n
+    
     open RoutingAlgebra 𝓡𝓐 public
     open MatrixDecEquality DS public
     open TableDecEquality DS using (𝕋ₛ)

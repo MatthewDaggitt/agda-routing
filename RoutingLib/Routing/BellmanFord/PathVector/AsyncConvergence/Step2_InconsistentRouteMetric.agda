@@ -2,7 +2,7 @@ open import Data.Product using (∃; _,_; _×_)
 open import Data.Sum using (_⊎_; inj₁; inj₂; [_,_]′; map)
 open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _<_; _≤_; _⊔_)
 open import Data.Nat.Properties
-  using (≤-refl; ≤-reflexive; ≤-total; <-transˡ; <-transʳ; ⊔-comm; ⊔-identityʳ; ⊔-idem; m≤m⊔n; <⇒≯; <⇒≤; n≤m⊔n)
+  using (≤-refl; ≤-reflexive; ≤-total; <-transˡ; <-transʳ; ⊔-comm; ⊔-identityʳ; ⊔-idem; m≤m⊔n; <⇒≯; <⇒≤; n≤m⊔n; ≤⇒≯; ⊔-monoˡ-≤; m≤n⇒m⊔n≡n)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Subset using (Subset; _∈_; _∉_; ⁅_⁆; ⊤)
 open import Data.Fin.Subset.Properties using (x∈p∩q⁺; x∈⁅x⁆; ∈⊤)
@@ -18,7 +18,7 @@ open import Induction.Nat using () renaming (<-well-founded to <-wellFounded)
 
 open import RoutingLib.Data.Fin.Subset using (_\\_; size[p\\q]<size[p]; i∉p\\q⇒i∉p; i∉⁅j⁆) renaming (size to sizeₛ)
 open import RoutingLib.Data.Nat.Properties
-  using (⊔-monoˡ-≤; ⊔-triangulate; m≤o⇒m≤n⊔o; m<n⇒n≢0; n≤m×o≤m⇒n⊔o≤m; m<n⊎m<o⇒m<n⊔o; n≤m⇒m⊔n≡m; m≤n⇒m⊔n≡n; m≤n⇒m≤n⊔o; module ≤-Reasoning; ≤⇒≯)
+  using (⊔-triangulate; m≤o⇒m≤n⊔o; m<n⇒n≢0; n≤m×o≤m⇒n⊔o≤m; m<n⊎m<o⇒m<n⊔o; n≤m⇒m⊔n≡m; m≤n⇒m≤n⊔o; module ≤-Reasoning)
 import RoutingLib.Function.Metric as Metric
 open import RoutingLib.Data.Sum using (flip)
 

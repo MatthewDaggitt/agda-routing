@@ -6,8 +6,6 @@ open import Algebra.FunctionProperties using (Op₂)
 open import Algebra.Structures
 import Relation.Binary.EqReasoning as EqReasoning
 
-open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_; Respects₂⇨RespectedBy)
-
 module RoutingLib.Relation.Binary.NaturalOrder.Right
   {a ℓ} {A : Set a} (_≈_ : Rel A ℓ) (_∙_ : Op₂ A) where
 
@@ -37,7 +35,7 @@ module RoutingLib.Relation.Binary.NaturalOrder.Right
   -- Properties
 
   ≤-reflexive : IsEquivalence _≈_ → Congruent₂ _∙_ → Idempotent _∙_ → _≈_ ⇒ _≤_
-  ≤-reflexive isEq cong idem {x} x≈y = trans (cong (sym x≈y) refl) (idem x)
+  ≤-reflexive isEq cong idem x≈y = trans (cong (sym x≈y) refl) (idem _)
     where open IsEquivalence isEq
     
   ≤-refl : Idempotent _∙_ → Reflexive _≤_

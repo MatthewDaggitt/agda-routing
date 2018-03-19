@@ -1,6 +1,6 @@
 open import Data.Bool using (Bool; true; if_then_else_)
-open import Data.List using (List; []; _∷_; _++_; reverse; filter; drop; take; concat; foldr; gfilter; map; zipWith; applyUpTo; tabulate)
-open import Data.List.All using (All; []; _∷_) renaming (map to mapₐ)
+open import Data.List hiding (any)
+open import Data.List.All using (All; []; _∷_; head; tail) renaming (map to mapₐ)
 open import Data.List.All.Properties
 open import Data.List.Any using (Any; here; there; any)
 open import Data.List.Relation.Pointwise using (Pointwise; []; _∷_)
@@ -24,6 +24,7 @@ open import RoutingLib.Data.List
 open import RoutingLib.Data.List.All
 open import RoutingLib.Data.List.Properties
 open import RoutingLib.Data.List.Permutation using (_⇿_; _◂_≡_; here; there; []; _∷_)
+open import RoutingLib.Data.Fin.Properties using (𝔽ₛ)
 
 module RoutingLib.Data.List.All.Properties where
 
@@ -32,7 +33,10 @@ module RoutingLib.Data.List.All.Properties where
              All (λ y → All (_~ y) xss) ys
   All-swap {ys = []}      _  = []
   All-swap {ys = _ ∷ _}  []  = All-universal (λ _ → []) _
-  All-swap {ys = y ∷ ys} ((x~y ∷ x~ys) ∷ pxss) = (x~y ∷ (mapₐ (λ {(x~y ∷ _) → x~y}) pxss)) ∷ All-swap (x~ys ∷ (mapₐ (λ {(_ ∷ pys) → pys}) pxss))
+  All-swap {ys = y ∷ ys} ((x~y ∷ x~ys) ∷ pxss) =
+    (x~y ∷ (mapₐ head pxss)) ∷ All-swap (x~ys ∷ (mapₐ tail pxss))
+
+
 
   module _ {a p} {A : Set a} {P : A → Set p} where
 
@@ -69,29 +73,6 @@ module RoutingLib.Data.List.All.Properties where
 
   betweenₛₑ<e : ∀ s e → All (_< e) (between s e)
   betweenₛₑ<e s e = All-applyBetween⁺₁ id s e (λ _ i<e → i<e)
-  
-  All-gfilter⁺₁ : ∀ {a b p q} {A : Set a} {B : Set b} {P : A → Set p} {Q : B → Set q} {f : A → Maybe B} → (∀ {x} → P x → ∀ {y} → f x ≡ just y → Q y) → ∀ {xs} → All P xs → All Q (gfilter f xs)
-  All-gfilter⁺₁ _ [] = []
-  All-gfilter⁺₁ {f = f} f-inj {x ∷ xs} (px ∷ pxs) with f x | inspect f x
-  ... | nothing | _            = All-gfilter⁺₁ f-inj pxs
-  ... | just v  | [ fₓ≡justᵥ ] = f-inj px fₓ≡justᵥ ∷ All-gfilter⁺₁ f-inj pxs
-
-  All-gfilter⁺₃ : ∀ {a b p} {A : Set a} {B : Set b} (P : B → Set p) {f : A → Maybe B} {xs} → All (λ x → f x ≡ nothing ⊎ (∀ {y} → f x ≡ just y → P y)) xs → All P (gfilter f xs)
-  All-gfilter⁺₃ _ [] = []
-  All-gfilter⁺₃ P {f = f} {x ∷ xs} (Px ∷ Pxs) with f x | inspect f x
-  ... | nothing | _            = All-gfilter⁺₃ P Pxs
-  ... | just v  | [ fₓ≡justᵥ ] with Px
-  ...   | inj₁ fx≡nothing = contradiction fx≡nothing λ()
-  ...   | inj₂ just⇒P     = just⇒P ≡-refl ∷ All-gfilter⁺₃ P Pxs
-  
-  All-gfilter⁺₂ : ∀ {a b p} {A : Set a} {B : Set b} {P : B → Set p} {f : A → Maybe B} → (∀ {x y} → f x ≡ just y → P y) → ∀ xs → All P (gfilter f xs)
-  All-gfilter⁺₂ {P = P} f-inj xs = All-gfilter⁺₃ P (All-universal (λ x → inj₂ (λ {y} t → f-inj {x} {y} t)) xs)
-
-
-  All-zipWith⁺ : ∀ {a b c p} {A : Set a} {B : Set b} {C : Set c} (P : C → Set p) (f : A → B → C) {xs ys} →
-                 Pointwise (λ x y → P (f x y)) xs ys → All P (zipWith f xs ys)
-  All-zipWith⁺ P f []              = []
-  All-zipWith⁺ P f (Pfxy ∷ Pfxsys) = Pfxy ∷ All-zipWith⁺ P f Pfxsys
 
 
   ----------------------
@@ -150,6 +131,14 @@ module RoutingLib.Data.List.All.Properties where
   open DoubleSetoidProperties public
 
 
+  allFinPairs⁺ : ∀ {n p} {P : Pred (Fin n × Fin n) p} → (∀ e → P e) → All P (allFinPairs n)
+  allFinPairs⁺ {n} P = All-combine⁺ (𝔽ₛ n) (𝔽ₛ n) _,_ (allFin n) (allFin n) (λ _ _ → P _)
+
+
+
+
+
+
 
   -- All pairs
 
@@ -163,25 +152,22 @@ module RoutingLib.Data.List.All.Properties where
   AllPairs-map⁺₂ f-pres []           = []
   AllPairs-map⁺₂ f-pres (x∉xs ∷ xs!) = All-map (mapₐ f-pres x∉xs) ∷ AllPairs-map⁺₂ f-pres xs!
 
-  AllPairs-gfilter⁺ : ∀ {a b ℓ₁ ℓ₂} {A : Set a} {B : Set b} {_~₁_ : Rel A ℓ₁} {_~₂_ : Rel B ℓ₂}
+  {-
+  AllPairs-mapMaybe⁺ : ∀ {a b ℓ₁ ℓ₂} {A : Set a} {B : Set b} {_~₁_ : Rel A ℓ₁} {_~₂_ : Rel B ℓ₂}
                   (f : A → Maybe B) → (∀ {x y} → x ~₁ y → (f x ≡ nothing) ⊎ (f y ≡ nothing) ⊎ (Eq _~₂_ (f x) (f y)))
-                  → AllPairs _~₁_ ⋐ AllPairs _~₂_ ∘ gfilter f
-  AllPairs-gfilter⁺ _ _ [] = []
-  AllPairs-gfilter⁺ {_~₁_ = _~₁_} {_~₂_} f f-inj {x ∷ xs} (px ∷ pxs) with f x | inspect f x
-  ... | nothing | _            = AllPairs-gfilter⁺ f f-inj pxs
-  ... | just v  | [ fx≡justv ] = All-gfilter⁺₁ convert px ∷ AllPairs-gfilter⁺ f f-inj pxs
+                  → AllPairs _~₁_ ⋐ AllPairs _~₂_ ∘ mapMaybe f
+  AllPairs-mapMaybe⁺ _ _ [] = []
+  AllPairs-mapMaybe⁺ {_~₁_ = _~₁_} {_~₂_} f f-inj {x ∷ xs} (px ∷ pxs) with f x | inspect f x
+  ... | nothing | _            = AllPairs-mapMaybe⁺ f f-inj pxs
+  ... | just v  | [ fx≡justv ] = mapMaybe⁺ (v ~₂_) {!!} ∷ AllPairs-mapMaybe⁺ f f-inj pxs
     where
     convert : ∀ {a} → x ~₁ a → ∀ {b} → f a ≡ just b → v ~₂ b
     convert {a} x~a {b} fa≡justb with f-inj x~a
     ... | inj₁ fx≡nothing        = contradiction (≡-trans (≡-sym fx≡nothing) fx≡justv) λ()
     ... | inj₂ (inj₁ fa≡nothing) = contradiction (≡-trans (≡-sym fa≡nothing) fa≡justb) λ()
     ... | inj₂ (inj₂ fx~fa)      = drop-just (subst₂ (Eq _~₂_) fx≡justv fa≡justb fx~fa)
-
-
-
-
-
-
+  -}
+  
   module _ {a ℓ} {A : Set a} {_~_ : Rel A ℓ} where
 
     AllPairs-◂≡ : Symmetric _~_ → ∀ {x xs ys} → AllPairs _~_ (x ∷ xs) → x ◂ xs ≡ ys → AllPairs _~_ ys

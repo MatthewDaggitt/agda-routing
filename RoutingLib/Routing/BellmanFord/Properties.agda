@@ -1,9 +1,11 @@
+import Algebra.FunctionProperties as FunctionProperties
 open import Data.Nat using (suc; zero; _+_)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Subset using (⊤; _∈_)
 open import Data.Fin.Dec using (_∈?_)
 open import Data.List using (tabulate)
+open import Data.List.Relation.Pointwise using (tabulate⁺)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (∃; ∃₂; _,_; _×_; proj₁; proj₂)
 open import Relation.Nullary using (¬_; yes; no)
@@ -16,11 +18,14 @@ open import RoutingLib.Routing.Definitions
 open import RoutingLib.Data.List.Properties using (foldr≤ₗe; foldr≤ᵣxs)
 open import RoutingLib.Data.List.Membership.Setoid.Properties
   using (foldr-∈; ∈-tabulate⁻; ∈-tabulate⁺)
+open import RoutingLib.Data.List.Relation.Pointwise
+  using (foldr-All₂)
+
 import RoutingLib.Routing.BellmanFord as BellmanFord
 
 module RoutingLib.Routing.BellmanFord.Properties
-  {a b ℓ n} {𝓡𝓐 : RoutingAlgebra a b ℓ}
-  (𝓡𝓟 : RoutingProblem 𝓡𝓐 n)
+  {a b ℓ n-1} {𝓡𝓐 : RoutingAlgebra a b ℓ}
+  (𝓡𝓟 : RoutingProblem 𝓡𝓐 n-1)
   where
 
   -----------
@@ -29,8 +34,7 @@ module RoutingLib.Routing.BellmanFord.Properties
 
   open RoutingProblem 𝓡𝓟
   open BellmanFord 𝓡𝓟
-
-  open import Algebra.FunctionProperties _≈_
+  open FunctionProperties _≈_
   
   abstract
 
@@ -64,6 +68,11 @@ module RoutingLib.Routing.BellmanFord.Properties
     -- Synchronous properties --
     ----------------------------
 
+    -- σ respects the underlying matrix equality
+    σ-cong : ∀ {X Y} → X ≈ₘ Y → σ X ≈ₘ σ Y
+    σ-cong X≈Y i j = foldr-All₂
+      _≈_ ⊕-cong ≈-refl (tabulate⁺ (λ k → ▷-cong (A i k) (X≈Y k j)))
+    
     -- σ either extends the route by going through some k or it chooses a
     -- trivial route from the identity matrix
     σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ : Selective _⊕_ → ∀ X i j →

@@ -27,11 +27,14 @@ module RoutingLib.Function where
 
 
   -- Pipelining
-  
+
+  -- stdlib
   infixl 0 _∣>_ _∣>′_
 
+  -- stdlib
   _∣>_ : ∀ {a b} {A : Set a} {B : A → Set b} (x : A) (f : ∀ x → B x) → B x
   x ∣> f = f x
- 
+
+  -- stdlib
   _∣>′_ : ∀ {a b} {A : Set a} {B : Set b} (x : A) (f : A → B) → B
   _∣>′_ = _∣>_

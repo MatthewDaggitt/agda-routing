@@ -1,6 +1,6 @@
 open import Data.Product using (∃; ∃₂; Σ; _×_; _,_; proj₁; proj₂)
 open import Data.Nat using (ℕ; zero; suc; _+_; z≤n; s≤s; _<_; _≤_; _≤?_; _∸_; _⊔_; _⊓_; ≤-pred) renaming (_≟_ to _≟ℕ_)
-open import Data.Nat.Properties using (≤-trans; ≤-refl; ≤-reflexive; m≤m+n; m+n∸m≡n; +-mono-≤; ∸-mono;  ⊓-mono-<; m≤m⊔n; m⊓n≤m; ≰⇒≥; n≤m⊔n; m⊓n≤n; <-transˡ; <-transʳ; +-distribˡ-⊔)
+open import Data.Nat.Properties using (≤-trans; ≤-refl; ≤-reflexive; m≤m+n; m+n∸m≡n; +-mono-≤; ∸-mono;  ⊓-mono-<; m≤m⊔n; m⊓n≤m; ≰⇒≥; n≤m⊔n; m⊓n≤n; <-transˡ; <-transʳ; +-distribˡ-⊔; ≤-stepsʳ; +-monoʳ-≤)
 open import Data.Fin using (Fin)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; subst; subst₂; cong₂)
@@ -11,10 +11,9 @@ open import Function using (_∘_)
 
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Algebra.FunctionProperties
-open import RoutingLib.Data.Graph
 open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
 open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions using () renaming (SufficientConditions to GeneralSufficientConditions)
-open import RoutingLib.Data.Nat.Properties using (m≤n⇒m≤n⊔o; m≤o⇒m≤n⊔o; n<m⇒n⊓o<m; n≤m⇒n⊓o≤m; m<n⇒n≢0; ≤-stepsʳ; +-monoʳ-≤; +-monoʳ-<; n≢0⇒0<n; module ≤-Reasoning)
+open import RoutingLib.Data.Nat.Properties using (m≤n⇒m≤n⊔o; m≤o⇒m≤n⊔o; n<m⇒n⊓o<m; n≤m⇒n⊓o≤m; m<n⇒n≢0; +-monoʳ-<; n≢0⇒0<n; module ≤-Reasoning)
 open import RoutingLib.Data.Matrix using (Any; map; min⁺)
 open import RoutingLib.Data.Matrix.Properties using (min⁺[M]<min⁺[N])
 open import RoutingLib.Data.Table using (Table)

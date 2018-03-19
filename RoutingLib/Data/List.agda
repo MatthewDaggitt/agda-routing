@@ -21,13 +21,7 @@ module RoutingLib.Data.List where
   merge total (x ∷ xs) (y ∷ ys) with total x y
   ... | inj₁ x≤y = x ∷ merge total xs (y ∷ ys)
   ... | inj₂ y≤x = y ∷ merge total (x ∷ xs) ys
-  
-  max : ℕ → List ℕ → ℕ
-  max ⊥ xs = foldr _⊔_ ⊥ xs
-
-  min : ℕ → List ℕ → ℕ
-  min ⊤ xs = foldr _⊓_ ⊤ xs
-  
+    
   applyBetween : ∀ {a} {A : Set a} (f : ℕ → A) s e → List A
   applyBetween f s e = drop s (applyUpTo f e)
 
@@ -35,9 +29,9 @@ module RoutingLib.Data.List where
   between s e = applyBetween id s e
 
 
-  combine : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c}
-         → (A → B → C) → List A → List B → List C
-  combine f [] _ = []
+  combine : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c} →
+            (A → B → C) → List A → List B → List C
+  combine f []       _  = []
   combine f (x ∷ xs) ys = map (f x) ys ++ combine f xs ys
 
   allFinPairs : ∀ n → List (Fin n × Fin n)

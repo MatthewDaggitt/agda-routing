@@ -1,3 +1,4 @@
+open import Algebra.FunctionProperties using (Op₂; Selective)
 open import Data.Nat using (ℕ; suc; zero; _<_; _≤_; s≤s; z≤n; _≟_)
 open import Data.Nat.Properties using (⊔-sel; m≤m⊔n; ≤+≢⇒<; ⊔-identityʳ; n≤m⊔n; ≤-trans)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
@@ -34,21 +35,24 @@ module RoutingLib.Data.List.Membership.Propositional.Properties where
   ∈-++⁻ : ∀ {a} {A : Set a} {v : A}  xs {ys} → v ∈ xs ++ ys → v ∈ xs ⊎ v ∈ ys
   ∈-++⁻ = GM.∈-++⁻ (setoid _)
 
-  ∈-concat⁺ : ∀ {a} {A : Set a} {v : A} {xs xss} → v ∈ xs → xs ∈ xss → v ∈ concat xss
-  ∈-concat⁺ {A = A} {xss = xss} v∈xs xs∈xss = GM.∈-concat⁺ (setoid A) v∈xs (Any.map ≡⇒Rel≡ xs∈xss)
+  ∈-concat⁺ : ∀ {a} {A : Set a} {v : A} {xs xss} →
+              v ∈ xs → xs ∈ xss → v ∈ concat xss
+  ∈-concat⁺ v∈xs xs∈xss = GM.∈-concat⁺ (setoid _) v∈xs (Any.map ≡⇒Rel≡ xs∈xss)
   
   ∈-combine⁺ : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c}
-              {u v xs ys} (f : A → B → C) → u ∈ xs → v ∈ ys 
-              → f u v ∈ combine f xs ys
+              {u v xs ys} (f : A → B → C) → u ∈ xs → v ∈ ys →
+              f u v ∈ combine f xs ys
   ∈-combine⁺ f = GM.∈-combine (setoid _) (setoid _) (setoid _) (cong₂ f)
 
-  ∈-applyUpTo⁺ : ∀ {a} {A : Set a} (f : ℕ → A) {n i} → i < n → f i ∈ applyUpTo f n
+  ∈-applyUpTo⁺ : ∀ {a} {A : Set a} (f : ℕ → A) {n i} →
+                 i < n → f i ∈ applyUpTo f n
   ∈-applyUpTo⁺ = GM.∈-applyUpTo⁺ (setoid _)
 
   ∈-upTo⁺ : ∀ {n i} → i < n → i ∈ upTo n
   ∈-upTo⁺ = ∈-applyUpTo⁺ id
   
-  ∈-applyDownFrom⁺ : ∀ {a} {A : Set a} (f : ℕ → A) {n i} → i < n → f i ∈ applyDownFrom f n
+  ∈-applyDownFrom⁺ : ∀ {a} {A : Set a} (f : ℕ → A) {n i} →
+                     i < n → f i ∈ applyDownFrom f n
   ∈-applyDownFrom⁺ f {suc n} {i} (s≤s i≤n) with i ≟ n
   ... | yes i≡n = here (cong f i≡n)
   ... | no  i≢n = there (∈-applyDownFrom⁺ f (≤+≢⇒< i≤n i≢n))
@@ -56,10 +60,12 @@ module RoutingLib.Data.List.Membership.Propositional.Properties where
   ∈-downFrom⁺ : ∀ {n i} → i < n → i ∈ downFrom n
   ∈-downFrom⁺ i<n = ∈-applyDownFrom⁺ id i<n
 
-  ∈-applyBetween⁺ : ∀ {a} {A : Set a} (f : ℕ → A) {s e i} → s ≤ i → i < e → f i ∈ applyBetween f s e
+  ∈-applyBetween⁺ : ∀ {a} {A : Set a} (f : ℕ → A) {s e i} →
+                    s ≤ i → i < e → f i ∈ applyBetween f s e
   ∈-applyBetween⁺ = GM.∈-applyBetween⁺ (setoid _)
 
-  ∈-applyBetween⁻ : ∀ {a} {A : Set a} (f : ℕ → A) s e {v} → v ∈ applyBetween f s e → ∃ λ i → s ≤ i × i < e × v ≡ f i
+  ∈-applyBetween⁻ : ∀ {a} {A : Set a} (f : ℕ → A) s e {v} →
+                    v ∈ applyBetween f s e → ∃ λ i → s ≤ i × i < e × v ≡ f i
   ∈-applyBetween⁻ = GM.∈-applyBetween⁻ (setoid _)
     
   ∈-between⁺ : ∀ {s e i} → s ≤ i → i < e → i ∈ between s e
@@ -96,3 +102,7 @@ module RoutingLib.Data.List.Membership.Propositional.Properties where
 
   ∈-lookup : ∀ {a} {A : Set a} (xs : List A) i → lookup xs i ∈ xs
   ∈-lookup = GM.∈-lookup (setoid _)
+
+  foldr-∈ : ∀ {a} {A : Set a} {_•_ : Op₂ A} → Selective _≡_ _•_ → ∀ e xs →
+            foldr _•_ e xs ≡ e ⊎ foldr _•_ e xs ∈ xs 
+  foldr-∈ = GM.foldr-∈ (setoid _)

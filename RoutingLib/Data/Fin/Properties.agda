@@ -2,11 +2,11 @@ open import Algebra.FunctionProperties
 open import Data.Fin renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties
 open import Data.Product using (_,_)
-open import Data.Nat using (z≤n; s≤s; zero; suc) renaming (_+_ to _+ℕ_; _<_ to _<ℕ_; _≤_ to _≤ℕ_; _≤?_ to _≤ℕ?_; ≤-pred to ≤ℕ-pred)
+open import Data.Nat using (ℕ; z≤n; s≤s; zero; suc) renaming (_+_ to _+ℕ_; _<_ to _<ℕ_; _≤_ to _≤ℕ_; _≤?_ to _≤ℕ?_; ≤-pred to ≤ℕ-pred)
 open import Data.Nat.Properties using (1+n≰n; <⇒≢)  renaming (≤-total to ≤ℕ-total; ≤-antisym to ≤ℕ-antisym; ≤-refl to ≤ℕ-refl; ≤-trans to ≤ℕ-trans)
 open import Relation.Nullary using (¬_)
 open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Binary using (_⇒_; _Respects₂_; _Respects_; Decidable; Reflexive; Irreflexive; Transitive; Total; Antisymmetric; IsDecTotalOrder; IsTotalOrder; IsPartialOrder; IsPreorder)
+open import Relation.Binary using (Setoid; _⇒_; _Respects₂_; _Respects_; Decidable; Reflexive; Irreflexive; Transitive; Total; Antisymmetric; IsDecTotalOrder; IsTotalOrder; IsPartialOrder; IsPreorder)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; subst; cong; isEquivalence; sym; trans; subst₂)
 open import Relation.Binary.Consequences using (trans∧tri⟶resp≈)
 open import Function using (_on_; _∘_; flip)
@@ -15,6 +15,9 @@ open import RoutingLib.Data.Fin
 
 module RoutingLib.Data.Fin.Properties where
 
+  𝔽ₛ : ℕ → Setoid _ _
+  𝔽ₛ = setoid
+  
   -----------------------
   -- To push to stdlib --
   -----------------------

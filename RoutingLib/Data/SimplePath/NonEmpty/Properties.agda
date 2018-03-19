@@ -14,7 +14,6 @@ open import Relation.Binary.Product.Pointwise using (_×-≟_)
 open import Function using (_∘_)
 open import Relation.Nullary.Negation using (¬?)
 
-open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_)
 open import RoutingLib.Data.Fin.Pigeonhole using (pigeonhole)
 open import RoutingLib.Data.SimplePath.NonEmpty
 open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Equality

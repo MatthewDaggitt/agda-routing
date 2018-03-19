@@ -24,15 +24,9 @@ open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique)
 open import RoutingLib.Data.List.Uniqueness.Propositional.Properties using (allFin!⁺; combine!⁺)
 open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-allFin⁺; ∈-combine⁺)
 open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-map⁺; ∈-concat⁺; ∈-applyUpTo⁺)
-<<<<<<< HEAD:RoutingLib/Data/Graph/SimplePath2/NonEmpty/Enumeration.agda
-open import RoutingLib.Data.Graph.SimplePath2.NonEmpty hiding (_∈_)
-open import RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties
-=======
-open import RoutingLib.Data.List.Uniset using (Uniset; Enumeration; IsEnumeration)
 open import RoutingLib.Data.SimplePath.NonEmpty hiding (_∈_)
 open import RoutingLib.Data.SimplePath.NonEmpty.Properties
 open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Equality
->>>>>>> master:RoutingLib/Data/SimplePath/NonEmpty/Enumeration.agda
 
 
 module RoutingLib.Data.SimplePath.NonEmpty.Enumeration (n : ℕ) where

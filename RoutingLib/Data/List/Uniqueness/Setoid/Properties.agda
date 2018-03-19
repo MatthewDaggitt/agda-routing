@@ -100,9 +100,11 @@ module RoutingLib.Data.List.Uniqueness.Setoid.Properties where
     map!⁺ _     [] = []
     map!⁺ f-inj (x∉xs ∷ xs!) = gmap (λ x≉y → f-inj x≉y) x∉xs ∷ map!⁺ f-inj xs!
 
-    gfilter!⁺ : ∀ f → (∀ {x y} → x ≉₁ y → f x ≡ nothing ⊎ f y ≡ nothing ⊎ Eq _≉₂_ (f x) (f y))
+    {-
+    mapMaybe!⁺ : ∀ f → (∀ {x y} → x ≉₁ y → f x ≡ nothing ⊎ f y ≡ nothing ⊎ Eq _≉₂_ (f x) (f y))
                → ∀ {xs} → Unique S₁ xs → Unique S₂ (gfilter f xs)
-    gfilter!⁺ = AllPairs-gfilter⁺
+    mapMaybe!⁺ = {!!} --AllPairs-mapMaybe⁺
+    -}
     
   open DoubleSetoid public
 

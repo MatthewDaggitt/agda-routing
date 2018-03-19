@@ -15,7 +15,6 @@ open import RoutingLib.Data.SimplePath.Relation.Equality
 open import RoutingLib.Data.SimplePath.NonEmpty as NE using (SimplePathⁿᵗ)
 open import RoutingLib.Data.SimplePath.NonEmpty.Properties as NEP using ()
 open import RoutingLib.Data.Nat.Properties using (n≢1+n)
-open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_)
 
 module RoutingLib.Data.SimplePath.Properties {n : ℕ} where
 

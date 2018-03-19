@@ -11,6 +11,7 @@ module RoutingLib.Data.List.All where
     []  : AllPairs _~_ []
     _∷_ : ∀ {x xs} → All (x ~_) xs → AllPairs _~_ xs → AllPairs _~_ (x ∷ xs)
 
+  -- stdlib
   all-product : ∀ {a p q} {A : Set a} {P : A → Set p} {Q : A → Set q} {xs} → All P xs → All Q xs → All (P ∩ Q) xs
   all-product [] [] = []
   all-product (px ∷ pxs) (qx ∷ qxs) = (px , qx) ∷ all-product pxs qxs

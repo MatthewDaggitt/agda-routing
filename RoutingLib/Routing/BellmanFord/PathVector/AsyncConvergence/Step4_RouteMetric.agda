@@ -1,7 +1,9 @@
 open import Data.Product using (∃; ∃₂; Σ; _×_; _,_; proj₁; proj₂)
 open import Data.Nat using (ℕ; zero; suc; _+_; z≤n; s≤s; _<_; _≮_; _≤_; _≤?_; _∸_; _⊔_; _⊓_; ≤-pred) renaming (_≟_ to _≟ℕ_)
 open import Data.Nat.Properties
-  using (≤-trans; ≤-refl; ≤-reflexive; m≤m+n; n≤1+n; m+n∸m≡n; n≤m+n; +-mono-≤; ∸-mono;  ⊓-mono-<;+-cancelˡ-≤;  m≤m⊔n; m⊓n≤m; ≰⇒≥; <⇒≱; <⇒≯; n≤m⊔n; m⊓n≤n; <-transˡ; <-transʳ; +-distribˡ-⊔; <⇒≤; +-comm; ≤-stepsʳ; +-monoʳ-≤)
+  using (≤-trans; ≤-refl; ≤-reflexive; m≤m+n; n≤1+n; m+n∸m≡n; n≤m+n; +-mono-≤;
+        ∸-mono;  ⊓-mono-<;+-cancelˡ-≤;  m≤m⊔n; m⊓n≤m; ≰⇒≥; <⇒≱; <⇒≯; n≤m⊔n;
+        m⊓n≤n; <-transˡ; <-transʳ; +-distribˡ-⊔; <⇒≤; +-comm; ≤-stepsʳ; +-monoʳ-≤; +-monoʳ-<)
 open import Data.Fin using (Fin)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Subset using (Subset; _∈_; _∉_; ⊤; ⁅_⁆)
@@ -20,20 +22,21 @@ open import RoutingLib.Routing.Definitions
 open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
 open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions using () renaming (SufficientConditions to GeneralSufficientConditions)
-open import RoutingLib.Data.Nat.Properties using (m≤n⇒m≤n⊔o; m≤o⇒m≤n⊔o; n<m⇒n⊓o<m; n≤m⇒n⊓o≤m; m<n⇒n≢0; +-monoʳ-<; n≢0⇒0<n; module ≤-Reasoning)
+open import RoutingLib.Data.Nat.Properties using (m≤n⇒m≤n⊔o; m≤o⇒m≤n⊔o; n<m⇒n⊓o<m; n≤m⇒n⊓o≤m; m<n⇒n≢0; n≢0⇒0<n; module ≤-Reasoning)
 open import RoutingLib.Data.Matrix using (Any; map; min⁺)
 open import RoutingLib.Data.Matrix.Properties using (min⁺[M]<min⁺[N])
 open import RoutingLib.Data.Table using (Table)
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
-open import RoutingLib.Data.Fin.Subset using (_\\_; size[p\\q]<size[p]; i∉p\\q⇒i∉p; i∉⁅j⁆) renaming (size to sizeₛ)
+open import RoutingLib.Data.Fin.Subset using (_\\_) renaming (size to sizeₛ)
+open import RoutingLib.Data.Fin.Subset.Properties using (size[p\\q]<size[p]; i∉p\\q⇒i∉p; i∉⁅j⁆)
 import RoutingLib.Function.Metric as Metric
 import RoutingLib.Function.Metric.MaxLift as MaxLift
 
-import RoutingLib.Routing.BellmanFord.PathVector.Prelude as Prelude
-import RoutingLib.Routing.BellmanFord.PathVector.Step2_InconsistentRouteMetric as Step2
-import RoutingLib.Routing.BellmanFord.PathVector.Step3_ConsistentRouteMetric as Step3
+import RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Prelude as Prelude
+import RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Step2_InconsistentRouteMetric as Step2
+import RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Step3_ConsistentRouteMetric as Step3
 
-module RoutingLib.Routing.BellmanFord.PathVector.Step4_RouteMetric
+module RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Step4_RouteMetric
   {a b ℓ} {𝓡𝓐 : RoutingAlgebra a b ℓ}
   {n-1} {𝓡𝓟 : RoutingProblem 𝓡𝓐 (suc n-1)}
   (𝓟𝓢𝓒 : PathSufficientConditions 𝓡𝓟)

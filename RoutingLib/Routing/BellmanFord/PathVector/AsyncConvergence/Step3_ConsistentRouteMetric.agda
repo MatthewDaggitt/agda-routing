@@ -13,7 +13,7 @@ open import RoutingLib.Routing.Definitions
 open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
 open import RoutingLib.Routing.BellmanFord.DistanceVector.SufficientConditions using () renaming (SufficientConditions to GeneralSufficientConditions)
-open import RoutingLib.Data.Nat.Properties using (m≤n⇒m≤n⊔o; m≤o⇒m≤n⊔o; n<m⇒n⊓o<m; n≤m⇒n⊓o≤m; m<n⇒n≢0; +-monoʳ-<; n≢0⇒0<n; module ≤-Reasoning)
+open import RoutingLib.Data.Nat.Properties using (m≤n⇒m≤n⊔o; m≤o⇒m≤n⊔o; n<m⇒n⊓o<m; n≤m⇒n⊓o≤m; m<n⇒n≢0; n≢0⇒0<n; module ≤-Reasoning)
 open import RoutingLib.Data.Matrix using (Any; map; min⁺)
 open import RoutingLib.Data.Matrix.Properties using (min⁺[M]<min⁺[N])
 open import RoutingLib.Data.Table using (Table)
@@ -23,13 +23,13 @@ import RoutingLib.Function.Metric.MaxLift as MaxLift
 
 import RoutingLib.Routing.BellmanFord as BellmanFord
 
-import RoutingLib.Routing.BellmanFord.PathVector.Prelude as Prelude
-import RoutingLib.Routing.BellmanFord.PathVector.Step2_InconsistentRouteMetric as Step2
+import RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Prelude as Prelude
+import RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Step2_InconsistentRouteMetric as Step2
 
 import RoutingLib.Routing.BellmanFord.DistanceVector.Prelude as Preludeᶜ
 import RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric as Step2ᶜ
 
-module RoutingLib.Routing.BellmanFord.PathVector.Step3_ConsistentRouteMetric
+module RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Step3_ConsistentRouteMetric
   {a b ℓ} {𝓡𝓐 : RoutingAlgebra a b ℓ}
   {n-1} {𝓡𝓟 : RoutingProblem 𝓡𝓐 (suc n-1)}
   (𝓟𝓢𝓒 : PathSufficientConditions 𝓡𝓟)

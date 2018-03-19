@@ -16,7 +16,7 @@ open import RoutingLib.Data.Table.All using (All)
 open import RoutingLib.Data.Table.Any using (Any)
 open import RoutingLib.Data.Table.Relation.Pointwise using (Pointwise; foldr-cong; foldr⁺-cong)
 open import RoutingLib.Algebra.FunctionProperties
-open import RoutingLib.Data.Nat.Properties hiding (+-monoʳ-<)
+open import RoutingLib.Data.Nat.Properties
 open import RoutingLib.Data.NatInf using (ℕ∞) renaming (_≤_ to _≤∞_; _⊓_ to _⊓∞_)
 open import RoutingLib.Data.NatInf.Properties using () renaming (≤-refl to ≤∞-refl; ≤-antisym to ≤∞-antisym; ≤-reflexive to ≤∞-reflexive; o≤m⇒n⊓o≤m to o≤∞m⇒n⊓o≤∞m; n≤m⊎o≤m⇒n⊓o≤m to n≤∞m⊎o≤∞m⇒n⊓o≤∞m; m≤n×m≤o⇒m≤n⊓o to m≤∞n×m≤∞o⇒m≤∞n⊓o)
 

@@ -1,6 +1,7 @@
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
 import RoutingLib.Routing.BellmanFord as BellmanFord
+import RoutingLib.Routing.BellmanFord.Properties as BellmanFordProperties
 import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions.Properties
   as SufficientConditionsProperties
 import RoutingLib.Routing.BellmanFord.PathVector.Consistency as Consistency
@@ -16,3 +17,4 @@ module RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Prelude
   open PathSufficientConditions 𝓟𝓢𝓒 public
   open SufficientConditionsProperties 𝓟𝓢𝓒 public
   open Consistency 𝓟𝓢𝓒 public
+  open BellmanFordProperties 𝓡𝓟 using (σ-cong) public

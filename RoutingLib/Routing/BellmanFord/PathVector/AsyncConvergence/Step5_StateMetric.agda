@@ -15,10 +15,10 @@ open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max
 open import RoutingLib.Function.Metric as Metric using (IsUltrametric; Bounded)
 import RoutingLib.Function.Metric.MaxLift as MaxLift
 
-import RoutingLib.Routing.BellmanFord.PathVector.Prelude as Prelude
-import RoutingLib.Routing.BellmanFord.PathVector.Step4_RouteMetric as Step4
+import RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Prelude as Prelude
+import RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Step4_RouteMetric as Step4
 
-module RoutingLib.Routing.BellmanFord.PathVector.Step6_StateMetric
+module RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Step5_StateMetric
   {a b ℓ} {𝓡𝓐 : RoutingAlgebra a b ℓ}
   {n-1} {𝓡𝓟 : RoutingProblem 𝓡𝓐 (suc n-1)}
   (𝓟𝓢𝓒 : PathSufficientConditions 𝓡𝓟)

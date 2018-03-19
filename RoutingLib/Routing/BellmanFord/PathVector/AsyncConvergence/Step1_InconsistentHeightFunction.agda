@@ -61,7 +61,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Step1_Inconsis
     ... | _     | yes rᶜ = contradiction rᶜ rⁱ
     ... | yes _ | no  _  = begin
       2                          ≡⟨ sym (m+n∸n≡m 2 n) ⟩
-      suc (suc n) ∸ n            ≤⟨ ∸-monoʳ-≤ (suc (suc n)) (size<n r) ⟩
+      suc (suc n) ∸ n            ≤⟨ ∸-monoʳ-≤ (size<n r) (suc (suc n)) ⟩
       suc (suc n) ∸ suc (size r) ≡⟨⟩ 
       suc n       ∸ size r       ∎
       where open ≤-Reasoning

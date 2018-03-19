@@ -6,7 +6,7 @@ open import Data.Nat
   using (ℕ; _≤_; _<_; z≤n; s≤s; zero; suc; _+_; _∸_; _⊔_) renaming (_≟_ to _≟ℕ_)
 open import Data.Nat.Properties
   using (≤-decTotalOrder; <⇒≢; _<?_; ≤-refl; ≤-antisym; <-transʳ; ≤-trans;
-        n≤1+n; n∸m≤n; <⇒≤; ≮⇒≥; m≤m+n; ⊔-sel; <⇒≱; m∸[m∸n]≡n)
+        n≤1+n; n∸m≤n; <⇒≤; ≮⇒≥; m≤m+n; ⊔-sel; <⇒≱; m∸[m∸n]≡n; m≤n⇒n⊔m≡n)
 open import Data.List
   using (List; []; _∷_; length; upTo; applyUpTo; lookup)
 open import Data.List.Any
@@ -22,7 +22,7 @@ open import Function using (_∘_)
 
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
 open import RoutingLib.Data.Nat.Properties
-  using (ℕₛ; n≤0⇒n≡0; m≤n⇒m∸n≡0; ∸-monoʳ-≤; ∸-cancelʳ-<; n≤m⇒m⊔n≡m; module ≤-Reasoning; ℕᵈˢ)
+  using (ℕₛ; n≤0⇒n≡0; m≤n⇒m∸n≡0; ∸-monoʳ-≤; ∸-cancelʳ-<; module ≤-Reasoning; ℕᵈˢ)
 open import RoutingLib.Data.Fin.Properties
   using (fromℕ≤-cong; fromℕ≤-mono-≤; fromℕ≤-mono⁻¹-<)
 open import RoutingLib.Data.List.Any.Properties using (lookup-index)
@@ -161,7 +161,7 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
     i[T]≡0 = fromℕ≤-cong (T-1∸t<T T) (s≤s z≤n) T-1∸T≡0
 
     i-mono-≤ : ∀ {s t} → s ≤ t → i[ t ] ≤𝔽 i[ s ]
-    i-mono-≤ {s} {t} s≤t = fromℕ≤-mono-≤ (T-1∸t<T t) (T-1∸t<T s) (∸-monoʳ-≤ _ s≤t)
+    i-mono-≤ {s} {t} s≤t = fromℕ≤-mono-≤ (T-1∸t<T t) (T-1∸t<T s) (∸-monoʳ-≤ s≤t _)
 
     i-mono⁻¹-< : ∀ {s t} → i[ s ] <𝔽 i[ t ] → t < s
     i-mono⁻¹-< is<it = ∸-cancelʳ-< (fromℕ≤-mono⁻¹-< _ _ is<it)
@@ -294,7 +294,7 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
     lemma2 x x≉x* = begin
       d x (f x)           ≤⟨ d-maxTriIneq x x* (f x) ⟩
       d x x* ⊔ d x* (f x) ≡⟨ cong (_⊔ d x* (f x)) (d-sym x x*) ⟩
-      d x* x ⊔ d x* (f x) ≡⟨ n≤m⇒m⊔n≡m (<⇒≤ (f-strContrOnFP fx*≈x* x≉x*)) ⟩
+      d x* x ⊔ d x* (f x) ≡⟨ m≤n⇒n⊔m≡n (<⇒≤ (f-strContrOnFP fx*≈x* x≉x*)) ⟩
       d x* x              ∎
       where open ≤-Reasoning
       

@@ -150,7 +150,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.Consistency
 
     σ-pres-𝑪ₘ : ∀ {X} → 𝑪ₘ X → 𝑪ₘ (σ X)
     σ-pres-𝑪ₘ Xᶜ i j = foldr-presᵇ {P = 𝑪} ⊕-pres-𝑪
-       (tabulate⁺ (λ k → ▷-pres-𝑪 i k (Xᶜ k j))) (Iᶜ i j)
+      (Iᶜ i j) (tabulate⁺ (λ k → ▷-pres-𝑪 i k (Xᶜ k j)))
            
     ----------------------------------------------------------------------------
     -- A few more non-obvious properties relating to consistency

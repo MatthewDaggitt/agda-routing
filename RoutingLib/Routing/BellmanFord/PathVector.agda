@@ -7,8 +7,8 @@ open import RoutingLib.Asynchronous.Theorems
   using (UltrametricConditions; ultra⇒safe)
 
 open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
-import RoutingLib.Routing.BellmanFord.PathVector.Prelude as Prelude
-import RoutingLib.Routing.BellmanFord.PathVector.Step6_StateMetric as Step6
+import RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Prelude as Prelude
+import RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Step5_StateMetric as Step6
 
 module RoutingLib.Routing.BellmanFord.PathVector
   {a b n-1 ℓ}

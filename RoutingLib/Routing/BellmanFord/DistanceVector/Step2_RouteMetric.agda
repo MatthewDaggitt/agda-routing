@@ -5,7 +5,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym
 open import Data.List using (List; _∷_)
 open import Data.List.Any.Membership.Propositional using (_∈_)
 open import Data.Nat using (ℕ; suc; zero; z≤n; s≤s; _⊔_; _≤_; _≥_; _<_)
-open import Data.Nat.Properties using (m≤m⊔n; n≤m⊔n; <⇒≢; <⇒≤; <⇒≱; ≤+≢⇒<; ⊔-comm; ⊔-identityʳ; ⊔-mono-≤; ⊔-mono-<; ≤-total; ≤-reflexive; ≤-refl; ≤-trans)
+open import Data.Nat.Properties using (m≤m⊔n; n≤m⊔n; <⇒≢; <⇒≤; <⇒≱; ≤+≢⇒<; ⊔-comm; ⊔-identityʳ; ⊔-mono-≤; ⊔-mono-<; ≤-total; ≤-reflexive; ≤-refl; ≤-trans; m≤n⇒n⊔m≡n)
 open import Data.Product using (∃; _,_)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
@@ -15,7 +15,7 @@ import Relation.Binary.PartialOrderReasoning as PO-Reasoning
 open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique)
 open import RoutingLib.Data.List.Sorting using (Sorted)
 open import RoutingLib.Data.Matrix using (Matrix; zipWith; max⁺)
-open import RoutingLib.Data.Nat.Properties using (ℕₛ; m≤n⇒m≤n⊔o; n≤m⇒m⊔n≡m; n≤m×o≤m⇒n⊔o≤m; n≢0⇒0<n; module ≤-Reasoning)
+open import RoutingLib.Data.Nat.Properties using (ℕₛ; m≤n⇒m≤n⊔o; n≤m×o≤m⇒n⊔o≤m; n≢0⇒0<n; module ≤-Reasoning)
 open import RoutingLib.Function.Metric using (Ultrametric; IsUltrametric; Bounded; MaxTriangleIneq)
 
 open import RoutingLib.Routing.Definitions using (RoutingProblem; RoutingAlgebra)
@@ -116,7 +116,7 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Step2_RouteMetric
     ...   | inj₂ σXᵢⱼ≈Iᵢⱼ = contradiction σXᵢⱼ≈Iᵢⱼ (σXᵢⱼ≉Iᵢⱼ X (σ Y i j) i≢j ((σXᵢⱼ≤σYᵢⱼ , σXᵢⱼ≉σYᵢⱼ)))
         where open PO-Reasoning ≤₊-poset
     ...   | inj₁ (k , σXᵢⱼ≈AᵢₖXₖⱼ) = begin
-      h (σ X i j) ⊔ h (σ Y i j)   ≡⟨ n≤m⇒m⊔n≡m (h-resp-≤ σXᵢⱼ≤σYᵢⱼ) ⟩
+      h (σ X i j) ⊔ h (σ Y i j)   ≡⟨ m≤n⇒n⊔m≡n (h-resp-≤ σXᵢⱼ≤σYᵢⱼ) ⟩
       h (σ X i j)                 ≡⟨ h-cong σXᵢⱼ≈AᵢₖXₖⱼ ⟩
       h (A i k ▷ X k j)           <⟨ h-resp-< (⊕-almost-strictly-absorbs-▷ (A i k) Xₖⱼ≉0) ⟩
       h (X k j)                   ≤⟨ m≤m⊔n (h (X k j)) (h (Y k j)) ⟩

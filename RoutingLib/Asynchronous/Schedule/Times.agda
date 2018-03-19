@@ -15,7 +15,6 @@ open import Induction.WellFounded using (Acc; acc)
 open import Induction.Nat using () renaming (<-well-founded to <-wf)
 
 open import RoutingLib.Asynchronous.Schedule using (Schedule; 𝕋)
-open import RoutingLib.Data.Nat.Properties using (m<n≤o⇒o∸n<o∸m)
 open import RoutingLib.Data.Table using (max)
 
 module RoutingLib.Asynchronous.Schedule.Times {n}(𝕤 : Schedule n) where

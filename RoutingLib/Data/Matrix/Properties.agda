@@ -24,20 +24,20 @@ module RoutingLib.Data.Matrix.Properties where
 
   module _ {a p} {A : Set a} (P : Pred A p) {_•_ : Op₂ A} where
   
-    fold-×pres : _•_ ×-Preserves P → ∀ {e : A} → P e →
-                        ∀ {m n} {M : Matrix A m n} → All P M →
-                        P (fold _•_ e M)
+    fold-×pres : _•_ Preservesᵇ P → ∀ {e : A} → P e →
+                 ∀ {m n} {M : Matrix A m n} → All P M →
+                 P (fold _•_ e M)
     fold-×pres pres Pe {zero}  PM = Pe
     fold-×pres pres Pe {suc m} PM = TableP.foldr-×pres P pres
       (fold-×pres pres Pe (PM ∘ fsuc)) (PM fzero)
 
-    fold-⊎pres : _•_ ⊎-Preserves P → ∀ e {m n} {M : Matrix A  m n} →
+    fold-⊎pres : _•_ Preservesᵒ P → ∀ e {m n} {M : Matrix A  m n} →
                  Any P M → P (fold _•_ e M)
     fold-⊎pres pres e {M}     (fzero , PMᵢ)  = TableP.foldr-⊎pres P pres _ PMᵢ
-    fold-⊎pres pres e {M = M} (fsuc i , PMᵢ) = TableP.foldr-⊎presʳ P (⊎pres⇒⊎presʳ pres)
+    fold-⊎pres pres e {M = M} (fsuc i , PMᵢ) = TableP.foldr-⊎presʳ P (presᵒ⇒presʳ pres)
       (fold-⊎pres pres e (i , PMᵢ)) (M fzero)
 
-    fold-⊎presʳ : _•_ ⊎-Preservesʳ P → ∀ {e} → P e →
+    fold-⊎presʳ : _•_ Preservesʳ P → ∀ {e} → P e →
                  ∀ {m n} (M : Matrix A m n) → P (fold _•_ e M)
     fold-⊎presʳ pres Pe {zero}  M = Pe
     fold-⊎presʳ pres Pe {suc m} M = TableP.foldr-⊎presʳ
@@ -48,12 +48,12 @@ module RoutingLib.Data.Matrix.Properties where
 
   module _ {a p} {A : Set a} (P : Pred A p) {_•_ : Op₂ A} where
   
-    fold⁺-×pres : _•_ ×-Preserves P → ∀ {m n} {M : Matrix A (suc m) (suc n)} →
+    fold⁺-×pres : _•_ Preservesᵇ P → ∀ {m n} {M : Matrix A (suc m) (suc n)} →
                   All P M → P (fold⁺ _•_ M)
     fold⁺-×pres •-pres-P {zero} PM  = TableP.foldr⁺-×pres P •-pres-P (PM fzero)
     fold⁺-×pres •-pres-P {suc m} PM = •-pres-P (TableP.foldr⁺-×pres P •-pres-P (PM fzero)) (fold⁺-×pres •-pres-P (PM ∘ fsuc))
 
-    fold⁺-⊎pres : _•_ ⊎-Preserves P → ∀ {m n} {M : Matrix A (suc m) (suc n)} →
+    fold⁺-⊎pres : _•_ Preservesᵒ P → ∀ {m n} {M : Matrix A (suc m) (suc n)} →
                   Any P M → P (fold⁺ _•_ M)
     fold⁺-⊎pres pres {zero}  (fzero , PM₀) = TableP.foldr⁺-⊎pres P pres PM₀
     fold⁺-⊎pres pres {zero}  (fsuc () , _)

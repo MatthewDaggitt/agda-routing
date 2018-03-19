@@ -2,7 +2,7 @@ open import Data.Product using (∃; _,_; _×_)
 open import Data.Sum using (_⊎_; inj₁; inj₂; [_,_]′; map)
 open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _<_; _≤_; _⊔_)
 open import Data.Nat.Properties
-  using (≤-refl; ≤-reflexive; ≤-total; <-transˡ; <-transʳ; ⊔-comm; ⊔-identityʳ; ⊔-idem; m≤m⊔n; <⇒≯; <⇒≤; n≤m⊔n; ≤⇒≯; ⊔-monoˡ-≤; m≤n⇒m⊔n≡n)
+  using (≤-refl; ≤-reflexive; ≤-total; <-transˡ; <-transʳ; ⊔-comm; ⊔-identityʳ; ⊔-idem; m≤m⊔n; <⇒≯; <⇒≤; n≤m⊔n; ≤⇒≯; ⊔-monoˡ-≤; m≤n⇒m⊔n≡n; m≤n⇒n⊔m≡n)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Subset using (Subset; _∈_; _∉_; ⁅_⁆; ⊤)
 open import Data.Fin.Subset.Properties using (x∈p∩q⁺; x∈⁅x⁆; ∈⊤)
@@ -16,18 +16,19 @@ open import Function using (_∘_; id)
 open import Induction.WellFounded using (Acc; acc)
 open import Induction.Nat using () renaming (<-well-founded to <-wellFounded)
 
-open import RoutingLib.Data.Fin.Subset using (_\\_; size[p\\q]<size[p]; i∉p\\q⇒i∉p; i∉⁅j⁆) renaming (size to sizeₛ)
+open import RoutingLib.Data.Fin.Subset using (_\\_) renaming (size to sizeₛ)
+open import RoutingLib.Data.Fin.Subset.Properties using (size[p\\q]<size[p]; i∉p\\q⇒i∉p; i∉⁅j⁆)
 open import RoutingLib.Data.Nat.Properties
-  using (⊔-triangulate; m≤o⇒m≤n⊔o; m<n⇒n≢0; n≤m×o≤m⇒n⊔o≤m; m<n⊎m<o⇒m<n⊔o; n≤m⇒m⊔n≡m; m≤n⇒m≤n⊔o; module ≤-Reasoning)
+  using (⊔-triangulate; m≤o⇒m≤n⊔o; m<n⇒n≢0; n≤m×o≤m⇒n⊔o≤m; m<n⊎m<o⇒m<n⊔o; m≤n⇒m≤n⊔o; module ≤-Reasoning)
 import RoutingLib.Function.Metric as Metric
 open import RoutingLib.Data.Sum using (flip)
 
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
-import RoutingLib.Routing.BellmanFord.PathVector.Prelude as Prelude
-import RoutingLib.Routing.BellmanFord.PathVector.Step1_InconsistentHeightFunction as Step1
+import RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Prelude as Prelude
+import RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Step1_InconsistentHeightFunction as Step1
 
-module RoutingLib.Routing.BellmanFord.PathVector.Step2_InconsistentRouteMetric
+module RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Step2_InconsistentRouteMetric
   {a b ℓ} {𝓡𝓐 : RoutingAlgebra a b ℓ}
   {n-1} {𝓡𝓟 : RoutingProblem 𝓡𝓐 (suc n-1)}
   (𝓟𝓢𝓒 : PathSufficientConditions 𝓡𝓟)
@@ -128,7 +129,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step2_InconsistentRouteMetric
                    ∀ {i j} → 𝑰 (σ X i j) ⊎ 𝑰 (σ (σ X) i j) → dᵣⁱ (σ X i j) (σ (σ X) i j) < dᵣⁱ (X r s) (σ X r s)
     dᵣⁱ-strContrOrbits X {r} {s} dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ {i} {j} σXᵢⱼⁱ⊎σ²Xᵢⱼⁱ with ≤-total (hⁱ (σ (σ X) i j)) (hⁱ (σ X i j))
     ...   | inj₁ σ²Xᵢⱼ≤σXᵢⱼ = begin
-      hⁱ (σ X i j) ⊔ hⁱ (σ (σ X) i j) ≡⟨ n≤m⇒m⊔n≡m σ²Xᵢⱼ≤σXᵢⱼ ⟩
+      hⁱ (σ X i j) ⊔ hⁱ (σ (σ X) i j) ≡⟨ m≤n⇒n⊔m≡n σ²Xᵢⱼ≤σXᵢⱼ ⟩
       hⁱ (σ X i j)                    <⟨ reduction X dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ i j ⊤ (<-wellFounded (sizeₛ {n} ⊤)) (λ l∉⊤ → contradiction ∈⊤ l∉⊤) (h-force-𝑰 (flip σXᵢⱼⁱ⊎σ²Xᵢⱼⁱ) σ²Xᵢⱼ≤σXᵢⱼ) ⟩
       hⁱ (X r s)   ⊔ hⁱ (σ X r s)     ∎
     ...   | inj₂ σXᵢⱼ≤σ²Xᵢⱼ with σXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ (σ X) _ _ (h-force-𝑰 σXᵢⱼⁱ⊎σ²Xᵢⱼⁱ σXᵢⱼ≤σ²Xᵢⱼ)
@@ -147,7 +148,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.Step2_InconsistentRouteMetric
     ... | no  _   with 𝑪? x | 𝑪? y
     ...   | yes xᶜ | _      = contradiction xᶜ xⁱ
     ...   | no  _  | no yⁱ = contradiction yᶜ yⁱ
-    ...   | no  _  | yes _ = n≤m⇒m⊔n≡m (<⇒≤ (h[sᶜ]<h[rⁱ] yᶜ xⁱ))
+    ...   | no  _  | yes _ = m≤n⇒n⊔m≡n (<⇒≤ (h[sᶜ]<h[rⁱ] yᶜ xⁱ))
     
     xⁱyᶜzᶜ⇒dᵣⁱxz≤dᵣⁱxy : ∀ {x y z} → 𝑰 x → 𝑪 y → 𝑪 z → dᵣⁱ x z ≤ dᵣⁱ x y
     xⁱyᶜzᶜ⇒dᵣⁱxz≤dᵣⁱxy xⁱ yᶜ zᶜ =

@@ -39,21 +39,23 @@ module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.FixedSubtree
   weightₑ : 𝕋 → Edge → Route
   weightₑ t (i , k) = A i k ▷ σ^ t X k j
 
-  e↷F⇒w[t+s]≡w[t] : ∀ {e} → e ↷ F → ∀ s → weightₑ (t + s) e ≈ weightₑ t e
-  e↷F⇒w[t+s]≡w[t] (_ , k∈F) s = ▷-cong (A _ _) (proj₁ (F-fixed k∈F) s)
+  abstract
+  
+    e↷F⇒w[t+s]≡w[t] : ∀ {e} → e ↷ F → ∀ s → weightₑ (t + s) e ≈ weightₑ t e
+    e↷F⇒w[t+s]≡w[t] (_ , k∈F) s = ▷-cong (A _ _) (proj₁ (F-fixed k∈F) s)
     
-  -- At least one edge out of the spanning tree exists
+    -- At least one edge out of the fixed subtree exists
   
-  eₐ : Edge
-  eₐ = (proj₁ F-nonFull , proj₁ F-nonEmpty)
+    eₐ : Edge
+    eₐ = (proj₁ F-nonFull , proj₁ F-nonEmpty)
 
-  eₐ↷F : eₐ ↷ F
-  eₐ↷F = (proj₂ F-nonFull , proj₂ F-nonEmpty)
+    eₐ↷F : eₐ ↷ F
+    eₐ↷F = (proj₂ F-nonFull , proj₂ F-nonEmpty)
   
-  -- Find the minimum edge out of the spanning tree
+    -- Find the minimum edge out of the fixed subtree
   
-  eₘᵢₙ : Edge
-  eₘᵢₙ = argmin (weightₑ t) eₐ (cutset F)
+    eₘᵢₙ : Edge
+    eₘᵢₙ = argmin (weightₑ t) eₐ (cutset F)
       
   iₘᵢₙ : Node
   iₘᵢₙ = proj₁ eₘᵢₙ
@@ -61,26 +63,27 @@ module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.FixedSubtree
   kₘᵢₙ : Node
   kₘᵢₙ = proj₂ eₘᵢₙ
 
-
-  -- Properties of the edge
-
-  eₘᵢₙ↷F : eₘᵢₙ ↷ F
-  eₘᵢₙ↷F = argmin-all eₐ↷F (∈cutset⇒↷ F)
+  abstract
   
-  iₘᵢₙ∉F : iₘᵢₙ ∉ F
-  iₘᵢₙ∉F = proj₁ eₘᵢₙ↷F
+    -- Properties of the edge
 
-  kₘᵢₙ∈F : kₘᵢₙ ∈ F
-  kₘᵢₙ∈F = proj₂ eₘᵢₙ↷F
+    eₘᵢₙ↷F : eₘᵢₙ ↷ F
+    eₘᵢₙ↷F = argmin-all eₐ↷F (∈cutset⇒↷ F)
+  
+    iₘᵢₙ∉F : iₘᵢₙ ∉ F
+    iₘᵢₙ∉F = proj₁ eₘᵢₙ↷F
 
-  eₘᵢₙ-isMinₜ : ∀ {e} → e ↷ F → weightₑ t eₘᵢₙ ≤₊ weightₑ t e
-  eₘᵢₙ-isMinₜ e↷F = lookup (f[argmin]≤fxs eₐ (cutset F)) (↷⇒∈cutset e↷F)
+    kₘᵢₙ∈F : kₘᵢₙ ∈ F
+    kₘᵢₙ∈F = proj₂ eₘᵢₙ↷F
+    
+    eₘᵢₙ-isMinₜ : ∀ {e} → e ↷ F → weightₑ t eₘᵢₙ ≤₊ weightₑ t e
+    eₘᵢₙ-isMinₜ e↷F = lookup (f[argmin]≤f[xs] eₐ (cutset F)) (↷⇒∈cutset e↷F)
 
-  eₘᵢₙ-isMinₜ₊ₛ : ∀ {e} → e ↷ F → ∀ s →
-                  weightₑ (t + s) eₘᵢₙ ≤₊ weightₑ (t + s) e
-  eₘᵢₙ-isMinₜ₊ₛ {e} e↷F s = begin
-    weightₑ (t + s) eₘᵢₙ  ≈⟨ e↷F⇒w[t+s]≡w[t] eₘᵢₙ↷F s ⟩
-    weightₑ t       eₘᵢₙ  ≤⟨ eₘᵢₙ-isMinₜ e↷F ⟩
-    weightₑ t       e     ≈⟨ ≈-sym (e↷F⇒w[t+s]≡w[t] e↷F s) ⟩
-    weightₑ (t + s) e     ∎
-    where open PartialOrderReasoning ≤₊-poset
+    eₘᵢₙ-isMinₜ₊ₛ : ∀ {e} → e ↷ F → ∀ s →
+                    weightₑ (t + s) eₘᵢₙ ≤₊ weightₑ (t + s) e
+    eₘᵢₙ-isMinₜ₊ₛ {e} e↷F s = begin
+      weightₑ (t + s) eₘᵢₙ  ≈⟨ e↷F⇒w[t+s]≡w[t] eₘᵢₙ↷F s ⟩
+      weightₑ t       eₘᵢₙ  ≤⟨ eₘᵢₙ-isMinₜ e↷F ⟩
+      weightₑ t       e     ≈⟨ ≈-sym (e↷F⇒w[t+s]≡w[t] e↷F s) ⟩
+      weightₑ (t + s) e     ∎
+      where open PartialOrderReasoning ≤₊-poset

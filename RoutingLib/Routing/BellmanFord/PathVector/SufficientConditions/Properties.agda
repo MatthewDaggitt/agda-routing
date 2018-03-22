@@ -9,7 +9,6 @@ open import Function using (_∘_)
 open import Relation.Binary using (DecTotalOrder; StrictTotalOrder)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; inspect; [_]; refl; sym)
-import Relation.Binary.NonStrictToStrict as NonStrictToStrict
 import Relation.Binary.EqReasoning as EqReasoning
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
@@ -21,9 +20,9 @@ open import RoutingLib.Data.SimplePath.Properties
 open import RoutingLib.Data.SimplePath.Relation.Equality
 open import RoutingLib.Data.SimplePath.NonEmpty.Properties
   using (_⇿?_; _∉?_)
-
 import RoutingLib.Relation.Binary.NaturalOrder.Right as RNO
-  
+import RoutingLib.Relation.Binary.NonStrictToStrict.DecTotalOrder as NonStrictToStrict
+
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
 import RoutingLib.Routing.BellmanFord as BellmanFord
@@ -86,16 +85,17 @@ module RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions.Properties
     ; isDecTotalOrder to ≤₊-isDecTotalOrder
     )
 
-  <₊-strictTotalOrder : StrictTotalOrder b ℓ ℓ
-  <₊-strictTotalOrder = record
-    { isStrictTotalOrder = NonStrictToStrict.isDecTotalOrder⟶isStrictTotalOrder
-                             _≈_ _≤₊_ ≤₊-isDecTotalOrder
-    }
-
-  open StrictTotalOrder <₊-strictTotalOrder public
+  open NonStrictToStrict ≤₊-decTotalOrder public
     using ()
     renaming
-    (_<?_ to _<₊?_
+    ( _<?_     to _<₊?_
+    ; <≤-trans to <≤₊-trans
+    ; ≤<-trans to ≤<₊-trans
+    ; <⇒≱      to <₊⇒≱₊
+    ; ≤⇒≯      to ≤₊⇒≯₊
+    ; <-asym   to <₊-asym
+    ; <-strictPartialOrder to <₊-strictPartialOrder
+    ; <-strictTotalOrder   to <₊-strictTotalOrder
     )
   
   ------------------------------------------------------------------------------

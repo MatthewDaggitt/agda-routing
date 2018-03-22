@@ -2,7 +2,7 @@ open import Relation.Binary using (Rel; Transitive; _⇒_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 open import Function using (case_of_)
 
-module RoutingLib.Relation.Binary.StrictReasoning
+module RoutingLib.Relation.Binary.Reasoning.StrictCore
   {a ℓ} {A : Set a}
   {_≤_ : Rel A ℓ} (≤-trans : Transitive _≤_) (≤-refl : _≡_ ⇒ _≤_) 
   {_<_ : Rel A ℓ} (<-trans : Transitive _<_)

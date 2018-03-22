@@ -1,12 +1,12 @@
 open import Algebra.FunctionProperties
 open import Relation.Binary using (TotalOrder; Setoid)
-import Relation.Binary.NonStrictToStrict as NonStrictToStrict
 open import Relation.Binary.PropositionalEquality using (_≡_)
 
 open import RoutingLib.Algebra.FunctionProperties
 import RoutingLib.Algebra.Selectivity.NaturalChoice.Min.TotalOrder as Min
 import RoutingLib.Algebra.Selectivity.NaturalChoice.Max.TotalOrder as Max
 open import RoutingLib.Algebra.Selectivity.Lifting
+import RoutingLib.Relation.Binary.NonStrictToStrict.TotalOrder as NonStrictToStrict
 
 module RoutingLib.Data.List.Extrema.Core
   {b ℓ₁ ℓ₂} (totalOrder : TotalOrder b ℓ₁ ℓ₂) where
@@ -16,10 +16,31 @@ module RoutingLib.Data.List.Extrema.Core
   
   
   open TotalOrder totalOrder renaming (Carrier to B)
-  open NonStrictToStrict _≈_ _≤_ using (_<_)
+  open NonStrictToStrict totalOrder using (_<_; ≤<-trans; <≤-trans)
    
   open Max totalOrder
   open Min totalOrder
+
+
+  
+  private
+    
+    module _ {a} {A : Set a} (f : A → B) where
+  
+      lemma₁ : ∀ {x y v} → f x ≤ v → f x ⊓ f y ≈ f y → f y ≤ v
+      lemma₁ fx≤v fx⊓fy≈fy = trans (x⊓y≈y⇒y≤x fx⊓fy≈fy) fx≤v
+
+      lemma₂ : ∀ {x y v} → f y ≤ v → f x ⊓ f y ≈ f x → f x ≤ v
+      lemma₂ fy≤v fx⊓fy≈fx = trans (x⊓y≈x⇒x≤y fx⊓fy≈fx) fy≤v
+    
+      lemma₃ : ∀ {x y v} → f x < v → f x ⊓ f y ≈ f y → f y < v
+      lemma₃ fx<v fx⊓fy≈fy = ≤<-trans (x⊓y≈y⇒y≤x fx⊓fy≈fy) fx<v
+
+      lemma₄ : ∀ {x y v} → f y < v → f x ⊓ f y ≈ f x → f x < v
+      lemma₄ fx<v fx⊓fy≈fy = ≤<-trans (x⊓y≈x⇒x≤y fx⊓fy≈fy) fx<v
+
+
+
 
   module _ {a} {A : Set a} where
   
@@ -30,19 +51,6 @@ module RoutingLib.Data.List.Extrema.Core
     ⊔-lift = Lift _≈_ ⊔-sel
     
     -- Properties
-
-    lemma₁ : ∀ (f : A → B) {x y v} → f x ≤ v → f x ⊓ f y ≈ f y → f y ≤ v
-    lemma₁ _ fx≤v fx⊓fy≈fy = trans (x⊓y≈y⇒y≤x fx⊓fy≈fy) fx≤v
-
-    lemma₂ : ∀ (f : A → B) {x y v} → f y ≤ v → f x ⊓ f y ≈ f x → f x ≤ v
-    lemma₂ _ fy≤v fx⊓fy≈fx = trans (x⊓y≈x⇒x≤y fx⊓fy≈fx) fy≤v
-    
-    lemma₃ : ∀ (f : A → B) {x y v} → f x < v → f x ⊓ f y ≈ f y → f y < v
-    lemma₃ _ fx<v fx⊓fy≈fy = {!!}
-
-    lemma₄ : ∀ (f : A → B) {x y v} → f y < v → f x ⊓ f y ≈ f x → f x < v
-    lemma₄ _ fx<v fx⊓fy≈fy = {!!}
-
 
     ⊓-lift-sel : ∀ f → Selective _≡_ (⊓-lift f)
     ⊓-lift-sel f = sel _≈_ ⊓-sel f

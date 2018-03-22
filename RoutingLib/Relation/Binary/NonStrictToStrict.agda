@@ -9,6 +9,12 @@ module RoutingLib.Relation.Binary.NonStrictToStrict
 
   open import Relation.Binary.NonStrictToStrict _≈_ _≤_
 
+  <⇒≱ : Antisymmetric _≈_ _≤_ → ∀ {x y} → x < y → ¬ (y ≤ x)
+  <⇒≱ antisym (x≤y , x≉y) y≤x = x≉y (antisym x≤y y≤x)
+
+  ≤⇒≯ : Antisymmetric _≈_ _≤_ → ∀ {x y} → x ≤ y → ¬ (y < x)
+  ≤⇒≯ antisym x≤y y<x = <⇒≱ antisym y<x x≤y
+  
   <≤-trans : Symmetric _≈_ → Transitive _≤_ → Antisymmetric _≈_ _≤_ →
              (∀ {x} → (x ≤_) Respects _≈_) →
              ∀ {x y z} → x < y → y ≤ z → x < z

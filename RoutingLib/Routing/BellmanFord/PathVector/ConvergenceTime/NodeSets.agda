@@ -83,7 +83,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.NodeSets
     path 1#        ≈⟨ p₁≈[] ⟩
     valid []       ∎))
     where open EqReasoning (ℙₛ n)
-  
+
   Fixedₜ⊆Fixedₛ₊ₜ : ∀ t s → Fixed t ⊆ᵤ Fixed (t + s)
   Fixedₜ⊆Fixedₛ₊ₜ t s (i∈Sₜ , p∈Sₜ) =
     Settledₜ⊆Settledₛ₊ₜ t s i∈Sₜ ,
@@ -100,6 +100,14 @@ module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.NodeSets
   ...     | k∈Fₜ with Fixed-path t (k∈Sₜ , k∈Fₜ) p[σᵗXₖⱼ]≈p
   ...       | valid p∈Fₜ = valid ([ i∈Fₜ , (k∈Sₜ , k∈Fₜ) ]∷ p∈Fₜ)
 
+  Fixed-eq : ∀ t k s₁ s₂ → k ∈ᵤ Fixed t →
+             σ^ (t + s₁) X k j ≈ σ^ (t + s₂) X k j
+  Fixed-eq t k s₁ s₂ (k∈Sₜ , _) = begin
+    σ^ (t + s₁) X k j ≈⟨ k∈Sₜ s₁ ⟩
+    σ^ (t)      X k j ≈⟨ ≈-sym (k∈Sₜ s₂) ⟩
+    σ^ (t + s₂) X k j ∎
+    where open EqReasoning S
+    
   ------------------------------------------------------------------------------
   -- Aligned edges
 
@@ -117,7 +125,10 @@ module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.NodeSets
 
   Real? : ∀ t → Decidable (Real t)
   Real? t i = allₑ? (Aligned? t) (path (σ^ t X i j))
-  
+
+  Real-cong : ∀ {s t k} → k ∈ᵤ Real s → s ≡ t → k ∈ᵤ Real t
+  Real-cong k∈Rₛ refl = k∈Rₛ
+          
   Real-alignment : ∀ t {i} → i ∈ᵤ Real (suc t) → ∀ {k l p e⇿p i∉p} →
                    path (σ^ (suc t) X i j) ≈ₚ valid ((l , k) ∷ p ∣ e⇿p ∣ i∉p) →
                    i ≡ l × σ^ (suc t) X i j ≈ A i k ▷ σ^ (suc t) X k j ×
@@ -143,8 +154,10 @@ module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.NodeSets
   ...       | valid allpʳ = valid ([ i∈R₁₊ₜ , k∈R₁₊ₜ ]∷ allpʳ)
 
   Fixed⊆Real : ∀ t {i p} → path (σ^ t X i j) ≈ₚ p → i ∈ᵤ Fixed t → i ∈ᵤ Real t
-  Fixed⊆Real t {i} {invalid}                     p[σᵗXᵢⱼ]≈∅    _ = Allₑ-resp-≈ₚ invalid   (≈ₚ-sym p[σᵗXᵢⱼ]≈∅)
-  Fixed⊆Real t {i} {valid []}                    p[σᵗXᵢⱼ]≈[]   _ = Allₑ-resp-≈ₚ (valid []) (≈ₚ-sym p[σᵗXᵢⱼ]≈[])
+  Fixed⊆Real t {i} {invalid}                     p[σᵗXᵢⱼ]≈∅    _ =
+    Allₑ-resp-≈ₚ invalid   (≈ₚ-sym p[σᵗXᵢⱼ]≈∅)
+  Fixed⊆Real t {i} {valid []}                    p[σᵗXᵢⱼ]≈[]   _ =
+    Allₑ-resp-≈ₚ (valid []) (≈ₚ-sym p[σᵗXᵢⱼ]≈[])
   Fixed⊆Real t {i} {valid ((_ , k) ∷ p ∣ _ ∣ _)} p[σᵗXᵢⱼ]≈ik∷p (i∈Sₜ , ik∷p∈Fₜ)
     with Settled-alignment t i∈Sₜ p[σᵗXᵢⱼ]≈ik∷p
   ... | refl , σᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ , p[σᵗXₖⱼ]≈p with Fixed-path t (i∈Sₜ , ik∷p∈Fₜ) p[σᵗXᵢⱼ]≈ik∷p

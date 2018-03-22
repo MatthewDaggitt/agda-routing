@@ -1,0 +1,39 @@
+open import Data.Product using (proj₁; proj₂)
+open import Relation.Binary
+open import Relation.Nullary using (¬_)
+import Relation.Binary.NonStrictToStrict as NonStrictToStrict
+
+import RoutingLib.Relation.Binary.NonStrictToStrict as NonStrictToStrict′
+
+module RoutingLib.Relation.Binary.NonStrictToStrict.PartialOrder
+  {a ℓ₁ ℓ₂} (poset : Poset a ℓ₁ ℓ₂) where
+
+  open Poset poset
+  open NonStrictToStrict _≈_ _≤_ using (_<_) public
+
+  <-strictPartialOrder : StrictPartialOrder a ℓ₁ _
+  <-strictPartialOrder = record
+    { isStrictPartialOrder =
+      NonStrictToStrict.isPartialOrder⟶isStrictPartialOrder
+        _≈_ _≤_ isPartialOrder
+    }
+
+  open StrictPartialOrder <-strictPartialOrder public
+    using (<-resp-≈)
+    renaming
+    ( irrefl     to <-irrefl
+    ; trans      to <-trans
+    ; asymmetric to <-asym
+    )
+  
+  <≤-trans : ∀ {x y z} → x < y → y ≤ z → x < z
+  <≤-trans = NonStrictToStrict′.<≤-trans _ _≤_ Eq.sym trans antisym (proj₁ ≤-resp-≈)
+
+  ≤<-trans : ∀ {x y z} → x ≤ y → y < z → x < z
+  ≤<-trans = NonStrictToStrict′.≤<-trans _ _≤_ trans antisym (proj₂ ≤-resp-≈)
+
+  <⇒≱ : ∀ {x y} → x < y → ¬ (y ≤ x)
+  <⇒≱ = NonStrictToStrict′.<⇒≱ _ _≤_ antisym
+
+  ≤⇒≯ : ∀ {x y} → x ≤ y → ¬ (y < x)
+  ≤⇒≯ = NonStrictToStrict′.≤⇒≯ _ _≤_ antisym

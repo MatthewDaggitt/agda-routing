@@ -13,7 +13,7 @@ open import Function using (_∘_)
 
 open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Relation.Binary
-import RoutingLib.Relation.Binary.StrictReasoning as StrictReasoning
+import RoutingLib.Relation.Binary.Reasoning.StrictCore as StrictReasoning
 
 module RoutingLib.Data.Nat.Properties where
 

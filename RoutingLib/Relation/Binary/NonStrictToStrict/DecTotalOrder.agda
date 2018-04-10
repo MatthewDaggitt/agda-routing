@@ -8,8 +8,6 @@ module RoutingLib.Relation.Binary.NonStrictToStrict.DecTotalOrder
   
   open DecTotalOrder decTotalOrder
 
-
-
   ------------------------------------------------------------------------------
   -- Exports
 
@@ -19,9 +17,9 @@ module RoutingLib.Relation.Binary.NonStrictToStrict.DecTotalOrder
   <-strictTotalOrder = record
     { isStrictTotalOrder = NSTS.isDecTotalOrder⟶isStrictTotalOrder _ _ isDecTotalOrder
     }
-
+  
   open StrictTotalOrder <-strictTotalOrder public
-    using    (_<?_)
+    using (_<?_)
     renaming
     ( isStrictTotalOrder to <-isStrictTotalOrder
     )

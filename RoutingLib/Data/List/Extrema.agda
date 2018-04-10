@@ -47,7 +47,7 @@ module RoutingLib.Data.List.Extrema
   ------------------------------------------------------------------------------
   -- Properties of argmin
 
-  module _ {a} {A : Set a} {f : A → B} where
+  module _ {a} {A : Set a} (f : A → B) where
 
     argmin-sel : ∀ ⊤ xs → (argmin f ⊤ xs ≡ ⊤) ⊎ (argmin f ⊤ xs ∈ xs)
     argmin-sel = foldr-∈ (⊓-lift-sel f)
@@ -58,7 +58,8 @@ module RoutingLib.Data.List.Extrema
     ... | inj₁ argmin≡⊤  = subst P (sym argmin≡⊤) p⊤
     ... | inj₂ argmin∈xs = lookup pxs argmin∈xs
 
-
+  module _ {a} {A : Set a} {f : A → B} where
+  
     f[argmin]≤v : ∀ {v} ⊤ xs → (f ⊤ ≤ v) ⊎ (Any (λ x → f x ≤ v) xs) →
                   f (argmin f ⊤ xs) ≤ v
     f[argmin]≤v = foldr-presᵒ (⊓-lift-presᵒ-≤v f)

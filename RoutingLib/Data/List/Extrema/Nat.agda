@@ -21,12 +21,8 @@ module RoutingLib.Data.List.Extrema.Nat where
     <×⇒< : ∀ {x y} → x ≤ y × x ≢ y → x < y
     <×⇒< (x≤y , x≢y) = ≤+≢⇒< x≤y x≢y
 
-  open Extrema public hiding
-    (f[argmin]<v; v<f[argmin]; argmin[xs]<argmin[ys])
+  open Extrema public hiding (f[argmin]<v; v<f[argmin]; argmin[xs]<argmin[ys])
 
-
-
-  
   module _ {a} {A : Set a} {f : A → ℕ} where
   
     f[argmin]<v : ∀ {v} ⊤ xs → (f ⊤ < v) ⊎ (Any (λ x → f x < v) xs) →

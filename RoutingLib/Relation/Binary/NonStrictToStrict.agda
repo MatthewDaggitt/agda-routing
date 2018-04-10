@@ -1,6 +1,9 @@
 open import Data.Product using (_,_)
+open import Data.Sum using (inj₁; inj₂)
+open import Function using (_∘_)
 open import Relation.Binary
 open import Relation.Nullary using (¬_)
+open import Relation.Nullary.Negation using (contradiction)
 
 
 module RoutingLib.Relation.Binary.NonStrictToStrict
@@ -14,6 +17,14 @@ module RoutingLib.Relation.Binary.NonStrictToStrict
 
   ≤⇒≯ : Antisymmetric _≈_ _≤_ → ∀ {x y} → x ≤ y → ¬ (y < x)
   ≤⇒≯ antisym x≤y y<x = <⇒≱ antisym y<x x≤y
+
+  ≰⇒> : Symmetric _≈_ → _≈_ ⇒ _≤_ → Total _≤_ →
+        ∀ {x y} → ¬ (x ≤ y) → y < x
+  ≰⇒> sym refl total {x} {y} x≰y with total x y
+  ... | inj₁ x≤y = contradiction x≤y x≰y
+  ... | inj₂ y≤x = y≤x , x≰y ∘ refl ∘ sym
+
+  postulate ≮⇒≥ : ∀ {x y} → ¬ (x < y) → y ≤ x
   
   <≤-trans : Symmetric _≈_ → Transitive _≤_ → Antisymmetric _≈_ _≤_ →
              (∀ {x} → (x ≤_) Respects _≈_) →

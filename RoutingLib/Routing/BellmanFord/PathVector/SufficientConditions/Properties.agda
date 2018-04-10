@@ -93,6 +93,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions.Properties
     ; ≤<-trans to ≤<₊-trans
     ; <⇒≱      to <₊⇒≱₊
     ; ≤⇒≯      to ≤₊⇒≯₊
+    ; ≰⇒>      to ≰₊⇒>₊
     ; <-asym   to <₊-asym
     ; <-strictPartialOrder to <₊-strictPartialOrder
     ; <-strictTotalOrder   to <₊-strictTotalOrder
@@ -103,21 +104,26 @@ module RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions.Properties
   
   open BellmanFord 𝓡𝓟
   import RoutingLib.Routing.BellmanFord.Properties 𝓡𝓟 as P
+
+  abstract
   
-  σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ : ∀ X i j → (∃ λ k → σ X i j ≈ A i k ▷ X k j) ⊎ (σ X i j ≈ I i j)
-  σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ = P.σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ ⊕-sel
+    σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ : ∀ X i j → (∃ λ k → σ X i j ≈ A i k ▷ X k j) ⊎ (σ X i j ≈ I i j)
+    σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ = P.σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ ⊕-sel
 
-  σXᵢᵢ≈Iᵢᵢ : ∀ X i → σ X i i ≈ I i i
-  σXᵢᵢ≈Iᵢᵢ = P.σXᵢᵢ≈Iᵢᵢ ⊕-sel ⊕-assoc ⊕-comm ⊕-zeroʳ
+    σXᵢᵢ≈Iᵢᵢ : ∀ X i → σ X i i ≈ I i i
+    σXᵢᵢ≈Iᵢᵢ = P.σXᵢᵢ≈Iᵢᵢ ⊕-sel ⊕-assoc ⊕-comm ⊕-zeroʳ
     
-  σXᵢᵢ≈σYᵢᵢ : ∀ X Y i → σ X i i ≈ σ Y i i
-  σXᵢᵢ≈σYᵢᵢ = P.σXᵢᵢ≈σYᵢᵢ ⊕-sel ⊕-assoc ⊕-comm ⊕-zeroʳ
+    σXᵢᵢ≈σYᵢᵢ : ∀ X Y i → σ X i i ≈ σ Y i i
+    σXᵢᵢ≈σYᵢᵢ = P.σXᵢᵢ≈σYᵢᵢ ⊕-sel ⊕-assoc ⊕-comm ⊕-zeroʳ
 
-  r≈0⇒e▷r≈0 : ∀ {e r} → r ≈ 0# → e ▷ r ≈ 0#
-  r≈0⇒e▷r≈0 {e} {r} r≈0 = ≈-trans (▷-cong _ r≈0) (▷-zero e)
+    σXᵢⱼ≤Aᵢₖ▷Xₖⱼ : ∀ X i j k → σ X i j ≤₊ A i k ▷ X k j
+    σXᵢⱼ≤Aᵢₖ▷Xₖⱼ = P.σXᵢⱼ≤Aᵢₖ▷Xₖⱼ ⊕-idem ⊕-assoc ⊕-comm
+    
+    r≈0⇒e▷r≈0 : ∀ {e r} → r ≈ 0# → e ▷ r ≈ 0#
+    r≈0⇒e▷r≈0 {e} {r} r≈0 = ≈-trans (▷-cong _ r≈0) (▷-zero e)
 
-  e▷r≉0⇒r≉0 : ∀ {e r} → e ▷ r ≉ 0# → r ≉ 0#
-  e▷r≉0⇒r≉0 e▷r≉0 r≈0 = e▷r≉0 (r≈0⇒e▷r≈0 r≈0)
+    e▷r≉0⇒r≉0 : ∀ {e r} → e ▷ r ≉ 0# → r ≉ 0#
+    e▷r≉0⇒r≉0 e▷r≉0 r≈0 = e▷r≉0 (r≈0⇒e▷r≈0 r≈0)
 
   ------------------------------------------------------------------------------
   -- Path properties
@@ -167,7 +173,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions.Properties
     
     alignPathExtension : ∀ (X : RMatrix) i j k {u v p e⇿p i∉p} →
               path (A i k ▷ X k j) ≈ₚ valid ((u , v) ∷ p ∣ e⇿p ∣ i∉p) →
-              i ≡ u × v ≡ k × path (X k j) ≈ₚ valid p
+              i ≡ u × k ≡ v × path (X k j) ≈ₚ valid p
     alignPathExtension X i j k p[AᵢₖXₖⱼ]≈uv∷p with A i k ▷ X k j ≟ 0#
     ...     | yes AᵢₖXₖⱼ≈0# = contradiction (
       ≈ₚ-trans (≈ₚ-sym p[AᵢₖXₖⱼ]≈uv∷p) (
@@ -204,8 +210,10 @@ module RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions.Properties
   ------------------------------------------------------------------------------
   -- Size properties
 
-  size<n : ∀ r → size r < n
-  size<n r = length<n (path _)
+  abstract
+  
+    size<n : ∀ r → size r < n
+    size<n r = length<n (path _)
 
-  size-cong : ∀ {r s} → r ≈ s → size r ≡ size s
-  size-cong {r} {s} r≈s = length-cong (path-cong r≈s)
+    size-cong : ∀ {r s} → r ≈ s → size r ≡ size s
+    size-cong {r} {s} r≈s = length-cong (path-cong r≈s)

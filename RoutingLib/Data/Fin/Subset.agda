@@ -10,8 +10,8 @@ open import RoutingLib.Data.Vec using (count)
 
 module RoutingLib.Data.Fin.Subset where
 
-  size : ∀ {n} → Subset n → ℕ
-  size p = count (_≟ inside) p
+  ∣_∣ : ∀ {n} → Subset n → ℕ
+  ∣ p ∣ = count (_≟ inside) p
 
   _\\_ : ∀ {n} → Subset n → Subset n → Subset n
   []      \\ _             = []

@@ -1,6 +1,8 @@
-open import Data.List using (List; length; []; _∷_)
+open import Data.List using (List; length; []; _∷_; filter)
 open import Data.List.Any using (Any; here; there)
 import Data.List.Any.Membership as Memb
+open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-filter⁻; ∈-filter⁺; ∈-resp-≈)
+open import Data.List.Properties using (length-filter; filter-some)
 open import Data.Nat using (ℕ; zero; suc; _+_; _<_; _≤_; z≤n; s≤s) renaming (_≟_ to _≟ℕ_)
 open import Data.Nat.Properties using (+-suc; +-identityʳ; ≤-trans; ≤-step; m≤m+n; ≤-reflexive; pred-mono; ≤+≢⇒<; ≤-refl; <⇒≤)
 open import Data.Product using (_×_; ∃; proj₁; proj₂; _,_)
@@ -13,9 +15,8 @@ open import Induction.Nat using (<-well-founded)
 open import Induction.WellFounded using (Acc; acc)
 
 open import RoutingLib.Asynchronous using (Parallelisation)
-open import RoutingLib.Data.List using (dfilter)
-open import RoutingLib.Data.List.Properties using (|dfilter[xs]|<|xs|)
-open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-dfilter⁻; ∈-dfilter⁺; ∈-resp-≈)
+-- open import RoutingLib.Data.List using (dfilter)
+-- open import RoutingLib.Data.List.Properties using (|dfilter[xs]|<|xs|)
 open import RoutingLib.Data.Table using (Table)
 open import RoutingLib.Relation.Unary.Consequences using (P?⇒¬P?)
 
@@ -58,13 +59,13 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois4 {a ℓ n}
 
     D₀-fixed : ℕ → List M
     D₀-fixed zero = D₀-list
-    D₀-fixed (suc K) = dfilter (P?⇒¬P? (iter x₀ K ≟_)) (D₀-fixed K)
+    D₀-fixed (suc K) = filter (P?⇒¬P? (iter x₀ K ≟_)) (D₀-fixed K)
 
     iterK∈D₀-list : ∀ K → iter x₀ K ∈L D₀-list
     iterK∈D₀-list K = x∈D₀⇒x∈D₀-list (closed-trans K)
 
     D₀-fixed-decreasing : ∀ K → D₀-fixed (suc K) ⊆L  D₀-fixed K
-    D₀-fixed-decreasing K x∈DsK = proj₁ (∈-dfilter⁻ M-setoid
+    D₀-fixed-decreasing K x∈DsK = proj₁ (∈-filter⁻ M-setoid
              ((P?⇒¬P? (iter x₀ K ≟_)))
              ((λ x≈y x≉iterK → x≉iterK ∘ λ iterK≈y → ≈-trans iterK≈y (≈-sym x≈y)))
              x∈DsK)
@@ -84,7 +85,7 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois4 {a ℓ n}
     iterK∈D₀-fixedt : ∀ K → iter x₀ K ≉ iter x₀ (suc K) → ∀ {t} → t ≤ K →
                       iter x₀ (suc K) ∈L D₀-fixed t
     iterK∈D₀-fixedt K iter≉ {zero} t≤K = iterK∈D₀-list (suc K)
-    iterK∈D₀-fixedt K iter≉ {suc t} t≤K = ∈-dfilter⁺ M-setoid (P?⇒¬P? (iter x₀ t ≟_))
+    iterK∈D₀-fixedt K iter≉ {suc t} t≤K = ∈-filter⁺ M-setoid (P?⇒¬P? (iter x₀ t ≟_))
               (λ x≈y x≉iterK → x≉iterK ∘ λ iterK≈y → ≈-trans iterK≈y (≈-sym x≈y))
               ((x≼y≼z∧x≉y⇒x≉z (iter-decreasing K)
                 (iter-decreasing-full (<⇒≤ t≤K)) (iter≉ ∘ ≈-sym)) ∘ ≈-sym)
@@ -92,7 +93,7 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois4 {a ℓ n}
 
     iter≉⇒iter∈D₀-fixed : ∀ K → iter x₀ K ≉ iter x₀ (suc K) → iter x₀ K ∈L D₀-fixed K
     iter≉⇒iter∈D₀-fixed zero _ = iterK∈D₀-list zero
-    iter≉⇒iter∈D₀-fixed (suc K) iter≉ = ∈-dfilter⁺ M-setoid (P?⇒¬P? (iter x₀ K ≟_))
+    iter≉⇒iter∈D₀-fixed (suc K) iter≉ = ∈-filter⁺ M-setoid (P?⇒¬P? (iter x₀ K ≟_))
                     (λ x≈y x≉iterK → x≉iterK ∘ λ iterK≈y → ≈-trans iterK≈y (≈-sym x≈y))
                     {iter x₀ (suc K)}
                     (λ iter≈ → contradiction (≈-trans (≈-sym iter≈)
@@ -113,7 +114,7 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois4 {a ℓ n}
 
     D₀-fixed-length-dec : ∀ K  → iter x₀ K ≉ iter x₀ (suc K) →
                           length (D₀-fixed (suc K)) < length (D₀-fixed K)
-    D₀-fixed-length-dec K iter≉ = |dfilter[xs]|<|xs| (P?⇒¬P? (iter x₀ K ≟_)) (D₀-fixed K)
+    D₀-fixed-length-dec K iter≉ = filter-some (P?⇒¬P? (iter x₀ K ≟_)) (D₀-fixed K)
       (y∈xs⇒¬¬y∈xs (D₀-fixed K) (iter x₀ K) (iter≉⇒iter∈D₀-fixed K iter≉))
 
     iter-fixed-point : ∀ {K} → Acc _<_ (length (D₀-fixed K)) →

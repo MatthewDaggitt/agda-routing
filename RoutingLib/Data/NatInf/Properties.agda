@@ -18,28 +18,35 @@ module RoutingLib.Data.NatInf.Properties where
   open import Algebra.FunctionProperties.Consequences (setoid ℕ∞) using (sel⇒idem)
 
   -- Properties of equality
+  -- A number is not equal to ∞
   ≢∞ : ∀ {m} → N m ≢ ∞
   ≢∞ ()
 
+  -- If x is not infinity, then x is a number
   ≢∞⇒≡N : ∀ {x} → x ≢ ∞ → ∃ λ m → x ≡ N m
   ≢∞⇒≡N {∞} x≢∞ = contradiction refl x≢∞
   ≢∞⇒≡N {N x} x≢∞ = x , refl
 
+  -- If x is a number, then it is not infinity
   ≡N⇒≢∞ : ∀ {x} → (∃ λ m → x ≡ N m) → x ≢ ∞
   ≡N⇒≢∞ (m , refl) ()
 
+  -- Inequality in ℕ implies inequality in ℕ∞
   ≢ℕ⇒≢ : ∀ {m n} → m ≢ n → N m ≢ N n
   ≢ℕ⇒≢ m≢n refl = m≢n refl
 
+  -- Inequality in ℕ∞ for numbers implies inequality in ℕ
   ≢⇒≢ℕ : ∀ {m n} → N m ≢ N n → m ≢ n
   ≢⇒≢ℕ Nm≢Nn refl = Nm≢Nn refl
 
+  -- Equality holds over suc
   ≡-suc : ∀ x y → N x ≡ N y → N (suc x) ≡ N (suc y)
   ≡-suc zero zero refl = cong N (cong suc refl)
   ≡-suc zero (suc y) ()
   ≡-suc (suc x) zero ()
   ≡-suc (suc x) (suc .x) refl = cong N (cong suc refl)
 
+  -- Equality in ℕ implies equality in ℕ∞
   ≡ℕ⇒≡ : ∀ {m n} → m ≡ n → N m ≡ N n
   ≡ℕ⇒≡ refl = refl
 

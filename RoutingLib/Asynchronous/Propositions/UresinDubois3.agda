@@ -49,26 +49,32 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3 {a ℓ n}
     D-decreasing K x∈DK i with x∈DK i
     ... | ((ξ≼x , x≼iterK), x∈D₀) = (ξ≼x , ≼ᵢ-trans x≼iterK (iter-decreasing K i)) , x∈D₀
 
+    -- All synchronous iterations are in D₀
     closed-trans : ∀ K → iter x₀ K ∈ D₀
     closed-trans zero    i = x₀∈D₀ i
     closed-trans (suc K) i = D₀-closed (iter x₀ K) (closed-trans K) i
-    
+
+    -- Synchronous iteration is monotonic
     iter-decreasing-full : ∀ {k t} → k ≤ t → iter x₀ t ≼ iter x₀ k
     iter-decreasing-full {.0} {zero} z≤n = ≼-refl
     iter-decreasing-full {k} {suc t} k≤t with k ≟ suc t
     ... | yes refl = ≼-refl
-    ... | no  k≢st = ≼-trans (iter-decreasing t) (iter-decreasing-full {k} {t} (pred-mono (≤+≢⇒< k≤t k≢st)))
+    ... | no  k≢st = ≼-trans (iter-decreasing t)
+      (iter-decreasing-full {k} {t} (pred-mono (≤+≢⇒< k≤t k≢st)))
 
     x₀∈D0 : x₀ ∈ D 0
     x₀∈D0 i = (iter-decreasing-full {0} {T} z≤n i , ≼ᵢ-refl) , x₀∈D₀ i
-    
+
+    -- All synchronous iterations after the convergence time equal ξ
     T≤K⇒ξ≈iterK : ∀ {K} → T ≤ K → ξ ≈ iter x₀ K
     T≤K⇒ξ≈iterK {K} T≤K = ≈-trans (proj₂ iter-converge (K ∸ T)) (≈-cong (iter x₀) (m+n∸m≡n T≤K))
 
+    -- ξ is a fixed point
     ξ≈fξ : ξ ≈ f ξ
     ξ≈fξ i = ≈ᵢ-trans (proj₂ iter-converge 1 i)
              (≈-cong (iter x₀) (trans (+-suc T 0) (cong suc (+-identityʳ T))) i)
 
+    -- ξ is in all D(K)
     ξ∈DK : ∀ K → ξ ∈ D K
     ξ∈DK K i with K ≤? T
     ... | yes K≤T = (≼ᵢ-refl , iter-decreasing-full K≤T i) , closed-trans T i

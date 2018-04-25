@@ -14,13 +14,15 @@ open import RoutingLib.Data.Table.Properties using (min∞[s]≤min∞[t])
 module RoutingLib.Asynchronous.Applications.AllPairs.Properties (n : ℕ) where
 
   open import RoutingLib.Asynchronous.Applications.AllPairs n
-  
+
+  -- path-cost properties
   path-cost-monotone : ∀ {g h} → g ≼ₘ h → ∀ i j k → path-cost g i j k ≤ path-cost h i j k
   path-cost-monotone g≼ₘh i j k = +-mono-≤ (g≼ₘh i k) (g≼ₘh k j)
 
   path-cost-equiv : ∀ {g h} → g ≡ₘ h → ∀ i j k → path-cost g i j k ≡ path-cost h i j k
   path-cost-equiv g≡ₘh i j k = +-mono (g≡ₘh i k) (g≡ₘh k j)
 
+  -- Row ordering relation properties
   ≼-refl : Reflexive _≼_
   ≼-refl i = ≤-refl
 
@@ -33,6 +35,7 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Properties (n : ℕ) where
   ≼-trans : Transitive _≼_
   ≼-trans x≼y y≼z i = ≤-trans (x≼y i) (y≼z i)
 
+  -- Row ordering relation is a preorder
   isPreorder : IsPreorder _≡ᵣ_ _≼_
   isPreorder = record {
     isEquivalence = record {
@@ -44,12 +47,14 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Properties (n : ℕ) where
     trans = ≼-trans
     }
 
+  -- Row ordering relation is a partial order
   ≼-isPartialOrder : IsPartialOrder _≡ᵣ_ _≼_
   ≼-isPartialOrder = record {
     isPreorder = isPreorder ;
     antisym = ≼-antisym
     }
 
+  -- Matrix ordering relation properties
   ≼ₘ-refl : Reflexive _≼ₘ_
   ≼ₘ-refl i = ≼-refl
 
@@ -94,6 +99,8 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Properties (n : ℕ) where
     trans = λ x≼y y≼z i → ≼-trans (x≼y i) (y≼z i)
     }
 
+
+  -- Extracting witnesses from inequality
   ≢ᵣ-witness : ∀ {x y} → x ≢ᵣ y → ∃ λ i → x i ≢ y i
   ≢ᵣ-witness {x} {y} x≢y with all? (λ i → x i ≟ y i)
   ... | yes all = contradiction all x≢y

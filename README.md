@@ -16,7 +16,7 @@ The core contributions of this library can be found in the `Asynchronous` and `R
 
 ## Requirements
 
-Requires Agda 2.5.3 and Standard Library 0.14
+Requires Agda 2.5.3 and Standard Library 0.15
 
 ## Postulates
 

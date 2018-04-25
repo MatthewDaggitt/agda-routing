@@ -20,12 +20,13 @@ open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (U; U-Universal; Decidable)
 
+open Relation.Binary.PropositionalEquality.≡-Reasoning
+
 open import RoutingLib.Asynchronous using (Parallelisation)
 import RoutingLib.Asynchronous.Applications.AllPairs as AllPairs
 open import RoutingLib.Asynchronous.Schedule using (Schedule; 𝕋)
 open import RoutingLib.Data.List using (allFinPairs)
 open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-filter⁺; ∈-combine⁺; ∈-tabulate⁺; ∈-filter⁻; ∈-allFinPairs⁺)
--- open import RoutingLib.Data.List.Properties using (|dfilter[xs]|≡|xs|⇒dfilter[xs]≡xs; dfilter[xs]≡xs; |dfilter[xs]|≤|xs|)
 open import RoutingLib.Data.NatInf
 open import RoutingLib.Data.NatInf.Properties
 open import RoutingLib.Data.Table using (Table; min∞; sum; max)
@@ -90,7 +91,8 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
   ...   | inj₁ iterᵢⱼ≡ = contradiction (trans iterᵢⱼ≡ iterᵢⱼsK≡∞) iterᵢⱼssK≢∞
   ...   | inj₂ (k , p) rewrite p with iter x₀ (suc K) i k ≟ ∞ | iter x₀ (suc K) k j ≟ ∞
   ...     | yes iterᵢₖsK≡∞ | _ rewrite iterᵢₖsK≡∞ = contradiction refl iterᵢⱼssK≢∞
-  ...     | no  _         | yes iterₖⱼsK≡∞ rewrite iterₖⱼsK≡∞ = contradiction (+-comm (iter x₀ (suc K) i k) ∞) iterᵢⱼssK≢∞
+  ...     | no  _         | yes iterₖⱼsK≡∞ rewrite iterₖⱼsK≡∞ =
+            contradiction (+-comm (iter x₀ (suc K) i k) ∞) iterᵢⱼssK≢∞
   ...     | no  iterᵢₖsK≢∞ | no iterₖⱼsK≢∞ with iter x₀ K i k ≟ ∞ | iter x₀ K k j ≟ ∞
   ...       | yes iterᵢₖK≡∞ | _            = contradiction (⇒∞ i k iterᵢₖK≡∞) iterᵢₖsK≢∞
   ...       | no  _        | yes iterₖⱼK≡∞ = contradiction (⇒∞ k j iterₖⱼK≡∞) iterₖⱼsK≢∞
@@ -105,8 +107,7 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
 
                 path-cost≤xᵢₖ+xₖⱼ : path-cost (iter x₀ K) i j k ≤ N (xᵢₖ +ℕ xₖⱼ)
                 path-cost≤xᵢₖ+xₖⱼ = ≤-reflexive (trans (cong (iter x₀ K i k +_) pₖⱼ)
-                  (cong (_+ N xₖⱼ) pᵢₖ))
-
+                  (cong (_+ N xₖⱼ) pᵢₖ)) 
 
   FinPair : Setoid lzero lzero
   FinPair = setoid (Fin n × Fin n)
@@ -170,8 +171,12 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
 
   ∞-nodes-fixed : ∀ K → ∞-nodes K ≡ ∞-nodes (suc K) → ∀ {t} → K ≤ℕ t →
                   ∞-nodes t ≡ ∞-nodes (suc t)
-  ∞-nodes-fixed K ∞-nodes≡ {t} K≤t = trans (sym (trans (∞-nodes-fixed-range K ∞-nodes≡ (t ∸ K)) (cong ∞-nodes (m+n∸m≡n K≤t))))
-    (trans (∞-nodes-fixed-range K ∞-nodes≡ (suc t ∸ K)) (cong ∞-nodes (m+n∸m≡n {K} {suc t} (≤ℕ-step K≤t))))
+  ∞-nodes-fixed K ∞-nodes≡ {t} K≤t = begin
+    ∞-nodes t                   ≡⟨ cong ∞-nodes (sym (m+n∸m≡n K≤t)) ⟩
+    ∞-nodes (K +ℕ (t ∸ K))     ≡⟨ sym (∞-nodes-fixed-range K ∞-nodes≡ (t ∸ K)) ⟩
+    ∞-nodes K                   ≡⟨ ∞-nodes-fixed-range K ∞-nodes≡ (suc t ∸ K) ⟩
+    ∞-nodes (K +ℕ (suc t ∸ K)) ≡⟨ cong ∞-nodes (m+n∸m≡n {K} {suc t} (≤ℕ-step K≤t)) ⟩
+    ∞-nodes (suc t)             ∎
 
   ∞-nodes-length-dec : ∀ K → length (∞-nodes (suc K)) ≤ℕ length (∞-nodes K)
   ∞-nodes-length-dec K = length-filter (is∞? (suc K)) (∞-nodes K)

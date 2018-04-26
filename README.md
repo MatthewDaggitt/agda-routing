@@ -7,12 +7,16 @@ The core contributions of this library can be found in the `Asynchronous` and `R
 	* `RoutingLib.Asynchronous` contains the formalisation of Uresin & Dubois of asynchronous processes.
 	
 	* `RoutingLib.Asynchronous.Theorems` contains various very general results about the convergence of asynchronous processes.
+
+	* `RoutingLib.Asynchronous.Propositions` contains various sufficient conditions that relate to the theorems above.
 	
 	* `RoutingLib.Routing.BellmanFord` contains an implementation of generalised distributed Bellman Ford-based routing algorithms.
 	
 	* `RoutingLib.Routing.BellmanFord.DistanceVector` contains a proof that distance-vector protocols converge with strictly increasing algebras and a finite set of routes.
 	
 	* `RoutingLib.Routing.BellmanFord.PathVector` contains a proof that path-vector protocols converge with strictly increasing algebras.
+
+	* `RoutingLib.Asynchronous.Applications` contains a proof that a solution to the all-pairs shortest path problem converges asynchronously.
 
 ## Requirements
 

@@ -58,7 +58,7 @@ module RoutingLib.Data.List.All.Properties where
     -- Other --
     -----------
 
-
+    {-
     All-applyBetween⁺₁ : ∀ f s e → (∀ {i} → s ≤ i → i < e → P (f i)) → All P (applyBetween f s e)
     All-applyBetween⁺₁ f zero    e       Pf = applyUpTo⁺₁ f e (Pf z≤n)
     All-applyBetween⁺₁ f (suc s) zero    Pf = []
@@ -66,14 +66,14 @@ module RoutingLib.Data.List.All.Properties where
 
     All-applyBetween⁺₂ : ∀ f s e → (∀ {i} → P (f i)) → All P (applyBetween f s e)
     All-applyBetween⁺₂ f s e Pf = All-applyBetween⁺₁ f s e (λ _ _ → Pf)
-
+    
 
   s≤betweenₛₑ : ∀ s e → All (s ≤_) (between s e)
   s≤betweenₛₑ s e = All-applyBetween⁺₁ id s e (λ s≤i _ → s≤i)
 
   betweenₛₑ<e : ∀ s e → All (_< e) (between s e)
   betweenₛₑ<e s e = All-applyBetween⁺₁ id s e (λ _ i<e → i<e)
-
+  -}
 
   ----------------------
   -- Pushed to stdlib --
@@ -124,15 +124,15 @@ module RoutingLib.Data.List.All.Properties where
     open import Data.List.Any.Membership S₁ using () renaming (_∈_ to _∈₁_)
     open import Data.List.Any.Membership S₂ using () renaming (_∈_ to _∈₂_)
 
-    All-combine⁺ : ∀ {b p} {B : Set b} {P : B → Set p} _•_ (xs : List A₁) (ys : List A₂) → (∀ {x y} → x ∈₁ xs → y ∈₂ ys → P (x • y)) → All P (combine _•_ xs ys)
-    All-combine⁺ _•_ []       ys pres = []
-    All-combine⁺ _•_ (x ∷ xs) ys pres = ++⁺ (map-all S₂ (x •_) (pres (here refl₁))) (All-combine⁺ _•_ xs ys (pres ∘ there))
+    combine⁺ : ∀ {b p} {B : Set b} {P : B → Set p} _•_ (xs : List A₁) (ys : List A₂) → (∀ {x y} → x ∈₁ xs → y ∈₂ ys → P (x • y)) → All P (combine _•_ xs ys)
+    combine⁺ _•_ []       ys pres = []
+    combine⁺ _•_ (x ∷ xs) ys pres = ++⁺ (map-all S₂ (x •_) (pres (here refl₁))) (combine⁺ _•_ xs ys (pres ∘ there))
 
   open DoubleSetoidProperties public
 
 
   allFinPairs⁺ : ∀ {n p} {P : Pred (Fin n × Fin n) p} → (∀ e → P e) → All P (allFinPairs n)
-  allFinPairs⁺ {n} P = All-combine⁺ (𝔽ₛ n) (𝔽ₛ n) _,_ (allFin n) (allFin n) (λ _ _ → P _)
+  allFinPairs⁺ {n} P = combine⁺ (𝔽ₛ n) (𝔽ₛ n) _,_ (allFin n) (allFin n) (λ _ _ → P _)
 
 
 
@@ -214,6 +214,7 @@ module RoutingLib.Data.List.All.Properties where
     AllPairs-applyUpTo⁺₂ : ∀ f n → (∀ i j → f i ~ f j) → AllPairs _~_ (applyUpTo f n)
     AllPairs-applyUpTo⁺₂ f n f~ = AllPairs-applyUpTo⁺₁ f n (λ _ _ → f~ _ _)
 
+    {-
     AllPairs-applyBetween⁺₁ : ∀ f s e → (∀ {i j} → s ≤ i → i < j → j < e → f i ~ f j) → AllPairs _~_ (applyBetween f s e)
     AllPairs-applyBetween⁺₁ f zero    e       Pf = AllPairs-applyUpTo⁺₁ f e (Pf z≤n)
     AllPairs-applyBetween⁺₁ f (suc s) zero    Pf = []
@@ -221,7 +222,7 @@ module RoutingLib.Data.List.All.Properties where
 
     AllPairs-applyBetween⁺₂ : ∀ f s e → (∀ {i j} → f i ~ f j) → AllPairs _~_ (applyBetween f s e)
     AllPairs-applyBetween⁺₂ f s e Pf = AllPairs-applyBetween⁺₁ f s e (λ _ _ _ → Pf)
-  
+    -}
 
   module AllPairsDecSetoidProperties {a ℓ} (DS : DecSetoid a ℓ) where
 

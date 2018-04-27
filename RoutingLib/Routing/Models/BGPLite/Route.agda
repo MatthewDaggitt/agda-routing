@@ -5,7 +5,9 @@ open import Relation.Binary using (Rel)
 open import Relation.Binary.PropositionalEquality using (_≡_)
 open import Relation.Nullary using (¬_)
 
-open import RoutingLib.Data.Graph.SimplePath2.NonEmpty renaming (_≈_ to _≈ₚ_)
+open import RoutingLib.Data.SimplePath.NonEmpty using (SimplePathⁿᵗ; length)
+open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Equality using (_≈ₚ_)
+open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Lex using (_<ₗₑₓ_)
 open import RoutingLib.Routing.Models.BGPLite.Communities
 
 module RoutingLib.Routing.Models.BGPLite.Route (n : ℕ) where

@@ -5,8 +5,6 @@ open import Relation.Nullary using (¬_)
 open import Algebra.FunctionProperties using (Congruent₂; Op₂)
 open import Algebra.Structures
 
-open import RoutingLib.Relation.Binary.RespectedBy using (_RespectedBy_; Respects₂⇨RespectedBy)
-
 module RoutingLib.Relation.Binary.NaturalOrder.Left
   {a ℓ} (S : Setoid a ℓ) (_•_ : Op₂ (Setoid.Carrier S))
   where
@@ -73,9 +71,6 @@ module RoutingLib.Relation.Binary.NaturalOrder.Left
 
     presᵣ : ∀ {y} → (_• y) Preserves _≈_ ⟶ _≈_
     presᵣ i≈j = {!!} --pres i≈j refl
-
-  ≤-resp-≈ : _≤_ RespectedBy _≈_
-  ≤-resp-≈ = Respects₂⇨RespectedBy ≤-resp₂-≈
 
   ≤-isPreorder : Associative _•_ → Idempotent _•_ → IsPreorder _≈_ _≤_
   ≤-isPreorder assoc idem = record {

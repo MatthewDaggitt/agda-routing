@@ -16,12 +16,12 @@ open import Function using (_∘_; id)
 open import Induction.WellFounded using (Acc; acc)
 open import Induction.Nat using () renaming (<-well-founded to <-wellFounded)
 
-open import RoutingLib.Data.Fin.Subset using (_\\_) renaming (size to sizeₛ)
-open import RoutingLib.Data.Fin.Subset.Properties using (size[p\\q]<size[p]; i∉p\\q⇒i∉p; i∉⁅j⁆)
+open import RoutingLib.Data.Fin.Subset using (_\\_; ∣_∣)
+open import RoutingLib.Data.Fin.Subset.Properties using (∣p\\q∣<∣p∣; i∉p\\q⇒i∉p; i∉⁅j⁆)
 open import RoutingLib.Data.Nat.Properties
   using (⊔-triangulate; m≤o⇒m≤n⊔o; m<n⇒n≢0; n≤m×o≤m⇒n⊔o≤m; m<n⊎m<o⇒m<n⊔o; m≤n⇒m≤n⊔o; module ≤-Reasoning)
 import RoutingLib.Function.Metric as Metric
-open import RoutingLib.Data.Sum using (flip)
+open import RoutingLib.Data.Sum using (swap)
 
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
@@ -100,7 +100,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Step2_Inconsis
       
       reduction : ∀ X {r s} →
                   (∀ {u v} → X u v ≉ σ X u v → 𝑰 (X u v) ⊎ 𝑰 (σ X u v) → dᵣⁱ (X u v) (σ X u v) ≤ dᵣⁱ (X r s) (σ X r s)) →
-                  ∀ i j (L : Subset n) → Acc _<_ (sizeₛ L) → (∀ {l} → l ∉ L → hⁱ (σ X l j) ≤ hⁱ (σ X i j)) →
+                  ∀ i j (L : Subset n) → Acc _<_ ∣ L ∣ → (∀ {l} → l ∉ L → hⁱ (σ X l j) ≤ hⁱ (σ X i j)) →
                   𝑰 (σ X i j) → hⁱ (σ X i j) < hⁱ (X r s) ⊔ hⁱ (σ X r s)
       reduction X {r} {s} dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ i j L (acc rec) L-less σXᵢⱼⁱ with chain₁ X _ _ σXᵢⱼⁱ
       ... | k , Xₖⱼⁱ , hσXᵢⱼ<hXₖⱼ⊔hσXₖⱼ  with X k j ≟ σ X k j
@@ -109,13 +109,13 @@ module RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Step2_Inconsis
       ...     | hσXᵢⱼ<hσXₖⱼ | no  k∉L = contradiction hσXᵢⱼ<hσXₖⱼ (≤⇒≯ (L-less k∉L))
       ...     | hσXᵢⱼ<hσXₖⱼ | yes k∈L = begin
         hⁱ (σ X i j)                <⟨ hσXᵢⱼ<hσXₖⱼ ⟩
-        hⁱ (σ X k j)                <⟨ reduction X dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ k j (L \\ ⁅ k ⁆) (rec _ L\\k<L) L-exclude (𝑰-cong Xₖⱼ≈σXₖⱼ Xₖⱼⁱ) ⟩
+        hⁱ (σ X k j)                <⟨ reduction X dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ k j (L \\ ⁅ k ⁆) (rec _ ∣L\\k∣<∣L∣) L-exclude (𝑰-cong Xₖⱼ≈σXₖⱼ Xₖⱼⁱ) ⟩
         hⁱ (X r s) ⊔ hⁱ (σ X r s) ∎
 
         where
   
-        L\\k<L : sizeₛ (L \\ ⁅ k ⁆) < sizeₛ L
-        L\\k<L = size[p\\q]<size[p] {p = L} {⁅ k ⁆} (k , x∈p∩q⁺ (k∈L , x∈⁅x⁆ k))
+        ∣L\\k∣<∣L∣ : ∣ L \\ ⁅ k ⁆ ∣ < ∣ L ∣
+        ∣L\\k∣<∣L∣ = ∣p\\q∣<∣p∣ {p = L} {⁅ k ⁆} (k , x∈p∩q⁺ (k∈L , x∈⁅x⁆ k))
   
         L-exclude : ∀ {l} → l ∉ (L \\ ⁅ k ⁆) → hⁱ (σ X l j) ≤ hⁱ (σ X k j)
         L-exclude {l} l∉L\\k with l ≟𝔽 k
@@ -130,14 +130,14 @@ module RoutingLib.Routing.BellmanFord.PathVector.AsyncConvergence.Step2_Inconsis
     dᵣⁱ-strContrOrbits X {r} {s} dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ {i} {j} σXᵢⱼⁱ⊎σ²Xᵢⱼⁱ with ≤-total (hⁱ (σ (σ X) i j)) (hⁱ (σ X i j))
     ...   | inj₁ σ²Xᵢⱼ≤σXᵢⱼ = begin
       hⁱ (σ X i j) ⊔ hⁱ (σ (σ X) i j) ≡⟨ m≤n⇒n⊔m≡n σ²Xᵢⱼ≤σXᵢⱼ ⟩
-      hⁱ (σ X i j)                    <⟨ reduction X dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ i j ⊤ (<-wellFounded (sizeₛ {n} ⊤)) (λ l∉⊤ → contradiction ∈⊤ l∉⊤) (h-force-𝑰 (flip σXᵢⱼⁱ⊎σ²Xᵢⱼⁱ) σ²Xᵢⱼ≤σXᵢⱼ) ⟩
+      hⁱ (σ X i j)                    <⟨ reduction X dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ i j ⊤ (<-wellFounded ∣ ⊤ {n = n} ∣) (λ l∉⊤ → contradiction ∈⊤ l∉⊤) (h-force-𝑰 (swap σXᵢⱼⁱ⊎σ²Xᵢⱼⁱ) σ²Xᵢⱼ≤σXᵢⱼ) ⟩
       hⁱ (X r s)   ⊔ hⁱ (σ X r s)     ∎
     ...   | inj₂ σXᵢⱼ≤σ²Xᵢⱼ with σXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ (σ X) _ _ (h-force-𝑰 σXᵢⱼⁱ⊎σ²Xᵢⱼⁱ σXᵢⱼ≤σ²Xᵢⱼ)
     ... | k , σ²Xᵢⱼ≈Aᵢₖ▷σXₖⱼ , σXₖⱼⁱ = begin
       hⁱ (σ X i j) ⊔ hⁱ (σ (σ X) i j) ≡⟨ m≤n⇒m⊔n≡n σXᵢⱼ≤σ²Xᵢⱼ ⟩
       hⁱ (σ (σ X) i j)                ≡⟨ hⁱ-cong σ²Xᵢⱼ≈Aᵢₖ▷σXₖⱼ ⟩
       hⁱ (A i k ▷ σ X k j)            <⟨ hⁱ-decr (𝑰-cong σ²Xᵢⱼ≈Aᵢₖ▷σXₖⱼ (h-force-𝑰 σXᵢⱼⁱ⊎σ²Xᵢⱼⁱ σXᵢⱼ≤σ²Xᵢⱼ)) ⟩
-      hⁱ (σ X k j)                    <⟨ reduction X dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ k j ⊤ (<-wellFounded (sizeₛ {n} ⊤)) (λ l∉⊤ → contradiction ∈⊤ l∉⊤) σXₖⱼⁱ ⟩ 
+      hⁱ (σ X k j)                    <⟨ reduction X dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ k j ⊤ (<-wellFounded ∣ ⊤ {n = n} ∣) (λ l∉⊤ → contradiction ∈⊤ l∉⊤) σXₖⱼⁱ ⟩ 
       hⁱ (X r s)   ⊔ hⁱ (σ X r s)     ∎
 
 

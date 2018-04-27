@@ -19,7 +19,7 @@ open import RoutingLib.Data.List.Properties using (foldr≤ₗe; foldr≤ᵣxs)
 open import RoutingLib.Data.List.Membership.Setoid.Properties
   using (foldr-∈; ∈-tabulate⁻; ∈-tabulate⁺)
 open import RoutingLib.Data.List.Relation.Pointwise
-  using (foldr-All₂)
+  using (foldr⁺)
 
 import RoutingLib.Routing.BellmanFord as BellmanFord
 
@@ -70,7 +70,7 @@ module RoutingLib.Routing.BellmanFord.Properties
 
     -- σ respects the underlying matrix equality
     σ-cong : ∀ {X Y} → X ≈ₘ Y → σ X ≈ₘ σ Y
-    σ-cong X≈Y i j = foldr-All₂
+    σ-cong X≈Y i j = foldr⁺
       _≈_ ⊕-cong ≈-refl (tabulate⁺ (λ k → ▷-cong (A i k) (X≈Y k j)))
     
     -- σ either extends the route by going through some k or it chooses a

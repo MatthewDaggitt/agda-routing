@@ -5,10 +5,10 @@ open import Data.Nat.Properties using (<⇒≢)
 open import Relation.Binary.PropositionalEquality using (setoid; _≡_; _≢_; refl; decSetoid)
 open import Function using (id)
 
-open import RoutingLib.Data.List using (combine; between)
+open import RoutingLib.Data.List using (combine)
 open import RoutingLib.Data.List.Disjoint using (_#_)
 open import RoutingLib.Data.List.Membership.DecPropositional using (deduplicate)
-open import RoutingLib.Data.List.All.Properties using (AllPairs-applyUpTo⁺₁; AllPairs-applyBetween⁺₁)
+open import RoutingLib.Data.List.All.Properties using (AllPairs-applyUpTo⁺₁)
 open import RoutingLib.Data.List.Uniqueness.Propositional
 import RoutingLib.Data.List.Uniqueness.Setoid.Properties as SP
 
@@ -37,5 +37,7 @@ module RoutingLib.Data.List.Uniqueness.Propositional.Properties where
   upTo!⁺ : ∀ n → Unique (upTo n)
   upTo!⁺ n = AllPairs-applyUpTo⁺₁ id n (λ i<j _ → <⇒≢ i<j)
 
+  {-
   between!⁺ : ∀ s e → Unique (between s e)
   between!⁺ s e = AllPairs-applyBetween⁺₁ id s e (λ _ i<j _ → <⇒≢ i<j)
+  -}

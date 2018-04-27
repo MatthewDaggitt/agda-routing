@@ -88,8 +88,6 @@ module RoutingLib.Data.SimplePath.NonEmpty.Relation.Lex {n : ℕ} where
 
   postulate <ₗₑₓ-trans : Transitive _<ₗₑₓ_
 
-  postulate <ₗₑₓ-resp-≈ₚ : _<ₗₑₓ_ Respects₂ _≈ₚ_
-
   postulate <ₗₑₓ-asym : Asymmetric _<ₗₑₓ_
   
   postulate <ₗₑₓ-irrefl : Irreflexive _≈ₚ_ _<ₗₑₓ_
@@ -99,3 +97,6 @@ module RoutingLib.Data.SimplePath.NonEmpty.Relation.Lex {n : ℕ} where
   postulate <ₗₑₓ-respˡ-≈ₚ : {p : SimplePathⁿᵗ n} → (p <ₗₑₓ_) Respects _≈ₚ_
 
   postulate <ₗₑₓ-respʳ-≈ₚ : {p : SimplePathⁿᵗ n} → (_<ₗₑₓ p) Respects _≈ₚ_
+
+  postulate <ₗₑₓ-resp-≈ₚ : _<ₗₑₓ_ Respects₂ _≈ₚ_
+

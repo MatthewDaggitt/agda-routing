@@ -21,13 +21,14 @@ module RoutingLib.Data.List where
   merge total (x ∷ xs) (y ∷ ys) with total x y
   ... | inj₁ x≤y = x ∷ merge total xs (y ∷ ys)
   ... | inj₂ y≤x = y ∷ merge total (x ∷ xs) ys
-    
+
+  {-
   applyBetween : ∀ {a} {A : Set a} (f : ℕ → A) s e → List A
   applyBetween f s e = drop s (applyUpTo f e)
 
   between : ∀ s e → List ℕ
   between s e = applyBetween id s e
-
+  -}
 
   combine : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c} →
             (A → B → C) → List A → List B → List C

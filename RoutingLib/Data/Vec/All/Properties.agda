@@ -11,7 +11,6 @@ open import Relation.Binary using (Rel; _⇒_)
 open import Function using (_∘_)
 open import Algebra.FunctionProperties using (Op₂)
 
-open import RoutingLib.Data.Vec using (foldr₂)
 open import RoutingLib.Data.Vec.All using (AllPairs; []; _∷_)
 open import RoutingLib.Data.List.All using ([]; _∷_) renaming (AllPairs to AllPairsₗ)
 

@@ -6,10 +6,7 @@ open import Data.Nat.Properties using (+-comm)
 open import Data.Product using (_,_; proj₁; proj₂)
 open import Data.List using (List)
 open import Data.List.All using (lookup)
-open import Relation.Unary
-  using () renaming (_∈_ to _∈ᵤ_)
-import Relation.Binary.PartialOrderReasoning as PartialOrderReasoning
-import Relation.Binary.EqReasoning as EqReasoning
+open import Relation.Unary using () renaming (_∈_ to _∈ᵤ_)
 import Relation.Binary.PartialOrderReasoning as POR
 open import Relation.Binary.PropositionalEquality
   using (refl; _≢_; subst)
@@ -27,9 +24,9 @@ open import RoutingLib.Data.SimplePath.All
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
 import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Prelude as Prelude
-import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.NodeSets as NodeSets
+import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Step1_NodeSets as Step1_NodeSets
 
-module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.FixedSubtree
+module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Step2_FixedSubtree
   {a b ℓ} {𝓡𝓐 : RoutingAlgebra a b ℓ}
   {n-1}   {𝓡𝓟 : RoutingProblem 𝓡𝓐 n-1}
   (𝓟𝓢𝓒 : PathSufficientConditions 𝓡𝓟)
@@ -39,12 +36,12 @@ module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.FixedSubtree
   {F : Subset (suc n-1)}
   (j∈F : j ∈ F)
   (F-nonFull : Nonfull F)
-  (F-fixed : ∀ {i} → i ∈ F → i ∈ᵤ NodeSets.Fixed 𝓟𝓢𝓒 X j (suc t-1))
+  (F-fixed : ∀ {i} → i ∈ F → i ∈ᵤ Step1_NodeSets.Fixed 𝓟𝓢𝓒 X j (suc t-1))
   where
 
   open Prelude 𝓟𝓢𝓒
   open Notation X j
-  open NodeSets 𝓟𝓢𝓒 X j
+  open Step1_NodeSets 𝓟𝓢𝓒 X j
   
   open Extrema ≤₊-totalOrder
   
@@ -55,7 +52,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.FixedSubtree
 
     e↷F⇒w[t+s]≡w[t] : ∀ {e} → e ↷ F → ∀ s → weightₑ (t + s) e ≈ weightₑ t e
     e↷F⇒w[t+s]≡w[t] (_ , k∈F) s = ▷-cong (A _ _) (proj₁ (F-fixed k∈F) s)
-    
+  
   ------------------------------------------------------------------------------
   -- Finding the fixed minimal edge entering the fixed set
 
@@ -108,7 +105,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.FixedSubtree
       weightₑ t       eₘᵢₙ  ≤⟨ lookup (f[argmin]≤f[xs] eₐ (cutset F)) (↷⇒∈cutset e↷F) ⟩
       weightₑ t       e     ≈⟨ ≈-sym (e↷F⇒w[t+s]≡w[t] e↷F s) ⟩
       weightₑ (t + s) e     ∎
-      where open PartialOrderReasoning ≤₊-poset
+      where open POR ≤₊-poset
 
 
 

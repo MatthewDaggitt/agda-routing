@@ -5,7 +5,7 @@ open import Relation.Binary
 open import Relation.Binary.Lattice using (Minimum)
 open import Relation.Binary.PropositionalEquality
 open import Level using () renaming (zero to ℓ₀)
-import Data.AVL {Key = ℕ} (λ _ → ℕ) <-isStrictTotalOrder as AVL
+import Data.AVL <-isStrictTotalOrder as AVL
 
 module RoutingLib.Routing.Models.BGPLite.Communities where
 
@@ -15,7 +15,7 @@ module RoutingLib.Routing.Models.BGPLite.Communities where
     Community = ℕ
 
     CommunitySet : Set
-    CommunitySet = AVL.Tree
+    CommunitySet = AVL.Tree (λ _ → ℕ)
 
     ∅ : CommunitySet
     ∅ = AVL.empty

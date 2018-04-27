@@ -21,6 +21,7 @@ module RoutingLib.Data.Fin.Subset.Properties where
   x∷p\\y∷q≡z∷p\\q p q x outside = x       , refl
   x∷p\\y∷q≡z∷p\\q p q x inside  = outside , refl
 
+  -- stdlib
   ∣p∣≤n : ∀ {n} (p : Subset n) → ∣ p ∣ ≤ n
   ∣p∣≤n = count≤n (_≟ inside)
   
@@ -29,14 +30,17 @@ module RoutingLib.Data.Fin.Subset.Properties where
   ... | yes _ = n≤1+n ∣ p ∣
   ... | no  _ = ≤-refl
 
+  -- stdlib
   ∣⊥∣≡0 : ∀ n → ∣ ⊥ {n = n} ∣ ≡ 0
   ∣⊥∣≡0 zero    = refl
   ∣⊥∣≡0 (suc n) = ∣⊥∣≡0 n
 
+  -- stdlib
   ∣⊤∣≡n : ∀ n → ∣ ⊤ {n = n} ∣ ≡ n
   ∣⊤∣≡n zero    = refl
   ∣⊤∣≡n (suc n) = cong suc (∣⊤∣≡n n)
   
+  -- stdlib
   ∣⁅i⁆∣≡1 : ∀ {n} (i : Fin n) → ∣ ⁅ i ⁆ ∣ ≡ 1
   ∣⁅i⁆∣≡1 {suc n} fzero    = cong suc (∣⊥∣≡0 n)
   ∣⁅i⁆∣≡1 {_}     (fsuc i) = ∣⁅i⁆∣≡1 i

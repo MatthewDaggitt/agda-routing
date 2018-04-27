@@ -13,7 +13,7 @@ import RoutingLib.Data.List.Sorting as Sorting
 open import RoutingLib.Data.List
 open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique)
 open import RoutingLib.Data.List.All using (AllPairs; []; _∷_) using (allPairs-product; allPairs-map)
-open import RoutingLib.Data.List.All.Properties using (AllPairs-applyUpTo⁺₁; AllPairs-applyBetween⁺₁)
+open import RoutingLib.Data.List.All.Properties using (AllPairs-applyUpTo⁺₁)
 open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-lookup)
 
 module RoutingLib.Data.List.Sorting.Nat where
@@ -26,9 +26,11 @@ module RoutingLib.Data.List.Sorting.Nat where
   upTo-↗ : ∀ e → Sorted (upTo e) 
   upTo-↗ e = AllPairs-applyUpTo⁺₁ id e (λ i<j _ → <⇒≤ i<j)
 
+  {-
   between-↗ : ∀ e s → Sorted (between e s)
   between-↗ e s = AllPairs-applyBetween⁺₁ id e s (λ _ i<j _ → <⇒≤ i<j)
-
+  -}
+  
   index-mono⁻¹-< : ∀ {xs} → Sorted xs → Unique xs → ∀ {i j} → lookup xs i < lookup xs j → i <𝔽 j
   index-mono⁻¹-< [] []                     {()}
   index-mono⁻¹-< (x≤xs ∷ xs↗) (x≉xs ∷ xs!) {zero}  {zero}  x<x     = contradiction x<x (n≮n _)

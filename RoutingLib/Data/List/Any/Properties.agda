@@ -14,7 +14,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong;
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Pred)
 
-open import RoutingLib.Data.List using (applyBetween)
+--open import RoutingLib.Data.List using (applyBetween)
 open import RoutingLib.Data.List.Permutation using (_⇿_; _◂_≡_; here; there; []; _∷_)
 
 module RoutingLib.Data.List.Any.Properties where
@@ -34,7 +34,7 @@ module RoutingLib.Data.List.Any.Properties where
     Any-⇿ (here px)   (x◂zs≡ys ∷ xs⇿zs) = Any-◂≡ (here px) x◂zs≡ys
     Any-⇿ (there pxs) (x◂zs≡ys ∷ xs⇿zs) = Any-◂≡ (there (Any-⇿ pxs xs⇿zs)) x◂zs≡ys
 
-
+{-
     Any-applyBetween⁺ : ∀ f {s e i} → s ≤ i → i < e → P (f i) →
                         Any P (applyBetween f s e)
     Any-applyBetween⁺ f z≤n       (s≤s i<e) Pf₀ = applyUpTo⁺ f Pf₀ (s≤s i<e)
@@ -46,7 +46,7 @@ module RoutingLib.Data.List.Any.Properties where
     Any-applyBetween⁻ f (suc s) zero    ()
     Any-applyBetween⁻ f (suc s) (suc e) pxs with Any-applyBetween⁻ (f ∘ suc) s e pxs
     ... | i , s≤i , i<e , Pfᵢ = suc i , s≤s s≤i , s≤s i<e , Pfᵢ
-
+-}
 
 
   module _ {a p} {A : Set a} {P : Pred A p} where

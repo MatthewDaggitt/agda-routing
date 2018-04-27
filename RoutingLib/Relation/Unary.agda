@@ -11,22 +11,22 @@ open import RoutingLib.Relation.Nullary.Product using (~-dec)
 
 module RoutingLib.Relation.Unary where
 
-  -----------------------
-  -- To push to stdlib --
-  -----------------------
 
   _Preserves_ : ∀ {a p} {A : Set a} → (A → A) → Pred A p → Set _
   f Preserves P = ∀ {a} → P a → P (f a)
 
   _Forces_ : ∀ {a p} {A : Set a} → (A → A) → Pred A p → Set _
   f Forces P = ∀ {a} → P (f a) → P a
+  
 
   module _ {a} {A : Set a} where
 
+    -- stdlib
     _∪?_ : ∀ {ℓ₁ ℓ₂} {P : Pred A ℓ₁} {Q : Pred A ℓ₂} →
            Decidable P → Decidable Q → Decidable (P ∪ Q)
     _∪?_ P? Q? x = (P? x) ⊎-dec (Q? x)
     
+    -- stdlib
     _∩?_ : ∀ {ℓ₁ ℓ₂} {P : Pred A ℓ₁} {Q : Pred A ℓ₂} →
            Decidable P → Decidable Q → Decidable (P ∩ Q)
     _∩?_ P? Q? x = (P? x) ×-dec (Q? x)
@@ -34,19 +34,23 @@ module RoutingLib.Relation.Unary where
     
   module _ {a b} {A : Set a} {B : Set b} where
     
+    -- stdlib
     _×?_ : ∀ {ℓ₁ ℓ₂} {P : Pred A ℓ₁} {Q : Pred B ℓ₂} →
            Decidable P → Decidable Q → Decidable (P ⟨×⟩ Q)
     _×?_ P? Q? (a , b) = (P? a) ×-dec (Q? b)
 
+    -- stdlib
     _⊙?_ : ∀ {ℓ₁ ℓ₂} {P : Pred A ℓ₁} {Q : Pred B ℓ₂} → 
            Decidable P → Decidable Q → Decidable (P ⟨⊙⟩ Q)
     _⊙?_ P? Q? (a , b) = (P? a) ⊎-dec (Q? b)
 
+    -- stdlib
     _⊎?_ : ∀ {ℓ} {P : Pred A ℓ} {Q : Pred B ℓ} → 
            Decidable P → Decidable Q → Decidable (P ⟨⊎⟩ Q)
     _⊎?_ P? Q? (inj₁ a) = P? a
     _⊎?_ P? Q? (inj₂ b) = Q? b
 
+    -- stdlib
     _~? : ∀ {ℓ} {P : Pred (A × B) ℓ} →
           Decidable P → Decidable (P ~)
     _~? P? = P? ∘ swap

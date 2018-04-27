@@ -9,11 +9,13 @@ open import Relation.Binary.Lattice using (Minimum; Maximum)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Data.Graph.SimplePath2.NonEmpty
-  using ([]; length; <ₗₑₓ-cmp; <ₗₑₓ-trans; <ₗₑₓ-resp-≈; <ₗₑₓ-asym; <ₗₑₓ-irrefl;
-         <ₗₑₓ-minimum; <ₗₑₓ-respˡ-≈; <ₗₑₓ-respʳ-≈)
-open import RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties
-  renaming (≈-refl to ≈ₚ-refl; ≈-trans to ≈ₚ-trans; ≈-sym to ≈ₚ-sym; _≟_ to _≟ₚ_)
+open import RoutingLib.Data.SimplePath.NonEmpty using ([]; length)
+open import RoutingLib.Data.SimplePath.NonEmpty.Properties using (length-cong)
+open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Lex
+  using (<ₗₑₓ-cmp; <ₗₑₓ-trans; <ₗₑₓ-resp-≈ₚ; <ₗₑₓ-asym; <ₗₑₓ-irrefl;
+         <ₗₑₓ-minimum; <ₗₑₓ-respˡ-≈ₚ; <ₗₑₓ-respʳ-≈ₚ)
+open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Equality
+  using (≈ₚ-refl; ≈ₚ-trans; ≈ₚ-sym; _≟ₚ_)
 open import RoutingLib.Routing.Models.BGPLite.Communities
 import RoutingLib.Routing.Models.BGPLite.Route as Routes
 
@@ -110,11 +112,11 @@ module RoutingLib.Routing.Models.BGPLite.Route.Properties (n : ℕ) where
   ≤ᵣ-trans (plex<   l≡k |p|≡|q| p<q) (level<  k<m)             = level< (subst (_< _) (sym l≡k) k<m)
   ≤ᵣ-trans (plex<   l≡k |p|≡|q| p<q) (length< k≡m |q|<|r|)     = length< (trans l≡k k≡m) (subst (_< _) (sym |p|≡|q|) |q|<|r|)
   ≤ᵣ-trans (plex<   l≡k |p|≡|q| p<q) (plex<   k≡m |q|≡|r| q<r) = plex< (trans l≡k k≡m) (trans |p|≡|q| |q|≡|r|) (<ₗₑₓ-trans p<q q<r)
-  ≤ᵣ-trans (plex<   l≡k |p|≡|q| p<q) (comm≤   k≡m q≈r ds≤es)   = plex< (trans l≡k k≡m) (trans |p|≡|q| (length-cong q≈r)) (proj₁ <ₗₑₓ-resp-≈ q≈r p<q)
+  ≤ᵣ-trans (plex<   l≡k |p|≡|q| p<q) (comm≤   k≡m q≈r ds≤es)   = plex< (trans l≡k k≡m) (trans |p|≡|q| (length-cong q≈r)) (<ₗₑₓ-respˡ-≈ₚ q≈r p<q)
   ≤ᵣ-trans (comm≤   l≡k p≈q cs≤ds)   invalid                   = invalid
   ≤ᵣ-trans (comm≤   l≡k p≈q cs≤ds)   (level<  k<m)             = level< (subst (_< _) (sym l≡k) k<m)
   ≤ᵣ-trans (comm≤   l≡k p≈q cs≤ds)   (length< k≡m |q|<|r|)     = length< (trans l≡k k≡m) (subst (_< _) (length-cong (≈ₚ-sym p≈q)) |q|<|r|)
-  ≤ᵣ-trans (comm≤   l≡k p≈q cs≤ds)   (plex<   k≡m |q|≡|r| q<r) = plex< (trans l≡k k≡m) (trans (length-cong p≈q) |q|≡|r|) (proj₂ <ₗₑₓ-resp-≈ (≈ₚ-sym p≈q) q<r)
+  ≤ᵣ-trans (comm≤   l≡k p≈q cs≤ds)   (plex<   k≡m |q|≡|r| q<r) = plex< (trans l≡k k≡m) (trans (length-cong p≈q) |q|≡|r|) (<ₗₑₓ-respʳ-≈ₚ (≈ₚ-sym p≈q) q<r)
   ≤ᵣ-trans (comm≤   l≡k p≈q cs≤ds)   (comm≤   k≡m q≈r ds≤es)   = comm≤ (trans l≡k k≡m) (≈ₚ-trans p≈q q≈r) (≤ᶜˢ-trans cs≤ds ds≤es)
 
   ≤ᵣ-antisym : Antisymmetric _≈ᵣ_ _≤ᵣ_
@@ -158,14 +160,14 @@ module RoutingLib.Routing.Models.BGPLite.Route.Properties (n : ℕ) where
   ≤ᵣ-respˡ-≈ᵣ invalidEq                invalid                   = invalid
   ≤ᵣ-respˡ-≈ᵣ (routeEq refl _     _)   (level<  k<l)             = level<  k<l
   ≤ᵣ-respˡ-≈ᵣ (routeEq refl ds≈es q≈r) (length< k≡l |p|<|q|)     = length< k≡l (subst (_ <_) (length-cong q≈r) |p|<|q|)
-  ≤ᵣ-respˡ-≈ᵣ (routeEq refl ds≈es q≈r) (plex<   k≡l |p|≡|q| p<q) = plex<   k≡l (trans |p|≡|q| (length-cong q≈r)) (<ₗₑₓ-respˡ-≈ q≈r p<q)
+  ≤ᵣ-respˡ-≈ᵣ (routeEq refl ds≈es q≈r) (plex<   k≡l |p|≡|q| p<q) = plex<   k≡l (trans |p|≡|q| (length-cong q≈r)) (<ₗₑₓ-respˡ-≈ₚ q≈r p<q)
   ≤ᵣ-respˡ-≈ᵣ (routeEq refl ds≈es q≈r) (comm≤   k≡l p≈q cs≤ds)   = comm≤   k≡l (≈ₚ-trans p≈q q≈r) (≤ᶜˢ-respˡ-≈ᶜˢ ds≈es cs≤ds)
 
   ≤ᵣ-respʳ-≈ᵣ : ∀ {x y z} → y ≈ᵣ z → y ≤ᵣ x → z ≤ᵣ x
   ≤ᵣ-respʳ-≈ᵣ _                        invalid                   = invalid
   ≤ᵣ-respʳ-≈ᵣ (routeEq refl _     _)   (level<  l<k)             = level<  l<k
   ≤ᵣ-respʳ-≈ᵣ (routeEq refl ds≈es q≈r) (length< l≡k |q|<|p|)     = length< l≡k (subst (_< _) (length-cong q≈r) |q|<|p|)
-  ≤ᵣ-respʳ-≈ᵣ (routeEq refl ds≈es q≈r) (plex<   l≡k |q|≡|p| q<p) = plex<   l≡k (trans (sym (length-cong q≈r)) |q|≡|p|) (<ₗₑₓ-respʳ-≈ q≈r q<p)
+  ≤ᵣ-respʳ-≈ᵣ (routeEq refl ds≈es q≈r) (plex<   l≡k |q|≡|p| q<p) = plex<   l≡k (trans (sym (length-cong q≈r)) |q|≡|p|) (<ₗₑₓ-respʳ-≈ₚ q≈r q<p)
   ≤ᵣ-respʳ-≈ᵣ (routeEq refl ds≈es q≈r) (comm≤   l≡k q≈p ds≤cs)   = comm≤   l≡k (≈ₚ-trans (≈ₚ-sym q≈r) q≈p) (≤ᶜˢ-respʳ-≈ᶜˢ ds≈es ds≤cs)
   
   ≤ᵣ-resp-≈ᵣ : _≤ᵣ_ Respects₂ _≈ᵣ_

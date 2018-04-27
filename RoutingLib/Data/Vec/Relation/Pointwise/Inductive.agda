@@ -18,8 +18,8 @@ module RoutingLib.Data.Vec.Relation.Pointwise.Inductive where
   foldr₂-All₂ P pres pe₁e₂ (pxy ∷ pxsys) = pres pxy (foldr₂-All₂ P pres pe₁e₂ pxsys)
 
   tabulate-All₂ : ∀ {a b p} {A : Set a} {B : Set b}
-                  (P : A → B → Set p) {n} {f : Fin n → A} {g : Fin n → B}
-                  → (∀ i → P (f i) (g i))
-                  → Pointwise P (tabulate f) (tabulate g)
+                  (P : A → B → Set p) {n} {f : Fin n → A} {g : Fin n → B} →
+                  (∀ i → P (f i) (g i)) →
+                  Pointwise P (tabulate f) (tabulate g)
   tabulate-All₂ P {zero} Pfg = []
   tabulate-All₂ P {suc n} Pfg = Pfg zero ∷ tabulate-All₂ P (Pfg ∘ suc)

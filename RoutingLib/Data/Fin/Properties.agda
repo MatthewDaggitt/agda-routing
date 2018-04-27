@@ -18,10 +18,7 @@ module RoutingLib.Data.Fin.Properties where
   𝔽ₛ : ℕ → Setoid _ _
   𝔽ₛ = setoid
   
-  -----------------------
-  -- To push to stdlib --
-  -----------------------
-
+  -- stdlib
   inject₁-injective : ∀ {n} {i j : Fin n} → inject₁ i ≡ inject₁ j → i ≡ j
   inject₁-injective {i = fzero}  {fzero}  i≡j = refl
   inject₁-injective {i = fzero}  {fsuc j} ()
@@ -39,22 +36,27 @@ module RoutingLib.Data.Fin.Properties where
   toℕ-mono-< : ∀ {n} {i j : Fin n} → i < j → toℕ i <ℕ toℕ j
   toℕ-mono-< i<j = i<j
   
+  -- stdlib
   <⇒≤pred : ∀ {n} {i j : Fin n} → j < i → j ≤ pred i
   <⇒≤pred {_} {fzero} {_} ()
   <⇒≤pred {_} {fsuc i} {fzero} j<i = z≤n
   <⇒≤pred {_} {fsuc i} {fsuc j} (s≤s j<i) = subst (_ ≤ℕ_) (sym (inject₁-lemma i)) j<i
 
+  -- stdlib
   ≤-respₗ-≡ : ∀ {n x} → ((_≤_ {n}) x) Respects _≡_
   ≤-respₗ-≡ refl x≤y = x≤y
 
+  -- stdlib
   ≤-respᵣ-≡ : ∀ {n x} → (flip (_≤_ {n}) x) Respects _≡_
   ≤-respᵣ-≡ refl x≤y = x≤y
 
+  -- stdlib
   ≤-resp₂-≡ : ∀ {n} → (_≤_ {n}) Respects₂ _≡_
   ≤-resp₂-≡ = ≤-respₗ-≡ , ≤-respᵣ-≡
 
   
 
+  -- stdlib
   ≤+≢⇒< : ∀ {n} {i j : Fin n} → i ≤ j → i ≢ j → i < j
   ≤+≢⇒< {i = fzero}  {fzero}  _         0≢0     = contradiction refl 0≢0
   ≤+≢⇒< {i = fzero}  {fsuc j} _         _       = s≤s z≤n

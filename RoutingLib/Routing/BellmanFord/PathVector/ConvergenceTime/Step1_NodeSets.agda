@@ -1,12 +1,9 @@
-open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _+_; _∸_; _<_; _≤_)
-open import Data.Nat.Properties using (+-identityʳ; +-comm; +-assoc)
-open import Data.Fin using (Fin; zero; suc)
-open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
-open import Data.Fin.Subset using (Subset; _∈_; _∉_; _∪_; ⁅_⁆)
+open import Data.Nat using (ℕ; suc; z≤n; s≤s; _+_; _∸_; _<_; _≤_)
+open import Data.Nat.Properties using (+-comm; +-assoc)
+open import Data.Fin using (Fin)
+open import Data.Fin.Subset using (_∈_; ⁅_⁆)
 open import Data.Fin.Subset.Properties using (x∈⁅y⁆⇒x≡y)
-open import Data.Fin.Dec using (_∈?_)
-open import Data.Sum using (_⊎_; inj₁; inj₂; [_,_]′)
-open import Data.Product using (_,_; _×_; ∃; ∃₂; proj₁; proj₂)
+open import Data.Product using (_,_; _×_; ∃; ∃₂)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary
@@ -25,16 +22,13 @@ open import RoutingLib.Data.SimplePath.Relation.Subpath
 open import RoutingLib.Data.SimplePath.All
 open import RoutingLib.Data.SimplePath.Properties
   using (∉-resp-≈ₚ)
-open import RoutingLib.Data.Fin.Subset using ()
-import RoutingLib.Data.List.Extrema as Extrema
 
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
-open import RoutingLib.Routing.BellmanFord.Properties using (Iᵢᵢ≡1#; Iᵢⱼ≡0#; Iᵢⱼ≈0⊎1)
 import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Prelude as Prelude
 import RoutingLib.Routing.BellmanFord.Properties as P
 
-module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.NodeSets
+module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Step1_NodeSets
   {a b ℓ} {𝓡𝓐 : RoutingAlgebra a b ℓ}
   {n-1} {𝓡𝓟 : RoutingProblem 𝓡𝓐 n-1}
   (𝓟𝓢𝓒 : PathSufficientConditions 𝓡𝓟)
@@ -109,11 +103,6 @@ module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.NodeSets
   ...     | k∈Fₜ with Fixed-path t p[σᵗXₖⱼ]≈p (k∈Sₜ , k∈Fₜ)
   ...       | valid p∈Fₜ = valid ([ i∈Fₜ , (k∈Sₜ , k∈Fₜ) ]∷ p∈Fₜ)
 
-{-
-  Fixed-path : ∀ t {i} → i ∈ᵤ Fixed t → Allₙ (Fixed t) (path (σ^ t X i j))
-  Fixed-path t = inner ≈ₚ-refl
--}  
-
   Fixed-eq : ∀ t k s₁ s₂ → k ∈ᵤ Fixed t →
              σ^ (t + s₁) X k j ≈ σ^ (t + s₂) X k j
   Fixed-eq t k s₁ s₂ (k∈Sₜ , _) = begin
@@ -171,12 +160,6 @@ module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.NodeSets
   ...     | k∈R₁₊ₜ with Real-path {t} p[σ¹⁺ᵗXₖⱼ]≈p k∈R₁₊ₜ
   ...       | valid allpʳ = valid ([ i∈R₁₊ₜ , k∈R₁₊ₜ ]∷ allpʳ)
 
-  {-
-  Real-path′ : ∀ {t i} → i ∈ᵤ Real (suc t) →
-              Allₙ (Real (suc t)) (path (σ^ (suc t) X i j))
-  Real-path′ {t} = Real-path ≈ₚ-refl
-  -}
-  
   Real-∅ : ∀ t i → path (σ^ t X i j) ≈ₚ invalid → i ∈ᵤ Real t
   Real-∅ _ _ p≡∅ = Allₑ-resp-≈ₚ invalid (≈ₚ-sym p≡∅)
 

@@ -1,29 +1,19 @@
-open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _+_; _∸_; _<_; _≤_)
-open import Data.Nat.Properties using (+-identityʳ; +-comm; +-suc; +-assoc; ≤-reflexive; <⇒≱; <-transˡ; m≤m+n)
+open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _+_; _<_; _≤_)
+open import Data.Nat.Properties using (+-suc)
 open import Data.Empty using (⊥)
-open import Data.Fin using (Fin; zero; suc)
-open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
+open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (Subset; _∈_; _∉_; _∪_)
 open import Data.Fin.Dec using (_∈?_)
-open import Data.Sum using (_⊎_; inj₁; inj₂; [_,_]′)
-open import Data.Product using (_,_; _×_; ∃; ∃₂; proj₁; proj₂)
-open import Data.List using (List; filter; allFin)
-open import Data.List.All as All using (All; lookup)
-open import Data.List.All.Properties using (filter⁺₁)
-open import Data.List.Any using (Any)
-open import Data.List.Any.Membership.Propositional
-  using (_⊆_; lose) renaming (_∈_ to _∈ₘ_)
+open import Data.Product using (_,_; _×_; ∃; ∃₂)
 open import Function using (_∘_)
 open import Relation.Nullary using (Dec; ¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Nullary.Product using (_×-dec_)
 open import Relation.Unary
-  using (∁; ∁?;  U; Decidable) renaming (_∈_ to _∈ᵤ_; _∉_ to _∉ᵤ_; _⊆_ to _⊆ᵤ_)
-open import Relation.Binary using (Rel)
+  using (∁?; Decidable) renaming (_∈_ to _∈ᵤ_; _∉_ to _∉ᵤ_; _⊆_ to _⊆ᵤ_)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; cong; subst; refl; sym; trans; inspect; [_]; module ≡-Reasoning)
 import Relation.Binary.PartialOrderReasoning as POR
-import Relation.Binary.EqReasoning as EqReasoning
 
 open import RoutingLib.Data.SimplePath
   using (SimplePath; []; _∷_∣_∣_; invalid; valid; notThere; notHere; continue; length)
@@ -35,7 +25,6 @@ open import RoutingLib.Data.SimplePath.Properties
   using (∉-resp-≈ₚ; length-cong)
 open import RoutingLib.Data.Fin.Subset using (Nonfull) renaming ()
 open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
-open import RoutingLib.Data.List.Extrema.Nat
 open import RoutingLib.Relation.Unary using (_∩?_)
 open import RoutingLib.Data.List using (allFinPairs)
 open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-filter⁺; ∈-allFinPairs⁺)
@@ -45,11 +34,11 @@ import RoutingLib.Relation.Binary.Reasoning.StrictPartialOrder as SPOR
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
 import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Prelude as Prelude
-import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.NodeSets as NodeSets
-import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.FixedSubtree as FixedSubtree
+import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Step1_NodeSets as Step1_NodeSets
+import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Step2_FixedSubtree as Step2_FixedSubtree
 import RoutingLib.Routing.BellmanFord.Properties as P
 
-module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.EdgeSets
+module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Step3_EdgeSets
   {a b ℓ} {𝓡𝓐 : RoutingAlgebra a b ℓ}
   {n-1} {𝓡𝓟 : RoutingProblem 𝓡𝓐 n-1}
   (𝓟𝓢𝓒 : PathSufficientConditions 𝓡𝓟)
@@ -59,12 +48,12 @@ module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.EdgeSets
   {F : Subset (suc n-1)}
   (j∈F : j ∈ F)
   (F-nonfull : Nonfull F)
-  (F-fixed : ∀ {i} → i ∈ F → i ∈ᵤ NodeSets.Fixed 𝓟𝓢𝓒 X j (suc t-1))
+  (F-fixed : ∀ {i} → i ∈ F → i ∈ᵤ Step1_NodeSets.Fixed 𝓟𝓢𝓒 X j (suc t-1))
   where
   
   open Prelude 𝓟𝓢𝓒
   open Notation X j
-  open NodeSets 𝓟𝓢𝓒 X j
+  open Step1_NodeSets 𝓟𝓢𝓒 X j
   
   ----------------------------------------------------------------------------
   -- Inductive proof
@@ -86,7 +75,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.EdgeSets
   --------------------------------------------------------------------------
   -- Compute the minimum cut edge (iₘᵢₙ , kₘᵢₙ) of F
 
-  open FixedSubtree 𝓟𝓢𝓒 X j t-1 j∈F F-nonfull F-fixed
+  open Step2_FixedSubtree 𝓟𝓢𝓒 X j t-1 j∈F F-nonfull F-fixed
 
   --------------------------------------------------------------------------
   -- Some lemmas
@@ -158,10 +147,10 @@ module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.EdgeSets
     DangerousJunk? : ∀ s → Decidable (DangerousJunk s)
     DangerousJunk? s (i , k) = (∁? (Real? (t + s)) k) ×-dec (Dangerous? s (i , k))
 
-    DangerousJunk-extension : ∀ {s i k} → (i , k) ∈ᵤ DangerousJunk (suc s) →
+    DangerousJunk-retraction : ∀ {s i k} → (i , k) ∈ᵤ DangerousJunk (suc s) →
                               ∃ λ l → (k , l) ∈ᵤ DangerousJunk s
                                 × lengthₑ (t + suc s) (i , k) ≡ suc (lengthₑ (t + s) (k , l))
-    DangerousJunk-extension {s} {i} {k} (k∉Rₜ₊₁₊ₛ , k∈Dₜ₊₁₊ₛ)
+    DangerousJunk-retraction {s} {i} {k} (k∉Rₜ₊₁₊ₛ , k∈Dₜ₊₁₊ₛ)
       with ¬Real-extension (t + s) k (¬Real-cong k∉Rₜ₊₁₊ₛ (+-suc t s))
     ... | (l , p , _ , _ , p[σ¹⁺ᵗ⁺ˢ]≈kl∷p , σ¹⁺ᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢ , p[σᵗ⁺ˢXₗⱼ]≈p) = 
       l , (
@@ -172,77 +161,9 @@ module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.EdgeSets
 
   junk-length : ∀ s {e} → e ∈ᵤ DangerousJunk s → s < lengthₑ (t + s) e
   junk-length zero    {i , k} (k∉Rₜ₊ₛ , _) = ¬Real-length (t + zero) k k∉Rₜ₊ₛ
-  junk-length (suc s) {i , k} ik∈Dₛ with DangerousJunk-extension ik∈Dₛ
+  junk-length (suc s) {i , k} ik∈Dₛ with DangerousJunk-retraction ik∈Dₛ
   ... | (l , kl∈Jₛ , |ik|≡1+|kl|) = begin
     suc s                          <⟨ s≤s (junk-length s kl∈Jₛ) ⟩
     suc (lengthₑ (t + s) (k , l))  ≡⟨ sym |ik|≡1+|kl| ⟩
     lengthₑ (t + suc s) (i , k)    ∎
     where open ≤-Reasoning
-
-
-
-
-
-
-
-
-  {-
-  -------------------------------------------------------------------------
-  -- We can enumerate all the dangerous junk at time (t + s)
-
-  allJunk : 𝕋 → List Edge
-  allJunk s = filter (DangerousJunk? s) (allFinPairs n)
-
-  abstract
-
-    allJunk-junk : ∀ s → All (DangerousJunk s) (allJunk s)
-    allJunk-junk s = filter⁺₁ (DangerousJunk? s) (allFinPairs n)
-
-    allJunk-complete : ∀ {s i} → i ∈ᵤ DangerousJunk s → i ∈ₘ allJunk s
-    allJunk-complete i∈Jₛ = ∈-filter⁺ (DangerousJunk? _) i∈Jₛ (∈-allFinPairs⁺ _ _)
-
-    allJunk-extension : ∀ {t e₁} → e₁ ∈ᵤ DangerousJunk (suc t) →
-                        Any (λ e₂ → lengthₑ t e₂ < lengthₑ (suc t) e₁) (allJunk t)
-    allJunk-extension k∈J₁₊ₜ with DangerousJunk-extension k∈J₁₊ₜ
-    ... | (l , l∈Jₜ , |k|≡1+|l|) =
-      lose (allJunk-complete l∈Jₜ) (≤-reflexive (sym |k|≡1+|l|))
-
-  -------------------------------------------------------------------------
-  -- We can also therefore calculate the dangerous junk with the shortest
-  -- length. The length of the shortest dangerous junk increases every
-  -- iteration.
-
-  module _ where
-
-    abstract
-
-      smallestJunk : ∀ s → ∃ (DangerousJunk s) → Edge
-      smallestJunk s (e , _) = argmin (lengthₑ s) e (allJunk s)
-
-      smallestJunk-incr : ∀ s ∃s ∃s+1 →
-                          lengthₑ s       (smallestJunk s ∃s) <
-                          lengthₑ (suc s) (smallestJunk (suc s) ∃s+1)
-      smallestJunk-incr s (e₁ , _) (e₂ , l∈J₁₊ₛ) =
-        argmin[xs]<argmin[ys] e₁ (allJunk s)
-          (inj₂ (allJunk-extension l∈J₁₊ₛ))
-          (All.map (inj₂ ∘ allJunk-extension) (allJunk-junk (suc s)))
-
-      smallestJunk-junk : ∀ s ∃s → smallestJunk s ∃s ∈ᵤ DangerousJunk s
-      smallestJunk-junk s ∃s = argmin-all (lengthₑ s) (proj₂ ∃s) (allJunk-junk s)
-
-      smallestJunk-smallest : ∀ s e ∃s → e ∈ᵤ DangerousJunk s →
-                              lengthₑ s (smallestJunk s ∃s) ≤ lengthₑ s e
-      smallestJunk-smallest s e (d , d∈Jₛ) e∈Jₛ =
-        lookup (f[argmin]≤f[xs] d (allJunk s)) (allJunk-complete e∈Jₛ) 
-
-  smallestJunk-length : ∀ s ∃s → s < lengthₑ s (smallestJunk s ∃s)
-  smallestJunk-length zero    ∃s = DangerousJunk-length (smallestJunk-junk _ ∃s)
-  smallestJunk-length (suc s) ∃s
-    with DangerousJunk-extension (smallestJunk-junk (suc s) ∃s)
-  ... | (l , kl∈Jₛ , |ik|≡1+|kl|) = begin
-    suc s                                                 <⟨ s≤s (smallestJunk-length s (_ , kl∈Jₛ)) ⟩
-    suc (lengthₑ s (smallestJunk s (_ , kl∈Jₛ)))          ≤⟨ s≤s (smallestJunk-smallest s _ _ kl∈Jₛ) ⟩
-    suc (lengthₑ s (proj₂ (smallestJunk (suc s) ∃s) , l)) ≡⟨ sym |ik|≡1+|kl| ⟩
-    lengthₑ (suc s) (smallestJunk (suc s) ∃s)             ∎
-    where open ≤-Reasoning
-  -}

@@ -1,27 +1,16 @@
 open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _+_; _∸_; _<_; _≤_)
-open import Data.Nat.Properties using (+-identityʳ; +-comm; +-suc; +-assoc; ≤-reflexive; <⇒≱; <-transˡ; m≤m+n)
-open import Data.Empty using (⊥)
+open import Data.Nat.Properties using (+-identityʳ; +-suc; +-assoc; ≤-reflexive; <⇒≱; <-transˡ; m≤m+n)
 open import Data.Fin using (Fin; zero; suc)
-open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Subset using (Subset; _∈_; _∉_; _∪_)
 open import Data.Fin.Dec using (_∈?_)
 open import Data.Sum using (_⊎_; inj₁; inj₂; [_,_]′)
 open import Data.Product using (_,_; _×_; ∃; ∃₂; proj₁; proj₂)
-open import Data.List using (List; filter; allFin)
-open import Data.List.All as All using (All; lookup)
-open import Data.List.All.Properties using (filter⁺₁)
-open import Data.List.Any using (Any)
-open import Data.List.Any.Membership.Propositional
-  using (_⊆_; lose) renaming (_∈_ to _∈ₘ_)
 open import Function using (_∘_)
 open import Relation.Nullary using (Dec; ¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Nullary.Product using (_×-dec_)
-open import Relation.Unary
-  using (∁; ∁?;  U; Decidable) renaming (_∈_ to _∈ᵤ_; _∉_ to _∉ᵤ_; _⊆_ to _⊆ᵤ_)
-open import Relation.Binary using (Rel)
+open import Relation.Unary using () renaming (_∈_ to _∈ᵤ_; _∉_ to _∉ᵤ_; _⊆_ to _⊆ᵤ_)
 open import Relation.Binary.PropositionalEquality
-  using (_≡_; _≢_; cong; subst; refl; sym; trans; inspect; [_]; module ≡-Reasoning)
+  using (_≡_; _≢_; cong; subst; refl; sym; trans; inspect; [_])
 import Relation.Binary.PartialOrderReasoning as POR
 import Relation.Binary.EqReasoning as EqReasoning
 
@@ -35,22 +24,15 @@ open import RoutingLib.Data.SimplePath.Properties
   using (∉-resp-≈ₚ; length-cong)
 open import RoutingLib.Data.Fin.Subset using (Nonfull)
 open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
-open import RoutingLib.Data.List.Extrema.Nat
-open import RoutingLib.Relation.Unary using (_∩?_)
-open import RoutingLib.Data.List using (allFinPairs)
-open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-filter⁺; ∈-allFinPairs⁺)
-open import RoutingLib.Function.Reasoning
-import RoutingLib.Relation.Binary.Reasoning.StrictPartialOrder as SPOR
 
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
 import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Prelude as Prelude
-import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.NodeSets as NodeSets
-import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.EdgeSets as EdgeSets
-import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.FixedSubtree as FixedSubtree
-import RoutingLib.Routing.BellmanFord.Properties as P
+import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Step1_NodeSets as Step1_NodeSets
+import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Step2_FixedSubtree as Step2_FixedSubtree
+import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Step3_EdgeSets as Step3_EdgeSets
 
-module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Proof
+module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Step4_InductiveStep
   {a b ℓ} {𝓡𝓐 : RoutingAlgebra a b ℓ}
   {n-1} {𝓡𝓟 : RoutingProblem 𝓡𝓐 n-1}
   (𝓟𝓢𝓒 : PathSufficientConditions 𝓡𝓟)
@@ -60,14 +42,14 @@ module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Proof
   {F : Subset (suc n-1)}
   (j∈F : j ∈ F)
   (F-nonfull : Nonfull F)
-  (F-fixed : ∀ {i} → i ∈ F → i ∈ᵤ NodeSets.Fixed 𝓟𝓢𝓒 X j (suc t-1))
+  (F-fixed : ∀ {i} → i ∈ F → i ∈ᵤ Step1_NodeSets.Fixed 𝓟𝓢𝓒 X j (suc t-1))
   where
   
   open Prelude 𝓟𝓢𝓒
   open Notation X j
-  open NodeSets 𝓟𝓢𝓒 X j
-  open FixedSubtree 𝓟𝓢𝓒 X j t-1 j∈F F-nonfull F-fixed
-  open EdgeSets 𝓟𝓢𝓒 X j t-1 j∈F F-nonfull F-fixed
+  open Step1_NodeSets 𝓟𝓢𝓒 X j
+  open Step2_FixedSubtree 𝓟𝓢𝓒 X j t-1 j∈F F-nonfull F-fixed
+  open Step3_EdgeSets 𝓟𝓢𝓒 X j t-1 j∈F F-nonfull F-fixed
   
   --------------------------------------------------------------------------
   -- Some lemmas

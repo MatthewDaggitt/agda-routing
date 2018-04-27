@@ -19,19 +19,22 @@ module RoutingLib.Routing.Models.BGPLite (n : ℕ) where
   open import Level using () renaming (zero to ℓ₀; suc to lsuc)
 
   open import RoutingLib.Data.Nat.Properties using (n≢1+n)
-  open import RoutingLib.Data.Graph.SimplePath2
+  open import RoutingLib.Data.SimplePath
     using (SimplePath; invalid; valid)
-    renaming (_≈_ to _≈ᵢₚ_)
-  open import RoutingLib.Data.Graph.SimplePath2.NonEmpty
-    using (SimplePathⁿᵗ; []; _∷_∣_∣_; _∷_; length; _⇿_; _∉_; _∈_; _<ₗₑₓ_; <ₗₑₓ-cmp; <ₗₑₓ-trans; <ₗₑₓ-resp-≈; <ₗₑₓ-asym; <ₗₑₓ-irrefl; <ₗₑₓ-minimum; <ₗₑₓ-respˡ-≈; <ₗₑₓ-respʳ-≈)
-    renaming (_≈_ to _≈ₚ_)
-  open import RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties
-    using (_⇿?_; ⇿-resp-≈; ∉-resp-≈; length-cong; p≉i∷p)
-    renaming (_∈?_ to _∈ₚ?_; _∉?_ to _∉ₚ?_; ≈-refl to ≈ₚ-refl; ≈-trans to ≈ₚ-trans; ≈-sym to ≈ₚ-sym; _≟_ to _≟ₚ_)
+  open import RoutingLib.Data.SimplePath.Relation.Equality
+  open import RoutingLib.Data.SimplePath.NonEmpty
+    using (SimplePathⁿᵗ; []; _∷_∣_∣_; length; _⇿_; _∉_; _∈_)
+  open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Equality
+    using (_≈ₚ_; ≈ₚ-refl; ≈ₚ-trans; ≈ₚ-sym; _≟ₚ_)
+  open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Lex
+    using (_<ₗₑₓ_; <ₗₑₓ-cmp; <ₗₑₓ-trans; <ₗₑₓ-resp-≈ₚ; <ₗₑₓ-asym; <ₗₑₓ-irrefl; <ₗₑₓ-minimum; <ₗₑₓ-respˡ-≈ₚ; <ₗₑₓ-respʳ-≈ₚ)
+  open import RoutingLib.Data.SimplePath.NonEmpty.Properties
+    using (_⇿?_; ⇿-resp-≈ₚ; ∉-resp-≈ₚ; length-cong; p≉i∷p)
+    renaming (_∈?_ to _∈ₚ?_; _∉?_ to _∉ₚ?_)
   import RoutingLib.Relation.Binary.NaturalOrder.Right as RightNaturalOrder
   open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
   open import RoutingLib.Routing.Definitions
-  import RoutingLib.Algebra.Selectivity.NaturalChoice as NaturalChoice
+  import RoutingLib.Algebra.Selectivity.NaturalChoice.Max as NaturalChoice
 
   
   open import RoutingLib.Routing.Models.BGPLite.Route n
@@ -56,7 +59,7 @@ module RoutingLib.Routing.Models.BGPLite (n : ℕ) where
   
   infix 5 _⊕_
   _⊕_ : Op₂ Route
-  _⊕_ = NaturalChoice._•_ ≤ᵣ-total
+  _⊕_ = NaturalChoice.max ≤ᵣ-total
 
   ⊕-cong : Congruent₂ _⊕_
   ⊕-cong = NaturalChoice.cong ≤ᵣ-total _≈ᵣ_ ≈ᵣ-refl ≈ᵣ-sym ≤ᵣ-antisym ≤ᵣ-resp-≈ᵣ
@@ -76,8 +79,8 @@ module RoutingLib.Routing.Models.BGPLite (n : ℕ) where
   ▷-cong (step i j pol) {r@(route l cs p)} {s@(route k ds q)} r≈s@(routeEq l≡k cs≈ds p≈q)
     with (i , j) ⇿? p | (i , j) ⇿? q
   ... | no _    | no _    = invalidEq 
-  ... | no ¬e⇿p | yes e⇿q = contradiction (⇿-resp-≈ (≈ₚ-sym p≈q) e⇿q) ¬e⇿p
-  ... | yes e⇿p | no ¬e⇿q = contradiction (⇿-resp-≈ p≈q e⇿p) ¬e⇿q
+  ... | no ¬e⇿p | yes e⇿q = contradiction (⇿-resp-≈ₚ (≈ₚ-sym p≈q) e⇿q) ¬e⇿p
+  ... | yes e⇿p | no ¬e⇿q = contradiction (⇿-resp-≈ₚ p≈q e⇿p) ¬e⇿q
   ... | yes _   | yes _ with i ∉ₚ? p | i ∉ₚ? q
   ...   | no _    | no  _   = invalidEq 
   ...   | no  i∈p | yes i∉q = contradiction (∉-resp-≈ (≈ₚ-sym p≈q) i∉q) i∈p

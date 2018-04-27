@@ -27,8 +27,6 @@ open import RoutingLib.Data.Matrix using (Any; map; min⁺)
 open import RoutingLib.Data.Matrix.Properties using (min⁺[M]<min⁺[N])
 open import RoutingLib.Data.Table using (Table)
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
-open import RoutingLib.Data.Fin.Subset using (_\\_) renaming (size to sizeₛ)
-open import RoutingLib.Data.Fin.Subset.Properties using (size[p\\q]<size[p]; i∉p\\q⇒i∉p; i∉⁅j⁆)
 import RoutingLib.Function.Metric as Metric
 import RoutingLib.Function.Metric.MaxLift as MaxLift
 

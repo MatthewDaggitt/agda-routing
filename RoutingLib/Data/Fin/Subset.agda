@@ -10,6 +10,7 @@ open import RoutingLib.Data.Vec using (count)
 
 module RoutingLib.Data.Fin.Subset where
 
+  -- stdlib
   ∣_∣ : ∀ {n} → Subset n → ℕ
   ∣ p ∣ = count (_≟ inside) p
 

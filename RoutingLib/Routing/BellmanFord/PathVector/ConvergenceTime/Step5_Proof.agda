@@ -19,12 +19,12 @@ open import RoutingLib.Data.Fin.Subset.Properties
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions
 import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Prelude as Prelude
-import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.NodeSets as NodeSets
-import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Proof as InductiveStep 
-import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.FixedSubtree as FixedSubtree
+import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Step1_NodeSets as Step1_NodeSets
+import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Step2_FixedSubtree as Step2_FixedSubtree
+import RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Step4_InductiveStep as Step4_InductiveStep 
 import RoutingLib.Routing.BellmanFord.Properties as P
 
-module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.InductiveStep
+module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.Step5_Proof
   {a b ℓ} {𝓡𝓐 : RoutingAlgebra a b ℓ}
   {n-1} {𝓡𝓟 : RoutingProblem 𝓡𝓐 n-1}
   (𝓟𝓢𝓒 : PathSufficientConditions 𝓡𝓟)
@@ -36,9 +36,9 @@ module RoutingLib.Routing.BellmanFord.PathVector.ConvergenceTime.InductiveStep
   module _ (X : RMatrix) (j : Fin n) where
 
     
-    open FixedSubtree 𝓟𝓢𝓒 X j
-    open NodeSets 𝓟𝓢𝓒 X j
-    open InductiveStep 𝓟𝓢𝓒 X j
+    open Step1_NodeSets 𝓟𝓢𝓒 X j
+    open Step2_FixedSubtree 𝓟𝓢𝓒 X j
+    open Step4_InductiveStep 𝓟𝓢𝓒 X j
     
     mutual
 

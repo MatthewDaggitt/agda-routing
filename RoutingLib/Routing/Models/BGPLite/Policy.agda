@@ -9,8 +9,8 @@ open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Decidable using (⌊_⌋)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Data.Graph.SimplePath2.NonEmpty.Properties
-  using (∉-resp-≈) renaming (_∈?_ to _∈ₚ?_; ≈-sym to ≈ₚ-sym)
+open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Equality using (≈ₚ-sym)
+open import RoutingLib.Data.SimplePath.NonEmpty.Properties using (∉-resp-≈ₚ) renaming (_∈?_ to _∈ₚ?_)
 
 import RoutingLib.Routing.Models.BGPLite.Route as Routes
 import RoutingLib.Routing.Models.BGPLite.Route.Properties as RouteProperties
@@ -59,8 +59,8 @@ module RoutingLib.Routing.Models.BGPLite.Policy (n : ℕ) where
   ... | no _    = refl
   ... | yes i<n with fromℕ≤ i<n ∈ₚ? p | fromℕ≤ i<n ∈ₚ? q
   ...   | yes i∈p | yes i∈q = refl
-  ...   | yes i∈p | no  i∉q = contradiction (i∈p ∘ (∉-resp-≈ (≈ₚ-sym p≈q))) i∉q
-  ...   | no  i∉p | yes i∈q = contradiction (i∈q ∘ ∉-resp-≈ p≈q) i∉p
+  ...   | yes i∈p | no  i∉q = contradiction (i∈p ∘ (∉-resp-≈ₚ (≈ₚ-sym p≈q))) i∉q
+  ...   | no  i∉p | yes i∈q = contradiction (i∈q ∘ ∉-resp-≈ₚ p≈q) i∉p
   ...   | no  i∉p | no  i∉q = refl
   
   ------------

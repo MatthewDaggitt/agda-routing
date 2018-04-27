@@ -328,7 +328,6 @@ module RoutingLib.Routing.BellmanFord.PathVector.Consistency
   ⊕ᶜ-strictlyAbsorbs-▷ᶜ (i , j) r≉0 = ⊕-strictlyAbsorbs-▷ (A i j) r≉0
 
   open Membership Sᶜ using () renaming (_∈_ to _∈ₗ_)
-  open RMembership DSᶜ using (deduplicate)
   
   pathToCRoute : SimplePath n → CRoute
   pathToCRoute p = weight p , weightᶜ p

@@ -5,15 +5,19 @@ open import Data.List using ([]; _∷_; length; lookup)
 open import Data.List.All as All using (All; []; _∷_)
 open import Data.List.Any using (here; there; index)
 open import Data.Product using (_,_; proj₁; proj₂; uncurry′)
+open import Data.Sum using (inj₁; inj₂)
 open import Relation.Binary using (DecTotalOrder)
-open import Relation.Binary.PropositionalEquality using (_≡_; cong) renaming (setoid to ≡-setoid; refl to ≡-refl)
+open import Relation.Binary.PropositionalEquality
+  using (_≡_; cong) renaming (setoid to ≡-setoid; refl to ≡-refl)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Pred)
 
-open import RoutingLib.Data.List.All using (AllPairs; []; _∷_) using (allPairs-product; allPairs-map)
+open import RoutingLib.Data.List using (insert)
+open import RoutingLib.Data.List.All.Properties as Allₚ
+open import RoutingLib.Data.List.AllPairs using ([]; _∷_)
 open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
 open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (perm!)
-open import RoutingLib.Data.List.Permutation.Properties using (⇿-sym; ⇿-length)
+open import RoutingLib.Data.List.Relation.Permutation.Properties using (⇿-sym; ⇿-length)
 open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-perm; ∈-lookup)
 
 module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTotalOrder a ℓ₁ ℓ₂) where
@@ -21,7 +25,7 @@ module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTot
   open DecTotalOrder order renaming (Carrier to A)
   open Eq using () renaming (setoid to S; trans to ≈-trans; sym to ≈-sym)
   
-  open import RoutingLib.Data.List.Sorting order
+  open import RoutingLib.Data.List.Sorting _≤_
   open import Data.List.Any.Membership S using (_∈_)
   open import Relation.Binary.NonStrictToStrict _≈_ _≤_ using (_<_) renaming (irrefl to <-irrefl)
   
@@ -59,3 +63,13 @@ module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTot
   index-mono-< (x≤xs ∷ xs↗) (here x≈z)   (there y∈xs) (x≤y , x≉y) = s≤s z≤n
   index-mono-< (x≤xs ∷ xs↗) (there x∈xs) (here y≈z)    (x≤y , x≉y) = contradiction (antisym x≤y (proj₂ ≤-resp-≈ (≈-sym y≈z) (lemma x≤xs x∈xs))) x≉y
   index-mono-< (x≤xs ∷ xs↗) (there x∈xs) (there y∈xs) x<y = s≤s (index-mono-< xs↗ x∈xs y∈xs x<y)
+
+
+
+------------------------------------------------------------------------
+
+  insert↗⁺ : ∀ v {xs} → Sorted xs → Sorted (insert total v xs)
+  insert↗⁺ v {_}      []           = [] ∷ []
+  insert↗⁺ v {x ∷ xs} (x≤xs ∷ xs↗) with total v x
+  ... | inj₁ v≤x = (v≤x ∷ All.map (trans v≤x) x≤xs) ∷ x≤xs ∷ xs↗
+  ... | inj₂ x≤v = (Allₚ.insert⁺ total x≤v x≤xs) ∷ insert↗⁺ v xs↗

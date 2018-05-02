@@ -14,6 +14,8 @@ open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; sym; trans)
 open import Algebra.FunctionProperties.Consequences using (sel⇒idem)
 
+open import RoutingLib.Algebra using (Semilattice)
+open import RoutingLib.Algebra.Structures using (IsSemilattice)
 open import RoutingLib.Routing.Definitions
 open import RoutingLib.Data.List.Properties using (foldr≤ₗe; foldr≤ᵣxs)
 open import RoutingLib.Data.List.Membership.Setoid.Properties
@@ -83,47 +85,43 @@ module RoutingLib.Routing.BellmanFord.Properties
 
     -- Under the following assumptions about ⊕, A▷ₘ always chooses the "best"
     -- option with respect to ⊕
-    σXᵢⱼ≤Aᵢₖ▷Xₖⱼ : Idempotent _⊕_ → Associative _⊕_ → Commutative _⊕_ →
+    σXᵢⱼ≤Aᵢₖ▷Xₖⱼ : IsSemilattice _≈_ _⊕_ →
                    ∀ X i j k → σ X i j ≤₊ A i k ▷ X k j
-    σXᵢⱼ≤Aᵢₖ▷Xₖⱼ ⊕-idem ⊕-assoc ⊕-comm X i j k =
-      foldr≤ᵣxs S ⊕-cong ⊕-idem ⊕-assoc ⊕-comm
+    σXᵢⱼ≤Aᵢₖ▷Xₖⱼ ⊕-isSemilattice X i j k =
+      foldr≤ᵣxs (record {isSemilattice = ⊕-isSemilattice})
         (I i j) (∈-tabulate⁺ S (λ k → A i k ▷ X k j) k)
 
     -- After an iteration, the diagonal of the RMatrix is always the identity
     σXᵢᵢ≈Iᵢᵢ : Selective _⊕_ → Associative _⊕_ → Commutative _⊕_ →
-             RightZero 1# _⊕_ → ∀ X i → σ X i i ≈ I i i
+               RightZero 1# _⊕_ → ∀ X i → σ X i i ≈ I i i
     σXᵢᵢ≈Iᵢᵢ ⊕-sel ⊕-assoc ⊕-comm 1#-anᵣ-⊕ X i with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ ⊕-sel X i i
     ... | inj₂ σXᵢᵢ≈Iᵢᵢ           = σXᵢᵢ≈Iᵢᵢ
     ... | inj₁ (k , σXᵢᵢ≈AᵢₖXₖⱼ) = begin
-      σ X i i         ≈⟨ ≈-sym (foldr≤ₗe S ⊕-cong (sel⇒idem S ⊕-sel) ⊕-assoc ⊕-comm (I i i) (tabulate (λ k → A i k ▷ X k i))) ⟩
+      σ X i i         ≈⟨ ≈-sym (foldr≤ₗe ⊕-semilattice (I i i) (tabulate (λ k → A i k ▷ X k i))) ⟩
       σ X i i ⊕ I i i ≈⟨ Iᵢᵢ-idᵣ-⊕ 1#-anᵣ-⊕ i (σ X i i) ⟩
       I i i           ∎
-      where open import Relation.Binary.EqReasoning S
+      where
+      open import Relation.Binary.EqReasoning S
+      ⊕-semilattice : Semilattice _ _
+      ⊕-semilattice = record
+        { isSemilattice = record
+          { isBand = record
+            { isSemigroup = record
+              { isEquivalence = ≈-isEquivalence
+              ; assoc         = ⊕-assoc
+              ; ∙-cong        = ⊕-cong
+              }
+            ; idem = sel⇒idem S ⊕-sel
+            }
+          ; comm = ⊕-comm
+          }
+        }
       
     -- After an iteration, the diagonals of any two RMatrices are equal
     σXᵢᵢ≈σYᵢᵢ : Selective _⊕_ → Associative _⊕_ →
-              Commutative _⊕_ → RightZero 1# _⊕_ →
-              ∀ X Y i → σ X i i ≈ σ Y i i
+                Commutative _⊕_ → RightZero 1# _⊕_ →
+                ∀ X Y i → σ X i i ≈ σ Y i i
     σXᵢᵢ≈σYᵢᵢ ⊕-sel ⊕-assoc ⊕-comm 1#-anᵣ-⊕ X Y i =
       ≈-trans
         (σXᵢᵢ≈Iᵢᵢ ⊕-sel ⊕-assoc ⊕-comm 1#-anᵣ-⊕ X i)
         (≈-sym (σXᵢᵢ≈Iᵢᵢ ⊕-sel ⊕-assoc ⊕-comm 1#-anᵣ-⊕ Y i))
-
-{-
-    -- A sufficient (but not necessary condition) for σXᵢⱼ ≈ σYᵢⱼ
-    σXᵢⱼ≈σYᵢⱼ : Selective _⊕_ → Associative _⊕_ → Commutative _⊕_ →
-                ∀ X Y i j → (∀ k →
-                  (A i k ▷ X k j ≈ A i k ▷ Y k j) ⊎
-                    ((∃ λ l → (A i l ▷ X l j) <₊ (A i k ▷ X k j)) ×
-                    (∃ λ m → (A i m ▷ Y m j) <₊ (A i k ▷ Y k j)))) →
-                σ X i j ≈ σ Y i j
-    σXᵢⱼ≈σYᵢⱼ ⊕-sel ⊕-assoc ⊕-comm X Y i j eqCon = ?
-      foldrₓₛ≈foldrᵥₛ ⊕-sel ⊕-comm ⊕-assoc (I i j) (extensions X i j) (extensions Y i j) adjust
-      where
-      adjust : ∀ k → (lookup k (extensions X i j) ≈ lookup k (extensions Y i j))
-        ⊎ ∃ (λ l → (lookup l (extensions X i j)) <ᵣ (lookup k (extensions X i j)))
-          × ∃ (λ m → (lookup m (extensions Y i j)) <ᵣ (lookup k (extensions Y i j)))
-      adjust k rewrite lookup-extensions X i j k | lookup-extensions Y i j k with eqCon k
-      ... | inj₁ AᵢₖXₖⱼ≈AᵢₖYₖⱼ                           = inj₁ AᵢₖXₖⱼ≈AᵢₖYₖⱼ
-      ... | inj₂ ((l , AᵢₗXₗⱼ<AₖⱼXₖⱼ) , (m , AᵢₘYₘⱼ<AᵢₖYₖⱼ)) = inj₂ ((l , subst₂ _<ᵣ_ (≡-sym (lookup-extensions X i j l)) ≡-refl AᵢₗXₗⱼ<AₖⱼXₖⱼ) , (m , subst₂ _<ᵣ_ (≡-sym (lookup-extensions Y i j m)) ≡-refl AᵢₘYₘⱼ<AᵢₖYₖⱼ))
--}

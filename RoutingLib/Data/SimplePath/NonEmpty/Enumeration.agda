@@ -16,13 +16,8 @@ open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Function using (_∘_)
 
-open import RoutingLib.Data.List using (combine)
-open import RoutingLib.Data.List.All using (AllPairs; []; _∷_)
-open import RoutingLib.Data.List.All.Properties using (AllPairs-applyUpTo⁺₁; All⇒AllPairs; All-map⁺₂; AllPairs-map⁺₂; AllPairs-concat⁺; All-∈)
-open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (map!⁺; concat!⁺)
-open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique)
-open import RoutingLib.Data.List.Uniqueness.Propositional.Properties using (allFin!⁺; combine!⁺)
-open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-allFin⁺; ∈-combine⁺)
+open import RoutingLib.Data.List using (allFinPairs)
+open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-allFin⁺; ∈-combine⁺; ∈-allFinPairs⁺)
 open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-map⁺; ∈-concat⁺; ∈-applyUpTo⁺)
 open import RoutingLib.Data.SimplePath.NonEmpty hiding (_∈_)
 open import RoutingLib.Data.SimplePath.NonEmpty.Properties
@@ -51,26 +46,10 @@ module RoutingLib.Data.SimplePath.NonEmpty.Enumeration (n : ℕ) where
     LPₛ = listSetoid Pₛ
 
     open import Data.List.Any.Membership Pₛ using () renaming (_∈_ to _∈ₚ_; _∉_ to _∉ₚ_)
-    open import RoutingLib.Data.List.Disjoint   Pₛ using () renaming (_#_ to _#ₚ_)
+    open import RoutingLib.Data.List.Relation.Disjoint   Pₛ using () renaming (_#_ to _#ₚ_)
     open import RoutingLib.Data.List.Uniqueness.Setoid Pₛ using () renaming (Unique to Uniqueₚ)
     open Setoid LPₛ using () renaming (reflexive to ≈ₗₚ-reflexive)
     
-  abstract
-  
-    allSrcDst : List (Fin n × Fin n)
-    allSrcDst = combine _,_ (allFin n) (allFin n)
-
-    ∈-allSrcDst : ∀ e → e ∈ allSrcDst
-    ∈-allSrcDst (i , j) = ∈-combine⁺ _,_ (∈-allFin⁺ i) (∈-allFin⁺ j)
-
-    revPairCong : {w x y z : Fin n} → w ≢ y ⊎ x ≢ z → (w , x) ≢ (y , z)
-    revPairCong (inj₁ w≢w) ≡-refl = w≢w ≡-refl
-    revPairCong (inj₂ x≢x) ≡-refl = x≢x ≡-refl
-    
-    allSrcDst! : Unique allSrcDst
-    allSrcDst! = combine!⁺ _,_ revPairCong (allFin!⁺ n) (allFin!⁺ n)
-
-
 
   abstract
   
@@ -133,16 +112,16 @@ module RoutingLib.Data.SimplePath.NonEmpty.Enumeration (n : ℕ) where
     
     allPathsOfLength : ℕ → List (SimplePathⁿᵗ n)
     allPathsOfLength 0       = [] ∷ []
-    allPathsOfLength (suc l) = concat (map (extendAll (allPathsOfLength l)) allSrcDst)
+    allPathsOfLength (suc l) = concat (map (extendAll (allPathsOfLength l)) (allFinPairs n))
 
     ∈-allPathsOfLength : ∀ p → p ∈ₚ (allPathsOfLength (length p))
     ∈-allPathsOfLength []                  = here ≈ₚ-refl
-    ∈-allPathsOfLength (e ∷ p ∣ e⇿p ∣ e∉p) = 
+    ∈-allPathsOfLength ((i , j) ∷ p ∣ e⇿p ∣ e∉p) = 
       ∈-concat⁺ Pₛ
         (∈-extendAll (∈-allPathsOfLength p))
         (∈-map⁺ F×Fₛ LPₛ
           (≈ₗₚ-reflexive ∘ cong (extendAll (allPathsOfLength (length p))))
-          (∈-allSrcDst e))
+          (∈-allFinPairs⁺ i j))
 {-
     allPathsOfLength! : ∀ l → Uniqueₚ (allPathsOfLength l)
     allPathsOfLength! zero          = []

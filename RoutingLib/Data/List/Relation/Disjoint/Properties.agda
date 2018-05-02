@@ -15,11 +15,11 @@ open import Data.Sum using (inj₁; inj₂)
 import RoutingLib.Data.List.Membership.Setoid as Membership
 open import RoutingLib.Data.List.All.Properties using (∈-All)
 
-module RoutingLib.Data.List.Disjoint.Properties {c ℓ} (S : Setoid c ℓ) where
+module RoutingLib.Data.List.Relation.Disjoint.Properties {c ℓ} (S : Setoid c ℓ) where
 
   open Setoid S renaming (Carrier to A)
   open import Data.List.Any.Membership S using (_∈_; _∉_)
-  open import RoutingLib.Data.List.Disjoint S
+  open import RoutingLib.Data.List.Relation.Disjoint S
 
   
   #-sym : Symmetric _#_

@@ -5,9 +5,18 @@ open import Relation.Binary using (Rel)
 
 module RoutingLib.Algebra.Structures {a ℓ} {A : Set a} (≈ : Rel A ℓ) where
 
-  record IsChoiceSemigroup (• : Op₂ A) : Set (a ⊔ ℓ) where
-    field
-      isSemigroup : IsSemigroup ≈ •
-      comm        : Commutative ≈ •
-      sel         : Selective   ≈ •
-      
+-- stdlib
+record IsBand (∙ : Op₂ A) : Set (a ⊔ ℓ) where
+  field
+    isSemigroup : IsSemigroup ≈ ∙
+    idem        : Idempotent ≈ ∙
+
+  open IsSemigroup isSemigroup public
+
+-- stdlib
+record IsSemilattice (∧ : Op₂ A) : Set (a ⊔ ℓ) where
+  field
+    isBand : IsBand ∧
+    comm   : Commutative ≈ ∧
+
+  open IsBand isBand public

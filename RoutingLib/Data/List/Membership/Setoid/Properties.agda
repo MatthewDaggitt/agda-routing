@@ -27,9 +27,10 @@ open import RoutingLib.Data.List
 open import RoutingLib.Data.Maybe using (Eq-reflexive)
 import RoutingLib.Data.List.Membership.Setoid as Membership
 open import RoutingLib.Data.List.Any.Properties
-open import RoutingLib.Data.List.Permutation using (_⇿_; _◂_≡_; _∷_; []; here; there)
+open import RoutingLib.Data.List.Relation.Permutation using (_⇿_; _◂_≡_; _∷_; []; here; there)
+open import RoutingLib.Data.List.Relation.Permutation.Properties using (Any-⇿)
 open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique; _∷_)
-open import RoutingLib.Data.List.All using ([]; _∷_)
+open import RoutingLib.Data.List.AllPairs using ([]; _∷_)
 
 
 module RoutingLib.Data.List.Membership.Setoid.Properties where
@@ -51,14 +52,15 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     ∈-resp-≈ (here v≈x)   v≈w = here (trans (sym v≈w) v≈x)
     ∈-resp-≈ (there v∈xs) v≈w = there (∈-resp-≈ v∈xs v≈w)
 
-    ∉-resp-≈ : ∀ {v w xs} → v ∉ xs → v ≈ w → w ∉ xs
-    ∉-resp-≈ v∉xs v≈w w∈xs = v∉xs (∈-resp-≈ w∈xs (sym v≈w))
-
     -- stdlib
     ∈-resp-≈ₗ : ∀ {v xs ys} → v ∈ xs → xs ≈ₗ ys → v ∈ ys
     ∈-resp-≈ₗ (here v≈x) (x≈y ∷ _) = here (trans v≈x x≈y)
     ∈-resp-≈ₗ (there v∈xs) (_ ∷ xs≈ys) = there (∈-resp-≈ₗ v∈xs xs≈ys)
 
+
+    ∉-resp-≈ : ∀ {v w xs} → v ∉ xs → v ≈ w → w ∉ xs
+    ∉-resp-≈ v∉xs v≈w w∈xs = v∉xs (∈-resp-≈ w∈xs (sym v≈w))
+    
     ∉-resp-≈ₗ : ∀ {v xs ys} → v ∉ xs → xs ≈ₗ ys → v ∉ ys
     ∉-resp-≈ₗ v∉xs xs≈ys v∈ys = v∉xs (∈-resp-≈ₗ v∈ys (symₗ xs≈ys))
 
@@ -138,6 +140,8 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     ... | yes Px | here  v≈x  = here v≈x , resp (sym v≈x) Px
     ... | yes Px | there v∈df = mapₚ there id (∈-filter⁻ P? resp v∈df)
 
+
+
     ∉-filter₁ : ∀ {p} {P : A → Set p} (P? : Decidable P) {v} {xs} → v ∉ xs → v ∉ filter P? xs
     ∉-filter₁ P? {_} {[]}     _      ()
     ∉-filter₁ P? {v} {x ∷ xs} v∉x∷xs v∈f[x∷xs] with P? x | v∈f[x∷xs]
@@ -209,15 +213,18 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     open import Data.List.Any.Membership S₁ using () renaming (_∈_ to _∈₁_)
     open import Data.List.Any.Membership S₂ using () renaming (_∈_ to _∈₂_)
 
+    -- stdlib
     ∈-map⁺ : ∀ {f} → f Preserves _≈₁_ ⟶ _≈₂_ → ∀ {v xs} → v ∈₁ xs → f v ∈₂ map f xs
     ∈-map⁺ f-pres v∈xs = map⁺ (mapₐ f-pres v∈xs)
 
+    -- stdlib
     ∈-map⁻ : ∀ {f v xs} → v ∈₂ map f xs → ∃ λ a → a ∈₁ xs × v ≈₂ f a
     ∈-map⁻ {xs = []}     ()
     ∈-map⁻ {xs = x ∷ xs} (here v≈fx) = x , here refl₁ , v≈fx
     ∈-map⁻ {xs = x ∷ xs} (there v∈mapfxs) with ∈-map⁻ v∈mapfxs
     ... | a , a∈xs , v≈fa = a , there a∈xs , v≈fa
 
+    {-
     ∈-mapMaybe : ∀ P {v xs a} → v ∈₁ xs → Eq _≈₂_ (P v) (just a) → (∀ {x y} → x ≈₁ y → Eq _≈₂_ (P x) (P y)) → a ∈₂ mapMaybe P xs
     ∈-mapMaybe _ {_} {[]}     ()
     ∈-mapMaybe P {v} {x ∷ xs} v∈xs Pᵥ≈justₐ P-resp-≈ with P x | inspect P x | v∈xs
@@ -225,7 +232,7 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     ... | nothing | [ _ ]          | there v∈xs₂ = ∈-mapMaybe P v∈xs₂ Pᵥ≈justₐ P-resp-≈
     ... | just b  | [ Px≡justb ]   | here v≈x    = here (drop-just (Eq-trans trans₂ (Eq-trans trans₂ (Eq-sym sym₂ Pᵥ≈justₐ) (P-resp-≈ v≈x)) (Eq-reflexive reflexive₂ Px≡justb)))
     ... | just b  | _              | there v∈xs₂ = there (∈-mapMaybe P v∈xs₂ Pᵥ≈justₐ P-resp-≈)
-
+    -}
 
 
   ------------------------------------

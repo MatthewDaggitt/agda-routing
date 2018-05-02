@@ -6,9 +6,9 @@ open import Relation.Binary.PropositionalEquality using (setoid; _≡_; _≢_; r
 open import Function using (id)
 
 open import RoutingLib.Data.List using (combine)
-open import RoutingLib.Data.List.Disjoint using (_#_)
+open import RoutingLib.Data.List.Relation.Disjoint using (_#_)
 open import RoutingLib.Data.List.Membership.DecPropositional using (deduplicate)
-open import RoutingLib.Data.List.All.Properties using (AllPairs-applyUpTo⁺₁)
+open import RoutingLib.Data.List.AllPairs.Properties using (applyUpTo⁺₁)
 open import RoutingLib.Data.List.Uniqueness.Propositional
 import RoutingLib.Data.List.Uniqueness.Setoid.Properties as SP
 
@@ -23,7 +23,8 @@ module RoutingLib.Data.List.Uniqueness.Propositional.Properties where
              ∀ {xs ys} → Unique xs → Unique ys → Unique (combine f xs ys)
   combine!⁺ f cong = SP.combine!⁺ (setoid _) (setoid _) (setoid _) f cong
 
-  ++!⁺ : ∀ {a} {A : Set a} {xs ys} → Unique xs → Unique ys → _#_ (setoid A) xs ys → Unique (xs ++ ys)
+  ++!⁺ : ∀ {a} {A : Set a} {xs ys} →
+         Unique xs → Unique ys → _#_ (setoid A) xs ys → Unique (xs ++ ys)
   ++!⁺ = SP.++!⁺ (setoid _)
   
   deduplicate!⁺ : ∀ {a} {A : Set a} _≟_ (xs : List A) → Unique (deduplicate _≟_ xs)
@@ -35,7 +36,7 @@ module RoutingLib.Data.List.Uniqueness.Propositional.Properties where
   map!⁺ = SP.map!⁺ (setoid _) (setoid _)
 
   upTo!⁺ : ∀ n → Unique (upTo n)
-  upTo!⁺ n = AllPairs-applyUpTo⁺₁ id n (λ i<j _ → <⇒≢ i<j)
+  upTo!⁺ n = applyUpTo⁺₁ n (λ i<j _ → <⇒≢ i<j)
 
   {-
   between!⁺ : ∀ s e → Unique (between s e)

@@ -4,19 +4,16 @@ open import Relation.Binary using (Rel; DecTotalOrder)
 open import Relation.Binary.PropositionalEquality using (_≡_)
 open import Relation.Nullary using (yes; no)
 
-open import RoutingLib.Data.List.All using (AllPairs; []; _∷_)
-open import RoutingLib.Data.List.Permutation using (_⇿_)
+open import RoutingLib.Data.List.AllPairs using (AllPairs; []; _∷_)
+open import RoutingLib.Data.List.Relation.Permutation using (_⇿_)
 open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
 
-module RoutingLib.Data.List.Sorting {a ℓ₁ ℓ₂} (order : DecTotalOrder a ℓ₁ ℓ₂) where
+module RoutingLib.Data.List.Sorting {a ℓ} {A : Set a} (_≤_ : Rel A ℓ) where
 
-  open DecTotalOrder order renaming (Carrier to A)
-  open Eq using () renaming (setoid to S)
-
-  Sorted : List A → Set _
+  Sorted : List A → Set (a ⊔ ℓ)
   Sorted xs = AllPairs _≤_ xs
   
-  record _↗_ (xs ys : List A) : Set (a ⊔ ℓ₂) where
+  record _↗_ (xs ys : List A) : Set (a ⊔ ℓ) where
     constructor sorting
     field
       perm   : xs ⇿ ys

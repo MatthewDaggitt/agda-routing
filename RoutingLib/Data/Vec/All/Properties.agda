@@ -12,11 +12,12 @@ open import Function using (_∘_)
 open import Algebra.FunctionProperties using (Op₂)
 
 open import RoutingLib.Data.Vec.All using (AllPairs; []; _∷_)
-open import RoutingLib.Data.List.All using ([]; _∷_) renaming (AllPairs to AllPairsₗ)
+open import RoutingLib.Data.List.AllPairs using ([]; _∷_) renaming (AllPairs to AllPairsₗ)
 
 module RoutingLib.Data.Vec.All.Properties where
 
-  AllPairs-lookup : ∀ {a ℓ} {A : Set a} {_~_ : Rel A ℓ} {n} {xs : Vec A n} → AllPairs _~_ xs → ∀ {i j} → i < j → lookup i xs ~ lookup j xs
+  AllPairs-lookup : ∀ {a ℓ} {A : Set a} {_~_ : Rel A ℓ} {n} {xs : Vec A n} →
+                    AllPairs _~_ xs → ∀ {i j} → i < j → lookup i xs ~ lookup j xs
   AllPairs-lookup [] {()}
   AllPairs-lookup (x~xs ∷ pxs) {_}      {fzero}  ()
   AllPairs-lookup (x~xs ∷ pxs) {fzero}  {fsuc j} (s≤s i<j) = lookupₐ j x~xs

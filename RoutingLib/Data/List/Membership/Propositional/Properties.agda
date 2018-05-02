@@ -16,7 +16,7 @@ open import Function using (_∘_; id)
 
 open import RoutingLib.Data.List using (combine; allFinPairs)
 open import RoutingLib.Data.Nat.Properties using (ℕₛ)
-open import RoutingLib.Data.List.Permutation using (_⇿_)
+open import RoutingLib.Data.List.Relation.Permutation using (_⇿_)
 import RoutingLib.Data.List.Membership.Setoid as SetoidMembership
 
 module RoutingLib.Data.List.Membership.Propositional.Properties where

@@ -9,7 +9,8 @@ import Relation.Binary.EqReasoning as EqReasoning
 module RoutingLib.Relation.Binary.NaturalOrder.Right
   {a ℓ} {A : Set a} (_≈_ : Rel A ℓ) (_∙_ : Op₂ A) where
 
-  --open Setoid S renaming (Carrier to A)
+  -- All added to standard library
+  
   open import Algebra.FunctionProperties _≈_
   open import RoutingLib.Algebra.Selectivity.Properties _≈_ _∙_
     using () renaming (idem to sel⇨idem)
@@ -61,8 +62,8 @@ module RoutingLib.Relation.Binary.NaturalOrder.Right
     open IsSemigroup semi
     open EqReasoning (record { isEquivalence = isEquivalence })
     
-  ≤-resp-≈ : IsEquivalence _≈_ → Congruent₂ _∙_ → ∀ {x} → (x ≤_) Respects _≈_
-  ≤-resp-≈ isEq cong x≈y x≤z = trans (cong (sym x≈y) refl) x≤z
+  ≤-respʳ-≈ : IsEquivalence _≈_ → Congruent₂ _∙_ → ∀ {x} → (x ≤_) Respects _≈_
+  ≤-respʳ-≈ isEq cong x≈y x≤z = trans (cong (sym x≈y) refl) x≤z
     where open IsEquivalence isEq
     
   ≤-respₗ-≈ : IsEquivalence _≈_ → Congruent₂ _∙_ → ∀ {x} → (_≤ x) Respects _≈_
@@ -70,7 +71,7 @@ module RoutingLib.Relation.Binary.NaturalOrder.Right
     where open IsEquivalence isEq
     
   ≤-resp₂-≈ : IsEquivalence _≈_ → Congruent₂ _∙_ →  _≤_ Respects₂ _≈_
-  ≤-resp₂-≈ isEq cong = ≤-resp-≈ isEq cong , ≤-respₗ-≈ isEq cong
+  ≤-resp₂-≈ isEq cong = ≤-respʳ-≈ isEq cong , ≤-respₗ-≈ isEq cong
 
 {-
   ≤-absₗ : Associative _∙_ → Idempotent _∙_ → ∀ x y → x ∙ y ≤ x

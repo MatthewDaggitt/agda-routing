@@ -3,11 +3,12 @@ open import Data.Fin renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties
 open import Data.Product using (_,_)
 open import Data.Nat using (ℕ; z≤n; s≤s; zero; suc) renaming (_+_ to _+ℕ_; _<_ to _<ℕ_; _≤_ to _≤ℕ_; _≤?_ to _≤ℕ?_; ≤-pred to ≤ℕ-pred)
-open import Data.Nat.Properties using (1+n≰n; <⇒≢)  renaming (≤-total to ≤ℕ-total; ≤-antisym to ≤ℕ-antisym; ≤-refl to ≤ℕ-refl; ≤-trans to ≤ℕ-trans)
+import Data.Nat.Properties as ℕₚ
 open import Relation.Nullary using (¬_)
 open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Binary using (Setoid; _⇒_; _Respects₂_; _Respects_; Decidable; Reflexive; Irreflexive; Transitive; Total; Antisymmetric; IsDecTotalOrder; IsTotalOrder; IsPartialOrder; IsPreorder)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; subst; cong; isEquivalence; sym; trans; subst₂)
+open import Relation.Binary 
+open import Relation.Binary.PropositionalEquality
+  using (_≡_; _≢_; refl; subst; cong; isEquivalence; sym; trans; subst₂)
 open import Relation.Binary.Consequences using (trans∧tri⟶resp≈)
 open import Function using (_on_; _∘_; flip)
 
@@ -29,12 +30,6 @@ module RoutingLib.Data.Fin.Properties where
   -------------------------
   -- Ordering properties --
   -------------------------
-
-  toℕ-cancel-< : ∀ {n} {i j : Fin n} → toℕ i <ℕ toℕ j → i < j
-  toℕ-cancel-< i<j = i<j
-  
-  toℕ-mono-< : ∀ {n} {i j : Fin n} → i < j → toℕ i <ℕ toℕ j
-  toℕ-mono-< i<j = i<j
   
   -- stdlib
   <⇒≤pred : ∀ {n} {i j : Fin n} → j < i → j ≤ pred i
@@ -53,15 +48,20 @@ module RoutingLib.Data.Fin.Properties where
   -- stdlib
   ≤-resp₂-≡ : ∀ {n} → (_≤_ {n}) Respects₂ _≡_
   ≤-resp₂-≡ = ≤-respₗ-≡ , ≤-respᵣ-≡
-
   
-
   -- stdlib
   ≤+≢⇒< : ∀ {n} {i j : Fin n} → i ≤ j → i ≢ j → i < j
   ≤+≢⇒< {i = fzero}  {fzero}  _         0≢0     = contradiction refl 0≢0
   ≤+≢⇒< {i = fzero}  {fsuc j} _         _       = s≤s z≤n
   ≤+≢⇒< {i = fsuc i} {fzero}  ()
   ≤+≢⇒< {i = fsuc i} {fsuc j} (s≤s i≤j) 1+i≢1+j = s≤s (≤+≢⇒< i≤j (1+i≢1+j ∘ (cong fsuc)))
+
+  toℕ-cancel-< : ∀ {n} {i j : Fin n} → toℕ i <ℕ toℕ j → i < j
+  toℕ-cancel-< i<j = i<j
+  
+  toℕ-mono-< : ∀ {n} {i j : Fin n} → i < j → toℕ i <ℕ toℕ j
+  toℕ-mono-< i<j = i<j
+
 
   -----------
   -- Other --
@@ -70,19 +70,20 @@ module RoutingLib.Data.Fin.Properties where
   suc≢zero : ∀ {n} {i : Fin n} → fsuc i ≢ fzero
   suc≢zero ()
 
-  m<n⇨m≢n : ∀ {n₁} {m n : Fin n₁} → m < n → m ≢ n
-  m<n⇨m≢n m<n m≡n = (<⇒≢ m<n) (cong toℕ m≡n)
+  <⇨≢ : ∀ {n₁} {m n : Fin n₁} → m < n → m ≢ n
+  <⇨≢ m<n m≡n = (ℕₚ.<⇒≢ m<n) (cong toℕ m≡n)
 
   m≰n⇨m≢n : ∀ {n₁} {m n : Fin n₁} → ¬ (m ≤ n) → m ≢ n
-  m≰n⇨m≢n m≰n refl = m≰n ≤ℕ-refl
+  m≰n⇨m≢n m≰n refl = m≰n ℕₚ.≤-refl
   
   ≤fromℕ : ∀ k → (i : Fin (suc k)) → i ≤ fromℕ k
   ≤fromℕ _       fzero    = z≤n
   ≤fromℕ zero    (fsuc ())
   ≤fromℕ (suc k) (fsuc i) = s≤s (≤fromℕ k i)
 
-  postulate fromℕ≤-cong : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) → i ≡ j → fromℕ≤ i<n ≡ fromℕ≤ j<n
-  --fromℕ≤-cong i<n j<n refl = cong fromℕ≤ (≤-cardinality i<n j<n)
+  fromℕ≤-cong : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
+                 i ≡ j → fromℕ≤ i<n ≡ fromℕ≤ j<n
+  fromℕ≤-cong i<n j<n refl = cong fromℕ≤ (ℕₚ.≤-irrelevance i<n j<n)
 
   fromℕ≤-mono-≤ : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
                    i ≤ℕ j → fromℕ≤ i<n ≤ fromℕ≤ j<n

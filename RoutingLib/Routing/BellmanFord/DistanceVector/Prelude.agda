@@ -2,6 +2,7 @@ open import Data.Nat using (ℕ; suc) renaming (_≤_ to _≤ℕ_)
 open import Data.Product using (∃; proj₁; proj₂)
 open import Data.Sum using (_⊎_)
 open import Data.List using (List; length)
+open import Function using (flip)
 
 open import RoutingLib.Data.Matrix using (fold⁺)
 open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
@@ -27,13 +28,32 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Prelude
   open import RoutingLib.Routing.BellmanFord.Properties 𝓡𝓟 public using (Iᵢⱼ≡0#)
   open import Data.List.Any.Membership S using (_∈_)
 
+  ⊕-isSemigroup : IsSemigroup _≈_ _⊕_
+  ⊕-isSemigroup = record
+    { isEquivalence = ≈-isEquivalence
+    ; assoc         = ⊕-assoc
+    ; ∙-cong        = ⊕-cong
+    }
+
+  ⊕-isBand : IsBand _≈_ _⊕_
+  ⊕-isBand = record
+    { isSemigroup = ⊕-isSemigroup
+    ; idem        = ⊕-idem
+    }
+
+  ⊕-isSemilattice : IsSemilattice _≈_ _⊕_
+  ⊕-isSemilattice = record
+    { isBand = ⊕-isBand
+    ; comm   = ⊕-comm
+    }
+    
   -- A route is always either an extension of an existing route or the identity matrix
   σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ : ∀ X i j → (∃ λ k → σ X i j ≈ A i k ▷ X k j) ⊎ (σ X i j ≈ I i j)
   σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ = P.σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ ⊕-sel
 
   -- A▷ₘ always chooses the "best" option with respect to ⊕
   σXᵢⱼ≤Aᵢₖ▷Xₖⱼ : ∀ X i j k → σ X i j ≤₊ A i k ▷ X k j
-  σXᵢⱼ≤Aᵢₖ▷Xₖⱼ = P.σXᵢⱼ≤Aᵢₖ▷Xₖⱼ ⊕-idem ⊕-assoc ⊕-comm
+  σXᵢⱼ≤Aᵢₖ▷Xₖⱼ = P.σXᵢⱼ≤Aᵢₖ▷Xₖⱼ {!⊕-isSemilattice!}
 
   -- After an iteration, the diagonal of the RMatrix is always the identity
   σXᵢᵢ≈Iᵢᵢ : ∀ X i → σ X i i ≈ I i i
@@ -50,7 +70,7 @@ module RoutingLib.Routing.BellmanFord.DistanceVector.Prelude
   
   -- We have a unique complete list of routes
 
-  open import RoutingLib.Data.List.Sorting ≥₊-decTotalOrder using (Sorted)
+  open import RoutingLib.Data.List.Sorting (flip _≤₊_) using (Sorted)
   open import RoutingLib.Data.List.Sorting.Mergesort ≥₊-decTotalOrder
     using (mergesort; mergesort!⁺; ∈-mergesort⁺; mergesort↗)
   open import RoutingLib.Data.List.Membership.DecSetoid DS using (deduplicate)

@@ -8,6 +8,8 @@ open import RoutingLib.Relation.Binary
 
 module RoutingLib.Relation.Binary.Flip where
 
+  -- All added to standard library
+  
   module _ {a ℓ₁ ℓ₂} {A : Set a} (≈ : Rel A ℓ₁) (∼ : Rel A ℓ₂) where
   
     reflexiveᵘ : Symmetric ≈ → ≈ ⇒ ∼ → ≈ ⇒ flip ∼

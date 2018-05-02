@@ -1,9 +1,9 @@
-open import Data.Nat using (ℕ; _<_; z≤n; s≤s)
+open import Data.Nat using (ℕ; _<_; _≤_; z≤n; s≤s)
 open import Data.Nat.Properties using (≤+≢⇒<; <⇒≯; <⇒≤; ≤-decTotalOrder; n≮n)
 open import Data.Fin using (zero; suc) renaming (_<_ to _<𝔽_)
-open import Data.List
+open import Data.List using (upTo; lookup)
 open import Data.List.All using () renaming (map to mapₐ; lookup to lookupₐ)
-open import Data.Product using (uncurry′)
+open import Data.Product using (_,_; uncurry′)
 open import Relation.Binary using (DecTotalOrder)
 open import Relation.Binary.PropositionalEquality using () renaming (setoid to ≡-setoid)
 open import Function using (id)
@@ -12,19 +12,19 @@ open import Relation.Nullary.Negation using (contradiction)
 import RoutingLib.Data.List.Sorting as Sorting
 open import RoutingLib.Data.List
 open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique)
-open import RoutingLib.Data.List.All using (AllPairs; []; _∷_) using (allPairs-product; allPairs-map)
-open import RoutingLib.Data.List.All.Properties using (AllPairs-applyUpTo⁺₁)
+open import RoutingLib.Data.List.AllPairs using (AllPairs; []; _∷_; map; zip)
+open import RoutingLib.Data.List.AllPairs.Properties using (applyUpTo⁺₁)
 open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-lookup)
 
 module RoutingLib.Data.List.Sorting.Nat where
 
-  open Sorting ≤-decTotalOrder using (Sorted)
+  open Sorting _≤_ using (Sorted)
   
   strictlySorted : ∀ {xs} → Sorted xs → Unique xs → AllPairs _<_ xs
-  strictlySorted xs↑ xs! = allPairs-map (uncurry′ ≤+≢⇒<) (allPairs-product xs↑ xs!)
+  strictlySorted xs↑ xs! = map (uncurry′ ≤+≢⇒<) (zip (xs↑ , xs!))
 
   upTo-↗ : ∀ e → Sorted (upTo e) 
-  upTo-↗ e = AllPairs-applyUpTo⁺₁ id e (λ i<j _ → <⇒≤ i<j)
+  upTo-↗ e = applyUpTo⁺₁ e (λ i<j _ → <⇒≤ i<j)
 
   {-
   between-↗ : ∀ e s → Sorted (between e s)

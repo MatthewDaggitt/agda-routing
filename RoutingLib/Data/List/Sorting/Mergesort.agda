@@ -17,8 +17,8 @@ module RoutingLib.Data.List.Sorting.Mergesort {a ℓ₁ ℓ₂} (DTO : DecTotalO
   open Membership S using (_∈_)
   
   postulate mergesort : List A → List A
-
-  postulate mergesort↗ : ∀ xs → Sorted DTO (mergesort xs)
+  
+  postulate mergesort↗ : ∀ xs → Sorted _≤_ (mergesort xs)
   
   postulate mergesort!⁺ : ∀ {xs} → Unique S xs → Unique S (mergesort xs)
 

@@ -13,6 +13,7 @@ import Relation.Binary.EqReasoning as EqReasoning
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
+open import RoutingLib.Algebra.Structures using (IsBand; IsSemilattice)
 open import RoutingLib.Data.SimplePath
   using (SimplePath; valid; invalid; []; _∷_∣_∣_; length; _⇿_; _∈_; _∉_; notThere)
 open import RoutingLib.Data.SimplePath.Properties
@@ -53,6 +54,18 @@ module RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions.Properties
     ; ∙-cong        = ⊕-cong
     }
 
+  ⊕-isBand : IsBand _≈_ _⊕_
+  ⊕-isBand = record
+    { isSemigroup = ⊕-isSemigroup
+    ; idem        = ⊕-idem
+    }
+
+  ⊕-isSemilattice : IsSemilattice _≈_ _⊕_
+  ⊕-isSemilattice = record
+    { isBand = ⊕-isBand
+    ; comm   = ⊕-comm
+    }
+  
   ⊕-absorbs-▷ : ∀ f x → x ≤₊ f ▷ x
   ⊕-absorbs-▷ f x with x ≟ 0#
   ... | no  x≉0 = proj₁ (⊕-strictlyAbsorbs-▷ f x≉0)
@@ -117,7 +130,7 @@ module RoutingLib.Routing.BellmanFord.PathVector.SufficientConditions.Properties
     σXᵢᵢ≈σYᵢᵢ = P.σXᵢᵢ≈σYᵢᵢ ⊕-sel ⊕-assoc ⊕-comm ⊕-zeroʳ
 
     σXᵢⱼ≤Aᵢₖ▷Xₖⱼ : ∀ X i j k → σ X i j ≤₊ A i k ▷ X k j
-    σXᵢⱼ≤Aᵢₖ▷Xₖⱼ = P.σXᵢⱼ≤Aᵢₖ▷Xₖⱼ ⊕-idem ⊕-assoc ⊕-comm
+    σXᵢⱼ≤Aᵢₖ▷Xₖⱼ = P.σXᵢⱼ≤Aᵢₖ▷Xₖⱼ ⊕-isSemilattice
     
     r≈0⇒e▷r≈0 : ∀ {e r} → r ≈ 0# → e ▷ r ≈ 0#
     r≈0⇒e▷r≈0 {e} {r} r≈0 = ≈-trans (▷-cong _ r≈0) (▷-zero e)

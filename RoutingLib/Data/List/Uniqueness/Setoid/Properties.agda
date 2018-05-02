@@ -21,14 +21,16 @@ open import Relation.Unary using (Decidable)
 open import RoutingLib.Data.List
 open import RoutingLib.Data.List.Membership.Setoid as Membership using ()
 open import RoutingLib.Data.List.Membership.Setoid.Properties as MembershipP using ()
-open import RoutingLib.Data.List.All using (AllPairs; []; _∷_)
+open import RoutingLib.Data.List.AllPairs using (AllPairs; []; _∷_)
+import RoutingLib.Data.List.AllPairs.Properties as AllPairs
 open import RoutingLib.Data.List.All.Properties
 open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 open import RoutingLib.Data.Fin.Properties using (suc≢zero)
 open import RoutingLib.Data.List.Uniqueness.Setoid as Uniqueness using (Unique)
-import RoutingLib.Data.List.Disjoint as Disjoint
-import RoutingLib.Data.List.Disjoint.Properties as DisjointProperties
-open import RoutingLib.Data.List.Permutation using (_⇿_)
+import RoutingLib.Data.List.Relation.Disjoint as Disjoint
+import RoutingLib.Data.List.Relation.Disjoint.Properties as DisjointProperties
+open import RoutingLib.Data.List.Relation.Permutation using (_⇿_)
+open import RoutingLib.Data.List.Relation.Permutation.Properties
 
 module RoutingLib.Data.List.Uniqueness.Setoid.Properties where
 
@@ -39,11 +41,12 @@ module RoutingLib.Data.List.Uniqueness.Setoid.Properties where
     open Disjoint S using (_#_; ∈ₗ⇒∉ᵣ; contractₗ)
     open DisjointProperties S using (#-concat; #⇒AllAll≉) 
 
-    filter!⁺ : ∀ {b} {P : A → Set b} (P? : Decidable P) → ∀ {xs} → Unique S xs → Unique S (filter P? xs)
-    filter!⁺ P? xs! = AllPairs-filter⁺ P? xs!
+    filter!⁺ : ∀ {b} {P : A → Set b} (P? : Decidable P) →
+               ∀ {xs} → Unique S xs → Unique S (filter P? xs)
+    filter!⁺ P? xs! = AllPairs.filter⁺ P? xs!
 
     ++!⁺ : ∀ {xs ys} → Unique S xs → Unique S ys → xs # ys → Unique S (xs ++ ys)
-    ++!⁺ xs! ys! xs#ys = AllPairs-++⁺ xs! ys! (#⇒AllAll≉ xs#ys)
+    ++!⁺ xs! ys! xs#ys = AllPairs.++⁺ xs! ys! (#⇒AllAll≉ xs#ys)
 
     concat!⁺ : ∀ {xss} → All (Unique S) xss → AllPairs _#_ xss → Unique S (concat xss)
     concat!⁺  []          _                 = []
@@ -51,19 +54,20 @@ module RoutingLib.Data.List.Uniqueness.Setoid.Properties where
 
     tabulate! : ∀ {n} (f : Fin n → A) → (∀ {i j} → f i ≈ f j → i ≡ j) → Unique S (tabulate f)
     tabulate! {n = zero}  f _     = []
-    tabulate! {n = suc n} f f-inj = tabulate⁺ (λ _ → suc≢zero ∘ f-inj ∘ sym) ∷ tabulate! (f ∘ fsuc) (suc-injective ∘ f-inj)
+    tabulate! {n = suc n} f f-inj =
+      tabulate⁺ (λ _ → suc≢zero ∘ f-inj ∘ sym) ∷ tabulate! (f ∘ fsuc) (suc-injective ∘ f-inj)
 
     drop!⁺ : ∀ {xs} n → Unique S xs → Unique S (drop n xs)
-    drop!⁺ = AllPairs-drop⁺
+    drop!⁺ = AllPairs.drop⁺
 
     take!⁺ : ∀ {xs} n → Unique S xs → Unique S (take n xs)
-    take!⁺ = AllPairs-take⁺
+    take!⁺ = AllPairs.take⁺
 
     
     -- Other
 
     perm! : ∀ {xs ys} → Unique S xs → xs ⇿ ys → Unique S ys
-    perm! xs! xs⇿ys = AllPairs-⇿ (λ i≉j → i≉j ∘ sym) xs! xs⇿ys
+    perm! xs! xs⇿ys = ⇿-pres-AllPairs (λ i≉j → i≉j ∘ sym) xs! xs⇿ys
     
 
   open SingleSetoid public
@@ -119,7 +123,8 @@ module RoutingLib.Data.List.Uniqueness.Setoid.Properties where
     open Disjoint S₃ using (_#_)
     open MembershipP using (∈-map⁻; combine-∈)
 
-    combine!⁺ : ∀ {xs ys} f → (∀ {w x y z} → ¬ (w ≈₁ y) ⊎ ¬ (x ≈₂ z) → ¬ (f w x ≈₃ f y z)) → Unique S₁ xs → Unique S₂ ys → Unique S₃ (combine f xs ys)
+    combine!⁺ : ∀ {xs ys} f → (∀ {w x y z} → ¬ (w ≈₁ y) ⊎ ¬ (x ≈₂ z) → ¬ (f w x ≈₃ f y z)) →
+                Unique S₁ xs → Unique S₂ ys → Unique S₃ (combine f xs ys)
     combine!⁺ _ _ [] _ = []
     combine!⁺ {x ∷ xs} {ys} f f-inj (x∉xs ∷ xs!) ys! = ++!⁺ S₃ (map!⁺ S₂ S₃ (f-inj ∘ inj₂) ys!) (combine!⁺ f f-inj xs! ys!) map#combine
       where

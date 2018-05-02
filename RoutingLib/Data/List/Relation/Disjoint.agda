@@ -6,7 +6,7 @@ open import Data.List using (List; []; [_]; _∷_)
 open import Data.List.Any using (here; there)
 open import Data.Product using (_×_; _,_)
 
-module RoutingLib.Data.List.Disjoint {c ℓ} (S : Setoid c ℓ) where
+module RoutingLib.Data.List.Relation.Disjoint {c ℓ} (S : Setoid c ℓ) where
 
   open Setoid S renaming (Carrier to A)
   open import Data.List.Any.Membership S using (_∈_; _∉_)

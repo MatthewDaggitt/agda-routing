@@ -6,7 +6,7 @@ open import Data.Nat using (suc)
 
 open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
 
-module RoutingLib.Data.List.Permutation {a} {A : Set a} where
+module RoutingLib.Data.List.Relation.Permutation {a} {A : Set a} where
 
   infix 5 _∷_
   infix 4 _⇿_

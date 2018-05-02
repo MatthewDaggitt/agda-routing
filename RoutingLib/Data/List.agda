@@ -15,20 +15,20 @@ module RoutingLib.Data.List where
   -- Other --
   -----------
 
-  merge : ∀ {a ℓ} {A : Set a} {_≤_ : Rel A ℓ} → Total _≤_ → Op₂ (List A)
-  merge total []       ys       = ys
-  merge total xs       []       = xs
-  merge total (x ∷ xs) (y ∷ ys) with total x y
-  ... | inj₁ x≤y = x ∷ merge total xs (y ∷ ys)
-  ... | inj₂ y≤x = y ∷ merge total (x ∷ xs) ys
+  module _ {a ℓ} {A : Set a} {_≤_ : Rel A ℓ} (total : Total _≤_) where
 
-  {-
-  applyBetween : ∀ {a} {A : Set a} (f : ℕ → A) s e → List A
-  applyBetween f s e = drop s (applyUpTo f e)
-
-  between : ∀ s e → List ℕ
-  between s e = applyBetween id s e
-  -}
+    insert : A → List A → List A
+    insert v []       = [ v ]
+    insert v (x ∷ xs) with total v x
+    ... | inj₁ v≤x = v ∷ x ∷ xs
+    ... | inj₂ x≤v = x ∷ insert v xs
+    
+    merge : List A → List A → List A
+    merge []       ys       = ys
+    merge xs       []       = xs
+    merge (x ∷ xs) (y ∷ ys) with total x y
+    ... | inj₁ x≤y = x ∷ merge xs (y ∷ ys)
+    ... | inj₂ y≤x = y ∷ merge (x ∷ xs) ys
 
   combine : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c} →
             (A → B → C) → List A → List B → List C

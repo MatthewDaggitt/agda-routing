@@ -27,7 +27,7 @@ open import RoutingLib.Data.Fin.Properties
   using (fromℕ≤-cong; fromℕ≤-mono-≤; fromℕ≤-mono⁻¹-<)
 open import RoutingLib.Data.List.Any.Properties using (lookup-index)
 open import RoutingLib.Data.List.Membership.DecPropositional.Properties using (∈-upTo⁺)
-open import RoutingLib.Data.List.Sorting ≤-decTotalOrder using (Sorted)
+open import RoutingLib.Data.List.Sorting _≤_ using (Sorted)
 open import RoutingLib.Data.List.Sorting.Properties ≤-decTotalOrder
   using (lookup-mono-≤)
 open import RoutingLib.Data.List.Sorting.Nat using (index-mono⁻¹-<; upTo-↗)

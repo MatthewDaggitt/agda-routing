@@ -5,6 +5,7 @@ open import Relation.Binary
 open import Relation.Nullary using (¬_)
 open import Relation.Nullary.Negation using (contradiction)
 
+open import RoutingLib.Relation.Binary
 
 module RoutingLib.Relation.Binary.NonStrictToStrict
   {a ℓ₁ ℓ₂} {A : Set a} (_≈_ : Rel A ℓ₁) (_≤_ : Rel A ℓ₂)
@@ -37,3 +38,12 @@ module RoutingLib.Relation.Binary.NonStrictToStrict
              ∀ {x y z} → x ≤ y → y < z → x < z
   ≤<-trans trans antisym respʳ x≤y (y≤z , y≉z) =
     trans x≤y y≤z , (λ x≈z → y≉z (antisym y≤z (respʳ x≈z x≤y)))
+
+  <-respˡ-≈ : Transitive _≈_ → _≤_ Respectsˡ _≈_ → _<_ Respectsˡ _≈_
+  <-respˡ-≈ trans respˡ y≈z (y≤x , y≉x) =
+    (respˡ y≈z y≤x) , (λ z≈x → y≉x (trans y≈z z≈x))
+
+  <-respʳ-≈ : Symmetric _≈_ → Transitive _≈_ →
+              _≤_ Respectsʳ _≈_ → _<_ Respectsʳ _≈_
+  <-respʳ-≈ sym trans respʳ {x} {y} {z} y≈z (x≤y , x≉y) =
+    (respʳ y≈z x≤y) , λ x≈z → x≉y (trans x≈z (sym y≈z))

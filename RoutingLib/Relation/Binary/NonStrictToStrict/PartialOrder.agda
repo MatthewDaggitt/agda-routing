@@ -3,6 +3,7 @@ open import Relation.Binary
 open import Relation.Nullary using (¬_)
 import Relation.Binary.NonStrictToStrict as NonStrictToStrict
 
+open import RoutingLib.Relation.Binary
 import RoutingLib.Relation.Binary.NonStrictToStrict as NonStrictToStrict′
 
 module RoutingLib.Relation.Binary.NonStrictToStrict.PartialOrder
@@ -37,3 +38,9 @@ module RoutingLib.Relation.Binary.NonStrictToStrict.PartialOrder
 
   ≤⇒≯ : ∀ {x y} → x ≤ y → ¬ (y < x)
   ≤⇒≯ = NonStrictToStrict′.≤⇒≯ _ _≤_ antisym
+
+  <-respˡ-≈ : _<_ Respectsˡ _≈_
+  <-respˡ-≈ = NonStrictToStrict′.<-respˡ-≈ _ _≤_ Eq.trans (proj₂ ≤-resp-≈)
+
+  <-respʳ-≈ : _<_ Respectsʳ _≈_
+  <-respʳ-≈ = NonStrictToStrict′.<-respʳ-≈ _ _≤_ Eq.sym Eq.trans (proj₁ ≤-resp-≈)

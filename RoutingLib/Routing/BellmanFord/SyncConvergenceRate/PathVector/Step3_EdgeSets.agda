@@ -27,6 +27,7 @@ open import RoutingLib.Data.SimplePath.Properties
 open import RoutingLib.Data.Fin.Subset using (Nonfull) renaming ()
 open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
 open import RoutingLib.Relation.Unary using (_∩?_)
+open import RoutingLib.Data.Fin.Dec using (any?)
 open import RoutingLib.Data.List using (allFinPairs)
 open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-filter⁺; ∈-allFinPairs⁺)
 open import RoutingLib.Function.Reasoning
@@ -86,11 +87,11 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step3_EdgeS
       A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + suc s) X kₘᵢₙ j ≈⟨ ▷-cong (A iₘᵢₙ kₘᵢₙ)
                                                (Converged-eq t kₘᵢₙ (suc s) s kₘᵢₙ∈Fₜ) ⟩
       A iₘᵢₙ kₘᵢₙ ▷ σ^ (t +     s) X kₘᵢₙ j ≤⟨ eₘᵢₙ≤kl ⟩
-      A k l ▷ σ^ (t + s) X l j             ≤⟨ ▷-increasing (A i k) (A k l ▷ σ^ (t + s) X l j) ⟩
-      A i k ▷ (A k l ▷ σ^ (t + s) X l j)   ≈⟨ ▷-cong (A i k) (≈-sym σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ) ⟩
-      A i    k   ▷ σ^ (suc t + s) X k   j  ≈⟨ ≈-reflexive (cong (λ v → A i k ▷ σ^ v X k j)
+      A k l ▷ σ^ (t + s) X l j              ≤⟨ ▷-increasing (A i k) (A k l ▷ σ^ (t + s) X l j) ⟩
+      A i k ▷ (A k l ▷ σ^ (t + s) X l j)    ≈⟨ ▷-cong (A i k) (≈-sym σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ) ⟩
+      A i    k   ▷ σ^ (suc t + s) X k   j   ≈⟨ ≈-reflexive (cong (λ v → A i k ▷ σ^ v X k j)
                                                (sym (+-suc t s))) ⟩
-      A i    k   ▷ σ^ (t + suc s) X k   j  ∎)
+      A i    k   ▷ σ^ (t + suc s) X k   j   ∎)
       where open POR ≤₊-poset
 
 
@@ -116,10 +117,10 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step3_EdgeS
       Dangerous-retraction : ∀ {i k l s} → σ^ (suc t + s) X k j ≈ A k l ▷ (σ^ (t + s) X l j) →
                              (i , k) ∈ᵤ Dangerous (suc s) → (k , l) ∈ᵤ Dangerous s
       Dangerous-retraction {i} {k} {l} {s} σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ ik∈D₁₊ₛ = begin
-        A k l ▷ σ^ (t + s) X l j             ≤⟨ ▷-increasing (A i k) _ ⟩<
-        A i k ▷ (A k l ▷ σ^ (t + s) X l j)   ≈⟨ ▷-cong _ (≈-sym σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ) ⟩<
-        A i    k    ▷ σ^ (suc t + s) X k   j ≡⟨ cong (λ v → A i k ▷ σ^ v X k j) (sym (+-suc t s)) ⟩<
-        A i    k    ▷ σ^ (t + suc s) X k   j <⟨ ik∈D₁₊ₛ ⟩≤
+        A k l ▷ σ^ (t + s) X l j              ≈⟨ ≈-sym σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ ⟩<
+        σ^ (suc t + s) X k j                  ≤⟨ ▷-increasing (A i k) _ ⟩<
+        A i    k    ▷ σ^ (suc t + s) X k   j  ≡⟨ cong (λ v → A i k ▷ σ^ v X k j) (sym (+-suc t s)) ⟩<
+        A i    k    ▷ σ^ (t + suc s) X k   j  <⟨ ik∈D₁₊ₛ ⟩≤
         A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + suc s) X kₘᵢₙ j ≈⟨ ▷-cong _ (Converged-eq t kₘᵢₙ (suc s) s kₘᵢₙ∈Fₜ) ⟩≤
         A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + s)     X kₘᵢₙ j ∎
         where open SPOR ≤₊-poset
@@ -137,31 +138,36 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step3_EdgeS
   -- real, and therefore don't respect the minimal spanning tree
   -- constraints.
 
-  DangerousJunk : 𝕋 → Edge → Set ℓ
-  DangerousJunk s (i , k) = k ∉ᵤ Real (t + s) × (i , k) ∈ᵤ Dangerous s
+  DangerousJunk : 𝕋 → Node → Set ℓ
+  DangerousJunk s k = k ∉ᵤ Real (t + s) × ∃ λ i → (i , k) ∈ᵤ Dangerous s
 
   abstract
   
     DangerousJunk? : ∀ s → Decidable (DangerousJunk s)
-    DangerousJunk? s (i , k) = (∁? (Real? (t + s)) k) ×-dec (Dangerous? s (i , k))
+    DangerousJunk? s k = (∁? (Real? (t + s)) k) ×-dec (any? λ v → Dangerous? s (v , k))
 
-    DangerousJunk-retraction : ∀ {s i k} → (i , k) ∈ᵤ DangerousJunk (suc s) →
-                              ∃ λ l → (k , l) ∈ᵤ DangerousJunk s
-                                × lengthₑ (t + suc s) (i , k) ≡ suc (lengthₑ (t + s) (k , l))
-    DangerousJunk-retraction {s} {i} {k} (k∉Rₜ₊₁₊ₛ , k∈Dₜ₊₁₊ₛ)
-      with ¬Real-extension (t + s) k (¬Real-cong k∉Rₜ₊₁₊ₛ (+-suc t s))
+    DangerousJunk-retraction : ∀ {s k} → k ∈ᵤ DangerousJunk (suc s) →
+                               ∃ λ l → l ∈ᵤ DangerousJunk s
+                                × lengthₙ (suc t + s) k ≡ suc (lengthₙ(t + s) l)
+    DangerousJunk-retraction {s} {k} (k∉Rₜ₊₁₊ₛ , (i , k∈Dₜ₊₁₊ₛ))
+      with ¬Real-retraction (t + s) k (¬Real-cong k∉Rₜ₊₁₊ₛ (+-suc t s))
     ... | (l , p , _ , _ , p[σ¹⁺ᵗ⁺ˢ]≈kl∷p , σ¹⁺ᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢ , p[σᵗ⁺ˢXₗⱼ]≈p) = 
-      l , (
-      Dangerous-predNotReal (¬Real⇒∉F k∉Rₜ₊₁₊ₛ) σ¹⁺ᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢ k∈Dₜ₊₁₊ₛ ,
-      Dangerous-retraction σ¹⁺ᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢ k∈Dₜ₊₁₊ₛ) ,
-      trans (cong (λ v → lengthₑ v (i , k)) (+-suc t s))
-            (lengthₑ-extension i {t + s} {k} p[σ¹⁺ᵗ⁺ˢ]≈kl∷p p[σᵗ⁺ˢXₗⱼ]≈p)
+      l ,
+      l∈DJₛ ,
+      (lengthₙ-extension {t + s} {k} p[σ¹⁺ᵗ⁺ˢ]≈kl∷p p[σᵗ⁺ˢXₗⱼ]≈p)
 
-  junk-length : ∀ s {e} → e ∈ᵤ DangerousJunk s → s < lengthₑ (t + s) e
-  junk-length zero    {i , k} (k∉Rₜ₊ₛ , _) = ¬Real-length (t + zero) k k∉Rₜ₊ₛ
-  junk-length (suc s) {i , k} ik∈Dₛ with DangerousJunk-retraction ik∈Dₛ
-  ... | (l , kl∈Jₛ , |ik|≡1+|kl|) = begin
-    suc s                          <⟨ s≤s (junk-length s kl∈Jₛ) ⟩
-    suc (lengthₑ (t + s) (k , l))  ≡⟨ sym |ik|≡1+|kl| ⟩
-    lengthₑ (t + suc s) (i , k)    ∎
+      where
+
+      l∈DJₛ : l ∈ᵤ DangerousJunk s
+      l∈DJₛ = Dangerous-predNotReal (¬Real⇒∉F k∉Rₜ₊₁₊ₛ) σ¹⁺ᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢ k∈Dₜ₊₁₊ₛ , (k , Dangerous-retraction σ¹⁺ᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢ k∈Dₜ₊₁₊ₛ)
+      
+      
+  junk-length : ∀ s {i} → i ∈ᵤ DangerousJunk s → s < lengthₙ (t + s) i
+  junk-length zero    {i} (k∉Rₜ₊ₛ , _) = ¬Real-length (t + zero) i k∉Rₜ₊ₛ
+  junk-length (suc s) {i} ik∈Dₛ with DangerousJunk-retraction ik∈Dₛ
+  ... | (l , l∈Jₛ , |i|≡1+|l|) = begin
+    suc s                    <⟨ s≤s (junk-length s l∈Jₛ) ⟩
+    suc (lengthₙ (t + s) l)  ≡⟨ sym |i|≡1+|l| ⟩
+    lengthₙ (suc t + s) i    ≡⟨ sym (cong (λ v → lengthₙ v i) (+-suc t s)) ⟩
+    lengthₙ (t + suc s) i    ∎
     where open ≤-Reasoning

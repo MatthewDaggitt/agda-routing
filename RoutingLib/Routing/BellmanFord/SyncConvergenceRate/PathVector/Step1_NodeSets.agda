@@ -170,11 +170,11 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step1_NodeS
   ... | valid []              = contradiction (valid []) i∉Rₜ
   ... | valid (e ∷ p ∣ _ ∣ _) = s≤s z≤n
 
-  ¬Real-extension : ∀ t i → i ∉ᵤ Real (suc t) → ∃₂ λ k p → ∃₂ λ k∉p e↔p →
+  ¬Real-retraction : ∀ t i → i ∉ᵤ Real (suc t) → ∃₂ λ k p → ∃₂ λ k∉p e↔p →
                     path (σ^ (suc t) X i j) ≈ₚ valid ((i , k) ∷ p ∣ k∉p ∣ e↔p) ×
                     σ^ (suc t) X i j ≈ A i k ▷ σ^ t X k j ×
                     path (σ^ t X k j) ≈ₚ valid p
-  ¬Real-extension t i i∉R₁₊ₜ with path (σ^ (suc t) X i j) | inspect path (σ^ (suc t) X i j)
+  ¬Real-retraction t i i∉R₁₊ₜ with path (σ^ (suc t) X i j) | inspect path (σ^ (suc t) X i j)
   ... | invalid  | _ = contradiction invalid i∉R₁₊ₜ
   ... | valid [] | _ = contradiction (valid []) i∉R₁₊ₜ
   ... | valid ((_ , k) ∷ p ∣ k∉p ∣ e↔p) | [ p[σ¹⁺ᵗ]≡ik∷p ]

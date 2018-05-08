@@ -76,3 +76,22 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Prelude
       suc (length (path (σ^ t X l j))) ≡⟨⟩
       suc (lengthₑ t (k , l))          ∎
       where open ≡-Reasoning
+
+
+    lengthₙ : 𝕋 → Node → ℕ
+    lengthₙ t k = size (σ^ t X k j)
+
+    lengthₙ<n : ∀ s e → lengthₙ s e < n
+    lengthₙ<n t k = size<n (s≤s z≤n) (σ^ t X k j)
+
+    lengthₙ-extension : ∀ {t k l e p ∼₁ ∼₂} →
+                        path (σ^ (suc t) X k j) ≈ₚ valid (e ∷ p ∣ ∼₁ ∣ ∼₂) →
+                        path (σ^ t X l j) ≈ₚ valid p →
+                        lengthₙ (suc t) k ≡ suc (lengthₙ t l)
+    lengthₙ-extension {t} {k} {l} {e} {p} p[σᵗ⁺¹⁺ˢ]≈kl∷p p[σᵗ⁺ˢXₗⱼ]≈p = begin
+      lengthₙ (suc t) k                ≡⟨⟩
+      length (path (σ^ (suc t) X k j)) ≡⟨ length-cong p[σᵗ⁺¹⁺ˢ]≈kl∷p ⟩
+      suc (length (valid p))           ≡⟨ sym (cong suc (length-cong p[σᵗ⁺ˢXₗⱼ]≈p)) ⟩
+      suc (length (path (σ^ t X l j))) ≡⟨⟩
+      suc (lengthₙ t l)                ∎
+      where open ≡-Reasoning

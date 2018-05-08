@@ -84,7 +84,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step4_Induc
   ...     | yes  k∈F | _       = contradiction (eₘᵢₙ-isMinₜ₊ₛ (iₘᵢₙ∉F , k∈F) (n-1 + s)) eₘᵢₙ≰e
   ...     | no   k∉F | yes k∈R = contradiction (∈Real (n-1 + s) iₘᵢₙ k∈R k∉F ≈ₚ-refl) eₘᵢₙ≰e
   ...     | no   _   | no  k∉R = contradiction
-    (junk-length (n-1 + s) (k∉R , ≰₊⇒>₊ eₘᵢₙ≰e))
+    (junk-length (n-1 + s) (k∉R , (iₘᵢₙ , ≰₊⇒>₊ eₘᵢₙ≰e)))
     (<⇒≱ (<-transˡ (lengthₑ<n (t + (n-1 + s)) (iₘᵢₙ , k)) (m≤m+n n s)))
 
   iₘᵢₙ-pred : ∀ s → σ^ (t + n + s) X iₘᵢₙ j ≈ A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + (n-1 + s)) X kₘᵢₙ j

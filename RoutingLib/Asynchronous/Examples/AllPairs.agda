@@ -11,7 +11,8 @@ open import RoutingLib.Data.NatInf
 open import RoutingLib.Data.Table using (Table; min∞)
 open import RoutingLib.Data.Table.All using (All)
 
-module RoutingLib.Asynchronous.Applications.AllPairs (n : ℕ) where
+module RoutingLib.Asynchronous.Examples.AllPairs (n : ℕ) where
+
   -- Row type - Table of ℕ∞
   Row : Set
   Row = Table ℕ∞ n
@@ -65,37 +66,37 @@ module RoutingLib.Asynchronous.Applications.AllPairs (n : ℕ) where
 
   -- Equality over Row is an equivalence class
   isEquivalenceᵣ : IsEquivalence _≡ᵣ_
-  isEquivalenceᵣ = record {
-    refl  = reflᵣ ;
-    sym   = symᵣ ;
-    trans = transᵣ
+  isEquivalenceᵣ = record
+    { refl  = reflᵣ
+    ; sym   = symᵣ
+    ; trans = transᵣ
     }
 
   -- Equality over Row is a decidable equivalence class
   isDecEquivalence : IsDecEquivalence _≡ᵣ_
-  isDecEquivalence = record {
-    isEquivalence = isEquivalenceᵣ ;
-    _≟_           = _≟ᵣ_
+  isDecEquivalence = record
+    { isEquivalence = isEquivalenceᵣ
+    ; _≟_           = _≟ᵣ_
     }
 
   -- Row Setoid
   row : Setoid lzero lzero
-  row = record {
-    Carrier = Row ;
-    _≈_ = _≡ᵣ_ ;
-    isEquivalence = isEquivalenceᵣ
+  row = record
+    { Carrier       = Row
+    ; _≈_           = _≡ᵣ_
+    ; isEquivalence = isEquivalenceᵣ
     }
 
   -- Cost of going from node i to j through k
   path-cost : Matrix → (i j k : Fin n) → ℕ∞
-  path-cost g i j k = (g i k) + (g k j) 
+  path-cost X i j k = (X i k) + (X k j) 
 
   -- Shortest cost from node i to j in matrix
-  f : Matrix → Fin n → Row
-  f g i j = min∞ (g i j) (path-cost g i j)
+  F : Matrix → Fin n → Row
+  F X i j = min∞ (X i j) (path-cost X i j)
 
   matrix : Fin n → Setoid lzero lzero
   matrix _ = row
 
   all-pairs-parallelisation : Parallelisation matrix
-  all-pairs-parallelisation = record {f = f}
+  all-pairs-parallelisation = record {F = F}

@@ -71,10 +71,15 @@ module RoutingLib.Data.Nat.Properties where
     >⇒≰ = <⇒≱
 
     ∀x≤m:n≢x⇒m<n : ∀ m n → (∀ {x} → x ≤ m → n ≢ x) → m < n
-    ∀x≤m:n≢x⇒m<n _ zero    x≤m⇒n≢x = contradiction refl (x≤m⇒n≢x z≤n)
-    ∀x≤m:n≢x⇒m<n zero (suc n) x≤0⇒n≢x = s≤s z≤n
+    ∀x≤m:n≢x⇒m<n _       zero    x≤m⇒n≢x = contradiction refl (x≤m⇒n≢x z≤n)
+    ∀x≤m:n≢x⇒m<n zero    (suc n) x≤0⇒n≢x = s≤s z≤n
     ∀x≤m:n≢x⇒m<n (suc m) (suc n) x≤m+1⇒n≢x = s≤s (∀x≤m:n≢x⇒m<n m n (λ x≤m n≡x → x≤m+1⇒n≢x (s≤s x≤m) (cong suc n≡x)))
 
+    ∀x<m:n≢x⇒m≤n : ∀ m n → (∀ {x} → x < m → n ≢ x) → m ≤ n
+    ∀x<m:n≢x⇒m≤n zero    n       f = z≤n
+    ∀x<m:n≢x⇒m≤n (suc m) zero    f = contradiction refl (f (s≤s z≤n))
+    ∀x<m:n≢x⇒m≤n (suc m) (suc n) f = s≤s (∀x<m:n≢x⇒m≤n m n (λ x<m n≡x → f (s≤s x<m) (cong suc n≡x)))
+    
     n≢0⇒0<n : ∀ {n} → n ≢ 0 → 0 < n
     n≢0⇒0<n {zero} 0≢0 = contradiction refl 0≢0
     n≢0⇒0<n {suc n} n+1≢0 = s≤s z≤n

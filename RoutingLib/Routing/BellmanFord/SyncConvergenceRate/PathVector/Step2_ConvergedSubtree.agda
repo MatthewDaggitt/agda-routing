@@ -108,18 +108,28 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step2_Conve
 
 
 
+  -- Safe extension
+
+    safe-extension : ∀ {s r i k l} → σ^ (t + r) X k j ≈ A k l ▷ (σ^ (t + s) X l j) →
+               eₘᵢₙ ≤[ t + s ] (k , l) → eₘᵢₙ ≤[ t + r ] (i , k)
+    safe-extension {s} {r} {i} {k} {l} σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ eₘᵢₙ≤kl = (begin
+      A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + r) X kₘᵢₙ j  ≈⟨ ▷-cong (A iₘᵢₙ kₘᵢₙ) (Converged-eq t kₘᵢₙ r s kₘᵢₙ∈Fₜ) ⟩
+      A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + s) X kₘᵢₙ j  ≤⟨ eₘᵢₙ≤kl ⟩
+      A k l ▷ σ^ (t + s) X l j           ≤⟨ ▷-increasing (A i k) (A k l ▷ σ^ (t + s) X l j) ⟩
+      A i k ▷ (A k l ▷ σ^ (t + s) X l j) ≈⟨ ▷-cong (A i k) (≈-sym σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ) ⟩
+      A i    k   ▷ σ^ (t + r) X k   j    ∎)
+      where open POR ≤₊-poset
+
+{-
+    lemma : ∀ {s r i k l} → σ^ (t + r) X k j ≈ A k l ▷ (σ^ (t + s) X l j) →
+            k ∉ F → l ∈ᵤ Real (t + s) → eₘᵢₙ ≤[ t + r ] (i , k)
+    lemma {s} {r} {i} {k} {l} σᵗ⁺ʳₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ k∉F l∈Rₜ₊ₛ with l ∈? F
+    ... | no  l∉F = safe-extension σᵗ⁺ʳₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ {!!}
+    ... | yes l∈F = safe-extension σᵗ⁺ʳₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ (eₘᵢₙ-isMinₜ₊ₛ (k∉F , l∈F) s)
+-}  
     -- Any "real" route ending in a node outside of the fixed set is worse
     -- than that ending with the minimal edge.
 
-  private
-    lemma₁ : ∀ {i k l s} → σ^ (t + s) X k j ≈ A k l ▷ σ^ (t + s) X l j →
-            eₘᵢₙ ≤[ t + s ] (k , l) → eₘᵢₙ ≤[ t + s ] (i , k)
-    lemma₁ {i} {k} {l} {s} eq leq = begin
-      A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + s) X kₘᵢₙ j         ≤⟨ leq ⟩
-      A k    l    ▷ σ^ (t + s) X l j           ≤⟨ ▷-increasing (A i k) _ ⟩
-      A i    k    ▷ (A k l ▷ σ^ (t + s) X l j) ≈⟨ ▷-cong (A i k) (≈-sym eq) ⟩
-      A i    k    ▷ σ^ (t + s) X k j           ∎
-      where open POR ≤₊-poset
    
   ∈Real-invalid : ∀ s {i k} →
                   path (σ^ (t + s) X k j) ≈ₚ invalid →
@@ -148,5 +158,5 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step2_Conve
   ... | valid ([ _ , l∈Rₛ₊ₜ ]∷ _)
     with Real-alignment (t-1 + s) k∈Rₛ₊ₜ p[σᵗ⁺ˢXₖⱼ]≈kl∷p
   ...   | refl , σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ , p[σᵗ⁺ˢXₗⱼ]≈p with l ∈? F
-  ...     | yes l∈F = lemma₁ σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ (eₘᵢₙ-isMinₜ₊ₛ (k∉F , l∈F) s)
-  ...     | no  l∉F = lemma₁ σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ (∈Real s _ l∈Rₛ₊ₜ l∉F p[σᵗ⁺ˢXₗⱼ]≈p)
+  ...     | no  l∉F = safe-extension σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ (∈Real s _ l∈Rₛ₊ₜ l∉F p[σᵗ⁺ˢXₗⱼ]≈p)
+  ...     | yes l∈F = safe-extension σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ (eₘᵢₙ-isMinₜ₊ₛ (k∉F , l∈F) s)

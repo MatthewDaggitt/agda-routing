@@ -8,7 +8,7 @@ open import Relation.Binary.PropositionalEquality
 
 open import RoutingLib.Data.NatInf using (ℕ∞; N; ∞)
 
-module RoutingLib.Asynchronous.Applications.AllPairs.Example where
+module RoutingLib.Asynchronous.Examples.AllPairs.Example where
 
   row₁ : Fin 5 → ℕ∞
   row₁ fzero                             = N 0

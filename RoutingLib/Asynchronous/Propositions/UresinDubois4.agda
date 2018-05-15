@@ -1,140 +1,138 @@
 open import Data.List using (List; length; []; _∷_; filter)
-open import Data.List.Any using (Any; here; there)
-import Data.List.Any.Membership as Memb
+open import Data.List.Any as Any using (Any; here; there)
+import Data.List.Any.Membership as Membership
 open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-filter⁻; ∈-filter⁺; ∈-resp-≈)
 open import Data.List.Properties using (length-filter; filter-some)
 open import Data.Nat using (ℕ; zero; suc; _+_; _<_; _≤_; z≤n; s≤s) renaming (_≟_ to _≟ℕ_)
-open import Data.Nat.Properties using (+-suc; +-identityʳ; ≤-trans; ≤-step; m≤m+n; ≤-reflexive; pred-mono; ≤+≢⇒<; ≤-refl; <⇒≤)
+open import Data.Nat.Properties using (+-suc; +-identityʳ; +-comm; ≤-trans; ≤-step; m≤m+n; ≤-reflexive; pred-mono; ≤+≢⇒<; ≤-refl; <⇒≤)
 open import Data.Product using (_×_; ∃; proj₁; proj₂; _,_)
 open import Function using (_∘_)
 open import Relation.Binary using (Setoid; Rel; Reflexive; Antisymmetric; Transitive; _⇒_; Decidable)
 open import Relation.Binary.PropositionalEquality using (subst; cong; _≡_; trans; sym; refl)
-open import Relation.Nullary using (¬_; yes; no)
+import Relation.Binary.PartialOrderReasoning as POR
+import Relation.Binary.EqReasoning as EqReasoning
+open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (∁?)
-open import Induction.Nat using (<-well-founded)
+open import Induction.Nat using (<-wellFounded)
 open import Induction.WellFounded using (Acc; acc)
 
-open import RoutingLib.Asynchronous using (Parallelisation)
 open import RoutingLib.Data.Table using (Table)
 
-module RoutingLib.Asynchronous.Propositions.UresinDubois4 {a ℓ n}
-                                                          {S : Table (Setoid a ℓ) n}
-                                                          (𝕡 : Parallelisation S)
+open import RoutingLib.Asynchronous using (Parallelisation)
+open import RoutingLib.Asynchronous.Theorems.Core
+import RoutingLib.Asynchronous.Propositions.UresinDubois3 as Prop3
+
+module RoutingLib.Asynchronous.Propositions.UresinDubois4
+  {a ℓ n p}
+  {S : Table (Setoid a ℓ) n}
+  (𝕡 : Parallelisation S)
+  (finiteCond : FiniteConditions 𝕡 p)
   where
 
-  open Parallelisation 𝕡 using (f)
-  open import RoutingLib.Asynchronous.Propositions.UresinDubois3 𝕡 using () renaming (module Proof to Prop3-proof)
-  open import RoutingLib.Asynchronous.Theorems.Core 𝕡 using (ACO; Start; SynchronousConditions; FiniteConditions; iter)
+  open Parallelisation 𝕡 using (F; syncIter)
   open import RoutingLib.Data.Table.IndexedTypes S
-  open Memb M-setoid using () renaming (_∈_ to _∈L_; _⊆_ to _⊆L_)
+  open Membership 𝕄ₛ using () renaming (_∈_ to _∈ₗ_; _⊆_ to _⊆ₗ_)
 
-  module Proof {p} (finiteCond : FiniteConditions p) where
+  open FiniteConditions finiteCond
+  open Start start
+  open M-poset poset hiding (trans)
 
-    open FiniteConditions finiteCond
-    open Start start
-    open M-poset poset hiding (trans)
+  x≼y≼z∧x≉y⇒x≉z : ∀ {x y z} → x ≼ y → y ≼ z → x ≉ y → x ≉ z
+  x≼y≼z∧x≉y⇒x≉z x≼y y≼z x≉y x≈z = x≉y (≼-antisym x≼y (≼-trans y≼z (≼-reflexive (≈-sym x≈z))))
 
-    closed-trans : ∀ K → iter x₀ K ∈ D₀
-    closed-trans zero    i = x₀∈D₀ i
-    closed-trans (suc K) i = D₀-closed (iter x₀ K) (closed-trans K) i
+  -- Synchronous iteration
 
-    iter-decreasing : ∀ K → iter x₀ (suc K) ≼ iter x₀ K
-    iter-decreasing K i = f-nonexpansive (closed-trans K) i
+  σ : ℕ → M
+  σ = syncIter x₀
 
-    iter-decreasing-full : ∀ {k t} → k ≤ t → iter x₀ t ≼ iter x₀ k
-    iter-decreasing-full {.0} {zero} z≤n = ≼-refl
-    iter-decreasing-full {k} {suc t} k≤t with k ≟ℕ suc t
-    ... | yes refl = ≼-refl
-    ... | no  k≢st = ≼-trans (iter-decreasing t)
-      (iter-decreasing-full {k} {t} (pred-mono (≤+≢⇒< k≤t k≢st)))
+  -- The initial set
+  
+  D₀-complete : ∀ K → σ K ∈ D₀
+  D₀-complete zero    i = x₀∈D₀ i
+  D₀-complete (suc K) i = D₀-closed (σ K) (D₀-complete K) i
 
-    D₀-list : List M
-    D₀-list = proj₁ D₀-finite
+  σ-decreasing : ∀ K → σ (suc K) ≼ σ K
+  σ-decreasing K i = F-nonexpansive (D₀-complete K) i
 
-    x∈D₀⇒x∈D₀-list : ∀ {x} → x ∈ D₀ → x ∈L D₀-list
-    x∈D₀⇒x∈D₀-list = proj₂ D₀-finite
+  σ-mono : ∀ {k t} → k ≤ t → σ t ≼ σ k
+  σ-mono {_} {zero}  z≤n = ≼-refl
+  σ-mono {k} {suc t} k≤t with k ≟ℕ suc t
+  ... | yes refl = ≼-refl
+  ... | no  k≢st = begin
+    σ (suc t) ≤⟨ F-nonexpansive (D₀-complete t) ⟩
+    σ t       ≤⟨ σ-mono {k} {t} (pred-mono (≤+≢⇒< k≤t k≢st)) ⟩
+    σ k       ∎
+    where open POR ≼-poset
+  
+  σ-fixed : ∀ K → σ K ≈ σ (suc K) → ∀ t → σ K ≈ σ (K + t)
+  σ-fixed K σ[K]≈σ[1+K] zero    = ≈-cong (σ) (sym (+-identityʳ K))
+  σ-fixed K σ[K]≈σ[1+K] (suc t) = begin
+    σ K           ≈⟨ σ[K]≈σ[1+K] ⟩
+    σ (suc K)     ≈⟨ σ-fixed (suc K) (F-cong σ[K]≈σ[1+K]) t ⟩
+    σ (suc K + t) ≡⟨ cong σ (sym (+-suc K t)) ⟩
+    σ (K + suc t) ∎
+    where open EqReasoning 𝕄ₛ
 
-    D₀-fixed : ℕ → List M
-    D₀-fixed zero = D₀-list
-    D₀-fixed (suc K) = filter (∁? (iter x₀ K ≟_)) (D₀-fixed K)
+  -- List of all states
+  D₀ˡ : List M
+  D₀ˡ = proj₁ D₀-finite
 
-    iterK∈D₀-list : ∀ K → iter x₀ K ∈L D₀-list
-    iterK∈D₀-list K = x∈D₀⇒x∈D₀-list (closed-trans K)
+  σ[K]∈D₀ˡ : ∀ K → σ K ∈ₗ D₀ˡ
+  σ[K]∈D₀ˡ K = proj₂ D₀-finite (D₀-complete K)
 
-    D₀-fixed-decreasing : ∀ K → D₀-fixed (suc K) ⊆L  D₀-fixed K
-    D₀-fixed-decreasing K x∈DsK = proj₁ (∈-filter⁻ M-setoid
-             ((∁? (iter x₀ K ≟_)))
-             ((λ x≈y x≉iterK → x≉iterK ∘ λ iterK≈y → ≈-trans iterK≈y (≈-sym x≈y)))
-             x∈DsK)
+  ≉σ[K]-cong : ∀ K {x y} → x ≈ y → σ K ≉ x → σ K ≉ y
+  ≉σ[K]-cong _ x≈y x≉iterK iterK≈y = x≉iterK (≈-trans iterK≈y (≈-sym x≈y))
+  
+  -- List of states at each time step
+  Dₖˡ : ℕ → List M
+  Dₖˡ zero    = D₀ˡ
+  Dₖˡ (suc K) = filter (∁? (σ K ≟_)) (Dₖˡ K)
 
-    iter-fixed : ∀ K → iter x₀ K ≈ iter x₀ (suc K) → ∀ t → iter x₀ K ≈ iter x₀ (K + t)
-    iter-fixed K iter≈ zero = ≈-cong (iter x₀) (sym (+-identityʳ K))
-    iter-fixed K iter≈ (suc t) = ≈-trans iter≈ (subst (iter x₀ (suc K) ≈_)
-               (cong (λ x → λ i → iter x₀ x i) (sym (+-suc K t)))
-               (iter-fixed (suc K) (f-cong iter≈) t))
+  Dₖˡ-decreasing : ∀ K → Dₖˡ (suc K) ⊆ₗ  Dₖˡ K
+  Dₖˡ-decreasing K x∈DsK = proj₁ (∈-filter⁻ 𝕄ₛ (∁? (σ K ≟_)) (≉σ[K]-cong K) x∈DsK)
 
+  σ[K]∈Dₜˡ : ∀ K → σ K ≉ σ (suc K) → ∀ {t} → t ≤ K → σ (suc K) ∈ₗ Dₖˡ t
+  σ[K]∈Dₜˡ K _           {zero}  _   = σ[K]∈D₀ˡ (suc K)
+  σ[K]∈Dₜˡ K σ[K]≉σ[1+K] {suc t} t≤K = ∈-filter⁺ 𝕄ₛ (∁? (σ t ≟_))
+    (≉σ[K]-cong t)
+    ((x≼y≼z∧x≉y⇒x≉z (σ-decreasing K) (σ-mono (<⇒≤ t≤K)) (σ[K]≉σ[1+K] ∘ ≈-sym)) ∘ ≈-sym)
+    (σ[K]∈Dₜˡ K σ[K]≉σ[1+K] (<⇒≤ t≤K))
 
-    x≼y≼z∧x≉y⇒x≉z : ∀ {x y z} → x ≼ y → y ≼ z → x ≉ y → x ≉ z
-    x≼y≼z∧x≉y⇒x≉z x≼y y≼z x≉y x≈z = contradiction
-          (≼-antisym x≼y (≼-trans y≼z (≼-reflexive (≈-sym x≈z))))
-          x≉y
+  σ[K]∈Dₖˡ : ∀ K → σ K ≉ σ (suc K) → σ K ∈ₗ Dₖˡ K
+  σ[K]∈Dₖˡ zero    _           = σ[K]∈D₀ˡ zero
+  σ[K]∈Dₖˡ (suc K) σ[K]≉σ[1+K] = ∈-filter⁺ 𝕄ₛ (∁? (σ K ≟_))
+    (≉σ[K]-cong K)
+    (λ σ[K]≈σ[2+k] → σ[K]≉σ[1+K] (begin
+      σ (1 + K) ≈⟨ ≈-sym σ[K]≈σ[2+k] ⟩
+      σ K       ≈⟨ σ-fixed K σ[K]≈σ[2+k] 2 ⟩
+      σ (K + 2) ≡⟨ cong σ (+-comm K 2) ⟩
+      σ (2 + K) ∎))
+    (σ[K]∈Dₜˡ K (σ[K]≉σ[1+K] ∘ F-cong) ≤-refl)
+    where open EqReasoning 𝕄ₛ
+         
+  |Dₖˡ|-decreasing : ∀ K  → σ K ≉ σ (suc K) → length (Dₖˡ (suc K)) < length (Dₖˡ K)
+  |Dₖˡ|-decreasing K σ[K]≉σ[1+K] = filter-some (∁? (σ K ≟_)) (Dₖˡ K) (Any.map contradiction (σ[K]∈Dₖˡ K σ[K]≉σ[1+K]))
 
-    iterK∈D₀-fixedt : ∀ K → iter x₀ K ≉ iter x₀ (suc K) → ∀ {t} → t ≤ K →
-                      iter x₀ (suc K) ∈L D₀-fixed t
-    iterK∈D₀-fixedt K iter≉ {zero} t≤K = iterK∈D₀-list (suc K)
-    iterK∈D₀-fixedt K iter≉ {suc t} t≤K = ∈-filter⁺ M-setoid (∁? (iter x₀ t ≟_))
-              (λ x≈y x≉iterK → x≉iterK ∘ λ iterK≈y → ≈-trans iterK≈y (≈-sym x≈y))
-              ((x≼y≼z∧x≉y⇒x≉z (iter-decreasing K)
-                (iter-decreasing-full (<⇒≤ t≤K)) (iter≉ ∘ ≈-sym)) ∘ ≈-sym)
-              (iterK∈D₀-fixedt K iter≉ (<⇒≤ t≤K))
+  -- Prove that fixed point exists
+  σ-fixedPoint : ∀ K → Acc _<_ (length (Dₖˡ K)) → ∃ λ T → ∀ t → σ T ≈ σ (T + t)
+  σ-fixedPoint K (acc rec) with σ K ≟ σ (suc K)
+  ... | yes σ[K]≈σ[1+K] = K , σ-fixed K σ[K]≈σ[1+K]
+  ... | no  σ[K]≉σ[1+K] = σ-fixedPoint (suc K) (rec _ (|Dₖˡ|-decreasing K σ[K]≉σ[1+K]))
 
-    iter≉⇒iter∈D₀-fixed : ∀ K → iter x₀ K ≉ iter x₀ (suc K) → iter x₀ K ∈L D₀-fixed K
-    iter≉⇒iter∈D₀-fixed zero _ = iterK∈D₀-list zero
-    iter≉⇒iter∈D₀-fixed (suc K) iter≉ = ∈-filter⁺ M-setoid (∁? (iter x₀ K ≟_))
-                    (λ x≈y x≉iterK → x≉iterK ∘ λ iterK≈y → ≈-trans iterK≈y (≈-sym x≈y))
-                    {iter x₀ (suc K)}
-                    (λ iter≈ → contradiction (≈-trans (≈-sym iter≈)
-                       (subst (iter x₀ K ≈_)
-                         (cong (iter x₀) (trans (+-suc K 1)
-                           (cong suc (trans (+-suc K 0)
-                             (cong suc (+-identityʳ K))))))
-                         (iter-fixed K iter≈ 2)))
-                       iter≉)
-                    {D₀-fixed K}
-                    (iterK∈D₀-fixedt K (λ iter≈ → contradiction (f-cong iter≈) iter≉) ≤-refl)
+  σ-converges : ∃ λ T → ∀ t → σ T ≈ σ (T + t)
+  σ-converges = σ-fixedPoint 0 (<-wellFounded (length D₀ˡ))
 
+  syncCond : SynchronousConditions 𝕡 p
+  syncCond = record
+    { start           = start
+    ; poset           = poset
+    ; F-monotone      = F-monotone
+    ; iter-decreasing = σ-decreasing
+    ; iter-converge   = σ-converges 
+    }
 
-    y∈xs⇒¬¬y∈xs : ∀ (xs : List M) y → y ∈L xs → Any (λ x → ¬ (λ z → y ≉ z) x) xs
-    y∈xs⇒¬¬y∈xs [] y ()
-    y∈xs⇒¬¬y∈xs (x ∷ xs) y (here px) = here λ y≉x → contradiction px y≉x
-    y∈xs⇒¬¬y∈xs (x ∷ xs) y (there y∈xs) = there (y∈xs⇒¬¬y∈xs xs y y∈xs)
+  open Prop3 𝕡 syncCond using () renaming (aco to Prop3-aco)
 
-    D₀-fixed-length-dec : ∀ K  → iter x₀ K ≉ iter x₀ (suc K) →
-                          length (D₀-fixed (suc K)) < length (D₀-fixed K)
-    D₀-fixed-length-dec K iter≉ = filter-some (∁? (iter x₀ K ≟_)) (D₀-fixed K)
-      (y∈xs⇒¬¬y∈xs (D₀-fixed K) (iter x₀ K) (iter≉⇒iter∈D₀-fixed K iter≉))
-
-    iter-fixed-point : ∀ {K} → Acc _<_ (length (D₀-fixed K)) →
-                                 ∃ λ T → ∀ t → iter x₀ T ≈ iter x₀ (T + t)
-    iter-fixed-point {K} (acc rs) with iter x₀ K ≟ iter x₀ (suc K)
-    ... | yes iter≈ = K , iter-fixed K iter≈
-    ... | no  iter≉ = iter-fixed-point {suc K}
-                      (rs (length (D₀-fixed (suc K))) (D₀-fixed-length-dec K iter≉))
-
-    iter-converge : ∃ λ T → ∀ t → iter x₀ T ≈ iter x₀ (T + t)
-    iter-converge = iter-fixed-point {0} (<-well-founded (length (D₀-list)))
-
-    syncCond : SynchronousConditions p
-    syncCond = record {
-      start           = start ;
-      poset           = poset ;
-      f-monotone      = f-monotone ;
-      iter-decreasing = iter-decreasing ;
-      iter-converge   = iter-converge 
-      }
-
-    open Prop3-proof syncCond using () renaming (aco to Prop3-aco)
-
-    aco : ACO p
-    aco = Prop3-aco
+  aco : ACO 𝕡 p
+  aco = Prop3-aco

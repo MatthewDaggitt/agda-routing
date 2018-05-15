@@ -1,4 +1,5 @@
 *.agdai
+*.lagda
 *.*~
 *.attr
 *.*#*

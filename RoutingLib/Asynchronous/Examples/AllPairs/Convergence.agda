@@ -11,7 +11,7 @@ open import Data.Sum using (inj₁; inj₂; _⊎_)
 open import Data.Product using (_×_; ∃; _,_; proj₁; proj₂; Σ)
 open import Function using (_∘_; id)
 open import Induction using (RecStruct)
-open import Induction.Nat using (<-well-founded)
+open import Induction.Nat using (<-wellFounded)
 open import Induction.WellFounded using (Acc; acc; WfRec; Well-founded)
 open import Level using () renaming (zero to lzero)
 open import Relation.Binary using (Rel; Setoid; Preorder)
@@ -23,7 +23,7 @@ open import Relation.Unary using (U; U-Universal; Decidable)
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 
 open import RoutingLib.Asynchronous using (Parallelisation)
-import RoutingLib.Asynchronous.Applications.AllPairs as AllPairs
+import RoutingLib.Asynchronous.Examples.AllPairs as AllPairs
 open import RoutingLib.Asynchronous.Schedule using (Schedule; 𝕋)
 open import RoutingLib.Data.List using (allFinPairs)
 open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-filter⁺; ∈-combine⁺; ∈-tabulate⁺; ∈-filter⁻; ∈-allFinPairs⁺)
@@ -34,15 +34,14 @@ open import RoutingLib.Data.Table.Any using (Any)
 open import RoutingLib.Data.Table.Properties using (min∞[s]≤min∞[t]; min∞[t]≤x; t≤max[t]; sum[s]≤sum[t]; sum[s]<sum[t])
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (min∞[t]∈t)
 
-module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Schedule n)(x₀ : AllPairs.Matrix n)(Cᵢ,ᵢ : ∀ i → x₀ i i ≡ N 0) where
+module RoutingLib.Asynchronous.Examples.AllPairs.Convergence {n}(𝕤 : Schedule n)(x₀ : AllPairs.Matrix n)(Cᵢ,ᵢ : ∀ i → x₀ i i ≡ N 0) where
 
   
-  open AllPairs n hiding (f)
-  open import RoutingLib.Asynchronous.Applications.AllPairs.Properties n
+  open AllPairs n hiding (F)
+  open import RoutingLib.Asynchronous.Examples.AllPairs.Properties n
   open Schedule 𝕤
   open Parallelisation all-pairs-parallelisation
-  open import RoutingLib.Asynchronous.Propositions.UresinDubois3 all-pairs-parallelisation renaming (module Proof to ProofProp)
-  open import RoutingLib.Asynchronous.Theorems.Core all-pairs-parallelisation using (iter; SynchronousConditions; Start)
+  open import RoutingLib.Asynchronous.Theorems.Core all-pairs-parallelisation using (SynchronousConditions; Start)
   open import RoutingLib.Asynchronous.Theorems.UresinDubois1 all-pairs-parallelisation
   
   D₀ : Pred lzero
@@ -54,59 +53,59 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
   D₀-subst : ∀ {x y} → x ≈ y → x ∈ D₀ → y ∈ D₀
   D₀-subst {_} {y} _ _ i = U-Universal (y i)
 
-  D₀-closed : ∀ x → x ∈ D₀ → f x ∈ D₀
-  D₀-closed x _ i = U-Universal (f x i)
+  D₀-closed : ∀ x → x ∈ D₀ → F x ∈ D₀
+  D₀-closed x _ i = U-Universal (F x i)
 
-  f-monotone : ∀ {x y} → x ∈ D₀ →  y ∈ D₀ → (∀ i → x i ≼ y i) →
-               ∀ i → f x i ≼ f y i
-  f-monotone {x} {y} x∈D₀ y∈D₀ x≼y i j =
+  F-monotone : ∀ {x y} → x ∈ D₀ →  y ∈ D₀ → (∀ i → x i ≼ y i) →
+               ∀ i → F x i ≼ F y i
+  F-monotone {x} {y} x∈D₀ y∈D₀ x≼y i j =
     min∞[s]≤min∞[t] (x i j) (inj₁ (x≼y i j)) ≤-path-cost
     where
     ≤-path-cost : ∀ k → x i j ≤ path-cost y i j k ⊎
                          Σ (Fin n) (λ v → path-cost x i j v ≤ path-cost y i j k)
     ≤-path-cost k = inj₂ (k , path-cost-monotone x≼y i j k)
 
-  iter-decreasing : ∀ K → iter x₀ (suc K) ≼ₘ iter x₀ K
-  iter-decreasing zero i j = min∞[t]≤x (x₀ i j) (path-cost x₀ i j) (inj₁ ≤-refl)
-  iter-decreasing (suc K) i = f-monotone
-    (λ j → U-Universal (iter x₀ (suc K)))
-    (λ j → U-Universal (iter x₀ K))
+  iter-decreasing : ∀ K → syncIter x₀ (suc K) ≼ₘ syncIter x₀ K
+  iter-decreasing zero i j  = min∞[t]≤x (x₀ i j) (path-cost x₀ i j) (inj₁ ≤-refl)
+  iter-decreasing (suc K) i = F-monotone
+    (λ j → U-Universal (syncIter x₀ (suc K)))
+    (λ j → U-Universal (syncIter x₀ K))
     (λ j → iter-decreasing K j) i
 
-  iter-fixed : ∀ t → iter x₀ (suc t) ≡ₘ iter x₀ t → ∀ K →
-               iter x₀ t ≈ iter x₀ (t +ℕ K)
-  iter-fixed t iter≡ zero i j = cong (λ x → iter x₀ x i j) (sym (+-idʳℕ t))
+  iter-fixed : ∀ t → syncIter x₀ (suc t) ≡ₘ syncIter x₀ t → ∀ K →
+               syncIter x₀ t ≈ syncIter x₀ (t +ℕ K)
+  iter-fixed t iter≡ zero i j = cong (λ x → syncIter x₀ x i j) (sym (+-idʳℕ t))
   iter-fixed t iter≡ (suc K) i j = trans (sym (iter≡ i j))
-    (subst (iter x₀ (suc t) i j ≡_)
-      (cong (λ x → iter x₀ x i j) (sym (+ℕ-suc t K)))
-      (iter-fixed (suc t) (f-cong iter≡) K i j)) 
+    (subst (syncIter x₀ (suc t) i j ≡_)
+      (cong (λ x → syncIter x₀ x i j) (sym (+ℕ-suc t K)))
+      (iter-fixed (suc t) (F-cong iter≡) K i j)) 
 
   iter∞-dependent : ℕ → Set
-  iter∞-dependent K = ∀ i j → iter x₀ K i j ≡ ∞ → iter x₀ (suc K) i j ≡ ∞
+  iter∞-dependent K = ∀ i j → syncIter x₀ K i j ≡ ∞ → syncIter x₀ (suc K) i j ≡ ∞
 
   iter∞-chain : ∀ K → iter∞-dependent K → iter∞-dependent (suc K)
-  iter∞-chain K ⇒∞ i j iterᵢⱼsK≡∞ with iter x₀ (suc (suc K)) i j ≟ ∞
+  iter∞-chain K ⇒∞ i j iterᵢⱼsK≡∞ with syncIter x₀ (suc (suc K)) i j ≟ ∞
   ... | yes iterᵢⱼssK≡∞ = iterᵢⱼssK≡∞
-  ... | no  iterᵢⱼssK≢∞  with min∞[t]∈t (iter x₀ (suc K) i j) (path-cost (iter x₀ (suc K)) i j)
+  ... | no  iterᵢⱼssK≢∞  with min∞[t]∈t (syncIter x₀ (suc K) i j) (path-cost (syncIter x₀ (suc K)) i j)
   ...   | inj₁ iterᵢⱼ≡ = contradiction (trans iterᵢⱼ≡ iterᵢⱼsK≡∞) iterᵢⱼssK≢∞
-  ...   | inj₂ (k , p) rewrite p with iter x₀ (suc K) i k ≟ ∞ | iter x₀ (suc K) k j ≟ ∞
+  ...   | inj₂ (k , p) rewrite p with syncIter x₀ (suc K) i k ≟ ∞ | syncIter x₀ (suc K) k j ≟ ∞
   ...     | yes iterᵢₖsK≡∞ | _ rewrite iterᵢₖsK≡∞ = contradiction refl iterᵢⱼssK≢∞
   ...     | no  _         | yes iterₖⱼsK≡∞ rewrite iterₖⱼsK≡∞ =
-            contradiction (+-comm (iter x₀ (suc K) i k) ∞) iterᵢⱼssK≢∞
-  ...     | no  iterᵢₖsK≢∞ | no iterₖⱼsK≢∞ with iter x₀ K i k ≟ ∞ | iter x₀ K k j ≟ ∞
+            contradiction (+-comm (syncIter x₀ (suc K) i k) ∞) iterᵢⱼssK≢∞
+  ...     | no  iterᵢₖsK≢∞ | no iterₖⱼsK≢∞ with syncIter x₀ K i k ≟ ∞ | syncIter x₀ K k j ≟ ∞
   ...       | yes iterᵢₖK≡∞ | _            = contradiction (⇒∞ i k iterᵢₖK≡∞) iterᵢₖsK≢∞
   ...       | no  _        | yes iterₖⱼK≡∞ = contradiction (⇒∞ k j iterₖⱼK≡∞) iterₖⱼsK≢∞
   ...       | no  iterᵢₖK≢∞ | no  iterₖⱼK≢∞ with ≢∞⇒≡N iterᵢₖK≢∞ | ≢∞⇒≡N iterₖⱼK≢∞
   ...         | xᵢₖ , pᵢₖ | xₖⱼ , pₖⱼ rewrite pᵢₖ | pₖⱼ = contradiction
-                (min∞[t]≤x (iter x₀ K i j) (path-cost (iter x₀ K) i j)
+                (min∞[t]≤x (syncIter x₀ K i j) (path-cost (syncIter x₀ K) i j)
                   (inj₂ (k , path-cost≤xᵢₖ+xₖⱼ)))
                 iterᵢⱼsK≰xᵢₖ+xₖⱼ
                 where
-                iterᵢⱼsK≰xᵢₖ+xₖⱼ : iter x₀ (suc K) i j ≰ N (xᵢₖ +ℕ xₖⱼ)
+                iterᵢⱼsK≰xᵢₖ+xₖⱼ : syncIter x₀ (suc K) i j ≰ N (xᵢₖ +ℕ xₖⱼ)
                 iterᵢⱼsK≰xᵢₖ+xₖⱼ = subst (_≰ N (xᵢₖ +ℕ xₖⱼ)) (sym iterᵢⱼsK≡∞) ∞≰
 
-                path-cost≤xᵢₖ+xₖⱼ : path-cost (iter x₀ K) i j k ≤ N (xᵢₖ +ℕ xₖⱼ)
-                path-cost≤xᵢₖ+xₖⱼ = ≤-reflexive (trans (cong (iter x₀ K i k +_) pₖⱼ)
+                path-cost≤xᵢₖ+xₖⱼ : path-cost (syncIter x₀ K) i j k ≤ N (xᵢₖ +ℕ xₖⱼ)
+                path-cost≤xᵢₖ+xₖⱼ = ≤-reflexive (trans (cong (syncIter x₀ K i k +_) pₖⱼ)
                   (cong (_+ N xₖⱼ) pᵢₖ)) 
 
   FinPair : Setoid lzero lzero
@@ -114,23 +113,23 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
 
   open Memb FinPair using () renaming (_∈_ to _∈L_; _⊆_ to _⊆L_)
 
-  is∞? : ∀ K → Decidable (λ node → iter x₀ K (proj₁ node) (proj₂ node) ≡ ∞)
-  is∞? K = λ node → iter x₀ K (proj₁ node) (proj₂ node) ≟ ∞
+  is∞? : ∀ K → Decidable (λ node → syncIter x₀ K (proj₁ node) (proj₂ node) ≡ ∞)
+  is∞? K = λ node → syncIter x₀ K (proj₁ node) (proj₂ node) ≟ ∞
 
   ∞-nodes : ℕ → List (Fin n × Fin n)
   ∞-nodes zero = filter (is∞? 0) (allFinPairs n)
   ∞-nodes (suc K) = filter (is∞? (suc K)) (∞-nodes K)
 
-  node∈∞-nodes⇒node≡∞ : ∀ K i j → (i , j) ∈L ∞-nodes K → iter x₀ K i j ≡ ∞
+  node∈∞-nodes⇒node≡∞ : ∀ K i j → (i , j) ∈L ∞-nodes K → syncIter x₀ K i j ≡ ∞
   node∈∞-nodes⇒node≡∞ zero i j node∈ = proj₂ (∈-filter⁻ (is∞? 0)
     {i , j} {allFinPairs n} node∈)
   node∈∞-nodes⇒node≡∞ (suc K) i j node∈ = proj₂ (∈-filter⁻ (is∞? (suc K))
     {i , j} {∞-nodes K} node∈)
 
-  node≡∞⇒node∈∞-nodes : ∀ K i j → iter x₀ K i j ≡ ∞ → (i , j) ∈L ∞-nodes K
+  node≡∞⇒node∈∞-nodes : ∀ K i j → syncIter x₀ K i j ≡ ∞ → (i , j) ∈L ∞-nodes K
   node≡∞⇒node∈∞-nodes zero i j iter≡∞ = ∈-filter⁺ (is∞? 0) iter≡∞
     (∈-allFinPairs⁺ i j)
-  node≡∞⇒node∈∞-nodes (suc K) i j iter≡∞ with iter x₀ K i j ≟ ∞
+  node≡∞⇒node∈∞-nodes (suc K) i j iter≡∞ with syncIter x₀ K i j ≟ ∞
   ... | yes ≡∞ =  ∈-filter⁺ (is∞? (suc K)) iter≡∞
     (node≡∞⇒node∈∞-nodes K i j ≡∞)
   ... | no  ≢∞ with ≢∞⇒≡N ≢∞
@@ -153,7 +152,7 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
 
   ∞-nodes≡+∈∞-nodes⇒iter≡∞ : ∀ K → ∞-nodes K ≡ ∞-nodes (suc K) →
                                {node : Fin n × Fin n} → node ∈L ∞-nodes (suc K) →
-                               iter x₀ (suc (suc K)) (proj₁ node) (proj₂ node) ≡ ∞
+                               syncIter x₀ (suc (suc K)) (proj₁ node) (proj₂ node) ≡ ∞
   ∞-nodes≡+∈∞-nodes⇒iter≡∞ K ∞-nodes≡ {i , j} node∈ =
     iter∞-chain K (∞-nodes≡⇒iterₖ≡∞⇒iterₛₖ≡∞ K ∞-nodes≡) i j
       (node∈∞-nodes⇒node≡∞ (suc K) i j node∈)
@@ -190,12 +189,12 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
     (≤+≢⇒ℕ< (∞-nodes-length-dec K) (∞-nodes-length≢ ∘ sym)))
   
   score : ℕ → ℕ
-  score K = sum {n} (λ i → sum {n} (λ j → extractℕ (iter x₀ K i j)))
+  score K = sum {n} (λ i → sum {n} (λ j → extractℕ (syncIter x₀ K i j)))
 
   module _ (∞-conv : ∃ λ T → ∀ {t} → T ≤ℕ t → ∞-nodes t ≡ ∞-nodes (suc t)) where
     extractℕ-dec : ∀ {K} → proj₁ ∞-conv ≤ℕ K → ∀ i j →
-                   extractℕ (iter x₀ (suc K) i j) ≤ℕ extractℕ (iter x₀ K i j)
-    extractℕ-dec {K} T≤K i j with iter x₀ (suc K) i j ≟ ∞ | iter x₀ K i j ≟ ∞
+                   extractℕ (syncIter x₀ (suc K) i j) ≤ℕ extractℕ (syncIter x₀ K i j)
+    extractℕ-dec {K} T≤K i j with syncIter x₀ (suc K) i j ≟ ∞ | syncIter x₀ K i j ≟ ∞
     ... | yes iterₛₖ≡∞ | yes iterₖ≡∞ rewrite iterₛₖ≡∞ | iterₖ≡∞ = ≤ℕ-refl
     ... | no  iterₛₖ≢∞ | yes iterₖ≡∞ = contradiction
       (∞-nodes≡⇒iterₖ≡∞⇒iterₛₖ≡∞ K (proj₂ ∞-conv T≤K) i j iterₖ≡∞) iterₛₖ≢∞
@@ -212,12 +211,12 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
                 (λ j → extractℕ-dec T≤K i j))
 
     extractℕ-dec-strict : ∀ {K} → proj₁ ∞-conv ≤ℕ K → ∀ i j →
-                          iter x₀ (suc K) i j ≢ iter x₀ K i j →
-                          extractℕ (iter x₀ (suc K) i j) <ℕ extractℕ (iter x₀ K i j)
+                          syncIter x₀ (suc K) i j ≢ syncIter x₀ K i j →
+                          extractℕ (syncIter x₀ (suc K) i j) <ℕ extractℕ (syncIter x₀ K i j)
     extractℕ-dec-strict {K} T≤K i j iter≢ = ≤+≢⇒ℕ< (extractℕ-dec T≤K i j) extractℕ≢
       where
-      extractℕ≢ : extractℕ (iter x₀ (suc K) i j) ≢ extractℕ (iter x₀ K i j)
-      extractℕ≢ with iter x₀ (suc K) i j ≟ ∞ | iter x₀ K i j ≟ ∞
+      extractℕ≢ : extractℕ (syncIter x₀ (suc K) i j) ≢ extractℕ (syncIter x₀ K i j)
+      extractℕ≢ with syncIter x₀ (suc K) i j ≟ ∞ | syncIter x₀ K i j ≟ ∞
       extractℕ≢ | yes iterₛₖ≡∞ | yes iterₖ≡∞ = contradiction (trans iterₛₖ≡∞ (sym iterₖ≡∞)) iter≢
       extractℕ≢ | yes iterₛₖ≡∞ | no  iterₖ≢∞ with ≢∞⇒≡N iterₖ≢∞
       ... | x , p = contradiction (iter-decreasing K i j) (subst₂ _≰_ (sym iterₛₖ≡∞) (sym p) ∞≰)
@@ -226,7 +225,7 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
                   iterₛₖ≢∞
       extractℕ≢ | no  iterₛₖ≢∞ | no  iterₖ≢∞ = ≢⇒extractℕ≢ iterₛₖ≢∞ iterₖ≢∞ iter≢
 
-    iter≉⇒score< : ∀ {t} → proj₁ (∞-conv) ≤ℕ t → iter x₀ (suc t) ≉ iter x₀ t →
+    iter≉⇒score< : ∀ {t} → proj₁ (∞-conv) ≤ℕ t → syncIter x₀ (suc t) ≉ syncIter x₀ t →
                     score (suc t) <ℕ score t
     iter≉⇒score< {t} T≤t iter≉ with ≢ₘ-witness iter≉
     ... | i , j , iterᵢⱼ≢ = sum[s]<sum[t]
@@ -236,18 +235,18 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
         (j , extractℕ-dec-strict T≤t i j iterᵢⱼ≢))
 
     iter-fixed-point : ∀ {t} → proj₁ (∞-conv) ≤ℕ t → Acc _<ℕ_ (score t) →
-                       ∃ λ T → ∀ K → iter x₀ T ≈ iter x₀ (T +ℕ K)
-    iter-fixed-point {t} T≤t accₜ with iter x₀ (suc t) ≟ₘ iter x₀ t
+                       ∃ λ T → ∀ K → syncIter x₀ T ≈ syncIter x₀ (T +ℕ K)
+    iter-fixed-point {t} T≤t accₜ with syncIter x₀ (suc t) ≟ₘ syncIter x₀ t
     ... | yes iter≈ = t , iter-fixed t iter≈
     iter-fixed-point {t} T≤t (acc rs) | no iter≉ =
                      iter-fixed-point {suc t} (≤ℕ-step T≤t)
                        (rs (score (suc t)) (iter≉⇒score< T≤t iter≉))
 
 
-  iter-converge : ∃ λ T → ∀ t → iter x₀ T ≈ iter x₀ (T +ℕ t)
-  iter-converge with ∞-nodes-converge {0} (<-well-founded (length (∞-nodes 0)))
+  iter-converge : ∃ λ T → ∀ t → syncIter x₀ T ≈ syncIter x₀ (T +ℕ t)
+  iter-converge with ∞-nodes-converge {0} (<-wellFounded (length (∞-nodes 0)))
   ... | T∞ , ∞-conv = iter-fixed-point (T∞ , ∞-conv) (≤ℕ-refl)
-                      (<-well-founded (score T∞))
+                      (<-wellFounded (score T∞))
 
   start : Start lzero
   start = record {
@@ -268,15 +267,15 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Convergence {n}(𝕤 : Sche
   syncCond = record {
     start           = start ;
     poset           = poset ;
-    f-monotone      = f-monotone ;
+    F-monotone      = F-monotone ;
     iter-decreasing = iter-decreasing ;
     iter-converge   = iter-converge 
     }
 
-  open ProofProp syncCond hiding (ξ)
+  open import RoutingLib.Asynchronous.Propositions.UresinDubois3 all-pairs-parallelisation syncCond using (aco; x₀∈D[0])
 
   convergence-time : 𝕋
-  convergence-time = proj₁ (async-converge aco 𝕤 x₀∈D0)
+  convergence-time = proj₁ (async-converge aco 𝕤 x₀∈D[0])
 
   convergence-state : Matrix
-  convergence-state = ξ aco 𝕤 x₀∈D0
+  convergence-state = ξ aco 𝕤 x₀∈D[0]

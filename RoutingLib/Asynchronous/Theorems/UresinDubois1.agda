@@ -1,150 +1,105 @@
-open import Data.Nat
-  using (ℕ; _+_; _≤_; zero; suc; _<_; _≟_; s≤s; z≤n; _∸_; _≤?_; pred)
-open import Data.Fin
-  using (Fin)
-open import Data.Fin.Subset using () renaming (_∈_ to _∈ₛ_; _∉_ to _∉ₛ_)
-open import Relation.Binary
-  using (Setoid; Rel; Reflexive; Antisymmetric; Transitive; IsEquivalence; _⇒_)
-open import Data.Product
-  using (∃; _,_; proj₂; proj₁; _×_)
-open import Induction.Nat
-  using (<-well-founded)
-open import Relation.Unary
-  using (Pred; _∩_) renaming (_∈_ to _∈ᵤ_; _∉_ to _∉ᵤ_)
-open import Induction.WellFounded
-  using (Acc; acc)
+open import Data.Fin using (Fin)
+open import Data.Fin.Subset using () renaming (_∈_ to _∈ₛ_)
+open import Data.Fin.Dec using (_∈?_)
+open import Relation.Binary using (Setoid)
+open import Data.Product using (proj₂; proj₁)
+open import Induction.WellFounded using (Acc; acc)
+open import Induction.Nat using (<-wellFounded)
+open import Data.Nat using (ℕ; _+_; _≤_; zero; suc; _<_; _≟_; s≤s; z≤n; _∸_)
 open import Data.Nat.Properties
-  using (≤-trans; ≤-reflexive; +-identityʳ; m≤m+n; <⇒≤;
-        <⇒≤pred; ≤+≢⇒<; m+n∸m≡n; ≤-antisym; pred-mono; +-suc; ≤-refl)
-open import Relation.Binary.PropositionalEquality
-  using (cong₂; subst; _≡_; _≢_; cong; refl) renaming (sym to ≡sym; trans to ≡trans)
-open import Data.Fin.Dec
-  using (_∈?_)
-open import Relation.Nullary
-  using (yes; no; ¬_)
-open import Relation.Nullary.Negation
-  using (contradiction)
+  using (≤-trans; +-identityʳ; m≤m+n; <⇒≱; module ≤-Reasoning;
+        <⇒≤pred; ≤+≢⇒<; m+n∸m≡n; ≤-antisym; +-suc; ≤-refl; n≤1+n)
+open import Relation.Binary.PropositionalEquality using (subst; cong; refl; sym; trans)
+open import Relation.Nullary using (yes; no; ¬_)
+open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using () renaming (_∈_ to _∈ᵤ_)
-open import Data.Fin.Subset
-  using () renaming (_∈_ to _∈ₛ_)
-open import Function
-  using (_∘_)
-  
-open Setoid
-  using (Carrier)
-open Data.Nat.Properties.≤-Reasoning
-
-open import RoutingLib.Asynchronous.Schedule using (Schedule; 𝕋)
+ 
+open import RoutingLib.Asynchronous.Schedule
 open import RoutingLib.Asynchronous using (Parallelisation; IsAsynchronouslySafe)
-import RoutingLib.Asynchronous.Schedule.Times as Times
-import RoutingLib.Asynchronous.Schedule.Times.Properties as TimesProperties
 open import RoutingLib.Asynchronous.Theorems.Core using (TotalACO; ACO)
 
 module RoutingLib.Asynchronous.Theorems.UresinDubois1
-  {a ℓ n} {S : Fin n → Setoid a ℓ} (𝕡 : Parallelisation S) where
+  {a ℓ n p} {𝕊ᵢ : Fin n → Setoid a ℓ} (𝓟 : Parallelisation 𝕊ᵢ)
+  (𝓟𝓢 : PseudoperiodicSchedule n) (aco : ACO 𝓟 p) where
 
-  open Parallelisation 𝕡
+  open Parallelisation 𝓟
+  open PseudoperiodicSchedule 𝓟𝓢
+  open ACO aco
 
-  module _ {p} {x₀ : M} (aco : ACO 𝕡 p) (𝕤 : Schedule n) (x₀∈D₀ : x₀ ∈ (ACO.D aco 0)) where
-    open ACO aco
+  β-decreasing : ∀ {t} i j → 1 ≤ t → β t i j ≤ t
+  β-decreasing i j (s≤s z≤n) = ≤-trans (causality _ i j) (n≤1+n _)
 
-    open Schedule 𝕤
-    open Times 𝕤
-    open TimesProperties 𝕤
+  τ[1+K]-expired : ∀ {t K i j} → τ (suc K) i ≤ t → τ K j ≤ β t i j
+  τ[1+K]-expired {t} {K} {i} {j} τ[1+K]≤t = begin
+    τ K j                               ≤⟨ τ-expired K (t ∸ φ (suc K)) i j ⟩
+    β (φ (suc K) + (t ∸ φ (suc K))) i j ≡⟨ cong (λ x → β x i j) (m+n∸m≡n (≤-trans (τ-after-φ (suc K) i) τ[1+K]≤t)) ⟩
+    β t                             i j ∎
+    where open ≤-Reasoning
 
-    ϕsK≤t⇒τK≤βt : ∀ {t K i j} → ϕ (suc K) ≤ t → τ K j ≤ β t i j
-    ϕsK≤t⇒τK≤βt {t} {K} {i} {j} ϕsK≤t = subst (τ K j ≤_)
-          (cong (λ x → β x i j) (m+n∸m≡n ϕsK≤t))
-          (proj₂ (ϕ≤τ≤βϕs+t K i j (t ∸ (ϕ (suc K)))))
-    -- Extract the fixed point
+  0<τ[1+K] : ∀ {K i} → 0 < τ (suc K) i
+  0<τ[1+K] {K} {i} = begin
+    1            ≤⟨ s≤s z≤n ⟩
+    suc K        ≤⟨ φ-increasing (suc K) ⟩
+    φ (suc K)    ≤⟨ τ-after-φ (suc K) i ⟩
+    τ (suc K) i  ∎
+    where open ≤-Reasoning
 
+
+
+
+
+
+  module _ {x₀ : S} (x₀∈D₀ : x₀ ∈ D 0) where
+    
+    async[t]'∈D₀ : ∀ {t} (accₜ : Acc _<_ t) → asyncIter' 𝓢 x₀ accₜ ∈ D 0
+    async[t]'∈D₀ {zero}   _          i = x₀∈D₀ i
+    async[t]'∈D₀ {suc t}  (acc rec)  i with i ∈? α (suc t)
+    ... | yes i∈α = D-decreasing 0 (F-monotonic 0 (λ j →
+          async[t]'∈D₀ (rec (β (suc t) i j) (s≤s (causality t i j))) j)) i
+    ... | no  i∉α = async[t]'∈D₀ (rec t (s≤s ≤-refl)) i
+
+    τ-stability' : ∀ {t} (accₜ : Acc _<_ t) → ∀ K i → τ K i ≤ t →
+                   asyncIter' 𝓢 x₀ accₜ i ∈ᵤ D K i
+    τ-stability' {_}      accₜ       zero     i  _      = async[t]'∈D₀ accₜ i
+    τ-stability' {zero}   _          (suc K)  i  τ≤0    = contradiction τ≤0 (<⇒≱ 0<τ[1+K])
+    τ-stability' {suc t}  (acc rec)  (suc K)  i  τ≤1+t  with i ∈? α (suc t)
+    ... | yes i∈α = F-monotonic K (λ j → τ-stability' _ K j (τ[1+K]-expired τ≤1+t)) i
+    ... | no  i∉α with τ (suc K) i ≟ suc t
+    ...   | no  τ≢1+t = τ-stability' (rec t ≤-refl) (suc K) i (<⇒≤pred (≤+≢⇒< τ≤1+t τ≢1+t))
+    ...   | yes τ≡1+t = contradiction (subst (i ∈ₛ_) (cong α τ≡1+t) (τ-active (suc K) i)) i∉α
+
+    τ-stability : ∀ t K i → τ K i ≤ t → asyncIter 𝓢 x₀ t i ∈ᵤ D K i
+    τ-stability t K i τK≤k = τ-stability' (<-wellFounded t) K i τK≤k
+
+
+    -- Theorem 1
+    
     T : 𝕋
     T = proj₁ D-finish
 
-    ξ : M
+    ξ : S
     ξ = proj₁ (proj₂ D-finish)
 
-    D-T+K≡ξ : ∀ K → IsSingleton ξ (D (T + K))
-    D-T+K≡ξ = proj₂ (proj₂ D-finish)
-
-
-    async'ₜ∈D₀ : ∀ {t} (accₜ : Acc _<_ t) → async-iter' 𝕤 x₀ accₜ ∈ D 0
-    async'ₜ∈D₀ {zero}  _ = x₀∈D₀
-    async'ₜ∈D₀ {suc t} (acc rs) i with i ∈? α (suc t)
-    ... | yes i∈α = D-decreasing 0 (f-monotonic 0 (λ j →
-          async'ₜ∈D₀ (rs (β (suc t) i j) (s≤s (causality t i j))) j)) i
-    ... | no  i∉α = async'ₜ∈D₀ (rs t (s≤s ≤-refl)) i
-
-    -- Case lemmas
+    D[T]≈⦃ξ⦄ : ∀ {s} → s ∈ D T → s ≈ ξ
+    D[T]≈⦃ξ⦄ {s} s∈D[T] rewrite sym (+-identityʳ T) = ≈-sym (proj₂ (proj₂ (proj₂ D-finish) 0) s s∈D[T])
     
-    lemma₁ : (acc₀ : Acc _<_ 0) → ∀ K i → τ K i ≤ zero → async-iter' 𝕤 x₀ acc₀ i ∈ᵤ D K i
-    lemma₁ _ K i τ≤0 = subst (x₀ i ∈ᵤ_) (cong (λ k → D k i) 0≡k) (x₀∈D₀ i)
-      where
-      0≡k : 0 ≡ K
-      0≡k = (≤-antisym z≤n (subst (K ≤_) (≤-antisym τ≤0 z≤n) (τ-inc K i)))
+    tᶜ : 𝕋
+    tᶜ = φ (suc T)
 
+    async[tᶜ]∈D[T] : ∀ t → asyncIter 𝓢 x₀ (tᶜ + t) ∈ D T
+    async[tᶜ]∈D[T] t j = τ-stability (tᶜ + t) T j (begin
+      τ T j           ≤⟨ τ-expired T 0 j j ⟩
+      β (tᶜ + 0) j j  ≡⟨ cong (λ v → β v j j) (+-identityʳ tᶜ) ⟩
+      β tᶜ j j        ≤⟨ β-decreasing j j (≤-trans (s≤s z≤n) (φ-increasing (suc T))) ⟩
+      tᶜ              ≤⟨ m≤m+n tᶜ t ⟩
+      tᶜ + t          ∎)
+      where open ≤-Reasoning
 
-    τK≤t⇒xₜ'∈DK : ∀ {t} (accₜ : Acc _<_ t) → ∀ K i → τ K i ≤ t → async-iter' 𝕤 x₀ accₜ i ∈ᵤ D K i
-    τK≤t⇒xₜ'∈DK {zero}  acc₀ K i τ≤0 = lemma₁ acc₀ K i τ≤0
-    τK≤t⇒xₜ'∈DK {suc t} (acc rs) K i τ≤st with i ∈? α (suc t)
-    ...  | no  i∉α with τ K i ≟ suc t
-    ...    | no  τ≢st = τK≤t⇒xₜ'∈DK (rs t ≤-refl) K i (<⇒≤pred (≤+≢⇒< τ≤st τ≢st))
-    τK≤t⇒xₜ'∈DK {suc t} (acc rs) zero i τ≤st | no i∉α | yes τ≡st =
-      async'ₜ∈D₀ (rs t (s≤s (≤-refl))) i
-    τK≤t⇒xₜ'∈DK {suc t} (acc rs) (suc K) i τ≤st | no i∉α | yes τ≡st = contradiction (subst (i ∈ₛ_) (cong α τ≡st) (nextActive-active (ϕ (suc K)) i)) i∉α
-    τK≤t⇒xₜ'∈DK {suc t} (acc rs) (suc K) i τ≤st | yes i∈α = f-monotonic K async∈DK i
-               where
-               accβ : ∀ j → Acc _<_ (β (suc t) i j)
-               accβ j = (rs (β (suc t) i j) (s≤s (causality t i j)))
-              
-               async∈DK : ∀ j → async-iter' 𝕤 x₀ (accβ j) j ∈ᵤ D K j
-               async∈DK j = τK≤t⇒xₜ'∈DK (accβ j) K j (ϕsK≤t⇒τK≤βt (≤-trans (ϕ≤τ (suc K) i) τ≤st))
-    τK≤t⇒xₜ'∈DK {suc t} (acc rs) zero    i τ≤st | yes i∈α with T ≟ 0
-    ... | no  T≢0 = D-decreasing 0 (f-monotonic 0
-        (λ j → async'ₜ∈D₀ (rs (β (suc t) i j) (s≤s (causality t i j))) j)) i
-    ... | yes T≡0 = D-subst 0 {x = ξ}
-          {y = f[newState]}
-          (λ l → proj₂ (D-T+K≡ξ 1) f[newState] (subst (λ v → f[newState] ∈ D v) {x = 1} {y = T + 1}
-          (≡sym (cong (_+ 1) T≡0))
-          (f-monotonic 0 λ j → async'ₜ∈D₀ (rs (β (suc t) i j) (s≤s (causality t i j))) j)) l)
-          (subst (λ v → ξ ∈ D v) (cong (_+ 0) T≡0) (proj₁ (D-T+K≡ξ 0))) i
-          where
-          accβ : ∀ j → Acc _<_ (β (suc t) i j)
-          accβ j = rs (β (suc t) i j) (s≤s (causality t i j))
-          
-          newState : M
-          newState = (λ j → async-iter' 𝕤 x₀ (accβ j) j)
-          
-          f[newState] : M
-          f[newState] = f newState
-
- 
-    τK≤t⇒xₜ∈DK : ∀ t K i → τ K i ≤ t → async-iter 𝕤 x₀ t i ∈ᵤ D K i
-    τK≤t⇒xₜ∈DK t K i τK≤k = τK≤t⇒xₜ'∈DK (<-well-founded t) K i τK≤k
-
-    -- Theorem 1
-
-    Tᶜ : 𝕋
-    Tᶜ = ϕ (suc T)
-
-    accTᶜ+K : ∀ K → Acc _<_ (Tᶜ + K)
-    accTᶜ+K K = <-well-founded (Tᶜ + K)
-
-    τ≤Tᶜ+K : ∀ K j → τ (T + 0) j ≤ Tᶜ + K
-    τ≤Tᶜ+K K j = begin 
-      τ (T + 0) j ≡⟨ cong₂ τ (+-identityʳ T) refl ⟩
-      τ T j       ≤⟨ <⇒≤ (nextActiveϕ<ϕs T j) ⟩
-      Tᶜ          ≤⟨ m≤m+n Tᶜ K ⟩
-      Tᶜ + K      ∎
-
-    async∈DT : ∀ K → async-iter 𝕤 x₀ (Tᶜ + K) ∈ D (T + 0)
-    async∈DT K j = τK≤t⇒xₜ∈DK (Tᶜ + K) (T + 0) j (τ≤Tᶜ+K K j)
-
-    async-converge : ∃ λ T → ∀ K → async-iter 𝕤 x₀ (T + K) ≈ ξ
-    async-converge = Tᶜ ,
-      (λ K → ≈-sym (proj₂ (D-T+K≡ξ 0) (async-iter 𝕤 x₀ (Tᶜ + K)) (async∈DT K)))
-
-
+    async-converge : ∀ K → asyncIter 𝓢 x₀ (tᶜ + K) ≈ ξ
+    async-converge K = D[T]≈⦃ξ⦄ (async[tᶜ]∈D[T] K)
+    
+      -- (subst (λ v → asyncIter 𝓢 x₀ (Tᶜ + K) ∈ D v) (sym (+-identityʳ T)) (async∈D[T] K)))
+{-
   module _ {p} (totalACO : TotalACO 𝕡 p) where
 
     open TotalACO totalACO
@@ -154,3 +109,4 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1
       { m*         = proj₁ (proj₂ D-finish)
       ; m*-reached = λ 𝕤 X → async-converge aco 𝕤 (total X)
       }
+-}

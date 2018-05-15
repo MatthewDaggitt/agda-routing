@@ -30,7 +30,7 @@ open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Prelude as Prelude
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step1_NodeSets as Step1_NodeSets
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step2_ConvergedSubtree as Step2_ConvergedSubtree
-import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step3_EdgeSets as Step3_EdgeSets
+import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step3_DangerousNodes as Step3_DangerousNodes
 open IncreasingPathAlgebra using (Route)
 
 module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step4_InductiveStep
@@ -48,7 +48,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step4_Induc
   open Notation X j
   open Step1_NodeSets algebra X j
   open Step2_ConvergedSubtree algebra X j t-1 j∈F F-nonfull F-fixed
-  open Step3_EdgeSets algebra X j t-1 j∈F F-nonfull F-fixed
+  open Step3_DangerousNodes algebra X j t-1 j∈F F-nonfull F-fixed
   
   --------------------------------------------------------------------------
   -- Some lemmas
@@ -57,12 +57,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step4_Induc
 
     t : ℕ
     t = suc t-1
-    
-    lemma₃ : ∀ s {e} → eₘᵢₙ ≤[ t + (n-1 + s) ] e → eₘᵢₙ ≤[ t + n-1 + s ] e
-    lemma₃ s {e} eₘᵢₙ≤e = subst (eₘᵢₙ ≤[_] e) (sym (+-assoc t n-1 s)) eₘᵢₙ≤e
 
-    
-      
   ------------------------------------------------------------------------
   -- Therefore at time (t + n) there is no more dangerous junk
 
@@ -76,21 +71,25 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step4_Induc
     where open POR ≤₊-poset
   ... | inj₁ (k , σXᵢⱼ≈AᵢₖXₖⱼ) with eₘᵢₙ ≤[ t + (n-1 + s) ]? (iₘᵢₙ , k)
   ...   | yes eₘᵢₙ≤e = begin
-    A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + n-1 + s)   X kₘᵢₙ j ≤⟨ lemma₃ s eₘᵢₙ≤e ⟩
-    A iₘᵢₙ k    ▷ σ^ (t + n-1 + s)   X k   j ≈⟨ ≈-sym σXᵢⱼ≈AᵢₖXₖⱼ ⟩
-    σ^ (suc (t + n-1 + s)) X iₘᵢₙ j          ∎
+    A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + n-1 + s)   X kₘᵢₙ j ≈⟨ {!!} ⟩
+    A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + (n-1 + s)) X kₘᵢₙ j ≤⟨ eₘᵢₙ≤e ⟩
+    A iₘᵢₙ k    ▷ σ^ (t + (n-1 + s)) X k    j ≈⟨ {!!} ⟩
+    A iₘᵢₙ k    ▷ σ^ (t + n-1 + s)   X k    j ≈⟨ ≈-sym σXᵢⱼ≈AᵢₖXₖⱼ ⟩
+    σ^ (suc (t + n-1 + s)) X iₘᵢₙ j           ∎
     where open POR ≤₊-poset
-  ...   | no  eₘᵢₙ≰e with k ∈? F | Real? (t + (n-1 + s)) k
-  ...     | yes  k∈F | _       = contradiction (eₘᵢₙ-isMinₜ₊ₛ (iₘᵢₙ∉F , k∈F) (n-1 + s)) eₘᵢₙ≰e
-  ...     | no   k∉F | yes k∈R = contradiction (∈Real (n-1 + s) iₘᵢₙ k∈R k∉F ≈ₚ-refl) eₘᵢₙ≰e
-  ...     | no   _   | no  k∉R = contradiction
+  ...   | no  eₘᵢₙ≰e with Real? (t + (n-1 + s)) k
+  ...     | no  k∉R = contradiction
     (junk-length (n-1 + s) (k∉R , (iₘᵢₙ , ≰₊⇒>₊ eₘᵢₙ≰e)))
     (<⇒≱ (<-transˡ (lengthₑ<n (t + (n-1 + s)) (iₘᵢₙ , k)) (m≤m+n n s)))
+  ...     | yes k∈R with k ∈? F
+  ...       | yes  k∈F = contradiction (eₘᵢₙ-isMinₜ₊ₛ (iₘᵢₙ∉F , k∈F) (n-1 + s)) eₘᵢₙ≰e
+  ...       | no   k∉F = contradiction (∈Real (n-1 + s) iₘᵢₙ k∈R k∉F ≈ₚ-refl) eₘᵢₙ≰e
+
 
   iₘᵢₙ-pred : ∀ s → σ^ (t + n + s) X iₘᵢₙ j ≈ A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + (n-1 + s)) X kₘᵢₙ j
   iₘᵢₙ-pred s = begin
-    σ^ (t + n + s) X iₘᵢₙ j                  ≡⟨ cong (λ v → σ^ (v + s) X iₘᵢₙ j) (+-suc t n-1) ⟩
-    σ^ (suc t + n-1 + s) X iₘᵢₙ j            ≈⟨ ≤₊-antisym (σXᵢⱼ≤Aᵢₖ▷Xₖⱼ
+    σ^ (t + n + s) X iₘᵢₙ j                   ≡⟨ cong (λ v → σ^ (v + s) X iₘᵢₙ j) (+-suc t n-1) ⟩
+    σ^ (suc t + n-1 + s) X iₘᵢₙ j             ≈⟨ ≤₊-antisym (σXᵢⱼ≤Aᵢₖ▷Xₖⱼ
                                                 (σ^ (t + n-1 + s) X) iₘᵢₙ j kₘᵢₙ) (iₘᵢₙ-pred≤ s) ⟩
     A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + n-1 + s) X kₘᵢₙ j   ≡⟨ cong (λ v → A iₘᵢₙ kₘᵢₙ ▷ σ^ v X kₘᵢₙ j) (+-assoc t n-1 s) ⟩
     A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + (n-1 + s)) X kₘᵢₙ j ∎
@@ -122,8 +121,8 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step4_Induc
 
   iₘᵢₙ-pathFixed : Allₙ (Fixed (t + n)) (path (σ^ (t + n) X iₘᵢₙ j))
   iₘᵢₙ-pathFixed with path (σ^ (t + n) X iₘᵢₙ j) | inspect path (σ^ (t + n) X iₘᵢₙ j)
-  ... | invalid  | _ = invalid
-  ... | valid [] | _ = valid []
+  ... | invalid                     | _ = invalid
+  ... | valid []                    | _ = valid []
   ... | valid ((_ , _) ∷ p ∣ _ ∣ _) | [ p[σᵗ⁺ⁿ]≡iₘk∷p ]
     with alignPathExtension (σ^ (t + n-1) X) iₘᵢₙ j kₘᵢₙ (lemma₄ p[σᵗ⁺ⁿ]≡iₘk∷p)
   ...   | refl , refl , p[σᵗ⁺ⁿ⁻¹Xₖⱼ]≈p with Convergedₜ⊆Convergedₜ₊ₛ t n kₘᵢₙ∈Fₜ

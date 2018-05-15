@@ -29,7 +29,6 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step5_Proof
 
   open Prelude algebra
 
-
   module _ (X : RMatrix) (j : Fin n) where
 
     open Step1_NodeSets algebra X j

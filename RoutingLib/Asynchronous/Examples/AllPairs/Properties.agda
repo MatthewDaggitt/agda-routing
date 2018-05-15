@@ -11,9 +11,9 @@ open import RoutingLib.Data.NatInf
 open import RoutingLib.Data.NatInf.Properties
 open import RoutingLib.Data.Table.Properties using (min∞[s]≤min∞[t])
 
-module RoutingLib.Asynchronous.Applications.AllPairs.Properties (n : ℕ) where
+module RoutingLib.Asynchronous.Examples.AllPairs.Properties (n : ℕ) where
 
-  open import RoutingLib.Asynchronous.Applications.AllPairs n
+  open import RoutingLib.Asynchronous.Examples.AllPairs n
 
   -- path-cost properties
   path-cost-monotone : ∀ {g h} → g ≼ₘ h → ∀ i j k → path-cost g i j k ≤ path-cost h i j k
@@ -38,11 +38,7 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Properties (n : ℕ) where
   -- Row ordering relation is a preorder
   isPreorder : IsPreorder _≡ᵣ_ _≼_
   isPreorder = record {
-    isEquivalence = record {
-      refl = reflᵣ ;
-      sym = symᵣ ;
-      trans = transᵣ
-      } ;
+    isEquivalence = isEquivalenceᵣ;
     reflexive = ≼-reflexive ;
     trans = ≼-trans
     }
@@ -76,8 +72,8 @@ module RoutingLib.Asynchronous.Applications.AllPairs.Properties (n : ℕ) where
   transₘ : Transitive _≡ₘ_
   transₘ x≡y y≡z i = transᵣ (x≡y i) (y≡z i)
 
-  f-cong : ∀ {x y} → x ≡ₘ y → f x ≡ₘ f y
-  f-cong {x} {y} x≡y i j = ≤-antisym
+  F-cong : ∀ {x y} → x ≡ₘ y → F x ≡ₘ F y
+  F-cong {x} {y} x≡y i j = ≤-antisym
              (min∞[s]≤min∞[t] (x i j) {y i j} {n} {n}
                (inj₁ (≤-reflexive (x≡y i j)))
                λ k → inj₂ (k , path-cost-monotone (≼ₘ-reflexive x≡y) i j k))

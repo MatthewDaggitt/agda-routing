@@ -2,7 +2,7 @@ open import Algebra.FunctionProperties
 open import Data.List using (List; foldr)
 open import Data.List.Any using (Any; here; there)
 open import Data.List.All using (All; []; _∷_; lookup; map)
-open import Data.List.Any.Membership.Propositional using (_∈_; lose)
+open import Data.List.Any.Membership.Propositional using (_∈_; _⊆_; lose)
 open import Data.List.Properties using ()
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Function using (id; flip; _on_)
@@ -46,6 +46,36 @@ module RoutingLib.Data.List.Extrema
 
   ------------------------------------------------------------------------------
   -- Properties of argmin
+  
+  module _ {a} {A : Set a} {f : A → B} where
+  
+    f[argmin]≤v⁺ : ∀ {v} ⊤ xs → (f ⊤ ≤ v) ⊎ (Any (λ x → f x ≤ v) xs) →
+                  f (argmin f ⊤ xs) ≤ v
+    f[argmin]≤v⁺ = foldr-presᵒ (⊓-lift-presᵒ-≤v f)
+
+    f[argmin]<v⁺ : ∀ {v} ⊤ xs → (f ⊤ < v) ⊎ (Any (λ x → f x < v) xs) →
+                  f (argmin f ⊤ xs) < v
+    f[argmin]<v⁺ = foldr-presᵒ (⊓-lift-presᵒ-<v f)
+    
+    v≤f[argmin]⁺ : ∀ {v ⊤ xs} → v ≤ f ⊤ → All (λ x → v ≤ f x) xs →
+                  v ≤ f (argmin f ⊤ xs)
+    v≤f[argmin]⁺ {v} = foldr-presᵇ (⊓-lift-presᵇ-v≤ f)
+
+    v<f[argmin]⁺ : ∀ {v ⊤ xs} → v < f ⊤ → All (λ x → v < f x) xs →
+                  v < f (argmin f ⊤ xs)
+    v<f[argmin]⁺ {v} = foldr-presᵇ (⊓-lift-presᵇ-v< f)
+    
+    f[argmin]≤f[⊤] : ∀ ⊤ xs → f (argmin f ⊤ xs) ≤ f ⊤
+    f[argmin]≤f[⊤] ⊤ xs = f[argmin]≤v⁺ ⊤ xs (inj₁ refl)
+
+    postulate f[argmin]≤f[xs] : ∀ ⊤ xs → All (λ x → f (argmin f ⊤ xs) ≤ f x) xs
+    --f[argmin]≤f[xs] ⊤ xs = {!!}
+
+    f[argmin]≈f[v]⁺ : ∀ {v ⊤ xs} → v ∈ xs → All (λ x → f v ≤ f x) xs → f v ≤ f ⊤ →
+                   f (argmin f ⊤ xs) ≈ f v
+    f[argmin]≈f[v]⁺ v∈xs fv≤fxs fv≤f⊤ = antisym
+      (f[argmin]≤v⁺ _ _ (inj₂ (lose v∈xs refl)))
+      (v≤f[argmin]⁺ fv≤f⊤ fv≤fxs)
 
   module _ {a} {A : Set a} (f : A → B) where
 
@@ -58,47 +88,21 @@ module RoutingLib.Data.List.Extrema
     ... | inj₁ argmin≡⊤  = subst P (sym argmin≡⊤) p⊤
     ... | inj₂ argmin∈xs = lookup pxs argmin∈xs
 
-  module _ {a} {A : Set a} {f : A → B} where
-  
-    f[argmin]≤v : ∀ {v} ⊤ xs → (f ⊤ ≤ v) ⊎ (Any (λ x → f x ≤ v) xs) →
-                  f (argmin f ⊤ xs) ≤ v
-    f[argmin]≤v = foldr-presᵒ (⊓-lift-presᵒ-≤v f)
 
-    v≤f[argmin] : ∀ {v ⊤ xs} → v ≤ f ⊤ → All (λ x → v ≤ f x) xs →
-                  v ≤ f (argmin f ⊤ xs)
-    v≤f[argmin] {v} = foldr-presᵇ (⊓-lift-presᵇ-v≤ f)
-
-    f[argmin]≤f[⊤] : ∀ ⊤ xs → f (argmin f ⊤ xs) ≤ f ⊤
-    f[argmin]≤f[⊤] ⊤ xs = f[argmin]≤v ⊤ xs (inj₁ refl)
-
-    postulate f[argmin]≤f[xs] : ∀ ⊤ xs → All (λ x → f (argmin f ⊤ xs) ≤ f x) xs
-    --f[argmin]≤f[xs] ⊤ xs = {!!}
-
-    f[argmin]≈fv : ∀ {v ⊤ xs} → v ∈ xs → All (λ x → f v ≤ f x) xs → f v ≤ f ⊤ →
-                   f (argmin f ⊤ xs) ≈ f v
-    f[argmin]≈fv v∈xs fv≤fxs fv≤f⊤ = antisym
-      (f[argmin]≤v _ _ (inj₂ (lose v∈xs refl)))
-      (v≤f[argmin] fv≤f⊤ fv≤fxs)
     
     
-
-
-    f[argmin]<v : ∀ {v} ⊤ xs → (f ⊤ < v) ⊎ (Any (λ x → f x < v) xs) →
-                  f (argmin f ⊤ xs) < v
-    f[argmin]<v = foldr-presᵒ (⊓-lift-presᵒ-<v f)
     
-    v<f[argmin] : ∀ {v ⊤ xs} → v < f ⊤ → All (λ x → v < f x) xs →
-                  v < f (argmin f ⊤ xs)
-    v<f[argmin] {v} = foldr-presᵇ (⊓-lift-presᵇ-v< f)
+    
+    
 
   module _ {a} {A : Set a} where
   
-    argmin[xs]<argmin[ys] : ∀ {f : A → B} {g : A → B} ⊤₁ {⊤₂} xs {ys : List A} →
+    argmin[xs]<argmin[ys]⁺ : ∀ {f : A → B} {g : A → B} ⊤₁ {⊤₂} xs {ys : List A} →
                             (f ⊤₁ < g ⊤₂) ⊎ Any (λ x → f x < g ⊤₂) xs →
                             All (λ y → (f ⊤₁ < g y) ⊎ Any (λ x → f x < g y) xs) ys →
                             f (argmin f ⊤₁ xs) < g (argmin g ⊤₂ ys)
-    argmin[xs]<argmin[ys] ⊤₁ xs xs<⊤₂ xs<ys =
-      v<f[argmin] (f[argmin]<v ⊤₁ _ xs<⊤₂) (map (f[argmin]<v ⊤₁ xs) xs<ys)
+    argmin[xs]<argmin[ys]⁺ ⊤₁ xs xs<⊤₂ xs<ys =
+      v<f[argmin]⁺ (f[argmin]<v⁺ ⊤₁ _ xs<⊤₂) (map (f[argmin]<v⁺ ⊤₁ xs) xs<ys)
 
     
     
@@ -108,44 +112,29 @@ module RoutingLib.Data.List.Extrema
     min[xs]<min[ys]₁ {xs} {y ∷ ys} {⊤₁} {⊤₂} ⊤₁<⊤₂ (xs<y  ∷ pxs) with ⊓-sel y (min ⊤₂ ys)
     ... | inj₁ y⊓m≡y rewrite y⊓m≡y = min[xs]<x ⊤₁ xs<y
     ... | inj₂ y⊓m≡m rewrite y⊓m≡m = min[xs]<min[ys]₁ ⊤₁<⊤₂ pxs
-
-    
-
-    postulate f[argmin]≤x⁺ : ∀ {x} ⊤ xs  →
-                             Any (λ y → f y ≤ x) xs ⊎ (f ⊤ ≤ x) →
-                             f (argmin f ⊤ xs) ≤ x
-    {-
-    f[argmin]≤x⁺ {x} ⊤ xs (inj₁ xs≤x) = foldr-presᵒ {!!} ⊤ xs≤x  --n≤m⊎o≤m⇒n⊓o≤m
-    f[argmin]≤x⁺ {x} ⊤ xs (inj₂ ⊤≤x)  = foldr-presʳ {P = λ y → f y ≤ x} {!!} xs ⊤≤x
-    -}
-
-    
-    -- f[argmin]≤fxs ⊤ xs = {!!}
-
-    
-  {-
-    f[argmin]≤x⁻ : ∀ {f x xs} ⊤ →
-                     argmin f ⊤ xs ≤ x →
-                     Any (λ y → f y ≤ x) xs ⊎ (f ⊤ ≤ x)
-    f[argmin]≤x⁻ = {!!}
-    
-    argmin[xs]≤f⊤ : ∀ {f} ⊤ xs → argmin f ⊤ xs ≤ f ⊤
-    argmin[xs]≤f⊤ ⊤ xs = foldr-presʳ {!!} xs refl
-
-    x≤argmin[xs] : ∀ {x xs ⊤} → All (x ≤_) xs → x ≤ ⊤ → x ≤ min ⊤ xs
-    x≤argmin[xs] = foldr-presᵇ {!!} --m≤n×m≤o⇒m≤n⊓o
-
-  argmin[xs]<x : ∀ {x xs} ⊤ → Any (_< x) xs → min ⊤ xs < x
-  argmin[xs]<x = foldr-⊎pres n<m⊎o<m⇒n⊓o<m
-  
-  x<argmin[xs] : ∀ {x xs ⊤} → All (x <_) xs → x < ⊤ → x < min ⊤ xs
-  x<argmin[xs] = foldr-×pres m≤n×m≤o⇒m≤n⊓o
-  -}
   -}
   
   ------------------------------------------------------------------------------
   -- Properties of argmax
-  
+
+  module _ {a} {A : Set a} {f : A → B} where
+  {-
+    f[argmax]≤v⁺ : ∀ {v} ⊤ xs → v ≤ f ⊤ → All (λ x → v ≤ f x) xs →
+                  f (argmax f ⊤ xs) ≤ v
+    f[argmax]≤v⁺ = foldr-presᵇ (⊔-lift-presᵒ-v≤ f)
+
+    f[argmax]<v⁺ : ∀ {v} ⊤ xs → v < f ⊤ → All (λ x → v < f x) xs →
+                  f (argmax f ⊤ xs) < v
+    f[argmax]<v⁺ = foldr-presᵒ (⊓-lift-presᵒ-<v f)
+    
+    v≤f[argmax]⁺ : ∀ {v ⊤ xs} → (f ⊤ ≤ v) ⊎ (Any (λ x → f x ≤ v) xs) →
+                  v ≤ f (argmax f ⊤ xs)
+    v≤f[argmax]⁺ {v} = foldr-presᵒ (⊓-lift-presᵒ-≤v f)
+
+    v<f[argmax]⁺ : ∀ {v ⊤ xs} → (f ⊤ < v) ⊎ (Any (λ x → f x < v) xs) →
+                  v < f (argmax f ⊤ xs)
+    v<f[argmax]⁺ {v} = foldr-presᵇ (⊓-lift-presᵇ-v< f)
+    -}
   module _ {a} {A : Set a} {f : A → B} where
 
     argmax-sel : ∀ ⊤ xs → (argmax f ⊤ xs ≡ ⊤) ⊎ (argmax f ⊤ xs ∈ xs)
@@ -163,20 +152,20 @@ module RoutingLib.Data.List.Extrema
 
   module _ {a} {A : Set a} where
   
-    min≤v : ∀ {v} ⊤ xs → ⊤ ≤ v ⊎ Any (_≤ v) xs → min ⊤ xs ≤ v
-    min≤v = f[argmin]≤v
+    min≤v⁺ : ∀ {v} ⊤ xs → ⊤ ≤ v ⊎ Any (_≤ v) xs → min ⊤ xs ≤ v
+    min≤v⁺ = f[argmin]≤v⁺
 
-    min<v : ∀ {v} ⊤ xs → ⊤ < v ⊎ Any (_< v) xs → min ⊤ xs < v
-    min<v = f[argmin]<v
+    min<v⁺ : ∀ {v} ⊤ xs → ⊤ < v ⊎ Any (_< v) xs → min ⊤ xs < v
+    min<v⁺ = f[argmin]<v⁺
 
-    v≤min : ∀ {v ⊤ xs} → v ≤ ⊤ → All (v ≤_) xs → v ≤ min ⊤ xs
-    v≤min = v≤f[argmin]
+    v≤min⁺ : ∀ {v ⊤ xs} → v ≤ ⊤ → All (v ≤_) xs → v ≤ min ⊤ xs
+    v≤min⁺ = v≤f[argmin]⁺
 
-    v<min : ∀ {v ⊤ xs} → v < ⊤ → All (v <_) xs → v < min ⊤ xs
-    v<min = v<f[argmin]
+    v<min⁺ : ∀ {v ⊤ xs} → v < ⊤ → All (v <_) xs → v < min ⊤ xs
+    v<min⁺ = v<f[argmin]⁺
      
-    min≈v : ∀ {v ⊤ xs} → v ∈ xs → All (v ≤_) xs → v ≤ ⊤ → min ⊤ xs ≈ v
-    min≈v = f[argmin]≈fv
+    min⁺≈v : ∀ {v ⊤ xs} → v ∈ xs → All (v ≤_) xs → v ≤ ⊤ → min ⊤ xs ≈ v
+    min⁺≈v = f[argmin]≈f[v]⁺
 
     min≤⊤ : ∀ ⊤ xs → min ⊤ xs ≤ ⊤
     min≤⊤ = f[argmin]≤f[⊤]
@@ -198,38 +187,32 @@ module RoutingLib.Data.List.Extrema
     min[xs]<min[ys]₃ {_} {y ∷ ys} ⊤₁ {⊤₂} xs<⊤₂ (xs<y ∷ pys) with ⊓-sel y (min ⊤₂ ys)
     ... | inj₁ y⊓m≡y rewrite y⊓m≡y = min[xs]<x ⊤₁ xs<y
     ... | inj₂ y⊓m≡m rewrite y⊓m≡m = min[xs]<min[ys]₃ ⊤₁ xs<⊤₂ pys
-  
+-}
+
   ------------------------------------------------------------------------------
   -- Properties of max
 
-  max[xs]≤x : ∀ {x xs ⊥} → All (_≤ x) xs → ⊥ ≤ x → max ⊥ xs ≤ x
-  max[xs]≤x = foldr-presᵇ n≤m×o≤m⇒n⊔o≤m
+  postulate max≤v⁺ : ∀ {v xs ⊥} → All (_≤ v) xs → ⊥ ≤ v → max ⊥ xs ≤ v
+  -- max[xs]≤v⁺ = {!f[argmax]≤v ?!}
 
-  max[xs]<x : ∀ {x xs ⊥} → All (_< x) xs → ⊥ < x → max ⊥ xs < x
-  max[xs]<x = foldr-presᵇ n≤m×o≤m⇒n⊔o≤m
-
-  x≤max[xs] : ∀ {x xs} ⊥ → Any (x ≤_) xs → x ≤ max ⊥ xs
-  x≤max[xs] = foldr-presᵒ m≤n⊎m≤o⇒m≤n⊔o
+  postulate max<v⁺ : ∀ {v xs ⊥} → All (_< v) xs → ⊥ < v → max ⊥ xs < v
+  -- ymax[xs]<v⁺ = {!!}
   
-  x<max[xs] : ∀ {x xs} ⊥ → Any (x <_) xs → x < max ⊥ xs
-  x<max[xs] = foldr-presᵒ m≤n⊎m≤o⇒m≤n⊔o
-
-  ⊥≤max[xs] : ∀ ⊥ xs → ⊥ ≤ max ⊥ xs
-  ⊥≤max[xs] ⊥ xs = foldr-presʳ m≤o⇒m≤n⊔o xs ≤-refl
+  postulate v≤max⁺ : ∀ {v xs} ⊥ → Any (v ≤_) xs → v ≤ max ⊥ xs
+  -- v≤max[xs]⁺ = {!!}
   
-  max[xs]≡x : ∀ {x xs ⊥} → x ∈ xs → All (_≤ x) xs → ⊥ ≤ x → max ⊥ xs ≡ x
-  max[xs]≡x x∈xs xs≤x ⊥≤x = ≤-antisym (max[xs]≤x xs≤x ⊥≤x) (x≤max[xs] _ (lose x∈xs ≤-refl))
+  postulate v<max⁺ : ∀ {v xs} ⊥ → Any (v <_) xs → v < max ⊥ xs
+  -- v<max[xs]⁺ = {!!}
   
-  max[xs]∈xs : ∀ {⊥ xs} → max ⊥ xs ≢ ⊥ → max ⊥ xs ∈ xs
-  max[xs]∈xs {⊥} {[]}     ⊥≢⊥ = contradiction refl ⊥≢⊥
-  max[xs]∈xs {⊥} {x ∷ xs} m≢⊥ with ⊔-sel x (max ⊥ xs)
-  ... | inj₁ x⊔r≡x rewrite x⊔r≡x = here refl
-  ... | inj₂ x⊔r≡r rewrite x⊔r≡r = there (max[xs]∈xs m≢⊥)
+  postulate ⊥≤max : ∀ ⊥ xs → ⊥ ≤ max ⊥ xs
+  -- ⊥≤max[xs] = {!!}
 
--}
+  postulate max≤max⁺ : ∀ ⊥₁ {⊥₂} {xs} {ys} → ⊥₁ ≤ ⊥₂ ⊎ Any (⊥₁ ≤_) ys →
+                       All (λ x → x ≤ ⊥₂ ⊎ Any (x ≤_) ys) xs → max ⊥₁ xs ≤ max ⊥₂ ys
+                
+  postulate max-mono-⊆ : ∀ {⊥₁} {⊥₂} {xs ys} → ⊥₁ ≤ ⊥₂ → xs ⊆ ys → max ⊥₁ xs ≤ max ⊥₂ ys
 
-
-
+  
 
 
 {-

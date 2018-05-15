@@ -2,7 +2,7 @@ open import Level using (Level; _⊔_) renaming (zero to lzero; suc to lsuc)
 open import Data.Fin using (Fin)
 open import Data.Nat using (ℕ; zero; suc; _+_; _<_)
 open import Data.Product using (∃; ∃₂)
-open import Relation.Binary using (Rel; Setoid; Decidable; _Preserves_⟶_; IsDecEquivalence; DecSetoid)
+open import Relation.Binary using (Rel; Setoid; Decidable; _Preserves_⟶_)
 
 open import RoutingLib.Asynchronous
 open import RoutingLib.Data.Nat.Properties using (ℕₛ)
@@ -12,11 +12,11 @@ open import RoutingLib.Function.Image using (FiniteImage)
 open import RoutingLib.Function.Metric using (IsUltrametric)
 import RoutingLib.Function.Metric.FixedPoint as FixedPoints
 
-module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {S : Table (Setoid a ℓ) n}
-                                        (P : Parallelisation S) where
+module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {𝕊ᵢ : Table (Setoid a ℓ) n}
+                                        (P : Parallelisation 𝕊ᵢ) where
 
   open Parallelisation P
-  open import RoutingLib.Function.Metric M-setoid
+  open import RoutingLib.Function.Metric 𝕊
     using (Bounded; _StrContrOnOrbitsOver_; _StrContrOnFixedPointOver_)
 
   -----------------------------------------
@@ -26,20 +26,22 @@ module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {S : Table (Setoid a ℓ)
   -- as defined by Üresin and Dubois
   record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
     field
-      D            : ℕ → Pred p
-      D-subst      : ∀ K {x y} → x ≈ y → x ∈ D K → y ∈ D K
+      D            : ℕ → ∀ i → Sᵢ i → Set p
+      -- D-subst      : ∀ K {x y} → x ≈ y → x ∈ D K → y ∈ D K
       D-decreasing : ∀ K → D (suc K) ⊆ D K
       D-finish     : ∃₂ λ T ξ → ∀ K → IsSingleton ξ (D (T + K))
-      f-monotonic  : ∀ K {t} → t ∈ D K → f t ∈ D (suc K)
+      F-monotonic  : ∀ K {t} → t ∈ D K → F t ∈ D (suc K)
 
   -- A version of ACO where the first box contains every element
   record TotalACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
     field
       aco   : ACO p
-      total : ∀ x → x ∈ ACO.D aco zero
+
     open ACO aco public
 
-
+    field
+      total : ∀ x → x ∈ D 0
+    
   ------------------------
   -- Ultrametric spaces --
   ------------------------
@@ -47,20 +49,20 @@ module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {S : Table (Setoid a ℓ)
   -- conditions as defined by Gurney
   record UltrametricConditions : Set (a ⊔ ℓ) where
     field
-      dᵢ                 : ∀ {i} → Mᵢ i → Mᵢ i → ℕ
+      dᵢ                 : ∀ {i} → Sᵢ i → Sᵢ i → ℕ
 
-    d : M → M → ℕ
+    d : S → S → ℕ
     d m n = max 0 (λ i → dᵢ {i} (m i) (n i))
 
     field
-      dᵢ-isUltrametric   : ∀ {i} → IsUltrametric (S i) dᵢ
-      f-strContrOrbits  : f StrContrOnOrbitsOver d
-      f-strContrOnFP    : f StrContrOnFixedPointOver d
+      dᵢ-isUltrametric  : ∀ {i} → IsUltrametric (𝕊ᵢ i) dᵢ
+      F-strContrOrbits  : F StrContrOnOrbitsOver d
+      F-strContrOnFP    : F StrContrOnFixedPointOver d
       d-bounded         : Bounded d
 
-      element : M
+      element : S
       _≟_     : Decidable _≈_
-      f-cong  : f Preserves _≈_ ⟶ _≈_
+      F-cong  : F Preserves _≈_ ⟶ _≈_
 
 
 
@@ -71,16 +73,12 @@ module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {S : Table (Setoid a ℓ)
   
   record Start p : Set (lsuc (a ⊔ ℓ ⊔ p)) where
     field
-      x₀ : M
+      x₀ : S
       D₀ : Pred p
       x₀∈D₀ : x₀ ∈ D₀
       D₀-subst : ∀ {x y} → x ≈ y → x ∈ D₀ → y ∈ D₀
-      D₀-closed : ∀ x → x ∈ D₀ → f x ∈ D₀
-
-  iter : M → ℕ → M
-  iter x₀ zero     = x₀
-  iter x₀ (suc K)  = f (iter x₀ K)
-
+      D₀-closed : ∀ x → x ∈ D₀ → F x ∈ D₀
+  
   record SynchronousConditions p : Set (lsuc (a ⊔ ℓ ⊔ p)) where
     field
       start : Start p
@@ -90,9 +88,9 @@ module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {S : Table (Setoid a ℓ)
     open M-poset poset
     
     field
-      f-monotone      : ∀ {x y} → x ∈ D₀ → y ∈ D₀ → x ≼ y → f x ≼ f y
-      iter-decreasing : ∀ K → iter x₀ (suc K) ≼ iter x₀ K
-      iter-converge   : ∃ λ T → ∀ t → iter x₀ T ≈ iter x₀ (T + t)
+      F-monotone      : ∀ {x y} → x ∈ D₀ → y ∈ D₀ → x ≼ y → F x ≼ F y
+      iter-decreasing : ∀ K → syncIter x₀ (suc K) ≼ syncIter x₀ K
+      iter-converge   : ∃ λ T → ∀ t → syncIter x₀ T ≈ syncIter x₀ (T + t)
       
   record FiniteConditions p : Set (lsuc (a ⊔ ℓ ⊔ p)) where
     field
@@ -105,6 +103,6 @@ module RoutingLib.Asynchronous.Theorems.Core {a ℓ n} {S : Table (Setoid a ℓ)
 
     field
       D₀-finite       : Finite-Pred D₀
-      f-nonexpansive  : ∀ {x} → x ∈ D₀ → f x ≼ x
-      f-monotone      : ∀ {x y} → x ∈ D₀ → y ∈ D₀ → x ≼ y → f x ≼ f y
-      f-cong          : ∀ {x y} → x ≈ y → f x ≈ f y
+      F-nonexpansive  : ∀ {x} → x ∈ D₀ → F x ≼ x
+      F-monotone      : ∀ {x y} → x ∈ D₀ → y ∈ D₀ → x ≼ y → F x ≼ F y
+      F-cong          : ∀ {x y} → x ≈ y → F x ≈ F y

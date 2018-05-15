@@ -1,3 +1,4 @@
+
 open import Level using (_⊔_) renaming (zero to lzero; suc to lsuc)
 open import Data.Fin using (Fin)
 open import Data.Fin.Dec using (_∈?_)
@@ -26,34 +27,35 @@ module RoutingLib.Asynchronous where
   -- Parallel function --
   -----------------------
   -- An operation σ that can be decomposed and carried out on n separate processors 
-  record Parallelisation {a ℓ n} (S : Table (Setoid a ℓ) n) : Set (lsuc a) where
+  record Parallelisation {a ℓ n} (𝕊ᵢ : Table (Setoid a ℓ) n) : Set (lsuc a) where
 
-    open IndexedTypes S public
+    open IndexedTypes 𝕊ᵢ public
+    open Schedule
     
     field
-      f      : M → M
+      F      : S → S
 
-    module _ (𝕤 : Schedule n) (x₀ : M) where
+    asyncIter' : Schedule n → S → ∀ {t} → Acc _<_ t → S
+    asyncIter' 𝓢 x[0] {zero}  _        i = x[0] i
+    asyncIter' 𝓢 x[0] {suc t} (acc rs) i with i ∈? α 𝓢 (suc t)
+    ... | yes _ = F (λ j → asyncIter' 𝓢 x[0] (rs (β 𝓢 (suc t) i j) (s≤s (causality 𝓢 t i j))) j) i
+    ... | no  _ = asyncIter' 𝓢 x[0] (rs t ≤-refl) i
 
-      open Schedule 𝕤
+    asyncIter : Schedule n → S → 𝕋 → S
+    asyncIter 𝓢 x[0] t = asyncIter' 𝓢 x[0] (<-wellFounded t)
 
-      async-iter' : ∀ {t} → Acc _<_ t → M
-      async-iter' {zero}  _        i = x₀ i
-      async-iter' {suc t} (acc rs) i with i ∈? α (suc t)
-      ... | yes _ = f (λ j → async-iter' (rs (β (suc t) i j) (s≤s (causality t i j))) j) i
-      ... | no  _ = async-iter' (rs t ≤-refl) i
-
-      async-iter : 𝕋 → M
-      async-iter t = async-iter' (<-wellFounded t)
+    syncIter : S → ℕ → S
+    syncIter x₀ zero     = x₀
+    syncIter x₀ (suc K)  = F (syncIter x₀ K)
 
 
 
   -- A record encapsulating the idea that p is a well behaved parallelisation
-  record IsAsynchronouslySafe {a ℓ n} {S : Fin n → Setoid a ℓ}
-                              (p : Parallelisation S) : Set (lsuc (a ⊔ ℓ)) where
+  record IsAsynchronouslySafe {a ℓ n} {T : Fin n → Setoid a ℓ}
+                              (p : Parallelisation T) : Set (lsuc (a ⊔ ℓ)) where
   
     open Parallelisation p
     
     field
-      m*         : M
-      m*-reached : ∀ s X → ∃ λ tᶜ → ∀ t → async-iter s X (tᶜ + t) ≈ m*
+      m*         : S
+      m*-reached : ∀ s X → ∃ λ tᶜ → ∀ t → asyncIter s X (tᶜ + t) ≈ m*

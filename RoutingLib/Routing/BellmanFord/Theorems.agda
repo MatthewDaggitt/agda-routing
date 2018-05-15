@@ -22,8 +22,8 @@ module Theorem1 {a b ℓ n} (algebra : FiniteStrictlyIncreasingRoutingAlgebra a 
 
   σ-ultrametricConditions : UltrametricConditions σ∥
   σ-ultrametricConditions = record
-    { dᵢ                = dₜ
-    ; dᵢ-isUltrametric  = dₜ-isUltrametric
+    { dᵢ               = dₜ
+    ; dᵢ-isUltrametric = dₜ-isUltrametric
     ; f-strContrOrbits = σ-strContr
     ; f-strContrOnFP   = σ-strContrOnFP
     ; f-cong           = σ-cong

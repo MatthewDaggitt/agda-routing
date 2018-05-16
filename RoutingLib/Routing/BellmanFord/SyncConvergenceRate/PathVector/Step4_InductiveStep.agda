@@ -71,9 +71,9 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step4_Induc
     where open POR ≤₊-poset
   ... | inj₁ (k , σXᵢⱼ≈AᵢₖXₖⱼ) with eₘᵢₙ ≤[ t + (n-1 + s) ]? (iₘᵢₙ , k)
   ...   | yes eₘᵢₙ≤e = begin
-    A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + n-1 + s)   X kₘᵢₙ j ≈⟨ {!!} ⟩
+    A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + n-1 + s)   X kₘᵢₙ j ≈⟨ ≈-reflexive (cong (λ v → A iₘᵢₙ kₘᵢₙ ▷ σ^ v X kₘᵢₙ j) (+-assoc t n-1 s)) ⟩
     A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + (n-1 + s)) X kₘᵢₙ j ≤⟨ eₘᵢₙ≤e ⟩
-    A iₘᵢₙ k    ▷ σ^ (t + (n-1 + s)) X k    j ≈⟨ {!!} ⟩
+    A iₘᵢₙ k    ▷ σ^ (t + (n-1 + s)) X k    j ≈⟨ ≈-reflexive (cong (λ v → A iₘᵢₙ k ▷ σ^ v X k j) (sym (+-assoc t n-1 s))) ⟩
     A iₘᵢₙ k    ▷ σ^ (t + n-1 + s)   X k    j ≈⟨ ≈-sym σXᵢⱼ≈AᵢₖXₖⱼ ⟩
     σ^ (suc (t + n-1 + s)) X iₘᵢₙ j           ∎
     where open POR ≤₊-poset

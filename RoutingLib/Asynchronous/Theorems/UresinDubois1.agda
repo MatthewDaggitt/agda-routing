@@ -58,18 +58,18 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1
           async[t]'∈D₀ (rec (β (suc t) i j) (s≤s (causality t i j))) j)) i
     ... | no  i∉α = async[t]'∈D₀ (rec t (s≤s ≤-refl)) i
 
-    τ-stability' : ∀ {t} (accₜ : Acc _<_ t) → ∀ K i → τ K i ≤ t →
+    τ-stability' : ∀ {t K i} (accₜ : Acc _<_ t) → τ K i ≤ t →
                    asyncIter' 𝓢 x₀ accₜ i ∈ᵤ D K i
-    τ-stability' {_}      accₜ       zero     i  _      = async[t]'∈D₀ accₜ i
-    τ-stability' {zero}   _          (suc K)  i  τ≤0    = contradiction τ≤0 (<⇒≱ 0<τ[1+K])
-    τ-stability' {suc t}  (acc rec)  (suc K)  i  τ≤1+t  with i ∈? α (suc t)
-    ... | yes i∈α = F-monotonic K (λ j → τ-stability' _ K j (τ[1+K]-expired τ≤1+t)) i
+    τ-stability' {_}      {zero}   {i} accₜ       _      = async[t]'∈D₀ accₜ i
+    τ-stability' {zero}   {suc K}  {i} _          τ≤0    = contradiction τ≤0 (<⇒≱ 0<τ[1+K])
+    τ-stability' {suc t}  {suc K}  {i} (acc rec)  τ≤1+t  with i ∈? α (suc t)
+    ... | yes _ = F-monotonic K (λ j → τ-stability' _ (τ[1+K]-expired τ≤1+t)) i
     ... | no  i∉α with τ (suc K) i ≟ suc t
-    ...   | no  τ≢1+t = τ-stability' (rec t ≤-refl) (suc K) i (<⇒≤pred (≤+≢⇒< τ≤1+t τ≢1+t))
+    ...   | no  τ≢1+t = τ-stability' _ (<⇒≤pred (≤+≢⇒< τ≤1+t τ≢1+t))
     ...   | yes τ≡1+t = contradiction (subst (i ∈ₛ_) (cong α τ≡1+t) (τ-active (suc K) i)) i∉α
 
-    τ-stability : ∀ t K i → τ K i ≤ t → asyncIter 𝓢 x₀ t i ∈ᵤ D K i
-    τ-stability t K i τK≤k = τ-stability' (<-wellFounded t) K i τK≤k
+    τ-stability : ∀ {t K i} → τ K i ≤ t → asyncIter 𝓢 x₀ t i ∈ᵤ D K i
+    τ-stability {t} = τ-stability' (<-wellFounded t)
 
 
     -- Theorem 1
@@ -85,20 +85,23 @@ module RoutingLib.Asynchronous.Theorems.UresinDubois1
     
     tᶜ : 𝕋
     tᶜ = φ (suc T)
+    
+    1≤tᶜ : 1 ≤ tᶜ
+    1≤tᶜ = ≤-trans (s≤s z≤n) (φ-increasing (suc T))
 
     async[tᶜ]∈D[T] : ∀ t → asyncIter 𝓢 x₀ (tᶜ + t) ∈ D T
-    async[tᶜ]∈D[T] t j = τ-stability (tᶜ + t) T j (begin
+    async[tᶜ]∈D[T] t j = τ-stability (begin
       τ T j           ≤⟨ τ-expired T 0 j j ⟩
       β (tᶜ + 0) j j  ≡⟨ cong (λ v → β v j j) (+-identityʳ tᶜ) ⟩
-      β tᶜ j j        ≤⟨ β-decreasing j j (≤-trans (s≤s z≤n) (φ-increasing (suc T))) ⟩
+      β tᶜ j j        ≤⟨ β-decreasing j j 1≤tᶜ ⟩
       tᶜ              ≤⟨ m≤m+n tᶜ t ⟩
       tᶜ + t          ∎)
       where open ≤-Reasoning
 
     async-converge : ∀ K → asyncIter 𝓢 x₀ (tᶜ + K) ≈ ξ
     async-converge K = D[T]≈⦃ξ⦄ (async[tᶜ]∈D[T] K)
-    
-      -- (subst (λ v → asyncIter 𝓢 x₀ (Tᶜ + K) ∈ D v) (sym (+-identityʳ T)) (async∈D[T] K)))
+
+
 {-
   module _ {p} (totalACO : TotalACO 𝕡 p) where
 

@@ -69,6 +69,6 @@ I i j with j ≟ᶠ i
 
 -- Parallelisation of algorithm
 σ∥ : Parallelisation (λ _ → ℝ𝕋ₛ)
-σ∥ = record { f = σ }
+σ∥ = record { F = σ }
 
-open Parallelisation σ∥ using () renaming (async-iter to δ) public
+open Parallelisation σ∥ using () renaming (asyncIter to δ) public

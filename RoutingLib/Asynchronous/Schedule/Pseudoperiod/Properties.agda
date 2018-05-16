@@ -57,10 +57,10 @@ module RoutingLib.Asynchronous.Schedule.Pseudoperiod.Properties {n} (𝓢 : Sche
   nextActive'-active t zero    {i} i∈α[t+1]  _       rewrite +-comm t 1 = i∈α[t+1]
   nextActive'-active t (suc k) {i} i∈α[t+1+k] (acc rs) with i ∈? α t
   ... | yes i∈α                         = i∈α
-  ... | no  i∉α rewrite +-suc t (suc k) = nextActive'-active (suc t) k i∈α[t+1+k] (rs k ≤-refl)
+  ... | no  i∉α rewrite +-suc t (suc k) = nextActive'-active (suc t) k i∈α[t+1+k] _
   
   nextActive'-increasing : ∀ t k {i} i∈α[t+1+k] (acc : Acc _<_ k) →
-                    t ≤ nextActive' t k {i} i∈α[t+1+k] acc
+                           t ≤ nextActive' t k {i} i∈α[t+1+k] acc
   nextActive'-increasing t zero    {i} p _        = n≤1+n t
   nextActive'-increasing t (suc k) {i} p (acc rec) with i ∈? α t
   ... | yes i∈α                         = ≤-reflexive refl
@@ -165,10 +165,10 @@ module RoutingLib.Asynchronous.Schedule.Pseudoperiod.Properties {n} (𝓢 : Sche
     
   τ-expired : ∀ K t i j → τ K j ≤ β (φ (suc K) + t) i j
   τ-expired K t i j = expiry-expired (begin
-    expiry (nextActive (φ K) j)  ≤⟨ expiry-monotone (nextActive≤allActive (φ K) j) ⟩
-    expiry (allActive (φ K))     ≤⟨ n≤1+n _ ⟩
-    φ (suc K)                    ≤⟨ m≤m+n (φ (suc K)) t ⟩
-    φ (suc K) + t                ∎) i j
+    expiry (nextActive _ j)  ≤⟨ expiry-monotone (nextActive≤allActive (φ K) j) ⟩
+    expiry (allActive (φ K)) ≤⟨ n≤1+n _ ⟩
+    φ (suc K)                ≤⟨ m≤m+n (φ (suc K)) t ⟩
+    φ (suc K) + t            ∎) i j
 
   -- Every schedule is pseudoperiodic
   isPseudoperiodic : IsPseudoperiodic 𝓢

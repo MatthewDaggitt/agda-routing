@@ -15,19 +15,19 @@ open import RoutingLib.Asynchronous.Theorems.Core
 
 module RoutingLib.Asynchronous.Propositions.UresinDubois3
   {a ℓ n p}
-  {S : Table (Setoid a ℓ) n}
-  (𝕡 : Parallelisation S)
-  (syncConditions : SynchronousConditions 𝕡 p)
+  {𝕊ᵢ : Table (Setoid a ℓ) n}
+  (𝓟 : Parallelisation 𝕊ᵢ)
+  (syncConditions : SynchronousConditions 𝓟 p)
   where
 
-  open import RoutingLib.Data.Table.IndexedTypes S
-  open Parallelisation 𝕡 using (F; syncIter)
+  open import RoutingLib.Data.Table.IndexedTypes 𝕊ᵢ
+  open Parallelisation 𝓟 using (F; syncIter)
   open SynchronousConditions syncConditions
   open Start start
   open M-poset poset hiding (trans)
 
   -- Synchronous iterations
-  σ : ℕ → M
+  σ : ℕ → S
   σ = syncIter x₀
 
   σ-mono : ∀ {k t} → k ≤ t → σ t ≼ σ k
@@ -45,7 +45,7 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3
   T = proj₁ iter-converge
   
   -- Convergence state
-  ξ : M
+  ξ : S
   ξ = σ T
   
   T≤K⇒ξ≈σ[K] : ∀ {K} → T ≤ K → ξ ≈ σ K
@@ -53,7 +53,7 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3
     ξ               ≈⟨ proj₂ iter-converge (K ∸ T) ⟩
     σ (T + (K ∸ T)) ≡⟨ cong σ (m+n∸m≡n T≤K) ⟩
     σ K             ∎
-    where open EqReasoning 𝕄ₛ
+    where open EqReasoning 𝕊
 
   ξ≈F[ξ] : ξ ≈ F ξ
   ξ≈F[ξ] = begin
@@ -61,7 +61,7 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3
     σ (T + 1) ≡⟨ cong σ (+-comm T 1) ⟩
     σ (1 + T) ≡⟨⟩
     F ξ ∎
-    where open EqReasoning 𝕄ₛ
+    where open EqReasoning 𝕊
 
 
   -- Sequence of sets
@@ -70,13 +70,7 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3
 
   x₀∈D[0] : x₀ ∈ D 0
   x₀∈D[0] i = (σ-mono {0} {T} z≤n i , ≼ᵢ-refl) , x₀∈D₀ i
-    
-  D-subst : ∀ K {x y} → x ≈ y → x ∈ D K → y ∈ D K
-  D-subst K x≈y x∈DK i with proj₁ (x∈DK i)
-  ... | ξ≼x , x≼iterK =  (≼ᵢ-trans ξ≼x (≼ᵢ-reflexive (x≈y i))             ,
-                              ≼ᵢ-trans (≼ᵢ-reflexive (≈ᵢ-sym (x≈y i))) x≼iterK) ,
-                              D₀-subst x≈y (λ j → proj₂ (x∈DK j)) i
-
+  
   D-decreasing : ∀ K → D (suc K) ⊆ D K
   D-decreasing K x∈DK i with x∈DK i
   ... | ((ξ≼x , x≼iterK), x∈D₀) = (ξ≼x , ≼ᵢ-trans x≼iterK (iter-decreasing K i)) , x∈D₀
@@ -106,10 +100,9 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3
     t≼iterK : t ≼ σ K
     t≼iterK j = proj₂ (proj₁ (t∈DK j))
 
-  aco : ACO 𝕡 p
+  aco : ACO 𝓟 p
   aco = record
     { D            = D
-    ; D-subst      = D-subst
     ; D-decreasing = D-decreasing
     ; D-finish     = D-finish
     ; F-monotonic  = F-monotonic  

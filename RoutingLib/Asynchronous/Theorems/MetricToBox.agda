@@ -6,7 +6,7 @@ open import Data.Nat
   using (ℕ; _≤_; _<_; z≤n; s≤s; zero; suc; _+_; _∸_; _⊔_) renaming (_≟_ to _≟ℕ_)
 open import Data.Nat.Properties
   using (≤-decTotalOrder; <⇒≢; _<?_; ≤-refl; ≤-antisym; <-transʳ; ≤-trans;
-        n≤1+n; n∸m≤n; <⇒≤; ≮⇒≥; m≤m+n; ⊔-sel; <⇒≱; m∸[m∸n]≡n; m≤n⇒n⊔m≡n)
+        n≤1+n; n∸m≤n; <⇒≤; ≮⇒≥; m≤m+n; ⊔-sel; <⇒≱; m∸[m∸n]≡n; m≤n⇒n⊔m≡n; m≤n⇒m⊔n≡n)
 open import Data.List
   using (List; []; _∷_; length; upTo; applyUpTo; lookup)
 open import Data.List.Any
@@ -16,6 +16,7 @@ open import Data.Product using (∃; ∃₂; _,_; proj₁; proj₂)
 open import Data.Sum using (inj₁; inj₂)
 open import Relation.Binary using (Setoid; Decidable; IsDecEquivalence; DecSetoid)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; subst; cong; sym; trans; module ≡-Reasoning)
+import Relation.Binary.EqReasoning as EqReasoning
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Function using (_∘_)
@@ -51,8 +52,8 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
     -- Export and define some useful properties --
     ----------------------------------------------
     
-    decSetoid : DecSetoid _ _
-    decSetoid = record
+    𝕊? : DecSetoid _ _
+    𝕊? = record
       { Carrier          = S
       ; _≈_              = _≈_
       ; isDecEquivalence = record
@@ -90,10 +91,10 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
     ------------------------------
 
     x* : S
-    x* = FixedPoints.x* decSetoid d F-strContrOrbits element
+    x* = FixedPoints.x* 𝕊? d F-strContrOnOrbits element
 
     Fx*≈x* : F x* ≈ x*
-    Fx*≈x* = FixedPoints.x*-fixed decSetoid d F-strContrOrbits element
+    Fx*≈x* = FixedPoints.x*-fixed 𝕊? d F-strContrOnOrbits element
       
     x*-unique : ∀ {x} → F x ≈ x → x ≈ x*
     x*-unique {x} Fx≈x with x ≟ x*
@@ -210,8 +211,8 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
         d x* m          ∎
         where open ≡-Reasoning
       
-      r≡dx*m : ∀ m → ∃ λ k → r[ k ] ≡ d x* m
-      r≡dx*m m = r-lookup m , r-lookup-res m
+      ∃K:r[K]≡dx*m : ∀ m → ∃ λ k → r[ k ] ≡ d x* m
+      ∃K:r[K]≡dx*m m = r-lookup m , r-lookup-res m
 
 
 
@@ -228,28 +229,34 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
     D-decreasing : ∀ K → D (suc K) ⊆ D K
     D-decreasing K {m} m∈D₁₊ₖ i = begin
       dᵢ (x* i) (m i)  ≤⟨ m∈D₁₊ₖ i ⟩
-      r[ suc K ]      ≤⟨ r-mono-≤ (n≤1+n K) ⟩
-      r[ K ]          ∎
+      r[ suc K ]       ≤⟨ r-mono-≤ (n≤1+n K) ⟩
+      r[ K ]           ∎
       where open ≤-Reasoning
 
-    -- D is finishing
+    -- D(T + K) is the singleton set
     
     m∈D[T+K]⇒x*≈m : ∀ K m → m ∈ D (T + K) → x* ≈ m
     m∈D[T+K]⇒x*≈m K m m∈D[T+K] i = dᵢ≡0⇒x≈y (n≤0⇒n≡0 (begin
-      dᵢ (x* i) (m i)          ≤⟨ m∈D[T+K] i ⟩
-      r[ T + K ]              ≡⟨ r[T+K]≡r[T] K ⟩
-      r[ T ]                  ≡⟨ r[T]≡0 ⟩
-      0 ∎))
+      dᵢ (x* i) (m i)  ≤⟨ m∈D[T+K] i ⟩
+      r[ T + K ]       ≡⟨ r[T+K]≡r[T] K ⟩
+      r[ T ]           ≡⟨ r[T]≡0 ⟩
+      0                ∎))
       where open ≤-Reasoning
       
     x*∈D[T+K] : ∀ K → x* ∈ D (T + K)
-    x*∈D[T+K] K i = subst (_≤ r[ T + K ]) (sym (x≈y⇒dᵢ≡0 ≈ᵢ-refl)) z≤n
-
+    x*∈D[T+K] K i = begin
+      dᵢ (x* i) (x* i)  ≡⟨ x≈y⇒dᵢ≡0 ≈ᵢ-refl ⟩
+      0                 ≤⟨ z≤n ⟩
+      r[ T + K ]        ∎
+      where open ≤-Reasoning
+      
     D-finish : ∃₂ λ T ξ → ∀ K → IsSingleton ξ (D (T + K))
     D-finish = T , x* , λ K → (x*∈D[T+K] K , m∈D[T+K]⇒x*≈m K)
 
-    test : ∀ K (x : S) → d x* x < r[ K ] → x ∈ D (suc K)
-    test K x d[x*,x]<radiiᵢ[K] j with r≡dx*m x
+    -- F is monotonic
+
+    test : ∀ K x → d x* x < r[ K ] → x ∈ D (suc K)
+    test K x d[x*,x]<radiiᵢ[K] j with ∃K:r[K]≡dx*m x
     ... | (S , r[S]≡dx*m) = begin
       dᵢ (x* j) (x j) ≤⟨ dᵢ≤d x* x j ⟩
       d x* x          ≡⟨ sym r[S]≡dx*m ⟩
@@ -270,24 +277,20 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
       r[ suc K ]          ∎
       where open ≤-Reasoning
 
-
+      
     lemma1 : ∀ x → x ≉ x* → d x* x ≤ d x (F x)
     lemma1 x x≉x* with ⊔-sel (d x* (F x)) (d (F x) x)
-    ... | inj₁ left = contradiction tv (<⇒≱ (F-strContrOnFP Fx*≈x* x≉x*))
-      where
-      open ≤-Reasoning
-      
-      tv : d x* x ≤ d x* (F x)
-      tv = begin
-        d x* x                 ≤⟨ d-maxTriIneq x* (F x) x ⟩
-        d x* (F x) ⊔ d (F x) x ≡⟨ left ⟩
-        d x* (F x)             ∎
-      
     ... | inj₂ right = begin
       d x* x                 ≤⟨ d-maxTriIneq x* (F x) x ⟩
       d x* (F x) ⊔ d (F x) x ≡⟨ right ⟩
       d (F x) x              ≡⟨ d-sym (F x) x ⟩
       d x (F x)              ∎
+      where open ≤-Reasoning
+    ... | inj₁ left = contradiction (begin
+        d x* x                 ≤⟨ d-maxTriIneq x* (F x) x ⟩
+        d x* (F x) ⊔ d (F x) x ≡⟨ left ⟩
+        d x* (F x)             ∎)
+        (<⇒≱ (F-strContrOnFP Fx*≈x* x≉x*))
       where open ≤-Reasoning
       
     lemma2 : ∀ x → x ≉ x* → d x (F x) ≤ d x* x
@@ -300,44 +303,40 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
       
     lemma : ∀ x → d x* x ≡ d x (F x)
     lemma x with x ≟ x*
-    ... | yes x≈x* = d-cong (≈-sym x≈x*) (≈-trans (≈-trans x≈x* (≈-sym Fx*≈x*)) (F-cong (≈-sym x≈x*)))
     ... | no  x≉x* = ≤-antisym (lemma1 x x≉x*) (lemma2 x x≉x*)
-
+    ... | yes x≈x* = begin
+      d x* x       ≡⟨ d-cong ≈-refl x≈x* ⟩
+      d x* x*      ≡⟨ d-cong ≈-refl (≈-sym Fx*≈x*) ⟩
+      d x* (F x*)  ≡⟨ sym (d-cong x≈x* (F-cong x≈x*)) ⟩
+      d x  (F x)   ∎
+      where open ≡-Reasoning
 
     F-monotonic-x*≉ : ∀ {t} → t ≉ x* → ∀ {K} → t ∈ D K → F t ∈ D (suc K)
     F-monotonic-x*≉ {t} t≉x* {K} t∈D[K] i with max[t]∈t 0 (λ i → dᵢ (x* i) (t i))
     ... | inj₁ d[x*,t]≡0 = contradiction (≈-sym (d≡0⇒x≈y d[x*,t]≡0)) t≉x*
     ... | inj₂ (j , d[x*,t]≡dⱼ[x*ⱼ,tⱼ]) with F t ≟ t
-    ...   | yes ft≈t = contradiction (x*-unique ft≈t) t≉x*
-    ...   | no  ft≉t = test K (F t) (begin
-      d x*     (F t)           ≡⟨ lemma (F t) ⟩
-      d (F t)  (F (F t))       <⟨ F-strContrOrbits ft≉t ⟩
-      d t      (F t)           ≡⟨ sym (lemma t) ⟩
-      d x*     t               ≡⟨ d[x*,t]≡dⱼ[x*ⱼ,tⱼ] ⟩
-      dᵢ (x* j) (t j)          ≤⟨ t∈D[K] j ⟩
-      r[ K ]                   ∎) i
+    ...   | yes F[t]≈t = contradiction (x*-unique F[t]≈t) t≉x*
+    ...   | no  F[t]≉t = test K (F t) (begin
+      d x*     (F t)      ≡⟨ lemma (F t) ⟩
+      d (F t)  (F (F t))  <⟨ F-strContrOnOrbits F[t]≉t ⟩
+      d t      (F t)      ≡⟨ sym (lemma t) ⟩
+      d x*     t          ≡⟨ d[x*,t]≡dⱼ[x*ⱼ,tⱼ] ⟩
+      dᵢ (x* j) (t j)     ≤⟨ t∈D[K] j ⟩
+      r[ K ]              ∎) i
       where open ≤-Reasoning
-
 
     F-monotonic  : ∀ K {t} → t ∈ D K → F t ∈ D (suc K)
     F-monotonic K {t} with t ≟ x*
     ... | yes t≈x* = F-monotonic-x*≈ t≈x* {K}
     ... | no  t≉x* = F-monotonic-x*≉ t≉x* {K}
-      
-    D-subst : ∀ K {x y} → x ≈ y → x ∈ D K → y ∈ D K
-    D-subst K {x} {y} x≈y x∈D[K] i = begin
-      dᵢ (x* i) (y i)  ≡⟨ dᵢ-cong ≈ᵢ-refl (≈ᵢ-sym (x≈y i)) ⟩
-      dᵢ (x* i) (x i)  ≤⟨ x∈D[K] i ⟩
-      r[ K ]           ∎
-      where open ≤-Reasoning
 
-    total : ∀ x → x ∈ D zero
-    total x i with r≡dx*m x
+    x∈D[0] : ∀ x → x ∈ D 0
+    x∈D[0] x i with ∃K:r[K]≡dx*m x
     ... | (t , r[t]≡dx*m) = begin
       dᵢ (x* i) (x i) ≤⟨ dᵢ≤d x* x i ⟩
       d   x*     x    ≡⟨ sym r[t]≡dx*m ⟩
-      r[ t    ]       ≤⟨ r-mono-≤ z≤n ⟩
-      r[ zero ]       ∎
+      r[ t ]          ≤⟨ r-mono-≤ z≤n ⟩
+      r[ 0 ]          ∎
       where open ≤-Reasoning
       
     aco : ACO P _
@@ -346,11 +345,10 @@ module RoutingLib.Asynchronous.Theorems.MetricToBox
       ; D-decreasing = D-decreasing
       ; D-finish     = D-finish
       ; F-monotonic  = F-monotonic
-      ; D-subst      = D-subst
       }
 
     totalACO : TotalACO P _
     totalACO = record
       { aco   = aco
-      ; total = total
+      ; total = x∈D[0]
       }

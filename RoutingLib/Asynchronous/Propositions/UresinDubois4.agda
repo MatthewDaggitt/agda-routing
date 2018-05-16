@@ -25,14 +25,14 @@ import RoutingLib.Asynchronous.Propositions.UresinDubois3 as Prop3
 
 module RoutingLib.Asynchronous.Propositions.UresinDubois4
   {a ℓ n p}
-  {S : Table (Setoid a ℓ) n}
-  (𝕡 : Parallelisation S)
-  (finiteCond : FiniteConditions 𝕡 p)
+  {𝕊ᵢ : Table (Setoid a ℓ) n}
+  (𝓟 : Parallelisation 𝕊ᵢ)
+  (finiteCond : FiniteConditions 𝓟 p)
   where
 
-  open Parallelisation 𝕡 using (F; syncIter)
-  open import RoutingLib.Data.Table.IndexedTypes S
-  open Membership 𝕄ₛ using () renaming (_∈_ to _∈ₗ_; _⊆_ to _⊆ₗ_)
+  open Parallelisation 𝓟 using (F; syncIter)
+  open import RoutingLib.Data.Table.IndexedTypes 𝕊ᵢ
+  open Membership 𝕊 using () renaming (_∈_ to _∈ₗ_; _⊆_ to _⊆ₗ_)
 
   open FiniteConditions finiteCond
   open Start start
@@ -43,7 +43,7 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois4
 
   -- Synchronous iteration
 
-  σ : ℕ → M
+  σ : ℕ → S
   σ = syncIter x₀
 
   -- The initial set
@@ -72,10 +72,10 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois4
     σ (suc K)     ≈⟨ σ-fixed (suc K) (F-cong σ[K]≈σ[1+K]) t ⟩
     σ (suc K + t) ≡⟨ cong σ (sym (+-suc K t)) ⟩
     σ (K + suc t) ∎
-    where open EqReasoning 𝕄ₛ
+    where open EqReasoning 𝕊
 
   -- List of all states
-  D₀ˡ : List M
+  D₀ˡ : List S
   D₀ˡ = proj₁ D₀-finite
 
   σ[K]∈D₀ˡ : ∀ K → σ K ∈ₗ D₀ˡ
@@ -85,23 +85,23 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois4
   ≉σ[K]-cong _ x≈y x≉iterK iterK≈y = x≉iterK (≈-trans iterK≈y (≈-sym x≈y))
   
   -- List of states at each time step
-  Dₖˡ : ℕ → List M
+  Dₖˡ : ℕ → List S
   Dₖˡ zero    = D₀ˡ
   Dₖˡ (suc K) = filter (∁? (σ K ≟_)) (Dₖˡ K)
 
   Dₖˡ-decreasing : ∀ K → Dₖˡ (suc K) ⊆ₗ  Dₖˡ K
-  Dₖˡ-decreasing K x∈DsK = proj₁ (∈-filter⁻ 𝕄ₛ (∁? (σ K ≟_)) (≉σ[K]-cong K) x∈DsK)
+  Dₖˡ-decreasing K x∈DsK = proj₁ (∈-filter⁻ 𝕊 (∁? (σ K ≟_)) (≉σ[K]-cong K) x∈DsK)
 
   σ[K]∈Dₜˡ : ∀ K → σ K ≉ σ (suc K) → ∀ {t} → t ≤ K → σ (suc K) ∈ₗ Dₖˡ t
   σ[K]∈Dₜˡ K _           {zero}  _   = σ[K]∈D₀ˡ (suc K)
-  σ[K]∈Dₜˡ K σ[K]≉σ[1+K] {suc t} t≤K = ∈-filter⁺ 𝕄ₛ (∁? (σ t ≟_))
+  σ[K]∈Dₜˡ K σ[K]≉σ[1+K] {suc t} t≤K = ∈-filter⁺ 𝕊 (∁? (σ t ≟_))
     (≉σ[K]-cong t)
     ((x≼y≼z∧x≉y⇒x≉z (σ-decreasing K) (σ-mono (<⇒≤ t≤K)) (σ[K]≉σ[1+K] ∘ ≈-sym)) ∘ ≈-sym)
     (σ[K]∈Dₜˡ K σ[K]≉σ[1+K] (<⇒≤ t≤K))
 
   σ[K]∈Dₖˡ : ∀ K → σ K ≉ σ (suc K) → σ K ∈ₗ Dₖˡ K
   σ[K]∈Dₖˡ zero    _           = σ[K]∈D₀ˡ zero
-  σ[K]∈Dₖˡ (suc K) σ[K]≉σ[1+K] = ∈-filter⁺ 𝕄ₛ (∁? (σ K ≟_))
+  σ[K]∈Dₖˡ (suc K) σ[K]≉σ[1+K] = ∈-filter⁺ 𝕊 (∁? (σ K ≟_))
     (≉σ[K]-cong K)
     (λ σ[K]≈σ[2+k] → σ[K]≉σ[1+K] (begin
       σ (1 + K) ≈⟨ ≈-sym σ[K]≈σ[2+k] ⟩
@@ -109,7 +109,7 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois4
       σ (K + 2) ≡⟨ cong σ (+-comm K 2) ⟩
       σ (2 + K) ∎))
     (σ[K]∈Dₜˡ K (σ[K]≉σ[1+K] ∘ F-cong) ≤-refl)
-    where open EqReasoning 𝕄ₛ
+    where open EqReasoning 𝕊
          
   |Dₖˡ|-decreasing : ∀ K  → σ K ≉ σ (suc K) → length (Dₖˡ (suc K)) < length (Dₖˡ K)
   |Dₖˡ|-decreasing K σ[K]≉σ[1+K] = filter-some (∁? (σ K ≟_)) (Dₖˡ K) (Any.map contradiction (σ[K]∈Dₖˡ K σ[K]≉σ[1+K]))
@@ -123,7 +123,7 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois4
   σ-converges : ∃ λ T → ∀ t → σ T ≈ σ (T + t)
   σ-converges = σ-fixedPoint 0 (<-wellFounded (length D₀ˡ))
 
-  syncCond : SynchronousConditions 𝕡 p
+  syncCond : SynchronousConditions 𝓟 p
   syncCond = record
     { start           = start
     ; poset           = poset
@@ -132,7 +132,7 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois4
     ; iter-converge   = σ-converges 
     }
 
-  open Prop3 𝕡 syncCond using () renaming (aco to Prop3-aco)
+  open Prop3 𝓟 syncCond using () renaming (aco to Prop3-aco)
 
-  aco : ACO 𝕡 p
+  aco : ACO 𝓟 p
   aco = Prop3-aco

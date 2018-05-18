@@ -32,10 +32,10 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step2_Conve
   (X : SquareMatrix (Route algebra) (suc n-1))
   (j : Fin (suc n-1))
   (t-1 : ℕ)
-  {F : Subset (suc n-1)}
-  (j∈F : j ∈ F)
-  (F-nonFull : Nonfull F)
-  (F-fixed : ∀ {i} → i ∈ F → i ∈ᵤ Step1_NodeSets.Converged algebra X j (suc t-1))
+  {C : Subset (suc n-1)}
+  (j∈C : j ∈ C)
+  (C-nonFull : Nonfull C)
+  (C⊆𝓒ₜ : ∀ {i} → i ∈ C → i ∈ᵤ Step1_NodeSets.𝓒 algebra X j (suc t-1))
   where
 
   open Prelude algebra
@@ -49,8 +49,8 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step2_Conve
     t : ℕ
     t = suc t-1
 
-    e↷F⇒w[t+s]≡w[t] : ∀ {e} → e ↷ F → ∀ s → weightₑ (t + s) e ≈ weightₑ t e
-    e↷F⇒w[t+s]≡w[t] (_ , k∈F) s = ▷-cong (A _ _) (proj₁ (F-fixed k∈F) s)
+    e↷C⇒w[t+s]≡w[t] : ∀ {e} → e ↷ C → ∀ s → weightₑ (t + s) e ≈ weightₑ t e
+    e↷C⇒w[t+s]≡w[t] (_ , k∈C) s = ▷-cong (A _ _) (proj₁ (C⊆𝓒ₜ k∈C) s)
   
   ------------------------------------------------------------------------------
   -- Finding the fixed minimal edge entering the fixed set
@@ -58,32 +58,32 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step2_Conve
   -- At least one edge entering the fixed set exists
   
     eₐ : Edge
-    eₐ = (proj₁ F-nonFull , j)
+    eₐ = (proj₁ C-nonFull , j)
 
-    eₐ↷F : eₐ ↷ F
-    eₐ↷F = (proj₂ F-nonFull , j∈F)
+    eₐ↷C : eₐ ↷ C
+    eₐ↷C = (proj₂ C-nonFull , j∈C)
 
   -- We can therefore find the minimum weight edge out of the fixed set
   
   abstract
   
     eₘᵢₙ : Edge
-    eₘᵢₙ = argmin (weightₑ t) eₐ (cutset F)
+    eₘᵢₙ = argmin (weightₑ t) eₐ (cutset C)
 
-    eₘᵢₙ↷F : eₘᵢₙ ↷ F
-    eₘᵢₙ↷F = argmin-all (weightₑ t) eₐ↷F (∈cutset⇒↷ F)
+    eₘᵢₙ↷C : eₘᵢₙ ↷ C
+    eₘᵢₙ↷C = argmin-all (weightₑ t) eₐ↷C (∈cutset⇒↷ C)
     
   iₘᵢₙ : Node
   iₘᵢₙ = proj₁ eₘᵢₙ
 
-  iₘᵢₙ∉F : iₘᵢₙ ∉ F
-  iₘᵢₙ∉F = proj₁ eₘᵢₙ↷F
+  iₘᵢₙ∉C : iₘᵢₙ ∉ C
+  iₘᵢₙ∉C = proj₁ eₘᵢₙ↷C
     
   kₘᵢₙ : Node
   kₘᵢₙ = proj₂ eₘᵢₙ
 
-  kₘᵢₙ∈F : kₘᵢₙ ∈ F
-  kₘᵢₙ∈F = proj₂ eₘᵢₙ↷F
+  kₘᵢₙ∈C : kₘᵢₙ ∈ C
+  kₘᵢₙ∈C = proj₂ eₘᵢₙ↷C
   
   ------------------------------------------------------------------------------
   -- Properties of eₘᵢₙ
@@ -91,18 +91,18 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step2_Conve
   abstract
 
     j≢iₘᵢₙ : j ≢ iₘᵢₙ
-    j≢iₘᵢₙ j≡iₘᵢₙ = iₘᵢₙ∉F (subst (_∈ F) j≡iₘᵢₙ j∈F)
+    j≢iₘᵢₙ j≡iₘᵢₙ = iₘᵢₙ∉C (subst (_∈ C) j≡iₘᵢₙ j∈C)
 
-    kₘᵢₙ∈Fₜ : kₘᵢₙ ∈ᵤ Converged t
-    kₘᵢₙ∈Fₜ = F-fixed kₘᵢₙ∈F
+    kₘᵢₙ∈𝓒ₜ : kₘᵢₙ ∈ᵤ 𝓒 t
+    kₘᵢₙ∈𝓒ₜ = C⊆𝓒ₜ kₘᵢₙ∈C
   
     -- Any edge that cuts the fixed set is -always- less than the minimum edge
-    eₘᵢₙ-isMinₜ₊ₛ : ∀ {e} → e ↷ F → ∀ s →
+    eₘᵢₙ-isMinₜ₊ₛ : ∀ {e} → e ↷ C → ∀ s →
                     weightₑ (t + s) eₘᵢₙ ≤₊ weightₑ (t + s) e
-    eₘᵢₙ-isMinₜ₊ₛ {e} e↷F s = begin
-      weightₑ (t + s) eₘᵢₙ  ≈⟨ e↷F⇒w[t+s]≡w[t] eₘᵢₙ↷F s ⟩
-      weightₑ t       eₘᵢₙ  ≤⟨ lookup (f[argmin]≤f[xs] eₐ (cutset F)) (↷⇒∈cutset e↷F) ⟩
-      weightₑ t       e     ≈⟨ ≈-sym (e↷F⇒w[t+s]≡w[t] e↷F s) ⟩
+    eₘᵢₙ-isMinₜ₊ₛ {e} e↷C s = begin
+      weightₑ (t + s) eₘᵢₙ  ≈⟨ e↷C⇒w[t+s]≡w[t] eₘᵢₙ↷C s ⟩
+      weightₑ t       eₘᵢₙ  ≤⟨ lookup (f[argmin]≤f[xs] eₐ (cutset C)) (↷⇒∈cutset e↷C) ⟩
+      weightₑ t       e     ≈⟨ ≈-sym (e↷C⇒w[t+s]≡w[t] e↷C s) ⟩
       weightₑ (t + s) e     ∎
       where open POR ≤₊-poset
 
@@ -111,52 +111,48 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step2_Conve
   -- Safe extension
 
     safe-extension : ∀ {s r i k l} → σ^ (t + r) X k j ≈ A k l ▷ (σ^ (t + s) X l j) →
-               eₘᵢₙ ≤[ t + s ] (k , l) → eₘᵢₙ ≤[ t + r ] (i , k)
+                     eₘᵢₙ ≤[ t + s ] (k , l) → eₘᵢₙ ≤[ t + r ] (i , k)
     safe-extension {s} {r} {i} {k} {l} σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ eₘᵢₙ≤kl = (begin
-      A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + r) X kₘᵢₙ j  ≈⟨ ▷-cong (A iₘᵢₙ kₘᵢₙ) (Converged-eq t kₘᵢₙ r s kₘᵢₙ∈Fₜ) ⟩
-      A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + s) X kₘᵢₙ j  ≤⟨ eₘᵢₙ≤kl ⟩
+      A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + r) X kₘᵢₙ j   ≈⟨ ▷-cong (A iₘᵢₙ kₘᵢₙ) (𝓒-eq t kₘᵢₙ r s kₘᵢₙ∈𝓒ₜ) ⟩
+      A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + s) X kₘᵢₙ j   ≤⟨ eₘᵢₙ≤kl ⟩
       A k l ▷ σ^ (t + s) X l j           ≤⟨ ▷-increasing (A i k) (A k l ▷ σ^ (t + s) X l j) ⟩
       A i k ▷ (A k l ▷ σ^ (t + s) X l j) ≈⟨ ▷-cong (A i k) (≈-sym σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ) ⟩
       A i    k   ▷ σ^ (t + r) X k   j    ∎)
       where open POR ≤₊-poset
 
-{-
-    lemma : ∀ {s r i k l} → σ^ (t + r) X k j ≈ A k l ▷ (σ^ (t + s) X l j) →
-            k ∉ F → l ∈ᵤ Real (t + s) → eₘᵢₙ ≤[ t + r ] (i , k)
-    lemma {s} {r} {i} {k} {l} σᵗ⁺ʳₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ k∉F l∈Rₜ₊ₛ with l ∈? F
-    ... | no  l∉F = safe-extension σᵗ⁺ʳₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ {!!}
-    ... | yes l∈F = safe-extension σᵗ⁺ʳₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ (eₘᵢₙ-isMinₜ₊ₛ (k∉F , l∈F) s)
--}  
-    -- Any "real" route ending in a node outside of the fixed set is worse
-    -- than that ending with the minimal edge.
+
+
+  ------------------------------------------------------------------------------
+  -- Any "real" route ending in a node outside of the fixed set is worse
+  -- than that ending with the minimal edge.
 
    
-  ∈Real-invalid : ∀ s {i k} →
+  ∈𝓡-invalid : ∀ s {i k} →
                   path (σ^ (t + s) X k j) ≈ₚ invalid →
                   eₘᵢₙ ≤[ t + s ] (i , k)
-  ∈Real-invalid s {i} {k} p[σᵗ⁺ˢXₖⱼ]≈∅ = begin
+  ∈𝓡-invalid s {i} {k} p[σᵗ⁺ˢXₖⱼ]≈∅ = begin
     A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + s) X kₘᵢₙ j ≤⟨ ⊕-identityˡ _ ⟩
     ∞                                ≈⟨ ≈-sym (▷-zero (A i k)) ⟩
     A i    k    ▷ ∞                  ≈⟨ ▷-cong (A i k) (≈-sym (path[r]≈∅⇒r≈∞ p[σᵗ⁺ˢXₖⱼ]≈∅)) ⟩
     A i    k    ▷ σ^ (t + s) X k j   ∎
     where open POR ≤₊-poset
 
-  ∈Real-trivial : ∀ s {i k} → k ∉ F →
+  ∈𝓡-trivial : ∀ s {i k} → k ∉ C →
                   path (σ^ (t + s) X k j) ≈ₚ valid [] →
                   eₘᵢₙ ≤[ t + s ] (i , k)
-  ∈Real-trivial s {i} {k} k∉F p[σᵗ⁺ˢXₖⱼ]≈[]
+  ∈𝓡-trivial s {i} {k} k∉C p[σᵗ⁺ˢXₖⱼ]≈[]
     with p[σXᵢⱼ]≈[]⇒i≡j (σ^ (t-1 + s) X) k j p[σᵗ⁺ˢXₖⱼ]≈[]
-  ... | refl = contradiction j∈F k∉F
+  ... | refl = contradiction j∈C k∉C
   
-  ∈Real : ∀ s i {k} → k ∈ᵤ Real (t + s) → k ∉ F →
+  ∈𝓡 : ∀ s i {k} → k ∈ᵤ 𝓡 (t + s) → k ∉ C →
           ∀ {p} → path (σ^ (t + s) X k j) ≈ₚ p →
           eₘᵢₙ ≤[ t + s ] (i , k)
-  ∈Real s i _      _    {invalid}  p[σᵗ⁺ˢXₖⱼ]≈∅  = ∈Real-invalid s p[σᵗ⁺ˢXₖⱼ]≈∅
-  ∈Real s i k∈Rₛ₊ₜ k∉F {valid []} p[σᵗ⁺ˢXₖⱼ]≈[] = ∈Real-trivial s k∉F p[σᵗ⁺ˢXₖⱼ]≈[]
-  ∈Real s i k∈Rₛ₊ₜ k∉F {valid ((_ , l) ∷ p ∣ _ ∣ _)} p[σᵗ⁺ˢXₖⱼ]≈kl∷p
-    with Real-path {t-1 + s} p[σᵗ⁺ˢXₖⱼ]≈kl∷p k∈Rₛ₊ₜ
+  ∈𝓡 s i _      _    {invalid}  p[σᵗ⁺ˢXₖⱼ]≈∅  = ∈𝓡-invalid s p[σᵗ⁺ˢXₖⱼ]≈∅
+  ∈𝓡 s i k∈Rₛ₊ₜ k∉C {valid []} p[σᵗ⁺ˢXₖⱼ]≈[] = ∈𝓡-trivial s k∉C p[σᵗ⁺ˢXₖⱼ]≈[]
+  ∈𝓡 s i k∈Rₛ₊ₜ k∉C {valid ((_ , l) ∷ p ∣ _ ∣ _)} p[σᵗ⁺ˢXₖⱼ]≈kl∷p
+    with 𝓡-path {t-1 + s} p[σᵗ⁺ˢXₖⱼ]≈kl∷p k∈Rₛ₊ₜ
   ... | valid ([ _ , l∈Rₛ₊ₜ ]∷ _)
-    with Real-alignment (t-1 + s) k∈Rₛ₊ₜ p[σᵗ⁺ˢXₖⱼ]≈kl∷p
-  ...   | refl , σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ , p[σᵗ⁺ˢXₗⱼ]≈p with l ∈? F
-  ...     | no  l∉F = safe-extension σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ (∈Real s _ l∈Rₛ₊ₜ l∉F p[σᵗ⁺ˢXₗⱼ]≈p)
-  ...     | yes l∈F = safe-extension σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ (eₘᵢₙ-isMinₜ₊ₛ (k∉F , l∈F) s)
+    with 𝓡-alignment (t-1 + s) k∈Rₛ₊ₜ p[σᵗ⁺ˢXₖⱼ]≈kl∷p
+  ...   | refl , σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ , p[σᵗ⁺ˢXₗⱼ]≈p with l ∈? C
+  ...     | no  l∉C = safe-extension σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ (∈𝓡 s _ l∈Rₛ₊ₜ l∉C p[σᵗ⁺ˢXₗⱼ]≈p)
+  ...     | yes l∈C = safe-extension σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ (eₘᵢₙ-isMinₜ₊ₛ (k∉C , l∈C) s)

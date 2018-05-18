@@ -39,25 +39,25 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step1_NodeS
   ------------------------------------------------------------------------------
   -- Fixed nodes (nodes that don't change their value after time t)
 
-  Fixed : 𝕋 → Node → Set _
-  Fixed t i = ∀ s → σ^ (t + s) X i j ≈ σ^ t X i j
+  𝓕 : 𝕋 → Node → Set _
+  𝓕 t i = ∀ s → σ^ (t + s) X i j ≈ σ^ t X i j
 
-  j∈Fixed₁ : j ∈ᵤ Fixed 1
-  j∈Fixed₁ s = σXᵢᵢ≈σYᵢᵢ (σ^ s X) X j
+  j∈𝓕₁ : j ∈ᵤ 𝓕 1
+  j∈𝓕₁ s = σXᵢᵢ≈σYᵢᵢ (σ^ s X) X j
 
-  Fixedₜ⊆Fixedₛ₊ₜ : ∀ t s → Fixed t ⊆ᵤ Fixed (t + s)
-  Fixedₜ⊆Fixedₛ₊ₜ t s {i} i∈Sₜ u = begin
-    σ^ ((t + s) + u) X i j  ≡⟨ cong (λ t → σ^ t X i j) (+-assoc t s u) ⟩
-    σ^ (t + (s + u)) X i j  ≈⟨ i∈Sₜ (s + u) ⟩
-    σ^ t             X i j  ≈⟨ ≈-sym (i∈Sₜ s)  ⟩
-    σ^ (t + s) X i j  ∎
+  𝓕ₜ⊆𝓕ₜ₊ₛ : ∀ t s {i} → i ∈ᵤ 𝓕 t → i ∈ᵤ 𝓕 (t + s)
+  𝓕ₜ⊆𝓕ₜ₊ₛ t s {i} i∈Fₜ r = begin
+    σ^ ((t + s) + r) X i j  ≡⟨ cong (λ t → σ^ t X i j) (+-assoc t s r) ⟩
+    σ^ (t + (s + r)) X i j  ≈⟨ i∈Fₜ (s + r) ⟩
+    σ^ t             X i j  ≈⟨ ≈-sym (i∈Fₜ s)  ⟩
+    σ^ (t + s) X i j        ∎
     where open EqReasoning S
 
-  Fixed-alignment : ∀ t {i} → i ∈ᵤ Fixed t → ∀ {k l p e⇿p i∉p} →
+  𝓕-alignment : ∀ t {i} → i ∈ᵤ 𝓕 t → ∀ {k l p e⇿p i∉p} →
                       path (σ^ t X i j) ≈ₚ valid ((l , k) ∷ p ∣ e⇿p ∣ i∉p) →
                       i ≡ l × σ^ t X i j ≈ A i k ▷ σ^ t X k j ×
                       path (σ^ t X k j) ≈ₚ valid p
-  Fixed-alignment t {i} i∈Sₜ p[σXᵢⱼ]≈uv∷p
+  𝓕-alignment t {i} i∈Sₜ p[σXᵢⱼ]≈uv∷p
     with ≈-reflexive (cong (λ t → σ^ t X i j) (+-comm 1 t))
   ... | σ¹⁺ᵗ≈σᵗ⁺¹ with p[σXᵢⱼ]⇒σXᵢⱼ≈AᵢₖXₖⱼ (σ^ t X) i j (≈ₚ-trans (path-cong (≈-trans σ¹⁺ᵗ≈σᵗ⁺¹ (i∈Sₜ 1))) p[σXᵢⱼ]≈uv∷p)
   ...   | i≡l , σ¹⁺ᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ , p[σᵗXₖⱼ]≈p = i≡l , ≈-trans (≈-sym (i∈Sₜ 1)) (≈-trans (≈-sym σ¹⁺ᵗ≈σᵗ⁺¹) σ¹⁺ᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ) , p[σᵗXₖⱼ]≈p
@@ -66,44 +66,40 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step1_NodeS
   -- Converged nodes (nodes for which all nodes they route through are fixed
   -- after time t)
     
-  Converged : 𝕋 → Node → Set _
-  Converged t i = i ∈ᵤ Fixed t × Allₙ (Fixed t) (path (σ^ t X i j))
+  𝓒 : 𝕋 → Node → Set _
+  𝓒 t i = i ∈ᵤ 𝓕 t × Allₙ (𝓕 t) (path (σ^ t X i j))
 
-  Converged-cong : ∀ {s t k} → k ∈ᵤ Converged s → s ≡ t → k ∈ᵤ Converged t
-  Converged-cong k∈Fₛ refl = k∈Fₛ
+  𝓒-cong : ∀ {s t k} → k ∈ᵤ 𝓒 s → s ≡ t → k ∈ᵤ 𝓒 t
+  𝓒-cong k∈Fₛ refl = k∈Fₛ
   
-  j∈Converged₁ : j ∈ᵤ Converged 1
-  j∈Converged₁ = j∈Fixed₁ , Allₙ-resp-≈ₚ (valid []) (≈ₚ-sym (begin
+  j∈𝓒₁ : j ∈ᵤ 𝓒 1
+  j∈𝓒₁ = j∈𝓕₁ , Allₙ-resp-≈ₚ (valid []) (≈ₚ-sym (begin
     path (σ X j j) ≈⟨ path-cong (σXᵢᵢ≈Iᵢᵢ X j) ⟩
     path (I j j)   ≡⟨ cong path (Iᵢᵢ≡0# j) ⟩
     path 0#        ≈⟨ p[0]≈[] ⟩
     valid []       ∎))
     where open EqReasoning (ℙₛ n)
-
-  i∈Converged₁ : ∀ {i} → i ∈ ⁅ j ⁆ → i ∈ᵤ Converged 1
-  i∈Converged₁ i∈⁅j⁆ = subst (_∈ᵤ Converged 1) (sym (x∈⁅y⁆⇒x≡y _ i∈⁅j⁆)) j∈Converged₁
   
-  Convergedₜ⊆Convergedₜ₊ₛ : ∀ t s → Converged t ⊆ᵤ Converged (t + s)
-  Convergedₜ⊆Convergedₜ₊ₛ t s (i∈Sₜ , p∈Sₜ) =
-    Fixedₜ⊆Fixedₛ₊ₜ t s i∈Sₜ ,
-    mapₙ (Fixedₜ⊆Fixedₛ₊ₜ t s) (Allₙ-resp-≈ₚ p∈Sₜ (path-cong (≈-sym (i∈Sₜ s))) )
+  𝓒ₜ⊆𝓒ₜ₊ₛ : ∀ t s → 𝓒 t ⊆ᵤ 𝓒 (t + s)
+  𝓒ₜ⊆𝓒ₜ₊ₛ t s (i∈Sₜ , p∈Sₜ) =
+    𝓕ₜ⊆𝓕ₜ₊ₛ t s i∈Sₜ ,
+    mapₙ (𝓕ₜ⊆𝓕ₜ₊ₛ t s) (Allₙ-resp-≈ₚ p∈Sₜ (path-cong (≈-sym (i∈Sₜ s))) )
 
-  Convergedₜ⊆Convergedₛ₊ₜ : ∀ t s → Converged t ⊆ᵤ Converged (s + t)
-  Convergedₜ⊆Convergedₛ₊ₜ t s rewrite +-comm s t = Convergedₜ⊆Convergedₜ₊ₛ t s
+  𝓒ₜ⊆𝓒ₛ₊ₜ : ∀ t s → 𝓒 t ⊆ᵤ 𝓒 (s + t)
+  𝓒ₜ⊆𝓒ₛ₊ₜ t s rewrite +-comm s t = 𝓒ₜ⊆𝓒ₜ₊ₛ t s
   
-  Converged-path : ∀ t {i p} → path (σ^ t X i j) ≈ₚ p → i ∈ᵤ Converged t → Allₙ (Converged t) p
-  Converged-path t {i} {invalid}  _ _ = invalid
-  Converged-path t {i} {valid []} _ _ = valid []
-  Converged-path t {i} {valid ((_ , k) ∷ p ∣ _ ∣ _)} p[σᵗXᵢⱼ]≈ik∷p i∈Fₜ@(i∈Sₜ , ik∷p∈Sₜ)  
-    with Fixed-alignment t i∈Sₜ p[σᵗXᵢⱼ]≈ik∷p
+  𝓒-path : ∀ t {i p} → path (σ^ t X i j) ≈ₚ p → i ∈ᵤ 𝓒 t → Allₙ (𝓒 t) p
+  𝓒-path t {i} {invalid}  _ _ = invalid
+  𝓒-path t {i} {valid []} _ _ = valid []
+  𝓒-path t {i} {valid ((_ , k) ∷ p ∣ _ ∣ _)} p[σᵗXᵢⱼ]≈ik∷p i∈Fₜ@(i∈Sₜ , ik∷p∈Sₜ)  
+    with 𝓕-alignment t i∈Sₜ p[σᵗXᵢⱼ]≈ik∷p
   ... | refl , σᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ , p[σᵗXₖⱼ]≈p with Allₙ-resp-≈ₚ ik∷p∈Sₜ p[σᵗXᵢⱼ]≈ik∷p
   ...   | (valid ([ _ , k∈Sₜ ]∷ p∈Sₜ)) with Allₙ-resp-≈ₚ (valid p∈Sₜ) (≈ₚ-sym p[σᵗXₖⱼ]≈p)
-  ...     | k∈Fₜ with Converged-path t p[σᵗXₖⱼ]≈p (k∈Sₜ , k∈Fₜ)
+  ...     | k∈Fₜ with 𝓒-path t p[σᵗXₖⱼ]≈p (k∈Sₜ , k∈Fₜ)
   ...       | valid p∈Fₜ = valid ([ i∈Fₜ , (k∈Sₜ , k∈Fₜ) ]∷ p∈Fₜ)
 
-  Converged-eq : ∀ t k s₁ s₂ → k ∈ᵤ Converged t →
-             σ^ (t + s₁) X k j ≈ σ^ (t + s₂) X k j
-  Converged-eq t k s₁ s₂ (k∈Sₜ , _) = begin
+  𝓒-eq : ∀ t k s₁ s₂ → k ∈ᵤ 𝓒 t → σ^ (t + s₁) X k j ≈ σ^ (t + s₂) X k j
+  𝓒-eq t k s₁ s₂ (k∈Sₜ , _) = begin
     σ^ (t + s₁) X k j ≈⟨ k∈Sₜ s₁ ⟩
     σ^ (t)      X k j ≈⟨ ≈-sym (k∈Sₜ s₂) ⟩
     σ^ (t + s₂) X k j ∎
@@ -121,23 +117,23 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step1_NodeS
   ------------------------------------------------------------------------------
   -- Real paths
   
-  Real : 𝕋 → Node → Set ℓ
-  Real t i = Allₑ (Aligned t) (path (σ^ t X i j))
+  𝓡 : 𝕋 → Node → Set ℓ
+  𝓡 t i = Allₑ (Aligned t) (path (σ^ t X i j))
 
-  Real? : ∀ t → Decidable (Real t)
-  Real? t i = allₑ? (Aligned? t) (path (σ^ t X i j))
+  𝓡? : ∀ t → Decidable (𝓡 t)
+  𝓡? t i = allₑ? (Aligned? t) (path (σ^ t X i j))
 
-  Real-cong : ∀ {s t k} → k ∈ᵤ Real s → s ≡ t → k ∈ᵤ Real t
-  Real-cong k∈Rₛ refl = k∈Rₛ
+  𝓡-cong : ∀ {s t k} → k ∈ᵤ 𝓡 s → s ≡ t → k ∈ᵤ 𝓡 t
+  𝓡-cong k∈Rₛ refl = k∈Rₛ
 
-  ¬Real-cong : ∀ {s t k} → k ∉ᵤ Real s → s ≡ t → k ∉ᵤ Real t
-  ¬Real-cong k∉Rₛ refl = k∉Rₛ
+  ¬𝓡-cong : ∀ {s t k} → k ∉ᵤ 𝓡 s → s ≡ t → k ∉ᵤ 𝓡 t
+  ¬𝓡-cong k∉Rₛ refl = k∉Rₛ
   
-  Real-alignment : ∀ t {i} → i ∈ᵤ Real (suc t) → ∀ {k l p e⇿p i∉p} →
+  𝓡-alignment : ∀ t {i} → i ∈ᵤ 𝓡 (suc t) → ∀ {k l p e⇿p i∉p} →
                    path (σ^ (suc t) X i j) ≈ₚ valid ((l , k) ∷ p ∣ e⇿p ∣ i∉p) →
                    i ≡ l × σ^ (suc t) X i j ≈ A i k ▷ σ^ (suc t) X k j ×
                    path (σ^ (suc t) X k j) ≈ₚ valid p
-  Real-alignment t {i} i∈R₁₊ₜ {k} p[σ¹⁺ᵗXᵢⱼ]≈uv∷p
+  𝓡-alignment t {i} i∈R₁₊ₜ {k} p[σ¹⁺ᵗXᵢⱼ]≈uv∷p
     with Allₑ-resp-≈ₚ i∈R₁₊ₜ p[σ¹⁺ᵗXᵢⱼ]≈uv∷p
   ... | valid (σ¹⁺ᵗXᵢⱼ≈Aᵢₖσ¹⁺ᵗXₖⱼ ∷ _)
       with p[σXᵢⱼ]⇒σXᵢⱼ≈AᵢₖXₖⱼ (σ^ t X) i j p[σ¹⁺ᵗXᵢⱼ]≈uv∷p
@@ -147,34 +143,34 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step1_NodeS
   ...     | _ , _ , p[σ¹⁺ᵗXₖⱼ]≈p = refl , σ¹⁺ᵗXᵢⱼ≈Aᵢₖσ¹⁺ᵗXₖⱼ , p[σ¹⁺ᵗXₖⱼ]≈p
 
 
-  Real-path : ∀ {t i p} → path (σ^ (suc t) X i j) ≈ₚ p →
-          i ∈ᵤ Real (suc t) → Allₙ (Real (suc t)) p
-  Real-path {_} {i} {invalid}  _ _ = invalid
-  Real-path {_} {i} {valid []} _ _ = valid []
-  Real-path {t} {i} {valid ((_ , k) ∷ p ∣ _ ∣ _)} p[σᵗXᵢⱼ]≈vk∷p i∈R₁₊ₜ  
+  𝓡-path : ∀ {t i p} → path (σ^ (suc t) X i j) ≈ₚ p →
+          i ∈ᵤ 𝓡 (suc t) → Allₙ (𝓡 (suc t)) p
+  𝓡-path {_} {i} {invalid}  _ _ = invalid
+  𝓡-path {_} {i} {valid []} _ _ = valid []
+  𝓡-path {t} {i} {valid ((_ , k) ∷ p ∣ _ ∣ _)} p[σᵗXᵢⱼ]≈vk∷p i∈R₁₊ₜ  
     with Allₑ-resp-≈ₚ i∈R₁₊ₜ p[σᵗXᵢⱼ]≈vk∷p 
-  ... | valid (σᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ ∷ pʳ) with Real-alignment t i∈R₁₊ₜ p[σᵗXᵢⱼ]≈vk∷p
+  ... | valid (σᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ ∷ pʳ) with 𝓡-alignment t i∈R₁₊ₜ p[σᵗXᵢⱼ]≈vk∷p
   ...   | refl , _ , p[σ¹⁺ᵗXₖⱼ]≈p with Allₑ-resp-≈ₚ (valid pʳ) (≈ₚ-sym p[σ¹⁺ᵗXₖⱼ]≈p)
-  ...     | k∈R₁₊ₜ with Real-path {t} p[σ¹⁺ᵗXₖⱼ]≈p k∈R₁₊ₜ
+  ...     | k∈R₁₊ₜ with 𝓡-path {t} p[σ¹⁺ᵗXₖⱼ]≈p k∈R₁₊ₜ
   ...       | valid allpʳ = valid ([ i∈R₁₊ₜ , k∈R₁₊ₜ ]∷ allpʳ)
 
-  Real-∅ : ∀ t i → path (σ^ t X i j) ≈ₚ invalid → i ∈ᵤ Real t
-  Real-∅ _ _ p≡∅ = Allₑ-resp-≈ₚ invalid (≈ₚ-sym p≡∅)
+  𝓡-∅ : ∀ t i → path (σ^ t X i j) ≈ₚ invalid → i ∈ᵤ 𝓡 t
+  𝓡-∅ _ _ p≡∅ = Allₑ-resp-≈ₚ invalid (≈ₚ-sym p≡∅)
 
-  Real-[] : ∀ t i → path (σ^ t X i j) ≈ₚ valid [] → i ∈ᵤ Real t
-  Real-[] _ _ p≡[] = Allₑ-resp-≈ₚ (valid []) (≈ₚ-sym p≡[])
+  𝓡-[] : ∀ t i → path (σ^ t X i j) ≈ₚ valid [] → i ∈ᵤ 𝓡 t
+  𝓡-[] _ _ p≡[] = Allₑ-resp-≈ₚ (valid []) (≈ₚ-sym p≡[])
   
-  ¬Real-length : ∀ t i → i ∉ᵤ Real t → 1 ≤ size (σ^ t X i j)
-  ¬Real-length t i i∉Rₜ with path (σ^ t X i j)
+  ¬𝓡-length : ∀ t i → i ∉ᵤ 𝓡 t → 1 ≤ size (σ^ t X i j)
+  ¬𝓡-length t i i∉Rₜ with path (σ^ t X i j)
   ... | invalid               = contradiction invalid i∉Rₜ
   ... | valid []              = contradiction (valid []) i∉Rₜ
   ... | valid (e ∷ p ∣ _ ∣ _) = s≤s z≤n
 
-  ¬Real-retraction : ∀ t i → i ∉ᵤ Real (suc t) → ∃₂ λ k p → ∃₂ λ k∉p e↔p →
-                    path (σ^ (suc t) X i j) ≈ₚ valid ((i , k) ∷ p ∣ k∉p ∣ e↔p) ×
-                    σ^ (suc t) X i j ≈ A i k ▷ σ^ t X k j ×
-                    path (σ^ t X k j) ≈ₚ valid p
-  ¬Real-retraction t i i∉R₁₊ₜ with path (σ^ (suc t) X i j) | inspect path (σ^ (suc t) X i j)
+  ¬𝓡-retraction : ∀ t i → i ∉ᵤ 𝓡 (suc t) → ∃₂ λ k p → ∃₂ λ k∉p e↔p →
+                  path (σ^ (suc t) X i j) ≈ₚ valid ((i , k) ∷ p ∣ k∉p ∣ e↔p) ×
+                  σ^ (suc t) X i j ≈ A i k ▷ σ^ t X k j ×
+                  path (σ^ t X k j) ≈ₚ valid p
+  ¬𝓡-retraction t i i∉R₁₊ₜ with path (σ^ (suc t) X i j) | inspect path (σ^ (suc t) X i j)
   ... | invalid  | _ = contradiction invalid i∉R₁₊ₜ
   ... | valid [] | _ = contradiction (valid []) i∉R₁₊ₜ
   ... | valid ((_ , k) ∷ p ∣ k∉p ∣ e↔p) | [ p[σ¹⁺ᵗ]≡ik∷p ]
@@ -182,15 +178,15 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step1_NodeS
   ...   | refl , σ¹⁺ᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ , p[σᵗXₖⱼ]≈p =
     k , p , k∉p , e↔p , ≈ₚ-refl , σ¹⁺ᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ , p[σᵗXₖⱼ]≈p
 
-  Converged⊆Real : ∀ t {i p} → path (σ^ t X i j) ≈ₚ p → i ∈ᵤ Converged t → i ∈ᵤ Real t
-  Converged⊆Real t {i} {invalid}  p[σᵗXᵢⱼ]≈∅  _ = Real-∅ t i p[σᵗXᵢⱼ]≈∅
-  Converged⊆Real t {i} {valid []} p[σᵗXᵢⱼ]≈[] _ = Real-[] t i p[σᵗXᵢⱼ]≈[]
-  Converged⊆Real t {i} {valid ((_ , k) ∷ p ∣ _ ∣ _)} p[σᵗXᵢⱼ]≈ik∷p (i∈Sₜ , ik∷p∈Fₜ)
-    with Fixed-alignment t i∈Sₜ p[σᵗXᵢⱼ]≈ik∷p
-  ... | refl , σᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ , p[σᵗXₖⱼ]≈p with Converged-path t p[σᵗXᵢⱼ]≈ik∷p (i∈Sₜ , ik∷p∈Fₜ)
-  ...   | valid ([ _ , k∈Fₜ ]∷ p∈Fₜ) with Converged⊆Real t p[σᵗXₖⱼ]≈p k∈Fₜ
+  𝓒ₜ⊆𝓡ₜ : ∀ t {i p} → path (σ^ t X i j) ≈ₚ p → i ∈ᵤ 𝓒 t → i ∈ᵤ 𝓡 t
+  𝓒ₜ⊆𝓡ₜ t {i} {invalid}  p[σᵗXᵢⱼ]≈∅  _ = 𝓡-∅ t i p[σᵗXᵢⱼ]≈∅
+  𝓒ₜ⊆𝓡ₜ t {i} {valid []} p[σᵗXᵢⱼ]≈[] _ = 𝓡-[] t i p[σᵗXᵢⱼ]≈[]
+  𝓒ₜ⊆𝓡ₜ t {i} {valid ((_ , k) ∷ p ∣ _ ∣ _)} p[σᵗXᵢⱼ]≈ik∷p (i∈Sₜ , ik∷p∈Fₜ)
+    with 𝓕-alignment t i∈Sₜ p[σᵗXᵢⱼ]≈ik∷p
+  ... | refl , σᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ , p[σᵗXₖⱼ]≈p with 𝓒-path t p[σᵗXᵢⱼ]≈ik∷p (i∈Sₜ , ik∷p∈Fₜ)
+  ...   | valid ([ _ , k∈Fₜ ]∷ p∈Fₜ) with 𝓒ₜ⊆𝓡ₜ t p[σᵗXₖⱼ]≈p k∈Fₜ
   ...     | k∈Rₜ with Allₑ-resp-≈ₚ k∈Rₜ p[σᵗXₖⱼ]≈p
   ...       | valid pˡ = Allₑ-resp-≈ₚ (valid (σᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ ∷ pˡ)) (≈ₚ-sym p[σᵗXᵢⱼ]≈ik∷p)
 
-  ¬Real⊆¬Converged : ∀ {t i} → i ∉ᵤ Real t → i ∉ᵤ Converged t
-  ¬Real⊆¬Converged {t} {i} i∉Rₜ i∈Fₜ = i∉Rₜ (Converged⊆Real t ≈ₚ-refl i∈Fₜ)
+  ¬𝓡⊆¬𝓒 : ∀ {t i} → i ∉ᵤ 𝓡 t → i ∉ᵤ 𝓒 t
+  ¬𝓡⊆¬𝓒 {t} {i} i∉Rₜ i∈Fₜ = i∉Rₜ (𝓒ₜ⊆𝓡ₜ t ≈ₚ-refl i∈Fₜ)

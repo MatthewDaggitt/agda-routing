@@ -44,10 +44,10 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step3_Dange
   (X : SquareMatrix (Route algebra) (suc n-1))
   (j : Fin (suc n-1))
   (t-1 : ℕ)
-  {F : Subset (suc n-1)}
-  (j∈F : j ∈ F)
-  (F-nonfull : Nonfull F)
-  (F-fixed : ∀ {i} → i ∈ F → i ∈ᵤ Step1_NodeSets.Converged algebra X j (suc t-1))
+  {C : Subset (suc n-1)}
+  (j∈C : j ∈ C)
+  (C-nonfull : Nonfull C)
+  (C-fixed : ∀ {i} → i ∈ C → i ∈ᵤ Step1_NodeSets.𝓒 algebra X j (suc t-1))
   where
   
   open Prelude algebra
@@ -62,19 +62,19 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step3_Dange
     t : ℕ
     t = suc t-1
 
-  ¬Real⇒∉F : ∀ {s k} → k ∉ᵤ Real (t + s) → k ∉ F
-  ¬Real⇒∉F {s} {k} k∉Realₜ₊ₛ k∈F =
-       k∈F                         ∶ k ∈ F
-    ∣> F-fixed                     ∶ k ∈ᵤ Converged t
-    ∣> Convergedₜ⊆Convergedₜ₊ₛ t s        ∶ k ∈ᵤ Converged (t + s)
-    ∣> Converged⊆Real (t + s) ≈ₚ-refl ∶ k ∈ᵤ Real (t + s)
-    ∣> k∉Realₜ₊ₛ                  ∶ ⊥
+  ¬𝓡⇒∉C : ∀ {s k} → k ∉ᵤ 𝓡 (t + s) → k ∉ C
+  ¬𝓡⇒∉C {s} {k} k∉𝓡ₜ₊ₛ k∈C =
+       k∈C                     ∶ k ∈ C
+    ∣> C-fixed                 ∶ k ∈ᵤ 𝓒 t
+    ∣> 𝓒ₜ⊆𝓒ₜ₊ₛ t s            ∶ k ∈ᵤ 𝓒 (t + s)
+    ∣> 𝓒ₜ⊆𝓡ₜ (t + s) ≈ₚ-refl  ∶ k ∈ᵤ 𝓡 (t + s)
+    ∣> k∉𝓡ₜ₊ₛ                 ∶ ⊥
 
 
   --------------------------------------------------------------------------
-  -- Compute the minimum cut edge (iₘᵢₙ , kₘᵢₙ) of F
+  -- Compute the minimum cut edge (iₘᵢₙ , kₘᵢₙ) of C
 
-  open Step2_ConvergedSubtree algebra X j t-1 j∈F F-nonfull F-fixed
+  open Step2_ConvergedSubtree algebra X j t-1 j∈C C-nonfull C-fixed
 
   -------------------------------------------------------------------------
   -- The only time that the source node of the minimal edge out of the fixed
@@ -101,38 +101,40 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step3_Dange
         A k l ▷ σ^ (t + s) X l j              ≈⟨ ≈-sym σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ ⟩<
         σ^ (t + suc s) X k j                  ≤⟨ ▷-increasing (A i k) _ ⟩<
         A i    k    ▷ σ^ (t + suc s) X k   j  <⟨ ik∈D₁₊ₛ ⟩≤
-        A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + suc s) X kₘᵢₙ j ≈⟨ ▷-cong _ (Converged-eq t kₘᵢₙ (suc s) s kₘᵢₙ∈Fₜ) ⟩≤
+        A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + suc s) X kₘᵢₙ j ≈⟨ ▷-cong _ (𝓒-eq t kₘᵢₙ (suc s) s kₘᵢₙ∈𝓒ₜ) ⟩≤
         A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + s)     X kₘᵢₙ j ∎
         where open SPOR ≤₊-poset
 
-      Dangerous-predNotReal : ∀ {i k l s} → k ∉ F →
+      Dangerous-predNot𝓡 : ∀ {i k l s} → k ∉ C →
                               σ^ (t + suc s) X k j ≈ A k l ▷ (σ^ (t + s) X l j) →
-                              (i , k) ∈ᵤ Dangerous (suc s) → l ∉ᵤ Real (t + s)
-      Dangerous-predNotReal {i} {k} {l} {s} k∉F σᵗ⁺¹⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ ik∈D₁₊ₛ l∈Rₜ₊ₛ with l ∈? F
-      ... | no  l∉F = <₊⇒≱₊ ik∈D₁₊ₛ (safe-extension σᵗ⁺¹⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ (∈Real s k l∈Rₜ₊ₛ l∉F ≈ₚ-refl ))
-      ... | yes l∈F = <₊⇒≱₊ ik∈D₁₊ₛ (safe-extension σᵗ⁺¹⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ (eₘᵢₙ-isMinₜ₊ₛ (k∉F , l∈F) s))
+                              (i , k) ∈ᵤ Dangerous (suc s) → l ∉ᵤ 𝓡 (t + s)
+      Dangerous-predNot𝓡 {i} {k} {l} {s} k∉C σᵗ⁺¹⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ ik∈D₁₊ₛ l∈Rₜ₊ₛ with l ∈? C
+      ... | no  l∉C = <₊⇒≱₊ ik∈D₁₊ₛ (safe-extension σᵗ⁺¹⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ (∈𝓡 s k l∈Rₜ₊ₛ l∉C ≈ₚ-refl ))
+      ... | yes l∈C = <₊⇒≱₊ ik∈D₁₊ₛ (safe-extension σᵗ⁺¹⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ (eₘᵢₙ-isMinₜ₊ₛ (k∉C , l∈C) s))
 
   -------------------------------------------------------------------------
   -- DangerousJunk nodes are those who are both dangerous and aren't
   -- real, and therefore don't respect the minimal spanning tree
   -- constraints.
 
-  DangerousJunk : 𝕋 → Node → Set ℓ
-  DangerousJunk s k = k ∉ᵤ Real (t + s) × ∃ λ i → (i , k) ∈ᵤ Dangerous s
+  𝓓 : 𝕋 → Node → Set ℓ
+  𝓓 s k = k ∉ᵤ 𝓡 (t + s) × ∃ λ i → (i , k) ∈ᵤ Dangerous s
 
   abstract
   
-    DangerousJunk? : ∀ s → Decidable (DangerousJunk s)
-    DangerousJunk? s k = (∁? (Real? (t + s)) k) ×-dec (any? λ v → Dangerous? s (v , k))
+    𝓓? : ∀ s → Decidable (𝓓 s)
+    𝓓? s k = (∁? (𝓡? (t + s)) k) ×-dec (any? λ v → Dangerous? s (v , k))
 
-    DangerousJunk-retraction : ∀ {s k} → k ∈ᵤ DangerousJunk (suc s) →
-                               ∃ λ l → l ∈ᵤ DangerousJunk s
+
+
+
+    𝓓-retraction : ∀ {s k} → k ∈ᵤ 𝓓 (suc s) →
+                               ∃ λ l → l ∈ᵤ 𝓓 s
                                 × lengthₙ (suc t + s) k ≡ suc (lengthₙ(t + s) l)
-    DangerousJunk-retraction {s} {k} (k∉Rₜ₊₁₊ₛ , (i , k∈Dₜ₊₁₊ₛ))
-      with ¬Real-retraction (t + s) k (¬Real-cong k∉Rₜ₊₁₊ₛ (+-suc t s))
+    𝓓-retraction {s} {k} (k∉Rₜ₊₁₊ₛ , (i , k∈Dₜ₊₁₊ₛ))
+      with ¬𝓡-retraction (t + s) k (¬𝓡-cong k∉Rₜ₊₁₊ₛ (+-suc t s))
     ... | (l , p , _ , _ , p[σ¹⁺ᵗ⁺ˢ]≈kl∷p , σ¹⁺ᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢ , p[σᵗ⁺ˢXₗⱼ]≈p) = 
-      l ,
-      l∈DJₛ ,
+      l , l∈𝓓ₛ ,
       (lengthₙ-extension {t + s} {k} p[σ¹⁺ᵗ⁺ˢ]≈kl∷p p[σᵗ⁺ˢXₗⱼ]≈p)
 
       where
@@ -140,16 +142,16 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step3_Dange
       σᵗ⁺¹⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢ : σ^ (t + suc s) X k j ≈ A k l ▷ σ^ (t + s) X l j
       σᵗ⁺¹⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢ = ≈-trans (≈-reflexive (cong (λ v → σ^ v X k j) (+-suc t s))) σ¹⁺ᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢ
       
-      l∈DJₛ : l ∈ᵤ DangerousJunk s
-      l∈DJₛ = Dangerous-predNotReal (¬Real⇒∉F k∉Rₜ₊₁₊ₛ) σᵗ⁺¹⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢ k∈Dₜ₊₁₊ₛ ,
+      l∈𝓓ₛ : l ∈ᵤ 𝓓 s
+      l∈𝓓ₛ = Dangerous-predNot𝓡 (¬𝓡⇒∉C k∉Rₜ₊₁₊ₛ) σᵗ⁺¹⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢ k∈Dₜ₊₁₊ₛ ,
               (k , Dangerous-retraction σᵗ⁺¹⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢ k∈Dₜ₊₁₊ₛ)
       
       
-  junk-length : ∀ s {i} → i ∈ᵤ DangerousJunk s → s < lengthₙ (t + s) i
-  junk-length zero    {i} (k∉Rₜ₊ₛ , _) = ¬Real-length (t + zero) i k∉Rₜ₊ₛ
-  junk-length (suc s) {i} ik∈Dₛ with DangerousJunk-retraction ik∈Dₛ
+  𝓓-length : ∀ s {i} → i ∈ᵤ 𝓓 s → s < lengthₙ (t + s) i
+  𝓓-length zero    {i} (k∉Rₜ₊ₛ , _) = ¬𝓡-length (t + zero) i k∉Rₜ₊ₛ
+  𝓓-length (suc s) {i} ik∈Dₛ with 𝓓-retraction ik∈Dₛ
   ... | (l , l∈Jₛ , |i|≡1+|l|) = begin
-    suc s                    <⟨ s≤s (junk-length s l∈Jₛ) ⟩
+    suc s                    <⟨ s≤s (𝓓-length s l∈Jₛ) ⟩
     suc (lengthₙ (t + s) l)  ≡⟨ sym |i|≡1+|l| ⟩
     lengthₙ (suc t + s) i    ≡⟨ sym (cong (λ v → lengthₙ v i) (+-suc t s)) ⟩
     lengthₙ (t + suc s) i    ∎

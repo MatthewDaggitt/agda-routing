@@ -61,7 +61,9 @@ module RoutingLib.Data.SimplePath.Properties {n : ℕ} where
     length-cong invalid     = refl
     length-cong (valid p≈q) = NEP.length-cong p≈q
 
-
+    ----------------------------------------------------------------------------
+    -- Other
+    
     -- Ordering
 {-
     ≤ₚ-refl : Reflexive (_≤ₚ_ {n})

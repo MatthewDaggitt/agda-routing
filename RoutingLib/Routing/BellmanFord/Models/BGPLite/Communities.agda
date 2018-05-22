@@ -7,61 +7,61 @@ open import Relation.Binary.PropositionalEquality
 open import Level using () renaming (zero to ℓ₀)
 import Data.AVL <-isStrictTotalOrder as AVL
 
-module RoutingLib.Routing.Models.BGPLite.Communities where
+module RoutingLib.Routing.BellmanFord.Models.BGPLite.Communities where
 
-  abstract
+abstract
 
-    Community : Set
-    Community = ℕ
+  Community : Set
+  Community = ℕ
 
-    CommunitySet : Set
-    CommunitySet = AVL.Tree (λ _ → ℕ)
+  CommunitySet : Set
+  CommunitySet = AVL.Tree (λ _ → ℕ)
 
-    ∅ : CommunitySet
-    ∅ = AVL.empty
-    
-    add : Community → CommunitySet → CommunitySet
-    add com set = AVL.insert com com set
+  ∅ : CommunitySet
+  ∅ = AVL.empty
 
-    remove : Community → CommunitySet → CommunitySet
-    remove com set = AVL.delete com set
+  add : Community → CommunitySet → CommunitySet
+  add com set = AVL.insert com com set
 
-    _∈?_ : Community → CommunitySet → Bool
-    _∈?_ = AVL._∈?_
+  remove : Community → CommunitySet → CommunitySet
+  remove com set = AVL.delete com set
 
-
-    postulate _≈ᶜˢ_ : Rel CommunitySet ℓ₀
-
-    postulate ≈ᶜˢ-refl : Reflexive _≈ᶜˢ_
-
-    postulate ≈ᶜˢ-sym : Symmetric _≈ᶜˢ_
-
-    postulate ≈ᶜˢ-trans : Transitive _≈ᶜˢ_
-
-    postulate _≟ᶜˢ_ : Decidable _≈ᶜˢ_
+  _∈?_ : Community → CommunitySet → Bool
+  _∈?_ = AVL._∈?_
 
 
-    postulate ∈-resp-≈ᶜˢ : ∀ c {cs ds} → cs ≈ᶜˢ ds → c ∈? cs ≡ c ∈? ds
-    
-    postulate add-cong : ∀ c {cs ds} → cs ≈ᶜˢ ds → add c cs ≈ᶜˢ add c ds
+  postulate _≈ᶜˢ_ : Rel CommunitySet ℓ₀
 
-    postulate remove-cong : ∀ c {cs ds} → cs ≈ᶜˢ ds → remove c cs ≈ᶜˢ remove c ds
+  postulate ≈ᶜˢ-refl : Reflexive _≈ᶜˢ_
+
+  postulate ≈ᶜˢ-sym : Symmetric _≈ᶜˢ_
+
+  postulate ≈ᶜˢ-trans : Transitive _≈ᶜˢ_
+
+  postulate _≟ᶜˢ_ : Decidable _≈ᶜˢ_
 
 
-    postulate _≤ᶜˢ_ : Rel CommunitySet ℓ₀
+  postulate ∈-resp-≈ᶜˢ : ∀ c {cs ds} → cs ≈ᶜˢ ds → c ∈? cs ≡ c ∈? ds
 
-    postulate ≤ᶜˢ-refl : Reflexive _≤ᶜˢ_
+  postulate add-cong : ∀ c {cs ds} → cs ≈ᶜˢ ds → add c cs ≈ᶜˢ add c ds
 
-    postulate ≤ᶜˢ-reflexive : _≈ᶜˢ_ ⇒ _≤ᶜˢ_
-    
-    postulate ≤ᶜˢ-antisym : Antisymmetric _≈ᶜˢ_ _≤ᶜˢ_
+  postulate remove-cong : ∀ c {cs ds} → cs ≈ᶜˢ ds → remove c cs ≈ᶜˢ remove c ds
 
-    postulate ≤ᶜˢ-trans : Transitive _≤ᶜˢ_
 
-    postulate ≤ᶜˢ-total : Total _≤ᶜˢ_
+  postulate _≤ᶜˢ_ : Rel CommunitySet ℓ₀
 
-    postulate ≤ᶜˢ-minimum : Minimum _≤ᶜˢ_ ∅
+  postulate ≤ᶜˢ-refl : Reflexive _≤ᶜˢ_
 
-    postulate ≤ᶜˢ-respˡ-≈ᶜˢ : ∀ {x y z} → y ≈ᶜˢ z → x ≤ᶜˢ y → x ≤ᶜˢ z
+  postulate ≤ᶜˢ-reflexive : _≈ᶜˢ_ ⇒ _≤ᶜˢ_
 
-    postulate ≤ᶜˢ-respʳ-≈ᶜˢ : ∀ {x y z} → y ≈ᶜˢ z → y ≤ᶜˢ x → z ≤ᶜˢ x
+  postulate ≤ᶜˢ-antisym : Antisymmetric _≈ᶜˢ_ _≤ᶜˢ_
+
+  postulate ≤ᶜˢ-trans : Transitive _≤ᶜˢ_
+
+  postulate ≤ᶜˢ-total : Total _≤ᶜˢ_
+
+  postulate ≤ᶜˢ-minimum : Minimum _≤ᶜˢ_ ∅
+
+  postulate ≤ᶜˢ-respˡ-≈ᶜˢ : ∀ {x y z} → y ≈ᶜˢ z → x ≤ᶜˢ y → x ≤ᶜˢ z
+
+  postulate ≤ᶜˢ-respʳ-≈ᶜˢ : ∀ {x y z} → y ≈ᶜˢ z → y ≤ᶜˢ x → z ≤ᶜˢ x

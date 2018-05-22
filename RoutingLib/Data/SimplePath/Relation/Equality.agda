@@ -26,6 +26,8 @@ module RoutingLib.Data.SimplePath.Relation.Equality where
     _≉ₚ_ : Rel (SimplePath n) ℓ₀
     xs ≉ₚ ys = ¬ (xs ≈ₚ ys)
 
+    p≉i∷p : ∀ {e} {p : SimplePathⁿᵗ n} {e⇿p e∉p} → ¬ (valid p ≈ₚ valid (e ∷ p ∣ e⇿p ∣ e∉p))
+    p≉i∷p (valid v) = NE.p≉i∷p v
 
     ----------------------------------------------------------------------------
     -- Properties

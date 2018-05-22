@@ -264,7 +264,7 @@ record IsPathAlgebra
     isRoutingAlgebra : IsRoutingAlgebra _≈_ _⊕_ _▷_ 0# ∞
 
     path-cong      : path Preserves _≈_ ⟶ _≈ₚ_
-    r≈1⇒path[r]≈[] : ∀ {r} → r ≈ 0# → path r ≈ₚ valid [] 
+    r≈0⇒path[r]≈[] : ∀ {r} → r ≈ 0# → path r ≈ₚ valid [] 
     r≈∞⇒path[r]≈∅  : ∀ {r} → r ≈ ∞ → path r ≈ₚ invalid
     path[r]≈∅⇒r≈∞  : ∀ {r} → path r ≈ₚ invalid  → r ≈ ∞
     path-reject    : ∀ {i j r p} → path r ≈ₚ valid p → ¬ (i , j) ⇿ p ⊎ i ∈ p →

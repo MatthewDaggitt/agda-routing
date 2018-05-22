@@ -67,10 +67,6 @@ module RoutingLib.Data.SimplePath.NonEmpty.Properties {n} where
     length-cong []        = refl
     length-cong (_ ∷ p≈ₚq) = cong suc (length-cong p≈ₚq)
 
-    p≉i∷p : ∀ {e} {p : SimplePathⁿᵗ n} {e⇿p e∉p} → ¬ (p ≈ₚ e ∷ p ∣ e⇿p ∣ e∉p)
-    p≉i∷p {p = []}            ()
-    p≉i∷p {p = _ ∷ _ ∣ _ ∣ _} (_ ∷ p≈ₚi∷p) = p≉i∷p p≈ₚi∷p
-
 
     ∉-lookup : ∀ {p : SimplePathⁿᵗ n} (p⁺ : NonEmpty p) →
                ∀ {i} → i ∉ p → ∀ k → lookupᵥ p⁺ k ≢ i

@@ -91,12 +91,12 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step1_NodeS
   𝓒-path : ∀ t {i p} → path (σ^ t X i j) ≈ₚ p → i ∈ᵤ 𝓒 t → Allₙ (𝓒 t) p
   𝓒-path t {i} {invalid}  _ _ = invalid
   𝓒-path t {i} {valid []} _ _ = valid []
-  𝓒-path t {i} {valid ((_ , k) ∷ p ∣ _ ∣ _)} p[σᵗXᵢⱼ]≈ik∷p i∈Fₜ@(i∈Sₜ , ik∷p∈Sₜ)  
-    with 𝓕-alignment t i∈Sₜ p[σᵗXᵢⱼ]≈ik∷p
-  ... | refl , σᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ , p[σᵗXₖⱼ]≈p with Allₙ-resp-≈ₚ ik∷p∈Sₜ p[σᵗXᵢⱼ]≈ik∷p
-  ...   | (valid ([ _ , k∈Sₜ ]∷ p∈Sₜ)) with Allₙ-resp-≈ₚ (valid p∈Sₜ) (≈ₚ-sym p[σᵗXₖⱼ]≈p)
-  ...     | k∈Fₜ with 𝓒-path t p[σᵗXₖⱼ]≈p (k∈Sₜ , k∈Fₜ)
-  ...       | valid p∈Fₜ = valid ([ i∈Fₜ , (k∈Sₜ , k∈Fₜ) ]∷ p∈Fₜ)
+  𝓒-path t {i} {valid ((_ , k) ∷ p ∣ _ ∣ _)} p[σᵗXᵢⱼ]≈ik∷p i∈𝓒ₜ@(i∈𝓕ₜ , ik∷p∈𝓕ₜ)  
+    with 𝓕-alignment t i∈𝓕ₜ p[σᵗXᵢⱼ]≈ik∷p
+  ... | refl , _ , p[σᵗXₖⱼ]≈p with Allₙ-resp-≈ₚ ik∷p∈𝓕ₜ p[σᵗXᵢⱼ]≈ik∷p
+  ...   | (valid ([ _ , k∈𝓕ₜ ]∷ p∈𝓕ₜ)) with Allₙ-resp-≈ₚ (valid p∈𝓕ₜ) (≈ₚ-sym p[σᵗXₖⱼ]≈p)
+  ...     | k∈𝓒ₜ with 𝓒-path t p[σᵗXₖⱼ]≈p (k∈𝓕ₜ , k∈𝓒ₜ)
+  ...       | valid p∈𝓒ₜ = valid ([ i∈𝓒ₜ , (k∈𝓕ₜ , k∈𝓒ₜ) ]∷ p∈𝓒ₜ)
 
   𝓒-eq : ∀ t k s₁ s₂ → k ∈ᵤ 𝓒 t → σ^ (t + s₁) X k j ≈ σ^ (t + s₂) X k j
   𝓒-eq t k s₁ s₂ (k∈Sₜ , _) = begin

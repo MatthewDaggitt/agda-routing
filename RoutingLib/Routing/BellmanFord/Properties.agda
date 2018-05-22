@@ -106,3 +106,9 @@ abstract
   -- After an iteration, the diagonals of any two RMatrices are equal
   σXᵢᵢ≈σYᵢᵢ : ∀ X Y i → σ X i i ≈ σ Y i i
   σXᵢᵢ≈σYᵢᵢ X Y i = ≈-trans (σXᵢᵢ≈Iᵢᵢ X i) (≈-sym (σXᵢᵢ≈Iᵢᵢ Y i))
+
+{-
+  -- Conditions for choosing an extension
+  σXᵢⱼ≈AᵢₖXₖⱼ : ∀ X i j k → (∀ l → A i k ▷ X k j ≤₊ A i l ▷ X k j) → σ X i j ≈ A i k ▷ X k j
+  σXᵢⱼ≈AᵢₖXₖⱼ X i j k k≤l = {!!}
+-}

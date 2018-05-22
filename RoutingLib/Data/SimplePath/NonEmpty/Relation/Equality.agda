@@ -37,6 +37,10 @@ module RoutingLib.Data.SimplePath.NonEmpty.Relation.Equality where
     
     abstract
 
+      p≉i∷p : ∀ {e} {p : SimplePathⁿᵗ n} {e⇿p e∉p} → ¬ (p ≈ₚ e ∷ p ∣ e⇿p ∣ e∉p)
+      p≉i∷p {p = []}            ()
+      p≉i∷p {p = _ ∷ _ ∣ _ ∣ _} (_ ∷ p≈ₚi∷p) = p≉i∷p p≈ₚi∷p
+    
       -- Injectivity properties
 
       module _ {i j k l p q w x y z} where

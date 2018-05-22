@@ -59,7 +59,18 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step4_Induc
     t = suc t-1
 
   ------------------------------------------------------------------------
-  -- Therefore at time (t + n) there is no more dangerous junk
+  -- eₘᵢₙ is the best candidate route at time t + (n-1 + s)
+
+  eₘᵢₙ≤ₜ₊ₙ₋₁₊ₛe : ∀ s k → eₘᵢₙ ≤[ t + (n-1 + s) ] (iₘᵢₙ , k)
+  eₘᵢₙ≤ₜ₊ₙ₋₁₊ₛe s k with 𝓡? (t + (n-1 + s)) k | k ∈? C
+  ... | _        | yes k∈C = eₘᵢₙ-isMinₜ₊ₛ (iₘᵢₙ∉C , k∈C) (n-1 + s)
+  ... | yes k∈𝓡 | no  k∉C = ∈𝓡 (n-1 + s) iₘᵢₙ k∈𝓡 k∉C ≈ₚ-refl
+  ... | no  k∉𝓡 | _       with eₘᵢₙ ≤[ t + (n-1 + s) ]? (iₘᵢₙ , k)
+  ...   | yes eₘᵢₙ≤e = eₘᵢₙ≤e
+  ...   | no  eₘᵢₙ≰e = contradiction
+    (𝓓-length (n-1 + s) (k∉𝓡 , (iₘᵢₙ , ≰₊⇒>₊ eₘᵢₙ≰e)))
+    (<⇒≱ (<-transˡ (lengthₑ<n (t + (n-1 + s)) (iₘᵢₙ , k)) (m≤m+n n s)))
+
 
   iₘᵢₙ-pred≤ : ∀ s → A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + n-1 + s) X kₘᵢₙ j ≤₊ σ^ (suc (t + n-1 + s)) X iₘᵢₙ j
   iₘᵢₙ-pred≤ s with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ (σ^ (t + n-1 + s) X) iₘᵢₙ j
@@ -69,22 +80,13 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step4_Induc
     I iₘᵢₙ j                                ≈⟨ ≈-sym σXᵢⱼ≈Iᵢⱼ ⟩
     σ^ (suc (t + n-1 + s)) X iₘᵢₙ j         ∎
     where open POR ≤₊-poset
-  ... | inj₁ (k , σXᵢⱼ≈AᵢₖXₖⱼ) with eₘᵢₙ ≤[ t + (n-1 + s) ]? (iₘᵢₙ , k)
-  ...   | yes eₘᵢₙ≤e = begin
+  ... | inj₁ (k , σXᵢⱼ≈AᵢₖXₖⱼ) = begin
     A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + n-1 + s)   X kₘᵢₙ j ≈⟨ ≈-reflexive (cong (λ v → A iₘᵢₙ kₘᵢₙ ▷ σ^ v X kₘᵢₙ j) (+-assoc t n-1 s)) ⟩
-    A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + (n-1 + s)) X kₘᵢₙ j ≤⟨ eₘᵢₙ≤e ⟩
+    A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + (n-1 + s)) X kₘᵢₙ j ≤⟨ eₘᵢₙ≤ₜ₊ₙ₋₁₊ₛe s k ⟩
     A iₘᵢₙ k    ▷ σ^ (t + (n-1 + s)) X k    j ≈⟨ ≈-reflexive (cong (λ v → A iₘᵢₙ k ▷ σ^ v X k j) (sym (+-assoc t n-1 s))) ⟩
     A iₘᵢₙ k    ▷ σ^ (t + n-1 + s)   X k    j ≈⟨ ≈-sym σXᵢⱼ≈AᵢₖXₖⱼ ⟩
     σ^ (suc (t + n-1 + s)) X iₘᵢₙ j           ∎
     where open POR ≤₊-poset
-  ...   | no  eₘᵢₙ≰e with 𝓡? (t + (n-1 + s)) k
-  ...     | no  k∉R = contradiction
-    (𝓓-length (n-1 + s) (k∉R , (iₘᵢₙ , ≰₊⇒>₊ eₘᵢₙ≰e)))
-    (<⇒≱ (<-transˡ (lengthₑ<n (t + (n-1 + s)) (iₘᵢₙ , k)) (m≤m+n n s)))
-  ...     | yes k∈R with k ∈? C
-  ...       | yes  k∈C = contradiction (eₘᵢₙ-isMinₜ₊ₛ (iₘᵢₙ∉C , k∈C) (n-1 + s)) eₘᵢₙ≰e
-  ...       | no   k∉C = contradiction (∈𝓡 (n-1 + s) iₘᵢₙ k∈R k∉C ≈ₚ-refl) eₘᵢₙ≰e
-
 
   iₘᵢₙ-pred : ∀ s → σ^ (t + n + s) X iₘᵢₙ j ≈ A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + (n-1 + s)) X kₘᵢₙ j
   iₘᵢₙ-pred s = begin
@@ -95,6 +97,17 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step4_Induc
     A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + (n-1 + s)) X kₘᵢₙ j ∎
     where open EqReasoning S
     
+  iₘᵢₙ∈𝓕ₜ₊ₙ : iₘᵢₙ ∈ᵤ 𝓕 (t + n)
+  iₘᵢₙ∈𝓕ₜ₊ₙ s = begin
+    σ^ (t + n + s) X iₘᵢₙ j                    ≈⟨ iₘᵢₙ-pred s ⟩
+    A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + (n-1 + s)) X kₘᵢₙ j  ≈⟨ ▷-cong (A iₘᵢₙ kₘᵢₙ)
+                                                  (𝓒-eq t kₘᵢₙ (n-1 + s) (n-1 + 0) kₘᵢₙ∈𝓒ₜ) ⟩
+    A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + (n-1 + 0)) X kₘᵢₙ j  ≈⟨ ≈-sym (iₘᵢₙ-pred 0) ⟩
+    σ^ (t + n + 0) X iₘᵢₙ j                    ≡⟨ cong (λ v → σ^ v X iₘᵢₙ j) (+-identityʳ (t + n)) ⟩
+    σ^ (t + n)     X iₘᵢₙ j                    ∎
+    where open EqReasoning S
+
+
 
   private
 
@@ -107,18 +120,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step4_Induc
       path (σ^ (t + n) X iₘᵢₙ j)                       ≡⟨ eq ⟩
       p                                                ∎
       where open EqReasoning (ℙₛ n)
-
-
-  iₘᵢₙ∈𝓕ₜ₊ₙ : iₘᵢₙ ∈ᵤ 𝓕 (t + n)
-  iₘᵢₙ∈𝓕ₜ₊ₙ s = begin
-    σ^ (t + n + s) X iₘᵢₙ j                    ≈⟨ iₘᵢₙ-pred s ⟩
-    A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + (n-1 + s)) X kₘᵢₙ j  ≈⟨ ▷-cong (A iₘᵢₙ kₘᵢₙ)
-                                                  (𝓒-eq t kₘᵢₙ (n-1 + s) (n-1 + 0) kₘᵢₙ∈𝓒ₜ) ⟩
-    A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + (n-1 + 0)) X kₘᵢₙ j  ≈⟨ ≈-sym (iₘᵢₙ-pred 0) ⟩
-    σ^ (t + n + 0) X iₘᵢₙ j                   ≡⟨ cong (λ v → σ^ v X iₘᵢₙ j) (+-identityʳ (t + n)) ⟩
-    σ^ (t + n)     X iₘᵢₙ j                   ∎
-    where open EqReasoning S
-
+      
   p[iₘᵢₙ]∈𝓕ₜ₊ₙ : Allₙ (𝓕 (t + n)) (path (σ^ (t + n) X iₘᵢₙ j))
   p[iₘᵢₙ]∈𝓕ₜ₊ₙ with path (σ^ (t + n) X iₘᵢₙ j) | inspect path (σ^ (t + n) X iₘᵢₙ j)
   ... | invalid                     | _ = invalid

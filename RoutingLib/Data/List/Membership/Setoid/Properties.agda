@@ -44,72 +44,9 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     open Setoid S renaming (Carrier to A; refl to ≈-refl)
     open Setoid (list-setoid S) using () renaming (_≈_ to _≈ₗ_; sym to symₗ; refl to reflₗ)
 
-    open import Data.List.Any.Membership S using (_∈_; _∉_; _⊆_)
-    open import Data.List.Any.Membership (list-setoid S) using () renaming (_∈_ to _∈ₗ_)
-
-    -- stdlib
-    ∈-resp-≈ : ∀ {v w xs} → v ∈ xs → v ≈ w → w ∈ xs
-    ∈-resp-≈ (here v≈x)   v≈w = here (trans (sym v≈w) v≈x)
-    ∈-resp-≈ (there v∈xs) v≈w = there (∈-resp-≈ v∈xs v≈w)
-
-    -- stdlib
-    ∈-resp-≈ₗ : ∀ {v xs ys} → v ∈ xs → xs ≈ₗ ys → v ∈ ys
-    ∈-resp-≈ₗ (here v≈x) (x≈y ∷ _) = here (trans v≈x x≈y)
-    ∈-resp-≈ₗ (there v∈xs) (_ ∷ xs≈ys) = there (∈-resp-≈ₗ v∈xs xs≈ys)
-
-
-    ∉-resp-≈ : ∀ {v w xs} → v ∉ xs → v ≈ w → w ∉ xs
-    ∉-resp-≈ v∉xs v≈w w∈xs = v∉xs (∈-resp-≈ w∈xs (sym v≈w))
-    
-    ∉-resp-≈ₗ : ∀ {v xs ys} → v ∉ xs → xs ≈ₗ ys → v ∉ ys
-    ∉-resp-≈ₗ v∉xs xs≈ys v∈ys = v∉xs (∈-resp-≈ₗ v∈ys (symₗ xs≈ys))
-
-
-    -- stdlib
-    ∈-++⁺ʳ : ∀ {v} xs {ys} → v ∈ ys → v ∈ xs ++ ys
-    ∈-++⁺ʳ = ++⁺ʳ
-
-    -- stdlib
-    ∈-++⁺ˡ : ∀ {v xs ys} → v ∈ xs → v ∈ xs ++ ys
-    ∈-++⁺ˡ = ++⁺ˡ
-
-    -- stdlib
-    ∈-++⁻ : ∀ {v} xs {ys} → v ∈ xs ++ ys → v ∈ xs ⊎ v ∈ ys
-    ∈-++⁻ = ++⁻
-
-
-    -- stdlib
-    ∈-concat⁺ : ∀ {v xs xss} → v ∈ xs → xs ∈ₗ xss → v ∈ concat xss
-    ∈-concat⁺ {_} {_ ∷ _} {[] ∷ _}         (here _)     (here ())
-    ∈-concat⁺ {_} {_ ∷ _} {[] ∷ _}         (there _)    (here ())
-    ∈-concat⁺ {_} {_ ∷ _} {(_ ∷ _) ∷ _}    (here v≈x)   (here (x≈y ∷ _))   = here (trans v≈x x≈y)
-    ∈-concat⁺ {_} {_ ∷ _} {(y ∷ ys) ∷ xss} (there v∈xs) (here (_ ∷ xs≈ys)) = there (∈-concat⁺ {xss = ys ∷ xss} v∈xs (here xs≈ys))
-    ∈-concat⁺ {_} {_ ∷ _} {ys ∷ xss}       v∈xs         (there s)          = ∈-++⁺ʳ ys (∈-concat⁺ v∈xs (s))
-
-    -- stdlib
-    ∈-concat⁻ : ∀ {v xss} → v ∈ concat xss → ∃ λ ys → v ∈ ys × ys ∈ₗ xss
-    ∈-concat⁻ {_} {[]} ()
-    ∈-concat⁻ {_} {[] ∷ []} ()
-    ∈-concat⁻ {_} {[] ∷ (xs ∷ xss)} v∈concat[xs∷xss] with ∈-concat⁻ v∈concat[xs∷xss]
-    ... | (ys , v∈ys , ys∈xss) = ys , v∈ys , there ys∈xss
-    ∈-concat⁻ {_} {(x ∷ xs) ∷ xss} (here v≈x) = x ∷ xs , here v≈x , here reflₗ
-    ∈-concat⁻ {_} {(x ∷ xs) ∷ xss} (there v∈concat[xs∷xss]) with ∈-concat⁻ {xss = xs ∷ xss} v∈concat[xs∷xss]
-    ... | (ys , v∈ys , here ys≈xs)   = x ∷ xs , ∈-resp-≈ₗ (there v∈ys) (≈-refl ∷ ys≈xs) , here reflₗ
-    ... | (ys , v∈ys , there ys∈xss) = ys , v∈ys , there ys∈xss
-
-
-    -- stdlib
-    ∈-tabulate⁺ : ∀ {n} (f : Fin n → A) i → f i ∈ tabulate f
-    ∈-tabulate⁺ f i = tabulate⁺ i ≈-refl
-    
-    -- stdlib
-    ∈-tabulate⁻ : ∀ {n} {f : Fin n → A} {x} → x ∈ tabulate f → ∃ λ i → x ≈ f i
-    ∈-tabulate⁻ = tabulate⁻
-
-    -- stdlib
-    ∈-applyUpTo⁺ : ∀ f {n i} → i < n → f i ∈ applyUpTo f n
-    ∈-applyUpTo⁺ f (s≤s z≤n)       = here ≈-refl
-    ∈-applyUpTo⁺ f (s≤s (s≤s i≤n)) = there (∈-applyUpTo⁺ (f ∘ suc) (s≤s i≤n))
+    open import Data.List.Membership.Setoid S using (_∈_; _∉_)
+    open import Data.List.Membership.Setoid.Properties
+    open import Data.List.Membership.Setoid (list-setoid S) using () renaming (_∈_ to _∈ₗ_)
 
     {-
     ∈-applyBetween⁺ : ∀ f {s e i} → s ≤ i → i < e → f i ∈ applyBetween f s e
@@ -118,28 +55,6 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     ∈-applyBetween⁻ : ∀ f s e {v} → v ∈ applyBetween f s e → ∃ λ i → s ≤ i × i < e × v ≈ f i
     ∈-applyBetween⁻ f s e v∈ = Any-applyBetween⁻ f s e v∈
     -}
-
-    -- filter
-
-    -- stdlib
-    ∈-filter⁺ : ∀ {p} {P : A → Set p} (P? : Decidable P) → P Respects _≈_ →
-                 ∀ {v} → P v → ∀ {xs} → v ∈ xs → v ∈ filter P? xs
-    ∈-filter⁺ P? resp Pv {x ∷ _} (here v≈x)   with P? x
-    ... | yes _   = here v≈x
-    ... | no  ¬Px = contradiction (resp v≈x Pv) ¬Px
-    ∈-filter⁺ P? resp Pv {x ∷ _} (there v∈xs) with P? x
-    ... | yes _ = there (∈-filter⁺ P? resp Pv v∈xs)
-    ... | no  _ = ∈-filter⁺ P? resp Pv v∈xs
-
-    -- stdlib
-    ∈-filter⁻ : ∀ {p} {P : A → Set p} (P? : Decidable P) → P Respects _≈_ →
-                 ∀ {v xs} → v ∈ filter P? xs → v ∈ xs × P v
-    ∈-filter⁻ P? resp {v} {[]}     ()
-    ∈-filter⁻ P? resp {v} {x ∷ xs} v∈filter with P? x | v∈filter
-    ... | no  _  | v∈df       = mapₚ there id (∈-filter⁻ P? resp v∈df)
-    ... | yes Px | here  v≈x  = here v≈x , resp (sym v≈x) Px
-    ... | yes Px | there v∈df = mapₚ there id (∈-filter⁻ P? resp v∈df)
-
 
 
     ∉-filter₁ : ∀ {p} {P : A → Set p} (P? : Decidable P) {v} {xs} → v ∉ xs → v ∉ filter P? xs
@@ -156,47 +71,13 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     ... | yes Px | here  v≈x     = ¬Pv (resp (sym v≈x) Px)
     ... | yes _  | there v∈f[xs] = ∉-filter₂ P? resp ¬Pv xs v∈f[xs]
 
-    
-    ⊆-filter : ∀ {p} {P : A → Set p} (P? : Decidable P)
-                  {q} {Q : A → Set q} (Q? : Decidable Q) → 
-                  P ⋐ Q → 
-                  ∀ xs → filter P? xs ⊆ filter Q? xs
-    ⊆-filter P? Q? P⋐Q [] ()
-    ⊆-filter P? Q? P⋐Q (x ∷ xs) v∈f[x∷xs] with P? x | Q? x
-    ... | no  _  | no  _  = ⊆-filter P? Q? P⋐Q xs v∈f[x∷xs]
-    ... | yes Px | no ¬Qx = contradiction (P⋐Q Px) ¬Qx
-    ... | no  _  | yes _  = there (⊆-filter P? Q? P⋐Q xs v∈f[x∷xs])
-    ... | yes _  | yes _  with v∈f[x∷xs]
-    ...   | here  v≈x     = here v≈x
-    ...   | there v∈f[xs] = there (⊆-filter P? Q? P⋐Q xs v∈f[xs])
-
-    -- stdlib
-    foldr-∈ : ∀ {_•_} → Selective _≈_ _•_ → ∀ e xs → foldr _•_ e xs ≈ e ⊎ foldr _•_ e xs ∈ xs 
-    foldr-∈ {_}   •-sel i [] = inj₁ ≈-refl
-    foldr-∈ {_•_} •-sel i (x ∷ xs) with •-sel x (foldr _•_ i xs)
-    ... | inj₁ x•f≈x = inj₂ (here x•f≈x)
-    ... | inj₂ x•f≈f with foldr-∈ •-sel i xs
-    ...   | inj₁ f≈i  = inj₁ (trans x•f≈f f≈i)
-    ...   | inj₂ f∈xs = inj₂ (∈-resp-≈ (there f∈xs) (sym x•f≈f))
-
     ∈-perm : ∀ {x xs ys} → x ∈ xs → xs ⇿ ys → x ∈ ys
     ∈-perm = Any-⇿
 
-    -- stdlib
-    ∈-length : ∀ {x xs} → x ∈ xs → 1 ≤ length xs
-    ∈-length {_} {_ ∷ xs} (here px)    = s≤s z≤n
-    ∈-length {_} {_ ∷ xs} (there x∈xs) = ≤-trans (∈-length x∈xs) (n≤1+n (length xs))
-    
-    -- stdlib
-    ∈-lookup : ∀ xs i → lookup xs i ∈ xs
-    ∈-lookup []       ()
-    ∈-lookup (x ∷ xs) fzero    = here ≈-refl
-    ∈-lookup (x ∷ xs) (fsuc i) = there (∈-lookup xs i)
-
     index-cong : ∀ {x y xs} → (x∈xs : x ∈ xs) (y∈xs : y ∈ xs) → Unique S xs → x ≈ y → index x∈xs ≡ index y∈xs
     index-cong (here x≈z)   (here y≈z)   _            x≈y = refl
-    index-cong (here x≈z)   (there y∈xs) (z≉xs ∷ xs!) x≈y = contradiction (∈-resp-≈ y∈xs (trans (sym x≈y) x≈z)) (All¬⇒¬Any z≉xs)
-    index-cong (there x∈xs) (here y≈z)   (z≉xs ∷ xs!) x≈y = contradiction (∈-resp-≈ x∈xs (trans x≈y y≈z)) (All¬⇒¬Any z≉xs)
+    index-cong (here x≈z)   (there y∈xs) (z≉xs ∷ xs!) x≈y = contradiction (∈-resp-≈ S (trans (sym x≈y) x≈z) y∈xs) (All¬⇒¬Any z≉xs)
+    index-cong (there x∈xs) (here y≈z)   (z≉xs ∷ xs!) x≈y = contradiction (∈-resp-≈ S (trans x≈y y≈z) x∈xs) (All¬⇒¬Any z≉xs)
     index-cong (there x∈xs) (there y∈xs) (_ ∷ xs!)    x≈y = cong fsuc (index-cong x∈xs y∈xs xs! x≈y)
     
 
@@ -210,19 +91,8 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
 
     open Setoid S₁ using () renaming (Carrier to A; _≈_ to _≈₁_; refl to refl₁; reflexive to reflexive₁; sym to sym₁; trans to trans₁)
     open Setoid S₂ using () renaming (Carrier to B; _≈_ to _≈₂_; refl to refl₂; reflexive to reflexive₂; sym to sym₂; trans to trans₂)
-    open import Data.List.Any.Membership S₁ using () renaming (_∈_ to _∈₁_)
-    open import Data.List.Any.Membership S₂ using () renaming (_∈_ to _∈₂_)
-
-    -- stdlib
-    ∈-map⁺ : ∀ {f} → f Preserves _≈₁_ ⟶ _≈₂_ → ∀ {v xs} → v ∈₁ xs → f v ∈₂ map f xs
-    ∈-map⁺ f-pres v∈xs = map⁺ (mapₐ f-pres v∈xs)
-
-    -- stdlib
-    ∈-map⁻ : ∀ {f v xs} → v ∈₂ map f xs → ∃ λ a → a ∈₁ xs × v ≈₂ f a
-    ∈-map⁻ {xs = []}     ()
-    ∈-map⁻ {xs = x ∷ xs} (here v≈fx) = x , here refl₁ , v≈fx
-    ∈-map⁻ {xs = x ∷ xs} (there v∈mapfxs) with ∈-map⁻ v∈mapfxs
-    ... | a , a∈xs , v≈fa = a , there a∈xs , v≈fa
+    open import Data.List.Membership.Setoid S₁ using () renaming (_∈_ to _∈₁_)
+    open import Data.List.Membership.Setoid S₂ using () renaming (_∈_ to _∈₂_)
 
     {-
     ∈-mapMaybe : ∀ P {v xs a} → v ∈₁ xs → Eq _≈₂_ (P v) (just a) → (∀ {x y} → x ≈₁ y → Eq _≈₂_ (P x) (P y)) → a ∈₂ mapMaybe P xs
@@ -244,14 +114,16 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     open Setoid S₁ using () renaming (Carrier to A; _≈_ to _≈₁_; refl to refl₁; sym to sym₁; trans to trans₁)
     open Setoid S₂ using () renaming (Carrier to B; _≈_ to _≈₂_; refl to refl₂; sym to sym₂; trans to trans₂)
     open Setoid S₃ using () renaming (Carrier to C; _≈_ to _≈₃_; refl to refl₃; sym to sym₃; trans to trans₃)
-    open import Data.List.Any.Membership S₁ using () renaming (_∈_ to _∈₁_)
-    open import Data.List.Any.Membership S₂ using () renaming (_∈_ to _∈₂_)
-    open import Data.List.Any.Membership S₃ using () renaming (_∈_ to _∈₃_)
+    open import Data.List.Membership.Setoid S₁ using () renaming (_∈_ to _∈₁_)
+    open import Data.List.Membership.Setoid S₂ using () renaming (_∈_ to _∈₂_)
+    open import Data.List.Membership.Setoid S₃ using () renaming (_∈_ to _∈₃_)
+
+    open import Data.List.Membership.Setoid.Properties
 
     -- combine
 
     ∈-combine : ∀ {f} → f Preserves₂ _≈₁_ ⟶ _≈₂_ ⟶ _≈₃_ → ∀ {xs ys a b} → a ∈₁ xs → b ∈₂ ys → f a b ∈₃ combine f xs ys
-    ∈-combine pres {_ ∷ _} {ys} (here  a≈x)  b∈ys = ∈-resp-≈ S₃ (∈-++⁺ˡ S₃ (∈-map⁺ S₂ S₃ (pres refl₁) b∈ys)) (pres (sym₁ a≈x) refl₂)
+    ∈-combine pres {_ ∷ _} {ys} (here  a≈x)  b∈ys = ∈-resp-≈ S₃ (pres (sym₁ a≈x) refl₂) (∈-++⁺ˡ S₃ (∈-map⁺ S₂ S₃ (pres refl₁) b∈ys))
     ∈-combine pres {_ ∷ _} {ys} (there a∈xs) b∈ys = ∈-++⁺ʳ S₃ (map _ ys) (∈-combine pres a∈xs b∈ys)
 
     combine-∈ : ∀ f xs ys {v} → v ∈₃ combine f xs ys → ∃₂ λ a b → a ∈₁ xs × b ∈₂ ys × v ≈₃ f a b

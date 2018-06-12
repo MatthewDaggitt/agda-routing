@@ -27,11 +27,11 @@ module RoutingLib.Relation.Binary.NonStrictToStrict.PartialOrder
     ; asymmetric to <-asym
     )
   
-  <≤-trans : ∀ {x y z} → x < y → y ≤ z → x < z
-  <≤-trans = NonStrictToStrict′.<≤-trans _ _≤_ Eq.sym trans antisym (proj₁ ≤-resp-≈)
+  <-≤-trans : ∀ {x y z} → x < y → y ≤ z → x < z
+  <-≤-trans = NonStrictToStrict.<-≤-trans _ _≤_ Eq.sym trans antisym (proj₁ ≤-resp-≈)
 
-  ≤<-trans : ∀ {x y z} → x ≤ y → y < z → x < z
-  ≤<-trans = NonStrictToStrict′.≤<-trans _ _≤_ trans antisym (proj₂ ≤-resp-≈)
+  ≤-<-trans : ∀ {x y z} → x ≤ y → y < z → x < z
+  ≤-<-trans = NonStrictToStrict.≤-<-trans _ _≤_ trans antisym (proj₂ ≤-resp-≈)
 
   <⇒≱ : ∀ {x y} → x < y → ¬ (y ≤ x)
   <⇒≱ = NonStrictToStrict′.<⇒≱ _ _≤_ antisym
@@ -40,7 +40,7 @@ module RoutingLib.Relation.Binary.NonStrictToStrict.PartialOrder
   ≤⇒≯ = NonStrictToStrict′.≤⇒≯ _ _≤_ antisym
 
   <-respˡ-≈ : _<_ Respectsˡ _≈_
-  <-respˡ-≈ = NonStrictToStrict′.<-respˡ-≈ _ _≤_ Eq.trans (proj₂ ≤-resp-≈)
+  <-respˡ-≈ = NonStrictToStrict.<-respˡ-≈ _ _≤_ Eq.trans (proj₂ ≤-resp-≈)
 
   <-respʳ-≈ : _<_ Respectsʳ _≈_
-  <-respʳ-≈ = NonStrictToStrict′.<-respʳ-≈ _ _≤_ Eq.sym Eq.trans (proj₁ ≤-resp-≈)
+  <-respʳ-≈ = NonStrictToStrict.<-respʳ-≈ _ _≤_ Eq.sym Eq.trans (proj₁ ≤-resp-≈)

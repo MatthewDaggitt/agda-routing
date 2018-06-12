@@ -28,5 +28,3 @@ module RoutingLib.Data.List.Relation.Length where
       ; isPreorder      to ≤ₗ-isPreorder
       ; isTotalPreorder to ≤ₗ-isTotalPreorder
       )
-
-  

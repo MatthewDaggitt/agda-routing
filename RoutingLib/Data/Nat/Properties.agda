@@ -105,10 +105,6 @@ module RoutingLib.Data.Nat.Properties where
 
     n<1+n : ∀ n → n < suc n
     n<1+n n = ≤-refl
-
-    -- stdlib
-    m+n≮m : ∀ m n → m + n ≮ m
-    m+n≮m m n = subst (_≮ m) (+-comm n m) (m+n≮n n m)
     
     m<n⇒n≡1+o : ∀ {m n} → m < n → ∃ λ o → n ≡ suc o
     m<n⇒n≡1+o {_} {zero} ()
@@ -241,63 +237,18 @@ module RoutingLib.Data.Nat.Properties where
 
     m<n×m<o⇒m<n⊓o : ∀ {m} → _⊓_ Preservesᵇ (m <_)
     m<n×m<o⇒m<n⊓o m<n m<o = subst (_< _) (⊓-idem _) (⊓-mono-< m<n m<o)
-
-    -- stdlib
-    ⊓-triangulate : ∀ x y z → x ⊓ y ⊓ z ≡ (x ⊓ y) ⊓ (y ⊓ z)
-    ⊓-triangulate x y z = begin
-      x ⊓ y ⊓ z           ≡⟨ cong (λ v → x ⊓ v ⊓ z) (sym (⊓-idem y)) ⟩
-      x ⊓ (y ⊓ y) ⊓ z     ≡⟨ ⊓-assoc x _ _ ⟩
-      x ⊓ ((y ⊓ y) ⊓ z)   ≡⟨ cong (x ⊓_) (⊓-assoc y _ _) ⟩
-      x ⊓ (y ⊓ (y ⊓ z))   ≡⟨ sym (⊓-assoc x _ _) ⟩
-      (x ⊓ y) ⊓ (y ⊓ z)   ∎
-      where open ≡-Reasoning
-
-    -- stdlib
-    ⊔-triangulate : ∀ x y z → x ⊔ y ⊔ z ≡ (x ⊔ y) ⊔ (y ⊔ z)
-    ⊔-triangulate x y z = begin
-      x ⊔ y ⊔ z           ≡⟨ cong (λ v → x ⊔ v ⊔ z) (sym (⊔-idem y)) ⟩
-      x ⊔ (y ⊔ y) ⊔ z     ≡⟨ ⊔-assoc x _ _ ⟩
-      x ⊔ ((y ⊔ y) ⊔ z)   ≡⟨ cong (x ⊔_) (⊔-assoc y _ _) ⟩
-      x ⊔ (y ⊔ (y ⊔ z))   ≡⟨ sym (⊔-assoc x _ _) ⟩
-      (x ⊔ y) ⊔ (y ⊔ z)   ∎
-      where open ≡-Reasoning
-      
+  
     -----------------
     -- Subtraction --
     -----------------
-
-    -- stdlib
-    ∸-monoˡ-≤ : ∀ {m n} → m ≤ n → ∀ o → m ∸ o ≤ n ∸ o
-    ∸-monoˡ-≤ m≤n o = ∸-mono {u = o} m≤n ≤-refl
-
-    -- stdlib
-    ∸-monoʳ-≤ : ∀ {m n} → m ≤ n → ∀ o → o ∸ n ≤ o ∸ m
-    ∸-monoʳ-≤ m≤n _ = ∸-mono ≤-refl m≤n
 
     ∸-monoʳ-< : ∀ {m n o} → o < n → n ≤ m → m ∸ n < m ∸ o
     ∸-monoʳ-< {_} {suc n} {zero}  (s≤s o<n) (s≤s n<m) = s≤s (n∸m≤n n _)
     ∸-monoʳ-< {_} {suc n} {suc o} (s≤s o<n) (s≤s n<m) = ∸-monoʳ-< o<n n<m
     
-    -- stdlib
-    m∸n≡0⇒m≤n : ∀ {m n} → m ∸ n ≡ 0 → m ≤ n
-    m∸n≡0⇒m≤n {zero}  {_}    _   = z≤n
-    m∸n≡0⇒m≤n {suc m} {zero} ()
-    m∸n≡0⇒m≤n {suc m} {suc n} eq = s≤s (m∸n≡0⇒m≤n eq)
-
-    -- stdlib
-    m≤n⇒m∸n≡0 : ∀ {m n} → m ≤ n → m ∸ n ≡ 0
-    m≤n⇒m∸n≡0 {n = n} z≤n = 0∸n≡0 n
-    m≤n⇒m∸n≡0 (s≤s m≤n)   = m≤n⇒m∸n≡0 m≤n
-
     m>n⇒m∸n≢0 : ∀ {m n} → m > n → m ∸ n ≢ 0
     m>n⇒m∸n≢0 {n = zero}  (s≤s m>n) = λ()
     m>n⇒m∸n≢0 {n = suc n} (s≤s m>n) = m>n⇒m∸n≢0 m>n
-
-    -- stdlib
-    m≮m∸n : ∀ m n → m ≮ m ∸ n
-    m≮m∸n zero    (suc n) ()
-    m≮m∸n m       zero    = n≮n m
-    m≮m∸n (suc m) (suc n) = m≮m∸n m n ∘ ≤-trans (n≤1+n (suc m))
 
     n∸1+m<n : ∀ m {n} → 1 ≤ n → n ∸ suc m < n
     n∸1+m<n m (s≤s z≤n) = s≤s (n∸m≤n m _)
@@ -311,28 +262,6 @@ module RoutingLib.Data.Nat.Properties where
     m<n⇒n∸m≡1+o {_}     {zero}  ()
     m<n⇒n∸m≡1+o {zero}  {suc n} (s≤s m<n) = n , refl
     m<n⇒n∸m≡1+o {suc m} {suc n} (s≤s m<n) = m<n⇒n∸m≡1+o m<n
-
-    
-  
-    -- stdlib
-    ∸-distribˡ-⊓-⊔ : ∀ x y z → x ∸ (y ⊓ z) ≡ (x ∸ y) ⊔ (x ∸ z)
-    ∸-distribˡ-⊓-⊔ x       zero    zero    = sym (⊔-idem x)
-    ∸-distribˡ-⊓-⊔ zero    zero    (suc z) = refl
-    ∸-distribˡ-⊓-⊔ zero    (suc y) zero    = refl
-    ∸-distribˡ-⊓-⊔ zero    (suc y) (suc z) = refl
-    ∸-distribˡ-⊓-⊔ (suc x) (suc y) zero    = sym (m≤n⇒m⊔n≡n (≤-step (n∸m≤n y x)))
-    ∸-distribˡ-⊓-⊔ (suc x) zero    (suc z) = sym (m≤n⇒n⊔m≡n (≤-step (n∸m≤n z x)))
-    ∸-distribˡ-⊓-⊔ (suc x) (suc y) (suc z) = ∸-distribˡ-⊓-⊔ x y z
-    
-    -- stdlib
-    ∸-distribˡ-⊔-⊓ : ∀ x y z → x ∸ (y ⊔ z) ≡ (x ∸ y) ⊓ (x ∸ z)
-    ∸-distribˡ-⊔-⊓ x       zero    zero    = sym (⊓-idem x)
-    ∸-distribˡ-⊔-⊓ zero    zero    z       = 0∸n≡0 z
-    ∸-distribˡ-⊔-⊓ zero    (suc y) z       = 0∸n≡0 (suc y ⊔ z)
-    ∸-distribˡ-⊔-⊓ (suc x) (suc y) zero    = sym (m≤n⇒m⊓n≡m (≤-step (n∸m≤n y x)))
-    ∸-distribˡ-⊔-⊓ (suc x) zero    (suc z) = sym (m≤n⇒n⊓m≡m (≤-step (n∸m≤n z x)))
-    ∸-distribˡ-⊔-⊓ (suc x) (suc y) (suc z) = ∸-distribˡ-⊔-⊓ x y z
-    
       
     ∸-cancelˡ-≡ :  ∀ {x y z} → y ≤ x → z ≤ x → x ∸ y ≡ x ∸ z → y ≡ z
     ∸-cancelˡ-≡ {_} {_}     {_}     z≤n       z≤n       _       = refl

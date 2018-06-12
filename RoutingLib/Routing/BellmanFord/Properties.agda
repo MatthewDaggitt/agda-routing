@@ -1,3 +1,5 @@
+open import Algebra using (Semilattice)
+open import Algebra.Structures using (IsSemilattice)
 import Algebra.FunctionProperties as FunctionProperties
 open import Data.Nat using (suc; zero; _+_)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
@@ -6,6 +8,8 @@ open import Data.Fin.Subset using (⊤; _∈_)
 open import Data.Fin.Dec using (_∈?_)
 open import Data.List using (tabulate)
 open import Data.List.Relation.Pointwise using (tabulate⁺)
+open import Data.List.Membership.Setoid.Properties
+  using (foldr-selective; ∈-tabulate⁻; ∈-tabulate⁺)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (∃; ∃₂; _,_; _×_; proj₁; proj₂)
 open import Relation.Nullary using (¬_; yes; no)
@@ -14,11 +18,7 @@ open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; sym; trans)
 open import Algebra.FunctionProperties.Consequences using (sel⇒idem)
 
-open import RoutingLib.Algebra using (Semilattice)
-open import RoutingLib.Algebra.Structures using (IsSemilattice)
 open import RoutingLib.Data.List.Properties using (foldr≤ₗe; foldr≤ᵣxs)
-open import RoutingLib.Data.List.Membership.Setoid.Properties
-  using (foldr-∈; ∈-tabulate⁻; ∈-tabulate⁺)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.List.Relation.Pointwise
   using (foldr⁺)
@@ -83,16 +83,14 @@ abstract
   -- σ either extends the route by going through some k or it chooses a
   -- trivial route from the identity matrix
   σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ : ∀ X i j → (∃ λ k → σ X i j ≈ A i k ▷ X k j) ⊎ (σ X i j ≈ I i j)
-  σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j with foldr-∈ S ⊕-sel (I i j) _
+  σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j with foldr-selective S ⊕-sel (I i j) _
   ... | inj₁ σXᵢⱼ≈Iᵢⱼ  = inj₂ σXᵢⱼ≈Iᵢⱼ
   ... | inj₂ σXᵢⱼ∈extₖ = inj₁ (∈-tabulate⁻ S σXᵢⱼ∈extₖ)
 
   -- Under the following assumptions about ⊕, A▷ₘ always chooses the "best"
   -- option with respect to ⊕
   σXᵢⱼ≤Aᵢₖ▷Xₖⱼ : ∀ X i j k → σ X i j ≤₊ A i k ▷ X k j
-  σXᵢⱼ≤Aᵢₖ▷Xₖⱼ X i j k =
-    foldr≤ᵣxs ⊕-semilattice
-      (I i j) (∈-tabulate⁺ S (λ k → A i k ▷ X k j) k)
+  σXᵢⱼ≤Aᵢₖ▷Xₖⱼ X i j k = foldr≤ᵣxs ⊕-semilattice (I i j) (∈-tabulate⁺ S k)
 
   -- After an iteration, the diagonal of the RMatrix is always the identity
   σXᵢᵢ≈Iᵢᵢ : ∀ X i → σ X i i ≈ I i i

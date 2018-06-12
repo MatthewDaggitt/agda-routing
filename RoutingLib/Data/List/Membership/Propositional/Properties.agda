@@ -4,7 +4,7 @@ open import Data.Nat.Properties using (⊔-sel; m≤m⊔n; ≤+≢⇒<; ⊔-iden
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.List
 open import Data.List.Any as Any using (here; there)
-open import Data.List.Any.Membership.Propositional using (_∈_)
+open import Data.List.Membership.Propositional using (_∈_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (∃; _,_; _×_; proj₂)
 open import Relation.Binary using (Setoid; Decidable; DecSetoid)
@@ -22,38 +22,15 @@ import RoutingLib.Data.List.Membership.Setoid as SetoidMembership
 module RoutingLib.Data.List.Membership.Propositional.Properties where
 
   import RoutingLib.Data.List.Membership.Setoid.Properties as GM
-
-  ∈-resp-≡ : ∀ {a} {A : Set a} {x y : A} {xs ys} → x ≡ y → xs ≡ ys → x ∈ xs → y ∈ ys 
-  ∈-resp-≡ refl refl = id
-
-  -- stdlib
-  ∈-++⁺ʳ : ∀ {a} {A : Set a} {v : A} xs {ys} → v ∈ ys → v ∈ xs ++ ys
-  ∈-++⁺ʳ = GM.∈-++⁺ʳ (setoid _)
-
-  -- stdlib
-  ∈-++⁺ˡ : ∀ {a} {A : Set a} {v : A} {xs ys} → v ∈ xs → v ∈ xs ++ ys
-  ∈-++⁺ˡ = GM.∈-++⁺ˡ (setoid _)
-
-  -- stdlib
-  ∈-++⁻ : ∀ {a} {A : Set a} {v : A}  xs {ys} → v ∈ xs ++ ys → v ∈ xs ⊎ v ∈ ys
-  ∈-++⁻ = GM.∈-++⁻ (setoid _)
-
-  -- stdlib
-  ∈-concat⁺ : ∀ {a} {A : Set a} {v : A} {xs xss} →
-              v ∈ xs → xs ∈ xss → v ∈ concat xss
-  ∈-concat⁺ v∈xs xs∈xss = GM.∈-concat⁺ (setoid _) v∈xs (Any.map ≡⇒Rel≡ xs∈xss)
+  import Data.List.Membership.Propositional.Properties as GM2
   
   ∈-combine⁺ : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c}
               {u v xs ys} (f : A → B → C) → u ∈ xs → v ∈ ys →
               f u v ∈ combine f xs ys
   ∈-combine⁺ f = GM.∈-combine (setoid _) (setoid _) (setoid _) (cong₂ f)
 
-  ∈-applyUpTo⁺ : ∀ {a} {A : Set a} (f : ℕ → A) {n i} →
-                 i < n → f i ∈ applyUpTo f n
-  ∈-applyUpTo⁺ = GM.∈-applyUpTo⁺ (setoid _)
-
   ∈-upTo⁺ : ∀ {n i} → i < n → i ∈ upTo n
-  ∈-upTo⁺ = ∈-applyUpTo⁺ id
+  ∈-upTo⁺ = GM2.∈-applyUpTo⁺ id
   
   ∈-applyDownFrom⁺ : ∀ {a} {A : Set a} (f : ℕ → A) {n i} →
                      i < n → f i ∈ applyDownFrom f n
@@ -82,13 +59,9 @@ module RoutingLib.Data.List.Membership.Propositional.Properties where
   ... | i , s≤i , i<e , refl = s≤i , i<e
   -}
   
-  -- stdlib
-  ∈-tabulate⁺ : ∀ {a n} {A : Set a} (f : Fin n → A) i → f i ∈ tabulate f
-  ∈-tabulate⁺ = GM.∈-tabulate⁺ (setoid _)
-
   ∈-allFin⁺ : ∀ {n} i → i ∈ allFin n
-  ∈-allFin⁺ = ∈-tabulate⁺ id
-
+  ∈-allFin⁺ = GM2.∈-tabulate⁺
+  
   ∈-allFinPairs⁺ : ∀ {n} i j → (i , j) ∈ allFinPairs n
   ∈-allFinPairs⁺ i j = ∈-combine⁺ _,_ (∈-allFin⁺ i) (∈-allFin⁺ j)
 
@@ -96,26 +69,3 @@ module RoutingLib.Data.List.Membership.Propositional.Properties where
 
   ∈-perm : ∀ {a} {A : Set a} {x : A} {xs ys} → x ∈ xs → xs ⇿ ys → x ∈ ys
   ∈-perm = GM.∈-perm (setoid _)
-
-  -- stdlib
-  ∈-length : ∀ {a} {A : Set a} {x : A} {xs} → x ∈ xs → 1 ≤ length xs
-  ∈-length x∈xs = GM.∈-length (setoid _) x∈xs
-
-  -- stdlib
-  ∈-filter⁺ : ∀ {a p} {A : Set a} {P : A → Set p} (P? : Decidableᵤ P) →
-               ∀ {v} → P v → ∀ {xs} → v ∈ xs → v ∈ filter P? xs
-  ∈-filter⁺ P? = GM.∈-filter⁺ (setoid _) P? λ {refl → id}
-
-  -- stdlib
-  ∈-filter⁻ : ∀ {a p} {A : Set a} {P : A → Set p} (P? : Decidableᵤ P)  →
-               ∀ {v xs} → v ∈ filter P? xs → v ∈ xs × P v
-  ∈-filter⁻ P? = GM.∈-filter⁻ (setoid _) P? λ {refl → id}
-
-  -- stdlib
-  ∈-lookup : ∀ {a} {A : Set a} (xs : List A) i → lookup xs i ∈ xs
-  ∈-lookup = GM.∈-lookup (setoid _)
-
-  -- stdlib
-  foldr-∈ : ∀ {a} {A : Set a} {_•_ : Op₂ A} → Selective _≡_ _•_ → ∀ e xs →
-            foldr _•_ e xs ≡ e ⊎ foldr _•_ e xs ∈ xs 
-  foldr-∈ = GM.foldr-∈ (setoid _)

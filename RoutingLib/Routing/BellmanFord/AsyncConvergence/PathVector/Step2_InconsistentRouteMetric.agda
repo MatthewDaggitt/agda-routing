@@ -1,10 +1,10 @@
 open import Data.Product using (∃; _,_; _×_)
-open import Data.Sum using (_⊎_; inj₁; inj₂; [_,_]′; map)
+open import Data.Sum using (_⊎_; inj₁; inj₂; [_,_]′; map; swap)
 open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _<_; _≤_; _⊔_)
 open import Data.Nat.Properties
-  using (≤-refl; ≤-reflexive; ≤-total; <-transˡ; <-transʳ; ⊔-comm; ⊔-identityʳ; ⊔-idem; m≤m⊔n; <⇒≯; <⇒≤; n≤m⊔n; ≤⇒≯; ⊔-monoˡ-≤; m≤n⇒m⊔n≡n; m≤n⇒n⊔m≡n)
+  using (≤-refl; ≤-reflexive; ≤-total; <-transˡ; <-transʳ; ⊔-comm; ⊔-identityʳ; ⊔-idem; m≤m⊔n; <⇒≯; <⇒≤; n≤m⊔n; ≤⇒≯; ⊔-monoˡ-≤; m≤n⇒m⊔n≡n; m≤n⇒n⊔m≡n; ⊔-triangulate)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
-open import Data.Fin.Subset using (Subset; _∈_; _∉_; ⁅_⁆; ⊤)
+open import Data.Fin.Subset using (Subset; _∈_; _∉_; ⁅_⁆; ∣_∣; ⊤)
 open import Data.Fin.Subset.Properties using (x∈p∩q⁺; x∈⁅x⁆; ∈⊤)
 open import Data.Fin.Dec using (_∈?_)
 open import Relation.Binary using (_Preserves₂_⟶_⟶_)
@@ -16,12 +16,11 @@ open import Function using (_∘_; id)
 open import Induction.WellFounded using (Acc; acc)
 open import Induction.Nat using () renaming (<-well-founded to <-wellFounded)
 
-open import RoutingLib.Data.Fin.Subset using (_\\_; ∣_∣)
+open import RoutingLib.Data.Fin.Subset using (_\\_)
 open import RoutingLib.Data.Fin.Subset.Properties using (∣p\\q∣<∣p∣; i∉p\\q⇒i∉p; i∉⁅j⁆)
 open import RoutingLib.Data.Nat.Properties
-  using (⊔-triangulate; m≤o⇒m≤n⊔o; m<n⇒n≢0; n≤m×o≤m⇒n⊔o≤m; m<n⊎m<o⇒m<n⊔o; m≤n⇒m≤n⊔o; module ≤-Reasoning)
+  using (m≤o⇒m≤n⊔o; m<n⇒n≢0; n≤m×o≤m⇒n⊔o≤m; m<n⊎m<o⇒m<n⊔o; m≤n⇒m≤n⊔o; module ≤-Reasoning)
 import RoutingLib.Function.Metric as Metric
-open import RoutingLib.Data.Sum using (swap)
 
 open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Prelude as Prelude

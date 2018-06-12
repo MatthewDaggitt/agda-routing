@@ -13,7 +13,6 @@ import Relation.Binary.EqReasoning as EqReasoning
 open import Relation.Unary using (Pred)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Algebra
 open import RoutingLib.Algebra.FunctionProperties
 
 module RoutingLib.Algebra.Selectivity.Lifting

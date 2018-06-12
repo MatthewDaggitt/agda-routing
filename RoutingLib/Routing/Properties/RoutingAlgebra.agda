@@ -1,3 +1,4 @@
+open import Algebra
 open import Algebra.Structures
 import Algebra.FunctionProperties as FunctionProperties
 import Algebra.FunctionProperties.Consequences as Consequences
@@ -5,8 +6,6 @@ open import Relation.Nullary using (yes; no)
 open import Relation.Binary using (DecTotalOrder; StrictTotalOrder)
 import RoutingLib.Relation.Binary.NaturalOrder.Right as RightNaturalOrder
 
-open import RoutingLib.Algebra
-open import RoutingLib.Algebra.Structures
 import RoutingLib.Relation.Binary.NonStrictToStrict.DecTotalOrder as NonStrictToStrict
 import RoutingLib.Relation.Binary.Flip as Flip
 
@@ -80,8 +79,8 @@ open NonStrictToStrict ≤₊-decTotalOrder public
   using ()
   renaming
   ( _<?_      to _<₊?_
-  ; <≤-trans  to <≤₊-trans
-  ; ≤<-trans  to ≤<₊-trans
+  ; <-≤-trans to <-≤₊-trans
+  ; ≤-<-trans to ≤-<₊-trans
   ; <⇒≱       to <₊⇒≱₊
   ; ≤⇒≯       to ≤₊⇒≯₊
   ; ≰⇒>       to ≰₊⇒>₊

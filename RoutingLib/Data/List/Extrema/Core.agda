@@ -16,7 +16,7 @@ module RoutingLib.Data.List.Extrema.Core
   
   
   open TotalOrder totalOrder renaming (Carrier to B)
-  open NonStrictToStrict totalOrder using (_<_; ≤<-trans; <≤-trans)
+  open NonStrictToStrict totalOrder using (_<_; ≤-<-trans; <-≤-trans)
    
   open Max totalOrder
   open Min totalOrder
@@ -34,10 +34,10 @@ module RoutingLib.Data.List.Extrema.Core
       lemma₂ fy≤v fx⊓fy≈fx = trans (x⊓y≈x⇒x≤y fx⊓fy≈fx) fy≤v
     
       lemma₃ : ∀ {x y v} → f x < v → f x ⊓ f y ≈ f y → f y < v
-      lemma₃ fx<v fx⊓fy≈fy = ≤<-trans (x⊓y≈y⇒y≤x fx⊓fy≈fy) fx<v
+      lemma₃ fx<v fx⊓fy≈fy = ≤-<-trans (x⊓y≈y⇒y≤x fx⊓fy≈fy) fx<v
 
       lemma₄ : ∀ {x y v} → f y < v → f x ⊓ f y ≈ f x → f x < v
-      lemma₄ fx<v fx⊓fy≈fy = ≤<-trans (x⊓y≈x⇒x≤y fx⊓fy≈fy) fx<v
+      lemma₄ fx<v fx⊓fy≈fy = ≤-<-trans (x⊓y≈x⇒x≤y fx⊓fy≈fy) fx<v
 
 
 

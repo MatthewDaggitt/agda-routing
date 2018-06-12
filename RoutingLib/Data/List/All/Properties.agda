@@ -16,7 +16,6 @@ open import Algebra.FunctionProperties using (Op₂; Congruent₂)
 open import Relation.Unary using () renaming (_⊆_ to _⋐_)
 
 open import RoutingLib.Data.List
-open import RoutingLib.Data.List.All
 open import RoutingLib.Data.List.Properties
 open import RoutingLib.Data.Fin.Properties using (𝔽ₛ)
 
@@ -91,7 +90,8 @@ betweenₛₑ<e s e = All-applyBetween⁺₁ id s e (λ _ i<e → i<e)
 module _ {a ℓ} (DS : DecSetoid a ℓ) where
 
   open DecSetoid DS renaming (Carrier to A)
-  open import RoutingLib.Data.List.Membership.DecSetoid DS using (deduplicate; _∈?_)
+  open import RoutingLib.Data.List.Membership.DecSetoid DS using (deduplicate)
+  open import Data.List.Membership.DecSetoid DS using (_∈?_)
 
   deduplicate⁺ : ∀ {p} {P : A → Set p} {xs} → All P xs → All P (deduplicate xs)
   deduplicate⁺ {xs = _}      [] = []
@@ -103,7 +103,7 @@ module _ {a ℓ} (DS : DecSetoid a ℓ) where
 module _ {a ℓ} (S : Setoid a ℓ) where
 
   open Setoid S renaming (Carrier to A)
-  open import Data.List.Any.Membership S using (_∈_)
+  open import Data.List.Membership.Setoid S using (_∈_)
 
   ∈-All : ∀ {p} {P : A → Set p} xs → (∀ {v} → v ∈ xs → P v) → All P xs
   ∈-All []       _   = []
@@ -128,8 +128,8 @@ module _ {a₁ ℓ₁} (S₁ : Setoid a₁ ℓ₁)
   open Setoid S₁ renaming (Carrier to A₁; refl to refl₁)
   open Setoid S₂ renaming (Carrier to A₂)
 
-  open import Data.List.Any.Membership S₁ using () renaming (_∈_ to _∈₁_)
-  open import Data.List.Any.Membership S₂ using () renaming (_∈_ to _∈₂_)
+  open import Data.List.Membership.Setoid S₁ using () renaming (_∈_ to _∈₁_)
+  open import Data.List.Membership.Setoid S₂ using () renaming (_∈_ to _∈₂_)
 
   combine⁺ : ∀ {b p} {B : Set b} {P : B → Set p} _•_ (xs : List A₁) (ys : List A₂) →
              (∀ {x y} → x ∈₁ xs → y ∈₂ ys → P (x • y)) → All P (combine _•_ xs ys)

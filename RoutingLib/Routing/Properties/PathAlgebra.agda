@@ -36,7 +36,7 @@ abstract
   p[∞]≈∅ = r≈∞⇒path[r]≈∅ ≈-refl
 
   p[0]≈[] : path 0# ≈ₚ valid []
-  p[0]≈[] = r≈1⇒path[r]≈[] ≈-refl
+  p[0]≈[] = r≈0⇒path[r]≈[] ≈-refl
 
   p[r]≡∅⇒Aᵢⱼr≈∞ : ∀ {i j r} → path r ≡ invalid → A i j ▷ r ≈ ∞
   p[r]≡∅⇒Aᵢⱼr≈∞ {i} {j} {r} pᵣ≡∅ = begin

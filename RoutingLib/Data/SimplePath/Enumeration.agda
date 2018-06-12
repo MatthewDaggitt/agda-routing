@@ -2,12 +2,12 @@ open import Data.Nat using (ℕ; _≤_; z≤n)
 open import Data.List using (List; _∷_; map)
 open import Data.List.Any using (here; there)
 open import Data.List.All using (_∷_)
+open import Data.List.Membership.Setoid.Properties using (∈-map⁺)
 
 open import RoutingLib.Data.SimplePath hiding (_∈_)
 open import RoutingLib.Data.SimplePath.Relation.Equality
 open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Equality
   using () renaming (ℙₛ to NEℙₛ)
-open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-map⁺)
 
 module RoutingLib.Data.SimplePath.Enumeration where
 
@@ -15,7 +15,7 @@ module RoutingLib.Data.SimplePath.Enumeration where
 
   private
     module _ {n : ℕ} where
-      open import Data.List.Any.Membership (ℙₛ n) using (_∈_) public
+      open import Data.List.Membership.Setoid (ℙₛ n) using (_∈_) public
 
   allPaths : ∀ n → List (SimplePath n)
   allPaths n = invalid ∷ map valid (Eⁿᵗ.allPaths n)

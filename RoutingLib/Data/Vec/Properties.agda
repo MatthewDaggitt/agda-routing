@@ -6,7 +6,7 @@ open import Data.Vec
 open import Data.Product using (∃; ∃₂; _,_; _×_) renaming (map to mapₚ)
 open import Data.List using ([]; _∷_)
 open import Data.List.Any as Any using (here; there)
-open import Data.List.Any.Membership.Propositional using () renaming (_∈_ to _∈ₗ_)
+open import Data.List.Membership.Propositional using () renaming (_∈_ to _∈ₗ_)
 open import Function using (_∘_; id)
 open import Relation.Unary using (Pred; Decidable)
 open import Relation.Nullary using (yes; no; ¬_)

@@ -26,24 +26,3 @@ module RoutingLib.Relation.Binary.NonStrictToStrict
   ... | inj₂ y≤x = y≤x , x≰y ∘ refl ∘ sym
 
   postulate ≮⇒≥ : ∀ {x y} → ¬ (x < y) → y ≤ x
-  
-  <≤-trans : Symmetric _≈_ → Transitive _≤_ → Antisymmetric _≈_ _≤_ →
-             (∀ {x} → (x ≤_) Respects _≈_) →
-             ∀ {x y z} → x < y → y ≤ z → x < z
-  <≤-trans sym trans antisym respʳ (x≤y , x≉y) y≤z =
-    trans x≤y y≤z , (λ x≈z → x≉y (antisym x≤y (respʳ (sym x≈z) y≤z )))
-
-  ≤<-trans : Transitive _≤_ → Antisymmetric _≈_ _≤_ →
-             (∀ {x} → (_≤ x) Respects _≈_) →
-             ∀ {x y z} → x ≤ y → y < z → x < z
-  ≤<-trans trans antisym respʳ x≤y (y≤z , y≉z) =
-    trans x≤y y≤z , (λ x≈z → y≉z (antisym y≤z (respʳ x≈z x≤y)))
-
-  <-respˡ-≈ : Transitive _≈_ → _≤_ Respectsˡ _≈_ → _<_ Respectsˡ _≈_
-  <-respˡ-≈ trans respˡ y≈z (y≤x , y≉x) =
-    (respˡ y≈z y≤x) , (λ z≈x → y≉x (trans y≈z z≈x))
-
-  <-respʳ-≈ : Symmetric _≈_ → Transitive _≈_ →
-              _≤_ Respectsʳ _≈_ → _<_ Respectsʳ _≈_
-  <-respʳ-≈ sym trans respʳ {x} {y} {z} y≈z (x≤y , x≉y) =
-    (respʳ y≈z x≤y) , λ x≈z → x≉y (trans x≈z (sym y≈z))

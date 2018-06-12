@@ -4,12 +4,6 @@ open import Level
 
 module RoutingLib.Relation.Binary where
 
-  _Respectsʳ_ : ∀ {a ℓ₁ ℓ₂} {A : Set a} → Rel A ℓ₁ → Rel A ℓ₂ → Set _
-  P Respectsʳ _∼_ = ∀ {x} → (P x) Respects _∼_
-
-  _Respectsˡ_ : ∀ {a ℓ₁ ℓ₂} {A : Set a} → Rel A ℓ₁ → Rel A ℓ₂ → Set _
-  P Respectsˡ _∼_ = ∀ {y} → (flip P y) Respects _∼_
-
   record IsDecPreorder {a ℓ₁ ℓ₂} {A : Set a}
                          (_≈_ : Rel A ℓ₁) (_≤_ : Rel A ℓ₂) :
                          Set (a ⊔ ℓ₁ ⊔ ℓ₂) where

@@ -4,10 +4,10 @@ open import Data.Fin.Subset
 open import Data.Fin.Subset.Properties using (∈⊤; ∉⊥)
 open import Data.Nat using (_≤_)
 open import Data.List using (List; []; filter; length)
-open import Data.List.Properties using (filter-all; filter-notAll)
-open import Data.List.Any.Membership.Propositional
+open import Data.List.Properties using (filter-none; filter-some)
+open import Data.List.Membership.Propositional
   using (lose) renaming (_∈_ to _∈ₘ_)
-open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-filter⁺)
+open import Data.List.Membership.Propositional.Properties using (∈-filter⁺)
 open import Data.List.All using (All)
 open import Data.List.All.Properties using (filter⁺₁)
 open import Data.Product using (_×_; _,_)
@@ -50,14 +50,14 @@ module RoutingLib.Data.Fin.Subset.Cutset {n} where
   ∈cutset⇒↷ p = filter⁺₁ (_↷? p) (allFinPairs n)
 
   ↷⇒∈cutset : ∀ {p e} → e ↷ p → e ∈ₘ cutset p
-  ↷⇒∈cutset e↷p = ∈-filter⁺ (_↷? _) e↷p (∈-allFinPairs⁺ _ _)
+  ↷⇒∈cutset e↷p = ∈-filter⁺ (_↷? _) (∈-allFinPairs⁺ _ _) e↷p
   
   cutset[⊤]≡[] : cutset ⊤ ≡ []
-  cutset[⊤]≡[] = filter-all (_↷? ⊤) (allFinPairs⁺ ¬e↷⊤)
+  cutset[⊤]≡[] = filter-none (_↷? ⊤) (allFinPairs⁺ ¬e↷⊤)
 
   cutset[⊥]≡[] : cutset ⊥ ≡ []
-  cutset[⊥]≡[] = filter-all (_↷? ⊥) (allFinPairs⁺ ¬e↷⊥)
+  cutset[⊥]≡[] = filter-none (_↷? ⊥) (allFinPairs⁺ ¬e↷⊥)
 
   cutset-nonTrivial : ∀ {p} → Nonempty p → Nonfull p → 1 ≤ length (cutset p)
   cutset-nonTrivial {p} (i , i∈p) (j , j∉p) =
-    filter-notAll (_↷? p) (lose (∈-allFinPairs⁺ j i) (j∉p , i∈p))
+    filter-some (_↷? p) (lose (∈-allFinPairs⁺ j i) (j∉p , i∈p))

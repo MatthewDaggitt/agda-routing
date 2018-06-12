@@ -1,5 +1,5 @@
 open import Data.List using (List)
-import Data.List.Any.Membership as Membership
+import Data.List.Membership.Setoid as Membership
 open import Data.Product using (∃)
 open import Level using (_⊔_)
 open import Relation.Binary using (Setoid)

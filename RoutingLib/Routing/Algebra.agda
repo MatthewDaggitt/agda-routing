@@ -2,7 +2,7 @@ open import Algebra.FunctionProperties
 open import Algebra.FunctionProperties.Consequences using (sel⇒idem)
 open import Data.Fin using (Fin)
 open import Data.List using (List)
-import Data.List.Any.Membership as ListMembership
+import Data.List.Membership.Setoid as ListMembership
 open import Data.Nat using (ℕ; suc)
 open import Data.Product using (_×_; _,_; proj₁)
 open import Data.Maybe

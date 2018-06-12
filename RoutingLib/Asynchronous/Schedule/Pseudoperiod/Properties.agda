@@ -10,7 +10,7 @@ open import Data.Sum using (inj₁; inj₂; _⊎_)
 open import Data.List using (List; []; _∷_; foldr; map; allFin; applyUpTo; tabulate)
 open import Data.List.Any using (Any) renaming (map to anyMap)
 open import Data.List.Any.Properties using (map⁺)
-open import Data.List.Any.Membership.Propositional.Properties using (∈-map⁺)
+open import Data.List.Membership.Propositional.Properties using (∈-map⁺)
 import Data.List.All.Properties as All
 open import Data.Vec using (Vec; lookup) renaming (map to mapᵥ; allFin to allFinᵥ)
 open import Function using (_∘_)
@@ -179,4 +179,10 @@ module RoutingLib.Asynchronous.Schedule.Pseudoperiod.Properties {n} (𝓢 : Sche
     ; τ-expired        = τ-expired
     ; τ-after-φ        = τ-after-φ
     ; τ-active         = τ-active
+    }
+
+  pseudoperiodic : PseudoperiodicSchedule n
+  pseudoperiodic = record
+    { 𝓢               = 𝓢
+    ; isPseudoperiodic = isPseudoperiodic
     }

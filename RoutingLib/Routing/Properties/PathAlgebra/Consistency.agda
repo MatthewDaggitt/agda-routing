@@ -1,7 +1,7 @@
 import Algebra.FunctionProperties as AlgebraicProperties
 open import Data.Fin using (Fin)
 open import Data.List using (List; map)
-import Data.List.Any.Membership as Membership
+import Data.List.Membership.Setoid as Membership
 open import Data.Product using (Σ; _×_; _,_; proj₁)
 open import Function using (_on_)
 open import Level using (_⊔_) renaming (zero to ℓ₀)
@@ -10,7 +10,7 @@ import Relation.Binary.On as On
 open import Relation.Nullary using (¬_)
 
 open import RoutingLib.Data.Matrix using (SquareMatrix)
-open import RoutingLib.Data.List.Membership.Setoid.Properties
+open import Data.List.Membership.Setoid.Properties
 open import RoutingLib.Data.SimplePath using (SimplePath)
 open import RoutingLib.Data.SimplePath.Enumeration
 open import RoutingLib.Data.SimplePath.Relation.Equality using (ℙₛ)
@@ -123,8 +123,8 @@ abstract
   allCRoutes = map pathToCRoute (allPaths n)
 
   ∈-allCRoutes : ∀ r → r ∈ₗ allCRoutes
-  ∈-allCRoutes (r , rᶜ) = ∈-resp-≈ Sᶜ {v = pathToCRoute (path r)} {w = r , rᶜ}
-    (∈-map⁺ (ℙₛ n) Sᶜ weight-cong (∈-allPaths (path r))) rᶜ
+  ∈-allCRoutes (r , rᶜ) = ∈-resp-≈ Sᶜ {x = pathToCRoute (path r)} {r , rᶜ}
+    rᶜ (∈-map⁺ (ℙₛ n) Sᶜ weight-cong (∈-allPaths (path r))) 
     
 ------------------------------------------------------------------------------
 -- Routing algebra

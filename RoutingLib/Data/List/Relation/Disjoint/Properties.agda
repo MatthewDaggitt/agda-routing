@@ -18,7 +18,7 @@ open import RoutingLib.Data.List.All.Properties using (∈-All)
 module RoutingLib.Data.List.Relation.Disjoint.Properties {c ℓ} (S : Setoid c ℓ) where
 
   open Setoid S renaming (Carrier to A)
-  open import Data.List.Any.Membership S using (_∈_; _∉_)
+  open import Data.List.Membership.Setoid S using (_∈_; _∉_)
   open import RoutingLib.Data.List.Relation.Disjoint S
 
   

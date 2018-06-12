@@ -11,3 +11,4 @@ open StrictlyIncreasingPathAlgebra algebra
 -- Open increasing path algebra properties
 
 open IncreasingPathAlgebraProperties increasingPathAlgebra public
+  hiding (▷-strictlyIncreasing)

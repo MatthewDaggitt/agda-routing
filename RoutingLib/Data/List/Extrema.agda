@@ -2,7 +2,8 @@ open import Algebra.FunctionProperties
 open import Data.List using (List; foldr)
 open import Data.List.Any using (Any; here; there)
 open import Data.List.All using (All; []; _∷_; lookup; map)
-open import Data.List.Any.Membership.Propositional using (_∈_; _⊆_; lose)
+open import Data.List.Membership.Propositional using (_∈_; lose)
+open import Data.List.Relation.Sublist.Propositional using (_⊆_)
 open import Data.List.Properties using ()
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Function using (id; flip; _on_)
@@ -16,8 +17,8 @@ open import RoutingLib.Data.List.Properties
 import RoutingLib.Algebra.Selectivity.NaturalChoice.Min as Min
 import RoutingLib.Algebra.Selectivity.NaturalChoice.Max as Max
 open import RoutingLib.Algebra.Selectivity.Lifting
-open import RoutingLib.Data.List.Membership.Propositional.Properties
-  using (foldr-∈)
+open import Data.List.Membership.Propositional.Properties
+  using (foldr-selective)
 
 module RoutingLib.Data.List.Extrema
   {b ℓ₁ ℓ₂} (totalOrder : TotalOrder b ℓ₁ ℓ₂) where
@@ -80,7 +81,7 @@ module RoutingLib.Data.List.Extrema
   module _ {a} {A : Set a} (f : A → B) where
 
     argmin-sel : ∀ ⊤ xs → (argmin f ⊤ xs ≡ ⊤) ⊎ (argmin f ⊤ xs ∈ xs)
-    argmin-sel = foldr-∈ (⊓-lift-sel f)
+    argmin-sel = foldr-selective (⊓-lift-sel f)
 
     argmin-all : ∀ {p} {P : Pred A p} {⊤ xs} →
                  P ⊤ → All P xs → P (argmin f ⊤ xs)
@@ -138,7 +139,7 @@ module RoutingLib.Data.List.Extrema
   module _ {a} {A : Set a} {f : A → B} where
 
     argmax-sel : ∀ ⊤ xs → (argmax f ⊤ xs ≡ ⊤) ⊎ (argmax f ⊤ xs ∈ xs)
-    argmax-sel = foldr-∈ (⊔-lift-sel _)
+    argmax-sel = foldr-selective (⊔-lift-sel _)
 
     argmax-all : ∀ {p} {P : Pred A p} {⊤ xs} →
                  P ⊤ → All P xs → P (argmax f ⊤ xs)

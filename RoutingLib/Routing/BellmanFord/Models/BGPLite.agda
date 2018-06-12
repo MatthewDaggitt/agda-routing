@@ -22,7 +22,6 @@ open import RoutingLib.Data.SimplePath.Relation.Equality hiding (≈ₚ-sym; p�
 open import RoutingLib.Data.SimplePath.NonEmpty
   using (SimplePathⁿᵗ; []; _∷_∣_∣_; length; _⇿_; _∉_; _∈_)
 open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Equality using (≈ₚ-sym; p≉i∷p)
---  using (_≈ₚ_; ≈ₚ-refl; ≈ₚ-trans; ≈ₚ-sym; _≟ₚ_; p≉i∷p)
 open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Lex
   using (_<ₗₑₓ_; <ₗₑₓ-cmp; <ₗₑₓ-trans; <ₗₑₓ-resp-≈ₚ; <ₗₑₓ-asym; <ₗₑₓ-irrefl; <ₗₑₓ-minimum; <ₗₑₓ-respˡ-≈ₚ; <ₗₑₓ-respʳ-≈ₚ)
 open import RoutingLib.Data.SimplePath.NonEmpty.Properties
@@ -50,7 +49,7 @@ data Step : Set₁ where
   step : Node → Node → Policy → Step
 
 0# : Route
-0# = route 0 ∅ []
+0# = valid 0 ∅ []
 
 ∞ : Route
 ∞ = invalid
@@ -65,16 +64,16 @@ _⊕_ = Choice._⊓_
 infix 5 _▷_
 _▷_ : Step → Route → Route
 _              ▷ invalid       = invalid
-(step i j pol) ▷ (route x c p) with (i , j) ⇿? p | i ∉ₚ? p
+(step i j pol) ▷ (valid x c p) with (i , j) ⇿? p | i ∉ₚ? p
 ... | no  _   | _       = invalid
 ... | yes _   | no  _   = invalid
-... | yes i⇿p | yes i∉p with apply pol (route x c p)
+... | yes i⇿p | yes i∉p with apply pol (valid x c p)
 ...   | invalid          = invalid
-...   | (route nl ncs _) = route nl ncs ((i , j) ∷ p ∣ i⇿p ∣ i∉p)
+...   | (valid nl ncs _) = valid nl ncs ((i , j) ∷ p ∣ i⇿p ∣ i∉p)
 
 ▷-cong : ∀ f {r s} → r ≈ᵣ s → f ▷ r ≈ᵣ f ▷ s
 ▷-cong (step i j pol) {_}                {_}                invalidEq = invalidEq
-▷-cong (step i j pol) {r@(route l cs p)} {s@(route k ds q)} r≈s@(routeEq l≡k cs≈ds p≈q)
+▷-cong (step i j pol) {r@(valid l cs p)} {s@(valid k ds q)} r≈s@(validEq l≡k cs≈ds p≈q)
   with (i , j) ⇿? p | (i , j) ⇿? q
 ... | no _    | no _    = invalidEq 
 ... | no ¬e⇿p | yes e⇿q = contradiction (⇿-resp-≈ₚ (≈ₚ-sym p≈q) e⇿q) ¬e⇿p
@@ -86,12 +85,12 @@ _              ▷ invalid       = invalid
 ...   | yes _  | yes _  with
   apply pol r | apply pol s | inspect (apply pol) r | inspect (apply pol) s
 ...     | invalid     | invalid     | _        | _ = invalidEq
-...     | invalid     | route _ _ _ | [ pᵣ≡i ] | [ pₛ≡r ] =
+...     | invalid     | valid _ _ _ | [ pᵣ≡i ] | [ pₛ≡r ] =
   contradiction (apply-trans pol r≈s pᵣ≡i pₛ≡r) λ()
-...     | route _ _ _ | invalid     | [ pᵣ≡r ] | [ pₛ≡i ] =
+...     | valid _ _ _ | invalid     | [ pᵣ≡r ] | [ pₛ≡i ] =
   contradiction (apply-trans pol r≈s pᵣ≡r pₛ≡i) λ()
-...     | route _ _ _ | route _ _ _ | [ pᵣ≡r ] | [ pₛ≡r ] with apply-trans pol r≈s pᵣ≡r pₛ≡r
-...       | routeEq leq ceq _ = routeEq leq ceq (refl ∷ p≈q)
+...     | valid _ _ _ | valid _ _ _ | [ pᵣ≡r ] | [ pₛ≡r ] with apply-trans pol r≈s pᵣ≡r pₛ≡r
+...       | validEq leq ceq _ = validEq leq ceq (refl ∷ p≈q)
 
 
 ---------------------
@@ -124,12 +123,12 @@ open RightNaturalOrder _≈ᵣ_ _⊕_ using () renaming (_≤_ to _≤₊_)
 
 ▷-increasing : ∀ f x → x ≤₊ f ▷ x
 ▷-increasing f              invalid        = ≈ᵣ-refl
-▷-increasing (step i j pol) (route l cs p) with (i , j) ⇿? p | i ∉ₚ? p
+▷-increasing (step i j pol) (valid l cs p) with (i , j) ⇿? p | i ∉ₚ? p
 ... | no  _   | _       = ≈ᵣ-refl
 ... | yes _   | no  _   = ≈ᵣ-refl
-... | yes i⇿p | yes i∉p with apply pol (route l cs p) | inspect (apply pol) (route l cs p)
+... | yes i⇿p | yes i∉p with apply pol (valid l cs p) | inspect (apply pol) (valid l cs p)
 ...   | invalid      | _         = ≈ᵣ-refl
-...   | route k ds _ | [ app≡s ] with ≤ᵣ-total (route k ds ((i , j) ∷ p ∣ i⇿p ∣ i∉p)) (route l cs p)
+...   | valid k ds _ | [ app≡s ] with ≤ᵣ-total (valid k ds ((i , j) ∷ p ∣ i⇿p ∣ i∉p)) (valid l cs p)
 ...     | inj₂ _                       = ≈ᵣ-refl
 ...     | inj₁ (level<  k<l)           = contradiction (apply-levelIncr pol (≈ᵣ-reflexive app≡s)) (<⇒≱ k<l)
 ...     | inj₁ (length< _ |i∷p|<|p|)   = contradiction |i∷p|<|p| (m+n≮n 1 _)
@@ -151,25 +150,25 @@ A i j = step i j (topology i j)
 
 path : Route → SimplePath n
 path invalid       = invalid
-path (route _ _ p) = valid p
+path (valid _ _ p) = valid p
 
 path-cong : ∀ {r s} → r ≈ᵣ s → path r ≈ₚ path s
 path-cong invalidEq         = invalid
-path-cong (routeEq _ _ p≈q) = valid p≈q
+path-cong (validEq _ _ p≈q) = valid p≈q
 
 r≈0⇒path[r]≈[] : ∀ {r} → r ≈ᵣ 0# → path r ≈ₚ valid []
-r≈0⇒path[r]≈[] (routeEq _ _ []) = valid []
+r≈0⇒path[r]≈[] (validEq _ _ []) = valid []
 
 r≈∞⇒path[r]≈∅ : ∀ {r} → r ≈ᵣ invalid → path r ≈ₚ invalid
 r≈∞⇒path[r]≈∅ invalidEq = invalid
 
 path[r]≈∅⇒r≈∞ : ∀ {r} → path r ≈ₚ invalid → r ≈ᵣ invalid
 path[r]≈∅⇒r≈∞ {invalid}      invalid = invalidEq
-path[r]≈∅⇒r≈∞ {route l cs p} ()
+path[r]≈∅⇒r≈∞ {valid l cs p} ()
 
 path-reject : ∀ {i j r q} → path r ≈ₚ valid q → ¬ (i , j) ⇿ q ⊎ i ∈ q → A i j ▷ r ≈ᵣ invalid
 path-reject {i} {j} {invalid}      pᵣ≈p        inv = invalidEq
-path-reject {i} {j} {route l cs p} (valid p≈q) inv with (i , j) ⇿? p | i ∉ₚ? p
+path-reject {i} {j} {valid l cs p} (valid p≈q) inv with (i , j) ⇿? p | i ∉ₚ? p
 ... | no  _    | _       = invalidEq
 ... | yes _    | no  _   = invalidEq
 ... | yes ij⇿p | yes i∉p with inv
@@ -179,12 +178,12 @@ path-reject {i} {j} {route l cs p} (valid p≈q) inv with (i , j) ⇿? p | i ∉
 path-accept : ∀ {i j r q} → path r ≈ₚ valid q → A i j ▷ r ≉ᵣ invalid →
               ∀ ij⇿q i∉q → path (A i j ▷ r) ≈ₚ valid ((i , j) ∷ q ∣ ij⇿q ∣ i∉q)
 path-accept {i} {j} {invalid}      pᵣ≈q        Aᵢⱼ▷r≉0 ij⇿q i∉q = contradiction invalidEq Aᵢⱼ▷r≉0
-path-accept {i} {j} {route l cs p} (valid p≈q) Aᵢⱼ▷r≉0 ij⇿q i∉q with (i , j) ⇿? p | i ∉ₚ? p
+path-accept {i} {j} {valid l cs p} (valid p≈q) Aᵢⱼ▷r≉0 ij⇿q i∉q with (i , j) ⇿? p | i ∉ₚ? p
 ... | no ¬ij⇿p | _       = contradiction (⇿-resp-≈ₚ (≈ₚ-sym p≈q) ij⇿q) ¬ij⇿p
 ... | yes _    | no  i∈p = contradiction (∉-resp-≈ₚ (≈ₚ-sym p≈q) i∉q) i∈p
-... | yes _    | yes _   with apply (topology i j) (route l cs p)
+... | yes _    | yes _   with apply (topology i j) (valid l cs p)
 ...   | invalid     = contradiction invalidEq Aᵢⱼ▷r≉0
-...   | route _ _ _ = valid (refl ∷ p≈q)
+...   | valid _ _ _ = valid (refl ∷ p≈q)
 
 --------------
 -- Algebras --

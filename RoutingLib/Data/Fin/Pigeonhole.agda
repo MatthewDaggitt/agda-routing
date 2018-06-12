@@ -18,4 +18,3 @@ module RoutingLib.Data.Fin.Pigeonhole where
   ... | no  ∄k[f₀≡fₖ₊₁] with pigeonhole (s≤s m≤n) ((λ j → punchOut (∄k[f₀≡fₖ₊₁] ∘ (j ,_ ))))
   ...    | (i , j , i≢j , fᵢ≡fⱼ) =
     suc i , suc j , i≢j ∘ suc-injective , punchOut-injective (∄k[f₀≡fₖ₊₁] ∘ (i ,_)) (∄k[f₀≡fₖ₊₁] ∘ (j ,_)) fᵢ≡fⱼ
-

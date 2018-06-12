@@ -7,6 +7,7 @@ open import Data.List using (List; []; _∷_; length; gfilter; filter; map; conc
 open import Data.List.Any using (here; there; any)
 open import Data.List.All using (All; []; _∷_; lookup) renaming (map to mapₐ; tabulate to tabulateₐ)
 open import Data.List.All.Properties using (gmap; ¬Any⇒All¬; tabulate⁺)
+open import Data.List.Membership.Setoid.Properties
 open import Data.Fin using (Fin) renaming (suc to fsuc)
 open import Data.Fin.Properties using (suc-injective)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
@@ -20,7 +21,7 @@ open import Relation.Unary using (Decidable)
 
 open import RoutingLib.Data.List
 open import RoutingLib.Data.List.Membership.Setoid as Membership using ()
-open import RoutingLib.Data.List.Membership.Setoid.Properties as MembershipP using ()
+open import RoutingLib.Data.List.Membership.Setoid.Properties
 open import RoutingLib.Data.List.AllPairs using (AllPairs; []; _∷_)
 import RoutingLib.Data.List.AllPairs.Properties as AllPairs
 open import RoutingLib.Data.List.All.Properties
@@ -37,7 +38,7 @@ module RoutingLib.Data.List.Uniqueness.Setoid.Properties where
   module SingleSetoid {c ℓ} (S : Setoid c ℓ) where
 
     open Setoid S renaming (Carrier to A)
-    open import Data.List.Any.Membership S using (_∈_; _∉_; _⊆_)
+    open import Data.List.Membership.Setoid S using (_∈_; _∉_)
     open Disjoint S using (_#_; ∈ₗ⇒∉ᵣ; contractₗ)
     open DisjointProperties S using (#-concat; #⇒AllAll≉) 
 
@@ -121,8 +122,7 @@ module RoutingLib.Data.List.Uniqueness.Setoid.Properties where
     open Setoid S₃ renaming (Carrier to A₃; _≈_ to _≈₃_)
     
     open Disjoint S₃ using (_#_)
-    open MembershipP using (∈-map⁻; combine-∈)
-
+    
     combine!⁺ : ∀ {xs ys} f → (∀ {w x y z} → ¬ (w ≈₁ y) ⊎ ¬ (x ≈₂ z) → ¬ (f w x ≈₃ f y z)) →
                 Unique S₁ xs → Unique S₂ ys → Unique S₃ (combine f xs ys)
     combine!⁺ _ _ [] _ = []

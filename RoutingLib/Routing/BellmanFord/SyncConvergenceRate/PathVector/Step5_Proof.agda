@@ -1,6 +1,6 @@
 open import Data.Fin using (Fin)
-open import Data.Fin.Subset using (Subset; ⁅_⁆; _∪_; _∈_; _∉_)
-open import Data.Fin.Subset.Properties using (x∈⁅x⁆; x∈p∪q⁺; x∈p∪q⁻; x∈⁅y⁆⇒x≡y; ∈⊤)
+open import Data.Fin.Subset using (Subset; ⁅_⁆; ∣_∣; _∪_; _∈_; _∉_)
+open import Data.Fin.Subset.Properties using (x∈⁅x⁆; x∈p∪q⁺; x∈p∪q⁻; x∈⁅y⁆⇒x≡y; ∈⊤; ∣⁅x⁆∣≡1)
 open import Data.Nat as ℕ using (ℕ; zero; suc; z≤n; s≤s; _+_; _^_; _*_; _<_; _≤_)
 open import Data.Nat.Properties using (≤⇒pred≤; +-comm; +-suc; *-identityʳ; ≤-refl; <⇒≢; ≤+≢⇒<; ≤-irrelevance)
 open import Data.Sum using (inj₁; inj₂)
@@ -12,9 +12,9 @@ open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Data.Fin.Subset using (∣_∣; Nonfull)
+open import RoutingLib.Data.Fin.Subset using (Nonfull)
 open import RoutingLib.Data.Fin.Subset.Properties
-  using (∣p∣<n⇒Nonfull; ∣⁅i⁆∣≡1; ∣p∪⁅i⁆∣≡1+∣p∣; i∉⁅j⁆; Nonfull⁅i⁆′; x∉p∪q⁺; ∣p∣≡n⇒p≡⊤)
+  using (∣p∣<n⇒Nonfull; ∣p∪⁅i⁆∣≡1+∣p∣; i∉⁅j⁆; Nonfull⁅i⁆′; x∉p∪q⁺; ∣p∣≡n⇒p≡⊤)
 
 open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Prelude as Prelude
@@ -107,7 +107,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step5_Proof
         (i∉⁅j⁆ (iᵗʰ≢kᵗʰ (suc i) (suc k) 1+i<n 1+k<n k<i))
       
       |Cᵢ|≡i : ∀ i → (i<n : i < n) → ∣ C i i<n ∣ ≡ suc i
-      |Cᵢ|≡i zero    _     = ∣⁅i⁆∣≡1 j
+      |Cᵢ|≡i zero    _     = ∣⁅x⁆∣≡1 j
       |Cᵢ|≡i (suc i) 1+i<n = trans
         (∣p∪⁅i⁆∣≡1+∣p∣ (iᵗʰ∉Cₖ (suc i) 1+i<n i (≤⇒pred≤ 1+i<n) ≤-refl))
         (cong suc (|Cᵢ|≡i i (≤⇒pred≤ 1+i<n)))

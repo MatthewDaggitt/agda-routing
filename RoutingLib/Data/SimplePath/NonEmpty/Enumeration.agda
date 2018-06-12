@@ -4,7 +4,8 @@ open import Data.Nat using (ℕ; zero; suc; _≤_; _<_)
 open import Data.Nat.Properties using (<⇒≢; <⇒≤; ≤-reflexive)
 open import Data.List using (List; []; _∷_; map; filter; concat; allFin; applyUpTo)
 open import Data.List.Any using (here; there)
-open import Data.List.Any.Membership.Propositional using (_∈_)
+open import Data.List.Membership.Propositional using (_∈_)
+open import Data.List.Membership.Setoid.Properties using (∈-map⁺; ∈-concat⁺′; ∈-applyUpTo⁺)
 open import Data.List.All using (All; []; _∷_) renaming (map to mapₐ)
 open import Data.List.All.Properties using (applyUpTo⁺₁; applyUpTo⁺₂; concat⁺) 
 open import Data.Product using (∃₂; ∃; _,_; _×_)
@@ -18,7 +19,6 @@ open import Function using (_∘_)
 
 open import RoutingLib.Data.List using (allFinPairs)
 open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-allFin⁺; ∈-combine⁺; ∈-allFinPairs⁺)
-open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-map⁺; ∈-concat⁺; ∈-applyUpTo⁺)
 open import RoutingLib.Data.SimplePath.NonEmpty hiding (_∈_)
 open import RoutingLib.Data.SimplePath.NonEmpty.Properties
 open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Equality
@@ -45,7 +45,7 @@ module RoutingLib.Data.SimplePath.NonEmpty.Enumeration (n : ℕ) where
     LPₛ : Setoid _ _
     LPₛ = listSetoid Pₛ
 
-    open import Data.List.Any.Membership Pₛ using () renaming (_∈_ to _∈ₚ_; _∉_ to _∉ₚ_)
+    open import Data.List.Membership.Setoid Pₛ using () renaming (_∈_ to _∈ₚ_; _∉_ to _∉ₚ_)
     open import RoutingLib.Data.List.Relation.Disjoint   Pₛ using () renaming (_#_ to _#ₚ_)
     open import RoutingLib.Data.List.Uniqueness.Setoid Pₛ using () renaming (Unique to Uniqueₚ)
     open Setoid LPₛ using () renaming (reflexive to ≈ₗₚ-reflexive)
@@ -117,7 +117,7 @@ module RoutingLib.Data.SimplePath.NonEmpty.Enumeration (n : ℕ) where
     ∈-allPathsOfLength : ∀ p → p ∈ₚ (allPathsOfLength (length p))
     ∈-allPathsOfLength []                  = here ≈ₚ-refl
     ∈-allPathsOfLength ((i , j) ∷ p ∣ e⇿p ∣ e∉p) = 
-      ∈-concat⁺ Pₛ
+      ∈-concat⁺′ Pₛ
         (∈-extendAll (∈-allPathsOfLength p))
         (∈-map⁺ F×Fₛ LPₛ
           (≈ₗₚ-reflexive ∘ cong (extendAll (allPathsOfLength (length p))))
@@ -157,7 +157,7 @@ module RoutingLib.Data.SimplePath.NonEmpty.Enumeration (n : ℕ) where
     ∈-allPaths : ∀ p → p ∈ₚ allPaths
     ∈-allPaths []                  = here ≈ₚ-refl
     ∈-allPaths (e ∷ p ∣ e⇿p ∣ e∉p) =
-      there (∈-concat⁺ Pₛ
+      there (∈-concat⁺′ Pₛ
         (∈-allPathsOfLength (e ∷ p ∣ e⇿p ∣ e∉p))
         (∈-applyUpTo⁺ LPₛ allPathsOfLength (|p|<n (nonEmpty e p e⇿p e∉p))))
 {-

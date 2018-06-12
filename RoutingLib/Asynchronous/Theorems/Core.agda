@@ -42,7 +42,7 @@ module RoutingLib.Asynchronous.Theorems.Core
       aco   : ACO p
       total : ∀ x → x ∈ D aco 0
 
-    open ACO public
+    open ACO aco public
     
   ------------------------
   -- Ultrametric spaces --

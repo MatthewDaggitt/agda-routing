@@ -22,14 +22,14 @@ module Theorem1 {a b ℓ n} (algebra : FiniteStrictlyIncreasingRoutingAlgebra a 
 
   σ-ultrametricConditions : UltrametricConditions σ∥
   σ-ultrametricConditions = record
-    { dᵢ               = dₜ
-    ; dᵢ-isUltrametric = dₜ-isUltrametric
-    ; f-strContrOrbits = σ-strContr
-    ; f-strContrOnFP   = σ-strContrOnFP
-    ; f-cong           = σ-cong
-    ; _≟_              = _≟ₘ_
-    ; d-bounded        = D-bounded
-    ; element          = I
+    { dᵢ                 = dₜ
+    ; dᵢ-isUltrametric   = dₜ-isUltrametric
+    ; F-strContrOnOrbits = σ-strContr
+    ; F-strContrOnFP     = σ-strContrOnFP
+    ; F-cong             = σ-cong
+    ; _≟_                = _≟ₘ_
+    ; d-bounded          = D-bounded
+    ; element            = I
     } 
 
   σ-isAsynchronouslySafe : IsAsynchronouslySafe σ∥
@@ -49,14 +49,14 @@ module Theorem2 {a b ℓ n} (algebra : StrictlyIncreasingPathAlgebra a b ℓ n) 
 
   ultrametricConditions : UltrametricConditions σ∥
   ultrametricConditions = record
-    { dᵢ                = dₜ
-    ; dᵢ-isUltrametric  = dₜ-isUltrametric
-    ; f-cong           = σ-cong
-    ; f-strContrOrbits = σ-strContrOrbits
-    ; f-strContrOnFP   = σ-strContrOnFP
-    ; d-bounded        = D-bounded
-    ; element          = I
-    ; _≟_              = _≟ₘ_
+    { dᵢ                 = dₜ
+    ; dᵢ-isUltrametric   = dₜ-isUltrametric
+    ; F-cong             = σ-cong
+    ; F-strContrOnOrbits = σ-strContrOrbits
+    ; F-strContrOnFP     = σ-strContrOnFP
+    ; d-bounded          = D-bounded
+    ; element            = I
+    ; _≟_                = _≟ₘ_
     }
 
   σ-isAsynchronouslySafe : IsAsynchronouslySafe σ∥

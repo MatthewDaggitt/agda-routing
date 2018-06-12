@@ -4,14 +4,15 @@ open import Data.List
 open import Data.List.Properties using (length-filter)
 open import Data.List.All using (All; []; _∷_)
 open import Data.List.Any using (Any; here; there)
-open import Data.List.Any.Membership.Propositional using (_∈_; lose)
+open import Data.List.Membership.Propositional using (_∈_; lose)
 open import Data.List.Relation.Pointwise using (Pointwise; []; _∷_)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Maybe using (Maybe; just; nothing; just-injective)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_,_)
 open import Relation.Binary using (Rel; Setoid)
-open import Relation.Unary using (Decidable; Pred; ∁; ∁?)
+open import Relation.Unary using (Decidable; Pred; ∁)
+open import Relation.Unary.Properties using (∁?)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; cong; cong₂; trans)
@@ -19,9 +20,9 @@ open import Relation.Binary.List.Pointwise using ([]; _∷_) renaming (Rel to Li
 open import Relation.Nullary using (¬_)
 open import Relation.Unary using (∁)
 open import Function using (id; _∘_)
+open import Algebra using (Semilattice)
 open import Algebra.FunctionProperties using (Op₂; Idempotent; Associative; Commutative; Congruent₂)
 
-open import RoutingLib.Algebra using (Semilattice)
 open import RoutingLib.Data.List
 open import RoutingLib.Data.Nat.Properties
 open import RoutingLib.Algebra.FunctionProperties
@@ -58,18 +59,6 @@ module _ {a b} {A : Set a} {B : Set b} (f : A → Maybe B) where
   ... | nothing | just _  = contradiction fx≡fy λ()
   ... | just _  | nothing = contradiction fx≡fy λ()
   ... | just _  | just _  = cong₂ _∷_ (just-injective fx≡fy) (mapMaybe-cong fxsys)
-
-------------------------------------------------------------------------
--- Properties of tabulate
-
-module _ {a} {A : Set a} where
-
-  -- stdlib
-  tabulate-cong : ∀ {n ℓ} {_≈_ : Rel A ℓ} (f g : Fin n → A) →
-                  (∀ i → f i ≈ g i) → ListRel _≈_ (tabulate f) (tabulate g)
-  tabulate-cong {zero}  f g f≈g = []
-  tabulate-cong {suc n} f g f≈g = f≈g fzero ∷ tabulate-cong (f ∘ fsuc) (g ∘ fsuc) (f≈g ∘ fsuc)
-
 
 ------------------------------------------------------------------------
 -- Properties of foldr
@@ -135,7 +124,7 @@ lookup∈xs (x ∷ xs) (fsuc i) = there (lookup∈xs xs i)
 module _ {a ℓ} (S : Semilattice a ℓ)  where
 
   open Semilattice S renaming (Carrier to A; refl to ≈-refl; sym to ≈-sym; trans to ≈-trans)
-  open import Data.List.Any.Membership setoid using () renaming (_∈_ to _∈ₛ_)
+  open import Data.List.Membership.Setoid setoid using () renaming (_∈_ to _∈ₛ_)
   open import Relation.Binary.EqReasoning setoid
 
   foldr≤ᵣe : ∀ e xs → e ∧ foldr _∧_ e xs ≈ foldr _∧_ e xs

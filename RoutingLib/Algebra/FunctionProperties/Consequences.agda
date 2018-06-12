@@ -22,7 +22,6 @@ module RoutingLib.Algebra.FunctionProperties.Consequences {a ℓ} (S : Setoid a 
   id-subst : ∀ {_•_ e f} → Congruent₂ _•_ → Identity e _•_ → e ≈ f → Identity f _•_
   id-subst cong (idˡ , idʳ) e≈f = idˡ-subst cong idˡ e≈f , idʳ-subst cong idʳ e≈f
 
-
   idˡ+zeˡ⇒singleton : ∀ {_•_ e} → LeftIdentity e _•_ → LeftZero e _•_ → 
                      ∀ x y → x ≈ y
   idˡ+zeˡ⇒singleton {_•_} {e} id ze x y = begin

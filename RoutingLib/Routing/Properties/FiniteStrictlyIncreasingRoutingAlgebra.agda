@@ -1,11 +1,11 @@
 open import Data.List using (List; length)
+open import Data.List.Membership.Setoid.Properties using (∈-length)
 open import Function using (flip)
 open import Data.Nat using (ℕ; _≤_)
 
 open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
 open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (deduplicate!⁺)
 open import RoutingLib.Data.List.Membership.DecSetoid.Properties using (∈-deduplicate⁺)
-open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-length)
 
 open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.Properties.StrictlyIncreasingRoutingAlgebra
@@ -24,7 +24,7 @@ open StrictlyIncreasingRoutingAlgebraProperties strictlyIncreasingRoutingAlgebra
 
 open import RoutingLib.Data.List.Sorting.Mergesort ≥₊-decTotalOrder
 open import RoutingLib.Data.List.Membership.DecSetoid DS using (deduplicate)
-open import Data.List.Any.Membership S using (_∈_)
+open import Data.List.Membership.Setoid S using (_∈_)
 
 abstract
 

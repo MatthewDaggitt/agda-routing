@@ -3,6 +3,7 @@ open import Data.Nat.Properties using (≤+≢⇒<; <⇒≯; <⇒≤; ≤-decTot
 open import Data.Fin using (zero; suc) renaming (_<_ to _<𝔽_)
 open import Data.List using (upTo; lookup)
 open import Data.List.All using () renaming (map to mapₐ; lookup to lookupₐ)
+open import Data.List.Membership.Propositional.Properties using (∈-lookup)
 open import Data.Product using (_,_; uncurry′)
 open import Relation.Binary using (DecTotalOrder)
 open import Relation.Binary.PropositionalEquality using () renaming (setoid to ≡-setoid)
@@ -14,7 +15,6 @@ open import RoutingLib.Data.List
 open import RoutingLib.Data.List.Uniqueness.Propositional using (Unique)
 open import RoutingLib.Data.List.AllPairs using (AllPairs; []; _∷_; map; zip)
 open import RoutingLib.Data.List.AllPairs.Properties using (applyUpTo⁺₁)
-open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-lookup)
 
 module RoutingLib.Data.List.Sorting.Nat where
 

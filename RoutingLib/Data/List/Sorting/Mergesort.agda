@@ -1,5 +1,5 @@
 open import Data.List using (List; []; _∷_; length; splitAt)
-import Data.List.Any.Membership as Membership
+import Data.List.Membership.Setoid as Membership
 open import Data.List.All using (All)
 open import Data.Nat using (⌈_/2⌉)
 open import Data.Product using (_,_)

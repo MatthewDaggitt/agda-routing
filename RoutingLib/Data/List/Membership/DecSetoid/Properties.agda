@@ -2,7 +2,8 @@ open import Relation.Binary using (DecSetoid; Setoid)
 open import Relation.Nullary using (yes; no)
 open import Data.List hiding (any)
 open import Data.List.Any using (here; there; any)
-import Data.List.Any.Membership as Membership
+import Data.List.Membership.Setoid as Membership
+open import Data.List.Membership.Setoid.Properties
 
 open import RoutingLib.Data.List
 import RoutingLib.Data.List.Membership.DecSetoid as DecMembership
@@ -23,7 +24,7 @@ module RoutingLib.Data.List.Membership.DecSetoid.Properties where
 
     ∈-deduplicate⁺ : ∀ {x xs} → x ∈ xs → x ∈ deduplicate xs
     ∈-deduplicate⁺ {y} {x ∷ xs} (here y≈x)   with any (x ≟_) xs
-    ... | yes x∈xs = ∈-deduplicate⁺ (∈-resp-≈ S x∈xs (sym y≈x))
+    ... | yes x∈xs = ∈-deduplicate⁺ (∈-resp-≈ S (sym y≈x) x∈xs)
     ... | no  _    = here y≈x
     ∈-deduplicate⁺ {y} {x ∷ xs} (there y∈xs) with any (x ≟_) xs
     ... | yes _ = ∈-deduplicate⁺ y∈xs

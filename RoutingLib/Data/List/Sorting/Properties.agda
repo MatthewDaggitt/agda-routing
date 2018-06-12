@@ -4,6 +4,7 @@ open import Data.Fin using (zero; suc) renaming (_≤_ to _≤𝔽_; _<_ to _<�
 open import Data.List using ([]; _∷_; length; lookup)
 open import Data.List.All as All using (All; []; _∷_)
 open import Data.List.Any using (here; there; index)
+open import Data.List.Membership.Setoid.Properties using (∈-lookup)
 open import Data.Product using (_,_; proj₁; proj₂; uncurry′)
 open import Data.Sum using (inj₁; inj₂)
 open import Relation.Binary using (DecTotalOrder)
@@ -18,7 +19,7 @@ open import RoutingLib.Data.List.AllPairs using ([]; _∷_)
 open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
 open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (perm!)
 open import RoutingLib.Data.List.Relation.Permutation.Properties using (⇿-sym; ⇿-length)
-open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-perm; ∈-lookup)
+open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-perm)
 
 module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTotalOrder a ℓ₁ ℓ₂) where
 
@@ -26,7 +27,7 @@ module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTot
   open Eq using () renaming (setoid to S; trans to ≈-trans; sym to ≈-sym)
   
   open import RoutingLib.Data.List.Sorting _≤_
-  open import Data.List.Any.Membership S using (_∈_)
+  open import Data.List.Membership.Setoid S using (_∈_)
   open import Relation.Binary.NonStrictToStrict _≈_ _≤_ using (_<_) renaming (irrefl to <-irrefl)
   
   

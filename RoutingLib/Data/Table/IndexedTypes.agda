@@ -1,7 +1,7 @@
 open import Data.Fin using (Fin)
 open import Data.Product using (∃; _×_)
 open import Data.List using (List)
-import Data.List.Any.Membership as Membership
+import Data.List.Membership.Setoid as Membership
 open import Level using (Level; _⊔_) renaming (suc to lsuc)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)

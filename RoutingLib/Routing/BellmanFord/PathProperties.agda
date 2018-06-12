@@ -44,7 +44,7 @@ open BellmanFordProperties routingAlgebra A
 abstract
 
   p[Iᵢᵢ]≈[] : ∀ i → path (I i i) ≈ₚ valid []
-  p[Iᵢᵢ]≈[] i = r≈1⇒path[r]≈[] (≈-reflexive (Iᵢᵢ≡0# i))
+  p[Iᵢᵢ]≈[] i = r≈0⇒path[r]≈[] (≈-reflexive (Iᵢᵢ≡0# i))
 
   p[Iᵢⱼ]≈invalid : ∀ {i j} → j ≢ i → path (I i j) ≈ₚ invalid
   p[Iᵢⱼ]≈invalid j≢i = r≈∞⇒path[r]≈∅ (≈-reflexive (Iᵢⱼ≡∞ j≢i))

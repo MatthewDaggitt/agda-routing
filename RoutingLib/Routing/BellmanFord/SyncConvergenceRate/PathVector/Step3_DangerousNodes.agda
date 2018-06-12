@@ -5,15 +5,18 @@ open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (Subset; _∈_; _∉_; _∪_)
 open import Data.Fin.Dec using (_∈?_)
 open import Data.Product using (_,_; _×_; ∃; ∃₂)
+open import Data.List.Membership.Propositional.Properties using (∈-filter⁺)
 open import Function using (_∘_)
 open import Relation.Nullary using (Dec; ¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Nullary.Product using (_×-dec_)
 open import Relation.Unary
-  using (∁?; Decidable) renaming (_∈_ to _∈ᵤ_; _∉_ to _∉ᵤ_; _⊆_ to _⊆ᵤ_)
+  using (Decidable) renaming (_∈_ to _∈ᵤ_; _∉_ to _∉ᵤ_; _⊆_ to _⊆ᵤ_)
+open import Relation.Unary.Properties using (∁?; _∩?_)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; cong; subst; refl; sym; trans; inspect; [_]; module ≡-Reasoning)
 import Relation.Binary.PartialOrderReasoning as POR
+open import Function.Reasoning
 
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.SimplePath
@@ -26,11 +29,9 @@ open import RoutingLib.Data.SimplePath.Properties
   using (∉-resp-≈ₚ; length-cong)
 open import RoutingLib.Data.Fin.Subset using (Nonfull) renaming ()
 open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
-open import RoutingLib.Relation.Unary using (_∩?_)
 open import RoutingLib.Data.Fin.Dec using (any?)
 open import RoutingLib.Data.List using (allFinPairs)
-open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-filter⁺; ∈-allFinPairs⁺)
-open import RoutingLib.Function.Reasoning
+open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-allFinPairs⁺)
 import RoutingLib.Relation.Binary.Reasoning.StrictPartialOrder as SPOR
 
 open import RoutingLib.Routing.Algebra
@@ -65,10 +66,10 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step3_Dange
   ¬𝓡⇒∉C : ∀ {s k} → k ∉ᵤ 𝓡 (t + s) → k ∉ C
   ¬𝓡⇒∉C {s} {k} k∉𝓡ₜ₊ₛ k∈C =
        k∈C                     ∶ k ∈ C
-    ∣> C-fixed                 ∶ k ∈ᵤ 𝓒 t
-    ∣> 𝓒ₜ⊆𝓒ₜ₊ₛ t s            ∶ k ∈ᵤ 𝓒 (t + s)
-    ∣> 𝓒ₜ⊆𝓡ₜ (t + s) ≈ₚ-refl  ∶ k ∈ᵤ 𝓡 (t + s)
-    ∣> k∉𝓡ₜ₊ₛ                 ∶ ⊥
+    |> C-fixed                 ∶ k ∈ᵤ 𝓒 t
+    |> 𝓒ₜ⊆𝓒ₜ₊ₛ t s            ∶ k ∈ᵤ 𝓒 (t + s)
+    |> 𝓒ₜ⊆𝓡ₜ (t + s) ≈ₚ-refl  ∶ k ∈ᵤ 𝓡 (t + s)
+    |> k∉𝓡ₜ₊ₛ                 ∶ ⊥
 
 
   --------------------------------------------------------------------------

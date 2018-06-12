@@ -5,8 +5,6 @@ open import Data.Product using (_,_; _×_)
 open import Relation.Binary using (Rel; _⇒_)
 open import Relation.Unary using (_∩_; _⊆_)
 
-import RoutingLib.Data.List.All as All
-
 module RoutingLib.Data.List.AllPairs where
 
   data AllPairs {a ℓ} {A : Set a} (_~_ : Rel A ℓ) : List A → Set (a ⊔ ℓ) where

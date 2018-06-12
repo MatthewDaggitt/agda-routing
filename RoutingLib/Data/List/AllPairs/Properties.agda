@@ -136,7 +136,8 @@ module _ {a ℓ} {A : Set a} {_~_ : Rel A ℓ} where
 module _ {a ℓ} (DS : DecSetoid a ℓ) where
 
   open DecSetoid DS renaming (Carrier to A)
-  open import RoutingLib.Data.List.Membership.DecSetoid DS using (deduplicate; _∈?_)
+  open import RoutingLib.Data.List.Membership.DecSetoid DS using (deduplicate)
+  open import Data.List.Membership.DecSetoid DS using (_∈?_)
 
   deduplicate⁺ : ∀ {ℓ} {_~_ : Rel A ℓ} {xs} → AllPairs _~_ xs →
                  AllPairs _~_ (deduplicate xs)

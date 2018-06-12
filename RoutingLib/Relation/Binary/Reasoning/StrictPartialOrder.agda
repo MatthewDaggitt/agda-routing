@@ -34,13 +34,13 @@ module RoutingLib.Relation.Binary.Reasoning.StrictPartialOrder
   _ ≤⟨ x≤y ⟩≤ relTo₁ y≤z = relTo₁ (trans x≤y y≤z)
 
   _≤⟨_⟩<_ : ∀ x {y z} → x ≤ y → y IsRelatedTo₂ z → x IsRelatedTo₂ z
-  _ ≤⟨ x≤y ⟩< relTo₂ y<z = relTo₂ (≤<-trans x≤y y<z)
+  _ ≤⟨ x≤y ⟩< relTo₂ y<z = relTo₂ (≤-<-trans x≤y y<z)
 
   _<⟨_⟩<_ : ∀ x {y z} → x < y → y IsRelatedTo₂ z → x IsRelatedTo₂ z
   _ <⟨ x∼y ⟩< relTo₂ y∼z = relTo₂ (<-trans x∼y y∼z)
 
   _<⟨_⟩≤_ : ∀ x {y z} → x < y → y IsRelatedTo₁ z → x IsRelatedTo₂ z
-  _ <⟨ x∼y ⟩≤ relTo₁ y∼z = relTo₂ (<≤-trans x∼y y∼z)
+  _ <⟨ x∼y ⟩≤ relTo₁ y∼z = relTo₂ (<-≤-trans x∼y y∼z)
   
 
 

@@ -1,11 +1,11 @@
 open import Data.Nat using (ℕ; suc; s≤s; z≤n;_+_; _≤_; _<_; _∸_; ≤-pred)
-open import Data.Nat.Properties using (<⇒≤; ≤-refl; ≤-reflexive; <-irrefl; ≤-trans; n∸m≤n; n≤1+n; <⇒≱; m+n∸n≡m)
+open import Data.Nat.Properties using (<⇒≤; ≤-refl; ≤-reflexive; <-irrefl; ≤-trans; n∸m≤n; n≤1+n; <⇒≱; m+n∸n≡m; ∸-monoʳ-≤)
 open import Data.Product using (∃; _,_)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; cong; subst₂)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Data.Nat.Properties using (∸-monoʳ-<; ∸-monoʳ-≤; m<n⇒0<n∸m; module ≤-Reasoning)
+open import RoutingLib.Data.Nat.Properties using (∸-monoʳ-<; m<n⇒0<n∸m; module ≤-Reasoning)
 
 open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Prelude as Prelude
@@ -59,7 +59,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step1_Inconsis
     ... | _     | yes rᶜ = contradiction rᶜ rⁱ
     ... | yes _ | no  _  = begin
       2                          ≡⟨ sym (m+n∸n≡m 2 n) ⟩
-      suc (suc n) ∸ n            ≤⟨ ∸-monoʳ-≤ (size<n 1≤n r) (suc (suc n)) ⟩
+      suc (suc n) ∸ n            ≤⟨ ∸-monoʳ-≤ (suc (suc n)) (size<n 1≤n r) ⟩
       suc (suc n) ∸ suc (size r) ≡⟨⟩ 
       suc n       ∸ size r       ∎
       where open ≤-Reasoning

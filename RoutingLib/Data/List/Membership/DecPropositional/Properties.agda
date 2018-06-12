@@ -1,4 +1,4 @@
-open import Data.List.Any.Membership.Propositional using (_∈_)
+open import Data.List.Membership.Propositional using (_∈_)
 open import Relation.Binary using (Decidable)
 open import Relation.Binary.PropositionalEquality using (_≡_; decSetoid)
 

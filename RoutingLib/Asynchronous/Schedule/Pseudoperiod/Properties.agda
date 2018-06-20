@@ -25,7 +25,7 @@ open import RoutingLib.Data.Nat.Properties using (m≤n⊎m≤o⇒m≤n⊔o; ∀
 open import RoutingLib.Data.Table using (max)
 open import RoutingLib.Data.Table.Properties using (t≤max[t]; x≤max[t]; max[s]≤max[t]; ⊥≤max[t])
 import RoutingLib.Data.List.Extrema.Nat as List
-import RoutingLib.Data.List.Relation.Subset as Sublist
+import RoutingLib.Data.List.Relation.Sublist.Propositional.Properties as Sublist
 
 open import RoutingLib.Asynchronous.Schedule
 import RoutingLib.Asynchronous.Schedule.Pseudoperiod as Pseudoperiod

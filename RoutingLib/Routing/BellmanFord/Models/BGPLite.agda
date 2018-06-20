@@ -12,7 +12,7 @@ open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
   using (_≡_; refl; sym; trans; subst; cong; cong₂; inspect; [_])
-open import Relation.Binary.Lattice using (Minimum; Maximum)
+open import Relation.Binary using (Minimum; Maximum)
 open import Level using () renaming (zero to ℓ₀; suc to lsuc)
 
 open import RoutingLib.Data.Nat.Properties using (n≢1+n)
@@ -67,9 +67,7 @@ _              ▷ invalid       = invalid
 (step i j pol) ▷ (valid x c p) with (i , j) ⇿? p | i ∉ₚ? p
 ... | no  _   | _       = invalid
 ... | yes _   | no  _   = invalid
-... | yes i⇿p | yes i∉p with apply pol (valid x c p)
-...   | invalid          = invalid
-...   | (valid nl ncs _) = valid nl ncs ((i , j) ∷ p ∣ i⇿p ∣ i∉p)
+... | yes i⇿p | yes i∉p = apply pol (valid x c ((i , j) ∷ p ∣ i⇿p ∣ i∉p))
 
 ▷-cong : ∀ f {r s} → r ≈ᵣ s → f ▷ r ≈ᵣ f ▷ s
 ▷-cong (step i j pol) {_}                {_}                invalidEq = invalidEq

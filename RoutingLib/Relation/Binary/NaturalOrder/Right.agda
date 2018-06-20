@@ -12,9 +12,12 @@ module RoutingLib.Relation.Binary.NaturalOrder.Right
   -- All added to standard library
   
   open import Algebra.FunctionProperties _≈_
-  open import RoutingLib.Algebra.Selectivity.Properties _≈_ _∙_
-    using () renaming (idem to sel⇨idem)
 
+  sel⇒idem : Selective _∙_ → Idempotent _∙_
+  sel⇒idem sel x with sel x x
+  ... | inj₁ x∙x≈x = x∙x≈x
+  ... | inj₂ x∙x≈x = x∙x≈x
+  
   -------------------------
   -- Right natural order --
   -------------------------
@@ -136,7 +139,7 @@ module RoutingLib.Relation.Binary.NaturalOrder.Right
   ≤-isTotalOrder : IsSemigroup _≈_ _∙_ → Commutative _∙_ →
                    Selective _∙_ → IsTotalOrder _≈_ _≤_
   ≤-isTotalOrder semi comm sel  = record
-    { isPartialOrder = ≤-isPartialOrder semi comm (sel⇨idem sel)
+    { isPartialOrder = ≤-isPartialOrder semi comm (sel⇒idem sel)
     ; total = ≤-total trans sel comm
     }
     where open IsSemigroup semi

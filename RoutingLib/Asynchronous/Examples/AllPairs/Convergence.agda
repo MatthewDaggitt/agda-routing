@@ -2,9 +2,10 @@ open import Data.Fin using (Fin) renaming (_≤_ to _≤F_)
 open import Data.List using (List; []; _∷_; length; filter)
 open import Data.List.All using (All) renaming ([] to [A]; _∷_ to _∷A_; tabulate to tabulateAll)
 open import Data.List.Any using (Any; here; there)
-import Data.List.Any.Membership as Memb
-import Data.List.Any.Membership.Properties as MembProp
-open import Data.List.Properties using (length-filter; filter-complete; filter-none)
+open import Data.List.Membership.Propositional renaming (_∈_ to _∈ₗ_)
+open import Data.List.Membership.Propositional.Properties using (∈-filter⁺; ∈-tabulate⁺; ∈-filter⁻)
+open import Data.List.Relation.Sublist.Propositional renaming (_⊆_ to _⊆ₗ_)
+open import Data.List.Properties using (length-filter; filter-complete; filter-all)
 open import Data.Nat using (ℕ; zero; suc; _∸_) renaming (_+_ to _+ℕ_; _<_ to _<ℕ_; _≤_ to _≤ℕ_; z≤n to z≤ℕn; s≤s to s≤ℕs; _≟_ to _≟ℕ_)
 open import Data.Nat.Properties using (1+n≰n; +-monoʳ-<; m+n∸m≡n) renaming (+-identityʳ to +-idʳℕ; +-suc to +ℕ-suc; ≤-reflexive to ≤ℕ-reflexive; ≤-trans to ≤ℕ-trans; n≤1+n to n≤ℕ1+n; ≤+≢⇒< to ≤+≢⇒ℕ<; ≤-refl to ≤ℕ-refl; n≤m+n to n≤ℕm+n; m≤m+n to m≤ℕm+n; <⇒≤ to <ℕ⇒≤ℕ; ≤-step to ≤ℕ-step)
 open import Data.Sum using (inj₁; inj₂; _⊎_)
@@ -18,7 +19,8 @@ open import Relation.Binary using (Rel; Setoid; Preorder)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; _≢_; subst; sym; trans; cong; subst₂; setoid)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Unary using (U; U-Universal; Decidable)
+open import Relation.Unary using (U; Decidable)
+open import Relation.Unary.Properties using (U-Universal)
 
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 
@@ -26,7 +28,7 @@ open import RoutingLib.Asynchronous using (Parallelisation)
 import RoutingLib.Asynchronous.Examples.AllPairs as AllPairs
 open import RoutingLib.Asynchronous.Schedule using (Schedule; 𝕋)
 open import RoutingLib.Data.List using (allFinPairs)
-open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-filter⁺; ∈-combine⁺; ∈-tabulate⁺; ∈-filter⁻; ∈-allFinPairs⁺)
+open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-combine⁺; ∈-allFinPairs⁺)
 open import RoutingLib.Data.NatInf
 open import RoutingLib.Data.NatInf.Properties
 open import RoutingLib.Data.Table using (Table; min∞; sum; max)
@@ -41,7 +43,7 @@ module RoutingLib.Asynchronous.Examples.AllPairs.Convergence {n}(𝕤 : Schedule
   open import RoutingLib.Asynchronous.Examples.AllPairs.Properties n
   open Schedule 𝕤
   open Parallelisation all-pairs-parallelisation
-  open import RoutingLib.Asynchronous.Theorems.Core all-pairs-parallelisation using (SynchronousConditions; Start)
+  open import RoutingLib.Asynchronous.Theorems.Core all-pairs-parallelisation using (SynchronousConditions; StartingConditions)
   open import RoutingLib.Asynchronous.Theorems.UresinDubois1 all-pairs-parallelisation
   
   D₀ : Pred lzero
@@ -49,9 +51,6 @@ module RoutingLib.Asynchronous.Examples.AllPairs.Convergence {n}(𝕤 : Schedule
 
   x₀∈D₀ : x₀ ∈ D₀
   x₀∈D₀ i = U-Universal (x₀ i)
-
-  D₀-subst : ∀ {x y} → x ≈ y → x ∈ D₀ → y ∈ D₀
-  D₀-subst {_} {y} _ _ i = U-Universal (y i)
 
   D₀-closed : ∀ x → x ∈ D₀ → F x ∈ D₀
   D₀-closed x _ i = U-Universal (F x i)
@@ -110,9 +109,7 @@ module RoutingLib.Asynchronous.Examples.AllPairs.Convergence {n}(𝕤 : Schedule
 
   FinPair : Setoid lzero lzero
   FinPair = setoid (Fin n × Fin n)
-
-  open Memb FinPair using () renaming (_∈_ to _∈L_; _⊆_ to _⊆L_)
-
+  
   is∞? : ∀ K → Decidable (λ node → syncIter x₀ K (proj₁ node) (proj₂ node) ≡ ∞)
   is∞? K = λ node → syncIter x₀ K (proj₁ node) (proj₂ node) ≟ ∞
 
@@ -120,24 +117,24 @@ module RoutingLib.Asynchronous.Examples.AllPairs.Convergence {n}(𝕤 : Schedule
   ∞-nodes zero = filter (is∞? 0) (allFinPairs n)
   ∞-nodes (suc K) = filter (is∞? (suc K)) (∞-nodes K)
 
-  node∈∞-nodes⇒node≡∞ : ∀ K i j → (i , j) ∈L ∞-nodes K → syncIter x₀ K i j ≡ ∞
+  node∈∞-nodes⇒node≡∞ : ∀ K i j → (i , j) ∈ₗ ∞-nodes K → syncIter x₀ K i j ≡ ∞
   node∈∞-nodes⇒node≡∞ zero i j node∈ = proj₂ (∈-filter⁻ (is∞? 0)
     {i , j} {allFinPairs n} node∈)
   node∈∞-nodes⇒node≡∞ (suc K) i j node∈ = proj₂ (∈-filter⁻ (is∞? (suc K))
     {i , j} {∞-nodes K} node∈)
 
-  node≡∞⇒node∈∞-nodes : ∀ K i j → syncIter x₀ K i j ≡ ∞ → (i , j) ∈L ∞-nodes K
-  node≡∞⇒node∈∞-nodes zero i j iter≡∞ = ∈-filter⁺ (is∞? 0) iter≡∞
-    (∈-allFinPairs⁺ i j)
+  node≡∞⇒node∈∞-nodes : ∀ K i j → syncIter x₀ K i j ≡ ∞ → (i , j) ∈ₗ ∞-nodes K
+  node≡∞⇒node∈∞-nodes zero i j iter≡∞ = ∈-filter⁺ (is∞? 0)
+    (∈-allFinPairs⁺ i j) iter≡∞
   node≡∞⇒node∈∞-nodes (suc K) i j iter≡∞ with syncIter x₀ K i j ≟ ∞
-  ... | yes ≡∞ =  ∈-filter⁺ (is∞? (suc K)) iter≡∞
-    (node≡∞⇒node∈∞-nodes K i j ≡∞)
+  ... | yes ≡∞ =  ∈-filter⁺ (is∞? (suc K))
+    (node≡∞⇒node∈∞-nodes K i j ≡∞) iter≡∞
   ... | no  ≢∞ with ≢∞⇒≡N ≢∞
   ...   | _ , p = contradiction
     (iter-decreasing K i j)
     (subst₂ _≰_ (sym iter≡∞) (sym p) ∞≰)
 
-  ∞-nodes-dec : ∀ K → ∞-nodes (suc K) ⊆L ∞-nodes K
+  ∞-nodes-dec : ∀ K → ∞-nodes (suc K) ⊆ₗ ∞-nodes K
   ∞-nodes-dec K x∈∞-nodes = proj₁ (∈-filter⁻ (is∞? (suc K)) x∈∞-nodes)
 
   ∞-nodes-length≡⇒∞-nodes≡ : ∀ K → length (∞-nodes K) ≡ length (∞-nodes (suc K)) →
@@ -147,11 +144,11 @@ module RoutingLib.Asynchronous.Examples.AllPairs.Convergence {n}(𝕤 : Schedule
   ∞-nodes≡⇒iterₖ≡∞⇒iterₛₖ≡∞ : ∀ K → ∞-nodes K ≡ ∞-nodes (suc K) →
                                 iter∞-dependent K
   ∞-nodes≡⇒iterₖ≡∞⇒iterₛₖ≡∞ K ∞-nodes≡ i j iterₖ≡∞ =
-    node∈∞-nodes⇒node≡∞ (suc K) i j (subst ((i , j) ∈L_) ∞-nodes≡
+    node∈∞-nodes⇒node≡∞ (suc K) i j (subst ((i , j) ∈ₗ_) ∞-nodes≡
       (node≡∞⇒node∈∞-nodes K i j iterₖ≡∞))
 
   ∞-nodes≡+∈∞-nodes⇒iter≡∞ : ∀ K → ∞-nodes K ≡ ∞-nodes (suc K) →
-                               {node : Fin n × Fin n} → node ∈L ∞-nodes (suc K) →
+                               {node : Fin n × Fin n} → node ∈ₗ ∞-nodes (suc K) →
                                syncIter x₀ (suc (suc K)) (proj₁ node) (proj₂ node) ≡ ∞
   ∞-nodes≡+∈∞-nodes⇒iter≡∞ K ∞-nodes≡ {i , j} node∈ =
     iter∞-chain K (∞-nodes≡⇒iterₖ≡∞⇒iterₛₖ≡∞ K ∞-nodes≡) i j
@@ -165,7 +162,7 @@ module RoutingLib.Asynchronous.Examples.AllPairs.Convergence {n}(𝕤 : Schedule
       (∞-nodes-fixed-range (suc K) ∞-nodesₛ≡ t))
     where
     ∞-nodesₛ≡ : ∞-nodes (suc K) ≡ ∞-nodes (suc (suc K))
-    ∞-nodesₛ≡ = sym (filter-none (is∞? (suc (suc K)))
+    ∞-nodesₛ≡ = sym (filter-all (is∞? (suc (suc K)))
       (tabulateAll (∞-nodes≡+∈∞-nodes⇒iter≡∞ K ∞-nodes≡)))
 
   ∞-nodes-fixed : ∀ K → ∞-nodes K ≡ ∞-nodes (suc K) → ∀ {t} → K ≤ℕ t →
@@ -192,6 +189,7 @@ module RoutingLib.Asynchronous.Examples.AllPairs.Convergence {n}(𝕤 : Schedule
   score K = sum {n} (λ i → sum {n} (λ j → extractℕ (syncIter x₀ K i j)))
 
   module _ (∞-conv : ∃ λ T → ∀ {t} → T ≤ℕ t → ∞-nodes t ≡ ∞-nodes (suc t)) where
+  
     extractℕ-dec : ∀ {K} → proj₁ ∞-conv ≤ℕ K → ∀ i j →
                    extractℕ (syncIter x₀ (suc K) i j) ≤ℕ extractℕ (syncIter x₀ K i j)
     extractℕ-dec {K} T≤K i j with syncIter x₀ (suc K) i j ≟ ∞ | syncIter x₀ K i j ≟ ∞
@@ -248,13 +246,12 @@ module RoutingLib.Asynchronous.Examples.AllPairs.Convergence {n}(𝕤 : Schedule
   ... | T∞ , ∞-conv = iter-fixed-point (T∞ , ∞-conv) (≤ℕ-refl)
                       (<-wellFounded (score T∞))
 
-  start : Start lzero
-  start = record {
-    x₀ = x₀ ;
-    D₀ = D₀ ;
-    x₀∈D₀ = x₀∈D₀ ;
-    D₀-subst = D₀-subst ;
-    D₀-closed = D₀-closed
+  start : StartingConditions lzero
+  start = record
+    { x₀ = x₀
+    ; D₀ = D₀
+    ; x₀∈D₀ = x₀∈D₀
+    ; D₀-closed = D₀-closed
     }
 
   poset : M-poset lzero
@@ -275,7 +272,7 @@ module RoutingLib.Asynchronous.Examples.AllPairs.Convergence {n}(𝕤 : Schedule
   open import RoutingLib.Asynchronous.Propositions.UresinDubois3 all-pairs-parallelisation syncCond using (aco; x₀∈D[0])
 
   convergence-time : 𝕋
-  convergence-time = proj₁ (async-converge aco 𝕤 x₀∈D[0])
+  convergence-time = {!!} --proj₁ (async-converge ? aco x₀∈D[0])
 
   convergence-state : Matrix
-  convergence-state = ξ aco 𝕤 x₀∈D[0]
+  convergence-state = {!!} --ξ aco 𝕤 x₀∈D[0]

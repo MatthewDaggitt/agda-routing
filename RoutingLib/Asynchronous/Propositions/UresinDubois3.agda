@@ -23,7 +23,7 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois3
   open import RoutingLib.Data.Table.IndexedTypes 𝕊ᵢ
   open Parallelisation 𝓟 using (F; syncIter)
   open SynchronousConditions syncConditions
-  open Start start
+  open StartingConditions start
   open M-poset poset hiding (trans)
 
   -- Synchronous iterations

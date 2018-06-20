@@ -7,9 +7,9 @@ open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary using (Rel; Decidable; IsDecEquivalence; Reflexive)
 open import Relation.Binary.Product.Pointwise using (_×-Rel_)
 open import Algebra.FunctionProperties.Core using (Op₂)
-open import Algebra.FunctionProperties using (Commutative; Associative; Idempotent)
+open import Algebra.FunctionProperties using (Commutative; Associative; Idempotent; Selective)
 
-open import RoutingLib.Algebra.FunctionProperties using (Selective; _Preserves_)
+open import RoutingLib.Algebra.FunctionProperties using ()
 
 
 module RoutingLib.Algebra.Selectivity.LexProduct

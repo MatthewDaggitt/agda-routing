@@ -31,56 +31,9 @@ module RoutingLib.Routing.Algebra  where
 --------------------------------------------------------------------------------
 -- Routing algebras --
 --------------------------------------------------------------------------------
--- Routing algebra
+-- Raw routing algebra without any properties
 
-record IsRoutingAlgebra
-  {a b ℓ} {Route : Set a} {Step : Set b}
-  (_≈_ : Rel Route ℓ)
-  (_⊕_ : Op₂ Route)
-  (_▷_ : Step → Route → Route)
-  (0# ∞ : Route) : Set (a ⊔ b ⊔ ℓ)
-  where
-  
-  field
-    ≈-isDecEquivalence : IsDecEquivalence _≈_
-
-    ⊕-cong             : Congruent₂    _≈_ _⊕_
-    ⊕-sel              : Selective     _≈_ _⊕_
-    ⊕-comm             : Commutative   _≈_ _⊕_
-    ⊕-assoc            : Associative   _≈_ _⊕_
-    ⊕-zeroʳ            : RightZero     _≈_ 0# _⊕_
-    ⊕-identityʳ        : RightIdentity _≈_ ∞ _⊕_
-
-    ▷-cong             : ∀ e → Congruent₁ _≈_ (e ▷_)
-    ▷-zero             : ∀ (f : Step) → (f ▷ ∞) ≈ ∞
-
-  open IsDecEquivalence ≈-isDecEquivalence public
-    renaming
-    ( refl          to ≈-refl
-    ; reflexive     to ≈-reflexive
-    ; sym           to ≈-sym
-    ; trans         to ≈-trans
-    ; isEquivalence to ≈-isEquivalence
-    ) public
-
-  infix 4 _≉_
-  _≉_ : Rel Route ℓ
-  x ≉ y = ¬ (x ≈ y)
-  
-  open RightNaturalOrder _≈_ _⊕_ public
-    using () renaming
-    ( _≤_ to _≤₊_
-    ; _≰_ to _≰₊_
-    ; _<_ to _<₊_
-    )
-
-  S : Setoid a ℓ
-  S = record { isEquivalence = ≈-isEquivalence }
-
-  DS : DecSetoid a ℓ
-  DS = record { isDecEquivalence = ≈-isDecEquivalence }
-
-record RoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
+record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
   no-eta-equality -- Needed due to bug #2732 in Agda
 
   infix 4 _≈_
@@ -95,44 +48,81 @@ record RoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
     _▷_              : Step → Route → Route
     0#               : Route
     ∞                : Route
-    isRoutingAlgebra : IsRoutingAlgebra _≈_ _⊕_ _▷_ 0# ∞
+    
+    ≈-isDecEquivalence : IsDecEquivalence _≈_
+    ▷-cong             : ∀ e → Congruent₁ _≈_ (e ▷_)
+    ⊕-cong             : Congruent₂    _≈_ _⊕_
+    
+  infix 4 _≉_
+  _≉_ : Rel Route ℓ
+  x ≉ y = ¬ (x ≈ y)
+  
+  open RightNaturalOrder _≈_ _⊕_ public
+    using () renaming
+    ( _≤_ to _≤₊_
+    ; _≰_ to _≰₊_
+    ; _<_ to _<₊_
+    )
 
+  open IsDecEquivalence ≈-isDecEquivalence public
+    renaming
+    ( refl          to ≈-refl
+    ; reflexive     to ≈-reflexive
+    ; sym           to ≈-sym
+    ; trans         to ≈-trans
+    ; isEquivalence to ≈-isEquivalence
+    ) public
+
+  S : Setoid _ ℓ
+  S = record { isEquivalence = ≈-isEquivalence }
+
+  DS : DecSetoid _ ℓ
+  DS = record { isDecEquivalence = ≈-isDecEquivalence }
+  
+--------------------------------------------------------------------------------
+-- Routing algebras
+
+record IsRoutingAlgebra {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) : Set (a ⊔ b ⊔ ℓ) where
+
+  open RawRoutingAlgebra algebra
+  
+  field
+    ⊕-sel       : Selective _≈_ _⊕_
+    ⊕-comm      : Commutative _≈_ _⊕_
+    ⊕-assoc     : Associative _≈_ _⊕_
+    ⊕-zeroʳ     : RightZero _≈_ 0# _⊕_
+    ⊕-identityʳ : RightIdentity _≈_ ∞ _⊕_
+    ▷-zero      : ∀ (f : Step) → (f ▷ ∞) ≈ ∞
+
+record RoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
+  no-eta-equality -- Needed due to bug #2732 in Agda
+
+  field
+    rawRoutingAlgebra : RawRoutingAlgebra a b ℓ
+    isRoutingAlgebra  : IsRoutingAlgebra rawRoutingAlgebra
+
+  open RawRoutingAlgebra rawRoutingAlgebra public
   open IsRoutingAlgebra isRoutingAlgebra public
-
+  
 --------------------------------------------------------------------------------
 -- Increasing routing algebras
 
-record IsIncreasingRoutingAlgebra
-  {a b ℓ} {Route : Set a} {Step : Set b}
-  (_≈_ : Rel Route ℓ)
-  (_⊕_ : Op₂ Route) (_▷_ : Step → Route → Route)
-  (0# ∞ : Route) : Set (a ⊔ b ⊔ ℓ)
+record IsIncreasingRoutingAlgebra {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) : Set (a ⊔ b ⊔ ℓ)
   where
   
-  field
-    isRoutingAlgebra     : IsRoutingAlgebra _≈_ _⊕_ _▷_ 0# ∞
-
-  open IsRoutingAlgebra isRoutingAlgebra public
-
-  field
-    ▷-increasing : ∀ f x → x ≤₊ (f ▷ x) 
-
-record IncreasingRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
-
-  infix 4 _≈_
-  infix 7 _⊕_
-  infix 6 _▷_
+  open RawRoutingAlgebra algebra
   
   field
-    Step  : Set a
-    Route : Set b
-    _≈_   : Rel Route ℓ
-    _⊕_   : Op₂ Route
-    _▷_   : Step → Route → Route
-    0#    : Route
-    ∞     : Route
-    isIncreasingRoutingAlgebra : IsIncreasingRoutingAlgebra _≈_ _⊕_ _▷_ 0# ∞
+    isRoutingAlgebra : IsRoutingAlgebra algebra
+    ▷-increasing     : ∀ f x → x ≤₊ (f ▷ x) 
 
+record IncreasingRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
+  
+  field
+    rawRoutingAlgebra          : RawRoutingAlgebra a b ℓ
+    isIncreasingRoutingAlgebra : IsIncreasingRoutingAlgebra rawRoutingAlgebra
+  
+  open RawRoutingAlgebra rawRoutingAlgebra public
   open IsIncreasingRoutingAlgebra isIncreasingRoutingAlgebra public
   
   routingAlgebra : RoutingAlgebra a b ℓ
@@ -141,21 +131,17 @@ record IncreasingRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
 --------------------------------------------------------------------------------
 -- Strictly increasing routing algebras
 
-record IsStrictlyIncreasingRoutingAlgebra
-  {a b ℓ} {Route : Set a} {Step : Set b}
-  (_≈_ : Rel Route ℓ)
-  (_⊕_ : Op₂ Route) (_▷_ : Step → Route → Route)
-  (0# ∞ : Route) : Set (a ⊔ b ⊔ ℓ)
+record IsStrictlyIncreasingRoutingAlgebra {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) : Set (a ⊔ b ⊔ ℓ)
   where
+
+  open RawRoutingAlgebra algebra
   
   field
-    isRoutingAlgebra     : IsRoutingAlgebra _≈_ _⊕_ _▷_ 0# ∞
-
-  open IsRoutingAlgebra isRoutingAlgebra public
-
-  field
+    isRoutingAlgebra     : IsRoutingAlgebra algebra
     ▷-strictlyIncreasing : ∀ f {x} → x ≉ ∞ → x <₊ (f ▷ x) 
 
+  open IsRoutingAlgebra isRoutingAlgebra public
+  
   ▷-increasing : ∀ f x → x ≤₊ f ▷ x
   ▷-increasing f x with x ≟ ∞
   ... | no  x≉∞ = proj₁ (▷-strictlyIncreasing f x≉∞)
@@ -167,7 +153,7 @@ record IsStrictlyIncreasingRoutingAlgebra
     x           ∎
     where open EqReasoning S
 
-  isIncreasingRoutingAlgebra : IsIncreasingRoutingAlgebra _≈_ _⊕_ _▷_ 0# ∞
+  isIncreasingRoutingAlgebra : IsIncreasingRoutingAlgebra algebra
   isIncreasingRoutingAlgebra = record
     { isRoutingAlgebra = isRoutingAlgebra
     ; ▷-increasing     = ▷-increasing
@@ -175,20 +161,11 @@ record IsStrictlyIncreasingRoutingAlgebra
 
 record StrictlyIncreasingRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
 
-  infix 4 _≈_
-  infix 7 _⊕_
-  infix 6 _▷_
-  
   field
-    Step  : Set a
-    Route : Set b
-    _≈_   : Rel Route ℓ
-    _⊕_   : Op₂ Route
-    _▷_   : Step → Route → Route
-    0#    : Route
-    ∞     : Route
-    isStrictlyIncreasingRoutingAlgebra : IsStrictlyIncreasingRoutingAlgebra _≈_ _⊕_ _▷_ 0# ∞
+    rawRoutingAlgebra                  : RawRoutingAlgebra a b ℓ
+    isStrictlyIncreasingRoutingAlgebra : IsStrictlyIncreasingRoutingAlgebra rawRoutingAlgebra
 
+  open RawRoutingAlgebra rawRoutingAlgebra public
   open IsStrictlyIncreasingRoutingAlgebra isStrictlyIncreasingRoutingAlgebra public
   
   routingAlgebra : RoutingAlgebra a b ℓ
@@ -198,19 +175,17 @@ record StrictlyIncreasingRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) w
   increasingRoutingAlgebra = record
     { isIncreasingRoutingAlgebra = isIncreasingRoutingAlgebra
     }
-  
---------------------------------------------------------------------------------
--- Increasing path algebra
 
-record IsFiniteStrictlyIncreasingRoutingAlgebra
-  {a b ℓ} {Route : Set a} {Step : Set b}
-  (_≈_ : Rel Route ℓ)
-  (_⊕_ : Op₂ Route) (_▷_ : Step → Route → Route)
-  (0# ∞ : Route) : Set (a ⊔ b ⊔ ℓ)
+--------------------------------------------------------------------------------
+-- Finite increasing routing algebra
+
+record IsFiniteStrictlyIncreasingRoutingAlgebra {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) : Set (a ⊔ b ⊔ ℓ)
   where
 
+  open RawRoutingAlgebra algebra
+  
   field
-    isStrictlyIncreasingRoutingAlgebra : IsStrictlyIncreasingRoutingAlgebra _≈_ _⊕_ _▷_ 0# ∞
+    isStrictlyIncreasingRoutingAlgebra : IsStrictlyIncreasingRoutingAlgebra algebra
 
   open IsStrictlyIncreasingRoutingAlgebra isStrictlyIncreasingRoutingAlgebra public
   open ListMembership S renaming (_∈_ to _∈ₗ_)
@@ -221,20 +196,11 @@ record IsFiniteStrictlyIncreasingRoutingAlgebra
 
 record FiniteStrictlyIncreasingRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
 
-  infix 4 _≈_
-  infix 7 _⊕_
-  infix 6 _▷_
-  
   field
-    Step  : Set a
-    Route : Set b
-    _≈_   : Rel Route ℓ
-    _⊕_   : Op₂ Route
-    _▷_   : Step → Route → Route
-    0#    : Route
-    ∞     : Route
-    isFiniteStrictlyIncreasingRoutingAlgebra : IsFiniteStrictlyIncreasingRoutingAlgebra _≈_ _⊕_ _▷_ 0# ∞
+    rawRoutingAlgebra                        : RawRoutingAlgebra a b ℓ
+    isFiniteStrictlyIncreasingRoutingAlgebra : IsFiniteStrictlyIncreasingRoutingAlgebra rawRoutingAlgebra
 
+  open RawRoutingAlgebra rawRoutingAlgebra public
   open IsFiniteStrictlyIncreasingRoutingAlgebra isFiniteStrictlyIncreasingRoutingAlgebra public
   
   strictlyIncreasingRoutingAlgebra : StrictlyIncreasingRoutingAlgebra a b ℓ
@@ -249,19 +215,28 @@ record FiniteStrictlyIncreasingRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ �
 --------------------------------------------------------------------------------
 -- Path algebras --
 --------------------------------------------------------------------------------
--- Path algebra
+-- Raw path algebras without properties
 
-record IsPathAlgebra
-  {a b ℓ n} {Route : Set a} {Step : Set b}
-  (_≈_ : Rel Route ℓ)
-  (_⊕_ : Op₂ Route) (_▷_ : Step → Route → Route)
-  (0# ∞ : Route)
-  (A : SquareMatrix Step n)
-  (path : Route → SimplePath n) : Set (a ⊔ b ⊔ ℓ)
-  where
+record RawPathAlgebra a b ℓ n : Set (lsuc (a ⊔ b ⊔ ℓ)) where
 
   field
-    isRoutingAlgebra : IsRoutingAlgebra _≈_ _⊕_ _▷_ 0# ∞
+    rawRoutingAlgebra : RawRoutingAlgebra a b ℓ
+
+  open RawRoutingAlgebra rawRoutingAlgebra public
+  
+  field
+    A        : SquareMatrix Step n
+    path     : Route → SimplePath n
+
+--------------------------------------------------------------------------------
+-- Path algebra
+
+record IsPathAlgebra {a b ℓ n} (algebra : RawPathAlgebra a b ℓ n) : Set (a ⊔ b ⊔ ℓ) where
+
+  open RawPathAlgebra algebra
+  
+  field
+    isRoutingAlgebra : IsRoutingAlgebra rawRoutingAlgebra
 
     path-cong      : path Preserves _≈_ ⟶ _≈ₚ_
     r≈0⇒path[r]≈[] : ∀ {r} → r ≈ 0# → path r ≈ₚ valid [] 
@@ -293,24 +268,12 @@ record IsPathAlgebra
   𝑰 r = ¬ 𝑪 r
   
 record PathAlgebra a b ℓ n : Set (lsuc (a ⊔ b ⊔ ℓ)) where
-
-  infix 4 _≈_
-  infix 7 _⊕_
-  infix 6 _▷_
   
   field
-    Step  : Set a
-    Route : Set b
-    _≈_   : Rel Route ℓ
-    _⊕_   : Op₂ Route
-    _▷_   : Step → Route → Route
-    0#    : Route
-    ∞     : Route
-    A     : SquareMatrix Step n
-    path  : Route → SimplePath n
+    rawPathAlgebra : RawPathAlgebra a b ℓ n
+    isPathAlgebra  : IsPathAlgebra rawPathAlgebra
 
-    isPathAlgebra : IsPathAlgebra _≈_ _⊕_ _▷_ 0# ∞ A path
-
+  open RawPathAlgebra rawPathAlgebra public
   open IsPathAlgebra isPathAlgebra public
 
   routingAlgebra : RoutingAlgebra a b ℓ
@@ -318,47 +281,27 @@ record PathAlgebra a b ℓ n : Set (lsuc (a ⊔ b ⊔ ℓ)) where
     { isRoutingAlgebra = isRoutingAlgebra
     }
 
-
-    
 --------------------------------------------------------------------------------
 -- Increasing path algebra
 
-record IsIncreasingPathAlgebra
-  {a b ℓ n} {Route : Set a} {Step : Set b}
-  (_≈_ : Rel Route ℓ)
-  (_⊕_ : Op₂ Route) (_▷_ : Step → Route → Route)
-  (0# ∞ : Route)
-  (A : SquareMatrix Step n)
-  (path : Route → SimplePath n) : Set (a ⊔ b ⊔ ℓ)
+record IsIncreasingPathAlgebra {a b ℓ n} (algebra : RawPathAlgebra a b ℓ n) : Set (a ⊔ b ⊔ ℓ)
   where
 
-  field
-    isPathAlgebra : IsPathAlgebra _≈_ _⊕_ _▷_ 0# ∞ A path
-
-  open IsPathAlgebra isPathAlgebra public
-
-  field
-    ▷-increasing : ∀ f x → x ≤₊ (f ▷ x)
-
-record IncreasingPathAlgebra a b ℓ n : Set (lsuc (a ⊔ b ⊔ ℓ)) where
-
-  infix 4 _≈_
-  infix 7 _⊕_
-  infix 6 _▷_
+  open RawPathAlgebra algebra
   
   field
-    Step  : Set a
-    Route : Set b
-    _≈_   : Rel Route ℓ
-    _⊕_   : Op₂ Route
-    _▷_   : Step → Route → Route
-    0#    : Route
-    ∞     : Route
-    A     : SquareMatrix Step n
-    path  : Route → SimplePath n
+    isPathAlgebra : IsPathAlgebra algebra
+    ▷-increasing : ∀ f x → x ≤₊ (f ▷ x)
 
-    isIncreasingPathAlgebra : IsIncreasingPathAlgebra _≈_ _⊕_ _▷_ 0# ∞ A path
+  open IsPathAlgebra isPathAlgebra public
+  
+record IncreasingPathAlgebra a b ℓ n : Set (lsuc (a ⊔ b ⊔ ℓ)) where
+  
+  field
+    rawPathAlgebra          : RawPathAlgebra a b ℓ n
+    isIncreasingPathAlgebra : IsIncreasingPathAlgebra rawPathAlgebra
 
+  open RawPathAlgebra rawPathAlgebra public
   open IsIncreasingPathAlgebra isIncreasingPathAlgebra public
 
   pathAlgebra : PathAlgebra a b ℓ n
@@ -373,22 +316,17 @@ record IncreasingPathAlgebra a b ℓ n : Set (lsuc (a ⊔ b ⊔ ℓ)) where
 -- Strictly increasing path algebra
 
 record IsStrictlyIncreasingPathAlgebra
-  {a b ℓ n} {Route : Set a} {Step : Set b}
-  (_≈_ : Rel Route ℓ)
-  (_⊕_ : Op₂ Route) (_▷_ : Step → Route → Route)
-  (0# ∞ : Route)
-  (A : SquareMatrix Step n)
-  (path : Route → SimplePath n) : Set (a ⊔ b ⊔ ℓ)
+  {a b ℓ n} (algebra : RawPathAlgebra a b ℓ n) : Set (a ⊔ b ⊔ ℓ)
   where
 
+  open RawPathAlgebra algebra
+  
   field
-    isPathAlgebra : IsPathAlgebra _≈_ _⊕_ _▷_ 0# ∞ A path
-
-  open IsPathAlgebra isPathAlgebra public
-
-  field
+    isPathAlgebra : IsPathAlgebra algebra
     ▷-strictlyIncreasing : ∀ f {x} → x ≉ ∞ → x <₊ (f ▷ x)
 
+  open IsPathAlgebra isPathAlgebra public
+  
   ▷-increasing : ∀ f x → x ≤₊ f ▷ x
   ▷-increasing f x with x ≟ ∞
   ... | no  x≉∞ = proj₁ (▷-strictlyIncreasing f x≉∞)
@@ -400,7 +338,7 @@ record IsStrictlyIncreasingPathAlgebra
     x           ∎
     where open EqReasoning S
 
-  isIncreasingPathAlgebra : IsIncreasingPathAlgebra _≈_ _⊕_ _▷_ 0# ∞ A path
+  isIncreasingPathAlgebra : IsIncreasingPathAlgebra algebra
   isIncreasingPathAlgebra = record
     { isPathAlgebra = isPathAlgebra
     ; ▷-increasing     = ▷-increasing
@@ -408,23 +346,11 @@ record IsStrictlyIncreasingPathAlgebra
     
 record StrictlyIncreasingPathAlgebra a b ℓ n : Set (lsuc (a ⊔ b ⊔ ℓ)) where
 
-  infix 4 _≈_
-  infix 7 _⊕_
-  infix 6 _▷_
-  
   field
-    Step  : Set a
-    Route : Set b
-    _≈_   : Rel Route ℓ
-    _⊕_   : Op₂ Route
-    _▷_   : Step → Route → Route
-    0#    : Route
-    ∞     : Route
-    A     : SquareMatrix Step n
-    path  : Route → SimplePath n
+    rawPathAlgebra                  : RawPathAlgebra a b ℓ n
+    isStrictlyIncreasingPathAlgebra : IsStrictlyIncreasingPathAlgebra rawPathAlgebra
 
-    isStrictlyIncreasingPathAlgebra : IsStrictlyIncreasingPathAlgebra _≈_ _⊕_ _▷_ 0# ∞ A path
-
+  open RawPathAlgebra rawPathAlgebra public
   open IsStrictlyIncreasingPathAlgebra isStrictlyIncreasingPathAlgebra public
 
   increasingPathAlgebra : IncreasingPathAlgebra a b ℓ n

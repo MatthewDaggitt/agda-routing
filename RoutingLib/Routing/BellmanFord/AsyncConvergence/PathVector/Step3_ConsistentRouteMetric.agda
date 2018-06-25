@@ -29,7 +29,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step3_Consiste
   where
 
   open Prelude algebra
-  open BellmanFord routingAlgebraᶜ Ac using () renaming (σ to σᶜ)
+  open BellmanFord rawAlgebraᶜ Ac using () renaming (σ to σᶜ)
 
   open Step2ᶜ finiteStrictlyIncreasingRoutingAlgebraᶜ Ac
   open Preludeᶜ finiteStrictlyIncreasingRoutingAlgebraᶜ Ac using () renaming

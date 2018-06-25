@@ -13,7 +13,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Prelude
   open StrictlyIncreasingPathAlgebra algebra public
   open StrictlyIncreasingPathAlgebraProperties algebra public
  
-  open BellmanFord routingAlgebra A public
+  open BellmanFord rawRoutingAlgebra A public
   open BellmanFordProperties routingAlgebra A public
   open BellmanFordPathProperties pathAlgebra public
 

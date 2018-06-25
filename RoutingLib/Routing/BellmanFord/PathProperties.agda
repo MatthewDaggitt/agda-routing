@@ -35,7 +35,7 @@ module RoutingLib.Routing.BellmanFord.PathProperties
 
 open PathAlgebra algebra
 open PathAlgebraProperties algebra
-open BellmanFord routingAlgebra A
+open BellmanFord rawRoutingAlgebra A
 open BellmanFordProperties routingAlgebra A
 
 ------------------------------------------------------------------------------
@@ -178,7 +178,7 @@ abstract
 -- Consistent algebra properties
 
 open Consistency algebra
-open BellmanFord routingAlgebraᶜ Ac using () renaming
+open BellmanFord rawAlgebraᶜ Ac using () renaming
   ( RMatrix to CMatrix
   ; _≈ₘ_ to _≈ᶜₘ_
   ; I    to Ic

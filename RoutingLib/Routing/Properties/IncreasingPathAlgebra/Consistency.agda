@@ -25,7 +25,7 @@ open Consistency pathAlgebra public
 ------------------------------------------------------------------------------
 -- Routing algebra
 
-isIncreasingRoutingAlgebraᶜ : IsIncreasingRoutingAlgebra _≈ᶜ_ _⊕ᶜ_ _▷ᶜ_ C0# C∞
+isIncreasingRoutingAlgebraᶜ : IsIncreasingRoutingAlgebra rawAlgebraᶜ
 isIncreasingRoutingAlgebraᶜ = record
   { isRoutingAlgebra     = isRoutingAlgebraᶜ
   ; ▷-increasing = ▷ᶜ-increasing

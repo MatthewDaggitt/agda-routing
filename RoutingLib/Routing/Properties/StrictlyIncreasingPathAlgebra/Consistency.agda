@@ -29,7 +29,7 @@ open IncreasingConsistency increasingPathAlgebra public
 ------------------------------------------------------------------------------
 -- Algebra
 
-isStrictlyIncreasingRoutingAlgebraᶜ : IsStrictlyIncreasingRoutingAlgebra _≈ᶜ_ _⊕ᶜ_ _▷ᶜ_ C0# C∞
+isStrictlyIncreasingRoutingAlgebraᶜ : IsStrictlyIncreasingRoutingAlgebra rawAlgebraᶜ
 isStrictlyIncreasingRoutingAlgebraᶜ = record
   { isRoutingAlgebra     = isRoutingAlgebraᶜ
   ; ▷-strictlyIncreasing = ▷ᶜ-strictlyIncreasing
@@ -40,7 +40,7 @@ strictlyIncreasingRoutingAlgebraᶜ = record
   { isStrictlyIncreasingRoutingAlgebra = isStrictlyIncreasingRoutingAlgebraᶜ
   }
   
-isFiniteStrictlyIncreasingRoutingAlgebraᶜ : IsFiniteStrictlyIncreasingRoutingAlgebra _≈ᶜ_ _⊕ᶜ_ _▷ᶜ_ C0# C∞
+isFiniteStrictlyIncreasingRoutingAlgebraᶜ : IsFiniteStrictlyIncreasingRoutingAlgebra rawAlgebraᶜ
 isFiniteStrictlyIncreasingRoutingAlgebraᶜ = record
   { isStrictlyIncreasingRoutingAlgebra = isStrictlyIncreasingRoutingAlgebraᶜ
   ; allRoutes                          = allCRoutes

@@ -21,6 +21,7 @@ open import RoutingLib.Data.Table using (Table)
 
 import RoutingLib.Data.Table.Relation.Equality as TableEquality
 import RoutingLib.Data.Table.IndexedTypes as IndexedTypes
+
 module RoutingLib.Asynchronous where
 
   -----------------------

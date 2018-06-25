@@ -17,11 +17,11 @@ open import RoutingLib.Routing.Algebra
 
 module RoutingLib.Routing.BellmanFord
   {a b ℓ n}
-  (𝓡𝓐 : RoutingAlgebra a b ℓ)
-  (A : SquareMatrix (RoutingAlgebra.Step 𝓡𝓐) n)
+  (𝓡𝓐 : RawRoutingAlgebra a b ℓ)
+  (A : SquareMatrix (RawRoutingAlgebra.Step 𝓡𝓐) n)
   where
   
-open RoutingAlgebra 𝓡𝓐
+open RawRoutingAlgebra 𝓡𝓐
 --------------------------------------------------------------------------------
 -- Definitions
 

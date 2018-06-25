@@ -129,16 +129,28 @@ abstract
 ------------------------------------------------------------------------------
 -- Routing algebra
 
-isRoutingAlgebraᶜ : IsRoutingAlgebra _≈ᶜ_ _⊕ᶜ_ _▷ᶜ_ C0# C∞
-isRoutingAlgebraᶜ = record
-  { ≈-isDecEquivalence = ≈ᶜ-isDecEquivalence
+rawAlgebraᶜ : RawRoutingAlgebra _ _ _
+rawAlgebraᶜ = record
+  { Step  = CStep
+  ; Route = CRoute
+  ; _≈_   = _≈ᶜ_
+  ; _⊕_   = _⊕ᶜ_
+  ; _▷_   = _▷ᶜ_
+  ; 0#    = C0#
+  ; ∞     = C∞
+  
+  ; ≈-isDecEquivalence = ≈ᶜ-isDecEquivalence
   ; ⊕-cong             = λ {w} {x} {y} {z} → ⊕ᶜ-cong {w} {x} {y} {z}
-  ; ⊕-sel              = ⊕ᶜ-sel
+  ; ▷-cong             = ▷ᶜ-cong
+  }
+
+isRoutingAlgebraᶜ : IsRoutingAlgebra rawAlgebraᶜ
+isRoutingAlgebraᶜ = record
+  { ⊕-sel              = ⊕ᶜ-sel
   ; ⊕-comm             = ⊕ᶜ-comm
   ; ⊕-assoc            = ⊕ᶜ-assoc
-  ; ⊕-zeroʳ             = ⊕ᶜ-zeroʳ
-  ; ⊕-identityʳ         = ⊕ᶜ-identityʳ
-  ; ▷-cong             = ▷ᶜ-cong
+  ; ⊕-zeroʳ            = ⊕ᶜ-zeroʳ
+  ; ⊕-identityʳ        = ⊕ᶜ-identityʳ
   ; ▷-zero             = ▷ᶜ-zero
   }
 

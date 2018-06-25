@@ -24,7 +24,6 @@ open IncreasingPathAlgebra algebra
 
 open PathAlgebraProperties pathAlgebra public
 
-
 ▷-strictlyIncreasing : ∀ i k x → x ≉ ∞ → x <₊ A i k ▷ x
 ▷-strictlyIncreasing i k x x≉∞ with A i k ▷ x ≟ ∞
 ... | yes Aᵢₖx≈∞ = ≈-trans (⊕-cong Aᵢₖx≈∞ ≈-refl) (⊕-identityˡ x) , x≉∞ ∘ (λ x≈Aᵢₖx → ≈-trans x≈Aᵢₖx Aᵢₖx≈∞)

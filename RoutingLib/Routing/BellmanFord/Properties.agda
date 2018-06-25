@@ -41,7 +41,7 @@ module RoutingLib.Routing.BellmanFord.Properties
 open RoutingAlgebra algebra
 open RoutingAlgebraProperties algebra
 
-open BellmanFord algebra A
+open BellmanFord rawRoutingAlgebra A
 open FunctionProperties _≈_
 open import Relation.Binary.EqReasoning S
 

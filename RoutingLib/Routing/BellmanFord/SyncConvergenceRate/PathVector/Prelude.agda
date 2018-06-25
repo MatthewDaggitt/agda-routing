@@ -22,7 +22,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Prelude
   open IncreasingPathAlgebra algebra public
   open IncreasingPathAlgebraProperties algebra public
   
-  open BellmanFord routingAlgebra A public
+  open BellmanFord rawRoutingAlgebra A public
   open BellmanFordProperties routingAlgebra A public
   open BellmanFordPathProperties pathAlgebra public
 

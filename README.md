@@ -1,15 +1,26 @@
-# agda-routing
+# Agda-routing for ITP 2018
 
-An Agda library for reasoning about asynchronous processes and network routing problems. The library is laid out similarly to the Agda standard library and contains extensions of several of the Agda standard library modules. 
+This Agda library reasons about asynchronous processes and network routing problems. 
+It is laid out similarly to the Agda standard library and contains extensions of 
+several of the Agda standard library modules. The core contributions of this library 
+can be found in the `RoutingLib.Asynchronous` and `RoutingLib.Routing` directories.
 
-The core contributions of this library can be found in the `Asynchronous` and `Routing` directories.
+This is the frozen version of the library accompanying the paper
+`An Agda Formalization of Üresin & Dubois' Asynchronous Fixed-Point Theory`
+by `Ran Zmigrod`, `Matthew L. Daggitt` and `Timothy G Griffin` in `ITP 2018`. 
+The latest version of the library can be found on the `master` branch in this
+repository.
+
+# Asynchronous reasoning
 
 - `RoutingLib.Asynchronous` contains the formalisation of Uresin & Dubois of asynchronous processes.
 	
 - `RoutingLib.Asynchronous.Theorems` contains various very general results about the convergence of asynchronous processes.
 
 - `RoutingLib.Asynchronous.Propositions` contains various sufficient conditions that relate to the theorems above.
-	
+
+# Routing feautres
+
 - `RoutingLib.Routing.BellmanFord` contains an implementation of generalised distributed Bellman Ford-based routing algorithms.
 	
 - `RoutingLib.Routing.BellmanFord.Theorems` contains various proofs about distance-vector and path-vector protocols.

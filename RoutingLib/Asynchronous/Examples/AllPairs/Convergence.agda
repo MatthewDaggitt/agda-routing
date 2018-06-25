@@ -43,8 +43,8 @@ module RoutingLib.Asynchronous.Examples.AllPairs.Convergence {n}(𝕤 : Schedule
   open import RoutingLib.Asynchronous.Examples.AllPairs.Properties n
   open Schedule 𝕤
   open Parallelisation all-pairs-parallelisation
-  open import RoutingLib.Asynchronous.Theorems.Core all-pairs-parallelisation using (SynchronousConditions; StartingConditions)
-  open import RoutingLib.Asynchronous.Theorems.UresinDubois1 all-pairs-parallelisation
+  open import RoutingLib.Asynchronous.Convergence.Conditions all-pairs-parallelisation using (SynchronousConditions; StartingConditions)
+  open import RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois1 all-pairs-parallelisation
   
   D₀ : Pred lzero
   D₀ i = U
@@ -269,7 +269,7 @@ module RoutingLib.Asynchronous.Examples.AllPairs.Convergence {n}(𝕤 : Schedule
     iter-converge   = iter-converge 
     }
 
-  open import RoutingLib.Asynchronous.Propositions.UresinDubois3 all-pairs-parallelisation syncCond using (aco; x₀∈D[0])
+  open import RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois3 all-pairs-parallelisation syncCond using (aco; x₀∈D[0])
 
   convergence-time : 𝕋
   convergence-time = {!!} --proj₁ (async-converge ? aco x₀∈D[0])

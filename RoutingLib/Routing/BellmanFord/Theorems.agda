@@ -3,7 +3,7 @@ open import Data.Nat using (suc; _^_; _+_)
 
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Asynchronous using (IsAsynchronouslySafe)
-open import RoutingLib.Asynchronous.Theorems using (UltrametricConditions; ultra⇒safe)
+open import RoutingLib.Asynchronous.Convergence.Theorems using (UltrametricConditions; ultra⇒safe)
 
 module RoutingLib.Routing.BellmanFord.Theorems where
 

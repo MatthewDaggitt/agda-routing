@@ -1,8 +1,9 @@
 open import Data.List using (List; length; []; _∷_; filter)
 open import Data.List.Any as Any using (Any; here; there)
-import Data.List.Any.Membership as Membership
-open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-filter⁻; ∈-filter⁺; ∈-resp-≈)
-open import Data.List.Properties using (length-filter; filter-some)
+import Data.List.Membership.Setoid as Membership
+import Data.List.Relation.Sublist.Setoid as Sublist
+open import Data.List.Membership.Setoid.Properties using (∈-filter⁻; ∈-filter⁺; ∈-resp-≈)
+open import Data.List.Properties using (length-filter; filter-notAll)
 open import Data.Nat using (ℕ; zero; suc; _+_; _<_; _≤_; z≤n; s≤s) renaming (_≟_ to _≟ℕ_)
 open import Data.Nat.Properties using (+-suc; +-identityʳ; +-comm; ≤-trans; ≤-step; m≤m+n; ≤-reflexive; pred-mono; ≤+≢⇒<; ≤-refl; <⇒≤)
 open import Data.Product using (_×_; ∃; proj₁; proj₂; _,_)
@@ -13,17 +14,17 @@ import Relation.Binary.PartialOrderReasoning as POR
 import Relation.Binary.EqReasoning as EqReasoning
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Unary using (∁?)
+open import Relation.Unary.Properties using (∁?)
 open import Induction.Nat using (<-wellFounded)
 open import Induction.WellFounded using (Acc; acc)
 
 open import RoutingLib.Data.Table using (Table)
 
 open import RoutingLib.Asynchronous using (Parallelisation)
-open import RoutingLib.Asynchronous.Theorems.Core
-import RoutingLib.Asynchronous.Propositions.UresinDubois3 as Prop3
+open import RoutingLib.Asynchronous.Convergence.Conditions
+import RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois3 as Prop3
 
-module RoutingLib.Asynchronous.Propositions.UresinDubois4
+module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois4
   {a ℓ n p}
   {𝕊ᵢ : Table (Setoid a ℓ) n}
   (𝓟 : Parallelisation 𝕊ᵢ)
@@ -32,10 +33,11 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois4
 
   open Parallelisation 𝓟 using (F; syncIter)
   open import RoutingLib.Data.Table.IndexedTypes 𝕊ᵢ
-  open Membership 𝕊 using () renaming (_∈_ to _∈ₗ_; _⊆_ to _⊆ₗ_)
-
+  open Membership 𝕊 using () renaming (_∈_ to _∈ₗ_)
+  open Sublist 𝕊 using () renaming (_⊆_ to _⊆ₗ_)
+  
   open FiniteConditions finiteCond
-  open Start start
+  open StartingConditions start
   open M-poset poset hiding (trans)
 
   x≼y≼z∧x≉y⇒x≉z : ∀ {x y z} → x ≼ y → y ≼ z → x ≉ y → x ≉ z
@@ -96,23 +98,23 @@ module RoutingLib.Asynchronous.Propositions.UresinDubois4
   σ[K]∈Dₜˡ K _           {zero}  _   = σ[K]∈D₀ˡ (suc K)
   σ[K]∈Dₜˡ K σ[K]≉σ[1+K] {suc t} t≤K = ∈-filter⁺ 𝕊 (∁? (σ t ≟_))
     (≉σ[K]-cong t)
-    ((x≼y≼z∧x≉y⇒x≉z (σ-decreasing K) (σ-mono (<⇒≤ t≤K)) (σ[K]≉σ[1+K] ∘ ≈-sym)) ∘ ≈-sym)
     (σ[K]∈Dₜˡ K σ[K]≉σ[1+K] (<⇒≤ t≤K))
-
+    ((x≼y≼z∧x≉y⇒x≉z (σ-decreasing K) (σ-mono (<⇒≤ t≤K)) (σ[K]≉σ[1+K] ∘ ≈-sym)) ∘ ≈-sym)
+    
   σ[K]∈Dₖˡ : ∀ K → σ K ≉ σ (suc K) → σ K ∈ₗ Dₖˡ K
   σ[K]∈Dₖˡ zero    _           = σ[K]∈D₀ˡ zero
   σ[K]∈Dₖˡ (suc K) σ[K]≉σ[1+K] = ∈-filter⁺ 𝕊 (∁? (σ K ≟_))
     (≉σ[K]-cong K)
+    (σ[K]∈Dₜˡ K (σ[K]≉σ[1+K] ∘ F-cong) ≤-refl)
     (λ σ[K]≈σ[2+k] → σ[K]≉σ[1+K] (begin
       σ (1 + K) ≈⟨ ≈-sym σ[K]≈σ[2+k] ⟩
       σ K       ≈⟨ σ-fixed K σ[K]≈σ[2+k] 2 ⟩
       σ (K + 2) ≡⟨ cong σ (+-comm K 2) ⟩
       σ (2 + K) ∎))
-    (σ[K]∈Dₜˡ K (σ[K]≉σ[1+K] ∘ F-cong) ≤-refl)
     where open EqReasoning 𝕊
          
   |Dₖˡ|-decreasing : ∀ K  → σ K ≉ σ (suc K) → length (Dₖˡ (suc K)) < length (Dₖˡ K)
-  |Dₖˡ|-decreasing K σ[K]≉σ[1+K] = filter-some (∁? (σ K ≟_)) (Dₖˡ K) (Any.map contradiction (σ[K]∈Dₖˡ K σ[K]≉σ[1+K]))
+  |Dₖˡ|-decreasing K σ[K]≉σ[1+K] = filter-notAll (∁? (σ K ≟_)) (Dₖˡ K) (Any.map contradiction (σ[K]∈Dₖˡ K σ[K]≉σ[1+K]))
 
   -- Prove that fixed point exists
   σ-fixedPoint : ∀ K → Acc _<_ (length (Dₖˡ K)) → ∃ λ T → ∀ t → σ T ≈ σ (T + t)

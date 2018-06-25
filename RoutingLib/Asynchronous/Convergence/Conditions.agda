@@ -1,18 +1,15 @@
-open import Level using (Level; _⊔_) renaming (zero to lzero; suc to lsuc)
+open import Level using (_⊔_) renaming (suc to lsuc)
 open import Data.Fin using (Fin)
 open import Data.Nat using (ℕ; zero; suc; _+_; _<_)
 open import Data.Product using (∃; ∃₂)
 open import Relation.Binary using (Rel; Setoid; Decidable; _Preserves_⟶_)
 
 open import RoutingLib.Asynchronous
-open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 open import RoutingLib.Data.Table using (Table; max)
 open import RoutingLib.Data.Table.Relation.Pointwise using (Pointwise)
-open import RoutingLib.Function.Image using (FiniteImage)
 open import RoutingLib.Function.Metric using (IsUltrametric)
-import RoutingLib.Function.Metric.FixedPoint as FixedPoints
 
-module RoutingLib.Asynchronous.Theorems.Core
+module RoutingLib.Asynchronous.Convergence.Conditions
   {a ℓ n} {𝕊ᵢ : Table (Setoid a ℓ) n}
   (𝓟 : Parallelisation 𝕊ᵢ)
   where
@@ -93,7 +90,9 @@ module RoutingLib.Asynchronous.Theorems.Core
       F-monotone       : ∀ {x y} → x ∈ D₀ → y ∈ D₀ → x ≼ y → F x ≼ F y
       iter-decreasing  : ∀ K → syncIter x₀ (suc K) ≼ syncIter x₀ K
       iter-converge    : ∃ λ T → ∀ t → syncIter x₀ T ≈ syncIter x₀ (T + t)
-      
+
+
+
   record FiniteConditions p : Set (lsuc (a ⊔ ℓ ⊔ p)) where
     field
       start           : StartingConditions p

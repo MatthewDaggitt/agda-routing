@@ -17,9 +17,9 @@ open import Relation.Unary using () renaming (_∈_ to _∈ᵤ_)
 open import RoutingLib.Asynchronous.Schedule
 open import RoutingLib.Asynchronous.Schedule.Pseudoperiod.Properties using (pseudoperiodic)
 open import RoutingLib.Asynchronous using (Parallelisation; IsAsynchronouslySafe)
-open import RoutingLib.Asynchronous.Theorems.Core using (TotalACO; ACO)
+open import RoutingLib.Asynchronous.Convergence.Conditions using (TotalACO; ACO)
 
-module RoutingLib.Asynchronous.Theorems.UresinDubois1
+module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois1
   {a ℓ n} {𝕊ᵢ : Fin n → Setoid a ℓ} (𝓟 : Parallelisation 𝕊ᵢ) where
 
   open Parallelisation 𝓟

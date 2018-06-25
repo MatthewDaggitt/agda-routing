@@ -40,9 +40,9 @@ import RoutingLib.Function.Metric.MaxLift as MaxLift
 import RoutingLib.Function.Metric.FixedPoint as FixedPoints
 
 open import RoutingLib.Asynchronous using (Parallelisation)
-open import RoutingLib.Asynchronous.Theorems.Core using (ACO; TotalACO; UltrametricConditions)
+open import RoutingLib.Asynchronous.Convergence.Conditions using (ACO; TotalACO; UltrametricConditions)
 
-module RoutingLib.Asynchronous.Theorems.MetricToBox
+module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
   {a ℓ n} {𝕊ᵢ : Fin n → Setoid a ℓ} {P : Parallelisation 𝕊ᵢ}
   (𝓤𝓒 : UltrametricConditions P) where
 

@@ -11,9 +11,9 @@ open import Relation.Unary using (_∩_; U) renaming (_∈_ to _∈ᵤ_)
 open import RoutingLib.Data.Table using (Table)
 
 open import RoutingLib.Asynchronous using (Parallelisation)
-open import RoutingLib.Asynchronous.Theorems.Core
+open import RoutingLib.Asynchronous.Convergence.Conditions
 
-module RoutingLib.Asynchronous.Propositions.UresinDubois3
+module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois3
   {a ℓ n p}
   {𝕊ᵢ : Table (Setoid a ℓ) n}
   (𝓟 : Parallelisation 𝕊ᵢ)

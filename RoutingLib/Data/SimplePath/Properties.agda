@@ -3,10 +3,10 @@ open import Relation.Binary using (Decidable; Total; _⇒_; Reflexive; Symmetric
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; trans; subst; cong)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
-open import Data.Nat using (ℕ; suc; z≤n; s≤s) renaming (_≟_ to _≟ℕ_; _≤?_ to _≤ℕ?_; _<_ to _<ℕ_)
-open import Data.Nat.Properties using (<-trans; m≢1+m+n; <⇒≢; <⇒≯; ≤-refl; m+n≮n; suc-injective; <-cmp)
-open import Data.Fin using (Fin; _<_; _≤?_) renaming (suc to fsuc)
-open import Data.Fin.Properties using (cmp; ≤-trans; ≤-antisym; ≤-total; _<?_)
+open import Data.Nat using (ℕ; suc; z≤n; s≤s) renaming (_≟_ to _≟ℕ_; _≤?_ to _≤ℕ?_; _≤_ to _≤ℕ_; _<_ to _<ℕ_)
+open import Data.Nat.Properties using (<-trans; ≤-trans; m≢1+m+n; <⇒≢; <⇒≯; ≤-refl; m+n≮n; suc-injective; <-cmp)
+open import Data.Fin using (Fin; _<_; _≤?_; suc; zero)
+open import Data.Fin.Properties using (cmp; ≤-antisym; ≤-total; _<?_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_,_; _×_)
 
@@ -56,6 +56,10 @@ module RoutingLib.Data.SimplePath.Properties {n : ℕ} where
     length<n invalid                     = s≤s z≤n
     length<n (valid [])                  = s≤s z≤n
     length<n (valid (e ∷ p ∣ e⇿p ∣ e∉p)) = NEP.|p|<n (NE.nonEmpty e p e⇿p e∉p)
+
+    length≤1+n : (p : SimplePath n) → length p ≤ℕ suc n
+    length≤1+n invalid   = z≤n
+    length≤1+n (valid p) = NEP.|p|≤1+n p
     
     length-cong : ∀ {p q : SimplePath n} → p ≈ₚ q → length p ≡ length q
     length-cong invalid     = refl

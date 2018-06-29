@@ -14,7 +14,6 @@ import RoutingLib.Data.Matrix.Relation.DecidableEquality as MatrixDecEquality
 
 open import RoutingLib.Routing.Algebra
 
-
 module RoutingLib.Routing.BellmanFord
   {a b ℓ n}
   (𝓡𝓐 : RawRoutingAlgebra a b ℓ)
@@ -22,6 +21,7 @@ module RoutingLib.Routing.BellmanFord
   where
   
 open RawRoutingAlgebra 𝓡𝓐
+
 --------------------------------------------------------------------------------
 -- Definitions
 
@@ -31,14 +31,17 @@ Node = Fin n
 Edge : Set
 Edge = Fin n × Fin n
 
-open MatrixDecEquality DS public
-open TableDecEquality DS using (𝕋ₛ)
-
 RTable : Set b
 RTable = Table Route n
 
 RMatrix : Set b
 RMatrix = SquareMatrix Route n
+
+--------------------------------------------------------------------------------
+-- Equality
+
+open MatrixDecEquality DS public
+open TableDecEquality DS using (𝕋ₛ)
 
 ℝ𝕋ₛ : Setoid b ℓ
 ℝ𝕋ₛ = 𝕋ₛ n

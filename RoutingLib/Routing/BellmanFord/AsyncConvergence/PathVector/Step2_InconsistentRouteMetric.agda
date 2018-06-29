@@ -27,11 +27,11 @@ import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Prelude as Pre
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step1_InconsistentHeightFunction as Step1
 
 module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step2_InconsistentRouteMetric
-  {a b ℓ n} (algebra : StrictlyIncreasingPathAlgebra a b ℓ n)
+  {a b ℓ n} (algebra : IncreasingPathAlgebra a b ℓ n) (1≤n : 1 ≤ n)
   where
 
   open Prelude algebra
-  open Step1 algebra using
+  open Step1 algebra 1≤n using
     ( hⁱ ; Hⁱ ; hⁱ-cong ; 1≤hⁱ; hⁱ≤Hⁱ ; hⁱ-decr ; h[sᶜ]<h[rⁱ] )
  
   open Metric S

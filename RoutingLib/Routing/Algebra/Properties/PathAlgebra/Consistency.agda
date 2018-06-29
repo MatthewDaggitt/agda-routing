@@ -16,10 +16,10 @@ open import RoutingLib.Data.SimplePath.Enumeration
 open import RoutingLib.Data.SimplePath.Relation.Equality using (ℙₛ)
 
 open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing.Properties.PathAlgebra
+import RoutingLib.Routing.Algebra.Properties.PathAlgebra
   as PathAlgebraProperties
 
-module RoutingLib.Routing.Properties.PathAlgebra.Consistency
+module RoutingLib.Routing.Algebra.Properties.PathAlgebra.Consistency
   {a b ℓ n} (algebra : PathAlgebra a b ℓ n)
   where
 

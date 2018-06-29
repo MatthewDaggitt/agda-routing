@@ -9,14 +9,14 @@ open import Relation.Unary using (Decidable)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.SimplePath
-open import RoutingLib.Data.SimplePath.Properties using (length<n; length-cong)
+open import RoutingLib.Data.SimplePath.Properties using (length<n; length≤1+n; length-cong)
 open import RoutingLib.Data.SimplePath.NonEmpty.Properties using (_⇿?_; _∉?_)
 open import RoutingLib.Data.SimplePath.Relation.Equality
 
 open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing.Properties.RoutingAlgebra as RoutingAlgebraProperties
+import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
 
-module RoutingLib.Routing.Properties.PathAlgebra
+module RoutingLib.Routing.Algebra.Properties.PathAlgebra
   {a b ℓ n} (algebra : PathAlgebra a b ℓ n) where
 
 open PathAlgebra algebra
@@ -117,7 +117,10 @@ abstract
 
   size<n : 1 ≤ n → ∀ r → size r < n
   size<n (s≤s _) r = length<n (path _)
-  
+
+  size≤n+1 : ∀ r → size r ≤ suc n
+  size≤n+1 r = length≤1+n (path r)
+    
   size-cong : ∀ {r s} → r ≈ s → size r ≡ size s
   size-cong {r} {s} r≈s = length-cong (path-cong r≈s)
 

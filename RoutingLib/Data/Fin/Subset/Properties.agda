@@ -1,10 +1,11 @@
 open import Data.Nat using (ℕ; zero; suc; _<_; _≤_; z≤n; s≤s; _⊔_; _⊓_; _∸_)
 open import Data.Nat.Properties using (≤-refl; ≤-step; ≤-trans; ⊓-monoˡ-≤; ⊓-monoʳ-≤; ⊔-monoˡ-≤; ⊔-monoʳ-≤; n≤1+n; +-∸-assoc; suc-injective; n≮n)
-open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
+open import Data.Fin using (Fin; zero; suc)
 open import Data.Fin.Subset
 open import Data.Fin.Subset.Properties
 open import Data.Bool using (_≟_)
 open import Data.Product using (∃; _,_; proj₂)
+open import Data.Sum using ([_,_]′)
 open import Data.Vec using ([]; _∷_; here; there; count)
 open import Function using (_∘_)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; cong; subst; sym; module ≡-Reasoning)
@@ -81,16 +82,20 @@ module RoutingLib.Data.Fin.Subset.Properties where
 
   ∣p\\q∣<∣p∣ : ∀ {n} {p q : Subset n} → Nonempty (p ∩ q) → ∣ p \\ q ∣ < ∣ p ∣
   ∣p\\q∣<∣p∣ {zero} {[]} {[]} (() , i∈p∩q)
-  ∣p\\q∣<∣p∣ {suc n} {outside ∷ p} {y ∷ q} (fzero , i∈p∩q) with x∈p∩q⁻ (outside ∷ p) (y ∷ q) i∈p∩q
+  ∣p\\q∣<∣p∣ {suc n} {outside ∷ p} {y ∷ q} (zero , i∈p∩q) with x∈p∩q⁻ (outside ∷ p) (y ∷ q) i∈p∩q
   ... | () , _
-  ∣p\\q∣<∣p∣ {suc n} {inside ∷ p} {outside ∷ q} (fzero , i∈p∩q) with x∈p∩q⁻ (inside ∷ p) (outside ∷ q) i∈p∩q
+  ∣p\\q∣<∣p∣ {suc n} {inside ∷ p} {outside ∷ q} (zero , i∈p∩q) with x∈p∩q⁻ (inside ∷ p) (outside ∷ q) i∈p∩q
   ... | _ , ()
-  ∣p\\q∣<∣p∣ {suc n} {outside ∷ p} {outside ∷ q} (fsuc i , i∈p∩q) = ∣p\\q∣<∣p∣ {n} {p} {q} (i , drop-there i∈p∩q)
-  ∣p\\q∣<∣p∣ {suc n} {outside ∷ p} {inside ∷ q} (fsuc i , i∈p∩q) = ∣p\\q∣<∣p∣ {n} {p} {q} (i , drop-there i∈p∩q)
-  ∣p\\q∣<∣p∣ {suc n} {inside ∷ p} {outside ∷ q} (fsuc i , i∈p∩q) = s≤s (∣p\\q∣<∣p∣ {n} {p} {q} (i , drop-there i∈p∩q))
+  ∣p\\q∣<∣p∣ {suc n} {outside ∷ p} {outside ∷ q} (suc i , i∈p∩q) = ∣p\\q∣<∣p∣ {n} {p} {q} (i , drop-there i∈p∩q)
+  ∣p\\q∣<∣p∣ {suc n} {outside ∷ p} {inside ∷ q} (suc i , i∈p∩q) = ∣p\\q∣<∣p∣ {n} {p} {q} (i , drop-there i∈p∩q)
+  ∣p\\q∣<∣p∣ {suc n} {inside ∷ p} {outside ∷ q} (suc i , i∈p∩q) = s≤s (∣p\\q∣<∣p∣ {n} {p} {q} (i , drop-there i∈p∩q))
   ∣p\\q∣<∣p∣ {suc n} {inside ∷ p} {inside ∷ q} (i , i∈p∩q) = s≤s (∣p\\q∣≤∣p∣ p q)
   
-  postulate ∣p∪⁅i⁆∣≡1+∣p∣ : ∀ {n} {p : Subset n} {i : Fin n} → i ∉ p → ∣ p ∪ ⁅ i ⁆ ∣ ≡ suc ∣ p ∣
+  ∣p∪⁅i⁆∣≡1+∣p∣ : ∀ {n} {p : Subset n} {i : Fin n} → i ∉ p → ∣ p ∪ ⁅ i ⁆ ∣ ≡ suc ∣ p ∣
+  ∣p∪⁅i⁆∣≡1+∣p∣ {_} {outside ∷ p} {zero}  i∉p = cong (λ q → suc ∣ q ∣) (∪-identityʳ p)
+  ∣p∪⁅i⁆∣≡1+∣p∣ {_} {inside  ∷ p} {zero}  i∉p = contradiction here i∉p
+  ∣p∪⁅i⁆∣≡1+∣p∣ {_} {outside ∷ p} {suc i} i∉p = ∣p∪⁅i⁆∣≡1+∣p∣ (i∉p ∘ there)
+  ∣p∪⁅i⁆∣≡1+∣p∣ {_} {inside  ∷ p} {suc i} i∉p = cong suc (∣p∪⁅i⁆∣≡1+∣p∣ (i∉p ∘ there))
   
   
   ∣∁p∣≡n∸∣p∣ : ∀ {n} (p : Subset n) → ∣ ∁ p ∣ ≡ n ∸ ∣ p ∣
@@ -104,9 +109,9 @@ module RoutingLib.Data.Fin.Subset.Properties where
 
   ∣p∣<n⇒Nonfull : ∀ {n} {p : Subset n} → ∣ p ∣ < n → Nonfull p
   ∣p∣<n⇒Nonfull {p = []}          ()
-  ∣p∣<n⇒Nonfull {p = outside ∷ p} _          = fzero , λ()
+  ∣p∣<n⇒Nonfull {p = outside ∷ p} _          = zero , λ()
   ∣p∣<n⇒Nonfull {p = inside  ∷ p} (s≤s ∣p∣<n) with ∣p∣<n⇒Nonfull {p = p} ∣p∣<n
-  ... | i , i∉p = fsuc i , λ {(there i∈p) → i∉p i∈p}
+  ... | i , i∉p = suc i , λ {(there i∈p) → i∉p i∈p}
 
   ∣p∣≡n⇒p≡⊤ : ∀ {n} {p : Subset n} → ∣ p ∣ ≡ n → p ≡ ⊤
   ∣p∣≡n⇒p≡⊤ {_} {[]}          _     = refl
@@ -114,44 +119,38 @@ module RoutingLib.Data.Fin.Subset.Properties where
   ∣p∣≡n⇒p≡⊤ {_} {inside  ∷ p} ∣p∣≡n = cong (inside ∷_) (∣p∣≡n⇒p≡⊤ (suc-injective ∣p∣≡n))
   
   Nonfull⁅i⁆ : ∀ {n} (i : Fin (suc (suc n))) → Nonfull ⁅ i ⁆
-  Nonfull⁅i⁆ fzero    = fsuc fzero , λ {(there ())}
-  Nonfull⁅i⁆ (fsuc i) = fzero      , λ()
+  Nonfull⁅i⁆ zero    = suc zero , λ {(there ())}
+  Nonfull⁅i⁆ (suc i) = zero     , λ()
 
   Nonfull⁅i⁆′ : ∀ {n} → 1 < n → (i : Fin n) → Nonfull ⁅ i ⁆
-  Nonfull⁅i⁆′ (s≤s (s≤s z≤n)) fzero    = fsuc fzero , λ {(there ())}
-  Nonfull⁅i⁆′ (s≤s (s≤s z≤n)) (fsuc i) = fzero      , λ()
+  Nonfull⁅i⁆′ (s≤s (s≤s z≤n)) zero    = suc zero , λ {(there ())}
+  Nonfull⁅i⁆′ (s≤s (s≤s z≤n)) (suc i) = zero     , λ()
 
   i∉p⇒i∉p\\q : ∀ {n} {p : Subset n} {i} → i ∉ p → ∀ q → i ∉ p \\ q
   i∉p⇒i∉p\\q {0} {[]} {i} i∉p [] = ∉⊥
-  i∉p⇒i∉p\\q {suc n} {outside ∷ p} {fzero} i∉p (outside ∷ q) ()
-  i∉p⇒i∉p\\q {suc n} {inside ∷ p} {fzero} i∉p (x ∷ q) = contradiction here i∉p
-  i∉p⇒i∉p\\q {suc n} {outside ∷ p} {fzero} i∉p (inside ∷ q) ()
-  i∉p⇒i∉p\\q {suc n} {x ∷ p} {fsuc i} i∉p (y ∷ q) with x∷p\\y∷q≡z∷p\\q p q x y
+  i∉p⇒i∉p\\q {suc n} {outside ∷ p} {zero} i∉p (outside ∷ q) ()
+  i∉p⇒i∉p\\q {suc n} {inside ∷ p} {zero} i∉p (x ∷ q) = contradiction here i∉p
+  i∉p⇒i∉p\\q {suc n} {outside ∷ p} {zero} i∉p (inside ∷ q) ()
+  i∉p⇒i∉p\\q {suc n} {x ∷ p} {suc i} i∉p (y ∷ q) with x∷p\\y∷q≡z∷p\\q p q x y
   ... | _ , ≡z∷p\\q rewrite (sym ≡z∷p\\q) = (i∉p⇒i∉p\\q {p = p} {i} (i∉p ∘ there) q) ∘ drop-there
 
   i∉p\\q⇒i∉p : ∀ {n} {p q : Subset n} {i} → i ∉ p \\ q → i ∉ q → i ∉ p
   i∉p\\q⇒i∉p {0}     {[]} {[]} {i} i∉p\\q i∉q = ∉⊥
-  i∉p\\q⇒i∉p {suc n} {x ∷ p} {y ∷ q} {fsuc i} i∉x∷p\\y∷q i∉q (there i∈p) =
+  i∉p\\q⇒i∉p {suc n} {x ∷ p} {y ∷ q} {suc i} i∉x∷p\\y∷q i∉q (there i∈p) =
     i∉p\\q⇒i∉p i∉p\\q (i∉q ∘ there) i∈p
     where
     i∉p\\q : i ∉ (p \\ q)
-    i∉p\\q = i∉x∷p\\y∷q ∘ (λ i∈p\\q → subst (fsuc i ∈_)
+    i∉p\\q = i∉x∷p\\y∷q ∘ (λ i∈p\\q → subst (suc i ∈_)
       (proj₂ (x∷p\\y∷q≡z∷p\\q p q x y)) (there i∈p\\q))
-  i∉p\\q⇒i∉p {.(suc _)} {inside ∷ p} {outside ∷ q} {fzero} i∉p\\q i∉q here = i∉p\\q here
-  i∉p\\q⇒i∉p {.(suc _)} {inside ∷ p} {inside ∷ q} {fzero} i∉p\\q i∉q here = i∉q here
+  i∉p\\q⇒i∉p {.(suc _)} {inside ∷ p} {outside ∷ q} {zero} i∉p\\q i∉q here = i∉p\\q here
+  i∉p\\q⇒i∉p {.(suc _)} {inside ∷ p} {inside ∷ q} {zero} i∉p\\q i∉q here = i∉q here
   
   i∉⁅j⁆ : ∀ {n} {i j : Fin n} → i ≢ j → i ∉ ⁅ j ⁆
   i∉⁅j⁆ {zero}  {()}
-  i∉⁅j⁆ {suc n} {fzero}  {fzero}  i≢j _             = contradiction refl i≢j
-  i∉⁅j⁆ {suc n} {fzero}  {fsuc j} i≢j ()
-  i∉⁅j⁆ {suc n} {fsuc i} {fzero}  i≢j (there i∈⁅j⁆) = contradiction i∈⁅j⁆ ∉⊥
-  i∉⁅j⁆ {suc n} {fsuc i} {fsuc j} i≢j i∈⁅j⁆         = i≢j (x∈⁅y⁆⇒x≡y (fsuc j) i∈⁅j⁆)
+  i∉⁅j⁆ {suc n} {zero}  {zero}  i≢j _             = contradiction refl i≢j
+  i∉⁅j⁆ {suc n} {zero}  {suc j} i≢j ()
+  i∉⁅j⁆ {suc n} {suc i} {zero}  i≢j (there i∈⁅j⁆) = contradiction i∈⁅j⁆ ∉⊥
+  i∉⁅j⁆ {suc n} {suc i} {suc j} i≢j i∈⁅j⁆         = i≢j (x∈⁅y⁆⇒x≡y (suc j) i∈⁅j⁆)
 
-  postulate x∉p∪q⁺ :  ∀ {n} {p q : Subset n} {x} → x ∉ p → x ∉ q → x ∉ p ∪ q
-  {-
-  x∉p∪q⁺ []            []            ()
-  x∉p∪q⁺ (inside  ∷ p) (t       ∷ q) here          = inj₁ here
-  x∉p∪q⁺ (outside ∷ p) (inside  ∷ q) here          = inj₂ here
-  x∉p∪q⁺ (s       ∷ p) (t       ∷ q) (there x∈p∪q) =
-  Sum.map there there (x∈p∪q⁻ p q x∈p∪q)
-  -}
+  x∉p∪q⁺ :  ∀ {n} {p q : Subset n} {x} → x ∉ p → x ∉ q → x ∉ p ∪ q
+  x∉p∪q⁺ x∉p x∉q = [ x∉p , x∉q ]′ ∘ x∈p∪q⁻ _ _

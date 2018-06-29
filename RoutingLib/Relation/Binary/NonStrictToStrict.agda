@@ -2,7 +2,7 @@ open import Data.Product using (_,_)
 open import Data.Sum using (inj₁; inj₂)
 open import Function using (_∘_)
 open import Relation.Binary
-open import Relation.Nullary using (¬_)
+open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Relation.Binary
@@ -25,4 +25,9 @@ module RoutingLib.Relation.Binary.NonStrictToStrict
   ... | inj₁ x≤y = contradiction x≤y x≰y
   ... | inj₂ y≤x = y≤x , x≰y ∘ refl ∘ sym
 
-  postulate ≮⇒≥ : ∀ {x y} → ¬ (x < y) → y ≤ x
+  ≮⇒≥ : Symmetric _≈_ → Decidable _≈_ → _≈_ ⇒ _≤_ → Total _≤_ →
+        ∀ {x y} → ¬ (x < y) → y ≤ x
+  ≮⇒≥ sym _≟_ refl _≤?_ {x} {y} x≮y with x ≟ y | y ≤? x
+  ... | yes x≈y  | _        = refl (sym x≈y)
+  ... | _        | inj₁ y≤x = y≤x
+  ... | no  x≉y  | inj₂ x≤y = contradiction (x≤y , x≉y) x≮y

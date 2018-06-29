@@ -1,9 +1,16 @@
 open import RoutingLib.Data.Matrix using (SquareMatrix)
-open import Data.Nat using (suc; _^_; _+_)
+open import Data.Nat using (zero; suc; s≤s; z≤n; _^_; _+_; _≤_)
+open import Function using (case_of_)
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Asynchronous using (IsAsynchronouslySafe)
+open import RoutingLib.Asynchronous using (IsAsynchronouslySafe; 0-IsSafe)
 open import RoutingLib.Asynchronous.Convergence.Theorems using (UltrametricConditions; ultra⇒safe)
+
+import RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Prelude as DistanceVectorPrelude
+import RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Step3_StateMetric as DistanceVectorResults
+import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Prelude as PathVectorPrelude
+import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step5_StateMetric as PathVectorResults
+
 
 module RoutingLib.Routing.BellmanFord.Theorems where
 
@@ -17,11 +24,11 @@ module Theorem1 {a b ℓ n} (algebra : FiniteStrictlyIncreasingRoutingAlgebra a 
          (A : SquareMatrix (FiniteStrictlyIncreasingRoutingAlgebra.Step algebra) n)
          where
   
-  open import RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Prelude algebra A
-  open import RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Step3_StateMetric algebra A
+  open DistanceVectorPrelude algebra A
+  open DistanceVectorResults algebra A
 
-  σ-ultrametricConditions : UltrametricConditions σ∥
-  σ-ultrametricConditions = record
+  σ-isAsynchronouslySafe : IsAsynchronouslySafe σ∥
+  σ-isAsynchronouslySafe = ultra⇒safe record
     { dᵢ                 = dₜ
     ; dᵢ-isUltrametric   = dₜ-isUltrametric
     ; F-strContrOnOrbits = σ-strContr
@@ -32,23 +39,22 @@ module Theorem1 {a b ℓ n} (algebra : FiniteStrictlyIncreasingRoutingAlgebra a 
     ; element            = I
     } 
 
-  σ-isAsynchronouslySafe : IsAsynchronouslySafe σ∥
-  σ-isAsynchronouslySafe = ultra⇒safe σ-ultrametricConditions
-
-
 --------------------------------------------------------------------------------
 -- Theorem 2
 --
 -- σ is always guaranteed to converge asynchronously over any strictly
 -- increasing path algebra.
+--
+-- A little bit messier than Theorem 1 as we need to deal with the zero case.
 
-module Theorem2 {a b ℓ n} (algebra : StrictlyIncreasingPathAlgebra a b ℓ n) where
-         
-  open import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Prelude algebra
-  open import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step5_StateMetric algebra
+module Theorem2 {a b ℓ} where
 
-  ultrametricConditions : UltrametricConditions σ∥
-  ultrametricConditions = record
+  open PathVectorPrelude using (σ∥)
+    
+  σ-isAsynchronouslySafe :  ∀ {n} (algebra : IncreasingPathAlgebra a b ℓ n) →
+                            IsAsynchronouslySafe (σ∥ algebra)
+  σ-isAsynchronouslySafe {n = zero}  algebra = 0-IsSafe (σ∥ algebra)
+  σ-isAsynchronouslySafe {n = suc n} algebra = ultra⇒safe record
     { dᵢ                 = dₜ
     ; dᵢ-isUltrametric   = dₜ-isUltrametric
     ; F-cong             = σ-cong
@@ -58,15 +64,15 @@ module Theorem2 {a b ℓ n} (algebra : StrictlyIncreasingPathAlgebra a b ℓ n) 
     ; element            = I
     ; _≟_                = _≟ₘ_
     }
-
-  σ-isAsynchronouslySafe : IsAsynchronouslySafe σ∥
-  σ-isAsynchronouslySafe = ultra⇒safe ultrametricConditions
-
+    where
+    open PathVectorResults algebra (s≤s z≤n)
+    open PathVectorPrelude algebra
+  
 --------------------------------------------------------------------------------
 -- Theorem 3
 --
 -- σ is always guaranteed to converge synchronously in n² steps over any
--- increasing (?) path algebra
+-- increasing path algebra
 
 module Theorem3 {a b ℓ n-1} (algebra : IncreasingPathAlgebra a b ℓ (suc n-1)) where
   

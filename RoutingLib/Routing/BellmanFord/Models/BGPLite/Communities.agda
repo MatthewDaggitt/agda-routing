@@ -29,17 +29,15 @@ abstract
   _∈?_ : Community → CommunitySet → Bool
   _∈?_ = AVL._∈?_
 
-
+  -- We assume there is decidable total order over community sets
+  
   postulate _≈ᶜˢ_ : Rel CommunitySet ℓ₀
 
-  postulate ≈ᶜˢ-refl : Reflexive _≈ᶜˢ_
+  postulate _≤ᶜˢ_ : Rel CommunitySet ℓ₀
+  
+  postulate ≤ᶜˢ-minimum : Minimum _≤ᶜˢ_ ∅
 
-  postulate ≈ᶜˢ-sym : Symmetric _≈ᶜˢ_
-
-  postulate ≈ᶜˢ-trans : Transitive _≈ᶜˢ_
-
-  postulate _≟ᶜˢ_ : Decidable _≈ᶜˢ_
-
+  postulate ≤ᶜˢ-isDecTotalOrder : IsDecTotalOrder _≈ᶜˢ_ _≤ᶜˢ_
 
   postulate ∈-resp-≈ᶜˢ : ∀ c {cs ds} → cs ≈ᶜˢ ds → c ∈? cs ≡ c ∈? ds
 
@@ -47,21 +45,25 @@ abstract
 
   postulate remove-cong : ∀ c {cs ds} → cs ≈ᶜˢ ds → remove c cs ≈ᶜˢ remove c ds
 
+  -- Re-exporting properties
 
-  postulate _≤ᶜˢ_ : Rel CommunitySet ℓ₀
+  open IsDecTotalOrder ≤ᶜˢ-isDecTotalOrder public
+    using (module Eq)
+    renaming
+    ( refl      to ≤ᶜˢ-refl
+    ; reflexive to ≤ᶜˢ-reflexive
+    ; antisym   to ≤ᶜˢ-antisym
+    ; trans     to ≤ᶜˢ-trans
+    ; total     to ≤ᶜˢ-total
+    ; ≤-respˡ-≈ to ≤ᶜˢ-respˡ-≈ᶜˢ
+    ; ≤-respʳ-≈ to ≤ᶜˢ-respʳ-≈ᶜˢ
+    )
 
-  postulate ≤ᶜˢ-refl : Reflexive _≤ᶜˢ_
-
-  postulate ≤ᶜˢ-reflexive : _≈ᶜˢ_ ⇒ _≤ᶜˢ_
-
-  postulate ≤ᶜˢ-antisym : Antisymmetric _≈ᶜˢ_ _≤ᶜˢ_
-
-  postulate ≤ᶜˢ-trans : Transitive _≤ᶜˢ_
-
-  postulate ≤ᶜˢ-total : Total _≤ᶜˢ_
-
-  postulate ≤ᶜˢ-minimum : Minimum _≤ᶜˢ_ ∅
-
-  postulate ≤ᶜˢ-respˡ-≈ᶜˢ : ∀ {x y z} → y ≈ᶜˢ z → x ≤ᶜˢ y → x ≤ᶜˢ z
-
-  postulate ≤ᶜˢ-respʳ-≈ᶜˢ : ∀ {x y z} → y ≈ᶜˢ z → y ≤ᶜˢ x → z ≤ᶜˢ x
+  open IsDecEquivalence Eq.isDecEquivalence public
+    using ()
+    renaming
+    ( refl  to ≈ᶜˢ-refl
+    ; sym   to ≈ᶜˢ-sym
+    ; trans to ≈ᶜˢ-trans
+    ; _≟_   to _≟ᶜˢ_
+    )

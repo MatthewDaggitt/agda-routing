@@ -30,7 +30,7 @@ module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTot
   open import Data.List.Membership.Setoid S using (_∈_)
   open import Relation.Binary.NonStrictToStrict _≈_ _≤_ using (_<_) renaming (irrefl to <-irrefl)
   
-  
+  {-
   ↗-length : ∀ {xs ys} → xs ↗ ys → length xs ≡ length ys
   ↗-length (sorting xs⇿ys _) = ⇿-length xs⇿ys
 
@@ -42,7 +42,8 @@ module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTot
 
   ↗-∈ʳ : ∀ {x xs ys} → x ∈ ys → xs ↗ ys → x ∈ xs
   ↗-∈ʳ x∈ys (sorting xs⇿ys _) = ∈-perm S x∈ys (⇿-sym xs⇿ys)
-
+  -}
+  
   private
 
     lemma : ∀ {x y xs} → All (x ≤_) xs → y ∈ xs → x ≤ y

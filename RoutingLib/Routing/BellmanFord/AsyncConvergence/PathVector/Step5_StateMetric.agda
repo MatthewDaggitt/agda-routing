@@ -18,11 +18,11 @@ import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Prelude as Pre
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step4_RouteMetric as Step4
 
 module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step5_StateMetric
-  {a b ℓ n} (algebra : StrictlyIncreasingPathAlgebra a b ℓ n)
+  {a b ℓ n} (algebra : IncreasingPathAlgebra a b ℓ n) (1≤n : 1 ≤ n)
   where
 
   open Prelude algebra
-  open Step4 algebra
+  open Step4 algebra 1≤n
 
   ------------------
   -- Table metric --

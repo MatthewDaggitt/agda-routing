@@ -5,7 +5,7 @@ open import Data.Fin.Dec using (_∈?_)
 open import Data.Fin.Properties using () renaming (setoid to 𝔽ₛ)
 open import Data.Nat using (ℕ; _≤_; _+_; s≤s; _<_; zero; suc)
 open import Data.Nat.Properties using (≤-refl)
-open import Data.Product using (∃; _×_)
+open import Data.Product using (∃; _×_; _,_)
 open import Relation.Binary using (DecSetoid; Setoid; Rel; _Preserves_⟶_)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 open import Relation.Nullary using (¬_; yes; no)
@@ -60,3 +60,8 @@ module RoutingLib.Asynchronous where
     field
       m*         : S
       m*-reached : ∀ s X → ∃ λ tᶜ → ∀ t → asyncIter s X (tᶜ + t) ≈ m*
+
+  -- The empty computation is safe (phew!)
+  0-IsSafe : ∀ {a ℓ} {T : Fin 0 → Setoid a ℓ} (p : Parallelisation T) →
+             IsAsynchronouslySafe p
+  0-IsSafe p = record { m* = λ() ; m*-reached = λ _ _ → 0 , λ _ () }

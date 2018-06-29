@@ -32,11 +32,11 @@ import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step2_Inconsis
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step3_ConsistentRouteMetric as Step3
 
 module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step4_RouteMetric
-  {a b ℓ n} (algebra : StrictlyIncreasingPathAlgebra a b ℓ n)
+  {a b ℓ n} (algebra : IncreasingPathAlgebra a b ℓ n) (1≤n : 1 ≤ n)
   where
 
   open Prelude algebra
-  open Step2 algebra
+  open Step2 algebra 1≤n
   open Step3 algebra
   open Metric S using (Ultrametric; IsUltrametric; Bounded; MaxTriangleIneq)
 

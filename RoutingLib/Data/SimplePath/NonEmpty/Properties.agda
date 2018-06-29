@@ -4,10 +4,10 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary.List.Pointwise using ([]; _∷_) renaming (setoid to listSetoid)
-open import Data.Nat using (ℕ; suc) renaming (_≟_ to _≟ℕ_; _≤?_ to _≤ℕ?_; _<_ to _<ℕ_)
-open import Data.Nat.Properties using (<-trans; ≰⇒>; <⇒≢; <⇒≯; ≤-refl; 1+n≰n; _<?_; ≰⇒≥)
+open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; ≤-pred) renaming (_≟_ to _≟ℕ_; _≤?_ to _≤ℕ?_; _≤_ to _≤ℕ_; _<_ to _<ℕ_)
+open import Data.Nat.Properties using (<-trans; ≰⇒>; <⇒≢; <⇒≯; ≤-refl; ≤-trans; 1+n≰n; _<?_; ≰⇒≥)
 open import Data.Fin using (Fin; _<_; _≤?_) renaming (zero to fzero; suc to fsuc)
-open import Data.Fin.Properties using (cmp; ≤-trans; ≤-antisym; ≤-total) renaming (_≟_ to _≟𝔽_)
+open import Data.Fin.Properties using (cmp; ≤-antisym; ≤-total) renaming (_≟_ to _≟𝔽_)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (_,_; _×_; proj₁; proj₂)
 open import Relation.Binary.Product.Pointwise using (_×-≟_)
@@ -110,3 +110,11 @@ module RoutingLib.Data.SimplePath.NonEmpty.Properties {n} where
     ... | yes |q|<n = |q|<n
     ... | no  |q|≮n with pigeonhole (≰⇒> |q|≮n) (lookupᵥ q)
     ...   | i , j , i≢j , pᵢ≡pⱼ = contradiction pᵢ≡pⱼ (lookup! q i j i≢j)
+
+    test : ∀ {x y} → x <ℕ y → x ≤ℕ suc y
+    test (s≤s z≤n)       = z≤n
+    test (s≤s (s≤s x<y)) = s≤s (test (s≤s x<y))
+    
+    |p|≤1+n : ∀ (p : SimplePathⁿᵗ n) → length p ≤ℕ suc n
+    |p|≤1+n []                   = z≤n
+    |p|≤1+n (e ∷ p ∣ e⇿p ∣ e∉p) = test (|p|<n (nonEmpty _ _ e⇿p e∉p))

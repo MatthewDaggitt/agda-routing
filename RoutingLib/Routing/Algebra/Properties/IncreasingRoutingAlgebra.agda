@@ -1,7 +1,7 @@
 open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing.Properties.RoutingAlgebra as RoutingAlgebraProperties
+import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
 
-module RoutingLib.Routing.Properties.IncreasingRoutingAlgebra
+module RoutingLib.Routing.Algebra.Properties.IncreasingRoutingAlgebra
   {a b ℓ} (algebra : IncreasingRoutingAlgebra a b ℓ) where
 
 open IncreasingRoutingAlgebra algebra

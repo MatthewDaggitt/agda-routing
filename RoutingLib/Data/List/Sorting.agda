@@ -12,9 +12,3 @@ module RoutingLib.Data.List.Sorting {a ℓ} {A : Set a} (_≤_ : Rel A ℓ) wher
 
   Sorted : List A → Set (a ⊔ ℓ)
   Sorted xs = AllPairs _≤_ xs
-  
-  record _↗_ (xs ys : List A) : Set (a ⊔ ℓ) where
-    constructor sorting
-    field
-      perm   : xs ⇿ ys
-      sorted : Sorted ys

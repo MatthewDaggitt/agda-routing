@@ -6,12 +6,13 @@ open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.Nat.Properties using (∸-monoʳ-<; m<n⇒0<n∸m; module ≤-Reasoning)
+open ≤-Reasoning
 
 open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Prelude as Prelude
 
 module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step1_InconsistentHeightFunction
-  {a b ℓ n} (pathAlgebra : StrictlyIncreasingPathAlgebra a b ℓ n)
+  {a b ℓ n} (pathAlgebra : IncreasingPathAlgebra a b ℓ n) (1≤n : 1 ≤ n)
   where
 
   open Prelude pathAlgebra
@@ -21,14 +22,6 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step1_Inconsis
   ------------------------------------------------------------------------------
   -- The size of inconsistent routes where consistent routes are viewed as
   -- having the maximum size `n`
-
-  private
-    
-    postulate 1≤n : 1 ≤ n
-    
-    size≤n+1 : ∀ r → size r ≤ suc n
-    size≤n+1 r = <⇒≤ (≤-trans (size<n 1≤n r) (n≤1+n _))
-    
     
   abstract
   
@@ -58,11 +51,10 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step1_Inconsis
     ... | no sⁱ | _      = contradiction sᶜ sⁱ
     ... | _     | yes rᶜ = contradiction rᶜ rⁱ
     ... | yes _ | no  _  = begin
-      2                          ≡⟨ sym (m+n∸n≡m 2 n) ⟩
-      suc (suc n) ∸ n            ≤⟨ ∸-monoʳ-≤ (suc (suc n)) (size<n 1≤n r) ⟩
-      suc (suc n) ∸ suc (size r) ≡⟨⟩ 
-      suc n       ∸ size r       ∎
-      where open ≤-Reasoning
+      2                    ≡⟨ sym (m+n∸n≡m 2 n) ⟩
+      2 + n ∸ n            ≤⟨ ∸-monoʳ-≤ (suc (suc n)) (size<n 1≤n r) ⟩
+      2 + n ∸ suc (size r) ≡⟨⟩ 
+      1 + n ∸ size r       ∎
     
     1≤hⁱ : ∀ r → 1 ≤ hⁱ r
     1≤hⁱ r with 𝑪? r

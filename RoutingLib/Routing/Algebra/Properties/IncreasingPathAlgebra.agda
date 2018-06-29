@@ -11,10 +11,10 @@ open import RoutingLib.Data.SimplePath.NonEmpty.Properties
 open import RoutingLib.Data.SimplePath.Relation.Equality
 
 open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing.Properties.PathAlgebra
+import RoutingLib.Routing.Algebra.Properties.PathAlgebra
   as PathAlgebraProperties
 
-module RoutingLib.Routing.Properties.IncreasingPathAlgebra
+module RoutingLib.Routing.Algebra.Properties.IncreasingPathAlgebra
   {a b ℓ n} (algebra : IncreasingPathAlgebra a b ℓ n) where
 
 open IncreasingPathAlgebra algebra
@@ -24,8 +24,8 @@ open IncreasingPathAlgebra algebra
 
 open PathAlgebraProperties pathAlgebra public
 
-▷-strictlyIncreasing : ∀ i k x → x ≉ ∞ → x <₊ A i k ▷ x
-▷-strictlyIncreasing i k x x≉∞ with A i k ▷ x ≟ ∞
+▷-strictlyIncreasing : ∀ i k {x} → x ≉ ∞ → x <₊ A i k ▷ x
+▷-strictlyIncreasing i k {x} x≉∞ with A i k ▷ x ≟ ∞
 ... | yes Aᵢₖx≈∞ = ≈-trans (⊕-cong Aᵢₖx≈∞ ≈-refl) (⊕-identityˡ x) , x≉∞ ∘ (λ x≈Aᵢₖx → ≈-trans x≈Aᵢₖx Aᵢₖx≈∞)
 ... | no  Aᵢₖx≉∞ with path x | inspect path x
 ...   | invalid | [ p[x]≡∅ ] = contradiction (path[r]≈∅⇒r≈∞ (≈ₚ-reflexive p[x]≡∅)) x≉∞

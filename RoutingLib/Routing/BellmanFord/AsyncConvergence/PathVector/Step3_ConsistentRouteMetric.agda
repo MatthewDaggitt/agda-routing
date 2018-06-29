@@ -25,7 +25,7 @@ import RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Prelude as
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Step2_RouteMetric as Step2ᶜ
 
 module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step3_ConsistentRouteMetric
-  {a b ℓ n} (algebra : StrictlyIncreasingPathAlgebra a b ℓ n)
+  {a b ℓ n} (algebra : IncreasingPathAlgebra a b ℓ n)
   where
 
   open Prelude algebra

@@ -11,7 +11,7 @@ import RoutingLib.Relation.Binary.Flip as Flip
 
 open import RoutingLib.Routing.Algebra
 
-module RoutingLib.Routing.Properties.RoutingAlgebra
+module RoutingLib.Routing.Algebra.Properties.RoutingAlgebra
   {a b ℓ} (𝓡𝓐 : RoutingAlgebra a b ℓ) where
 
 open RoutingAlgebra 𝓡𝓐

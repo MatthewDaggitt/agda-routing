@@ -7,7 +7,7 @@ open import Function using (flip)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 
 open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing.Properties.FiniteStrictlyIncreasingRoutingAlgebra
+import RoutingLib.Routing.Algebra.Properties.FiniteStrictlyIncreasingRoutingAlgebra
  as FiniteStrictlyIncreasingRoutingAlgebraProperties
 import RoutingLib.Routing.BellmanFord as BellmanFord
 import RoutingLib.Routing.BellmanFord.Properties as BellmanFordProperties

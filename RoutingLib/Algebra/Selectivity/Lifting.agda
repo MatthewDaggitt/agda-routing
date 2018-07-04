@@ -53,6 +53,16 @@ module RoutingLib.Algebra.Selectivity.Lifting
   presᵇ P {x} {y} Px Py with •-sel (f x) (f y)
   ... | inj₁ _ = Px
   ... | inj₂ _ = Py
+
+  forcesᵇ : ∀ {p} {P : Pred A p} →
+            (∀ {x y} → P x → (f x • f y) ≈ᵇ f x → P y) →
+            (∀ {x y} → P y → (f x • f y) ≈ᵇ f y → P x) →
+            Lift Forcesᵇ P
+  forcesᵇ presˡ presʳ x y P[x•y] with •-sel (f x) (f y)
+  ... | inj₁ fx•fy≈fx = P[x•y] , presˡ P[x•y] fx•fy≈fx
+  ... | inj₂ fx•fy≈fy = presʳ P[x•y] fx•fy≈fy , P[x•y]
+
+
 {-
   module _ {ℓ} {f : A → B} {_≈ᵇ_ : Rel B ℓ} {•-sel : Selective _≈ᵇ_ _•_} where
     

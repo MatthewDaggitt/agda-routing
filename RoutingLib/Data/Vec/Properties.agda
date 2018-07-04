@@ -10,12 +10,20 @@ open import Data.List.Membership.Propositional using () renaming (_∈_ to _∈�
 open import Function using (_∘_; id)
 open import Relation.Unary using (Pred; Decidable)
 open import Relation.Nullary using (yes; no; ¬_)
+open import Relation.Binary using () renaming (Decidable to BDecidable)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym)
 
 open import RoutingLib.Data.Vec
 
 module RoutingLib.Data.Vec.Properties where
 
+  ≟-Vec : ∀ {a n} {A : Set a} → BDecidable {A = A} _≡_ → BDecidable {A = Vec A n} _≡_
+  ≟-Vec _≟_ []       []       = yes refl
+  ≟-Vec _≟_ (x ∷ xs) (y ∷ ys) with x ≟ y | ≟-Vec _≟_ xs ys
+  ... | yes refl | yes refl = yes refl
+  ... | no  x≢y  | _        = no λ { refl → x≢y refl }
+  ... | _        | no xs≢ys = no λ { refl → xs≢ys refl }
+  
   ∈-lookup : ∀ {a n} {A : Set a} {v : A} {xs : Vec A n} →
              v ∈ xs → ∃ λ i → lookup i xs ≡ v
   ∈-lookup here = fzero , refl

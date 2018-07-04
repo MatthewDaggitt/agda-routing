@@ -59,6 +59,9 @@ module RoutingLib.Data.SimplePath.NonEmpty.Relation.Equality where
       ≈ₚ-refl {[]}            = []
       ≈ₚ-refl {_ ∷ _ ∣ _ ∣ _} = refl ∷ ≈ₚ-refl
 
+      ≈ₚ-reflexive : _≡_ ⇒ _≈ₚ_
+      ≈ₚ-reflexive refl = ≈ₚ-refl
+      
       ≈ₚ-sym : Symmetric _≈ₚ_
       ≈ₚ-sym []           = []
       ≈ₚ-sym (refl ∷ p≈ₚq) = refl ∷ (≈ₚ-sym p≈ₚq)

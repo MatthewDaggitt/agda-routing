@@ -1,10 +1,10 @@
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Properties.IncreasingPathAlgebra
+open import RoutingLib.Routing.Algebra.Properties.IncreasingPathAlgebra
   as IncreasingPathAlgebraProperties
 import RoutingLib.Routing.BellmanFord as BellmanFord
 import RoutingLib.Routing.BellmanFord.Properties as BellmanFordProperties
 import RoutingLib.Routing.BellmanFord.PathProperties as BellmanFordPathProperties
-import RoutingLib.Routing.Properties.IncreasingPathAlgebra.Consistency as Consistency
+import RoutingLib.Routing.Algebra.Properties.IncreasingPathAlgebra.Consistency as Consistency
 
 module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Prelude
   {a b ℓ n} (algebra : IncreasingPathAlgebra a b ℓ n)

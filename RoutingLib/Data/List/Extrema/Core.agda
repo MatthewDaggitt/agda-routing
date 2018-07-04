@@ -14,7 +14,6 @@ module RoutingLib.Data.List.Extrema.Core
   ------------------------------------------------------------------------------
   -- Setup
   
-  
   open TotalOrder totalOrder renaming (Carrier to B)
   open NonStrictToStrict totalOrder using (_<_; ≤-<-trans; <-≤-trans)
    
@@ -41,7 +40,6 @@ module RoutingLib.Data.List.Extrema.Core
 
 
 
-
   module _ {a} {A : Set a} where
   
     ⊓-lift : (A → B) → Op₂ A
@@ -58,6 +56,7 @@ module RoutingLib.Data.List.Extrema.Core
     ⊔-lift-sel : ∀ f → Selective _≡_ (⊔-lift f)
     ⊔-lift-sel f = sel _≈_ ⊔-sel f
 
+
     ⊓-lift-presᵒ-≤v : ∀ f {v} → (⊓-lift f) Preservesᵒ (λ x → f x ≤ v)
     ⊓-lift-presᵒ-≤v f = presᵒ _≈_ ⊓-sel f (lemma₁ f) (lemma₂ f)
     
@@ -69,3 +68,30 @@ module RoutingLib.Data.List.Extrema.Core
     
     ⊓-lift-presᵇ-v< : ∀ f {v} → (⊓-lift f) Preservesᵇ (λ x → v < f x)
     ⊓-lift-presᵇ-v< f {v} = presᵇ _≈_ ⊓-sel f (λ x → v < f x)
+
+    ⊓-lift-forcesᵇ-v≤ : ∀ f {v} → (⊓-lift f) Forcesᵇ (λ x → v ≤ f x)
+    ⊓-lift-forcesᵇ-v≤ f {v} = forcesᵇ _≈_ ⊓-sel f
+      (λ v≤fx fx⊓fy≈fx → trans v≤fx (x⊓y≈x⇒x≤y fx⊓fy≈fx))
+      (λ v≤fy fx⊓fy≈fy → trans v≤fy (x⊓y≈y⇒y≤x fx⊓fy≈fy))
+
+
+    ⊔-lift-presᵇ-≤v : ∀ f {v} → ⊔-lift f Preservesᵇ (λ x → f x ≤ v)
+    ⊔-lift-presᵇ-≤v f {v} = presᵇ _≈_ ⊔-sel f (λ x → f x ≤ v)
+
+    ⊔-lift-presᵇ-<v : ∀ f {v} → ⊔-lift f Preservesᵇ (λ x → f x < v)
+    ⊔-lift-presᵇ-<v f {v} = presᵇ _≈_ ⊔-sel f (λ x → f x < v)
+    
+    ⊔-lift-presᵒ-v≤ : ∀ f {v} → ⊔-lift f Preservesᵒ (λ x → v ≤ f x)
+    ⊔-lift-presᵒ-v≤ f {v} = presᵒ _≈_ ⊔-sel f
+      (λ v≤fx fx⊔fy≈fy → trans v≤fx (x⊔y≈y⇒x≤y fx⊔fy≈fy))
+      (λ v≤fy fx⊔fy≈fx → trans v≤fy (x⊔y≈x⇒y≤x fx⊔fy≈fx))
+    
+    ⊔-lift-presᵒ-v< : ∀ f {v} → ⊔-lift f Preservesᵒ (λ x → v < f x)
+    ⊔-lift-presᵒ-v< f {v} = presᵒ _≈_ ⊔-sel f
+      (λ v<fx fx⊔fy≈fy → <-≤-trans v<fx (x⊔y≈y⇒x≤y fx⊔fy≈fy))
+      (λ v<fy fx⊔fy≈fx → <-≤-trans v<fy (x⊔y≈x⇒y≤x fx⊔fy≈fx))
+
+    ⊔-lift-forcesᵇ-≤v : ∀ f {v} → (⊔-lift f) Forcesᵇ (λ x → f x ≤ v)
+    ⊔-lift-forcesᵇ-≤v f {v} = forcesᵇ _≈_ ⊔-sel f
+      (λ fx≤v fx⊔fy≈fx → trans (x⊔y≈x⇒y≤x fx⊔fy≈fx) fx≤v)
+      (λ fy≤v fx⊔fy≈fy → trans (x⊔y≈y⇒x≤y fx⊔fy≈fy) fy≤v)

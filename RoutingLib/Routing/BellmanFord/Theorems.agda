@@ -27,8 +27,8 @@ module Theorem1 {a b ℓ n} (algebra : FiniteStrictlyIncreasingRoutingAlgebra a 
   open DistanceVectorPrelude algebra A
   open DistanceVectorResults algebra A
 
-  σ-isAsynchronouslySafe : IsAsynchronouslySafe σ∥
-  σ-isAsynchronouslySafe = ultra⇒safe record
+  finiteStrictlyIncr-converges : IsAsynchronouslySafe σ∥
+  finiteStrictlyIncr-converges = ultra⇒safe record
     { dᵢ                 = dₜ
     ; dᵢ-isUltrametric   = dₜ-isUltrametric
     ; F-strContrOnOrbits = σ-strContr
@@ -47,14 +47,14 @@ module Theorem1 {a b ℓ n} (algebra : FiniteStrictlyIncreasingRoutingAlgebra a 
 --
 -- A little bit messier than Theorem 1 as we need to deal with the zero case.
 
-module Theorem2 {a b ℓ} where
+module _ {a b ℓ} where
 
   open PathVectorPrelude using (σ∥)
     
-  σ-isAsynchronouslySafe :  ∀ {n} (algebra : IncreasingPathAlgebra a b ℓ n) →
-                            IsAsynchronouslySafe (σ∥ algebra)
-  σ-isAsynchronouslySafe {n = zero}  algebra = 0-IsSafe (σ∥ algebra)
-  σ-isAsynchronouslySafe {n = suc n} algebra = ultra⇒safe record
+  incrPaths-converges :  ∀ {n} (algebra : IncreasingPathAlgebra a b ℓ n) →
+                         IsAsynchronouslySafe (σ∥ algebra)
+  incrPaths-converges {n = zero}  algebra = 0-IsSafe (σ∥ algebra)
+  incrPaths-converges {n = suc n} algebra = ultra⇒safe record
     { dᵢ                 = dₜ
     ; dᵢ-isUltrametric   = dₜ-isUltrametric
     ; F-cong             = σ-cong

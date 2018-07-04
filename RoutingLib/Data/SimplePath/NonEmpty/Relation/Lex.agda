@@ -1,17 +1,19 @@
 open import Data.Fin using (_<_)
-open import Data.Fin.Properties using (<-trans; cmp)
+open import Data.Fin.Properties using (<-trans; <-cmp)
 open import Data.Nat using (ℕ)
 open import Data.Nat.Properties using (<⇒≯; 1+n≰n)
 open import Data.Product using (_,_)
+open import Data.Sum using (inj₁; inj₂)
 open import Level using () renaming (zero to ℓ₀)
 open import Relation.Binary
 open import Relation.Binary.Lattice using (Minimum)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl)
-open import Relation.Nullary using (yes; no)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym)
+open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.SimplePath.NonEmpty
 open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Equality
+import RoutingLib.Relation.Binary.NonStrictToStrict.DecTotalOrder as ToStrict
 
 module RoutingLib.Data.SimplePath.NonEmpty.Relation.Lex {n : ℕ} where
 
@@ -26,17 +28,33 @@ module RoutingLib.Data.SimplePath.NonEmpty.Relation.Lex {n : ℕ} where
     step  : ∀ {i j k l p q ij⇿p kl⇿q i∉p k∉q} →
             i ≡ k → j ≡ l → p ≤ₗₑₓ q  → (i , j) ∷ p ∣ ij⇿p ∣ i∉p ≤ₗₑₓ (k , l) ∷ q ∣ kl⇿q ∣ k∉q
             
-  postulate _<ₗₑₓ_ : Rel (SimplePathⁿᵗ n) ℓ₀
-
 
   -- Properties
 
   abstract
   
+
+    ≤ₗₑₓ-reflexive : _≈ₚ_ ⇒ _≤ₗₑₓ_
+    ≤ₗₑₓ-reflexive []         = stop
+    ≤ₗₑₓ-reflexive (refl ∷ p≈q) = step refl refl (≤ₗₑₓ-reflexive p≈q)
+
     ≤ₗₑₓ-refl : Reflexive _≤ₗₑₓ_
     ≤ₗₑₓ-refl {[]}            = stop
     ≤ₗₑₓ-refl {i ∷ p ∣ _ ∣ _} = step refl refl ≤ₗₑₓ-refl
 
+    ≤ₗₑₓ-total : Total _≤ₗₑₓ_
+    ≤ₗₑₓ-total p [] = inj₂ stop
+    ≤ₗₑₓ-total [] q = inj₁ stop
+    ≤ₗₑₓ-total ((i , j) ∷ p ∣ e⇿p ∣ e∉p) ((l , k) ∷ q ∣ f⇿q ∣ f∉q) with <-cmp i l
+    ... | tri< i<l _ _ = inj₁ (here₁ i<l)
+    ... | tri> _ _ l<i = inj₂ (here₁ l<i)
+    ... | tri≈ _ i≡l _ with <-cmp j k
+    ...   | tri< j<k _ _ = inj₁ (here₂ i≡l j<k)
+    ...   | tri> _ _ j<k = inj₂ (here₂ (sym i≡l) j<k)
+    ...   | tri≈ _ j≡k _ with ≤ₗₑₓ-total p q
+    ...     | inj₁ p≤q = inj₁ (step i≡l j≡k p≤q)
+    ...     | inj₂ q≤p = inj₂ (step (sym i≡l) (sym j≡k) q≤p)
+    
     ≤ₗₑₓ-trans : Transitive _≤ₗₑₓ_
     ≤ₗₑₓ-trans stop                  _                     = stop
     ≤ₗₑₓ-trans (here₁ i<j)           (here₁ j<k)           = here₁ (<-trans i<j j<k)
@@ -64,39 +82,59 @@ module RoutingLib.Data.SimplePath.NonEmpty.Relation.Lex {n : ℕ} where
     _≤ₗₑₓ?_ : Decidable _≤ₗₑₓ_
     [] ≤ₗₑₓ? _ = yes stop
     (i ∷ p ∣ _ ∣ _) ≤ₗₑₓ? []          = no λ()
-    ((i , j) ∷ p ∣ _ ∣ _) ≤ₗₑₓ? ((k , l) ∷ q ∣ _ ∣ _) with cmp i k | cmp j l |  p ≤ₗₑₓ? q
+    ((i , j) ∷ p ∣ _ ∣ _) ≤ₗₑₓ? ((k , l) ∷ q ∣ _ ∣ _) with <-cmp i k | <-cmp j l |  p ≤ₗₑₓ? q
     ... | tri< i<k _   _ | _              | _       = yes (here₁ i<k)
     ... | tri> i≮k i≢k _ | _              | _       = no λ
-                                                     { (here₁ i<k)     → i≮k i<k
-                                                     ; (here₂ i≡k _)   → i≢k i≡k
-                                                     ; (step  i≡k _ _) → i≢k i≡k
-                                                     }
+      { (here₁ i<k)     → i≮k i<k
+      ; (here₂ i≡k _)   → i≢k i≡k
+      ; (step  i≡k _ _) → i≢k i≡k
+      }
     ... | tri≈ _   i≡k _ | tri< j<l _   _ | _       = yes (here₂ i≡k j<l)
     ... | tri≈ i≮k _   _ | tri> j≮l j≢l _ | _       = no λ
-                                                     { (here₁ i<k)     → i≮k i<k
-                                                     ; (here₂ _ j<l)   → j≮l j<l
-                                                     ; (step  _ j≡l _) → j≢l j≡l
-                                                     }
+      { (here₁ i<k)     → i≮k i<k
+      ; (here₂ _ j<l)   → j≮l j<l
+      ; (step  _ j≡l _) → j≢l j≡l
+      }
     ... | tri≈ i≮k _   _ | tri≈ j≮l _ _   | no  p≰q = no λ
-                                                     { (here₁ i<k)     → i≮k i<k
-                                                     ; (here₂ _ j<l)   → j≮l j<l
-                                                     ; (step  _ _ p≤q) → p≰q p≤q
-                                                     }
+      { (here₁ i<k)     → i≮k i<k
+      ; (here₂ _ j<l)   → j≮l j<l
+      ; (step  _ _ p≤q) → p≰q p≤q
+      }
     ... | tri≈ _   i≡k _ | tri≈ _ j≡l _   | yes p≤q = yes (step i≡k j≡l p≤q)
-    
-  postulate <ₗₑₓ-cmp : Trichotomous _≈ₚ_ _<ₗₑₓ_
 
-  postulate <ₗₑₓ-trans : Transitive _<ₗₑₓ_
 
-  postulate <ₗₑₓ-asym : Asymmetric _<ₗₑₓ_
+  ≤ₗₑₓ-decTotalOrder : DecTotalOrder _ _ _
+  ≤ₗₑₓ-decTotalOrder = record
+    { isDecTotalOrder = record
+      { isTotalOrder = record
+        { isPartialOrder = record
+          { isPreorder = record
+            { isEquivalence = ≈ₚ-isEquivalence
+            ; reflexive     = ≤ₗₑₓ-reflexive
+            ; trans         = ≤ₗₑₓ-trans
+            }
+          ; antisym    = ≤ₗₑₓ-antisym
+          }
+        ; total          = ≤ₗₑₓ-total
+        }
+      ; _≟_          = _≟ₚ_
+      ; _≤?_         = _≤ₗₑₓ?_
+      }
+    }
+ 
+  open ToStrict ≤ₗₑₓ-decTotalOrder public
+    using ()
+    renaming
+    ( _<_       to _<ₗₑₓ_
+    ; <-trans   to <ₗₑₓ-trans
+    ; <-asym    to <ₗₑₓ-asym
+    ; <-irrefl  to <ₗₑₓ-irrefl
+    ; <-respˡ-≈ to <ₗₑₓ-respˡ-≈ₚ
+    ; <-respʳ-≈ to <ₗₑₓ-respʳ-≈ₚ
+    ; <-cmp     to <ₗₑₓ-cmp
+    )
   
-  postulate <ₗₑₓ-irrefl : Irreflexive _≈ₚ_ _<ₗₑₓ_
 
-  postulate <ₗₑₓ-minimum : Minimum _<ₗₑₓ_ []
-
-  postulate <ₗₑₓ-respˡ-≈ₚ : {p : SimplePathⁿᵗ n} → (p <ₗₑₓ_) Respects _≈ₚ_
-
-  postulate <ₗₑₓ-respʳ-≈ₚ : {p : SimplePathⁿᵗ n} → (_<ₗₑₓ p) Respects _≈ₚ_
-
-  postulate <ₗₑₓ-resp-≈ₚ : _<ₗₑₓ_ Respects₂ _≈ₚ_
-
+  p≮ₗₑₓ[] : ∀ {p} → ¬ (p <ₗₑₓ [])
+  p≮ₗₑₓ[] {[]}                (_ , []≉[]) = []≉[] []
+  p≮ₗₑₓ[] {e ∷ p ∣ e⇿p ∣ e∉p} (() , _)

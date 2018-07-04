@@ -1,6 +1,7 @@
 open import Relation.Binary
 import Relation.Binary.NonStrictToStrict as NSTS
 open import Relation.Nullary using (¬_)
+open import Data.Sum using (inj₁; inj₂)
 
 
 import RoutingLib.Relation.Binary.NonStrictToStrict.PartialOrder as PO
@@ -18,3 +19,4 @@ module RoutingLib.Relation.Binary.NonStrictToStrict.TotalOrder
 
   ≰⇒> : ∀ {x y} → ¬ (x ≤ y) → y < x
   ≰⇒> = NSTS′.≰⇒> _ _ Eq.sym reflexive total
+

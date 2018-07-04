@@ -25,8 +25,8 @@ open import RoutingLib.Data.SimplePath.Properties using (∉-resp-≈ₚ)
 open import RoutingLib.Data.SimplePath.Relation.Equality
 
 open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing.Properties.PathAlgebra as PathAlgebraProperties
-import RoutingLib.Routing.Properties.PathAlgebra.Consistency as Consistency
+import RoutingLib.Routing.Algebra.Properties.PathAlgebra as PathAlgebraProperties
+import RoutingLib.Routing.Algebra.Properties.PathAlgebra.Consistency as Consistency
 import RoutingLib.Routing.BellmanFord as BellmanFord
 import RoutingLib.Routing.BellmanFord.Properties as BellmanFordProperties
 

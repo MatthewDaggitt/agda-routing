@@ -26,7 +26,7 @@ open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max
 open import RoutingLib.Data.Nat.Properties
   using (ℕₛ; n≤0⇒n≡0; ∸-cancelʳ-<; module ≤-Reasoning; ℕᵈˢ)
 open import RoutingLib.Data.Fin.Properties
-  using (fromℕ≤-cong; fromℕ≤-mono-≤; fromℕ≤-mono⁻¹-<)
+  using (fromℕ≤-cong; fromℕ≤-mono-≤; fromℕ≤-cancel-<)
 open import RoutingLib.Data.List.Any.Properties using (lookup-index)
 open import RoutingLib.Data.List.Membership.DecPropositional.Properties using (∈-upTo⁺)
 open import RoutingLib.Data.List.Sorting _≤_ using (Sorted)
@@ -166,7 +166,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
     i-mono-≤ {s} {t} s≤t = fromℕ≤-mono-≤ (T-1∸t<T t) (T-1∸t<T s) (∸-monoʳ-≤ _ s≤t)
 
     i-mono⁻¹-< : ∀ {s t} → i[ s ] <𝔽 i[ t ] → t < s
-    i-mono⁻¹-< is<it = ∸-cancelʳ-< (fromℕ≤-mono⁻¹-< _ _ is<it)
+    i-mono⁻¹-< is<it = ∸-cancelʳ-< (fromℕ≤-cancel-< _ _ is<it)
 
     i-lookup : Fin T → ℕ
     i-lookup t = T-1 ∸ toℕ t

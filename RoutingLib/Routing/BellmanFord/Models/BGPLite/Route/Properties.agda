@@ -12,8 +12,7 @@ open import Relation.Nullary.Negation using (contradiction)
 open import RoutingLib.Data.SimplePath.NonEmpty using ([]; length)
 open import RoutingLib.Data.SimplePath.NonEmpty.Properties using (length-cong)
 open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Lex
-  using (<ₗₑₓ-cmp; <ₗₑₓ-trans; <ₗₑₓ-resp-≈ₚ; <ₗₑₓ-asym; <ₗₑₓ-irrefl;
-         <ₗₑₓ-minimum; <ₗₑₓ-respˡ-≈ₚ; <ₗₑₓ-respʳ-≈ₚ)
+  using (<ₗₑₓ-cmp; <ₗₑₓ-trans; <ₗₑₓ-respˡ-≈ₚ; <ₗₑₓ-respʳ-≈ₚ;  <ₗₑₓ-asym; <ₗₑₓ-irrefl; p≮ₗₑₓ[])
 open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Equality
   using (≈ₚ-refl; ≈ₚ-trans; ≈ₚ-sym; _≟ₚ_)
 
@@ -113,11 +112,11 @@ valid l cs p ≟ᵣ valid k ds q with l ≟ k | cs ≟ᶜˢ ds | p ≟ₚ q
 ≤ᵣ-trans (plex<   l≡k |p|≡|q| p<q) (level<  k<m)             = level< (subst (_< _) (sym l≡k) k<m)
 ≤ᵣ-trans (plex<   l≡k |p|≡|q| p<q) (length< k≡m |q|<|r|)     = length< (trans l≡k k≡m) (subst (_< _) (sym |p|≡|q|) |q|<|r|)
 ≤ᵣ-trans (plex<   l≡k |p|≡|q| p<q) (plex<   k≡m |q|≡|r| q<r) = plex< (trans l≡k k≡m) (trans |p|≡|q| |q|≡|r|) (<ₗₑₓ-trans p<q q<r)
-≤ᵣ-trans (plex<   l≡k |p|≡|q| p<q) (comm≤   k≡m q≈r ds≤es)   = plex< (trans l≡k k≡m) (trans |p|≡|q| (length-cong q≈r)) (<ₗₑₓ-respˡ-≈ₚ q≈r p<q)
+≤ᵣ-trans (plex<   l≡k |p|≡|q| p<q) (comm≤   k≡m q≈r ds≤es)   = plex< (trans l≡k k≡m) (trans |p|≡|q| (length-cong q≈r)) (<ₗₑₓ-respʳ-≈ₚ q≈r p<q)
 ≤ᵣ-trans (comm≤   l≡k p≈q cs≤ds)   invalid                   = invalid
 ≤ᵣ-trans (comm≤   l≡k p≈q cs≤ds)   (level<  k<m)             = level< (subst (_< _) (sym l≡k) k<m)
 ≤ᵣ-trans (comm≤   l≡k p≈q cs≤ds)   (length< k≡m |q|<|r|)     = length< (trans l≡k k≡m) (subst (_< _) (length-cong (≈ₚ-sym p≈q)) |q|<|r|)
-≤ᵣ-trans (comm≤   l≡k p≈q cs≤ds)   (plex<   k≡m |q|≡|r| q<r) = plex< (trans l≡k k≡m) (trans (length-cong p≈q) |q|≡|r|) (<ₗₑₓ-respʳ-≈ₚ (≈ₚ-sym p≈q) q<r)
+≤ᵣ-trans (comm≤   l≡k p≈q cs≤ds)   (plex<   k≡m |q|≡|r| q<r) = plex< (trans l≡k k≡m) (trans (length-cong p≈q) |q|≡|r|) (<ₗₑₓ-respˡ-≈ₚ (≈ₚ-sym p≈q) q<r)
 ≤ᵣ-trans (comm≤   l≡k p≈q cs≤ds)   (comm≤   k≡m q≈r ds≤es)   = comm≤ (trans l≡k k≡m) (≈ₚ-trans p≈q q≈r) (≤ᶜˢ-trans cs≤ds ds≤es)
 
 ≤ᵣ-antisym : Antisymmetric _≈ᵣ_ _≤ᵣ_
@@ -149,7 +148,7 @@ valid l cs p ≟ᵣ valid k ds q with l ≟ k | cs ≟ᶜˢ ds | p ≟ₚ q
 ...   | tri> _ _ () 
 ...   | tri≈ _ 0≡|p| _ with <ₗₑₓ-cmp [] p
 ...     | tri< []<p _ _ = plex< 0≡l 0≡|p| []<p
-...     | tri> _ _ p<[] = contradiction (<ₗₑₓ-minimum p) (<ₗₑₓ-asym p<[])
+...     | tri> _ _ p<[] = contradiction p<[] p≮ₗₑₓ[]
 ...     | tri≈ _ []≈p _ with ≤ᶜˢ-total ∅ cs
 ...       | inj₁ ∅≤cs = comm≤ 0≡l []≈p ∅≤cs
 ...       | inj₂ cs≤∅ = ≤ᵣ-reflexive (validEq 0≡l (≤ᶜˢ-antisym (≤ᶜˢ-minimum cs) cs≤∅) []≈p)
@@ -161,30 +160,39 @@ valid l cs p ≟ᵣ valid k ds q with l ≟ k | cs ≟ᶜˢ ds | p ≟ₚ q
 ≤ᵣ-respˡ-≈ᵣ invalidEq                invalid                   = invalid
 ≤ᵣ-respˡ-≈ᵣ (validEq refl _     _)   (level<  k<l)             = level<  k<l
 ≤ᵣ-respˡ-≈ᵣ (validEq refl ds≈es q≈r) (length< k≡l |p|<|q|)     = length< k≡l (subst (_ <_) (length-cong q≈r) |p|<|q|)
-≤ᵣ-respˡ-≈ᵣ (validEq refl ds≈es q≈r) (plex<   k≡l |p|≡|q| p<q) = plex<   k≡l (trans |p|≡|q| (length-cong q≈r)) (<ₗₑₓ-respˡ-≈ₚ q≈r p<q)
-≤ᵣ-respˡ-≈ᵣ (validEq refl ds≈es q≈r) (comm≤   k≡l p≈q cs≤ds)   = comm≤   k≡l (≈ₚ-trans p≈q q≈r) (≤ᶜˢ-respˡ-≈ᶜˢ ds≈es cs≤ds)
+≤ᵣ-respˡ-≈ᵣ (validEq refl ds≈es q≈r) (plex<   k≡l |p|≡|q| p<q) = plex<   k≡l (trans |p|≡|q| (length-cong q≈r)) (<ₗₑₓ-respʳ-≈ₚ q≈r p<q)
+≤ᵣ-respˡ-≈ᵣ (validEq refl ds≈es q≈r) (comm≤   k≡l p≈q cs≤ds)   = comm≤   k≡l (≈ₚ-trans p≈q q≈r) (≤ᶜˢ-respʳ-≈ᶜˢ ds≈es cs≤ds)
 
 ≤ᵣ-respʳ-≈ᵣ : ∀ {x y z} → y ≈ᵣ z → y ≤ᵣ x → z ≤ᵣ x
 ≤ᵣ-respʳ-≈ᵣ _                        invalid                   = invalid
 ≤ᵣ-respʳ-≈ᵣ (validEq refl _     _)   (level<  l<k)             = level<  l<k
 ≤ᵣ-respʳ-≈ᵣ (validEq refl ds≈es q≈r) (length< l≡k |q|<|p|)     = length< l≡k (subst (_< _) (length-cong q≈r) |q|<|p|)
-≤ᵣ-respʳ-≈ᵣ (validEq refl ds≈es q≈r) (plex<   l≡k |q|≡|p| q<p) = plex<   l≡k (trans (sym (length-cong q≈r)) |q|≡|p|) (<ₗₑₓ-respʳ-≈ₚ q≈r q<p)
-≤ᵣ-respʳ-≈ᵣ (validEq refl ds≈es q≈r) (comm≤   l≡k q≈p ds≤cs)   = comm≤   l≡k (≈ₚ-trans (≈ₚ-sym q≈r) q≈p) (≤ᶜˢ-respʳ-≈ᶜˢ ds≈es ds≤cs)
+≤ᵣ-respʳ-≈ᵣ (validEq refl ds≈es q≈r) (plex<   l≡k |q|≡|p| q<p) = plex<   l≡k (trans (sym (length-cong q≈r)) |q|≡|p|) (<ₗₑₓ-respˡ-≈ₚ q≈r q<p)
+≤ᵣ-respʳ-≈ᵣ (validEq refl ds≈es q≈r) (comm≤   l≡k q≈p ds≤cs)   = comm≤   l≡k (≈ₚ-trans (≈ₚ-sym q≈r) q≈p)
+  (≤ᶜˢ-respˡ-≈ᶜˢ ds≈es ds≤cs)
 
 ≤ᵣ-resp-≈ᵣ : _≤ᵣ_ Respects₂ _≈ᵣ_
 ≤ᵣ-resp-≈ᵣ = ≤ᵣ-respˡ-≈ᵣ , ≤ᵣ-respʳ-≈ᵣ
 
+≤ᵣ-isPartialOrder : IsPartialOrder _≈ᵣ_ _≤ᵣ_
+≤ᵣ-isPartialOrder = record
+  { isPreorder = record
+    { isEquivalence = ≈ᵣ-isEquivalence
+    ; reflexive = ≤ᵣ-reflexive
+    ; trans = ≤ᵣ-trans
+    }
+  ; antisym = ≤ᵣ-antisym
+  }
+
+≤ᵣ-poset : Poset _ _ _
+≤ᵣ-poset = record
+  { isPartialOrder = ≤ᵣ-isPartialOrder
+  }
+
 ≤ᵣ-totalOrder : TotalOrder _ _ _
 ≤ᵣ-totalOrder = record
   { isTotalOrder = record
-    { isPartialOrder = record
-      { isPreorder = record
-        { isEquivalence = ≈ᵣ-isEquivalence
-        ; reflexive = ≤ᵣ-reflexive
-        ; trans = ≤ᵣ-trans
-        }
-      ; antisym = ≤ᵣ-antisym
-      }
+    { isPartialOrder = ≤ᵣ-isPartialOrder
     ; total = ≤ᵣ-total
     }
   }

@@ -10,7 +10,7 @@ open import RoutingLib.Data.SimplePath.Relation.Equality
 open import RoutingLib.Data.SimplePath.Properties using (length-cong)
 
 open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing.Properties.IncreasingPathAlgebra as IncreasingPathAlgebraProperties
+import RoutingLib.Routing.Algebra.Properties.IncreasingPathAlgebra as IncreasingPathAlgebraProperties
 import RoutingLib.Routing.BellmanFord as BellmanFord
 import RoutingLib.Routing.BellmanFord.Properties as BellmanFordProperties
 import RoutingLib.Routing.BellmanFord.PathProperties as BellmanFordPathProperties

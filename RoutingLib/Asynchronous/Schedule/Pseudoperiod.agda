@@ -46,12 +46,18 @@ allActive t = max t (nextActive t)
 ---------------
 
 -- pointExpiryᵢⱼ returns a time such that i does not use data from j from time t
+
 pointExpiryᵢⱼ : Fin n → Fin n → 𝕋 → 𝕋
 pointExpiryᵢⱼ i j t = proj₁ (finite t i j)
 
 -- expiryᵢⱼ returns a time such that i only uses data from j after time t
+
 expiryᵢⱼ : 𝕋 → Fin n → Fin n → 𝕋
 expiryᵢⱼ t i j = List.max t (applyUpTo (pointExpiryᵢⱼ i j) (suc t))
+
+-- expiryᵢⱼ : 𝕋 → Fin n → Fin n → 𝕋
+-- expiryᵢⱼ t i j = max {suc t} t (pointExpiryᵢⱼ i j)
+
 
 -- expiryᵢ returns a time ≥ t such that i only ever uses data from after time t
 expiryᵢ : 𝕋 → Fin n → 𝕋

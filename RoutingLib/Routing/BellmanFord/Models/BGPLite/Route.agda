@@ -4,6 +4,7 @@ open import Level using () renaming (zero to ℓ₀)
 open import Relation.Binary using (Rel)
 open import Relation.Binary.PropositionalEquality using (_≡_)
 open import Relation.Nullary using (¬_)
+open import Relation.Unary using (Pred)
 
 open import RoutingLib.Data.SimplePath.NonEmpty using (SimplePathⁿᵗ; length)
 open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Equality using (_≈ₚ_)
@@ -43,7 +44,7 @@ r ≉ᵣ s = ¬ (r ≈ᵣ s)
 -- Preference order --
 ----------------------
 
-infix 4 _≤ᵣ_
+infix 4 _≤ᵣ_ _≰ᵣ_
 
 data _≤ᵣ_ : Rel Route ℓ₀ where
   invalid : ∀ {r} → r ≤ᵣ invalid
@@ -51,3 +52,13 @@ data _≤ᵣ_ : Rel Route ℓ₀ where
   length< : ∀ {k l cs ds p q} → k ≡ l → length p < length q → valid k cs p ≤ᵣ valid l ds q
   plex<   : ∀ {k l cs ds p q} → k ≡ l → length p ≡ length q → p <ₗₑₓ q → valid k cs p ≤ᵣ valid l ds q
   comm≤   : ∀ {k l cs ds p q} → k ≡ l → p ≈ₚ q → cs ≤ᶜˢ ds → valid k cs p ≤ᵣ valid l ds q
+
+_≰ᵣ_ : Rel Route ℓ₀
+r ≰ᵣ s = ¬ (r ≤ᵣ s)
+
+--------------
+-- Validity --
+--------------
+
+data IsValid : Pred Route ℓ₀ where
+  isValid : ∀ {l cs p} → IsValid (valid l cs p)

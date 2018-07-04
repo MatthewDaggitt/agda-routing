@@ -1,5 +1,5 @@
-open import Data.Nat using (ℕ; zero; suc; _≤_; _<_; _⊔_; _∸_; _+_; z≤n; s≤s; _≟_; _≤?_; ≤-pred)
-open import Data.Nat.Properties using (m≤m⊔n; n≤1+n; ⊔-sel; module ≤-Reasoning; <-cmp; ≤+≢⇒<; <⇒≱; ≤-refl; <⇒≤; ⊔-identityʳ; <-irrefl; ≤-trans; ≤-reflexive; ≮⇒≥; n≤m⊔n; ⊔-mono-≤; m≤m+n; m+n∸m≡n; <⇒≢; +-suc; +-comm)
+open import Data.Nat using (ℕ; zero; suc; _≤_; _<_; _⊔_; _∸_; _+_; z≤n; s≤s; _≟_; _≤?_; ≤-pred; less-than-or-equal)
+open import Data.Nat.Properties using (m≤m⊔n; n≤1+n; ⊔-sel; module ≤-Reasoning; <-cmp; ≤+≢⇒<; <⇒≱; ≤-refl; <⇒≤; ⊔-identityʳ; <-irrefl; ≤-trans; ≤-reflexive; ≮⇒≥; n≤m⊔n; ⊔-mono-≤; m≤m+n; m+n∸m≡n; <⇒≢; ≤⇒≤″; +-suc; +-comm)
 open import Data.Fin using (Fin; toℕ; fromℕ; inject≤; inject₁) renaming (zero to fzero)
 open import Data.Fin.Properties using (inject≤-lemma; to-from; inject₁-lemma)
 open import Data.Fin.Subset using (_∈_)
@@ -10,7 +10,8 @@ open import Data.Sum using (inj₁; inj₂; _⊎_)
 open import Data.List using (List; []; _∷_; foldr; map; allFin; applyUpTo; tabulate)
 open import Data.List.Any using (Any) renaming (map to anyMap)
 open import Data.List.Any.Properties using (map⁺)
-open import Data.List.Membership.Propositional.Properties using (∈-map⁺)
+open import Data.List.Membership.Propositional.Properties using (∈-map⁺; ∈-applyUpTo⁺)
+import Data.List.All as All
 import Data.List.All.Properties as All
 open import Data.Vec using (Vec; lookup) renaming (map to mapᵥ; allFin to allFinᵥ)
 open import Function using (_∘_)
@@ -92,23 +93,30 @@ module RoutingLib.Asynchronous.Schedule.Pseudoperiod.Properties {n} (𝓢 : Sche
   ---------------
 
   -- Properties of pointExpiryᵢⱼ
-  postulate pointExpiryᵢⱼ-expired : ∀ {i j t s} → pointExpiryᵢⱼ i j t ≤ s → β s i j ≢ t
-  -- pointExpiryᵢⱼ-expired {i} {j} {t} {s} v≤s x = proj₂ (finite {!!} i j) {!!} {!!}
   
+  pointExpiryᵢⱼ-expired : ∀ {i j t s} → pointExpiryᵢⱼ i j t ≤ s → β s i j ≢ t
+  pointExpiryᵢⱼ-expired {i} {j} {t} v≤s with ≤⇒≤″ v≤s
+  ... | less-than-or-equal {k} refl = proj₂ (finite t i j) k
+
   -- Properties of expiryᵢⱼ
+  
   expiryᵢⱼ-inc : ∀ t i j → t ≤ expiryᵢⱼ t i j
   expiryᵢⱼ-inc t i j = List.⊥≤max t (applyUpTo (pointExpiryᵢⱼ i j) (suc t))
   
   expiryᵢⱼ-monotone : ∀ {t k} → t ≤ k → ∀ i j → expiryᵢⱼ t i j ≤ expiryᵢⱼ k i j
   expiryᵢⱼ-monotone t≤k i j = List.max-mono-⊆ t≤k (Sublist.applyUpTo⁺ (pointExpiryᵢⱼ i j) (s≤s t≤k))
 
-  postulate pointExpiryᵢⱼ≤expiryᵢⱼ : ∀ {r t i j} → r ≤ t → pointExpiryᵢⱼ i j r ≤ expiryᵢⱼ t i j
-  -- pointExpiryᵢⱼ≤expiryᵢⱼ r≤t = {!All.lookup ? ?!}
+  pointExpiryᵢⱼ≤expiryᵢⱼ : ∀ t i j → pointExpiryᵢⱼ i j t ≤ expiryᵢⱼ t i j
+  pointExpiryᵢⱼ≤expiryᵢⱼ t i j = All.lookup (List.xs≤max t (applyUpTo (pointExpiryᵢⱼ i j) (suc t))) (∈-applyUpTo⁺ (pointExpiryᵢⱼ i j) ≤-refl)
 
   expiryᵢⱼ-expired' : ∀ {t s r i j} → expiryᵢⱼ t i j ≤ s → r < t → β s i j ≢ r
   expiryᵢⱼ-expired' {t} {s} {r} {i} {j} expiryₜᵢⱼ≤s βₛᵢⱼ<t refl =
-    pointExpiryᵢⱼ-expired (≤-trans ((pointExpiryᵢⱼ≤expiryᵢⱼ (<⇒≤ βₛᵢⱼ<t))) expiryₜᵢⱼ≤s) refl
-  
+    pointExpiryᵢⱼ-expired (begin
+      pointExpiryᵢⱼ i j (β s i j) ≤⟨ pointExpiryᵢⱼ≤expiryᵢⱼ (β s i j) i j ⟩
+      expiryᵢⱼ (β s i j) i j      ≤⟨ expiryᵢⱼ-monotone (<⇒≤ βₛᵢⱼ<t) i j ⟩
+      expiryᵢⱼ t i j              ≤⟨ expiryₜᵢⱼ≤s ⟩
+      s                           ∎) refl
+
   expiryᵢⱼ-expired : ∀ {t k i j} → expiryᵢⱼ t i j ≤ k → t ≤ β k i j
   expiryᵢⱼ-expired expiryᵢⱼt≤k = ∀x<m:n≢x⇒m≤n _ _ (expiryᵢⱼ-expired' expiryᵢⱼt≤k)
 
@@ -127,6 +135,7 @@ module RoutingLib.Asynchronous.Schedule.Pseudoperiod.Properties {n} (𝓢 : Sche
   expiryᵢ-expired : ∀ {t k i} → expiryᵢ t i ≤ k → ∀ j → t ≤ β k i j
   expiryᵢ-expired {t} {k} {i} expiryᵢt≤k j = expiryᵢⱼ-expired
                   (≤-trans (expiryᵢⱼ≤expiryᵢ t i j) expiryᵢt≤k)
+
 
   -- Properties of expiry
   

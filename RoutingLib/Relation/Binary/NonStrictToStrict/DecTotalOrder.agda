@@ -17,6 +17,10 @@ module RoutingLib.Relation.Binary.NonStrictToStrict.DecTotalOrder
   <-strictTotalOrder = record
     { isStrictTotalOrder = NSTS.isDecTotalOrder⟶isStrictTotalOrder _ _ isDecTotalOrder
     }
+    
+  
+  <-cmp : Trichotomous _≈_ _<_
+  <-cmp = NSTS.<-trichotomous _ _ Eq.sym _≟_ antisym total
   
   open StrictTotalOrder <-strictTotalOrder public
     using (_<?_)

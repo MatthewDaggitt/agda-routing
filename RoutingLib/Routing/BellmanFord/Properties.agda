@@ -24,7 +24,7 @@ open import RoutingLib.Data.List.Relation.Pointwise
   using (foldr⁺)
 
 open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing.Properties.RoutingAlgebra as RoutingAlgebraProperties
+import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
 
 import RoutingLib.Routing.BellmanFord as BellmanFord
 

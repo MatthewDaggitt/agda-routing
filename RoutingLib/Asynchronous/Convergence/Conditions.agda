@@ -74,8 +74,6 @@ module RoutingLib.Asynchronous.Convergence.Conditions
     field
       D₀         : ∀ i → Sᵢ i → Set p
       D₀-closed  : ∀ x → x ∈ D₀ → F x ∈ D₀
-      x₀         : S
-      x₀∈D₀      : x₀ ∈ D₀
 
 
   record SynchronousConditions p : Set (lsuc (a ⊔ ℓ ⊔ p)) where
@@ -83,13 +81,13 @@ module RoutingLib.Asynchronous.Convergence.Conditions
       start            : StartingConditions p
       poset            : M-poset p
 
-    open StartingConditions start
-    open M-poset poset
+    open StartingConditions start public
+    open M-poset poset public
     
     field
       F-monotone       : ∀ {x y} → x ∈ D₀ → y ∈ D₀ → x ≼ y → F x ≼ F y
-      iter-decreasing  : ∀ K → syncIter x₀ (suc K) ≼ syncIter x₀ K
-      iter-converge    : ∃ λ T → ∀ t → syncIter x₀ T ≈ syncIter x₀ (T + t)
+      iter-decreasing  : ∀ {x} → x ∈ D₀ → ∀ K → syncIter x (suc K) ≼ syncIter x K
+      iter-converge    : ∀ {x} → x ∈ D₀ → ∃ λ T → ∀ t → syncIter x T ≈ syncIter x (T + t)
 
 
 
@@ -99,8 +97,8 @@ module RoutingLib.Asynchronous.Convergence.Conditions
       poset           : M-poset p
       _≟_             : Decidable _≈_
 
-    open StartingConditions start
-    open M-poset poset
+    open StartingConditions start public
+    open M-poset poset public
 
     field
       D₀-finite       : Finite-Pred D₀

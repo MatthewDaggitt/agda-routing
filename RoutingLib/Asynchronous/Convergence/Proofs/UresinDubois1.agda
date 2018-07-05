@@ -14,20 +14,26 @@ open import Relation.Nullary using (yes; no; ¬_)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using () renaming (_∈_ to _∈ᵤ_)
  
+open import RoutingLib.Asynchronous
 open import RoutingLib.Asynchronous.Schedule
 open import RoutingLib.Asynchronous.Schedule.Pseudoperiod.Properties using (pseudoperiodic)
-open import RoutingLib.Asynchronous using (Parallelisation; IsAsynchronouslySafe)
 open import RoutingLib.Asynchronous.Convergence.Conditions using (TotalACO; ACO)
 
 module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois1
-  {a ℓ n} {𝕊ᵢ : Fin n → Setoid a ℓ} (𝓟 : Parallelisation 𝕊ᵢ) where
+  {a ℓ n p} {𝕊ᵢ : Fin n → Setoid a ℓ} (𝓟 : Parallelisation 𝕊ᵢ) (aco : ACO 𝓟 p) where
 
   open Parallelisation 𝓟
+  open ACO aco
   
-  module _ {p} (𝓟𝓢 : PseudoperiodicSchedule n) (aco : ACO 𝓟 p) where
+  T : 𝕋
+  T = proj₁ D-finish
+
+  ξ : S
+  ξ = proj₁ (proj₂ D-finish)
+    
+  module _ (𝓟𝓢 : PseudoperiodicSchedule n) where
 
     open PseudoperiodicSchedule 𝓟𝓢
-    open ACO aco
 
     β-decreasing : ∀ {t} i j → 1 ≤ t → β t i j ≤ t
     β-decreasing i j (s≤s z≤n) = ≤-trans (causality _ i j) (n≤1+n _)
@@ -46,7 +52,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois1
       φ (suc K)    ≤⟨ τ-after-φ (suc K) i ⟩
       τ (suc K) i  ∎
       where open ≤-Reasoning
-
+      
     module _ {x₀ : S} (x₀∈D₀ : x₀ ∈ D 0) where
 
       async[t]'∈D₀ : ∀ {t} (accₜ : Acc _<_ t) → asyncIter' 𝓢 x₀ accₜ ∈ D 0
@@ -72,11 +78,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois1
 
       -- Theorem 1
 
-      T : 𝕋
-      T = proj₁ D-finish
-
-      ξ : S
-      ξ = proj₁ (proj₂ D-finish)
+      
 
       D[T]≈⦃ξ⦄ : ∀ {s} → s ∈ D T → s ≈ ξ
       D[T]≈⦃ξ⦄ {s} s∈D[T] rewrite sym (+-identityʳ T) = ≈-sym (proj₂ (proj₂ (proj₂ D-finish) 0) s s∈D[T])
@@ -100,18 +102,11 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois1
       async-converge K = D[T]≈⦃ξ⦄ (async[tᶜ]∈D[T] K)
 
 
-  module _ {p} (totalACO : TotalACO 𝓟 p) where
+  ξ-reached : ∀ {X} → X ∈ D 0 → ∀ s → ∃ λ tᶜ → ∀ t → asyncIter s X (tᶜ + t) ≈ ξ
+  ξ-reached X∈D₀ s = tᶜ (pseudoperiodic s) X∈D₀ , async-converge (pseudoperiodic s) X∈D₀ 
 
-    open TotalACO totalACO
-
-    m* : S
-    m* = proj₁ (proj₂ (TotalACO.D-finish totalACO))
-    
-    m*-reached : ∀ s X → ∃ λ tᶜ → ∀ t → asyncIter s X (tᶜ + t) ≈ m*
-    m*-reached s X = tᶜ (pseudoperiodic s) aco (total X) , async-converge (pseudoperiodic s) aco (total X)
-
-    isAsynchronouslySafe : IsAsynchronouslySafe 𝓟
-    isAsynchronouslySafe = record
-      { m*         = m*
-      ; m*-reached = m*-reached
-      }
+  isPartiallyAsynchronouslySafe : IsPartiallyAsynchronouslySafe 𝓟 (D 0)
+  isPartiallyAsynchronouslySafe = record
+    { m*         = ξ
+    ; m*-reached = ξ-reached
+    }

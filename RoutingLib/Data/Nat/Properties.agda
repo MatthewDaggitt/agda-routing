@@ -2,7 +2,7 @@ open import Level using () renaming (zero to lzero)
 open import Data.Nat
 open import Data.Nat.Properties hiding (module ≤-Reasoning; +-monoʳ-<)
 open import Data.Sum using (inj₁; inj₂)
-open import Data.Product using (∃; _,_; _×_; proj₁)
+open import Data.Product using (∃; _,_; _×_; proj₁; map₂)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Flip as Flip
@@ -120,6 +120,9 @@ module RoutingLib.Data.Nat.Properties where
     m≤n⇒m+o≡n (s≤s m≤n) with m≤n⇒m+o≡n m≤n
     ... | o , m+o≡n = o , cong suc m+o≡n
 
+    m≤n⇒o+m≡n : ∀ {m n} → m ≤ n → ∃ λ o → o + m ≡ n
+    m≤n⇒o+m≡n {m} m≤n = map₂ (λ { refl → +-comm _ m }) (m≤n⇒m+o≡n m≤n)
+    
     m<n⇒1+m+o≡n : ∀ {m n} → m < n → ∃ λ o → suc m + o ≡ n
     m<n⇒1+m+o≡n {_} {suc n} (s≤s z≤n) = n , refl
     m<n⇒1+m+o≡n (s≤s (s≤s m<n)) with m<n⇒1+m+o≡n (s≤s m<n)

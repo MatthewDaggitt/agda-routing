@@ -10,6 +10,7 @@ open import RoutingLib.Asynchronous using (Parallelisation)
 open import RoutingLib.Data.NatInf
 open import RoutingLib.Data.Table using (Table; min∞)
 open import RoutingLib.Data.Table.All using (All)
+open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (triviallyIndexSetoid) renaming (Setoid to ISetoid)
 
 module RoutingLib.Asynchronous.Examples.AllPairs (n : ℕ) where
 
@@ -95,8 +96,8 @@ module RoutingLib.Asynchronous.Examples.AllPairs (n : ℕ) where
   F : Matrix → Fin n → Row
   F X i j = min∞ (X i j) (path-cost X i j)
 
-  matrix : Fin n → Setoid lzero lzero
-  matrix _ = row
+  matrix : ISetoid (Fin n) lzero lzero
+  matrix = triviallyIndexSetoid (Fin n) row
 
   all-pairs-parallelisation : Parallelisation matrix
   all-pairs-parallelisation = record {F = F}

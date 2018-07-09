@@ -1,7 +1,7 @@
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset using () renaming (_∈_ to _∈ₛ_)
 open import Data.Fin.Dec using (_∈?_)
-open import Relation.Binary using (Setoid)
+-- open import Relation.Binary using (Setoid)
 open import Data.Product using (∃; proj₂; proj₁; _,_)
 open import Induction.WellFounded using (Acc; acc)
 open import Induction.Nat using (<-wellFounded)
@@ -13,14 +13,16 @@ open import Relation.Binary.PropositionalEquality using (subst; cong; refl; sym;
 open import Relation.Nullary using (yes; no; ¬_)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using () renaming (_∈_ to _∈ᵤ_)
- 
+
 open import RoutingLib.Asynchronous
 open import RoutingLib.Asynchronous.Schedule
 open import RoutingLib.Asynchronous.Schedule.Pseudoperiod.Properties using (pseudoperiodic)
-open import RoutingLib.Asynchronous.Convergence.Conditions using (TotalACO; ACO)
+open import RoutingLib.Asynchronous.Convergence.Conditions using (ACO)
+open import RoutingLib.Relation.Binary.Indexed.Homogeneous
+open import RoutingLib.Relation.Unary.Indexed
 
 module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois1
-  {a ℓ n p} {𝕊ᵢ : Fin n → Setoid a ℓ} (𝓟 : Parallelisation 𝕊ᵢ) (aco : ACO 𝓟 p) where
+  {a ℓ n p} {𝕊 : Setoid (Fin n) a ℓ} (𝓟 : Parallelisation 𝕊) (aco : ACO 𝓟 p) where
 
   open Parallelisation 𝓟
   open ACO aco
@@ -63,7 +65,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois1
       ... | no  i∉α = async[t]'∈D₀ (rec t (s≤s ≤-refl)) i
 
       τ-stability' : ∀ {t K i} (accₜ : Acc _<_ t) → τ K i ≤ t →
-                     asyncIter' 𝓢 x₀ accₜ i ∈ᵤ D K i
+                     asyncIter' 𝓢 x₀ accₜ i ∈ᵤ D K
       τ-stability' {_}      {zero}   {i} accₜ       _      = async[t]'∈D₀ accₜ i
       τ-stability' {zero}   {suc K}  {i} _          τ≤0    = contradiction τ≤0 (<⇒≱ 0<τ[1+K])
       τ-stability' {suc t}  {suc K}  {i} (acc rec)  τ≤1+t  with i ∈? α (suc t)
@@ -72,7 +74,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois1
       ...   | no  τ≢1+t = τ-stability' _ (<⇒≤pred (≤+≢⇒< τ≤1+t τ≢1+t))
       ...   | yes τ≡1+t = contradiction (subst (i ∈ₛ_) (cong α τ≡1+t) (τ-active (suc K) i)) i∉α
 
-      τ-stability : ∀ {t K i} → τ K i ≤ t → asyncIter 𝓢 x₀ t i ∈ᵤ D K i
+      τ-stability : ∀ {t K i} → τ K i ≤ t → asyncIter 𝓢 x₀ t i ∈ᵤ D K
       τ-stability {t} = τ-stability' (<-wellFounded t)
 
 
@@ -81,7 +83,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois1
       
 
       D[T]≈⦃ξ⦄ : ∀ {s} → s ∈ D T → s ≈ ξ
-      D[T]≈⦃ξ⦄ {s} s∈D[T] rewrite sym (+-identityʳ T) = ≈-sym (proj₂ (proj₂ (proj₂ D-finish) 0) s s∈D[T])
+      D[T]≈⦃ξ⦄ {s} s∈D[T] rewrite sym (+-identityʳ T) = ≈-sym (proj₂ (proj₂ (proj₂ D-finish) 0) s∈D[T])
 
       tᶜ : 𝕋
       tᶜ = φ (suc T)

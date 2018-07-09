@@ -47,10 +47,10 @@ dₜ : RTable → RTable → ℕ
 dₜ x y = max 0 (zipWith d x y)
 
 dₜ-isUltrametric : IsUltrametric _ dₜ
-dₜ-isUltrametric = MaxLift.isUltrametric {n = n} (λ _ → S) d-isUltrametric
+dₜ-isUltrametric = MaxLift.isUltrametric {n = n} _ d-isUltrametric
 
 dₜ-bounded : Bounded ℝ𝕋ₛ dₜ
-dₜ-bounded = MaxLift.bounded (λ _ → S) d-bounded
+dₜ-bounded = MaxLift.bounded ℝ𝕋ₛⁱ d-bounded
 
 -------------------------------------
 -- Ultrametric over routing states --
@@ -60,10 +60,10 @@ D : RMatrix → RMatrix → ℕ
 D X Y = max 0 (zipWith dₜ X Y)
 
 D-isUltrametric : IsUltrametric _ D
-D-isUltrametric = MaxLift.isUltrametric {n = n} (λ _ → _) dₜ-isUltrametric
+D-isUltrametric = MaxLift.isUltrametric {n = n} _ dₜ-isUltrametric
 
 D-bounded : Bounded ℝ𝕄ₛ D
-D-bounded = MaxLift.bounded (λ _ → ℝ𝕋ₛ) dₜ-bounded
+D-bounded = MaxLift.bounded ℝ𝕄ₛⁱ dₜ-bounded
 
 open IsUltrametric D-isUltrametric public using ()
   renaming
@@ -92,8 +92,8 @@ open IsUltrametric D-isUltrametric public using ()
 
   dᵣ≤dᵣXᵣₛYᵣₛ : ∀ u v → X u v ≉ Y u v → d (X u v) (Y u v) ≤ d (X r s) (Y r s)
   dᵣ≤dᵣXᵣₛYᵣₛ u v _ = begin
-    d (X u v) (Y u v) ≤⟨ MaxLift.dᵢ≤d (λ _ → S) d (X u) (Y u) v ⟩
-    dₜ (X u)   (Y u)  ≤⟨ MaxLift.dᵢ≤d (λ _ → ℝ𝕋ₛ) dₜ X (Y) u ⟩
+    d (X u v) (Y u v) ≤⟨ MaxLift.dᵢ≤d ℝ𝕋ₛⁱ d (X u) (Y u) v ⟩
+    dₜ (X u)   (Y u)  ≤⟨ MaxLift.dᵢ≤d ℝ𝕄ₛⁱ dₜ X (Y) u ⟩
     D X (Y)           ≡⟨ DXY≈dᵣXᵣₛYᵣₛ ⟩
     d (X r s) (Y r s) ∎
 

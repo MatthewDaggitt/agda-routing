@@ -32,10 +32,10 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step5_StateMet
   dₜ x y = max 0 (zipWith dᵣ x y)
   
   dₜ-isUltrametric : IsUltrametric _ dₜ
-  dₜ-isUltrametric = MaxLift.isUltrametric {n = n} (λ _ → S) dᵣ-isUltrametric
+  dₜ-isUltrametric = MaxLift.isUltrametric {n = n} _ dᵣ-isUltrametric
 
   dₜ-bounded : Bounded ℝ𝕋ₛ dₜ  
-  dₜ-bounded = MaxLift.bounded (λ _ → S) dᵣ-bounded
+  dₜ-bounded = MaxLift.bounded ℝ𝕋ₛⁱ dᵣ-bounded
 
   ------------------
   -- State metric --
@@ -45,10 +45,10 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step5_StateMet
   D X Y = max 0 (zipWith dₜ X Y)
   
   D-isUltrametric : IsUltrametric _ D
-  D-isUltrametric = MaxLift.isUltrametric {n = n} (λ _ → _) dₜ-isUltrametric
+  D-isUltrametric = MaxLift.isUltrametric {n = n} _ dₜ-isUltrametric
 
   D-bounded : Bounded ℝ𝕄ₛ D  
-  D-bounded = MaxLift.bounded (λ _ → ℝ𝕋ₛ) dₜ-bounded
+  D-bounded = MaxLift.bounded ℝ𝕄ₛⁱ dₜ-bounded
 
   open IsUltrametric D-isUltrametric public using ()
     renaming
@@ -82,8 +82,8 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step5_StateMet
 
     dᵣ≤dᵣXᵣₛσXᵣₛ : ∀ u v → dᵣ (X u v) (σ X u v) ≤ dᵣ (X r s) (σ X r s)
     dᵣ≤dᵣXᵣₛσXᵣₛ u v = begin
-      dᵣ (X u v) (σ X u v) ≤⟨ MaxLift.dᵢ≤d (λ _ → S) dᵣ (X u) (σ X u) v ⟩
-      dₜ (X u)   (σ X u)   ≤⟨ MaxLift.dᵢ≤d (λ _ → ℝ𝕋ₛ) dₜ X (σ X) u ⟩
+      dᵣ (X u v) (σ X u v) ≤⟨ MaxLift.dᵢ≤d ℝ𝕋ₛⁱ dᵣ (X u) (σ X u) v ⟩
+      dₜ (X u)   (σ X u)   ≤⟨ MaxLift.dᵢ≤d ℝ𝕄ₛⁱ dₜ X (σ X) u ⟩
       D X (σ X)           ≡⟨ DXσX≈dᵣXᵣₛσXᵣₛ ⟩
       dᵣ (X r s) (σ X r s) ∎
 
@@ -122,8 +122,8 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step5_StateMet
 
     dᵣ≤dᵣXᵣₛYᵣₛ : ∀ u v → dᵣ (X u v) (Y u v) ≤ dᵣ (X r s) (Y r s)
     dᵣ≤dᵣXᵣₛYᵣₛ u v = begin
-      dᵣ (X u v) (Y u v) ≤⟨ MaxLift.dᵢ≤d (λ _ → S) dᵣ (X u) (Y u) v ⟩
-      dₜ (X u)   (Y u)   ≤⟨ MaxLift.dᵢ≤d (λ _ → ℝ𝕋ₛ) dₜ X (Y) u ⟩
+      dᵣ (X u v) (Y u v) ≤⟨ MaxLift.dᵢ≤d ℝ𝕋ₛⁱ dᵣ (X u) (Y u) v ⟩
+      dₜ (X u)   (Y u)   ≤⟨ MaxLift.dᵢ≤d ℝ𝕄ₛⁱ dₜ X (Y) u ⟩
       D X (Y)           ≡⟨ DXY≈dᵣXᵣₛYᵣₛ ⟩
       dᵣ (X r s) (Y r s) ∎
 

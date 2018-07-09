@@ -2,6 +2,7 @@ open import Data.Fin
   using (Fin; zero; suc; toℕ; fromℕ≤) renaming (_≤_ to _≤𝔽_; _<_ to _<𝔽_)
 open import Data.Fin.Properties
   using (fromℕ≤-toℕ; prop-toℕ-≤′)
+open import Data.Fin.Dec using (all?)
 open import Data.Nat
   using (ℕ; _≤_; _<_; z≤n; s≤s; zero; suc; _+_; _∸_; _⊔_) renaming (_≟_ to _≟ℕ_)
 open import Data.Nat.Properties
@@ -13,12 +14,12 @@ open import Data.List
 open import Data.List.Any
   using (here; there; index)
 open import Data.List.Membership.Propositional using () renaming (_∈_ to _∈ℕ_)
-open import Data.Product using (∃; ∃₂; _,_; proj₁; proj₂)
+open import Data.Product using (∃; ∃₂; _×_; _,_; proj₁; proj₂)
 open import Data.Sum using (inj₁; inj₂)
-open import Relation.Binary using (Setoid; Decidable; IsDecEquivalence; DecSetoid)
+open import Relation.Binary using (Rel; Decidable; IsDecEquivalence; DecSetoid)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; subst; cong; sym; trans; module ≡-Reasoning)
 import Relation.Binary.EqReasoning as EqReasoning
-open import Relation.Nullary using (yes; no)
+open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Function using (_∘_)
 
@@ -38,12 +39,14 @@ open import RoutingLib.Data.List.Uniqueness.Propositional.Properties using (upTo
 open import RoutingLib.Function.Metric using (IsUltrametric)
 import RoutingLib.Function.Metric.MaxLift as MaxLift
 import RoutingLib.Function.Metric.FixedPoint as FixedPoints
+open import RoutingLib.Relation.Unary.Indexed
+open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (Setoid)
 
 open import RoutingLib.Asynchronous using (Parallelisation)
-open import RoutingLib.Asynchronous.Convergence.Conditions using (ACO; TotalACO; UltrametricConditions)
+open import RoutingLib.Asynchronous.Convergence.Conditions using (ACO; UltrametricConditions)
 
 module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
-  {a ℓ n} {𝕊ᵢ : Fin n → Setoid a ℓ} {P : Parallelisation 𝕊ᵢ}
+  {a ℓ n} {𝕊 : Setoid (Fin n) a ℓ} {P : Parallelisation 𝕊}
   (𝓤𝓒 : UltrametricConditions P) where
 
     open Parallelisation P
@@ -52,6 +55,9 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
     ----------------------------------------------
     -- Export and define some useful properties --
     ----------------------------------------------
+
+    _≟_ : Decidable _≈_
+    x ≟ y = all? (λ i → x i ≟ᵢ y i)
     
     𝕊? : DecSetoid _ _
     𝕊? = record
@@ -72,8 +78,8 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
         ; cong to dᵢ-cong
         ) public
     
-    d-isUltrametric : IsUltrametric 𝕊 d
-    d-isUltrametric = MaxLift.isUltrametric 𝕊ᵢ dᵢ-isUltrametric
+    d-isUltrametric : IsUltrametric setoid d
+    d-isUltrametric = MaxLift.isUltrametric 𝕊 dᵢ-isUltrametric
 
     open IsUltrametric d-isUltrametric using () renaming
       ( cong to d-cong
@@ -84,7 +90,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
       )
 
     dᵢ≤d : ∀ x y i → dᵢ (x i) (y i) ≤ d x y
-    dᵢ≤d = MaxLift.dᵢ≤d 𝕊ᵢ dᵢ
+    dᵢ≤d = MaxLift.dᵢ≤d 𝕊 dᵢ
 
 
     ------------------------------
@@ -222,8 +228,8 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
     -----------
     -- Definitions of the boxes D
 
-    D : ℕ → Pred _
-    D t i m = dᵢ (x* i) m ≤ r[ t ]
+    D : ℕ → Pred Sᵢ _
+    D t {i} m = dᵢ (x* i) m ≤ r[ t ]
 
     -- D is decreasing
     
@@ -236,8 +242,8 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
 
     -- D(T + K) is the singleton set
     
-    m∈D[T+K]⇒x*≈m : ∀ K m → m ∈ D (T + K) → x* ≈ m
-    m∈D[T+K]⇒x*≈m K m m∈D[T+K] i = dᵢ≡0⇒x≈y (n≤0⇒n≡0 (begin
+    m∈D[T+K]⇒x*≈m : ∀ K {m} → m ∈ D (T + K) → x* ≈ m
+    m∈D[T+K]⇒x*≈m K {m} m∈D[T+K] i = dᵢ≡0⇒x≈y (n≤0⇒n≡0 (begin
       dᵢ (x* i) (m i)  ≤⟨ m∈D[T+K] i ⟩
       r[ T + K ]       ≡⟨ r[T+K]≡r[T] K ⟩
       r[ T ]           ≡⟨ r[T]≡0 ⟩
@@ -251,7 +257,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
       r[ T + K ]        ∎
       where open ≤-Reasoning
       
-    D-finish : ∃₂ λ T ξ → ∀ K → IsSingleton ξ (D (T + K))
+    D-finish : ∃₂ λ T ξ → ∀ K → ξ ∈ D (T + K) × (∀ {x} → x ∈ D (T + K) → ξ ≈ x) --IsSingleton ξ (D (T + K))
     D-finish = T , x* , λ K → (x*∈D[T+K] K , m∈D[T+K]⇒x*≈m K)
 
     -- F is monotonic
@@ -277,7 +283,6 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
       0                   ≤⟨ z≤n ⟩
       r[ suc K ]          ∎
       where open ≤-Reasoning
-
       
     lemma1 : ∀ x → x ≉ x* → d x* x ≤ d x (F x)
     lemma1 x x≉x* with ⊔-sel (d x* (F x)) (d (F x) x)
@@ -346,10 +351,4 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
       ; D-decreasing = D-decreasing
       ; D-finish     = D-finish
       ; F-monotonic  = F-monotonic
-      }
-
-    totalACO : TotalACO P _
-    totalACO = record
-      { aco   = aco
-      ; total = x∈D[0]
       }

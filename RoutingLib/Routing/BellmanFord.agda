@@ -11,6 +11,7 @@ open import RoutingLib.Data.Table using (Table)
 import RoutingLib.Data.Table.Relation.DecidableEquality as TableDecEquality
 open import RoutingLib.Data.Matrix
 import RoutingLib.Data.Matrix.Relation.DecidableEquality as MatrixDecEquality
+open import RoutingLib.Relation.Binary.Indexed.Homogeneous as I using (triviallyIndexSetoid)
 
 open import RoutingLib.Routing.Algebra
 
@@ -41,13 +42,19 @@ RMatrix = SquareMatrix Route n
 -- Equality
 
 open MatrixDecEquality DS public
-open TableDecEquality DS using (𝕋ₛ)
+open TableDecEquality DS using (𝕋ₛ;_≟ₜ_) public
 
 ℝ𝕋ₛ : Setoid b ℓ
 ℝ𝕋ₛ = 𝕋ₛ n
 
+ℝ𝕋ₛⁱ : I.Setoid (Fin n) _ _ 
+ℝ𝕋ₛⁱ = triviallyIndexSetoid (Fin n) S
+
 ℝ𝕄ₛ : Setoid b ℓ
 ℝ𝕄ₛ = 𝕄ₛ n n
+
+ℝ𝕄ₛⁱ : I.Setoid (Fin n) _ _ 
+ℝ𝕄ₛⁱ = triviallyIndexSetoid (Fin n) ℝ𝕋ₛ
 
 Decℝ𝕄ₛ : DecSetoid b ℓ
 Decℝ𝕄ₛ = Dec𝕄ₛ n n
@@ -71,7 +78,7 @@ I i j with j ≟ᶠ i
 σ^ (suc t) X = σ (σ^ t X)
 
 -- Parallelisation of algorithm
-σ∥ : Parallelisation (λ _ → ℝ𝕋ₛ)
+σ∥ : Parallelisation ℝ𝕄ₛⁱ
 σ∥ = record { F = σ }
 
 open Parallelisation σ∥ using () renaming (asyncIter to δ) public

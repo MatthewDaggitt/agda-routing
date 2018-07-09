@@ -34,7 +34,7 @@ module Theorem1 {a b ℓ n} (algebra : FiniteStrictlyIncreasingRoutingAlgebra a 
     ; F-strContrOnOrbits = σ-strContr
     ; F-strContrOnFP     = σ-strContrOnFP
     ; F-cong             = σ-cong
-    ; _≟_                = _≟ₘ_
+    ; _≟ᵢ_               = _≟ₜ_
     ; d-bounded          = D-bounded
     ; element            = I
     } 
@@ -62,7 +62,7 @@ module _ {a b ℓ} where
     ; F-strContrOnFP     = σ-strContrOnFP
     ; d-bounded          = D-bounded
     ; element            = I
-    ; _≟_                = _≟ₘ_
+    ; _≟ᵢ_               = _≟ₜ_
     }
     where
     open PathVectorResults algebra (s≤s z≤n)

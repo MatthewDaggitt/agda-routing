@@ -36,9 +36,9 @@ conditions in `Convergence.Conditions` and then use the relevant theorem in `Con
 The author's main use for this library has been to apply this work to internet routing protocols based
 on the Distributed Bellman Ford (DBF) algorithm.
 
-- `RoutingLib.Routing.BellmanFord` contains an implementation of generalised distributed Bellman Ford-based routing algorithms.
+* `RoutingLib.Routing.BellmanFord` contains an implementation of generalised distributed Bellman Ford-based routing algorithms.
 	
-- `RoutingLib.Routing.BellmanFord.Theorems` contains various proofs about distance-vector and path-vector protocols.
+* `RoutingLib.Routing.BellmanFord.Theorems` contains various proofs about distance-vector and path-vector protocols.
 
 ## Requirements
 
@@ -46,5 +46,4 @@ Requires Agda 2.5.4 and Standard Library 0.16
 
 ## Postulates
 
-Currently the only postulates are in `Data.List.Sorting.Mergesort`. At some point I plan to get around to writing an implementation, 
-but hopefully in the meantime it is obvious that they are fairly inoffensive.
+Currently there are no postulates in the library.

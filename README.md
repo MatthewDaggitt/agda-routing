@@ -33,6 +33,8 @@ on the Distributed Bellman Ford (DBF) algorithm.
 
 * `RoutingLib.Routing.BellmanFord.Theorems` contains various proofs about distance-vector and path-vector protocols.
 
+* `RoutingLib.Routing.BellmanFord.Models.BGPLite` shows how the work may be used to create a safe-by-design protocol.
+
 ## Requirements
 
 Requires Agda 2.5.4 and Standard Library 0.16

@@ -9,18 +9,18 @@ module RoutingLib.Algebra.Selectivity.NaturalChoice.Max.TotalOrder
   {a ℓ₁ ℓ₂} (TO : TotalOrder a ℓ₁ ℓ₂) where
 
   open TotalOrder TO renaming (Carrier to A)
-  
+
   infix 7 _⊔_
-  
+
   _⊔_ : Op₂ A
   _⊔_ = Max.max total
-  
+
   ------------------------------------------------------------------------------
   -- Algebraic properties
 
   ⊔-sel : Selective _≈_ _⊔_
   ⊔-sel = Max.sel total _≈_ Eq.refl
-  
+
   ⊔-cong : Congruent₂ _≈_ _⊔_
   ⊔-cong = Max.cong total Eq.sym antisym ≤-resp-≈
 
@@ -59,6 +59,6 @@ module RoutingLib.Algebra.Selectivity.NaturalChoice.Max.TotalOrder
 
   x⊔y≈y⇒x≤y : ∀ {x y} → (x ⊔ y) ≈ y → x ≤ y
   x⊔y≈y⇒x≤y = Max.max[x,y]≈y⇒x≤y total reflexive Eq.sym
-  
+
   x⊔y≈x⇒y≤x : ∀ {x y} → (x ⊔ y) ≈ x → y ≤ x
   x⊔y≈x⇒y≤x = Max.max[x,y]≈x⇒y≤x total reflexive Eq.sym

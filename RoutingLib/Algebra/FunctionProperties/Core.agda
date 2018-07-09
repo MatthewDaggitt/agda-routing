@@ -14,7 +14,7 @@ module RoutingLib.Algebra.FunctionProperties.Core {a} {A : Set a} where
 
   _Preservesᵒ_ : Op₂ A → ∀ {p} → Pred A p → Set _
   _•_ Preservesᵒ P = ∀ a b → P a ⊎ P b → P (a • b)
-  
+
   _Preservesᵇ_ : Op₂ A → ∀ {p} → Pred A p → Set _
   _•_ Preservesᵇ P = ∀ {a b} → P a → P b → P (a • b)
 
@@ -24,7 +24,7 @@ module RoutingLib.Algebra.FunctionProperties.Core {a} {A : Set a} where
 
   _Forcesʳ_ : Op₂ A → ∀ {p} → Pred A p → Set _
   _•_ Forcesʳ P = ∀ a b → P (a • b) → P b
-  
+
   _Forcesᵇ_ : Op₂ A → ∀ {p} → Pred A p → Set _
   _•_ Forcesᵇ P = ∀ a b → P (a • b) → P a × P b
 

@@ -9,18 +9,18 @@ module RoutingLib.Algebra.Selectivity.NaturalChoice.Min.TotalOrder
   {a ℓ₁ ℓ₂} (TO : TotalOrder a ℓ₁ ℓ₂) where
 
   open TotalOrder TO renaming (Carrier to A)
-  
+
   infix 7 _⊓_
-  
+
   _⊓_ : Op₂ A
   _⊓_ = Min.min total
-  
+
   ------------------------------------------------------------------------------
   -- Algebraic properties
 
   ⊓-sel : Selective _≈_ _⊓_
   ⊓-sel = Min.sel total _≈_ Eq.refl
-  
+
   ⊓-cong : Congruent₂ _≈_ _⊓_
   ⊓-cong = Min.cong total Eq.sym antisym ≤-resp-≈
 
@@ -59,6 +59,6 @@ module RoutingLib.Algebra.Selectivity.NaturalChoice.Min.TotalOrder
 
   x⊓y≈y⇒y≤x : ∀ {x y} → (x ⊓ y) ≈ y → y ≤ x
   x⊓y≈y⇒y≤x = Min.min[x,y]≈y⇒y≤x total reflexive Eq.sym
-  
+
   x⊓y≈x⇒x≤y : ∀ {x y} → (x ⊓ y) ≈ x → x ≤ y
   x⊓y≈x⇒x≤y = Min.min[x,y]≈x⇒x≤y total reflexive Eq.sym

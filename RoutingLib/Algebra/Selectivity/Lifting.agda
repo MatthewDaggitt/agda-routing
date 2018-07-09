@@ -19,7 +19,7 @@ module RoutingLib.Algebra.Selectivity.Lifting
   {a b ℓ} {A : Set a} {B : Set b} {_•_ : Op₂ B}
   (_≈ᵇ_ : Rel B ℓ) (•-sel : Selective _≈ᵇ_ _•_) (f : A → B)
   where
-  
+
 
   Lift : Op₂ A
   Lift x y with •-sel (f x) (f y)
@@ -32,7 +32,7 @@ module RoutingLib.Algebra.Selectivity.Lifting
   ... | inj₂ _ = inj₂ refl
 
   presᵒ : ∀ {p} {P : Pred A p} →
-          (∀ {x y} → P x → (f x • f y) ≈ᵇ f y → P y) → 
+          (∀ {x y} → P x → (f x • f y) ≈ᵇ f y → P y) →
           (∀ {x y} → P y → (f x • f y) ≈ᵇ f x → P x) →
           Lift Preservesᵒ P
   presᵒ left right x y (inj₁ px) with •-sel (f x) (f y)
@@ -65,13 +65,13 @@ module RoutingLib.Algebra.Selectivity.Lifting
 
 {-
   module _ {ℓ} {f : A → B} {_≈ᵇ_ : Rel B ℓ} {•-sel : Selective _≈ᵇ_ _•_} where
-    
+
     --open EqReasoning S
-  
+
     _◦_ : Op₂ A
     _◦_ = Lift _≈ᵇ_ •-sel f
 
-    distrib : ∀ x y → ((f x) • (f y)) ≈ᵇ f (x ◦ y) 
+    distrib : ∀ x y → ((f x) • (f y)) ≈ᵇ f (x ◦ y)
     distrib x y with •-sel (f x) (f y)
     ... | inj₁ fx•fy≈fx = fx•fy≈fx
     ... | inj₂ fx•fy≈fy = fx•fy≈fy
@@ -91,17 +91,17 @@ module RoutingLib.Algebra.Selectivity.Lifting
 
         Injective : (f : A → B) → Set _
         Injective = ∀ {x y} → f x ≈ᵇ f y → x ≈ᵃ y
-    
+
       assoc : Congruent₂ _≈ᵇ_ _•_ → Injective → Associative _≈ᵇ_ _•_ →
               Associative _≈ᵃ_ _◦_
       assoc •-cong injective •-assoc x y z = injective (begin
         f ((x ◦ y) ◦ z)   ≈⟨ distrib (x ◦ y) z ⟩
         f (x ◦ y) • f z   ≈⟨ •-cong (distrib x y) refl ⟩
-        (f x • f y) • f z ≈⟨ •-assoc (f x) (f y) (f z) ⟩ 
+        (f x • f y) • f z ≈⟨ •-assoc (f x) (f y) (f z) ⟩
         f x • (f y • f z) ≈⟨ •-cong refl (sym (distrib y z)) ⟩
         f x • f (y ◦ z)   ≈⟨ sym (distrib x (y ◦ z)) ⟩
         f (x ◦ (y ◦ z))   ∎)
-  
+
       comm : Injective → Commutative _≈ᵇ_ _•_ → Commutative _≈ᵃ_ _◦_
       comm injective •-comm x y = injective (begin
         f (x ◦ y) ≈⟨ distrib x y ⟩
@@ -109,9 +109,9 @@ module RoutingLib.Algebra.Selectivity.Lifting
         f y • f x ≈⟨ sym (distrib y x) ⟩
         f (y ◦ x) ∎)
       -}
-      
+
   -}
-    
+
 {-
   cong : Injective → Congruent₁ _≈ᵇ_ _•_ → Congruent₂ _≈ᵃ_ _◦_
   cong injective •-cong {x} {y} {u} {v} x≈y u≈v with •-sel (f x) (f u) | •-sel (f y) (f v)

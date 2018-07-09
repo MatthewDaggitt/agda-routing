@@ -16,17 +16,17 @@ module RoutingLib.Algebra.Selectivity.NaturalChoice.Min where
     min x y with total x y
     ... | inj₁ x≤y = x
     ... | inj₂ y≤x = y
-  
+
     ----------------------------------------------------------------------------
     -- Algebraic properties
-  
+
     module _ {ℓ₂} (_≈_ : Rel A ℓ₂) where
-  
+
       sel : Reflexive _≈_ → Selective _≈_ min
       sel refl x y with total x y
       ... | inj₁ x≤y = inj₁ refl
       ... | inj₂ y≤x = inj₂ refl
-    
+
     module _ {ℓ₂} {_≈_ : Rel A ℓ₂} where
 
       cong : Symmetric _≈_ → Antisymmetric _≈_ _≤_ →
@@ -125,10 +125,10 @@ module RoutingLib.Algebra.Selectivity.NaturalChoice.Min where
         ; ∙-cong        = cong Eq.sym antisym ≤-resp-≈
         } where open IsPartialOrder ord
 
-      isMonoid : IsPartialOrder _≈_ _≤_ → ∀ {⊥} → Maximum _≤_ ⊥ → 
+      isMonoid : IsPartialOrder _≈_ _≤_ → ∀ {⊥} → Maximum _≤_ ⊥ →
                  IsMonoid _≈_ min ⊥
       isMonoid ord max = record
-        { isSemigroup = isSemigroup ord 
+        { isSemigroup = isSemigroup ord
         ; identity    = identity Eq.refl antisym max
         } where open IsPartialOrder ord
 

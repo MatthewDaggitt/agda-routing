@@ -17,19 +17,19 @@ module RoutingLib.Algebra.Selectivity.NaturalChoice.Max where
   module _ {a ℓ} {A : Set a} {_≤_ : Rel A ℓ} (≤-total : Total _≤_) where
 
     private
-    
+
       total : Total (flip _≤_)
       total = Flip.total _≤_ ≤-total
 
       antisymᶠ : ∀ {ℓ₂} {_≈_ : Rel A ℓ₂} → Antisymmetric _≈_ _≤_ → Antisymmetric _≈_ (flip _≤_)
       antisymᶠ antisym = Flip.antisymmetricᵘ _ _≤_ antisym
-      
+
     max : Op₂ A
     max = Min.min total
-  
+
     ----------------------------------------------------------------------------
     -- Algebraic properties
-  
+
     module _ {ℓ₂} (_≈_ : Rel A ℓ₂) where
 
       sel : Reflexive _≈_ → Selective _≈_ max
@@ -39,7 +39,7 @@ module RoutingLib.Algebra.Selectivity.NaturalChoice.Max where
 
       cong : Symmetric _≈_ → Antisymmetric _≈_ _≤_ → _≤_ Respects₂ _≈_ → Congruent₂ _≈_ max
       cong sym antisym resp = Min.cong total sym (antisymᶠ antisym) (Flip.respects₂ᵘ _ _ resp)
-      
+
       comm : Reflexive _≈_ →  Antisymmetric _≈_ _≤_ → Commutative _≈_ max
       comm refl antisym = Min.comm total refl (antisymᶠ antisym)
 
@@ -61,7 +61,7 @@ module RoutingLib.Algebra.Selectivity.NaturalChoice.Max where
       zeroˡ : Reflexive _≈_ → Antisymmetric _≈_ _≤_ →
               ∀ {⊥} → Maximum _≤_ ⊥ → LeftZero _≈_ ⊥ max
       zeroˡ refl antisym max = Min.zeroˡ total refl (antisymᶠ antisym) max
-      
+
       zeroʳ : Reflexive _≈_ → Antisymmetric _≈_ _≤_ →
             ∀ {⊥} → Maximum _≤_ ⊥ → RightZero _≈_ ⊥ max
       zeroʳ refl antisym max = Min.zeroʳ total refl (antisymᶠ antisym) max
@@ -74,7 +74,7 @@ module RoutingLib.Algebra.Selectivity.NaturalChoice.Max where
                     IsSemigroup _≈_ max
       isSemigroup ord = Min.isSemigroup total (Flip.isPartialOrderᵘ ord)
 
-      isMonoid : IsPartialOrder _≈_ _≤_ → ∀ {⊥} → Minimum _≤_ ⊥ → 
+      isMonoid : IsPartialOrder _≈_ _≤_ → ∀ {⊥} → Minimum _≤_ ⊥ →
                  IsMonoid _≈_ max ⊥
       isMonoid ord min = Min.isMonoid total (Flip.isPartialOrderᵘ ord) min
 

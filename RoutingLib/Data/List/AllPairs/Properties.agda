@@ -28,7 +28,7 @@ All⇒AllPairs (px ∷ pxs) pres = All.map (pres px) pxs ∷ (All⇒AllPairs pxs
   AllPairs-map⁺₂ f-pres []           = []
   AllPairs-map⁺₂ f-pres (x∉xs ∷ xs!) = All-map (mapₐ f-pres x∉xs) ∷ AllPairs-map⁺₂ f-pres xs!
   -}
-  
+
   {-
   AllPairs-mapMaybe⁺ : ∀ {a b ℓ₁ ℓ₂} {A : Set a} {B : Set b} {_~₁_ : Rel A ℓ₁} {_~₂_ : Rel B ℓ₂}
                   (f : A → Maybe B) → (∀ {x y} → x ~₁ y → (f x ≡ nothing) ⊎ (f y ≡ nothing) ⊎ (Eq _~₂_ (f x) (f y)))
@@ -44,7 +44,7 @@ All⇒AllPairs (px ∷ pxs) pres = All.map (pres px) pxs ∷ (All⇒AllPairs pxs
     ... | inj₂ (inj₁ fa≡nothing) = contradiction (≡-trans (≡-sym fa≡nothing) fa≡justb) λ()
     ... | inj₂ (inj₂ fx~fa)      = drop-just (subst₂ (Eq _~₂_) fx≡justv fa≡justb fx~fa)
   -}
-  
+
 ------------------------------------------------------------------------
 -- filter
 
@@ -112,20 +112,20 @@ module _ {a ℓ} {A : Set a} {_~_ : Rel A ℓ} where
 
   applyUpTo⁺₂ : ∀ f n → (∀ i j → f i ~ f j) → AllPairs _~_ (applyUpTo f n)
   applyUpTo⁺₂ f n f~ = applyUpTo⁺₁ n (λ _ _ → f~ _ _)
-  
+
 {-
 ------------------------------------------------------------------------
 -- applyBetween
 
 module _ {a ℓ} {A : Set a} {_~_ : Rel A ℓ} where
-  applyBetween⁺₁ : ∀ f s e → (∀ {i j} → s ≤ i → i < j → j < e → f i ~ f j) → 
+  applyBetween⁺₁ : ∀ f s e → (∀ {i j} → s ≤ i → i < j → j < e → f i ~ f j) →
                    AllPairs _~_ (applyBetween f s e)
   applyBetween⁺₁ f zero    e       Pf = applyUpTo⁺₁ f e (Pf z≤n)
   applyBetween⁺₁ f (suc s) zero    Pf = []
-  applyBetween⁺₁ f (suc s) (suc e) Pf = 
+  applyBetween⁺₁ f (suc s) (suc e) Pf =
     applyBetween⁺₁ (f ∘ suc) s e (λ s≤i i<j j<e → Pf (s≤s s≤i) (s≤s i<j) (s≤s j<e))
 
-  applyBetween⁺₂ : ∀ f s e → (∀ {i j} → f i ~ f j) → 
+  applyBetween⁺₂ : ∀ f s e → (∀ {i j} → f i ~ f j) →
                    AllPairs _~_ (applyBetween f s e)
   applyBetween⁺₂ f s e Pf = applyBetween⁺₁ f s e (λ _ _ _ → Pf)
 

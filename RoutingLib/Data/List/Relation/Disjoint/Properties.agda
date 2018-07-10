@@ -21,7 +21,7 @@ module RoutingLib.Data.List.Relation.Disjoint.Properties {c ℓ} (S : Setoid c �
   open import Data.List.Membership.Setoid S using (_∈_; _∉_)
   open import RoutingLib.Data.List.Relation.Disjoint S
 
-  
+
   #-sym : Symmetric _#_
   #-sym xs#ys ∈both = xs#ys (swap ∈both)
 
@@ -30,13 +30,13 @@ module RoutingLib.Data.List.Relation.Disjoint.Properties {c ℓ} (S : Setoid c �
 
 
   -- Operations on disjoint #
-  
+
   #-concat : ∀ {vs xss} → All (vs #_) xss → vs # (concat xss)
   #-concat [] (_ , ())
   #-concat {xss = xs ∷ xss} (vs#xs ∷ vs#xss) (v∈vs , v∈xs++concatxss) with ++⁻ xs v∈xs++concatxss
   ... | inj₁ v∈xs  = vs#xs (v∈vs , v∈xs)
   ... | inj₂ v∈xss = #-concat vs#xss (v∈vs , v∈xss)
-  
+
   -- Other
   #⇒AllAll≉ : ∀ {xs ys} → xs # ys → All (λ x → All (λ y → ¬ x ≈ y) ys) xs
   #⇒AllAll≉ xs#ys = map (¬Any⇒All¬ _) (∈-All S _ (λ v∈xs v∈ys → xs#ys (v∈xs , v∈ys)))

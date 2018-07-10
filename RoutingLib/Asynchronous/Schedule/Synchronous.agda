@@ -17,14 +17,14 @@ module RoutingLib.Asynchronous.Schedule.Synchronous where
   -- Synchronous Schedule functions
   α : {n : ℕ} → 𝕋 → Subset n
   α t = ⊤
-  
+
   α₀ : {n : ℕ} → α {n} 0 ≡ ⊤
   α₀ = refl
 
   β : {n : ℕ} → 𝕋 → Fin n → Fin n → 𝕋
   β zero _ _ = zero
   β (suc t) _ _ = t
-  
+
   causality : {n : ℕ} → ∀ t (i j : Fin n) → β (suc t) i j ≤ t
   causality t i j = ≤-reflexive refl
 

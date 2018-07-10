@@ -14,7 +14,7 @@ open import RoutingLib.Asynchronous.Schedule.Synchronous using () renaming (α t
 module RoutingLib.Asynchronous.Schedule.Latency (l : ℕ) where
 
   β : ∀ {n} → 𝕋 → Fin n → Fin n → 𝕋
-  β t i j = t ∸ 1 ∸ l 
+  β t i j = t ∸ 1 ∸ l
 
   causality : ∀ {n} → ∀ t (i j : Fin n) → β (suc t) i j ≤ t
   causality t i j = n∸m≤n l t
@@ -56,4 +56,4 @@ module RoutingLib.Asynchronous.Schedule.Latency (l : ℕ) where
     nonstarvation = nonstarvation-rr;
     finite = finite
     }
-  
+

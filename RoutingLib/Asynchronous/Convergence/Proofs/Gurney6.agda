@@ -58,7 +58,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
 
     _≟_ : Decidable _≈_
     x ≟ y = all? (λ i → x i ≟ᵢ y i)
-    
+
     𝕊? : DecSetoid _ _
     𝕊? = record
       { Carrier          = S
@@ -68,7 +68,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
         ; _≟_           = _≟_
         }
       }
-      
+
     module _ {i} where
 
       open IsUltrametric (dᵢ-isUltrametric {i}) renaming
@@ -77,7 +77,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
         ; 0⇒eq to dᵢ≡0⇒x≈y
         ; cong to dᵢ-cong
         ) public
-    
+
     d-isUltrametric : IsUltrametric setoid d
     d-isUltrametric = MaxLift.isUltrametric 𝕊 dᵢ-isUltrametric
 
@@ -102,13 +102,13 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
 
     Fx*≈x* : F x* ≈ x*
     Fx*≈x* = FixedPoints.x*-fixed 𝕊? d F-strContrOnOrbits element
-      
+
     x*-unique : ∀ {x} → F x ≈ x → x ≈ x*
     x*-unique {x} Fx≈x with x ≟ x*
     ... | yes x≈x* = x≈x*
     ... | no  x≉x* = contradiction (d-cong ≈-refl Fx≈x) (<⇒≢ (F-strContrOnFP Fx*≈x* x≉x*))
 
-    
+
     -----------
     -- Radii --
     -----------
@@ -118,13 +118,13 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
 
     d≤dₘₐₓ : ∀ x y → d x y ≤ dₘₐₓ
     d≤dₘₐₓ = proj₂ d-bounded
-    
+
     radii : List ℕ
     radii = upTo (suc dₘₐₓ)
 
     radii↗ : Sorted radii
     radii↗ = upTo-↗ (suc dₘₐₓ)
-    
+
     radii! : Unique radii
     radii! = upTo!⁺ (suc dₘₐₓ)
 
@@ -135,26 +135,26 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
     ---------------------
     -- Finishing times --
     ---------------------
-    
+
     T-1 : ℕ
     T-1 = length {A = ℕ} (applyUpTo suc dₘₐₓ)
-    
+
     T : ℕ
     T = length radii
 
     T-1≤T+K : ∀ K → T-1 ≤ T + K
     T-1≤T+K K = ≤-trans (n≤1+n T-1) (m≤m+n T K)
-    
+
     T-1∸t<T : ∀ t → T-1 ∸ t < T
     T-1∸t<T t = s≤s (n∸m≤n t T-1)
 
     T-1∸T≡0 : T-1 ∸ T ≡ 0
     T-1∸T≡0 = m≤n⇒m∸n≡0 (n≤1+n T-1)
-    
+
     T-1∸T+K≡T-1∸T : ∀ K → T-1 ∸ (T + K) ≡ T-1 ∸ T
     T-1∸T+K≡T-1∸T K = trans (m≤n⇒m∸n≡0 (T-1≤T+K K)) (sym T-1∸T≡0)
 
-    
+
     -----------------------------
     -- Radii indexing function --
     -----------------------------
@@ -191,13 +191,13 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
     ---------------------
 
     abstract
-    
+
       r[_] : ℕ → ℕ
       r[ k ] = lookup radii i[ k ]
 
       r[T+K]≡r[T] : ∀ K → r[ T + K ] ≡ r[ T ]
       r[T+K]≡r[T] K = cong (lookup radii) (i[T+K]≡i[T] K)
-    
+
       r[T]≡0 : r[ T ] ≡ 0
       r[T]≡0 = cong (lookup radii) i[T]≡0
 
@@ -217,7 +217,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
         lookup radii (index (radii-complete m))               ≡⟨ sym (lookup-index (radii-complete m)) ⟩
         d x* m          ∎
         where open ≡-Reasoning
-      
+
       ∃K:r[K]≡dx*m : ∀ m → ∃ λ k → r[ k ] ≡ d x* m
       ∃K:r[K]≡dx*m m = r-lookup m , r-lookup-res m
 
@@ -232,7 +232,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
     D t {i} m = dᵢ (x* i) m ≤ r[ t ]
 
     -- D is decreasing
-    
+
     D-decreasing : ∀ K → D (suc K) ⊆ D K
     D-decreasing K {m} m∈D₁₊ₖ i = begin
       dᵢ (x* i) (m i)  ≤⟨ m∈D₁₊ₖ i ⟩
@@ -241,7 +241,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
       where open ≤-Reasoning
 
     -- D(T + K) is the singleton set
-    
+
     m∈D[T+K]⇒x*≈m : ∀ K {m} → m ∈ D (T + K) → x* ≈ m
     m∈D[T+K]⇒x*≈m K {m} m∈D[T+K] i = dᵢ≡0⇒x≈y (n≤0⇒n≡0 (begin
       dᵢ (x* i) (m i)  ≤⟨ m∈D[T+K] i ⟩
@@ -249,14 +249,14 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
       r[ T ]           ≡⟨ r[T]≡0 ⟩
       0                ∎))
       where open ≤-Reasoning
-      
+
     x*∈D[T+K] : ∀ K → x* ∈ D (T + K)
     x*∈D[T+K] K i = begin
       dᵢ (x* i) (x* i)  ≡⟨ x≈y⇒dᵢ≡0 ≈ᵢ-refl ⟩
       0                 ≤⟨ z≤n ⟩
       r[ T + K ]        ∎
       where open ≤-Reasoning
-      
+
     D-finish : ∃₂ λ T ξ → ∀ K → ξ ∈ D (T + K) × (∀ {x} → x ∈ D (T + K) → ξ ≈ x) --IsSingleton ξ (D (T + K))
     D-finish = T , x* , λ K → (x*∈D[T+K] K , m∈D[T+K]⇒x*≈m K)
 
@@ -272,18 +272,18 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
       where
 
       open ≤-Reasoning
-      
+
       K<S : K < S
       K<S = r-mono⁻¹-< (subst (_< r[ K ]) (sym r[S]≡dx*m) d[x*,x]<radiiᵢ[K])
 
-    F-monotonic-x*≈ : ∀ {t} → t ≈ x* → ∀ {K} → t ∈ D K → F t ∈ D (suc K) 
+    F-monotonic-x*≈ : ∀ {t} → t ≈ x* → ∀ {K} → t ∈ D K → F t ∈ D (suc K)
     F-monotonic-x*≈ {t} t≈x* {K} t∈D[K] i = begin
       dᵢ (x* i) (F t i)   ≡⟨ dᵢ-cong ≈ᵢ-refl (F-cong t≈x* i) ⟩
       dᵢ (x* i) (F x* i)  ≡⟨ x≈y⇒dᵢ≡0 (≈ᵢ-sym (Fx*≈x* i)) ⟩
       0                   ≤⟨ z≤n ⟩
       r[ suc K ]          ∎
       where open ≤-Reasoning
-      
+
     lemma1 : ∀ x → x ≉ x* → d x* x ≤ d x (F x)
     lemma1 x x≉x* with ⊔-sel (d x* (F x)) (d (F x) x)
     ... | inj₂ right = begin
@@ -298,7 +298,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
         d x* (F x)             ∎)
         (<⇒≱ (F-strContrOnFP Fx*≈x* x≉x*))
       where open ≤-Reasoning
-      
+
     lemma2 : ∀ x → x ≉ x* → d x (F x) ≤ d x* x
     lemma2 x x≉x* = begin
       d x (F x)           ≤⟨ d-maxTriIneq x x* (F x) ⟩
@@ -306,7 +306,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
       d x* x ⊔ d x* (F x) ≡⟨ m≤n⇒n⊔m≡n (<⇒≤ (F-strContrOnFP Fx*≈x* x≉x*)) ⟩
       d x* x              ∎
       where open ≤-Reasoning
-      
+
     lemma : ∀ x → d x* x ≡ d x (F x)
     lemma x with x ≟ x*
     ... | no  x≉x* = ≤-antisym (lemma1 x x≉x*) (lemma2 x x≉x*)
@@ -344,7 +344,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
       r[ t ]          ≤⟨ r-mono-≤ z≤n ⟩
       r[ 0 ]          ∎
       where open ≤-Reasoning
-      
+
     aco : ACO P _
     aco = record
       { D            = D

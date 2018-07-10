@@ -22,7 +22,7 @@ module RoutingLib.Data.Vec.Relation.Lex {a ℓ} {A : Set a} (_<_ : Rel A ℓ) wh
 
   ≤-reflexive : ∀ {n} → _≡_ ⇒ (Lex {n})
   ≤-reflexive refl = ≤-refl
-  
+
   ≤-trans : Transitive _<_ → ∀ {n} → Transitive (Lex {n})
   ≤-trans trans base         base         = base
   ≤-trans trans (here x<y)   (here y<z)   = here (trans x<y y<z)
@@ -33,7 +33,7 @@ module RoutingLib.Data.Vec.Relation.Lex {a ℓ} {A : Set a} (_<_ : Rel A ℓ) wh
   ≤-antisym : Asymmetric _<_ → ∀ {n} → Antisymmetric _≡_ (Lex {n})
   ≤-antisym asym base         base         = refl
   ≤-antisym asym (here x<y)   (here y<x)   = contradiction x<y (asym y<x)
-  ≤-antisym asym (here x<x)   (next ys≤xs) = contradiction x<x (asym x<x) 
+  ≤-antisym asym (here x<x)   (next ys≤xs) = contradiction x<x (asym x<x)
   ≤-antisym asym (next xs≤ys) (here y<y)   = contradiction y<y (asym y<y)
   ≤-antisym asym (next xs≤ys) (next ys≤xs) = cong (_ ∷_) (≤-antisym asym xs≤ys ys≤xs)
 

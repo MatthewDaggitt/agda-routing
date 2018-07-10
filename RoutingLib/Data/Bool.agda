@@ -21,7 +21,7 @@ module RoutingLib.Data.Bool where
   <-minimum : ∀ {x} → x ≢ false → false < x
   <-minimum {false} neq = contradiction refl neq
   <-minimum {true}  _   = f<t
-  
+
   <-isStrictTotalOrder : IsStrictTotalOrder _≡_ _<_
   <-isStrictTotalOrder = record
     { isEquivalence = isEquivalence

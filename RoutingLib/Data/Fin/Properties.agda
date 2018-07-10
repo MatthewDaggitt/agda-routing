@@ -6,7 +6,7 @@ open import Data.Nat as ℕ using (ℕ; z≤n; s≤s; zero; suc) renaming (_<_ t
 import Data.Nat.Properties as ℕₚ
 open import Relation.Nullary using (¬_)
 open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Binary 
+open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; subst; cong; isEquivalence; sym; trans; subst₂; module ≡-Reasoning)
 open import Relation.Binary.Consequences using (trans∧tri⟶resp≈)
@@ -75,7 +75,7 @@ fromℕ≤-mono-≤ (s≤s (s≤s i<n)) (s≤s (s≤s j<n)) (s≤s i≤j) =
   s≤s (fromℕ≤-mono-≤ (s≤s i<n) (s≤s j<n) i≤j)
 
 fromℕ≤-cancel-< : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
-                  fromℕ≤ i<n < fromℕ≤ j<n → i <ℕ j 
+                  fromℕ≤ i<n < fromℕ≤ j<n → i <ℕ j
 fromℕ≤-cancel-< i<n j<n i<j = subst₂ _<ℕ_ (toℕ-fromℕ≤ i<n) (toℕ-fromℕ≤ j<n) i<j
 
 ------------------------------------------------------------------------
@@ -127,6 +127,4 @@ suc≢zero ()
 
 ≰⇒≢ : ∀ {n₁} {m n : Fin n₁} → ¬ (m ≤ n) → m ≢ n
 ≰⇒≢ m≰n refl = m≰n ≤-refl
-
-
 

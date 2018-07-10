@@ -38,14 +38,14 @@ open import RoutingLib.Data.Table.Membership.Propositional.Properties using (min
 
 module RoutingLib.Asynchronous.Examples.AllPairs.Convergence {n}(𝕤 : Schedule n)(x₀ : AllPairs.Matrix n)(Cᵢ,ᵢ : ∀ i → x₀ i i ≡ N 0) where
 
-  
+
   open AllPairs n hiding (F)
   open import RoutingLib.Asynchronous.Examples.AllPairs.Properties n
   open Schedule 𝕤
   open Parallelisation all-pairs-parallelisation
   open import RoutingLib.Asynchronous.Convergence.Conditions all-pairs-parallelisation using (SynchronousConditions; StartingConditions)
   open import RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois1 all-pairs-parallelisation
-  
+
   D₀ : Pred lzero
   D₀ i = U
 
@@ -77,7 +77,7 @@ module RoutingLib.Asynchronous.Examples.AllPairs.Convergence {n}(𝕤 : Schedule
   iter-fixed t iter≡ (suc K) i j = trans (sym (iter≡ i j))
     (subst (syncIter x₀ (suc t) i j ≡_)
       (cong (λ x → syncIter x₀ x i j) (sym (+ℕ-suc t K)))
-      (iter-fixed (suc t) (F-cong iter≡) K i j)) 
+      (iter-fixed (suc t) (F-cong iter≡) K i j))
 
   iter∞-dependent : ℕ → Set
   iter∞-dependent K = ∀ i j → syncIter x₀ K i j ≡ ∞ → syncIter x₀ (suc K) i j ≡ ∞
@@ -105,11 +105,11 @@ module RoutingLib.Asynchronous.Examples.AllPairs.Convergence {n}(𝕤 : Schedule
 
                 path-cost≤xᵢₖ+xₖⱼ : path-cost (syncIter x₀ K) i j k ≤ N (xᵢₖ +ℕ xₖⱼ)
                 path-cost≤xᵢₖ+xₖⱼ = ≤-reflexive (trans (cong (syncIter x₀ K i k +_) pₖⱼ)
-                  (cong (_+ N xₖⱼ) pᵢₖ)) 
+                  (cong (_+ N xₖⱼ) pᵢₖ))
 
   FinPair : Setoid lzero lzero
   FinPair = setoid (Fin n × Fin n)
-  
+
   is∞? : ∀ K → Decidable (λ node → syncIter x₀ K (proj₁ node) (proj₂ node) ≡ ∞)
   is∞? K = λ node → syncIter x₀ K (proj₁ node) (proj₂ node) ≟ ∞
 
@@ -176,7 +176,7 @@ module RoutingLib.Asynchronous.Examples.AllPairs.Convergence {n}(𝕤 : Schedule
 
   ∞-nodes-length-dec : ∀ K → length (∞-nodes (suc K)) ≤ℕ length (∞-nodes K)
   ∞-nodes-length-dec K = length-filter (is∞? (suc K)) (∞-nodes K)
-  
+
   ∞-nodes-converge : ∀ {K} → Acc _<ℕ_ (length (∞-nodes K)) → ∃ λ T → ∀ {t} →
                      T ≤ℕ t → ∞-nodes t ≡ ∞-nodes (suc t)
   ∞-nodes-converge {K} (acc rs) with length (∞-nodes K) ≟ℕ length (∞-nodes (suc K))
@@ -184,12 +184,12 @@ module RoutingLib.Asynchronous.Examples.AllPairs.Convergence {n}(𝕤 : Schedule
     ∞-nodes-fixed K (∞-nodes-length≡⇒∞-nodes≡ K ∞-nodes-length≡)
   ... | no  ∞-nodes-length≢ = ∞-nodes-converge {suc K} (rs (length (∞-nodes (suc K)))
     (≤+≢⇒ℕ< (∞-nodes-length-dec K) (∞-nodes-length≢ ∘ sym)))
-  
+
   score : ℕ → ℕ
   score K = sum {n} (λ i → sum {n} (λ j → extractℕ (syncIter x₀ K i j)))
 
   module _ (∞-conv : ∃ λ T → ∀ {t} → T ≤ℕ t → ∞-nodes t ≡ ∞-nodes (suc t)) where
-  
+
     extractℕ-dec : ∀ {K} → proj₁ ∞-conv ≤ℕ K → ∀ i j →
                    extractℕ (syncIter x₀ (suc K) i j) ≤ℕ extractℕ (syncIter x₀ K i j)
     extractℕ-dec {K} T≤K i j with syncIter x₀ (suc K) i j ≟ ∞ | syncIter x₀ K i j ≟ ∞
@@ -266,7 +266,7 @@ module RoutingLib.Asynchronous.Examples.AllPairs.Convergence {n}(𝕤 : Schedule
     poset           = poset ;
     F-monotone      = F-monotone ;
     iter-decreasing = iter-decreasing ;
-    iter-converge   = iter-converge 
+    iter-converge   = iter-converge
     }
 
   open import RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois3 all-pairs-parallelisation syncCond using (aco; x₀∈D[0])

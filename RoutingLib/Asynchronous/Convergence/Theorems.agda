@@ -16,10 +16,9 @@ module RoutingLib.Asynchronous.Convergence.Theorems
 ------------------------------------------------------------------------
 -- Export core publically
 open import RoutingLib.Asynchronous.Convergence.Conditions public
-open Parallelisation P
 
+open Parallelisation P
 open ACO
--- open FiniteConditions
 open SynchronousConditions
 
 ------------------------------------------------------------------------
@@ -37,7 +36,7 @@ ultra⇒ACO ultra = aco
   where open Gurney6 ultra using (aco)
 
 ultra⇒safe : UltrametricConditions P → IsAsynchronouslySafe P
-ultra⇒safe ultra = partialToTotalSafety x∈D[0] (ACO⇒partiallySafe (ultra⇒ACO ultra)) 
+ultra⇒safe ultra = partialToTotalSafety x∈D[0] (ACO⇒partiallySafe (ultra⇒ACO ultra))
   where open Gurney6 ultra using (x∈D[0])
 
 ------------------------------------------------------------------------

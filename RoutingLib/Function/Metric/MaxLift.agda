@@ -24,18 +24,18 @@ module RoutingLib.Function.Metric.MaxLift {a ℓ n} (𝕊 : Setoid (Fin n) a ℓ
     )
 
   module _ (dᵢ : ∀ {i} → Sᵢ i → Sᵢ i → ℕ) where
-  
+
     d : S → S → ℕ
     d x y = max 0 (λ i → dᵢ (x i) (y i))
 
     abstract
-  
+
       dᵢ≤d : ∀ x y i → dᵢ (x i) (y i) ≤ d x y
       dᵢ≤d x y = t≤max[t] 0 (λ i → dᵢ (x i) (y i))
-    
+
       d-sym : (∀ {i} → Symmetric (Setoid 𝕊 at i) (dᵢ {i})) → Symmetric ≈-setoid d
       d-sym dᵢ-sym x y = max-cong refl (λ i → dᵢ-sym (x i) (y i))
-    
+
       d-cong : (∀ {i} → dᵢ {i} Preserves₂ _≈ᵢ_ ⟶ _≈ᵢ_ ⟶ _≡_) →
                d Preserves₂ _≈_ ⟶ _≈_ ⟶ _≡_
       d-cong dᵢ-cong m≈n p≈q = max-cong refl (λ i → dᵢ-cong (m≈n i) (p≈q i))
@@ -46,8 +46,8 @@ module RoutingLib.Function.Metric.MaxLift {a ℓ n} (𝕊 : Setoid (Fin n) a ℓ
       x≈y⇒d≡0 : (∀ {i} {xᵢ yᵢ : Sᵢ i} → xᵢ ≈ᵢ yᵢ → dᵢ xᵢ yᵢ ≡ 0) → ∀ {x y} → x ≈ y → d x y ≡ 0
       x≈y⇒d≡0 x≈y⇒dᵢ≡0 x≈y = max-constant refl (λ i → x≈y⇒dᵢ≡0 (x≈y i))
 
-      
-      
+
+
       maxTriIneq : (∀ {i} → MaxTriangleIneq (Setoid 𝕊 at i) dᵢ) →
                    MaxTriangleIneq ≈-setoid d
       maxTriIneq dᵢ-ineq x y z with max[t]∈t 0 λ i → dᵢ (x i) (z i)
@@ -64,7 +64,7 @@ module RoutingLib.Function.Metric.MaxLift {a ℓ n} (𝕊 : Setoid (Fin n) a ℓ
   bounded dᵢ-bounded =
       (max 0 (λ i → proj₁ (dᵢ-bounded {i}))) ,
       (λ x y → max[s]≤max[t]₂ (≤-refl {0}) (λ i → proj₂ (dᵢ-bounded {i}) (x i) (y i)))
-        
+
   isUltrametric : {dᵢ : ∀ {i} → Sᵢ i → Sᵢ i → ℕ} → (∀ {i} → IsUltrametric (Setoid 𝕊 at i) dᵢ) →
                   IsUltrametric ≈-setoid (d dᵢ)
   isUltrametric {dᵢ} um = record

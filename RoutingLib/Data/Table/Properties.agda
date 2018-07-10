@@ -31,13 +31,13 @@ module RoutingLib.Data.Table.Properties where
     foldr-forces×ʳ forces _ {zero}  t Pe = Pe
     foldr-forces×ʳ forces e {suc n} t Pf =
       foldr-forces×ʳ forces e (t ∘ fsuc) (forces _ _ Pf)
-      
+
     foldr-forces× : _•_ Forcesᵇ P → ∀ e {n} (t : Table A n) →
                     P (foldr _•_ e t) → All P t
     foldr-forces× forces _ _ Pfold fzero    = proj₁ (forces _ _ Pfold)
     foldr-forces× forces _ _ Pfold (fsuc i) =
       foldr-forces× forces _ _ (proj₂ (forces _ _ Pfold)) i
-    
+
     foldr-×pres : _•_ Preservesᵇ P → ∀ {e} → P e →
                   ∀ {n} {t : Table A n} → All P t →
                   P (foldr _•_ e t)
@@ -59,21 +59,21 @@ module RoutingLib.Data.Table.Properties where
 
 
   -- Properties of foldr⁺
-  
+
   module _ {a p} {A : Set a} (P : Pred A p) {_•_ : Op₂ A} where
 
     foldr⁺-forces× : _•_ Forcesᵇ P → ∀ {n} (t : Table A (suc n)) →
                     P (foldr⁺ _•_ t) → All P t
     foldr⁺-forces× forces {zero}  t Pt₀ fzero     = Pt₀
-    foldr⁺-forces× forces {zero}  t Pft (fsuc ()) 
+    foldr⁺-forces× forces {zero}  t Pft (fsuc ())
     foldr⁺-forces× forces {suc n} t Pft (fzero)   = proj₁ (forces (t fzero) _ Pft)
     foldr⁺-forces× forces {suc n} t Pft (fsuc i)  = foldr⁺-forces× forces (t ∘ fsuc) (proj₂ (forces _ _ Pft)) i
-    
+
     foldr⁺-×pres : _•_ Preservesᵇ P → ∀ {n} {t : Table A (suc n)} →
                    All P t → P (foldr⁺ _•_ t)
     foldr⁺-×pres pres {zero}  Pt = Pt fzero
     foldr⁺-×pres pres {suc n} Pt = pres (Pt _) (foldr⁺-×pres pres (Pt ∘ fsuc))
-    
+
     foldr⁺-⊎pres : _•_ Preservesᵒ P → ∀ {n} {t : Table A (suc n)} →
                        Any P t → P (foldr⁺ _•_ t)
     foldr⁺-⊎pres pres {zero}  (fzero , Pt₀) = Pt₀
@@ -85,13 +85,13 @@ module RoutingLib.Data.Table.Properties where
   min[t]<x : ∀ ⊤ {n} (t : Table ℕ n) {x} → ⊤ < x ⊎ Any (_< x) t → min ⊤ t < x
   min[t]<x ⊤ t (inj₁ ⊤<x) = foldr-⊎presʳ (_< _) o<m⇒n⊓o<m ⊤<x t
   min[t]<x ⊤ t (inj₂ t<x) = foldr-⊎pres (_< _) n<m⊎o<m⇒n⊓o<m ⊤ t<x
-  
+
   min⁺[t]<x : ∀ {n} {t : Table ℕ (suc n)} {x} → Any (_< x) t → min⁺ t < x
   min⁺[t]<x = foldr⁺-⊎pres (_< _) n<m⊎o<m⇒n⊓o<m
 
   x<min⁺[t] : ∀ {n} {t : Table ℕ (suc n)} {x} → All (x <_) t → x < min⁺ t
   x<min⁺[t] = foldr⁺-×pres (_ <_) m<n×m<o⇒m<n⊓o
-  
+
   min[s]<min[t] : ∀ ⊤₁ {⊤₂} {m n} {s : Table ℕ m} {t : Table ℕ n} → ⊤₁ < ⊤₂ ⊎ Any (_< ⊤₂) s →
                   All (λ y → ⊤₁ < y ⊎ Any (_< y) s) t → min ⊤₁ s < min ⊤₂ t
   min[s]<min[t] ⊤₁ {n = zero}  v all = min[t]<x ⊤₁ _ v
@@ -103,7 +103,7 @@ module RoutingLib.Data.Table.Properties where
                    All (λ y → Any (_< y) s) t → min⁺ s < min⁺ t
   min⁺[s]<min⁺[t] {n = zero}  {s} {t} all = min⁺[t]<x (all fzero)
   min⁺[s]<min⁺[t] {n = suc n} {s} {t} all = m<n×m<o⇒m<n⊓o (min⁺[t]<x (all fzero)) (min⁺[s]<min⁺[t] (all ∘ fsuc))
-    
+
   max⁺-cong : ∀ {n} {s t : Table ℕ (suc n)} → Pointwise _≡_ s t → max⁺ s ≡ max⁺ t
   max⁺-cong s≡t = foldr⁺-cong {_~_ = _≡_} (cong₂ _⊔_) s≡t
 
@@ -135,7 +135,7 @@ module RoutingLib.Data.Table.Properties where
   max-constant : ∀ {n} {⊥} {t : Table ℕ n} →
                  ∀ {x} → ⊥ ≡ x → All (_≡ x) t → max ⊥ t ≡ x
   max-constant {x = x} ⊥≡x all = foldr-×pres (_≡ x) ⊔-preserves-≡x ⊥≡x all
-  
+
   ⊥≤max[t] : ∀ {n} ⊥ (t : Table ℕ n)→ ⊥ ≤ max ⊥ t
   ⊥≤max[t] {n} ⊥ t = x≤max[t] {n} ⊥ (inj₁ ≤-refl)
 
@@ -157,8 +157,8 @@ module RoutingLib.Data.Table.Properties where
                    Pointwise _≤_ s t → max ⊥₁ s ≤ max ⊥₂ t
   max[s]≤max[t]₂ {n = zero}  ⊥₁≤⊥₂ s≤t = ⊥₁≤⊥₂
   max[s]≤max[t]₂ {n = suc n} ⊥₁≤⊥₂ s≤t = ⊔-mono-≤ (s≤t fzero) (max[s]≤max[t]₂ ⊥₁≤⊥₂ (s≤t ∘ fsuc))
-      
-      
+
+
   min∞[t]≤x : ∀ ⊤ {n} (t : Table ℕ∞ n) {x} → ⊤ ≤∞ x ⊎ Any (_≤∞ x) t → min∞ ⊤ t ≤∞ x
   min∞[t]≤x ⊤ t (inj₁ ⊤≤x) = foldr-⊎presʳ (_≤∞ _)  o≤∞m⇒n⊓o≤∞m ⊤≤x t
   min∞[t]≤x ⊤ t (inj₂ t≤x) = foldr-⊎pres (_≤∞ _) n≤∞m⊎o≤∞m⇒n⊓o≤∞m ⊤ t≤x
@@ -170,7 +170,7 @@ module RoutingLib.Data.Table.Properties where
                   (min∞[s]≤min∞[t] ⊤₁ v (all ∘ fsuc))
 
   x≤min∞[t] : ∀ {n x ⊤} {t : Table ℕ∞ n} → All (x ≤∞_) t → x ≤∞ ⊤ → x ≤∞ min∞ ⊤ t
-  x≤min∞[t] {n} {x} {⊤} {t} all x≤⊤ = foldr-×pres (x ≤∞_) m≤∞n×m≤∞o⇒m≤∞n⊓o x≤⊤ all 
+  x≤min∞[t] {n} {x} {⊤} {t} all x≤⊤ = foldr-×pres (x ≤∞_) m≤∞n×m≤∞o⇒m≤∞n⊓o x≤⊤ all
 
   min∞[t]≡x : ∀ {n x ⊤} {t : Table ℕ∞ n} → Any (x ≡_) t → All (x ≤∞_) t → x ≤∞ ⊤ → min∞ ⊤ t ≡ x
   min∞[t]≡x {n} {x} {⊤} {t} (i , x≡tᵢ) all x≤⊤ = ≤∞-antisym
@@ -181,11 +181,11 @@ module RoutingLib.Data.Table.Properties where
   sum[s]≤sum[t] : ∀ {n} {s t : Table ℕ n} → Pointwise _≤_ s t → sum s ≤ sum t
   sum[s]≤sum[t] {zero} {s} {t} s≤t = z≤n
   sum[s]≤sum[t] {suc n} {s} {t} s≤t = +-mono-≤ (s≤t fzero) (sum[s]≤sum[t] {n} (λ i → s≤t (fsuc i)))
-  
+
   sum[s]<sum[t] : ∀ {n} {s t : Table ℕ n} → Pointwise _≤_ s t →
                   (∃ λ i → s i < t i) → sum s < sum t
   sum[s]<sum[t] {zero} {s} {t} _ (() , _)
-  sum[s]<sum[t] {suc n} {s} {t} s≤t (fzero , sᵢ<tᵢ)  = +-mono-<-≤ sᵢ<tᵢ (sum[s]≤sum[t] {n} (λ i → s≤t (fsuc i))) 
+  sum[s]<sum[t] {suc n} {s} {t} s≤t (fzero , sᵢ<tᵢ)  = +-mono-<-≤ sᵢ<tᵢ (sum[s]≤sum[t] {n} (λ i → s≤t (fsuc i)))
   sum[s]<sum[t] {suc n} {s} {t} s≤t (fsuc i , sᵢ<tᵢ) = +-mono-≤-< (s≤t fzero)
                 (sum[s]<sum[t] (λ j → s≤t (fsuc j)) (i , sᵢ<tᵢ))
 

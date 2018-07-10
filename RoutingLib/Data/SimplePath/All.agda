@@ -13,9 +13,9 @@ module RoutingLib.Data.SimplePath.All {n : ℕ} where
 
   ----------------------------------------------------------------------------
   -- Datatypes
-   
+
   open NEP public using ([]; _∷_; [_,_]∷_)
-  
+
   data Allₙ {a} (P : Pred (Fin n) a) : SimplePath n → Set a where
     invalid : Allₙ P invalid
     valid   : ∀ {p} → NEP.Allₙ P p → Allₙ P (valid p)
@@ -23,7 +23,7 @@ module RoutingLib.Data.SimplePath.All {n : ℕ} where
   data Allₑ {a} (P : Pred (Fin n × Fin n) a) : SimplePath n → Set a where
     invalid : Allₑ P invalid
     valid   : ∀ {p} → NEP.Allₑ P p → Allₑ P (valid p)
-    
+
   ----------------------------------------------------------------------------
   -- Operations
 
@@ -37,18 +37,18 @@ module RoutingLib.Data.SimplePath.All {n : ℕ} where
   allₑ? P? (valid x) with NEP.allₑ? P? x
   ... | yes px = yes (valid px)
   ... | no ¬px = no λ {(valid px) → ¬px px}
-  
+
   ----------------------------------------------------------------------------
   -- Properties
-    
+
   module _ {a} {P : Pred (Fin n) a} where
-  
+
     Allₙ-resp-≈ₚ : ∀ {p q} → Allₙ P p → p ≈ₚ q → Allₙ P q
     Allₙ-resp-≈ₚ invalid    invalid     = invalid
     Allₙ-resp-≈ₚ (valid p) (valid p≈q) = valid (NEP.Allₙ-resp-≈ₚ p p≈q)
 
   module _ {a} {P : Pred (Fin n × Fin n) a} where
-  
+
     Allₑ-resp-≈ₚ : ∀ {p q} → Allₑ P p → p ≈ₚ q → Allₑ P q
     Allₑ-resp-≈ₚ invalid   invalid     = invalid
     Allₑ-resp-≈ₚ (valid p) (valid p≈q) = valid (NEP.Allₑ-resp-≈ₚ p p≈q)

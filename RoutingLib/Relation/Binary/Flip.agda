@@ -9,12 +9,12 @@ open import RoutingLib.Relation.Binary
 module RoutingLib.Relation.Binary.Flip where
 
   -- All added to standard library
-  
+
   module _ {a ℓ₁ ℓ₂} {A : Set a} (≈ : Rel A ℓ₁) (∼ : Rel A ℓ₂) where
-  
+
     reflexiveᵘ : Symmetric ≈ → ≈ ⇒ ∼ → ≈ ⇒ flip ∼
     reflexiveᵘ sym impl = impl ∘ sym
-  
+
     antisymmetricᵘ : Antisymmetric ≈ ∼ → Antisymmetric ≈ (flip ∼)
     antisymmetricᵘ antisym y∼x x∼y = antisym x∼y y∼x
 
@@ -23,7 +23,7 @@ module RoutingLib.Relation.Binary.Flip where
 
     respects₂ᵘ : ∼ Respects₂ ≈ → (flip ∼) Respects₂ ≈
     respects₂ᵘ (resp₁ , resp₂) = resp₂ , resp₁
-    
+
     trichotomousᵘ : Trichotomous ≈ ∼ → Trichotomous ≈ (flip ∼)
     trichotomousᵘ compare x y with compare x y
     ... | tri< x<y x≉y y≮x = tri> y≮x x≉y x<y
@@ -31,15 +31,15 @@ module RoutingLib.Relation.Binary.Flip where
     ... | tri> x≮y x≉y y<x = tri< y<x x≉y x≮y
 
   module _ {a ℓ} {A : Set a} (∼ : Rel A ℓ) where
-  
+
     max : ∀ {⊥} → Minimum ∼ ⊥ → Maximum (flip ∼) ⊥
     max min = min
 
     min : ∀ {⊥} → Maximum ∼ ⊥ → Minimum (flip ∼) ⊥
     min max = max
-    
+
   module _ {a ℓ₁ ℓ₂} {A : Set a} {≈ : Rel A ℓ₁} {∼ : Rel A ℓ₂} where
-  
+
     isPreorderᵘ : IsPreorder ≈ ∼ → IsPreorder ≈ (flip ∼)
     isPreorderᵘ pre = record
       { isEquivalence = Pre.isEquivalence
@@ -54,7 +54,7 @@ module RoutingLib.Relation.Binary.Flip where
       ; total      = total ∼ Pre.total
       }
       where module Pre = IsTotalPreorder pre
-      
+
     isPartialOrderᵘ : IsPartialOrder ≈ ∼ → IsPartialOrder ≈ (flip ∼)
     isPartialOrderᵘ po = record
       { isPreorder = isPreorderᵘ Po.isPreorder
@@ -96,7 +96,7 @@ module RoutingLib.Relation.Binary.Flip where
 
 
   module _ {ℓ₁ ℓ₂ ℓ₃} where
-  
+
     preorderᵘ : Preorder ℓ₁ ℓ₂ ℓ₃ → Preorder ℓ₁ ℓ₂ ℓ₃
     preorderᵘ P = record
       { isPreorder = isPreorderᵘ (Preorder.isPreorder P)
@@ -106,7 +106,7 @@ module RoutingLib.Relation.Binary.Flip where
     totalPreorderᵘ P = record
       { isTotalPreorder = isTotalPreorderᵘ (TotalPreorder.isTotalPreorder P)
       }
-      
+
     posetᵘ : Poset ℓ₁ ℓ₂ ℓ₃ → Poset ℓ₁ ℓ₂ ℓ₃
     posetᵘ O = record
       { isPartialOrder = isPartialOrderᵘ (Poset.isPartialOrder O)

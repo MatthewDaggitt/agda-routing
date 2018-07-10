@@ -26,13 +26,13 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois1
 
   open Parallelisation 𝓟
   open ACO aco
-  
+
   T : 𝕋
   T = proj₁ D-finish
 
   ξ : S
   ξ = proj₁ (proj₂ D-finish)
-    
+
   module _ (𝓟𝓢 : PseudoperiodicSchedule n) where
 
     open PseudoperiodicSchedule 𝓟𝓢
@@ -54,7 +54,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois1
       φ (suc K)    ≤⟨ τ-after-φ (suc K) i ⟩
       τ (suc K) i  ∎
       where open ≤-Reasoning
-      
+
     module _ {x₀ : S} (x₀∈D₀ : x₀ ∈ D 0) where
 
       async[t]'∈D₀ : ∀ {t} (accₜ : Acc _<_ t) → asyncIter' 𝓢 x₀ accₜ ∈ D 0
@@ -80,7 +80,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois1
 
       -- Theorem 1
 
-      
+
 
       D[T]≈⦃ξ⦄ : ∀ {s} → s ∈ D T → s ≈ ξ
       D[T]≈⦃ξ⦄ {s} s∈D[T] rewrite sym (+-identityʳ T) = ≈-sym (proj₂ (proj₂ (proj₂ D-finish) 0) s∈D[T])
@@ -105,7 +105,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois1
 
 
   ξ-reached : ∀ {X} → X ∈ D 0 → ∀ s → ∃ λ tᶜ → ∀ t → asyncIter s X (tᶜ + t) ≈ ξ
-  ξ-reached X∈D₀ s = tᶜ (pseudoperiodic s) X∈D₀ , async-converge (pseudoperiodic s) X∈D₀ 
+  ξ-reached X∈D₀ s = tᶜ (pseudoperiodic s) X∈D₀ , async-converge (pseudoperiodic s) X∈D₀
 
   isPartiallyAsynchronouslySafe : IsPartiallyAsynchronouslySafe 𝓟 (D 0)
   isPartiallyAsynchronouslySafe = record

@@ -85,7 +85,7 @@ modₕ-minus acc (suc a) zero    rewrite +-identityʳ acc = begin
   modₕ 0 acc (suc acc + (a ∸ modₕ 0 acc a acc)) acc ≡⟨ cong (λ v → modₕ 0 acc v acc) (+-comm (suc acc) _) ⟩
   modₕ 0 acc (a ∸ modₕ 0 acc a acc + suc acc) acc   ≡⟨ a+n[modₕ]n≡a[modₕ]n 0 (a ∸ modₕ 0 acc a acc) acc ⟩
   modₕ 0 acc (a ∸ modₕ 0 acc a acc) acc             ≡⟨ modₕ-minus 0 a acc ⟩
-  0                                                 ∎ 
+  0                                                 ∎
 modₕ-minus acc (suc a) (suc n) rewrite +-suc acc a | +-suc acc n = modₕ-minus (suc acc) a n
 
 -- modₕ acc (acc + n) (acc + a + suc n) n ≡ modₕ acc (acc + n) a n

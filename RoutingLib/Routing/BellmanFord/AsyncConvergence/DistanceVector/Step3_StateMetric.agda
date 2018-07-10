@@ -25,7 +25,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Step3_Stat
   {a b ℓ n} (algebra : FiniteStrictlyIncreasingRoutingAlgebra a b ℓ)
   (A : SquareMatrix (Step algebra) n)
   where
-  
+
 open Prelude algebra A
 open Step2 algebra A using
   ( d

@@ -33,31 +33,31 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step2_Inconsis
   open Prelude algebra
   open Step1 algebra 1≤n using
     ( hⁱ ; Hⁱ ; hⁱ-cong ; 1≤hⁱ; hⁱ≤Hⁱ ; hⁱ-decr ; h[sᶜ]<h[rⁱ] )
- 
+
   open Metric S
 
   open ≤-Reasoning
-    
+
   private
 
     h-force-𝑰 : ∀ {x y} → 𝑰 x ⊎ 𝑰 y → hⁱ x ≤ hⁱ y → 𝑰 y
     h-force-𝑰 (inj₂ yⁱ) hx≤hy yᶜ = yⁱ yᶜ
     h-force-𝑰 (inj₁ xⁱ) hx≤hy yᶜ = contradiction (h[sᶜ]<h[rⁱ] yᶜ xⁱ) (≤⇒≯ hx≤hy)
-    
+
   abstract
-  
+
     dᵣⁱ : Route → Route → ℕ
     dᵣⁱ x y = hⁱ x ⊔ hⁱ y
 
     dᵣⁱ-cong : dᵣⁱ Preserves₂ _≈_ ⟶ _≈_ ⟶ _≡_
     dᵣⁱ-cong x≈y u≈v = cong₂ _⊔_ (hⁱ-cong x≈y) (hⁱ-cong u≈v)
-  
+
     dᵣⁱ-sym : ∀ x y → dᵣⁱ x y ≡ dᵣⁱ y x
     dᵣⁱ-sym x y = ⊔-comm (hⁱ x) (hⁱ y)
 
     dᵣⁱ≡0⇒x≈y : ∀ {x y} → dᵣⁱ x y ≡ 0 → x ≈ y
     dᵣⁱ≡0⇒x≈y {x} {y} dᵣⁱ≡0 = contradiction dᵣⁱ≡0 (m<n⇒n≢0 (m≤o⇒m≤n⊔o (hⁱ x) (1≤hⁱ y)))
-    
+
     dᵣⁱ-maxTriIneq : MaxTriangleIneq dᵣⁱ
     dᵣⁱ-maxTriIneq x y z = begin
       hⁱ x ⊔ hⁱ z                   ≤⟨ ⊔-monoˡ-≤ (hⁱ z) (m≤m⊔n (hⁱ x) (hⁱ y)) ⟩
@@ -66,18 +66,18 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step2_Inconsis
 
     1≤dᵣⁱ : ∀ x y → 1 ≤ dᵣⁱ x y
     1≤dᵣⁱ x y = m≤n⇒m≤n⊔o (hⁱ y) (1≤hⁱ x)
-    
+
     dᵣⁱ≤Hⁱ : ∀ x y → dᵣⁱ x y ≤ Hⁱ
     dᵣⁱ≤Hⁱ x y = n≤m×o≤m⇒n⊔o≤m (hⁱ≤Hⁱ x) (hⁱ≤Hⁱ y)
-  
+
     dᵣⁱ-bounded : Bounded dᵣⁱ
     dᵣⁱ-bounded = Hⁱ , dᵣⁱ≤Hⁱ
-    
 
-    
+
+
     private
-    
-      
+
+
 
       chain₁ : ∀ X i j → 𝑰 (σ X i j) → ∃ λ k → 𝑰 (X k j) × hⁱ (σ X i j) < hⁱ (X k j) ⊔ hⁱ (σ X k j)
       chain₁ X i j σXᵢⱼⁱ with σXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ X _ _ σXᵢⱼⁱ
@@ -86,14 +86,14 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step2_Inconsis
         hⁱ (A i k ▷ X k j)        <⟨ hⁱ-decr (𝑰-cong σXᵢⱼ≈Aᵢₖ▷Xₖⱼ σXᵢⱼⁱ) ⟩
         hⁱ (X k j)                ≤⟨ m≤m⊔n (hⁱ (X k j)) (hⁱ (σ X k j)) ⟩
         hⁱ (X k j) ⊔ hⁱ (σ X k j) ∎)
-        
+
       chain₂ : ∀ X i k j → hⁱ (σ X i j) < hⁱ (X k j) ⊔ hⁱ (σ X k j) → X k j ≈ σ X k j → hⁱ (σ X i j) < hⁱ (σ X k j)
       chain₂ X i k j hσXᵢⱼ<hXₖⱼ⊔hσXₖⱼ Xₖⱼ≈σXₖⱼ = begin
         hⁱ (σ X i j)                <⟨ hσXᵢⱼ<hXₖⱼ⊔hσXₖⱼ ⟩
         hⁱ (X k j)   ⊔ hⁱ (σ X k j) ≡⟨ cong (_⊔ hⁱ (σ X k j)) (hⁱ-cong Xₖⱼ≈σXₖⱼ) ⟩
         hⁱ (σ X k j) ⊔ hⁱ (σ X k j) ≡⟨ ⊔-idem (hⁱ (σ X k j)) ⟩
         hⁱ (σ X k j)                ∎
-      
+
       reduction : ∀ X {r s} →
                   (∀ {u v} → X u v ≉ σ X u v → 𝑰 (X u v) ⊎ 𝑰 (σ X u v) → dᵣⁱ (X u v) (σ X u v) ≤ dᵣⁱ (X r s) (σ X r s)) →
                   ∀ i j (L : Subset n) → Acc _<_ ∣ L ∣ → (∀ {l} → l ∉ L → hⁱ (σ X l j) ≤ hⁱ (σ X i j)) →
@@ -109,10 +109,10 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step2_Inconsis
         hⁱ (X r s) ⊔ hⁱ (σ X r s) ∎
 
         where
-  
+
         ∣L\\k∣<∣L∣ : ∣ L \\ ⁅ k ⁆ ∣ < ∣ L ∣
         ∣L\\k∣<∣L∣ = ∣p\\q∣<∣p∣ {p = L} {⁅ k ⁆} (k , x∈p∩q⁺ (k∈L , x∈⁅x⁆ k))
-  
+
         L-exclude : ∀ {l} → l ∉ (L \\ ⁅ k ⁆) → hⁱ (σ X l j) ≤ hⁱ (σ X k j)
         L-exclude {l} l∉L\\k with l ≟𝔽 k
         ... | yes refl = ≤-refl
@@ -121,7 +121,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step2_Inconsis
 
 
     dᵣⁱ-strContrOrbits : ∀ X {r s} →
-                   (∀ {u v} → X u v ≉ σ X u v → 𝑰 (X u v) ⊎ 𝑰 (σ X u v) → dᵣⁱ (X u v) (σ X u v) ≤ dᵣⁱ (X r s) (σ X r s)) → 
+                   (∀ {u v} → X u v ≉ σ X u v → 𝑰 (X u v) ⊎ 𝑰 (σ X u v) → dᵣⁱ (X u v) (σ X u v) ≤ dᵣⁱ (X r s) (σ X r s)) →
                    ∀ {i j} → 𝑰 (σ X i j) ⊎ 𝑰 (σ (σ X) i j) → dᵣⁱ (σ X i j) (σ (σ X) i j) < dᵣⁱ (X r s) (σ X r s)
     dᵣⁱ-strContrOrbits X {r} {s} dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ {i} {j} σXᵢⱼⁱ⊎σ²Xᵢⱼⁱ with ≤-total (hⁱ (σ (σ X) i j)) (hⁱ (σ X i j))
     ...   | inj₁ σ²Xᵢⱼ≤σXᵢⱼ = begin
@@ -133,7 +133,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step2_Inconsis
       hⁱ (σ X i j) ⊔ hⁱ (σ (σ X) i j) ≡⟨ m≤n⇒m⊔n≡n σXᵢⱼ≤σ²Xᵢⱼ ⟩
       hⁱ (σ (σ X) i j)                ≡⟨ hⁱ-cong σ²Xᵢⱼ≈Aᵢₖ▷σXₖⱼ ⟩
       hⁱ (A i k ▷ σ X k j)            <⟨ hⁱ-decr (𝑰-cong σ²Xᵢⱼ≈Aᵢₖ▷σXₖⱼ (h-force-𝑰 σXᵢⱼⁱ⊎σ²Xᵢⱼⁱ σXᵢⱼ≤σ²Xᵢⱼ)) ⟩
-      hⁱ (σ X k j)                    <⟨ reduction X dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ k j ⊤ (<-wellFounded ∣ ⊤ {n = n} ∣) (λ l∉⊤ → contradiction ∈⊤ l∉⊤) σXₖⱼⁱ ⟩ 
+      hⁱ (σ X k j)                    <⟨ reduction X dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ k j ⊤ (<-wellFounded ∣ ⊤ {n = n} ∣) (λ l∉⊤ → contradiction ∈⊤ l∉⊤) σXₖⱼⁱ ⟩
       hⁱ (X r s)   ⊔ hⁱ (σ X r s)     ∎
 
 
@@ -145,11 +145,11 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step2_Inconsis
     ...   | yes xᶜ | _      = contradiction xᶜ xⁱ
     ...   | no  _  | no yⁱ = contradiction yᶜ yⁱ
     ...   | no  _  | yes _ = m≤n⇒n⊔m≡n (<⇒≤ (h[sᶜ]<h[rⁱ] yᶜ xⁱ))
-    
+
     xⁱyᶜzᶜ⇒dᵣⁱxz≤dᵣⁱxy : ∀ {x y z} → 𝑰 x → 𝑪 y → 𝑪 z → dᵣⁱ x z ≤ dᵣⁱ x y
     xⁱyᶜzᶜ⇒dᵣⁱxz≤dᵣⁱxy xⁱ yᶜ zᶜ =
       ≤-reflexive (trans (dᵣⁱxⁱyᶜ≡hⁱxⁱ xⁱ zᶜ) (sym (dᵣⁱxⁱyᶜ≡hⁱxⁱ xⁱ yᶜ)))
-    
+
     xᶜyᶜzⁱ⇒dᵣⁱxz≤dᵣⁱyz : ∀ {x y z} → 𝑪 x → 𝑪 y → 𝑰 z → dᵣⁱ x z ≤ dᵣⁱ y z
     xᶜyᶜzⁱ⇒dᵣⁱxz≤dᵣⁱyz {x} {y} {z} xᶜ yᶜ zⁱ =
       subst₂ _≤_ (dᵣⁱ-sym z x) (dᵣⁱ-sym z y) (xⁱyᶜzᶜ⇒dᵣⁱxz≤dᵣⁱxy zⁱ yᶜ xᶜ)
@@ -160,7 +160,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step2_Inconsis
 
 
     dᵣⁱ-strContrᶜ : ∀ X Y {r s} → 𝑪ₘ X →
-                   (∀ {u v} → X u v ≉ Y u v → 𝑰 (X u v) ⊎ 𝑰 (Y u v) → dᵣⁱ (X u v) (Y u v) ≤ dᵣⁱ (X r s) (Y r s)) → 
+                   (∀ {u v} → X u v ≉ Y u v → 𝑰 (X u v) ⊎ 𝑰 (Y u v) → dᵣⁱ (X u v) (Y u v) ≤ dᵣⁱ (X r s) (Y r s)) →
                    ∀ {i j} → 𝑰 (σ Y i j) → dᵣⁱ (σ X i j) (σ Y i j) < dᵣⁱ (X r s) (Y r s)
     dᵣⁱ-strContrᶜ X Y {r} {s} Xᶜ dᵣⁱ≤dᵣⁱXᵣₛYᵣₛ {i} {j} σYᵢⱼⁱ with σXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ Y _ _ σYᵢⱼⁱ
     ... | k , σYᵢⱼ≈Aᵢₖ▷Yₖⱼ , Yₖⱼⁱ = begin

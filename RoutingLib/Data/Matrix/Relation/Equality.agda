@@ -11,7 +11,7 @@ module RoutingLib.Data.Matrix.Relation.Equality {a ℓ} (S : Setoid a ℓ) where
 
   _≈ₘ_ : ∀ {m n} → Rel (Matrix A m n) ℓ
   _≈ₘ_ = Pointwise _≈_
-  
+
   _≉ₘ_ : ∀ {m n} → Rel (Matrix A m n) ℓ
   t ≉ₘ s = ¬ (t ≈ₘ s)
 

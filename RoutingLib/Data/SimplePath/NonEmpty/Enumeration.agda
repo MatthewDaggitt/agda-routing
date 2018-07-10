@@ -7,7 +7,7 @@ open import Data.List.Any using (here; there)
 open import Data.List.Membership.Propositional using (_∈_)
 open import Data.List.Membership.Setoid.Properties using (∈-map⁺; ∈-concat⁺′; ∈-applyUpTo⁺)
 open import Data.List.All using (All; []; _∷_) renaming (map to mapₐ)
-open import Data.List.All.Properties using (applyUpTo⁺₁; applyUpTo⁺₂; concat⁺) 
+open import Data.List.All.Properties using (applyUpTo⁺₁; applyUpTo⁺₂; concat⁺)
 open import Data.Product using (∃₂; ∃; _,_; _×_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Relation.Binary using (Setoid; DecSetoid; _Respects_)
@@ -35,7 +35,7 @@ module RoutingLib.Data.SimplePath.NonEmpty.Enumeration (n : ℕ) where
 
     F×Fₛ : Setoid _ _
     F×Fₛ = ≡-setoid (Fin n × Fin n)
-    
+
     Pₛ : Setoid _ _
     Pₛ = ℙₛ n
 
@@ -49,10 +49,10 @@ module RoutingLib.Data.SimplePath.NonEmpty.Enumeration (n : ℕ) where
     open import RoutingLib.Data.List.Relation.Disjoint   Pₛ using () renaming (_#_ to _#ₚ_)
     open import RoutingLib.Data.List.Uniqueness.Setoid Pₛ using () renaming (Unique to Uniqueₚ)
     open Setoid LPₛ using () renaming (reflexive to ≈ₗₚ-reflexive)
-    
+
 
   abstract
-  
+
     extendAll : List (SimplePathⁿᵗ n) → (Fin n × Fin n) → List (SimplePathⁿᵗ n)
     extendAll []       _       = []
     extendAll (p ∷ ps) (i , j) with (i , j) ⇿? p | i ∉? p
@@ -109,14 +109,14 @@ module RoutingLib.Data.SimplePath.NonEmpty.Enumeration (n : ℕ) where
 
 
   abstract
-    
+
     allPathsOfLength : ℕ → List (SimplePathⁿᵗ n)
     allPathsOfLength 0       = [] ∷ []
     allPathsOfLength (suc l) = concat (map (extendAll (allPathsOfLength l)) (allFinPairs n))
 
     ∈-allPathsOfLength : ∀ p → p ∈ₚ (allPathsOfLength (length p))
     ∈-allPathsOfLength []                  = here ≈ₚ-refl
-    ∈-allPathsOfLength ((i , j) ∷ p ∣ e⇿p ∣ e∉p) = 
+    ∈-allPathsOfLength ((i , j) ∷ p ∣ e⇿p ∣ e∉p) =
       ∈-concat⁺′ Pₛ
         (∈-extendAll (∈-allPathsOfLength p))
         (∈-map⁺ F×Fₛ LPₛ
@@ -148,12 +148,12 @@ module RoutingLib.Data.SimplePath.NonEmpty.Enumeration (n : ℕ) where
     allPathsOfLength-inc : ∀ {l k} → l < k → k < n → All (λ p → All (p ≤ₗ_) (allPathsOfLength k)) (allPathsOfLength l)
     allPathsOfLength-inc {l} {k} l<k _ = mapₐ (λ {≡-refl → mapₐ (λ {≡-refl → <⇒≤ l<k}) (allPathsOfLength-length k)}) (allPathsOfLength-length l)
 -}
-    
+
 
 
     allPaths : List (SimplePathⁿᵗ n)
     allPaths = [] ∷ concat (applyUpTo allPathsOfLength n)
-    
+
     ∈-allPaths : ∀ p → p ∈ₚ allPaths
     ∈-allPaths []                  = here ≈ₚ-refl
     ∈-allPaths (e ∷ p ∣ e⇿p ∣ e∉p) =
@@ -170,12 +170,12 @@ module RoutingLib.Data.SimplePath.NonEmpty.Enumeration (n : ℕ) where
     allPaths-sortedByLength = AllPairs-concat⁺
       (applyUpTo⁺₂ allPathsOfLength n allPathsOfLength-sorted)
       (AllPairs-applyUpTo⁺₁ allPathsOfLength n allPathsOfLength-inc )
-    
+
   P : Uniset DPₛ
   P = allPaths , allPaths!
 
   enumeration : Enumeration DPₛ
-  enumeration = record 
+  enumeration = record
     { X             = P
     ; isEnumeration = ∈-allPaths
     }

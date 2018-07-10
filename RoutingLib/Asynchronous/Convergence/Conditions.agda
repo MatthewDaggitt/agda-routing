@@ -39,10 +39,10 @@ module RoutingLib.Asynchronous.Convergence.Conditions
   ------------------------
   -- Ultrametic space conditions that are also sufficient (and necessary)
   -- conditions as defined by Gurney
-  
+
   open import RoutingLib.Function.Metric setoid
     using (Bounded; _StrContrOnOrbitsOver_; _StrContrOnFixedPointOver_)
-    
+
   record UltrametricConditions : Set (a ⊔ ℓ) where
     field
       dᵢ                 : ∀ {i} → Sᵢ i → Sᵢ i → ℕ
@@ -67,7 +67,7 @@ module RoutingLib.Asynchronous.Convergence.Conditions
   -- Sufficient but not necessary conditions by Üresin and Dubois
 
   record SynchronousConditions p o : Set (lsuc (a ⊔ ℓ ⊔ p ⊔ o)) where
-  
+
     field
       D₀               : Pred Sᵢ p
       D₀-cong          : ∀ {x y} → x ∈ D₀ → x ≈ y → y ∈ D₀
@@ -87,9 +87,9 @@ module RoutingLib.Asynchronous.Convergence.Conditions
       ; transᵢ     to ≤ᵢ-trans
       ; antisymᵢ   to ≤ᵢ-antisym
       )
-    
+
     _≤_ = Lift Sᵢ _≤ᵢ_
-    
+
     field
       ξ                : S
       ξ-fixed          : F ξ ≈ ξ
@@ -103,15 +103,15 @@ module RoutingLib.Asynchronous.Convergence.Conditions
 
   record FiniteConditions p o : Set (lsuc (a ⊔ ℓ ⊔ p ⊔ o)) where
     open Membership (setoid) using () renaming (_∈_ to _∈L_)
-    
+
     field
       D₀                : Pred Sᵢ p
       D₀-cong           : ∀ {x y} → x ∈ D₀ → x ≈ y → y ∈ D₀
       D₀-closed         : ∀ {x} → x ∈ D₀ → F x ∈ D₀
       D₀-finite         : ∃ λ xs → ∀ {x} → x ∈ D₀ → x ∈L xs
-      
+
       -- ξ∈D₀              : ξ ∈ D₀
-      
+
       _≤ᵢ_              : Rel Sᵢ o
       ≤ᵢ-isPartialOrder : IsPartialOrder Sᵢ _≈ᵢ_ _≤ᵢ_
       _≟ᵢ_              : Decidable Sᵢ _≈ᵢ_
@@ -130,7 +130,7 @@ module RoutingLib.Asynchronous.Convergence.Conditions
 
     _≤_ = Lift Sᵢ _≤ᵢ_
     open NonStrictToStrict _≈_ _≤_ using (_<_)
-    
+
     field
       ξ               : S
       ξ∈D₀            : ξ ∈ D₀

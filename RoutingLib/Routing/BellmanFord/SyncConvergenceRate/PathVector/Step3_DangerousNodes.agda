@@ -50,16 +50,16 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step3_Dange
   (C-nonfull : Nonfull C)
   (C-fixed : ∀ {i} → i ∈ C → i ∈ᵤ Step1_NodeSets.𝓒 algebra X j (suc t-1))
   where
-  
+
   open Prelude algebra
   open Notation X j
   open Step1_NodeSets algebra X j
-  
+
   ----------------------------------------------------------------------------
   -- Inductive proof
 
   private
-  
+
     t : ℕ
     t = suc t-1
 
@@ -122,7 +122,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step3_Dange
   𝓓 s k = k ∉ᵤ 𝓡 (t + s) × ∃ λ i → (i , k) ∈ᵤ Dangerous s
 
   abstract
-  
+
     𝓓? : ∀ s → Decidable (𝓓 s)
     𝓓? s k = (∁? (𝓡? (t + s)) k) ×-dec (any? λ v → Dangerous? s (v , k))
 
@@ -134,7 +134,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step3_Dange
                                 × lengthₙ (suc t + s) k ≡ suc (lengthₙ(t + s) l)
     𝓓-retraction {s} {k} (k∉Rₜ₊₁₊ₛ , (i , k∈Dₜ₊₁₊ₛ))
       with ¬𝓡-retraction (t + s) k (¬𝓡-cong k∉Rₜ₊₁₊ₛ (+-suc t s))
-    ... | (l , p , _ , _ , p[σ¹⁺ᵗ⁺ˢ]≈kl∷p , σ¹⁺ᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢ , p[σᵗ⁺ˢXₗⱼ]≈p) = 
+    ... | (l , p , _ , _ , p[σ¹⁺ᵗ⁺ˢ]≈kl∷p , σ¹⁺ᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢ , p[σᵗ⁺ˢXₗⱼ]≈p) =
       l , l∈𝓓ₛ ,
       (lengthₙ-extension {t + s} {k} p[σ¹⁺ᵗ⁺ˢ]≈kl∷p p[σᵗ⁺ˢXₗⱼ]≈p)
 
@@ -142,12 +142,12 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step3_Dange
 
       σᵗ⁺¹⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢ : σ^ (t + suc s) X k j ≈ A k l ▷ σ^ (t + s) X l j
       σᵗ⁺¹⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢ = ≈-trans (≈-reflexive (cong (λ v → σ^ v X k j) (+-suc t s))) σ¹⁺ᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢ
-      
+
       l∈𝓓ₛ : l ∈ᵤ 𝓓 s
       l∈𝓓ₛ = Dangerous-predNot𝓡 (¬𝓡⇒∉C k∉Rₜ₊₁₊ₛ) σᵗ⁺¹⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢ k∈Dₜ₊₁₊ₛ ,
               (k , Dangerous-retraction σᵗ⁺¹⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢ k∈Dₜ₊₁₊ₛ)
-      
-      
+
+
   𝓓-length : ∀ s {i} → i ∈ᵤ 𝓓 s → s < lengthₙ (t + s) i
   𝓓-length zero    {i} (k∉Rₜ₊ₛ , _) = ¬𝓡-length (t + zero) i k∉Rₜ₊ₛ
   𝓓-length (suc s) {i} ik∈Dₛ with 𝓓-retraction ik∈Dₛ

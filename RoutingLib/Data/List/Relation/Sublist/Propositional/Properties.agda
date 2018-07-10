@@ -5,7 +5,7 @@ open import Data.List.Relation.Sublist.Propositional
 
 module RoutingLib.Data.List.Relation.Sublist.Propositional.Properties where
 
-  
+
 module _ {a} {A : Set a} where
 
   applyUpTo⁺ : ∀ (f : ℕ → A) {m n} → m ≤ n → applyUpTo f m ⊆ applyUpTo f n

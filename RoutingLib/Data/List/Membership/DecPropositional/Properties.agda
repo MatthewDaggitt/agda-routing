@@ -9,12 +9,12 @@ import RoutingLib.Data.List.Membership.Propositional.Properties as PropPropertie
 module RoutingLib.Data.List.Membership.DecPropositional.Properties where
 
   open PropProperties public
-  
+
   module _ {a} {A : Set a} (_≟_ : Decidable {A = A} _≡_) where
 
-    
+
     open DecMembership _≟_ using (deduplicate)
- 
+
     -- deduplicate
 
     ∈-deduplicate⁺ : ∀ {x xs} → x ∈ xs → x ∈ deduplicate xs

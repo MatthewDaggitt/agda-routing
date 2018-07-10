@@ -9,13 +9,13 @@ open import RoutingLib.Data.Table
 open import RoutingLib.Data.Table.Properties
 open import RoutingLib.Data.Table.Relation.Pointwise
   using () renaming (decSetoid to pointwiseDecSetoid)
-  
+
 module RoutingLib.Data.Table.Relation.DecidableEquality
   {a ℓ} (DS : DecSetoid a ℓ) where
 
   open DecSetoid DS using (_≈_; _≟_) renaming (setoid to S; Carrier to A)
   open import RoutingLib.Data.Table.Relation.Equality S public
-  
+
   Dec𝕋ₛ : ℕ → DecSetoid a ℓ
   Dec𝕋ₛ n = pointwiseDecSetoid DS n
 

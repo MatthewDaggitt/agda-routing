@@ -14,9 +14,9 @@ module RoutingLib.Data.Table where
 
   Table : ∀ {a} → Set a → ℕ → Set a
   Table A n = Fin n → A
-  
+
   -- Conversion
-  
+
   toList : ∀ {a n} {A : Set a} → Table A n → List A
   toList = List.tabulate
 
@@ -24,7 +24,7 @@ module RoutingLib.Data.Table where
   toVec = Vec.tabulate
 
   -- Operations
-  
+
   map : ∀ {a b} {A : Set a} {B : Set b} → (A → B) → ∀{n} → Table A n → Table B n
   map f t i = f (t i)
 
@@ -36,39 +36,39 @@ module RoutingLib.Data.Table where
         Table A n → Table B n → Table (A × B) n
   zip = zipWith _,_
 
-  
+
   foldl : ∀ {a b} {A : Set a} {B : Set b} →
           (B → A → B) → B → ∀ {n} → Table A n → B
   foldl f e {zero}  t = e
   foldl f e {suc n} t = foldl f (f e (t fzero)) (t ∘ fsuc)
-  
+
   foldr : ∀ {a b} {A : Set a} {B : Set b} →
           (A → B → B) → B → ∀ {n} → Table A n → B
   foldr f e {zero}  t = e
   foldr f e {suc n} t = f (t fzero) (foldr f e (t ∘ fsuc))
-  
+
   foldr⁺ : ∀ {a} {A : Set a} → Op₂ A → ∀ {n} → Table A (suc n) → A
   foldr⁺ f {zero}  t = t fzero
   foldr⁺ f {suc n} t = f (t fzero) (foldr⁺ f (t ∘ fsuc))
-  
+
   foldl⁺ : ∀ {a} {A : Set a} → Op₂ A → ∀ {n} → Table A (suc n) → A
   foldl⁺ f {n} t = foldl f (t fzero) (t ∘ fsuc)
 
   max : ∀ {n} → ℕ → Table ℕ n → ℕ
   max ⊥ t = foldr _⊔_ ⊥ t
-  
+
   max⁺ : ∀ {n} → Table ℕ (suc n) → ℕ
   max⁺ t = foldr⁺ _⊔_ t
 
   min : ∀ {n} → ℕ → Table ℕ n → ℕ
   min ⊤ t = foldr _⊓_ ⊤ t
-  
+
   min⁺ : ∀ {n} → Table ℕ (suc n) → ℕ
   min⁺ t = foldr⁺ _⊓_ t
 
   min∞ : ∀ {n} → ℕ∞ → Table ℕ∞ n → ℕ∞
   min∞ ⊤ t = foldr _⊓∞_ ⊤ t
-  
+
   min∞⁺ : ∀ {n} → Table ℕ∞ (suc n) → ℕ∞
   min∞⁺ t = foldr⁺ _⊓∞_ t
 

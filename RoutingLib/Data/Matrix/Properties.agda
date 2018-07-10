@@ -23,7 +23,7 @@ module RoutingLib.Data.Matrix.Properties where
   -- Properties fold
 
   module _ {a p} {A : Set a} (P : Pred A p) {_•_ : Op₂ A} where
-  
+
     fold-×pres : _•_ Preservesᵇ P → ∀ {e : A} → P e →
                  ∀ {m n} {M : Matrix A m n} → All P M →
                  P (fold _•_ e M)
@@ -47,7 +47,7 @@ module RoutingLib.Data.Matrix.Properties where
   -- Properties of fold⁺
 
   module _ {a p} {A : Set a} (P : Pred A p) {_•_ : Op₂ A} where
-  
+
     fold⁺-×pres : _•_ Preservesᵇ P → ∀ {m n} {M : Matrix A (suc m) (suc n)} →
                   All P M → P (fold⁺ _•_ M)
     fold⁺-×pres •-pres-P {zero} PM  = TableP.foldr⁺-×pres P •-pres-P (PM fzero)
@@ -66,33 +66,33 @@ module RoutingLib.Data.Matrix.Properties where
 
   x≤min⁺[M] : ∀ {m n} {M : Matrix ℕ (suc m) (suc n)} → ∀ {x} → All (x ≤_) M → x ≤ min⁺ M
   x≤min⁺[M] = fold⁺-×pres (_ ≤_) m≤n×m≤o⇒m≤n⊓o
-  
+
   min⁺[M]≤x : ∀ {m n} (M : Matrix ℕ (suc m) (suc n)) → ∀ {x} → Any (_≤ x) M → min⁺ M ≤ x
   min⁺[M]≤x _ = fold⁺-⊎pres (_≤ _) n≤m⊎o≤m⇒n⊓o≤m
 
   min⁺[M]≤M : ∀ {m n} (M : Matrix ℕ (suc m) (suc n)) → All (min⁺ M ≤_) M
   min⁺[M]≤M M i j = min⁺[M]≤x M (i , j , ≤-refl)
-  
+
   min⁺[M]<x : ∀ {m n} (M : Matrix ℕ (suc m) (suc n)) → ∀ {x} → Any (_< x) M → min⁺ M < x
   min⁺[M]<x _ = fold⁺-⊎pres (_< _) n<m⊎o<m⇒n⊓o<m
-  
+
   min⁺[M]≡x : ∀ {x} {m n} {M : Matrix ℕ (suc m) (suc n)} → x ∈ M → All (x ≤_) M → min⁺ M ≡ x
   min⁺[M]≡x {M = M} (i , j , x≈Mᵢⱼ) x≤M = ≤-antisym (min⁺[M]≤x M (i , j , ≤-reflexive (sym x≈Mᵢⱼ))) (x≤min⁺[M] x≤M)
-  
+
   min⁺-constant : ∀ {m n} {M : Matrix ℕ (suc m) (suc n)} → ∀ {x} → All (_≡ x) M → min⁺ M ≡ x
   min⁺-constant = fold⁺-×pres (_≡ _) ⊓-preserves-≡x
 
   min⁺-cong : ∀ {m n} {M N : Matrix ℕ (suc m) (suc n)} →
               Pointwise _≡_ M N → min⁺ M ≡ min⁺ N
   min⁺-cong = fold⁺-cong {_~_ = _≡_} (cong₂ _⊓_)
-  
+
   min⁺[M]<min⁺[N] : ∀ {m n p q} {M : Matrix ℕ (suc m) (suc n)} {N : Matrix ℕ (suc p) (suc q)} →
                     All (λ y → Any (_< y) M) N → min⁺ M < min⁺ N
   min⁺[M]<min⁺[N] {p = zero}  {zero}  M<N = min⁺[M]<x _ (M<N fzero fzero)
   min⁺[M]<min⁺[N] {p = zero}  {suc q} M<N = m<n×m<o⇒m<n⊓o (min⁺[M]<x _ (M<N fzero fzero)) (min⁺[M]<min⁺[N] (λ i j → M<N i (fsuc j)))
   min⁺[M]<min⁺[N] {p = suc p} {zero}  M<N = m<n×m<o⇒m<n⊓o (min⁺[M]<x _ (M<N fzero fzero)) (min⁺[M]<min⁺[N] (λ i j → M<N (fsuc i) j))
   min⁺[M]<min⁺[N] {p = suc p} {suc q} M<N = m<n×m<o⇒m<n⊓o (m<n×m<o⇒m<n⊓o (min⁺[M]<x _ (M<N fzero fzero)) (min⁺[M]<min⁺[N] {p = 0} (λ i j → M<N fzero (fsuc j)))) (min⁺[M]<min⁺[N] (λ i j → M<N (fsuc i) j))
-              
+
 
 
   max⁺-cong : ∀ {m n} {t s : Matrix ℕ (suc m) (suc n)} →
@@ -100,7 +100,7 @@ module RoutingLib.Data.Matrix.Properties where
   max⁺-cong = fold⁺-cong {_~_ = _≡_} (cong₂ _⊔_)
 
   x≤max⁺[M] : ∀ {m n} (M : Matrix ℕ (suc m) (suc n)) →
-              ∀ {x} → Any (x ≤_) M → x ≤ max⁺ M 
+              ∀ {x} → Any (x ≤_) M → x ≤ max⁺ M
   x≤max⁺[M] _ = fold⁺-⊎pres (_ ≤_) m≤n⊎m≤o⇒m≤n⊔o
 
   max⁺[M]≤x : ∀ {m n} {M : Matrix ℕ (suc m) (suc n)} →
@@ -113,7 +113,7 @@ module RoutingLib.Data.Matrix.Properties where
   max⁺-constant : ∀ {m n} {M : Matrix ℕ (suc m) (suc n)} →
                   ∀ {x} → All (_≡ x) M → max⁺ M ≡ x
   max⁺-constant {x = x} = fold⁺-×pres (_≡ x) ⊔-preserves-≡x
-  
+
   max⁺[M]≡x : ∀ {x} {m n} {M : Matrix ℕ (suc m) (suc n)} → x ∈ M → All (_≤ x) M → max⁺ M ≡ x
   max⁺[M]≡x {M = M} (i , j , x≈Mᵢⱼ) M≤x = ≤-antisym (max⁺[M]≤x M≤x) (x≤max⁺[M] M (i , j , ≤-reflexive x≈Mᵢⱼ))
 

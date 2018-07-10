@@ -113,7 +113,7 @@ module _ {a p} {A : Set a} {P : Pred A p} {_•_ : Op₂ A} where
 
 lookup∈xs : ∀ {a} {A : Set a} (xs : List A) (i : Fin (length xs)) →
             lookup xs i ∈ xs
-lookup∈xs []       ()     
+lookup∈xs []       ()
 lookup∈xs (x ∷ xs) fzero    = here refl
 lookup∈xs (x ∷ xs) (fsuc i) = there (lookup∈xs xs i)
 

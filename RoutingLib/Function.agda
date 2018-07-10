@@ -7,14 +7,14 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong)
 module RoutingLib.Function where
 
   -- Double composition
-  
+
   _∘₂_ : ∀ {a b c d} → {A : Set a} {B : Set b} {C : Set c} {D : Set d} →
-         (f : C → D) → (g : A → B → C) → (A → B → D) 
+         (f : C → D) → (g : A → B → C) → (A → B → D)
   f ∘₂ g = λ x y → f (g x y)
 
 
   -- Repeated application
-  
+
   infix 7 _^ˡ_ _^ʳ_
 
   _^ˡ_ : ∀ {a} {A : Set a} → (A → A) → ℕ → (A → A)

@@ -19,18 +19,18 @@ open import RoutingLib.Data.List.AllPairs.Properties using (applyUpTo⁺₁)
 module RoutingLib.Data.List.Sorting.Nat where
 
   open Sorting _≤_ using (Sorted)
-  
+
   strictlySorted : ∀ {xs} → Sorted xs → Unique xs → AllPairs _<_ xs
   strictlySorted xs↑ xs! = map (uncurry′ ≤+≢⇒<) (zip (xs↑ , xs!))
 
-  upTo-↗ : ∀ e → Sorted (upTo e) 
+  upTo-↗ : ∀ e → Sorted (upTo e)
   upTo-↗ e = applyUpTo⁺₁ e (λ i<j _ → <⇒≤ i<j)
 
   {-
   between-↗ : ∀ e s → Sorted (between e s)
   between-↗ e s = AllPairs-applyBetween⁺₁ id e s (λ _ i<j _ → <⇒≤ i<j)
   -}
-  
+
   index-mono⁻¹-< : ∀ {xs} → Sorted xs → Unique xs → ∀ {i j} → lookup xs i < lookup xs j → i <𝔽 j
   index-mono⁻¹-< [] []                     {()}
   index-mono⁻¹-< (x≤xs ∷ xs↗) (x≉xs ∷ xs!) {zero}  {zero}  x<x     = contradiction x<x (n≮n _)

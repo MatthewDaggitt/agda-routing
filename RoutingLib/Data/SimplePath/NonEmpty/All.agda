@@ -13,7 +13,7 @@ module RoutingLib.Data.SimplePath.NonEmpty.All {n : ℕ} where
 
   ----------------------------------------------------------------------------
   -- Datatypes
-  
+
   data Allₙ {p} (P : Pred (Fin n) p) : SimplePathⁿᵗ n → Set p where
     []      : Allₙ P []
     [_,_]∷_ : ∀ {i j p ij⇿p i∉p} → P i → P j → Allₙ P p → Allₙ P ((i , j) ∷ p ∣ ij⇿p ∣ i∉p)
@@ -37,18 +37,18 @@ module RoutingLib.Data.SimplePath.NonEmpty.All {n : ℕ} where
   ... | no ¬pe | _      = no λ {(pe ∷ _) → ¬pe pe}
   ... | _      | no ¬pp = no λ {(_ ∷ pp) → ¬pp pp}
   ... | yes pe | yes pp = yes (pe ∷ pp)
-  
+
   ----------------------------------------------------------------------------
   -- Properties
-  
+
   module _ {a} {P : Pred (Fin n) a} where
-  
+
     Allₙ-resp-≈ₚ : ∀ {p q} → Allₙ P p → p ≈ₚ q → Allₙ P q
     Allₙ-resp-≈ₚ []                []           = []
     Allₙ-resp-≈ₚ ([ Pi , Pj ]∷ Pp) (refl ∷ p≈q) = [ Pi , Pj ]∷ Allₙ-resp-≈ₚ Pp p≈q
 
   module _ {a} {P : Pred (Fin n × Fin n) a} where
-  
+
     Allₑ-resp-≈ₚ : ∀ {p q} → Allₑ P p → p ≈ₚ q → Allₑ P q
     Allₑ-resp-≈ₚ []          []           = []
     Allₑ-resp-≈ₚ ( i~j ∷ ~p) (refl ∷ p≈q) = i~j ∷ Allₑ-resp-≈ₚ ~p p≈q

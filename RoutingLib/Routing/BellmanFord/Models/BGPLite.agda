@@ -74,11 +74,11 @@ _              ▷ invalid       = invalid
 ▷-cong (step i j pol) {_}                {_}                invalidEq = invalidEq
 ▷-cong (step i j pol) {r@(valid l cs p)} {s@(valid k ds q)} r≈s@(validEq l≡k cs≈ds p≈q)
   with (i , j) ⇿? p | (i , j) ⇿? q
-... | no _    | no _    = invalidEq 
+... | no _    | no _    = invalidEq
 ... | no ¬e⇿p | yes e⇿q = contradiction (⇿-resp-≈ₚ (≈ₚ-sym p≈q) e⇿q) ¬e⇿p
 ... | yes e⇿p | no ¬e⇿q = contradiction (⇿-resp-≈ₚ p≈q e⇿p) ¬e⇿q
 ... | yes _   | yes _ with i ∉ₚ? p | i ∉ₚ? q
-...   | no _    | no  _   = invalidEq 
+...   | no _    | no  _   = invalidEq
 ...   | no  i∈p | yes i∉q = contradiction (∉-resp-≈ₚ (≈ₚ-sym p≈q) i∉q) i∈p
 ...   | yes i∉p | no  i∈q = contradiction (∉-resp-≈ₚ p≈q i∉p) i∈q
 ...   | yes _   | yes _  = apply-cong pol (validEq l≡k cs≈ds (refl ∷ p≈q))
@@ -237,4 +237,4 @@ module _ (topology : Fin n → Fin n → Policy) where
   open BellmanFord rawRoutingAlgebra A
 
   δ-convergesAbsolutely : IsAsynchronouslySafe σ∥
-  δ-convergesAbsolutely = ConvergenceTheorems.incrPaths-converges increasingPathAlgebra 
+  δ-convergesAbsolutely = ConvergenceTheorems.incrPaths-converges increasingPathAlgebra

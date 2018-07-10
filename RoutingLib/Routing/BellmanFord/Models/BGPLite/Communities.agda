@@ -37,28 +37,28 @@ abstract
   c ∈? cs = ⌊ c ∈ₛ? cs ⌋
 
   -- We assume there is decidable total order over community sets
-  
+
   _≈ᶜˢ_ : Rel CommunitySet ℓ₀
   _≈ᶜˢ_ = _≡_
-  
+
   _≤ᶜˢ_ : Rel CommunitySet ℓ₀
   _≤ᶜˢ_ = Lex _<_
-  
+
   ≤ᶜˢ-minimum : Minimum _≤ᶜˢ_ ∅
   ≤ᶜˢ-minimum = ≤-minimum _<_ _≟_ <-minimum
-  
+
   ≤ᶜˢ-isDecTotalOrder : IsDecTotalOrder _≈ᶜˢ_ _≤ᶜˢ_
   ≤ᶜˢ-isDecTotalOrder = ≤-isDecTotalOrder _<_ <-isStrictTotalOrder
-  
+
   ∈-resp-≈ᶜˢ : ∀ c {cs ds} → cs ≈ᶜˢ ds → c ∈? cs ≡ c ∈? ds
   ∈-resp-≈ᶜˢ c refl = refl
-  
+
   add-cong : ∀ c {cs ds} → cs ≈ᶜˢ ds → add c cs ≈ᶜˢ add c ds
   add-cong c refl = refl
-  
+
   remove-cong : ∀ c {cs ds} → cs ≈ᶜˢ ds → remove c cs ≈ᶜˢ remove c ds
   remove-cong c refl = refl
-  
+
   -- Re-exporting properties
 
   open IsDecTotalOrder ≤ᶜˢ-isDecTotalOrder public

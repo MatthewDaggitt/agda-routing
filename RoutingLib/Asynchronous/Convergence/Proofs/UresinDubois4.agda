@@ -35,26 +35,26 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois4
   where
 
   open Parallelisation 𝓟
-  
+
   open Membership setoid using () renaming (_∈_ to _∈ₗ_)
   open Sublist setoid using () renaming (_⊆_ to _⊆ₗ_)
-  
+
   open FiniteConditions finiteCond
 
   -------------------------------------------------------
   -- This is currently a work in progress
-  
+
   _≟_ : Decidable _≈_
   x ≟ y = all? (λ i → x i ≟ᵢ y i)
-  
+
   ξ-fixed : F ξ ≈ ξ
   ξ-fixed = {!!}
-  
+
   F-decr : ∀ {x} → x ∈ D₀ → F x ≤ x
   F-decr {x} x∈D₀ with x ≟ ξ
   ... | yes x≈ξ = ≤-reflexive (≈-trans (≈-trans (F-cong x≈ξ) ξ-fixed) (≈-sym x≈ξ))
   ... | no  x≉ξ = proj₁ (F-strictlyDecr x∈D₀ x≉ξ)
-  
+
   {-
   x≤y≤z∧x≉y⇒x≉z : ∀ {x y z} → x ≤ y → y ≤ z → x ≉ y → x ≉ z
   x≤y≤z∧x≉y⇒x≉z x≤y y≤z x≉y x≈z = x≉y (≤-antisym x≤y (≤-trans y≤z (≤-reflexive (≈-sym x≈z))))
@@ -66,7 +66,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois4
   D₀-complete : ∀ {x₀} → x₀ ∈ D₀ → ∀ K → syncIter x₀ K ∈ D₀
   D₀-complete x₀∈D₀ zero    = x₀∈D₀
   D₀-complete x₀∈D₀ (suc K) = D₀-closed (D₀-complete x₀∈D₀ K)
-    
+
   iter-decreasing : ∀ {x₀} → x₀ ∈ D₀ → ∀ K → syncIter x₀ (suc K) ≤ syncIter x₀ K
   iter-decreasing x₀∈D₀ K i = F-nonexpansive (D₀-complete x₀∈D₀ K) ? i
 
@@ -75,7 +75,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois4
   -- Synchronous iteration
 
   module _ {x₀} (x₀∈D₀ : x₀ ∈ D₀) where
-  
+
     σ : ℕ → S
     σ = syncIter x₀
 
@@ -140,12 +140,12 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois4
     |Dₖˡ|-decreasing K σ[K]≉σ[1+K] = filter-notAll (∁? (σ K ≟_)) (Dₖˡ K) (Any.map contradiction (σ[K]∈Dₖˡ K σ[K]≉σ[1+K]))
 
     -- Prove that fixed point exists
-    σ-fixedPoint : ∀ K → Acc _<ℕ_ (length (Dₖˡ K)) → ∃ λ T → ∀ t → σ (t + T) ≈ σ T 
+    σ-fixedPoint : ∀ K → Acc _<ℕ_ (length (Dₖˡ K)) → ∃ λ T → ∀ t → σ (t + T) ≈ σ T
     σ-fixedPoint K (acc rec) with σ K ≟ σ (suc K)
     ... | yes σ[K]≈σ[1+K] = K , σ-fixed K (≈-sym σ[K]≈σ[1+K])
     ... | no  σ[K]≉σ[1+K] = σ-fixedPoint (suc K) (rec _ (|Dₖˡ|-decreasing K σ[K]≉σ[1+K]))
 
-    σ-converges : ∃ λ T → ∀ t → σ (t + T) ≈ σ T 
+    σ-converges : ∃ λ T → ∀ t → σ (t + T) ≈ σ T
     σ-converges = σ-fixedPoint 0 (<-wellFounded (length D₀ˡ))
 
 {-
@@ -154,7 +154,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois4
 
   ξ-fixed : F ξ ≈ ξ
   ξ-fixed = proj₂ (σ-converges v∈D₀) 1
-  
+
   ξ-unique : ∀ {x} → F x ≈ x → x ≈ ξ
   ξ-unique Fx≈x = {!!}
 
@@ -169,7 +169,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois4
     ; D₀-closed       = D₀-closed
     ; _≤ᵢ_            = _≤ᵢ_
     ; ≤ᵢ-isPartialOrder = ≤ᵢ-isPartialOrder
-    
+
     ; ξ               = ξ
     ; ξ-fixed         = ? --ξ-fixed
     ; F-monotone      = F-monotone

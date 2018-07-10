@@ -23,7 +23,7 @@ module RoutingLib.Data.Vec.Properties where
   ... | yes refl | yes refl = yes refl
   ... | no  x≢y  | _        = no λ { refl → x≢y refl }
   ... | _        | no xs≢ys = no λ { refl → xs≢ys refl }
-  
+
   ∈-lookup : ∀ {a n} {A : Set a} {v : A} {xs : Vec A n} →
              v ∈ xs → ∃ λ i → lookup i xs ≡ v
   ∈-lookup here = fzero , refl

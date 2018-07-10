@@ -21,7 +21,7 @@ open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Equality
 module RoutingLib.Data.SimplePath.NonEmpty.Properties {n} where
 
   abstract
-  
+
     ----------------------
     -- Linking
 
@@ -44,7 +44,7 @@ module RoutingLib.Data.SimplePath.NonEmpty.Properties {n} where
 
   ----------------------
   -- Membership
-  
+
     _∉?_ : Decidable (_∉_ {n})
     k ∉? [] = yes notThere
     k ∉? ((i , j) ∷ p ∣ _ ∣ _) with k ≟𝔽 i | k ≟𝔽 j | k ∉? p
@@ -55,7 +55,7 @@ module RoutingLib.Data.SimplePath.NonEmpty.Properties {n} where
 
     _∈?_ : Decidable (_∈_ {n})
     k ∈? p = ¬? (k ∉? p)
-    
+
     ∉-resp-≈ₚ : ∀ {k : Fin n} → (k ∉_) Respects _≈ₚ_
     ∉-resp-≈ₚ []            notThere             = notThere
     ∉-resp-≈ₚ (refl ∷ p≈ₚq) (notHere k≢i k≢j k∉p) = notHere k≢i k≢j (∉-resp-≈ₚ p≈ₚq k∉p)
@@ -83,15 +83,15 @@ module RoutingLib.Data.SimplePath.NonEmpty.Properties {n} where
     ∉-lookup₂ (nonEmpty (j , l) p e⇿p e∉p) {i} {.j} (continue x) fzero    = ij⇿p⇒i≢j e⇿p ∘ sym
     ∉-lookup₂ (nonEmpty (j , l) [] e⇿p e∉p) {i} {.j} (continue x) (fsuc ())
     ∉-lookup₂ (nonEmpty (j , l) (.(_ , _) ∷ p ∣ e⇿p₁ ∣ e∉p₁) e⇿p (notHere x₁ x₂ e∉p)) {i} {.j} (continue x) (fsuc fzero) = x₂ ∘ sym
-    ∉-lookup₂ (nonEmpty (j , l) (e ∷ p ∣ e⇿p₁ ∣ e∉p₁) e⇿p e∉p) {i} {.j} (continue x) (fsuc (fsuc k)) = 
+    ∉-lookup₂ (nonEmpty (j , l) (e ∷ p ∣ e⇿p₁ ∣ e∉p₁) e⇿p e∉p) {i} {.j} (continue x) (fsuc (fsuc k)) =
       ∉-lookup (nonEmpty e p e⇿p₁ e∉p₁) e∉p (fsuc (fsuc k))
-    
+
     lookup! : ∀ {p : SimplePathⁿᵗ n} (p⁺ : NonEmpty p) → ∀ k l → k ≢ l → lookupᵥ p⁺ k ≢ lookupᵥ p⁺ l
     lookup! (nonEmpty e p e⇿p e∉p)               fzero           fzero           0≢0 = contradiction refl 0≢0
     lookup! (nonEmpty e p e⇿p e∉p)               fzero           (fsuc fzero)    _   = ij⇿p⇒i≢j e⇿p
     lookup! (nonEmpty e [] e⇿p e∉p)              fzero           (fsuc (fsuc ()))
     lookup! (nonEmpty e p e⇿p e∉p)               (fsuc fzero)    fzero           _   = ij⇿p⇒i≢j e⇿p ∘ sym
-    lookup! (nonEmpty e [] e⇿p e∉p)              (fsuc (fsuc ())) _      
+    lookup! (nonEmpty e [] e⇿p e∉p)              (fsuc (fsuc ())) _
     lookup! (nonEmpty e p e⇿p e∉p)               (fsuc fzero)    (fsuc fzero)    1≢1 = contradiction refl 1≢1
     lookup! (nonEmpty e [] e⇿p e∉p)              (fsuc fzero)    (fsuc (fsuc ()))
     lookup! (nonEmpty e (f ∷ p ∣ a ∣ b) e⇿p e∉p) fzero           (fsuc (fsuc l)) _   =
@@ -114,7 +114,7 @@ module RoutingLib.Data.SimplePath.NonEmpty.Properties {n} where
     test : ∀ {x y} → x <ℕ y → x ≤ℕ suc y
     test (s≤s z≤n)       = z≤n
     test (s≤s (s≤s x<y)) = s≤s (test (s≤s x<y))
-    
+
     |p|≤1+n : ∀ (p : SimplePathⁿᵗ n) → length p ≤ℕ suc n
     |p|≤1+n []                   = z≤n
     |p|≤1+n (e ∷ p ∣ e⇿p ∣ e∉p) = test (|p|<n (nonEmpty _ _ e⇿p e∉p))

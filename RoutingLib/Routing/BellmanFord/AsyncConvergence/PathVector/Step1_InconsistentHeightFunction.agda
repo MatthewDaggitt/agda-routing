@@ -16,30 +16,30 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step1_Inconsis
   where
 
   open Prelude pathAlgebra
-  
+
   ------------------------------------------------------------------------------
   -- Inconsistent length
   ------------------------------------------------------------------------------
   -- The size of inconsistent routes where consistent routes are viewed as
   -- having the maximum size `n`
-    
+
   abstract
-  
+
     hⁱ : Route → ℕ
     hⁱ r with 𝑪? r
     ... | yes _ = 1
     ... | no  _ = suc n ∸ size r
-  
+
     Hⁱ : ℕ
     Hⁱ = suc n
-  
+
     hⁱ-cong : ∀ {r s} → r ≈ s → hⁱ r ≡ hⁱ s
     hⁱ-cong {r} {s} r≈s with 𝑪? r | 𝑪? s
     ... | yes _  | yes _  = refl
     ... | no  rⁱ | yes sᶜ = contradiction (𝑪-cong (≈-sym r≈s) sᶜ) rⁱ
     ... | yes rᶜ | no  sⁱ = contradiction (𝑪-cong r≈s rᶜ) sⁱ
     ... | no  _  | no  _  = cong (suc n ∸_) (size-cong r≈s)
-  
+
     hⁱ-decr : ∀ {i j x} → 𝑰 (A i j ▷ x) → hⁱ (A i j ▷ x) < hⁱ x
     hⁱ-decr {i} {j} {x} Aᵢⱼxⁱ with 𝑪? x | 𝑪? (A i j ▷ x)
     ... | yes xᶜ | _        = contradiction xᶜ (▷-forces-𝑰 Aᵢⱼxⁱ)
@@ -53,14 +53,14 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step1_Inconsis
     ... | yes _ | no  _  = begin
       2                    ≡⟨ sym (m+n∸n≡m 2 n) ⟩
       2 + n ∸ n            ≤⟨ ∸-monoʳ-≤ (suc (suc n)) (size<n 1≤n r) ⟩
-      2 + n ∸ suc (size r) ≡⟨⟩ 
+      2 + n ∸ suc (size r) ≡⟨⟩
       1 + n ∸ size r       ∎
-    
+
     1≤hⁱ : ∀ r → 1 ≤ hⁱ r
     1≤hⁱ r with 𝑪? r
     ... | yes _ = s≤s z≤n
     ... | no  _ = m<n⇒0<n∸m (s≤s (<⇒≤ (size<n 1≤n r)))
-    
+
     hⁱ≤Hⁱ : ∀ r → hⁱ r ≤ Hⁱ
     hⁱ≤Hⁱ r with 𝑪? r
     ... | yes _ = s≤s z≤n

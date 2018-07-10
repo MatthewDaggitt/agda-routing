@@ -51,7 +51,7 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     {-
     ∈-applyBetween⁺ : ∀ f {s e i} → s ≤ i → i < e → f i ∈ applyBetween f s e
     ∈-applyBetween⁺ f s≤i i<e = Any-applyBetween⁺ f s≤i i<e ≈-refl
-    
+
     ∈-applyBetween⁻ : ∀ f s e {v} → v ∈ applyBetween f s e → ∃ λ i → s ≤ i × i < e × v ≈ f i
     ∈-applyBetween⁻ f s e v∈ = Any-applyBetween⁻ f s e v∈
     -}
@@ -79,10 +79,10 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     index-cong (here x≈z)   (there y∈xs) (z≉xs ∷ xs!) x≈y = contradiction (∈-resp-≈ S (trans (sym x≈y) x≈z) y∈xs) (All¬⇒¬Any z≉xs)
     index-cong (there x∈xs) (here y≈z)   (z≉xs ∷ xs!) x≈y = contradiction (∈-resp-≈ S (trans x≈y y≈z) x∈xs) (All¬⇒¬Any z≉xs)
     index-cong (there x∈xs) (there y∈xs) (_ ∷ xs!)    x≈y = cong fsuc (index-cong x∈xs y∈xs xs! x≈y)
-    
 
-    
-    
+
+
+
   ------------------------------------
   -- Properties involving 2 setoids --
   ------------------------------------
@@ -134,6 +134,3 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     combine-∈ f (x ∷ xs) ys v∈map++com | inj₂ v∈com with combine-∈ f xs ys v∈com
     ... | (a , b , a∈xs , b∈ys , v≈fab) = a , b , there a∈xs , b∈ys , v≈fab
 
-
-
-  

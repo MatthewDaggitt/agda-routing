@@ -39,7 +39,7 @@ module RoutingLib.Data.List.Extrema
 
   argmax : ∀ {a} {A : Set a} (f : A → B) → A → List A → A
   argmax f = foldr (⊔-lift f)
-  
+
   min : B → List B → B
   min = argmin id
 
@@ -48,9 +48,9 @@ module RoutingLib.Data.List.Extrema
 
   ------------------------------------------------------------------------------
   -- Properties of argmin
-  
+
   module _ {a} {A : Set a} {f : A → B} where
-  
+
     f[argmin]≤v⁺ : ∀ {v} ⊤ xs → (f ⊤ ≤ v) ⊎ (Any (λ x → f x ≤ v) xs) →
                   f (argmin f ⊤ xs) ≤ v
     f[argmin]≤v⁺ = foldr-presᵒ (⊓-lift-presᵒ-≤v f)
@@ -58,7 +58,7 @@ module RoutingLib.Data.List.Extrema
     f[argmin]<v⁺ : ∀ {v} ⊤ xs → (f ⊤ < v) ⊎ (Any (λ x → f x < v) xs) →
                   f (argmin f ⊤ xs) < v
     f[argmin]<v⁺ = foldr-presᵒ (⊓-lift-presᵒ-<v f)
-    
+
     v≤f[argmin]⁺ : ∀ {v ⊤ xs} → v ≤ f ⊤ → All (λ x → v ≤ f x) xs →
                   v ≤ f (argmin f ⊤ xs)
     v≤f[argmin]⁺ {v} = foldr-presᵇ (⊓-lift-presᵇ-v≤ f)
@@ -91,7 +91,7 @@ module RoutingLib.Data.List.Extrema
     ... | inj₂ argmin∈xs = lookup pxs argmin∈xs
 
   module _ {a} {A : Set a} where
-  
+
     argmin[xs]<argmin[ys]⁺ : ∀ {f : A → B} {g : A → B} ⊤₁ {⊤₂} xs {ys : List A} →
                             (f ⊤₁ < g ⊤₂) ⊎ Any (λ x → f x < g ⊤₂) xs →
                             All (λ y → (f ⊤₁ < g y) ⊎ Any (λ x → f x < g y) xs) ys →
@@ -99,20 +99,20 @@ module RoutingLib.Data.List.Extrema
     argmin[xs]<argmin[ys]⁺ ⊤₁ xs xs<⊤₂ xs<ys =
       v<f[argmin]⁺ (f[argmin]<v⁺ ⊤₁ _ xs<⊤₂) (map (f[argmin]<v⁺ ⊤₁ xs) xs<ys)
 
-  
+
   ------------------------------------------------------------------------------
   -- Properties of argmax
 
   module _ {a} {A : Set a} {f : A → B} where
-  
+
     f[argmax]≤v⁺ : ∀ {v ⊥ xs} → f ⊥ ≤ v → All (λ x → f x ≤ v) xs →
                   f (argmax f ⊥ xs) ≤ v
     f[argmax]≤v⁺ = foldr-presᵇ (⊔-lift-presᵇ-≤v f)
-    
+
     f[argmax]<v⁺ : ∀ {v ⊥ xs} → f ⊥ < v → All (λ x → f x < v) xs →
                   f (argmax f ⊥ xs) < v
     f[argmax]<v⁺ = foldr-presᵇ (⊔-lift-presᵇ-<v f)
-    
+
     v≤f[argmax]⁺ : ∀ {v} ⊥ xs → (v ≤ f ⊥) ⊎ (Any (λ x → v ≤ f x) xs) →
                   v ≤ f (argmax f ⊥ xs)
     v≤f[argmax]⁺ = foldr-presᵒ (⊔-lift-presᵒ-v≤ f)
@@ -126,7 +126,7 @@ module RoutingLib.Data.List.Extrema
 
     f[xs]≤f[argmax] : ∀ ⊥ xs → All (λ x → f x ≤ f (argmax f ⊥ xs)) xs
     f[xs]≤f[argmax] ⊥ xs = foldr-forcesᵇ (⊔-lift-forcesᵇ-≤v f) ⊥ xs refl
-    
+
   module _ {a} {A : Set a} {f : A → B} where
 
     argmax-sel : ∀ ⊥ xs → (argmax f ⊥ xs ≡ ⊥) ⊎ (argmax f ⊥ xs ∈ xs)
@@ -137,7 +137,7 @@ module RoutingLib.Data.List.Extrema
     argmax-all {P = P} {⊥} {xs} p⊥ pxs with argmax-sel ⊥ xs
     ... | inj₁ argmax≡⊥  = subst P (sym argmax≡⊥) p⊥
     ... | inj₂ argmax∈xs = lookup pxs argmax∈xs
-  
+
   module _ {a} {A : Set a} where
 
     argmax≤argmax⁺ : ∀ {f : A → B} {g : A → B} {⊥₁} ⊥₂ {xs : List A} ys →
@@ -146,19 +146,19 @@ module RoutingLib.Data.List.Extrema
                      f (argmax f ⊥₁ xs) ≤ g (argmax g ⊥₂ ys)
     argmax≤argmax⁺ ⊥₂ ys ⊥₁≤ys xs≤ys =
       f[argmax]≤v⁺ (v≤f[argmax]⁺ ⊥₂ _ ⊥₁≤ys) (map (v≤f[argmax]⁺ ⊥₂ ys) xs≤ys)
-    
+
     argmax<argmax⁺ : ∀ {f : A → B} {g : A → B} {⊥₁} ⊥₂ {xs : List A} ys →
                      (f ⊥₁ < g ⊥₂) ⊎ Any (λ y → f ⊥₁ < g y) ys →
                      All (λ x → (f x < g ⊥₂) ⊎ Any (λ y → f x < g y) ys) xs →
                      f (argmax f ⊥₁ xs) < g (argmax g ⊥₂ ys)
     argmax<argmax⁺ ⊥₂ ys ⊥₁<ys xs<ys =
       f[argmax]<v⁺ (v<f[argmax]⁺ ⊥₂ _ ⊥₁<ys) (map (v<f[argmax]⁺ ⊥₂ ys) xs<ys)
-    
+
   ------------------------------------------------------------------------------
   -- Properties of min
 
   module _ {a} {A : Set a} where
-  
+
     min≤v⁺ : ∀ {v} ⊤ xs → ⊤ ≤ v ⊎ Any (_≤ v) xs → min ⊤ xs ≤ v
     min≤v⁺ = f[argmin]≤v⁺
 
@@ -170,7 +170,7 @@ module RoutingLib.Data.List.Extrema
 
     v<min⁺ : ∀ {v ⊤ xs} → v < ⊤ → All (v <_) xs → v < min ⊤ xs
     v<min⁺ = v<f[argmin]⁺
-     
+
     min⁺≈v : ∀ {v ⊤ xs} → v ∈ xs → All (v ≤_) xs → v ≤ ⊤ → min ⊤ xs ≈ v
     min⁺≈v = f[argmin]≈f[v]⁺
 
@@ -187,22 +187,22 @@ module RoutingLib.Data.List.Extrema
 
   max<v⁺ : ∀ {v xs ⊥} → ⊥ < v → All (_< v) xs → max ⊥ xs < v
   max<v⁺ = f[argmax]<v⁺
-  
+
   v≤max⁺ : ∀ {v} ⊥ xs → v ≤ ⊥ ⊎ Any (v ≤_) xs → v ≤ max ⊥ xs
   v≤max⁺ = v≤f[argmax]⁺
-  
+
   v<max⁺ : ∀ {v} ⊥ xs → v < ⊥ ⊎ Any (v <_) xs → v < max ⊥ xs
   v<max⁺ = v<f[argmax]⁺
-  
+
   ⊥≤max : ∀ ⊥ xs → ⊥ ≤ max ⊥ xs
   ⊥≤max = f[⊥]≤f[argmax]
 
   xs≤max : ∀ ⊥ xs → All (_≤ max ⊥ xs) xs
   xs≤max = f[xs]≤f[argmax]
-  
+
   max≤max⁺ : ∀ {⊥₁} ⊥₂ {xs} ys → ⊥₁ ≤ ⊥₂ ⊎ Any (⊥₁ ≤_) ys →
              All (λ x → x ≤ ⊥₂ ⊎ Any (x ≤_) ys) xs → max ⊥₁ xs ≤ max ⊥₂ ys
   max≤max⁺ = argmax≤argmax⁺
-  
+
   max-mono-⊆ : ∀ {⊥₁} {⊥₂} {xs ys} → ⊥₁ ≤ ⊥₂ → xs ⊆ ys → max ⊥₁ xs ≤ max ⊥₂ ys
   max-mono-⊆ {⊥₁} {⊥₂} {xs} {ys} ⊥₁≤⊥₂ xs⊆ys = max≤max⁺ {⊥₁} ⊥₂ {xs} ys (inj₁ ⊥₁≤⊥₂) (tabulate λ x∈xs → inj₂ (Any.map (λ {≡-refl → refl}) (xs⊆ys x∈xs)))

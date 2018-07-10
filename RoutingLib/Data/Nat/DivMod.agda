@@ -131,7 +131,7 @@ toℕ-mod {n} i = begin
   fromℕ≤″ (toℕ i % suc n) _  ≡⟨ fromℕ≤″-cong _ _ (a≤n⇒a%n≡a (≤-pred (toℕ<n i))) ⟩
   fromℕ≤″ (toℕ i) _          ≡⟨ fromℕ≤″-toℕ (≤⇒≤″ (toℕ<n i)) ⟩
   i                           ∎
-  
+
 +ˡ-mod : ∀ a b {n} → a mod suc n ≡ zero → (a + b) mod suc n ≡ b mod suc n
 +ˡ-mod a b eq = fromℕ≤″-cong _ _ (+ˡ-% a b (fromℕ≤″-injective _ (≤⇒≤″ (s≤s z≤n)) eq))
 

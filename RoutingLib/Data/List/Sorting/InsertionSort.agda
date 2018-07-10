@@ -24,7 +24,7 @@ module RoutingLib.Data.List.Sorting.InsertionSort
   open Sortingₚ decTotalOrder
   open Uniqueness Eq.setoid using (Unique)
   open Membership Eq.setoid using (_∈_)
-  
+
   sort : List A → List A
   sort []       = []
   sort (x ∷ xs) = insert total x (sort xs)

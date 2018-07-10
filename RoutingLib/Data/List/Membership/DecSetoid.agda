@@ -7,7 +7,7 @@ module RoutingLib.Data.List.Membership.DecSetoid {a ℓ} (DS : DecSetoid a ℓ) 
 
   open DecSetoid DS public renaming (Carrier to A)
   open import Data.List.Membership.DecSetoid DS using (_∈?_)
-  
+
   deduplicate : List A → List A
   deduplicate []       = []
   deduplicate (x ∷ xs) with x ∈? xs

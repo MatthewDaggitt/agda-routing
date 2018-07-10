@@ -59,7 +59,7 @@ open FunctionProperties _≈_
 
 ≥₊-decTotalOrder : DecTotalOrder _ _ _
 ≥₊-decTotalOrder = Flip.decTotalOrderᵘ ≤₊-decTotalOrder
-    
+
 open DecTotalOrder ≤₊-decTotalOrder public
   using ()
   renaming
@@ -93,7 +93,7 @@ open NonStrictToStrict ≤₊-decTotalOrder public
 
 ------------------------------------------------------------------------------
 -- Other
-    
+
 r≈∞⇒e▷r≈∞ : ∀ {e r} → r ≈ ∞ → e ▷ r ≈ ∞
 r≈∞⇒e▷r≈∞ {e} {r} r≈∞ = ≈-trans (▷-cong _ r≈∞) (▷-zero e)
 

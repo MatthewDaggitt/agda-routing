@@ -23,7 +23,7 @@ module RoutingLib.Routing.BellmanFord.Theorems where
 module Theorem1 {a b ℓ n} (algebra : FiniteStrictlyIncreasingRoutingAlgebra a b ℓ)
          (A : SquareMatrix (FiniteStrictlyIncreasingRoutingAlgebra.Step algebra) n)
          where
-  
+
   open DistanceVectorPrelude algebra A
   open DistanceVectorResults algebra A
 
@@ -37,7 +37,7 @@ module Theorem1 {a b ℓ n} (algebra : FiniteStrictlyIncreasingRoutingAlgebra a 
     ; _≟ᵢ_               = _≟ₜ_
     ; d-bounded          = D-bounded
     ; element            = I
-    } 
+    }
 
 --------------------------------------------------------------------------------
 -- Theorem 2
@@ -50,7 +50,7 @@ module Theorem1 {a b ℓ n} (algebra : FiniteStrictlyIncreasingRoutingAlgebra a 
 module _ {a b ℓ} where
 
   open PathVectorPrelude using (σ∥)
-    
+
   incrPaths-converges :  ∀ {n} (algebra : IncreasingPathAlgebra a b ℓ n) →
                          IsAsynchronouslySafe (σ∥ algebra)
   incrPaths-converges {n = zero}  algebra = 0-IsSafe (σ∥ algebra)
@@ -67,7 +67,7 @@ module _ {a b ℓ} where
     where
     open PathVectorResults algebra (s≤s z≤n)
     open PathVectorPrelude algebra
-  
+
 --------------------------------------------------------------------------------
 -- Theorem 3
 --
@@ -75,7 +75,7 @@ module _ {a b ℓ} where
 -- increasing path algebra
 
 module Theorem3 {a b ℓ n-1} (algebra : IncreasingPathAlgebra a b ℓ (suc n-1)) where
-  
+
   open import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Prelude algebra
   open import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step5_Proof algebra
 

@@ -11,14 +11,14 @@ module RoutingLib.Function.Metric.Properties {a} {ℓ} (S : Setoid a ℓ) where
     open Setoid S renaming (Carrier to A)
     open import RoutingLib.Function.Metric S
     open import RoutingLib.Function.FixedPoint S
-    
+
     -- Inequalities
-    
+
     maxTriangle⇒triangle : ∀ {d} → MaxTriangleIneq d → TriangleIneq d
     maxTriangle⇒triangle {d} sti x y z = ≤-trans (sti x y z) (m⊔n≤m+n (d x y) (d y z))
-  
+
     -- Contractions
-    
+
     contr⇒contrOrbits : ∀ {d f} → f ContrOver d → f ContrOnOrbitsOver d
     contr⇒contrOrbits {_} {f} c x = c x (f x)
 
@@ -39,4 +39,3 @@ module RoutingLib.Function.Metric.Properties {a} {ℓ} (S : Setoid a ℓ) where
     ball-mono-≤ : ∀ {r s} → r ≤ s → ∀ d {x y} → x ∈[ d ∥ y , r ] → x ∈[ d ∥ y , s ]
     ball-mono-≤ r≤s d dxy≤r = ≤-trans dxy≤r r≤s
 
-      

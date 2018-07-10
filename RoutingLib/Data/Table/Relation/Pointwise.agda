@@ -23,7 +23,7 @@ module RoutingLib.Data.Table.Relation.Pointwise where
 
   -- Pointwise properties
   module _ {a ℓ} {A : Set a} {_~_ : Rel A ℓ} where
-  
+
    reflexive : _≡_ ⇒ _~_ → ∀ {n} → _≡_ ⇒ Pointwise _~_ {n}
    reflexive reflexive ≡-refl i = reflexive ≡-refl
 

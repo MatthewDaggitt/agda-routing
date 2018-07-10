@@ -19,7 +19,7 @@ module RoutingLib.Asynchronous.Schedule.RoundRobin where
   -- Round Robin Schedule Functions
   α : {n : ℕ} → 𝕋 → Subset (suc n)
   α {n} t = ⁅ t mod (suc n) ⁆
-  
+
   mod-properties : ∀ {n} t (i : Fin (suc n)) → i ≡ (t + suc (n + (toℕ i) ∸ (t % (suc n)))) mod (suc n)
   mod-properties {n} t i = begin
     i                                             ≡⟨ sym (toℕ-mod i) ⟩
@@ -31,7 +31,7 @@ module RoutingLib.Asynchronous.Schedule.RoundRobin where
     (t + suc (n + toℕ i) ∸ t % suc n)   mod suc n ≡⟨ cong (_mod _) (+-∸-assoc t (≤-trans (a%[1+n]≤n t n) (≤-trans (m≤m+n n _) (n≤m+n 1 _)))  ) ⟩
     (t + (suc (n + toℕ i) ∸ t % suc n)) mod suc n ≡⟨ cong (λ v → (t + v) mod _) (+-∸-assoc 1 (≤-trans (a%[1+n]≤n t n) (m≤m+n n _))) ⟩
     (t + suc (n + toℕ i ∸ t % suc n))   mod suc n ∎
-  
+
   nonstarvation : ∀ {n} t (i : Fin (suc n)) → ∃ λ k → i ∈ α (t + suc k)
   nonstarvation {n} t i = n + (toℕ i) ∸ (t % (suc n)) ,
                 subst (i ∈_) (cong ⁅_⁆ (mod-properties t i)) (x∈⁅x⁆ i)

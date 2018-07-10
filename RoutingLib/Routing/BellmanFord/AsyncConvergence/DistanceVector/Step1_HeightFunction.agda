@@ -20,7 +20,7 @@ open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Prelude as Prelude
 open FiniteStrictlyIncreasingRoutingAlgebra using (Step)
 
-module RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Step1_HeightFunction 
+module RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Step1_HeightFunction
   {a b ℓ n} (algebra : FiniteStrictlyIncreasingRoutingAlgebra a b ℓ)
   (A : SquareMatrix (Step algebra) n)
   where
@@ -53,5 +53,4 @@ abstract
 
   h≤H : ∀ x → h x ≤ H
   h≤H x = subst (h x ≤_) (suc∘pred[n]≡n 1≤H) (s≤s (prop-toℕ-≤ (index (∈-routes x))))
-
 

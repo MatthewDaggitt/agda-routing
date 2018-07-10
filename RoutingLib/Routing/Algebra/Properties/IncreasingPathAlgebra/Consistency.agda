@@ -47,12 +47,12 @@ isStrictlyIncreasingRoutingAlgebraᶜ = record
   { isRoutingAlgebra     = isRoutingAlgebraᶜ
   ; ▷-strictlyIncreasing = ▷ᶜ-strictlyIncreasing
   }
-  
+
 strictlyIncreasingRoutingAlgebraᶜ : StrictlyIncreasingRoutingAlgebra ℓ₀ (b ⊔ ℓ) ℓ
 strictlyIncreasingRoutingAlgebraᶜ = record
   { isStrictlyIncreasingRoutingAlgebra = isStrictlyIncreasingRoutingAlgebraᶜ
   }
-  
+
 isFiniteStrictlyIncreasingRoutingAlgebraᶜ : IsFiniteStrictlyIncreasingRoutingAlgebra rawAlgebraᶜ
 isFiniteStrictlyIncreasingRoutingAlgebraᶜ = record
   { isStrictlyIncreasingRoutingAlgebra = isStrictlyIncreasingRoutingAlgebraᶜ

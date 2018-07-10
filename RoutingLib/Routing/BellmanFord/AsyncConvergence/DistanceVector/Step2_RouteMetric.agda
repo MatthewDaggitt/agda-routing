@@ -27,7 +27,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Step2_Rout
   {a b ℓ n} (algebra : FiniteStrictlyIncreasingRoutingAlgebra a b ℓ)
   (A : SquareMatrix (Step algebra) n)
   where
-  
+
 open Prelude algebra A
 open Step1 algebra A
 
@@ -37,7 +37,7 @@ abstract
   h-resp-≤ {u} {v} u≤v with u ≟ v
   ... | yes u≈v = ≤-reflexive (h-cong (≈-sym u≈v))
   ... | no  u≉v = <⇒≤ (h-resp-< (u≤v , u≉v))
-  
+
   ----------------------------
   -- distance between two routes
 
@@ -59,15 +59,15 @@ abstract
   ... | no  x≉y = contradiction x≈y x≉y
 
   d≡0⇒x≈y : ∀ {x y} → d x y ≡ 0 → x ≈ y
-  d≡0⇒x≈y {x} {y} d≡0 with x ≟ y 
+  d≡0⇒x≈y {x} {y} d≡0 with x ≟ y
   ... | yes x≈y = x≈y
   ... | no  _   = contradiction (sym d≡0) (<⇒≢ (m≤n⇒m≤n⊔o (h y) (1≤h x)))
 
   d-sym : ∀ x y → d x y ≡ d y x
   d-sym x y with x ≟ y | y ≟ x
   ... | yes _   | yes _   = refl
-  ... | no  x≉y | yes y≈x = contradiction (≈-sym y≈x) x≉y 
-  ... | yes x≈y | no  y≉x = contradiction (≈-sym x≈y) y≉x 
+  ... | no  x≉y | yes y≈x = contradiction (≈-sym y≈x) x≉y
+  ... | yes x≈y | no  y≉x = contradiction (≈-sym x≈y) y≉x
   ... | no  _   | no  _   = ⊔-comm (h x) (h y)
 
   d-maxTriIneq : MaxTriangleIneq S d
@@ -79,7 +79,7 @@ abstract
   ... | no  _   | yes y≈z | no _   = begin
     h x ⊔ h z     ≡⟨ cong (h x ⊔_) (h-cong (≈-sym y≈z)) ⟩
     h x ⊔ h y     ≡⟨ sym (⊔-identityʳ _) ⟩
-    h x ⊔ h y ⊔ 0 ∎     
+    h x ⊔ h y ⊔ 0 ∎
     where open ≤-Reasoning
 
   d≤H : ∀ x y → d x y ≤ H
@@ -165,12 +165,12 @@ abstract
       rewrite d-sym (Y u v) (X u v) | ⊔-comm (h (Y r s)) (h (X r s))
         = d≤dXᵣₛYᵣₛ u v (Yᵤᵥ≉Xᵤᵥ ∘ ≈-sym)
 
-  
+
   d-isUltrametric : IsUltrametric S d
-  d-isUltrametric = record 
-    { eq⇒0        = x≈y⇒d≡0 
-    ; 0⇒eq        = d≡0⇒x≈y 
-    ; sym         = d-sym 
+  d-isUltrametric = record
+    { eq⇒0        = x≈y⇒d≡0
+    ; 0⇒eq        = d≡0⇒x≈y
+    ; sym         = d-sym
     ; maxTriangle = d-maxTriIneq
     ; cong        = d-cong
     }

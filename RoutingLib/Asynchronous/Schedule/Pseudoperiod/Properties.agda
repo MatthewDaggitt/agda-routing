@@ -47,19 +47,19 @@ module RoutingLib.Asynchronous.Schedule.Pseudoperiod.Properties {n} (𝓢 : Sche
   finite-fin {t} k i j t' p  with finite (toℕ t') i j
   ... | (m , q) = subst (_≢ toℕ t')
     (cong (λ x → β x i j) (m+n∸m≡n p))
-    (q (k ∸ m)) 
+    (q (k ∸ m))
 
   -----------------
   -- Activations --
   -----------------
   -- Properties of nextActive'
 
-  nextActive'-active : ∀ t k {i} i∈α[t+1+k] rec → i ∈ α (nextActive' t k {i} i∈α[t+1+k] rec) 
+  nextActive'-active : ∀ t k {i} i∈α[t+1+k] rec → i ∈ α (nextActive' t k {i} i∈α[t+1+k] rec)
   nextActive'-active t zero    {i} i∈α[t+1]  _       rewrite +-comm t 1 = i∈α[t+1]
   nextActive'-active t (suc k) {i} i∈α[t+1+k] (acc rs) with i ∈? α t
   ... | yes i∈α                         = i∈α
   ... | no  i∉α rewrite +-suc t (suc k) = nextActive'-active (suc t) k i∈α[t+1+k] _
-  
+
   nextActive'-increasing : ∀ t k {i} i∈α[t+1+k] (acc : Acc _<_ k) →
                            t ≤ nextActive' t k {i} i∈α[t+1+k] acc
   nextActive'-increasing t zero    {i} p _        = n≤1+n t
@@ -69,9 +69,9 @@ module RoutingLib.Asynchronous.Schedule.Pseudoperiod.Properties {n} (𝓢 : Sche
     t                         ≤⟨ n≤1+n t ⟩
     suc t                     ≤⟨ nextActive'-increasing (suc t) k p (rec k ≤-refl) ⟩
     nextActive' (suc t) k p _ ∎
-  
+
   -- Properties of nextActive
-  
+
   nextActive-increasing : ∀ t i → t ≤ nextActive t i
   nextActive-increasing t i with nonstarvation t i
   ... | k , p = nextActive'-increasing t k p (<-wf k)
@@ -87,22 +87,22 @@ module RoutingLib.Asynchronous.Schedule.Pseudoperiod.Properties {n} (𝓢 : Sche
 
   nextActive≤allActive : ∀ t i → nextActive t i ≤ allActive t
   nextActive≤allActive t i = t≤max[t] t _ i
-  
+
   ---------------
   -- Data flow --
   ---------------
 
   -- Properties of pointExpiryᵢⱼ
-  
+
   pointExpiryᵢⱼ-expired : ∀ {i j t s} → pointExpiryᵢⱼ i j t ≤ s → β s i j ≢ t
   pointExpiryᵢⱼ-expired {i} {j} {t} v≤s with ≤⇒≤″ v≤s
   ... | less-than-or-equal {k} refl = proj₂ (finite t i j) k
 
   -- Properties of expiryᵢⱼ
-  
+
   expiryᵢⱼ-inc : ∀ t i j → t ≤ expiryᵢⱼ t i j
   expiryᵢⱼ-inc t i j = List.⊥≤max t (applyUpTo (pointExpiryᵢⱼ i j) (suc t))
-  
+
   expiryᵢⱼ-monotone : ∀ {t k} → t ≤ k → ∀ i j → expiryᵢⱼ t i j ≤ expiryᵢⱼ k i j
   expiryᵢⱼ-monotone t≤k i j = List.max-mono-⊆ t≤k (Sublist.applyUpTo⁺ (pointExpiryᵢⱼ i j) (s≤s t≤k))
 
@@ -121,7 +121,7 @@ module RoutingLib.Asynchronous.Schedule.Pseudoperiod.Properties {n} (𝓢 : Sche
   expiryᵢⱼ-expired expiryᵢⱼt≤k = ∀x<m:n≢x⇒m≤n _ _ (expiryᵢⱼ-expired' expiryᵢⱼt≤k)
 
   -- Properties of expiryᵢ
-  
+
   expiryᵢⱼ≤expiryᵢ : ∀ t i j → expiryᵢⱼ t i j ≤ expiryᵢ t i
   expiryᵢⱼ≤expiryᵢ t i j = t≤max[t] t (expiryᵢⱼ t i) j
 
@@ -138,8 +138,8 @@ module RoutingLib.Asynchronous.Schedule.Pseudoperiod.Properties {n} (𝓢 : Sche
 
 
   -- Properties of expiry
-  
-  expiryᵢ≤expiry : ∀ t i → expiryᵢ t i ≤ expiry t 
+
+  expiryᵢ≤expiry : ∀ t i → expiryᵢ t i ≤ expiry t
   expiryᵢ≤expiry t i = t≤max[t] t (expiryᵢ t) i
 
   expiry-increasing : ∀ t → t ≤ expiry t
@@ -167,11 +167,11 @@ module RoutingLib.Asynchronous.Schedule.Pseudoperiod.Properties {n} (𝓢 : Sche
   -- Properties of τ
   τ-active :  ∀ K i → i ∈ α (τ K i)
   τ-active K = nextActive-active (φ K)
-  
+
   τ-after-φ : ∀ K i → φ K ≤ τ K i
   τ-after-φ zero     i = z≤n
   τ-after-φ (suc K)  i = nextActive-increasing (φ (suc K)) i
-    
+
   τ-expired : ∀ K t i j → τ K j ≤ β (φ (suc K) + t) i j
   τ-expired K t i j = expiry-expired (begin
     expiry (nextActive _ j)  ≤⟨ expiry-monotone (nextActive≤allActive (φ K) j) ⟩

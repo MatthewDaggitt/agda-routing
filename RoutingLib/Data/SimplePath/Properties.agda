@@ -19,7 +19,7 @@ open import RoutingLib.Data.Nat.Properties using (n≢1+n)
 module RoutingLib.Data.SimplePath.Properties {n : ℕ} where
 
   abstract
-  
+
     ----------------------------------------------------------------------------
     -- Linkage
 
@@ -51,7 +51,7 @@ module RoutingLib.Data.SimplePath.Properties {n : ℕ} where
 
     ----------------------------------------------------------------------------
     -- Length
-    
+
     length<n : (p : SimplePath (suc n)) → length p <ℕ suc n
     length<n invalid                     = s≤s z≤n
     length<n (valid [])                  = s≤s z≤n
@@ -60,14 +60,14 @@ module RoutingLib.Data.SimplePath.Properties {n : ℕ} where
     length≤1+n : (p : SimplePath n) → length p ≤ℕ suc n
     length≤1+n invalid   = z≤n
     length≤1+n (valid p) = NEP.|p|≤1+n p
-    
+
     length-cong : ∀ {p q : SimplePath n} → p ≈ₚ q → length p ≡ length q
     length-cong invalid     = refl
     length-cong (valid p≈q) = NEP.length-cong p≈q
 
     ----------------------------------------------------------------------------
     -- Other
-    
+
     -- Ordering
 {-
     ≤ₚ-refl : Reflexive (_≤ₚ_ {n})
@@ -106,7 +106,7 @@ module RoutingLib.Data.SimplePath.Properties {n : ℕ} where
     ... | no  |p|≮|q| | no  |p|≢|q| | _       = no (λ{(len |p|<|q|) → |p|≮|q| |p|<|q|; (lex |p|≡|q| _) → |p|≢|q| |p|≡|q|})
     ... | no  |p|≮|q| | _           | no  p≰q = no (λ{(len |p|<|q|) → |p|≮|q| |p|<|q|; (lex _ p≤q) → p≰q p≤q})
     ... | no  _       | yes |p|≡|q| | yes p≤q = yes (lex |p|≡|q| p≤q)
-  
+
     ≤ₚ-total : Total (_≤ₚ_ {n})
     ≤ₚ-total invalid     _     = inj₁ empty
     ≤ₚ-total _     invalid     = inj₂ empty
@@ -145,8 +145,8 @@ module RoutingLib.Data.SimplePath.Properties {n : ℕ} where
     i∷p≰p (len 1+|p|<|p|)   = contradiction 1+|p|<|p| (m+n≮n 1 _)
     i∷p≰p (lex 1+|p|≡|p| _) = contradiction (sym 1+|p|≡|p|) (n≢1+n _)
 -}
-    
-    
+
+
 
 
 {-
@@ -160,7 +160,7 @@ module RoutingLib.Data.SimplePath.Properties {n : ℕ} where
     ... | yes _    | yes _    | no  i∈p | yes i∉q = contradiction (NEP.∉-resp-≈ₚ (NEP.≈ₚ-sym p≈q) i∉q) i∈p
     ... | yes _    | yes _    | yes i∉p | no  i∈p = contradiction (NEP.∉-resp-≈ₚ p≈q i∉p) i∈p
     ... | yes _    | yes _    | yes _   | yes _   = valid (refl ∷ p≈q)
-    
+
     ∷ₐ-accept : ∀ {i j : Fin n} {p} (ij⇿p : (i , j) NE.⇿ p) (i∉p : i NE.∉ p) →
                 (i , j) ∷ₐ valid p ≈ₚ valid ((i , j) ∷ p ∣ ij⇿p ∣ i∉p)
     ∷ₐ-accept {i} {j} {p} il⇿p i∉p with (i , j) NEP.⇿? p | i NEP.∉? p

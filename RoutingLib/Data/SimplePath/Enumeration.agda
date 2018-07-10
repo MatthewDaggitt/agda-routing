@@ -19,7 +19,7 @@ module RoutingLib.Data.SimplePath.Enumeration where
 
   allPaths : ∀ n → List (SimplePath n)
   allPaths n = invalid ∷ map valid (Eⁿᵗ.allPaths n)
-    
+
   ∈-allPaths : ∀ {n} (p : SimplePath n) → p ∈ allPaths n
   ∈-allPaths {_} invalid   = here invalid
   ∈-allPaths {n} (valid p) = there (∈-map⁺ (NEℙₛ n) (ℙₛ n) valid (Eⁿᵗ.∈-allPaths n p))

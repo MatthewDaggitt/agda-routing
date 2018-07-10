@@ -14,7 +14,7 @@ module RoutingLib.Relation.Binary.NonStrictToStrict.TotalOrder
 
   ------------------------------------------------------------------------------
   -- Exports
-  
+
   open PO (TotalOrder.poset totalOrder) public
 
   ≰⇒> : ∀ {x y} → ¬ (x ≤ y) → y < x

@@ -45,14 +45,14 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois3
   syncIter-fixed′ : ∀ {x} (x∈D₀ : x ∈ D₀) {t} → proj₁ (iter-converge x∈D₀) ≤ℕ t → syncIter x t ≈ ξ
   syncIter-fixed′ x∈D₀ T≤t with m≤n⇒o+m≡n T≤t
   ... | s , refl = syncIter-fixed x∈D₀ s
-  
+
   ξ≤syncIter : ∀ {x} → x ∈ D₀ → ∀ t → ξ ≤ syncIter x t
   ξ≤syncIter {x} x∈D₀ t i with t ≤? proj₁ (iter-converge x∈D₀)
   ... | yes t≤T = ≤ᵢ-respˡ-≈ᵢ (proj₂ (iter-converge x∈D₀) i) (syncIter-mono x∈D₀ t≤T i)
   ... | no  t≰T = ≤ᵢ-reflexive (≈ᵢ-sym (syncIter-fixed′ x∈D₀ (≰⇒≥ t≰T) i))
-  
+
   module _ {x₀} (x₀∈D₀ : x₀ ∈ D₀) where
-  
+
     -- Synchronous iterations
     σ : ℕ → S
     σ = syncIter x₀
@@ -63,11 +63,11 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois3
 
     ξ∈D₀ : ξ ∈ D₀
     ξ∈D₀ = D₀-cong (syncIter∈D₀ x₀∈D₀ T) (proj₂ (iter-converge x₀∈D₀))
-    
+
     -- Sequence of sets
     D : ℕ → Pred Sᵢ _
-    D K {i} = (λ x → (ξ i ≤ᵢ x) × (x ≤ᵢ σ K i)) ∩ D₀ 
-    
+    D K {i} = (λ x → (ξ i ≤ᵢ x) × (x ≤ᵢ σ K i)) ∩ D₀
+
     x₀∈D[0] : x₀ ∈ D 0
     x₀∈D[0] i = (ξ≤syncIter x₀∈D₀ 0 i , ≤ᵢ-refl) , (x₀∈D₀ i)
 
@@ -86,7 +86,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois3
 
     D-finish : ∃₂ λ T ξ → ∀ K → ξ ∈ D (T + K) × (∀ {x} → x ∈ D (T + K) → ξ ≈ x)
     D-finish = T , ξ , λ K → ξ∈D[K] (T + K) , D-finish′ K
-    
+
     F-monotonic  : ∀ K {t} → t ∈ D K → F t ∈ D (suc K)
     F-monotonic K {t} t∈DK i =
       (≤ᵢ-respˡ-≈ᵢ (ξ-fixed i) (F-monotone ξ∈D₀ t∈D₀ ξ≤t i) ,
@@ -111,6 +111,6 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois3
       { D            = D
       ; D-decreasing = D-decreasing
       ; D-finish     = D-finish
-      ; F-monotonic  = F-monotonic  
+      ; F-monotonic  = F-monotonic
       }
 

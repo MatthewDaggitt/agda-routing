@@ -42,25 +42,25 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step3_Consiste
   -------------------------------------------
 
   abstract
-  
+
     dᵣᶜ : ∀ {x y} → 𝑪 x → 𝑪 y → ℕ
     dᵣᶜ xᶜ yᶜ = d (toCRoute xᶜ) (toCRoute yᶜ)
-  
+
     dᵣᶜ-cong : ∀ {x y w z} (wᶜ : 𝑪 w) (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) (zᶜ : 𝑪 z) →
                w ≈ y → x ≈ z → dᵣᶜ wᶜ xᶜ ≡ dᵣᶜ yᶜ zᶜ
     dᵣᶜ-cong wᶜ xᶜ yᶜ zᶜ w≈y x≈z = d-cong
       {x = toCRoute wᶜ} {y = toCRoute yᶜ}
       {u = toCRoute xᶜ} {v = toCRoute zᶜ} w≈y x≈z
-    
+
     dᵣᶜ-sym : ∀ {x y} (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → dᵣᶜ xᶜ yᶜ ≡ dᵣᶜ yᶜ xᶜ
     dᵣᶜ-sym xᶜ yᶜ = d-sym (toCRoute xᶜ) (toCRoute yᶜ)
-    
+
     x≈y⇒dᵣᶜ≡0 : ∀ {x y} (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → x ≈ y → dᵣᶜ xᶜ yᶜ ≡ 0
     x≈y⇒dᵣᶜ≡0 xᶜ yᶜ x≈y = x≈y⇒d≡0 {toCRoute xᶜ} {toCRoute yᶜ} x≈y
-    
+
     dᵣᶜ≡0⇒x≈y : ∀ {x y} (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → dᵣᶜ xᶜ yᶜ ≡ 0 → x ≈ y
     dᵣᶜ≡0⇒x≈y xᶜ yᶜ d≡0 = d≡0⇒x≈y {toCRoute xᶜ} {toCRoute yᶜ} d≡0
-  
+
     dᵣᶜ-maxTriIneq : ∀ {x y z} (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) (zᶜ : 𝑪 z) →
                     dᵣᶜ xᶜ zᶜ ≤ dᵣᶜ xᶜ yᶜ ⊔ dᵣᶜ yᶜ zᶜ
     dᵣᶜ-maxTriIneq xᶜ yᶜ zᶜ = d-maxTriIneq (toCRoute xᶜ) (toCRoute yᶜ) (toCRoute zᶜ)
@@ -80,12 +80,12 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step3_Consiste
       d (X' r s)            (Y' r s)            ≡⟨⟩
       d (toCMatrix Xᶜ r s)  (toCMatrix Yᶜ r s)  ∎
       where
-      
+
       open ≤-Reasoning
-      
+
       X' = toCMatrix Xᶜ
       Y' = toCMatrix Yᶜ
-      
+
       σXᶜᵢⱼ≈σᶜX'ᵢⱼ : toCMatrix σXᶜ i j ≈ᶜ σᶜ X' i j
       σXᶜᵢⱼ≈σᶜX'ᵢⱼ = σ-toCMatrix-commute Xᶜ σXᶜ i j
 

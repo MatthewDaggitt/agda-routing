@@ -41,22 +41,22 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step2_Conve
   open Prelude algebra
   open Notation X j
   open Step1_NodeSets algebra X j
-  
+
   open Extrema ≤₊-totalOrder
-  
+
   private
-  
+
     t : ℕ
     t = suc t-1
 
     e↷C⇒w[t+s]≡w[t] : ∀ {e} → e ↷ C → ∀ s → weightₑ (t + s) e ≈ weightₑ t e
     e↷C⇒w[t+s]≡w[t] (_ , k∈C) s = ▷-cong (A _ _) (proj₁ (C⊆𝓒ₜ k∈C) s)
-  
+
   ------------------------------------------------------------------------------
   -- Finding the fixed minimal edge entering the fixed set
 
   -- At least one edge entering the fixed set exists
-  
+
     eₐ : Edge
     eₐ = (proj₁ C-nonFull , j)
 
@@ -64,30 +64,30 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step2_Conve
     eₐ↷C = (proj₂ C-nonFull , j∈C)
 
   -- We can therefore find the minimum weight edge out of the fixed set
-  
+
   abstract
-  
+
     eₘᵢₙ : Edge
     eₘᵢₙ = argmin (weightₑ t) eₐ (cutset C)
 
     eₘᵢₙ↷C : eₘᵢₙ ↷ C
     eₘᵢₙ↷C = argmin-all (weightₑ t) eₐ↷C (∈cutset⇒↷ C)
-    
+
   iₘᵢₙ : Node
   iₘᵢₙ = proj₁ eₘᵢₙ
 
   iₘᵢₙ∉C : iₘᵢₙ ∉ C
   iₘᵢₙ∉C = proj₁ eₘᵢₙ↷C
-    
+
   kₘᵢₙ : Node
   kₘᵢₙ = proj₂ eₘᵢₙ
 
   kₘᵢₙ∈C : kₘᵢₙ ∈ C
   kₘᵢₙ∈C = proj₂ eₘᵢₙ↷C
-  
+
   ------------------------------------------------------------------------------
   -- Properties of eₘᵢₙ
-  
+
   abstract
 
     j≢iₘᵢₙ : j ≢ iₘᵢₙ
@@ -95,7 +95,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step2_Conve
 
     kₘᵢₙ∈𝓒ₜ : kₘᵢₙ ∈ᵤ 𝓒 t
     kₘᵢₙ∈𝓒ₜ = C⊆𝓒ₜ kₘᵢₙ∈C
-  
+
     -- Any edge that cuts the fixed set is -always- less than the minimum edge
     eₘᵢₙ-isMinₜ₊ₛ : ∀ {e} → e ↷ C → ∀ s →
                     weightₑ (t + s) eₘᵢₙ ≤₊ weightₑ (t + s) e
@@ -126,7 +126,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step2_Conve
   -- Any "real" route ending in a node outside of the fixed set is worse
   -- than that ending with the minimal edge.
 
-   
+
   ∈𝓡-invalid : ∀ s {i k} →
                   path (σ^ (t + s) X k j) ≈ₚ invalid →
                   eₘᵢₙ ≤[ t + s ] (i , k)
@@ -143,7 +143,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step2_Conve
   ∈𝓡-trivial s {i} {k} k∉C p[σᵗ⁺ˢXₖⱼ]≈[]
     with p[σXᵢⱼ]≈[]⇒i≡j (σ^ (t-1 + s) X) k j p[σᵗ⁺ˢXₖⱼ]≈[]
   ... | refl = contradiction j∈C k∉C
-  
+
   ∈𝓡 : ∀ s i {k} → k ∈ᵤ 𝓡 (t + s) → k ∉ C →
           ∀ {p} → path (σ^ (t + s) X k j) ≈ₚ p →
           eₘᵢₙ ≤[ t + s ] (i , k)

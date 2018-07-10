@@ -16,9 +16,9 @@ module RoutingLib.Data.List.Uniqueness.Propositional.Properties where
 
   allFin!⁺ : ∀ n → Unique (allFin n)
   allFin!⁺ n = SP.tabulate! (setoid (Fin n)) id id
-  
+
   combine!⁺ : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c}
-             (f : A → B → C) → 
+             (f : A → B → C) →
              (∀ {w x y z} → (w ≢ y) ⊎ (x ≢ z) → f w x ≢ f y z) →
              ∀ {xs ys} → Unique xs → Unique ys → Unique (combine f xs ys)
   combine!⁺ f cong = SP.combine!⁺ (setoid _) (setoid _) (setoid _) f cong
@@ -26,7 +26,7 @@ module RoutingLib.Data.List.Uniqueness.Propositional.Properties where
   ++!⁺ : ∀ {a} {A : Set a} {xs ys} →
          Unique xs → Unique ys → _#_ (setoid A) xs ys → Unique (xs ++ ys)
   ++!⁺ = SP.++!⁺ (setoid _)
-  
+
   deduplicate!⁺ : ∀ {a} {A : Set a} _≟_ (xs : List A) → Unique (deduplicate _≟_ xs)
   deduplicate!⁺ _≟_ = SP.deduplicate!⁺ (decSetoid _≟_)
 

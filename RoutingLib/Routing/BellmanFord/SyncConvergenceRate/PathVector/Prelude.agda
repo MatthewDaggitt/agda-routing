@@ -18,17 +18,17 @@ import RoutingLib.Routing.BellmanFord.PathProperties as BellmanFordPathPropertie
 module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Prelude
   {a b ℓ n-1} (algebra : IncreasingPathAlgebra a b ℓ (suc n-1))
   where
-  
+
   open IncreasingPathAlgebra algebra public
   open IncreasingPathAlgebraProperties algebra public
-  
+
   open BellmanFord rawRoutingAlgebra A public
   open BellmanFordProperties routingAlgebra A public
   open BellmanFordPathProperties pathAlgebra public
 
   n : ℕ
   n = suc n-1
-  
+
   𝕋 : Set
   𝕋 = ℕ
 

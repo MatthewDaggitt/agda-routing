@@ -27,7 +27,7 @@ module RoutingLib.Data.Fin.Subset.Cutset {n} where
 
   ------------------------------------------------------------------------------
   -- The "cuts" relation
-  
+
   _↷_ : Fin n × Fin n → Subset n → Set
   (i , j) ↷ p = i ∉ p × j ∈ p
 
@@ -39,19 +39,19 @@ module RoutingLib.Data.Fin.Subset.Cutset {n} where
 
   ¬e↷⊥ : ∀ e → ¬ (e ↷ ⊥)
   ¬e↷⊥ (i , j) (_ , j∈⊥) = ∉⊥ j∈⊥
-  
+
   ------------------------------------------------------------------------------
   -- Computing the cutset
-  
+
   cutset : Subset n → List (Fin n × Fin n)
   cutset p = filter (_↷? p) (allFinPairs n)
-  
+
   ∈cutset⇒↷ : ∀ p → All (_↷ p) (cutset p)
   ∈cutset⇒↷ p = filter⁺₁ (_↷? p) (allFinPairs n)
 
   ↷⇒∈cutset : ∀ {p e} → e ↷ p → e ∈ₘ cutset p
   ↷⇒∈cutset e↷p = ∈-filter⁺ (_↷? _) (∈-allFinPairs⁺ _ _) e↷p
-  
+
   cutset[⊤]≡[] : cutset ⊤ ≡ []
   cutset[⊤]≡[] = filter-none (_↷? ⊤) (allFinPairs⁺ ¬e↷⊤)
 

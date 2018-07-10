@@ -11,9 +11,9 @@ module RoutingLib.Data.List.Relation.Sublist.Setoid.Properties where
 
     open Setoid S renaming (Carrier to A)
     open import Data.List.Relation.Sublist.Setoid S
-    
+
     ⊆-filter : ∀ {p} {P : A → Set p} (P? : Decidable P)
-                 {q} {Q : A → Set q} (Q? : Decidable Q) → 
+                 {q} {Q : A → Set q} (Q? : Decidable Q) →
                  P U.⊆ Q → ∀ xs → filter P? xs ⊆ filter Q? xs
     ⊆-filter P? Q? P⋐Q []       ()
     ⊆-filter P? Q? P⋐Q (x ∷ xs) v∈f[x∷xs] with P? x | Q? x

@@ -12,7 +12,7 @@ open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Data.NatInf
 
 module RoutingLib.Data.NatInf.Properties where
-  
+
 
   open import Algebra.FunctionProperties {lzero} {A = ℕ∞} _≡_ using (Idempotent)
   open import Algebra.FunctionProperties.Consequences (setoid ℕ∞) using (sel⇒idem)

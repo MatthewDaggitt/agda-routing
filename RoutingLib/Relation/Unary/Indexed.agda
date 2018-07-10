@@ -27,7 +27,7 @@ module _ {i a} {I : Set i} {A : I → Set a} where
 -}
 
 {-
-  
+
   ｛_｝ : S → Predᵤ S ℓ
   ｛ t ｝ = t ≈_
 

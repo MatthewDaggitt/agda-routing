@@ -41,7 +41,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step4_RouteMet
   open Metric S using (Ultrametric; IsUltrametric; Bounded; MaxTriangleIneq)
 
   abstract
-  
+
     Hᶜ : ℕ
     Hᶜ = suc (proj₁ dᵣᶜ-bounded)
 
@@ -50,7 +50,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step4_RouteMet
 
     dᵣᶜ<Hᶜ : ∀ {x y} (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → dᵣᶜ xᶜ yᶜ < Hᶜ
     dᵣᶜ<Hᶜ xᶜ yᶜ = s≤s (proj₂ dᵣᶜ-bounded xᶜ yᶜ)
-    
+
     dᵣᶜ<Hᶜ+x : ∀ {x y} (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) z → dᵣᶜ xᶜ yᶜ < Hᶜ + z
     dᵣᶜ<Hᶜ+x xᶜ yᶜ z = s≤s (≤-trans (proj₂ dᵣᶜ-bounded xᶜ yᶜ) (m≤m+n _ z))
 
@@ -70,9 +70,9 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step4_RouteMet
     ... | yes _ | _      | _      = zero
     ... | no  _ | yes xᶜ | yes yᶜ = dᵣᶜ xᶜ yᶜ
     ... | no  _ | _      | _      = Hᶜ + dᵣⁱ x y
-  
+
     dᵣ-cong : dᵣ Preserves₂ _≈_ ⟶ _≈_ ⟶ _≡_
-    dᵣ-cong {W} {X} {Y} {Z} W≈X Y≈Z with W ≟ Y | X ≟ Z 
+    dᵣ-cong {W} {X} {Y} {Z} W≈X Y≈Z with W ≟ Y | X ≟ Z
     ... | yes _   | yes _   = refl
     ... | yes W≈Y | no  X≉Z = contradiction (≈-trans (≈-trans (≈-sym W≈X) W≈Y) Y≈Z) X≉Z
     ... | no  W≉Y | yes X≈Z = contradiction (≈-trans (≈-trans W≈X X≈Z) (≈-sym Y≈Z)) W≉Y
@@ -84,7 +84,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step4_RouteMet
     ...   | no _   | no _   | _      | _      = cong (Hᶜ +_) (dᵣⁱ-cong W≈X Y≈Z)
     ...   | yes _  | yes _  | no  _  | no  _  = cong (Hᶜ +_) (dᵣⁱ-cong W≈X Y≈Z)
     ...   | yes wᶜ | yes xᶜ | yes yᶜ | yes zᶜ = dᵣᶜ-cong wᶜ yᶜ xᶜ zᶜ W≈X Y≈Z
-  
+
     x≈y⇒dᵣ≡0 : ∀ {X Y} → X ≈ Y → dᵣ X Y ≡ 0
     x≈y⇒dᵣ≡0 {X} {Y} X≈Y with X ≟ Y
     ... | yes _   = refl
@@ -97,7 +97,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step4_RouteMet
     ...   | yes Xᶜ | yes Yᶜ  = dᵣᶜ≡0⇒x≈y Xᶜ Yᶜ dᵣ≡0
     ...   | no  Xⁱ | _      = contradiction dᵣ≡0 λ()
     ...   | yes Xᶜ | no  Yⁱ = contradiction dᵣ≡0 λ()
-  
+
     dᵣ-sym : ∀ X Y → dᵣ X Y ≡ dᵣ Y X
     dᵣ-sym X Y with X ≟ Y | Y ≟ X
     ... | yes _   | yes _   = refl
@@ -115,7 +115,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step4_RouteMet
       Hᶜ + (dᵣⁱ X Y ⊔ dᵣⁱ Y Z)        ≡⟨ +-distribˡ-⊔ Hᶜ _ _ ⟩
       (Hᶜ + dᵣⁱ X Y) ⊔ (Hᶜ + dᵣⁱ Y Z) ∎
       where open ≤-Reasoning
-  
+
     dᵣ-maxTriIneq : MaxTriangleIneq dᵣ
     dᵣ-maxTriIneq x y z with x ≟ z | x ≟ y | y ≟ z
     dᵣ-maxTriIneq x y z | yes _   | _       | _       = z≤n
@@ -153,10 +153,10 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step4_RouteMet
     ...   | no  _  | no  _  = +-monoʳ-≤ Hᶜ (proj₂ dᵣⁱ-bounded x y)
     ...   | no  _  | yes _  = +-monoʳ-≤ Hᶜ (proj₂ dᵣⁱ-bounded x y)
     ...   | yes _  | no  _  = +-monoʳ-≤ Hᶜ (proj₂ dᵣⁱ-bounded x y)
-  
+
     dᵣ-bounded : Bounded dᵣ
     dᵣ-bounded = Hᶜ + Hⁱ , dᵣ≤Hᶜ+Hⁱ
-  
+
     dᵣ-isUltrametric : IsUltrametric dᵣ
     dᵣ-isUltrametric = record
       { cong        = dᵣ-cong
@@ -174,18 +174,18 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step4_RouteMet
 
 
   abstract
-  
+
     private
 
-      H<dᵣ : ∀ {x y} → x ≉ y → 𝑰 x ⊎ 𝑰 y → Hᶜ < dᵣ x y 
+      H<dᵣ : ∀ {x y} → x ≉ y → 𝑰 x ⊎ 𝑰 y → Hᶜ < dᵣ x y
       H<dᵣ {x} {y} x≉y xⁱ⊎yⁱ with x ≟ y
       ... | yes x≈y = contradiction x≈y x≉y
       ... | no  _   with 𝑪? x | 𝑪? y | xⁱ⊎yⁱ
       ... | yes xᶜ | yes yᶜ | inj₁ xⁱ = contradiction xᶜ xⁱ
-      ... | yes xᶜ | yes yᶜ | inj₂ yⁱ = contradiction yᶜ yⁱ 
+      ... | yes xᶜ | yes yᶜ | inj₂ yⁱ = contradiction yᶜ yⁱ
       ... | no  _  | _      | _       = Hᶜ<Hᶜ+dᵣⁱ x y
       ... | yes _  | no  _  | _       = Hᶜ<Hᶜ+dᵣⁱ x y
-      
+
       dᵣᶜ<dᵣ : ∀ {w x y z} (wᶜ : 𝑪 w) (xᶜ : 𝑪 x) → y ≉ z → 𝑰 y ⊎ 𝑰 z  → dᵣᶜ wᶜ xᶜ < dᵣ y z
       dᵣᶜ<dᵣ wᶜ xᶜ y≉z yⁱ⊎zⁱ = <-transʳ (<⇒≤ (dᵣᶜ<Hᶜ wᶜ xᶜ)) (H<dᵣ y≉z yⁱ⊎zⁱ)
 
@@ -196,17 +196,17 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step4_RouteMet
       ...   | yes _  | yes _  = ≤-reflexive (dᵣᶜ-cong _ _ _ _ ≈-refl ≈-refl)
       ...   | no  xⁱ | _      = contradiction xᶜ xⁱ
       ...   | yes _  | no  yⁱ = contradiction yᶜ yⁱ
-      
+
       H+dᵣⁱ≤dᵣ : ∀ {x y} → x ≉ y → 𝑰 x ⊎ 𝑰 y → Hᶜ + dᵣⁱ x y ≤ dᵣ x y
       H+dᵣⁱ≤dᵣ {x} {y} x≉y xⁱ⊎yⁱ with x ≟ y
       ... | yes x≈y = contradiction x≈y x≉y
       ... | no  _   with 𝑪? x | 𝑪? y | xⁱ⊎yⁱ
       ... | yes xᶜ | yes yᶜ | inj₁ xⁱ = contradiction xᶜ xⁱ
-      ... | yes xᶜ | yes yᶜ | inj₂ yⁱ = contradiction yᶜ yⁱ 
+      ... | yes xᶜ | yes yᶜ | inj₂ yⁱ = contradiction yᶜ yⁱ
       ... | no  _  | _      | _       = ≤-refl
       ... | yes _  | no  _  | _       = ≤-refl
 
-      dᵣ-force-dᵣⁱ : ∀ (X Y : RMatrix) {r s} → 
+      dᵣ-force-dᵣⁱ : ∀ (X Y : RMatrix) {r s} →
                     (∀ u v → dᵣ (X u v) (Y u v) ≤ Hᶜ + dᵣⁱ (X r s) (Y r s)) →
                     (∀ {u v} → X u v ≉ Y u v → 𝑰 (X u v) ⊎ 𝑰 (Y u v) →
                       dᵣⁱ (X u v) (Y u v) ≤ dᵣⁱ (X r s) (Y r s))
@@ -237,7 +237,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step4_RouteMet
 
 
     reduction : ∀ X l j → 𝑰 (σ X l j) → Acc _<_ (size (σ X l j)) →
-                ∃ λ k → Hᶜ < dᵣ (X k j) (σ X k j)  
+                ∃ λ k → Hᶜ < dᵣ (X k j) (σ X k j)
     reduction X l j σXₗⱼⁱ (acc rec) with σXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ X _ _ σXₗⱼⁱ
     ... | (k , σXₗⱼ≈AᵢₖXₖⱼ , Xₖⱼⁱ) with X k j ≟ σ X k j
     ...   | no  Xₖⱼ≉σXₖⱼ = k , H<dᵣ Xₖⱼ≉σXₖⱼ (inj₁ Xₖⱼⁱ)
@@ -256,16 +256,16 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step4_RouteMet
 
 
 
-    dᵣ-strContrOrbitsᶜ : ∀ {X r s i j} → X r s ≉ σ X r s → (Xᵣₛᶜ : 𝑪 (X r s)) (σXᵣₛᶜ : 𝑪 (σ X r s)) → 
+    dᵣ-strContrOrbitsᶜ : ∀ {X r s i j} → X r s ≉ σ X r s → (Xᵣₛᶜ : 𝑪 (X r s)) (σXᵣₛᶜ : 𝑪 (σ X r s)) →
                          (∀ u v → dᵣ (X u v) (σ X u v) ≤ dᵣᶜ Xᵣₛᶜ σXᵣₛᶜ) →
                          dᵣ (σ X i j) (σ (σ X) i j) < dᵣᶜ Xᵣₛᶜ σXᵣₛᶜ
     dᵣ-strContrOrbitsᶜ {X} {r} {s} {i} {j}  Xᵣₛ≉σXᵣₛ Xᵣₛᶜ σXᵣₛᶜ dᵣ≤dᵣᶜXᵣₛσXᵣₛ with σ X i j ≟ σ (σ X) i j
     ... | yes σXᵢⱼ≈σ²Xᵢⱼ = n≢0⇒0<n (Xᵣₛ≉σXᵣₛ ∘ dᵣᶜ≡0⇒x≈y Xᵣₛᶜ σXᵣₛᶜ)
-    ... | no  σXᵢⱼ≉σ²Xᵢⱼ with force-Xᶜ X (λ u v → <-transʳ (dᵣ≤dᵣᶜXᵣₛσXᵣₛ u v) (dᵣᶜ<Hᶜ _ _)) 
+    ... | no  σXᵢⱼ≉σ²Xᵢⱼ with force-Xᶜ X (λ u v → <-transʳ (dᵣ≤dᵣᶜXᵣₛσXᵣₛ u v) (dᵣᶜ<Hᶜ _ _))
     ...   | Xᶜ with σ-pres-𝑪ₘ Xᶜ
     ...     | σXᶜ with σ-pres-𝑪ₘ σXᶜ
     ...       | σ²Xᶜ with 𝑪? (σ X i j) | 𝑪? (σ (σ X) i j)
-    ...         | no  σXᵢⱼⁱ | _           = contradiction (σXᶜ i j) σXᵢⱼⁱ 
+    ...         | no  σXᵢⱼⁱ | _           = contradiction (σXᶜ i j) σXᵢⱼⁱ
     ...         | yes _     | no  σ²Xᵢⱼⁱ  = contradiction (σ²Xᶜ i j) σ²Xᵢⱼⁱ
     ...         | yes σXᵢⱼᶜ  | yes σ²Xᵢⱼᶜ  = begin
       dᵣᶜ σXᵢⱼᶜ σ²Xᵢⱼᶜ          ≡⟨ dᵣᶜ-cong _ _ _ _ ≈-refl ≈-refl ⟩
@@ -282,8 +282,8 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step4_RouteMet
         dᵣ (X u v) (σ X u v)  ≤⟨ dᵣ≤dᵣᶜXᵣₛσXᵣₛ u v ⟩
         dᵣᶜ Xᵣₛᶜ σXᵣₛᶜ         ≡⟨ dᵣᶜ-cong _ _ _ _ ≈-refl ≈-refl ⟩
         dᵣᶜ (Xᶜ r s) (σXᶜ r s) ∎
-  
-    dᵣ-strContrOrbits : ∀ {X r s} → X r s ≉ σ X r s → 
+
+    dᵣ-strContrOrbits : ∀ {X r s} → X r s ≉ σ X r s →
                         (∀ u v → dᵣ (X u v) (σ X u v) ≤ dᵣ (X r s) (σ X r s)) →
                         ∀ i j → dᵣ (σ X i j) (σ (σ X) i j) < dᵣ (X r s) (σ X r s)
     dᵣ-strContrOrbits {X} {r} {s} Xᵣₛ≉σXᵣₛ dᵣ≤dᵣXᵣₛσXᵣₛ i j with X r s ≟ σ X r s
@@ -296,7 +296,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step4_RouteMet
 
 
 
-  
+
     -- Strictly contracting when one of the arguments is consistent
 
 
@@ -309,18 +309,18 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step4_RouteMet
     ... | no  Xᵢⱼ≉Yᵢⱼ with 𝑪? (Y i j)
     ...   | yes Yᵢⱼᶜ = Yᵢⱼᶜ
     ...   | no  Yᵢⱼⁱ = contradiction (dᵣ≤dᵣᶜXᵣₛYᵣₛ i j) (<⇒≱ (dᵣᶜ<dᵣ Xᵣₛᶜ Yᵣₛᶜ Xᵢⱼ≉Yᵢⱼ (inj₂ Yᵢⱼⁱ)))
-    
+
     dᵣ-strContrᶜᶜ : ∀ {X Y r s} → X r s ≉ Y r s → 𝑪ₘ X →
-                    (Xᵣₛᶜ : 𝑪 (X r s)) (Yᵣₛᶜ : 𝑪 (Y r s)) → 
+                    (Xᵣₛᶜ : 𝑪 (X r s)) (Yᵣₛᶜ : 𝑪 (Y r s)) →
                     (∀ u v → dᵣ (X u v) (Y u v) ≤ dᵣᶜ Xᵣₛᶜ Yᵣₛᶜ) →
                     ∀ i j → dᵣ (σ X i j) (σ Y i j) < dᵣᶜ Xᵣₛᶜ Yᵣₛᶜ
     dᵣ-strContrᶜᶜ {X} {Y} {r} {s}  Xᵣₛ≉Yᵣₛ Xᶜ Xᵣₛᶜ Yᵣₛᶜ dᵣ≤dᵣᶜXᵣₛYᵣₛ i j
       with σ X i j ≟ σ Y i j
     ... | yes σXᵢⱼ≈σYᵢⱼ = n≢0⇒0<n (Xᵣₛ≉Yᵣₛ ∘ dᵣᶜ≡0⇒x≈y Xᵣₛᶜ Yᵣₛᶜ)
-    ... | no  σXᵢⱼ≉σYᵢⱼ with force-Yᶜ Xᶜ Xᵣₛᶜ Yᵣₛᶜ dᵣ≤dᵣᶜXᵣₛYᵣₛ 
+    ... | no  σXᵢⱼ≉σYᵢⱼ with force-Yᶜ Xᶜ Xᵣₛᶜ Yᵣₛᶜ dᵣ≤dᵣᶜXᵣₛYᵣₛ
     ...   | Yᶜ with σ-pres-𝑪ₘ Xᶜ |  σ-pres-𝑪ₘ Yᶜ
     ...       | σXᶜ | σYᶜ with 𝑪? (σ X i j) | 𝑪? (σ Y i j)
-    ...         | no  σXᵢⱼⁱ | _         = contradiction (σXᶜ i j) σXᵢⱼⁱ 
+    ...         | no  σXᵢⱼⁱ | _         = contradiction (σXᶜ i j) σXᵢⱼⁱ
     ...         | yes _     | no  σYᵢⱼⁱ = contradiction (σYᶜ i j) σYᵢⱼⁱ
     ...         | yes σXᵢⱼᶜ | yes σYᵢⱼᶜ = begin
       dᵣᶜ σXᵢⱼᶜ σYᵢⱼᶜ         ≡⟨ dᵣᶜ-cong _ _ _ _ ≈-refl ≈-refl ⟩
@@ -338,7 +338,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step4_RouteMet
         dᵣ  (X u v)  (Y u v)  ≤⟨ dᵣ≤dᵣᶜXᵣₛYᵣₛ u v ⟩
         dᵣᶜ Xᵣₛᶜ     Yᵣₛᶜ     ≡⟨ dᵣᶜ-cong _ _ _ _ ≈-refl ≈-refl ⟩
         dᵣᶜ (Xᶜ r s) (Yᶜ r s) ∎
-       
+
     dᵣ-strContrᶜⁱ : ∀ {X Y : RMatrix} {r s} → 𝑪ₘ X → 𝑰 (Y r s)
                     → (∀ u v → dᵣ (X u v) (Y u v) ≤ Hᶜ + dᵣⁱ (X r s) (Y r s))
                     → ∀ i j → dᵣ (σ X i j) (σ Y i j) < Hᶜ + dᵣⁱ (X r s) (Y r s)
@@ -348,10 +348,10 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step4_RouteMet
     ...   | yes σXᵢⱼᶜ | yes σYᵢⱼᶜ = dᵣᶜ<Hᶜ+x σXᵢⱼᶜ σYᵢⱼᶜ _
     ...   | yes _     | no  σYᵢⱼⁱ = +-monoʳ-< Hᶜ (dᵣⁱ-strContrᶜ X Y Xᶜ (dᵣ-force-dᵣⁱ X Y dᵣ≤Hᶜ+dᵣⁱ) σYᵢⱼⁱ)
     ...   | no  σXᵢⱼⁱ | _         = contradiction (σ-pres-𝑪ₘ Xᶜ i j) σXᵢⱼⁱ
-    
+
       --(dᵣⁱ-strContrOrbits X (dᵣ-force-dᵣⁱ X dᵣ≤Hᶜ+dᵣⁱ) (inj₂ σ²Xᵢⱼⁱ))
-    
-    dᵣ-strContrᶜ : ∀ {X Y r s} → 𝑪ₘ X → X r s ≉ Y r s → 
+
+    dᵣ-strContrᶜ : ∀ {X Y r s} → 𝑪ₘ X → X r s ≉ Y r s →
                   (∀ u v → dᵣ (X u v) (Y u v) ≤ dᵣ (X r s) (Y r s)) →
                   ∀ i j → dᵣ (σ X i j) (σ Y i j) < dᵣ (X r s) (Y r s)
     dᵣ-strContrᶜ {X} {Y} {r} {s} Xᶜ Xᵣₛ≉Yᵣₛ dᵣ≤dᵣXᵣₛYᵣₛ with X r s ≟ Y r s

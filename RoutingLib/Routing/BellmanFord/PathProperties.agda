@@ -61,7 +61,7 @@ abstract
 
   p[σXᵢᵢ]≈[] : ∀ X i → path (σ X i i) ≈ₚ valid []
   p[σXᵢᵢ]≈[] X i = ≈ₚ-trans (path-cong (σXᵢᵢ≈Iᵢᵢ X i)) (p[Iᵢᵢ]≈[] i)
-  
+
   p[σXᵢⱼ]≈[]⇒i≡j : ∀ X i j → path (σ X i j) ≈ₚ valid [] → i ≡ j
   p[σXᵢⱼ]≈[]⇒i≡j X i j p[σXᵢⱼ]≈[] with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
   ... | inj₂ σXᵢⱼ≈Iᵢⱼ          = p[Iᵢⱼ]≈[]⇒i≡j (≈ₚ-trans (path-cong (≈-sym σXᵢⱼ≈Iᵢⱼ)) p[σXᵢⱼ]≈[])
@@ -115,12 +115,12 @@ abstract
 
 𝑪ₘ : RMatrix → Set _
 𝑪ₘ X = ∀ i j → 𝑪 (X i j)
-  
+
 𝑰ₘ : RMatrix → Set _
 𝑰ₘ X = ¬ 𝑪ₘ X
 
 abstract
-  
+
   𝑪ₘ? : Decidable 𝑪ₘ
   𝑪ₘ? X = all? (λ i → all? (λ j → 𝑪? (X i j)))
 
@@ -141,7 +141,7 @@ abstract
   Iᶜ i j with j ≟𝔽 i
   ... | yes _ = 0ᶜ
   ... | no  _ = ∞ᶜ
-  
+
   σ-pres-𝑪ₘ : ∀ {X} → 𝑪ₘ X → 𝑪ₘ (σ X)
   σ-pres-𝑪ₘ Xᶜ i j = foldr-presᵇ {P = 𝑪} ⊕-pres-𝑪
     (Iᶜ i j) (All.tabulate⁺ (λ k → ▷-pres-𝑪 i k (Xᶜ k j)))
@@ -164,7 +164,7 @@ abstract
       size (σ X k j)         ≡⟨ size-cong (≈-sym Xₖⱼ≈σXₖⱼ) ⟩
       size (X k j)           <⟨ ≤-reflexive (size-incr (𝑰-cong σXₗⱼ≈AₗₖXₖⱼ σXₗⱼⁱ)) ⟩
       size (A l k ▷ X k j)   ≡⟨ size-cong (≈-sym σXₗⱼ≈AₗₖXₖⱼ) ⟩
-      size (σ X l j)         ∎))    
+      size (σ X l j)         ∎))
 
   fixedPointᶜ : ∀ {X} → σ X ≈ₘ X → 𝑪ₘ X
   fixedPointᶜ {X} σX≈X with 𝑪ₘ? (σ X)
@@ -185,7 +185,7 @@ open BellmanFord rawAlgebraᶜ Ac using () renaming
   ; σ    to σᶜ
   )
 
-toCMatrix : ∀ {X} → 𝑪ₘ X → CMatrix 
+toCMatrix : ∀ {X} → 𝑪ₘ X → CMatrix
 toCMatrix {X} Xᶜ i j = X i j , Xᶜ i j
 
 toCMatrix-cong : ∀ {X Y} (Xᶜ : 𝑪ₘ X) (Yᶜ : 𝑪ₘ Y) → X ≈ₘ Y →
@@ -204,7 +204,7 @@ foldrᶜ-lemma eᶜ []            = eᶜ
 foldrᶜ-lemma eᶜ (_∷_ {y = y , yᶜ} x≈y xs≈ys) =
   ⊕-pres-𝑪 (𝑪-cong (≈-sym x≈y) yᶜ) (foldrᶜ-lemma eᶜ xs≈ys)
 
-foldr-toCRoute-commute : ∀ {e f} (eᶜ : 𝑪 e) → toCRoute eᶜ ≈ᶜ f → 
+foldr-toCRoute-commute : ∀ {e f} (eᶜ : 𝑪 e) → toCRoute eᶜ ≈ᶜ f →
                       ∀ {xs ys} (foldrᶜ : 𝑪 (foldr _⊕_ e xs)) →
                       Pointwise (λ x y → x ≈ proj₁ y) xs ys →
                       toCRoute foldrᶜ ≈ᶜ foldr _⊕ᶜ_ f ys

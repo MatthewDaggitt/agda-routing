@@ -10,11 +10,11 @@ module RoutingLib.Function.Metric.FixedPoint {a ℓ} (DS : DecSetoid a ℓ) wher
   open DecSetoid DS using (_≈_; _≟_) renaming (Carrier to A; setoid to S)
   open import RoutingLib.Function.Metric S using (_StrContrOnOrbitsOver_)
   open import RoutingLib.Function.FixedPoint S using (FixedPoint)
-  
+
   module _ d {f} (strContrOnOrbits : f StrContrOnOrbitsOver d) where
 
     abstract
-    
+
       fixedPoint : A → ∃ (λ x → FixedPoint f x)
       fixedPoint x = inner x (<-well-founded (d x (f x)))
         where
@@ -25,6 +25,6 @@ module RoutingLib.Function.Metric.FixedPoint {a ℓ} (DS : DecSetoid a ℓ) wher
 
       x* : A → A
       x* x = proj₁ (fixedPoint x)
-  
+
       x*-fixed : ∀ x → f (x* x) ≈ x* x
       x*-fixed x = proj₂ (fixedPoint x)

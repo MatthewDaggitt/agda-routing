@@ -10,16 +10,16 @@ module RoutingLib.Data.SimplePath.Relation.Subpath {n : ℕ} where
 
   ------------------------------------------------------------------------------
   -- Relations
-    
+
   data _⊆ₚ_ : Rel (SimplePath n) ℓ₀ where
     invalid : invalid ⊆ₚ invalid
     valid   : ∀ {p q} → p NE.⊆ₚ q → valid p ⊆ₚ valid q
 
   ------------------------------------------------------------------------------
   -- Properties
-    
+
   abstract
-    
+
     ⊆ₚ-reflexive : _≈ₚ_ ⇒ _⊆ₚ_
     ⊆ₚ-reflexive invalid     = invalid
     ⊆ₚ-reflexive (valid p≈q) = valid (NE.refl p≈q)

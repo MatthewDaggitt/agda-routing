@@ -43,13 +43,13 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step4_Induc
   (C-nonfull : Nonfull C)
   (C⊆𝓒ₜ : ∀ {i} → i ∈ C → i ∈ᵤ Step1_NodeSets.𝓒 algebra X j (suc t-1))
   where
-  
+
   open Prelude algebra
   open Notation X j
   open Step1_NodeSets algebra X j
   open Step2_ConvergedSubtree algebra X j t-1 j∈C C-nonfull C⊆𝓒ₜ
   open Step3_DangerousNodes algebra X j t-1 j∈C C-nonfull C⊆𝓒ₜ
-  
+
   --------------------------------------------------------------------------
   -- Some lemmas
 
@@ -96,7 +96,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step4_Induc
     A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + n-1 + s) X kₘᵢₙ j   ≡⟨ cong (λ v → A iₘᵢₙ kₘᵢₙ ▷ σ^ v X kₘᵢₙ j) (+-assoc t n-1 s) ⟩
     A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + (n-1 + s)) X kₘᵢₙ j ∎
     where open EqReasoning S
-    
+
   iₘᵢₙ∈𝓕ₜ₊ₙ : iₘᵢₙ ∈ᵤ 𝓕 (t + n)
   iₘᵢₙ∈𝓕ₜ₊ₙ s = begin
     σ^ (t + n + s) X iₘᵢₙ j                    ≈⟨ iₘᵢₙ-pred s ⟩
@@ -120,7 +120,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step4_Induc
       path (σ^ (t + n) X iₘᵢₙ j)                       ≡⟨ eq ⟩
       p                                                ∎
       where open EqReasoning (ℙₛ n)
-      
+
   p[iₘᵢₙ]∈𝓕ₜ₊ₙ : Allₙ (𝓕 (t + n)) (path (σ^ (t + n) X iₘᵢₙ j))
   p[iₘᵢₙ]∈𝓕ₜ₊ₙ with path (σ^ (t + n) X iₘᵢₙ j) | inspect path (σ^ (t + n) X iₘᵢₙ j)
   ... | invalid                     | _ = invalid

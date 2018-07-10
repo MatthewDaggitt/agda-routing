@@ -26,7 +26,7 @@ module RoutingLib.Relation.Binary.NonStrictToStrict.PartialOrder
     ; trans      to <-trans
     ; asymmetric to <-asym
     )
-  
+
   <-≤-trans : ∀ {x y z} → x < y → y ≤ z → x < z
   <-≤-trans = NonStrictToStrict.<-≤-trans _ _≤_ Eq.sym trans antisym (proj₁ ≤-resp-≈)
 

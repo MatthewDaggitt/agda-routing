@@ -15,9 +15,9 @@ module RoutingLib.Data.SimplePath.NonEmpty.Relation.Subpath {n : ℕ} where
 
   ----------------
   -- Properties
-  
+
   abstract
-  
+
     ⊆ₚ-cong : ∀ {p q r s : SimplePathⁿᵗ n} →
               p ≈ₚ q → r ≈ₚ s → p ⊆ₚ r → q ⊆ₚ s
     ⊆ₚ-cong p≈q r≈s       (refl p≈r) = refl (≈ₚ-trans (≈ₚ-sym p≈q) (≈ₚ-trans p≈r r≈s))
@@ -25,7 +25,7 @@ module RoutingLib.Data.SimplePath.NonEmpty.Relation.Subpath {n : ℕ} where
 
     ⊆ₚ-reflexive : ∀ {p q : SimplePathⁿᵗ n} → p ≈ₚ q → p ⊆ₚ q
     ⊆ₚ-reflexive p≈q = refl p≈q
-    
+
     ⊆ₚ-trans : Transitive _⊆ₚ_
     ⊆ₚ-trans p⊆q (refl q≈r) = ⊆ₚ-cong ≈ₚ-refl q≈r p⊆q
     ⊆ₚ-trans p⊆q (drop q⊆r) = drop (⊆ₚ-trans p⊆q q⊆r)

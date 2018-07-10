@@ -145,7 +145,7 @@ valid l cs p ≟ᵣ valid k ds q with l ≟ k | cs ≟ᶜˢ ds | p ≟ₚ q
 ... | tri> _ _ ()
 ... | tri≈ _ 0≡l _ with <-cmp 0 (length p)
 ...   | tri< 0<|p| _ _ = length< 0≡l 0<|p|
-...   | tri> _ _ () 
+...   | tri> _ _ ()
 ...   | tri≈ _ 0≡|p| _ with <ₗₑₓ-cmp [] p
 ...     | tri< []<p _ _ = plex< 0≡l 0≡|p| []<p
 ...     | tri> _ _ p<[] = contradiction p<[] p≮ₗₑₓ[]

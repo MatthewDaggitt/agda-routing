@@ -16,7 +16,7 @@ module RoutingLib.Data.Fin.Subset where
 
   Nonfull : ∀ {n} → Subset n → Set
   Nonfull p = ∃ λ i → i ∉ p
-  
+
   Full : ∀ {n} → Subset n → Set
   Full p = ¬ (Nonfull p)
-  
+

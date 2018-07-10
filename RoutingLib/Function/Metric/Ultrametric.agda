@@ -24,5 +24,4 @@ module RoutingLib.Function.Metric.Ultrametric {a} {ℓ} (S : Setoid a ℓ) where
   ------------------
   -- Ultrametrics --
   ------------------
-  
 

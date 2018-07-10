@@ -111,7 +111,7 @@ apply-increasing (raise x)     refl = n≤m+n x _ , refl
 apply-increasing (addComm c)   refl = ≤-refl    , refl
 apply-increasing (delComm c)   refl = ≤-refl    , refl
 apply-increasing (cond x pol)  {l} {cs} {p} eq with evaluate x (valid l cs p) | eq
-... | 𝔹.true  | e    = apply-increasing pol e 
+... | 𝔹.true  | e    = apply-increasing pol e
 ... | 𝔹.false | refl = ≤-refl , refl
 apply-increasing (compose r s) {l} {cs} {p} eq
   with apply r (valid l cs p) | inspect (apply r) (valid l cs p)

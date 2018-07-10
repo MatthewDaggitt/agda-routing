@@ -27,12 +27,12 @@ module RoutingLib.Data.SimplePath.NonEmpty.Relation.Lex {n : ℕ} where
             i ≡ k → j < l → (i , j) ∷ p ∣ ij⇿p ∣ i∉p ≤ₗₑₓ (k , l) ∷ q ∣ kl⇿q ∣ k∉q
     step  : ∀ {i j k l p q ij⇿p kl⇿q i∉p k∉q} →
             i ≡ k → j ≡ l → p ≤ₗₑₓ q  → (i , j) ∷ p ∣ ij⇿p ∣ i∉p ≤ₗₑₓ (k , l) ∷ q ∣ kl⇿q ∣ k∉q
-            
+
 
   -- Properties
 
   abstract
-  
+
 
     ≤ₗₑₓ-reflexive : _≈ₚ_ ⇒ _≤ₗₑₓ_
     ≤ₗₑₓ-reflexive []         = stop
@@ -54,7 +54,7 @@ module RoutingLib.Data.SimplePath.NonEmpty.Relation.Lex {n : ℕ} where
     ...   | tri≈ _ j≡k _ with ≤ₗₑₓ-total p q
     ...     | inj₁ p≤q = inj₁ (step i≡l j≡k p≤q)
     ...     | inj₂ q≤p = inj₂ (step (sym i≡l) (sym j≡k) q≤p)
-    
+
     ≤ₗₑₓ-trans : Transitive _≤ₗₑₓ_
     ≤ₗₑₓ-trans stop                  _                     = stop
     ≤ₗₑₓ-trans (here₁ i<j)           (here₁ j<k)           = here₁ (<-trans i<j j<k)
@@ -121,7 +121,7 @@ module RoutingLib.Data.SimplePath.NonEmpty.Relation.Lex {n : ℕ} where
       ; _≤?_         = _≤ₗₑₓ?_
       }
     }
- 
+
   open ToStrict ≤ₗₑₓ-decTotalOrder public
     using ()
     renaming
@@ -133,7 +133,7 @@ module RoutingLib.Data.SimplePath.NonEmpty.Relation.Lex {n : ℕ} where
     ; <-respʳ-≈ to <ₗₑₓ-respʳ-≈ₚ
     ; <-cmp     to <ₗₑₓ-cmp
     )
-  
+
 
   p≮ₗₑₓ[] : ∀ {p} → ¬ (p <ₗₑₓ [])
   p≮ₗₑₓ[] {[]}                (_ , []≉[]) = []≉[] []

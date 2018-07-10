@@ -76,7 +76,7 @@ module _ {a p} {A : Set a} {P : A → Set p} where
 
 ------------------------------------------------------------------------
 -- between
-  
+
 s≤betweenₛₑ : ∀ s e → All (s ≤_) (between s e)
 s≤betweenₛₑ s e = All-applyBetween⁺₁ id s e (λ s≤i _ → s≤i)
 

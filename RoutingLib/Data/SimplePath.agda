@@ -11,7 +11,7 @@ module RoutingLib.Data.SimplePath where
 
   ----------------------------------------------------------------------------
   -- Datatype
-    
+
   open NT using ([]; _∷_∣_∣_; notHere; notThere; continue) public
 
   data SimplePath (n : ℕ) : Set where
@@ -20,11 +20,11 @@ module RoutingLib.Data.SimplePath where
 
   ----------------------------------------------------------------------------
   -- Linkage
-  
+
   open NT using (continue) public
-  
+
   infix 4 _⇿_
-  
+
   data _⇿_ {n : ℕ} : Fin n × Fin n → SimplePath n → Set where
     valid : ∀ {e p} → e NT.⇿ p → e ⇿ valid p
 
@@ -32,9 +32,9 @@ module RoutingLib.Data.SimplePath where
   -- Membership
 
   open NT using (notHere; notThere) public
-  
+
   infix 4 _∉_ _∈_
-  
+
   data _∉_ {n : ℕ} : Fin n → SimplePath n → Set where
     invalid : ∀ {i} → i ∉ invalid
     valid   : ∀ {i p} → i NT.∉ p → i ∉ valid p
@@ -45,15 +45,15 @@ module RoutingLib.Data.SimplePath where
 
   ----------------------------------------------------------------------------
   -- Operations
-  
+
   length : ∀ {n} → SimplePath n → ℕ
   length invalid   = 0
   length (valid p) = NT.length p
 
-  
-  
 
-  
+
+
+
 {-
   -- Orderings
 
@@ -70,9 +70,9 @@ module RoutingLib.Data.SimplePath where
   p ≰ₚ q = ¬ (p ≤ₚ q)
 
 
-  
+
   infixr 5 _∷ₐ_
-  
+
   _∷ₐ_ : ∀ {n} → Fin n × Fin n → SimplePath n → SimplePath n
   _       ∷ₐ invalid = invalid
   (i , j) ∷ₐ valid p with (i , j) NTP.⇿? p | i NTP.∉? p

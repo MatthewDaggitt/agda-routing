@@ -30,11 +30,11 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step5_StateMet
 
   dₜ : RTable → RTable → ℕ
   dₜ x y = max 0 (zipWith dᵣ x y)
-  
+
   dₜ-isUltrametric : IsUltrametric _ dₜ
   dₜ-isUltrametric = MaxLift.isUltrametric {n = n} _ dᵣ-isUltrametric
 
-  dₜ-bounded : Bounded ℝ𝕋ₛ dₜ  
+  dₜ-bounded : Bounded ℝ𝕋ₛ dₜ
   dₜ-bounded = MaxLift.bounded ℝ𝕋ₛⁱ dᵣ-bounded
 
   ------------------
@@ -43,11 +43,11 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step5_StateMet
 
   D : RMatrix → RMatrix → ℕ
   D X Y = max 0 (zipWith dₜ X Y)
-  
+
   D-isUltrametric : IsUltrametric _ D
   D-isUltrametric = MaxLift.isUltrametric {n = n} _ dₜ-isUltrametric
 
-  D-bounded : Bounded ℝ𝕄ₛ D  
+  D-bounded : Bounded ℝ𝕄ₛ D
   D-bounded = MaxLift.bounded ℝ𝕄ₛⁱ dₜ-bounded
 
   open IsUltrametric D-isUltrametric public using ()
@@ -61,7 +61,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step5_StateMet
   -- Strictly contracting
 
   open Metric ℝ𝕄ₛ using (_StrContrOnOrbitsOver_; _StrContrOnFixedPointOver_)
-  
+
   σ-strContrOrbits : σ StrContrOnOrbitsOver D
   σ-strContrOrbits {X} σX≉X with max[t]∈t 0 (λ i → dₜ (X i) (σ X i))
   ... | inj₁ dXσX≡0              = contradiction (≈ₘ-sym (D≡0⇒X≈Y dXσX≡0)) σX≉X
@@ -76,7 +76,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step5_StateMet
 
     DXσX≈dᵣXᵣₛσXᵣₛ : D X (σ X) ≡ dᵣ (X r s) (σ X r s)
     DXσX≈dᵣXᵣₛσXᵣₛ = trans DXσX≡dₜXᵣσXᵣ dXᵣσXᵣ≡dᵣXᵣₛσXᵣₛ
-    
+
     Xᵣₛ≉σXᵣₛ : X r s ≉ σ X r s
     Xᵣₛ≉σXᵣₛ Xᵣₛ≈σXᵣₛ = σX≉X (≈ₘ-sym (D≡0⇒X≈Y (trans DXσX≈dᵣXᵣₛσXᵣₛ (x≈y⇒dᵣ≡0 Xᵣₛ≈σXᵣₛ))))
 
@@ -89,7 +89,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step5_StateMet
 
     0<dᵣXᵣₛσXᵣₛ : 0 < dᵣ (X r s) (σ X r s)
     0<dᵣXᵣₛσXᵣₛ = n≢0⇒0<n (Xᵣₛ≉σXᵣₛ ∘ dᵣ≡0⇒x≈y)
-    
+
     test : D (σ X) (σ (σ X)) < dᵣ (X r s) (σ X r s)
     test = max[t]<x {t = zipWith dₜ (σ X) (σ (σ X))}
              (λ i → max[t]<x {t = zipWith dᵣ (σ X i) (σ (σ X) i)}
@@ -101,7 +101,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step5_StateMet
 
 
   -- Strictly contracting when one of the arguments is consistent
-  
+
   σ-strContrᶜ : ∀ {X Y} → 𝑪ₘ X → X ≉ₘ Y → D (σ X) (σ Y) < D X Y
   σ-strContrᶜ {X} {Y} Xᶜ X≉Y with max[t]∈t 0 (λ i → dₜ (X i) (Y i))
   ... | inj₁ dXY≡0              = contradiction (D≡0⇒X≈Y dXY≡0) X≉Y
@@ -116,7 +116,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step5_StateMet
 
     DXY≈dᵣXᵣₛYᵣₛ : D X Y ≡ dᵣ (X r s) (Y r s)
     DXY≈dᵣXᵣₛYᵣₛ = trans DXY≡dₜXᵣYᵣ dXᵣYᵣ≡dᵣXᵣₛYᵣₛ
-    
+
     Xᵣₛ≉Yᵣₛ : X r s ≉ Y r s
     Xᵣₛ≉Yᵣₛ Xᵣₛ≈Yᵣₛ = X≉Y (D≡0⇒X≈Y (trans DXY≈dᵣXᵣₛYᵣₛ (x≈y⇒dᵣ≡0 Xᵣₛ≈Yᵣₛ)))
 
@@ -129,14 +129,14 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step5_StateMet
 
     0<dᵣXᵣₛYᵣₛ : 0 < dᵣ (X r s) (Y r s)
     0<dᵣXᵣₛYᵣₛ = n≢0⇒0<n (Xᵣₛ≉Yᵣₛ ∘ dᵣ≡0⇒x≈y)
-    
+
     test : D (σ X) (σ Y) < dᵣ (X r s) (Y r s)
     test = max[t]<x {t = zipWith dₜ (σ X) (σ Y)}
              (λ i → max[t]<x {t = zipWith dᵣ (σ X i) (σ Y i)}
                (λ j → dᵣ-strContrᶜ Xᶜ Xᵣₛ≉Yᵣₛ dᵣ≤dᵣXᵣₛYᵣₛ i j)
                0<dᵣXᵣₛYᵣₛ)
              0<dᵣXᵣₛYᵣₛ
-  
+
   σ-strContrOnFP : σ StrContrOnFixedPointOver D
   σ-strContrOnFP {X} {X*} σX*≈X* X≉X* = begin
     D X*     (σ X) ≡⟨ D-cong (≈ₘ-sym σX*≈X*) (≈ₘ-refl {x = σ X}) ⟩

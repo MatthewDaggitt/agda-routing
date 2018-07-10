@@ -8,7 +8,7 @@ open import Relation.Nullary.Negation using (contradiction)
 open import RoutingLib.Data.Matrix
 open import RoutingLib.Data.Matrix.Relation.Pointwise
   using () renaming (decSetoid to pointwiseDecSetoid)
-  
+
 module RoutingLib.Data.Matrix.Relation.DecidableEquality
   {a ℓ} (DS : DecSetoid a ℓ) where
 

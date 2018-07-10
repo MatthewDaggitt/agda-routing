@@ -21,6 +21,6 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Prelude
 
   open FiniteStrictlyIncreasingRoutingAlgebra algebra public
   open FiniteStrictlyIncreasingRoutingAlgebraProperties algebra public
-  
+
   open BellmanFord rawRoutingAlgebra A public
   open BellmanFordProperties routingAlgebra A public

@@ -25,7 +25,7 @@ module RoutingLib.Data.Matrix.Relation.Pointwise where
   module _ {a ℓ} {A : Set a} {_~_ : Rel A ℓ} where
 
     abstract
-    
+
       reflexive : _≡_ ⇒ _~_ → ∀ {m n} → _≡_ ⇒ Pointwise _~_ {m} {n}
       reflexive reflexive ≡-refl = Table.reflexive (Table.reflexive reflexive) ≡-refl
 
@@ -40,7 +40,7 @@ module RoutingLib.Data.Matrix.Relation.Pointwise where
 
       dec : Decidable _~_ → ∀ {m n} → Decidable (Pointwise _~_ {m} {n})
       dec dec M N = all? (λ i → all? (λ j → dec (M i j) (N i j)))
-   
+
       isEquivalence : IsEquivalence _~_ → ∀ {m n} → IsEquivalence (Pointwise _~_ {m} {n})
       isEquivalence isEq = record
         { refl  = refl  (IsEquivalence.refl  isEq)

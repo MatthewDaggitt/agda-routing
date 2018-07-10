@@ -37,7 +37,7 @@ module RoutingLib.Asynchronous.Schedule where
   -- at processor i at time t was generated
   𝔹 : ℕ → Set
   𝔹 n = 𝕋 → Fin n → Fin n → 𝕋
-  
+
   -- A data flow function is causal if data always flows forwards in time.
   Causality : ∀ {n} → 𝔹 n → Set
   Causality β = ∀ t i j → β (suc t) i j ≤ t
@@ -46,7 +46,7 @@ module RoutingLib.Asynchronous.Schedule where
   -- number of times (i.e. eventually fresh data will be used).
   Dynamic : ∀ {n} → 𝔹 n → Set
   Dynamic β = ∀ t i j → ∃ λ k → ∀ k₁ → β (t + k + k₁) i j ≢ t
-  
+
   --------------
   -- Schedule --
   --------------

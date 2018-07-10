@@ -12,7 +12,7 @@ import RoutingLib.Data.Table.Membership as Membership
 module RoutingLib.Data.Table.Membership.Properties where
 
   module SingleSetoid {a ℓ} (S : Setoid a ℓ) where
-    
+
     open Membership S
     open Setoid S renaming (Carrier to A)
 

@@ -11,14 +11,14 @@ import RoutingLib.Data.SimplePath.NonEmpty.Relation.Equality as NE
 module RoutingLib.Data.SimplePath.Relation.Equality where
 
   module _ {n : ℕ} where
-  
+
     ----------------------------------------------------------------------------
     -- Relations
-  
+
     open NE using ([]; _∷_) public
-  
+
     infix 4 _≈ₚ_ _≉ₚ_
-  
+
     data _≈ₚ_ : Rel (SimplePath n) ℓ₀ where
       invalid : invalid  ≈ₚ invalid
       valid   : ∀ {p q} → p NE.≈ₚ q → valid p ≈ₚ valid q
@@ -31,12 +31,12 @@ module RoutingLib.Data.SimplePath.Relation.Equality where
 
     ----------------------------------------------------------------------------
     -- Properties
-  
+
     abstract
 
       valid-injective : ∀ {p q} → valid p ≈ₚ valid q → p NE.≈ₚ q
       valid-injective (valid p≈q) = p≈q
-      
+
       ≈ₚ-refl : Reflexive _≈ₚ_
       ≈ₚ-refl {invalid} = invalid
       ≈ₚ-refl {valid p} = valid NE.≈ₚ-refl
@@ -59,7 +59,7 @@ module RoutingLib.Data.SimplePath.Relation.Equality where
       valid p ≟ₚ valid q with p NE.≟ₚ q
       ... | no  p≉q = no (λ{(valid p≈q) → p≉q p≈q})
       ... | yes p≈q = yes (valid p≈q)
-  
+
       ≈ₚ-isEquivalence : IsEquivalence _≈ₚ_
       ≈ₚ-isEquivalence = record
         { refl  = ≈ₚ-refl
@@ -74,15 +74,15 @@ module RoutingLib.Data.SimplePath.Relation.Equality where
         }
 
   ℙₛ : ℕ → Setoid ℓ₀ ℓ₀
-  ℙₛ n = record 
-    { Carrier       = SimplePath n 
-    ; _≈_           = _≈ₚ_ 
-    ; isEquivalence = ≈ₚ-isEquivalence 
+  ℙₛ n = record
+    { Carrier       = SimplePath n
+    ; _≈_           = _≈ₚ_
+    ; isEquivalence = ≈ₚ-isEquivalence
     }
 
   ℙₛ? : ℕ → DecSetoid ℓ₀ ℓ₀
-  ℙₛ? n = record 
-    { Carrier          = SimplePath n 
-    ; _≈_              = _≈ₚ_ 
-    ; isDecEquivalence = ≈ₚ-isDecEquivalence 
+  ℙₛ? n = record
+    { Carrier          = SimplePath n
+    ; _≈_              = _≈ₚ_
+    ; isDecEquivalence = ≈ₚ-isDecEquivalence
     }

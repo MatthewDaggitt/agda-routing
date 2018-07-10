@@ -40,7 +40,7 @@ module RoutingLib.Data.List.Uniqueness.Setoid.Properties where
     open Setoid S renaming (Carrier to A)
     open import Data.List.Membership.Setoid S using (_∈_; _∉_)
     open Disjoint S using (_#_; ∈ₗ⇒∉ᵣ; contractₗ)
-    open DisjointProperties S using (#-concat; #⇒AllAll≉) 
+    open DisjointProperties S using (#-concat; #⇒AllAll≉)
 
     filter!⁺ : ∀ {b} {P : A → Set b} (P? : Decidable P) →
                ∀ {xs} → Unique S xs → Unique S (filter P? xs)
@@ -64,12 +64,12 @@ module RoutingLib.Data.List.Uniqueness.Setoid.Properties where
     take!⁺ : ∀ {xs} n → Unique S xs → Unique S (take n xs)
     take!⁺ = AllPairs.take⁺
 
-    
+
     -- Other
 
     perm! : ∀ {xs ys} → Unique S xs → xs ⇿ ys → Unique S ys
     perm! xs! xs⇿ys = ⇿-pres-AllPairs (λ i≉j → i≉j ∘ sym) xs! xs⇿ys
-    
+
 
   open SingleSetoid public
 
@@ -100,7 +100,7 @@ module RoutingLib.Data.List.Uniqueness.Setoid.Properties where
 
       _≉₂_ : Rel A₂ ℓ₂
       x ≉₂ y = ¬ x ≈₂ y
-      
+
     map!⁺ : ∀ {f} → (∀ {x y} → x ≉₁ y → f x ≉₂ f y) → ∀ {xs} → Unique S₁ xs → Unique S₂ (map f xs)
     map!⁺ _     [] = []
     map!⁺ f-inj (x∉xs ∷ xs!) = gmap (λ x≉y → f-inj x≉y) x∉xs ∷ map!⁺ f-inj xs!
@@ -110,7 +110,7 @@ module RoutingLib.Data.List.Uniqueness.Setoid.Properties where
                → ∀ {xs} → Unique S₁ xs → Unique S₂ (gfilter f xs)
     mapMaybe!⁺ = {!!} --AllPairs-mapMaybe⁺
     -}
-    
+
   open DoubleSetoid public
 
 
@@ -120,20 +120,20 @@ module RoutingLib.Data.List.Uniqueness.Setoid.Properties where
     open Setoid S₁ renaming (Carrier to A₁; _≈_ to _≈₁_; sym to sym₁; trans to trans₁)
     open Setoid S₂ renaming (Carrier to A₂; _≈_ to _≈₂_; sym to sym₂; trans to trans₂)
     open Setoid S₃ renaming (Carrier to A₃; _≈_ to _≈₃_)
-    
+
     open Disjoint S₃ using (_#_)
-    
+
     combine!⁺ : ∀ {xs ys} f → (∀ {w x y z} → ¬ (w ≈₁ y) ⊎ ¬ (x ≈₂ z) → ¬ (f w x ≈₃ f y z)) →
                 Unique S₁ xs → Unique S₂ ys → Unique S₃ (combine f xs ys)
     combine!⁺ _ _ [] _ = []
     combine!⁺ {x ∷ xs} {ys} f f-inj (x∉xs ∷ xs!) ys! = ++!⁺ S₃ (map!⁺ S₂ S₃ (f-inj ∘ inj₂) ys!) (combine!⁺ f f-inj xs! ys!) map#combine
       where
-      
+
       pres : ∀ {a} {b} → a ≈₁ b → ¬ (x ≈₁ a) → ¬ (x ≈₁ b)
       pres a≈b x≉a x≈b = x≉a (trans₁ x≈b (sym₁ a≈b))
 
       map#combine : map (f x) ys # combine f xs ys
       map#combine (v∈map , v∈com) with ∈-map⁻ S₂ S₃ v∈map | combine-∈ S₁ S₂ S₃ f xs ys v∈com
       ... | (c , _ , v≈fxc) | (a , b , a∈xs , _ , v≈fab) = contradiction (trans (sym v≈fxc) v≈fab) (f-inj (inj₁ (All-∈ S₁ pres x∉xs a∈xs)))
- 
+
   open TripleSetoid public

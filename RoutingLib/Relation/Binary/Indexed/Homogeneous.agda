@@ -45,7 +45,7 @@ Symmetric _ _∼_ = ∀ {i} → B.Symmetric (_∼_ {i})
 
 Transitive : ∀ {i a ℓ} {I : Set i} (A : I → Set a) → Rel A ℓ → Set _
 Transitive _ _∼_ = ∀ {i} → B.Transitive (_∼_ {i})
-  
+
 Antisymmetric : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → Rel A ℓ₁ → Rel A ℓ₂ → Set _
 Antisymmetric _ _≈_ _∼_ = ∀ {i} → B.Antisymmetric (_≈_ {i}) (_∼_ {i})
 
@@ -55,10 +55,10 @@ Decidable A _∼_ = ∀ {i} → B.Decidable (_∼_ {i})
 Respects : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → Pred A ℓ₁ → Rel A ℓ₂ → Set _
 Respects A P _∼_ = ∀ {i} {x y : A i} → x ∼ y → P x → P y
 
-Respectsˡ : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → Rel A ℓ₁ → Rel A ℓ₂ → Set _ 
+Respectsˡ : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → Rel A ℓ₁ → Rel A ℓ₂ → Set _
 Respectsˡ A P _∼_  = ∀ {i} {x y z : A i} → x ∼ y → P x z → P y z
 
-Respectsʳ : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → Rel A ℓ₁ → Rel A ℓ₂ → Set _ 
+Respectsʳ : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → Rel A ℓ₁ → Rel A ℓ₂ → Set _
 Respectsʳ A P _∼_ = ∀ {i} {x y z : A i} → x ∼ y → P z x → P z y
 
 Respects₂ : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → Rel A ℓ₁ → Rel A ℓ₂ → Set _
@@ -84,10 +84,10 @@ record IsEquivalence {i a ℓ} {I : Set i} (A : I → Set a)
   reflexiveᵢ P.refl = reflᵢ
 
   -- Lift properties
-  
+
   reflexive : _≡_ B.⇒ (Lift A _≈_)
   reflexive P.refl i = reflᵢ
-  
+
   refl : B.Reflexive (Lift A _≈_)
   refl i = reflᵢ
 
@@ -116,13 +116,13 @@ record Setoid {i} (I : Set i) c ℓ : Set (suc (i ⊔ c ⊔ ℓ)) where
 
   Carrier : Set _
   Carrier = ∀ i → Carrierᵢ i
-  
+
   _≈_ : B.Rel Carrier _
   _≈_ = Lift Carrierᵢ _≈ᵢ_
 
   _≉_ : B.Rel Carrier _
   x ≉ y = ¬ (x ≈ y)
-    
+
   setoid : B.Setoid _ _
   setoid = record
     { isEquivalence = isEquivalence
@@ -137,7 +137,7 @@ record IsPreorder {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a)
     transᵢ         : Transitive A _∼ᵢ_
 
   module Eq = IsEquivalence isEquivalenceᵢ
-  
+
   reflᵢ : Reflexive A _∼ᵢ_
   reflᵢ = reflexiveᵢ Eq.reflᵢ
 
@@ -149,7 +149,7 @@ record IsPreorder {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a)
 
   ∼ᵢ-resp-≈ᵢ : Respects₂ A _∼ᵢ_ _≈ᵢ_
   ∼ᵢ-resp-≈ᵢ = ∼ᵢ-respʳ-≈ᵢ , ∼ᵢ-respˡ-≈ᵢ
-  
+
 
 
   reflexive : Lift A _≈ᵢ_ B.⇒ Lift A _∼ᵢ_
@@ -157,7 +157,7 @@ record IsPreorder {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a)
 
   refl : B.Reflexive (Lift A _∼ᵢ_)
   refl i = reflᵢ
-  
+
   trans : B.Transitive (Lift A _∼ᵢ_)
   trans x≈y y≈z i = transᵢ (x≈y i) (y≈z i)
 
@@ -166,7 +166,7 @@ record IsPreorder {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a)
 
   ∼-respʳ-≈ : (Lift A _∼ᵢ_) B.Respectsʳ (Lift A _≈ᵢ_)
   ∼-respʳ-≈ x≈y z∼x i = ∼ᵢ-respʳ-≈ᵢ (x≈y i) (z∼x i)
-  
+
   ∼-resp-≈ : (Lift A _∼ᵢ_) B.Respects₂ (Lift A _≈ᵢ_)
   ∼-resp-≈ = ∼-respʳ-≈ , ∼-respˡ-≈
 
@@ -176,11 +176,11 @@ record IsPreorder {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a)
     ; reflexive     = reflexive
     ; trans         = trans
     }
-  
+
 record Preorder {i} (I : Set i) c ℓ : Set (suc (i ⊔ c ⊔ ℓ)) where
 
   infix 4 _≈ᵢ_ _∼ᵢ_ _≈_ _∼_
-  
+
   field
     Carrierᵢ    : I → Set c
     _≈ᵢ_        : Rel Carrierᵢ ℓ
@@ -191,7 +191,7 @@ record Preorder {i} (I : Set i) c ℓ : Set (suc (i ⊔ c ⊔ ℓ)) where
 
   Carrier : Set _
   Carrier = ∀ i → Carrierᵢ i
-  
+
   _≈_ : B.Rel Carrier _
   x ≈ y = ∀ i → x i ≈ᵢ y i
 
@@ -200,7 +200,7 @@ record Preorder {i} (I : Set i) c ℓ : Set (suc (i ⊔ c ⊔ ℓ)) where
 
   preorder : B.Preorder _ _ _
   preorder = record { isPreorder = isPreorder }
-  
+
 record IsPartialOrder {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a)
                       (_≈ᵢ_ : Rel A ℓ₁) (_≤ᵢ_ : Rel A ℓ₂) : Set (i ⊔ a ⊔ ℓ₁ ⊔ ℓ₂) where
   field
@@ -225,7 +225,7 @@ record IsPartialOrder {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a)
     { isPreorder = isPreorder
     ; antisym    = antisym
     }
-  
+
 record Poset {i} (I : Set i) c ℓ : Set (suc (i ⊔ c ⊔ ℓ)) where
 
   field
@@ -245,7 +245,7 @@ record Poset {i} (I : Set i) c ℓ : Set (suc (i ⊔ c ⊔ ℓ)) where
 
   poset : B.Poset _ _ _
   poset = record { isPartialOrder = isPartialOrder }
-  
+
 -------------------------------------------------------
 -- At lemmas
 

@@ -10,14 +10,14 @@ module RoutingLib.Relation.Binary.NaturalOrder.Right
   {a ℓ} {A : Set a} (_≈_ : Rel A ℓ) (_∙_ : Op₂ A) where
 
   -- All added to standard library
-  
+
   open import Algebra.FunctionProperties _≈_
 
   sel⇒idem : Selective _∙_ → Idempotent _∙_
   sel⇒idem sel x with sel x x
   ... | inj₁ x∙x≈x = x∙x≈x
   ... | inj₂ x∙x≈x = x∙x≈x
-  
+
   -------------------------
   -- Right natural order --
   -------------------------
@@ -26,7 +26,7 @@ module RoutingLib.Relation.Binary.NaturalOrder.Right
 
   _≤_ : Rel A ℓ
   x ≤ y = (y ∙ x) ≈ x
-  
+
   _≰_ : Rel A ℓ
   x ≰ y = ¬ (x ≤ y)
 
@@ -35,25 +35,25 @@ module RoutingLib.Relation.Binary.NaturalOrder.Right
 
   _≮_ : Rel A ℓ
   x ≮ y = ¬ (x < y)
-  
+
   -- Properties
 
   ≤-reflexive : IsEquivalence _≈_ → Congruent₂ _∙_ → Idempotent _∙_ → _≈_ ⇒ _≤_
   ≤-reflexive isEq cong idem x≈y = trans (cong (sym x≈y) refl) (idem _)
     where open IsEquivalence isEq
-    
+
   ≤-refl : Idempotent _∙_ → Reflexive _≤_
   ≤-refl idem {x} = idem x
 
   ≤-antisym : IsEquivalence _≈_ → Commutative _∙_ → Antisymmetric _≈_ _≤_
   ≤-antisym isEq comm {x} {y} x≤y y≤x = trans (trans (sym x≤y) (comm y x)) y≤x
     where open IsEquivalence isEq
-    
+
   ≤-total : Transitive _≈_ → Selective _∙_ → Commutative _∙_ → Total _≤_
   ≤-total trans sel comm x y with sel x y
   ... | inj₁ x∙y≈x = inj₁ (trans (comm y x) x∙y≈x)
   ... | inj₂ x∙y≈y = inj₂ x∙y≈y
-    
+
   ≤-trans : IsSemigroup _≈_ _∙_ → Transitive _≤_
   ≤-trans semi {x} {y} {z} x≤y y≤z = begin
     z ∙ x       ≈⟨ ∙-cong refl (sym x≤y) ⟩
@@ -64,15 +64,15 @@ module RoutingLib.Relation.Binary.NaturalOrder.Right
     where
     open IsSemigroup semi
     open EqReasoning (record { isEquivalence = isEquivalence })
-    
+
   ≤-respʳ-≈ : IsEquivalence _≈_ → Congruent₂ _∙_ → ∀ {x} → (x ≤_) Respects _≈_
   ≤-respʳ-≈ isEq cong x≈y x≤z = trans (cong (sym x≈y) refl) x≤z
     where open IsEquivalence isEq
-    
+
   ≤-respₗ-≈ : IsEquivalence _≈_ → Congruent₂ _∙_ → ∀ {x} → (_≤ x) Respects _≈_
   ≤-respₗ-≈ isEq cong z≈x z≤y = trans (trans (cong refl (sym z≈x)) z≤y) z≈x
     where open IsEquivalence isEq
-    
+
   ≤-resp₂-≈ : IsEquivalence _≈_ → Congruent₂ _∙_ →  _≤_ Respects₂ _≈_
   ≤-resp₂-≈ isEq cong = ≤-respʳ-≈ isEq cong , ≤-respₗ-≈ isEq cong
 
@@ -110,7 +110,7 @@ module RoutingLib.Relation.Binary.NaturalOrder.Right
     ; antisym    = ≤-antisym isEquivalence comm
     }
     where open IsSemigroup semi
-    
+
   ≤-poset : IsSemigroup _≈_ _∙_ → Commutative _∙_ → Idempotent _∙_ →  Poset a ℓ ℓ
   ≤-poset semi comm idem = record
     { Carrier = A
@@ -143,7 +143,7 @@ module RoutingLib.Relation.Binary.NaturalOrder.Right
     ; total = ≤-total trans sel comm
     }
     where open IsSemigroup semi
-    
+
   ≤-totalOrder : IsSemigroup _≈_ _∙_ → Commutative _∙_ →
                  Selective _∙_ → TotalOrder a ℓ ℓ
   ≤-totalOrder semi comm sel = record

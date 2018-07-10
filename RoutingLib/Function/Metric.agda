@@ -21,10 +21,10 @@ module RoutingLib.Function.Metric {a} {ℓ} (S : Setoid a ℓ) where
 
   Symmetric : Pred MetricFunction a
   Symmetric d = ∀ x y → d x y ≡ d y x
-  
+
   TriangleIneq : Pred MetricFunction a
   TriangleIneq d = ∀ x y z → d x z ≤ d x y + d y z
-    
+
   MaxTriangleIneq : Pred MetricFunction a
   MaxTriangleIneq d = ∀ x y z → d x z ≤ d x y ⊔ d y z
 
@@ -32,7 +32,7 @@ module RoutingLib.Function.Metric {a} {ℓ} (S : Setoid a ℓ) where
   Bounded d = ∃ λ n → ∀ x y → d x y ≤ n
 
   -- Contractions
-    
+
   _ContrOver_ : Op₁ A → MetricFunction → Set _
   f ContrOver d = ∀ x y → d (f x) (f y) ≤ d x y
 
@@ -57,7 +57,7 @@ module RoutingLib.Function.Metric {a} {ℓ} (S : Setoid a ℓ) where
 
 
   -- Types of distance spaces
-  
+
   record IsMetric (d : MetricFunction) : Set (a ⊔ₗ ℓ) where
     field
       cong     : d Preserves₂ _≈_ ⟶ _≈_ ⟶ _≡_

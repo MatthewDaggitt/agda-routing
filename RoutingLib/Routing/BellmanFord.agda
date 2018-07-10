@@ -20,7 +20,7 @@ module RoutingLib.Routing.BellmanFord
   (𝓡𝓐 : RawRoutingAlgebra a b ℓ)
   (A : SquareMatrix (RawRoutingAlgebra.Step 𝓡𝓐) n)
   where
-  
+
 open RawRoutingAlgebra 𝓡𝓐
 
 --------------------------------------------------------------------------------
@@ -47,13 +47,13 @@ open TableDecEquality DS using (𝕋ₛ;_≟ₜ_) public
 ℝ𝕋ₛ : Setoid b ℓ
 ℝ𝕋ₛ = 𝕋ₛ n
 
-ℝ𝕋ₛⁱ : I.Setoid (Fin n) _ _ 
+ℝ𝕋ₛⁱ : I.Setoid (Fin n) _ _
 ℝ𝕋ₛⁱ = triviallyIndexSetoid (Fin n) S
 
 ℝ𝕄ₛ : Setoid b ℓ
 ℝ𝕄ₛ = 𝕄ₛ n n
 
-ℝ𝕄ₛⁱ : I.Setoid (Fin n) _ _ 
+ℝ𝕄ₛⁱ : I.Setoid (Fin n) _ _
 ℝ𝕄ₛⁱ = triviallyIndexSetoid (Fin n) ℝ𝕋ₛ
 
 Decℝ𝕄ₛ : DecSetoid b ℓ

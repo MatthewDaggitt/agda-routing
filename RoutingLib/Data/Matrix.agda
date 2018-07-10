@@ -9,13 +9,13 @@ open import Function using (_∘_)
 import RoutingLib.Data.Table as Table
 
 module RoutingLib.Data.Matrix where
-    
+
   Matrix : ∀ {a} → Set a → ℕ → ℕ → Set a
   Matrix A m n = Fin m → Fin n → A
 
   SquareMatrix : ∀ {a} → Set a → ℕ → Set a
   SquareMatrix A n = Matrix A n n
-  
+
   -- Predicates
 
   All : ∀ {a ℓ} {A : Set a} → Pred A ℓ → ∀ {m n} → Pred (Matrix A m n) ℓ
@@ -32,7 +32,7 @@ module RoutingLib.Data.Matrix where
   map : ∀ {a b} {A : Set a} {B : Set b} → (A → B) →
         ∀ {m n} → Matrix A m n → Matrix B m n
   map f M i j = f (M i j)
-  
+
   zipWith : ∀ {a b c m n} {A : Set a} {B : Set b} {C : Set c} →
             (A → B → C) → Matrix A m n → Matrix B m n → Matrix C m n
   zipWith f M N i j = f (M i j) (N i j)
@@ -40,11 +40,11 @@ module RoutingLib.Data.Matrix where
   fold : ∀ {a b} {A : Set a} {B : Set b} →
            (A → B → B) → B → ∀ {m n} → Matrix A m n → B
   fold f e M = Table.foldr (λ t e → Table.foldr f e t) e M
-  
+
   fold⁺ : ∀ {a} {A : Set a} → Op₂ A → ∀ {m n} → Matrix A (suc m) (suc n) → A
   fold⁺ _•_ {zero}  M = Table.foldr⁺ _•_ (M zero)
   fold⁺ _•_ {suc m} M = Table.foldr⁺ _•_ (M zero) • fold⁺ _•_ (M ∘ suc)
-  
+
   max⁺ : ∀ {m n} → Matrix ℕ (suc m) (suc n) → ℕ
   max⁺ M = fold⁺ _⊔_ M
 

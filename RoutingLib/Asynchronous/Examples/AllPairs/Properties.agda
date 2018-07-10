@@ -80,7 +80,7 @@ module RoutingLib.Asynchronous.Examples.AllPairs.Properties (n : ℕ) where
              (min∞[s]≤min∞[t] (y i j) {x i j} {n} {n}
                (inj₁ (≤-reflexive (sym (x≡y i j))))
                λ k → inj₂ (k , path-cost-monotone (≼ₘ-reflexive (symₘ x≡y)) i j k))
-  
+
   ≡ᵣ⇒≼ : ∀ {x y} → x ≡ᵣ y → x ≼ y
   ≡ᵣ⇒≼ x≡y i = ≤-reflexive (x≡y i)
 

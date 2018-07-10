@@ -26,9 +26,9 @@ module RoutingLib.Data.Vec.All.Properties where
 
 
   -- All & fromList
-  
+
   module _ {a p} {A : Set a} {P : A → Set p} where
-  
+
     All-fromList⁺ : ∀ {xs} → Allₗ P xs → All P (fromList xs)
     All-fromList⁺ []         = []
     All-fromList⁺ (px ∷ pxs) = px ∷ All-fromList⁺ pxs
@@ -38,7 +38,7 @@ module RoutingLib.Data.Vec.All.Properties where
     All-fromList⁻ {x ∷ xs} (px ∷ pxs) = px ∷ (All-fromList⁻ pxs)
 
   -- AllPairs & fromList
-  
+
   module _ {a ℓ} {A : Set a} {_~_ : Rel A ℓ} where
 
     AllPairs-fromList⁺ : ∀ {xs} → AllPairsₗ _~_ xs → AllPairs _~_ (fromList xs)
@@ -48,13 +48,13 @@ module RoutingLib.Data.Vec.All.Properties where
 
 
   -- All & toList
-  
+
   module _ {a p} {A : Set a} {P : A → Set p} where
 
     All-toList⁺ : ∀ {n} {xs : Vec A n} → Allₗ P (toList xs) → All P xs
     All-toList⁺ {xs = []}     []         = []
     All-toList⁺ {xs = x ∷ xs} (px ∷ pxs) = px ∷ All-toList⁺ pxs
-    
+
     All-toList⁻ : ∀ {n} {xs : Vec A n} → All P xs → Allₗ P (toList xs)
     All-toList⁻ [] = []
     All-toList⁻ (px ∷ pxs) = px ∷ All-toList⁻ pxs

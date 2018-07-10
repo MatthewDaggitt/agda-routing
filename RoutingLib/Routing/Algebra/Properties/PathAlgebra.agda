@@ -31,7 +31,7 @@ open RoutingAlgebraProperties routingAlgebra public
 -- Path properties
 
 abstract
-  
+
   p[∞]≈∅ : path ∞ ≈ₚ invalid
   p[∞]≈∅ = r≈∞⇒path[r]≈∅ ≈-refl
 
@@ -43,7 +43,7 @@ abstract
     A i j ▷ r ≈⟨ ▷-cong (A i j) (path[r]≈∅⇒r≈∞ (≈ₚ-reflexive pᵣ≡∅)) ⟩
     A i j ▷ ∞ ≈⟨ ▷-zero (A i j) ⟩
     ∞         ∎
-    
+
 --------------------------------------------------------------------------------
 -- Weight properties
 
@@ -72,7 +72,7 @@ abstract
 
   ∞ᶜ : 𝑪 ∞
   ∞ᶜ = weight-cong p[∞]≈∅
-  
+
   ⊕-pres-𝑪 : ∀ {r s} → 𝑪 r → 𝑪 s → 𝑪 (r ⊕ s)
   ⊕-pres-𝑪 {r} {s} rᶜ sᶜ with ⊕-sel r s
   ... | inj₁ r⊕s≈r = 𝑪-cong (≈-sym r⊕s≈r) rᶜ
@@ -102,7 +102,7 @@ abstract
   ... | yes Aᵢⱼ▷wₚ≈∞ = 𝑪-cong (≈-sym Aᵢⱼ▷wₚ≈∞) ∞ᶜ
   ... | no  Aᵢⱼ▷wₚ≉∞ with path (weight (valid p)) | inspect path (weight (valid p))
   ...   | invalid | [ p[wₚ]≡∅ ] = 𝑪-cong (≈-sym (p[r]≡∅⇒Aᵢⱼr≈∞ p[wₚ]≡∅)) ∞ᶜ
-  ...   | valid q | [ p[wₚ]≡q ] with ≈ₚ-reflexive p[wₚ]≡q | (i , j) ⇿? q | i ∉? q 
+  ...   | valid q | [ p[wₚ]≡q ] with ≈ₚ-reflexive p[wₚ]≡q | (i , j) ⇿? q | i ∉? q
   ...     | p[wₚ]≈q | no ¬ij⇿q | _       = 𝑪-cong (≈-sym (path-reject p[wₚ]≈q (inj₁ ¬ij⇿q))) ∞ᶜ
   ...     | p[wₚ]≈q | _        | no  i∈q = 𝑪-cong (≈-sym (path-reject p[wₚ]≈q (inj₂ i∈q))) ∞ᶜ
   ...     | p[wₚ]≈q | yes ij⇿q | yes i∉q = begin
@@ -120,7 +120,7 @@ abstract
 
   size≤n+1 : ∀ r → size r ≤ suc n
   size≤n+1 r = length≤1+n (path r)
-    
+
   size-cong : ∀ {r s} → r ≈ s → size r ≡ size s
   size-cong {r} {s} r≈s = length-cong (path-cong r≈s)
 

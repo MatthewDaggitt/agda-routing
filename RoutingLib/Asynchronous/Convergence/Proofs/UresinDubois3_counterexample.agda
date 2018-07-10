@@ -20,7 +20,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois3_counterexample w
   record SynchronousConditions {a ℓ n} {𝕊 : Setoid (Fin n) a ℓ} (P : Parallelisation 𝕊) p o : Set (lsuc (a ⊔ ℓ ⊔ p ⊔ o)) where
 
     open Parallelisation P
-    
+
     field
       D₀               : Pred Sᵢ p
       D₀-cong          : ∀ {x y} → x ∈ D₀ → x ≈ y → y ∈ D₀
@@ -31,13 +31,13 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois3_counterexample w
 
     open IsPartialOrder ≤ᵢ-isPartialOrder public
     _≤_ = Lift Sᵢ _≤ᵢ_
-    
+
     field
       F-monotone       : ∀ {x y} → x ∈ D₀ → y ∈ D₀ → x ≤ y → F x ≤ F y
       F-cong           : ∀ {x y} → x ≈ y → F x ≈ F y
       iter-decreasing  : ∀ {x} → x ∈ D₀ → ∀ K → syncIter x (suc K) ≤ syncIter x K
       iter-converge    : ∀ {x} → x ∈ D₀ → ∃ λ T → ∀ t → syncIter x T ≈ syncIter x (T + t)
-      
+
 
   ---------------------------------------------------------
   -- We now construct a counterexample that obeys the
@@ -54,7 +54,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois3_counterexample w
 
   Sᵢ : Fin 1 → Set _
   Sᵢ i = S
-  
+
   module _ where
 
     -- abstract
@@ -78,7 +78,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois3_counterexample w
 
     _≤_ = Lift Sᵢ _≤ᵢ_
 
-  
+
   𝕊 : Setoid (Fin 1) _ _
   𝕊 = record
     { Carrierᵢ       = Sᵢ
@@ -89,28 +89,28 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois3_counterexample w
       ; transᵢ = trans
       }
     }
-    
+
 
   F : Table S 1 → Table S 1
   F x = x
 
   F∥ : Parallelisation 𝕊
   F∥ = record { F = F }
-  
+
   open Parallelisation F∥ hiding (F; Sᵢ) renaming (S to T)
-  
+
   F-cong : ∀ {x y} → x ≈ y → F x ≈ F y
   F-cong x≈y = x≈y
-  
+
   D₀ : Pred Sᵢ _
   D₀ {i} x = U x
 
   _∈D₀ : T → Set _
   x ∈D₀ = ∀ i → D₀ {i} (x i)
-  
+
   D₀-cong : ∀ {x y} → x ∈D₀ → x ≈ y → y ∈D₀
   D₀-cong {_} {y} _ _ i = U-Universal (y i)
-  
+
   D₀-closed : ∀ {s} → s ∈D₀ → F s ∈D₀
   D₀-closed {s} s∈D₀ i = U-Universal (s i)
 
@@ -120,13 +120,13 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois3_counterexample w
   syncIter-id : ∀ x t i → x i ≡ syncIter x t i
   syncIter-id x zero    i = refl
   syncIter-id x (suc t) i = syncIter-id x t i
-  
+
   iter-decreasing : ∀ {x} → x ∈D₀ → ∀ K → syncIter x (suc K) ≤ syncIter x K
   iter-decreasing _ K i = ≤-refl
 
   iter-converge : ∀ {x} → x ∈D₀ → ∃ λ T → ∀ t → syncIter x T ≈ syncIter x (T + t)
   iter-converge {x} _ = 0 , syncIter-id x
-  
+
   syncConditions : SynchronousConditions F∥ _ _
   syncConditions = record
     { D₀                = λ {i} → D₀ {i}
@@ -139,7 +139,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois3_counterexample w
     ; iter-decreasing   = iter-decreasing
     ; iter-converge     = iter-converge
     }
-  
+
   -- But
 
   a-convergesTo-a : F (λ _ → a) ≡ (λ _ → a)

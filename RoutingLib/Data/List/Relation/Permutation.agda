@@ -10,7 +10,7 @@ module RoutingLib.Data.List.Relation.Permutation {a} {A : Set a} where
 
   infix 5 _∷_
   infix 4 _⇿_
-  
+
   -- "x ◂ xs ≡ xys" means that xys is equal to "xs with x inserted somewhere in it"
   data _◂_≡_ (x : A) : List A → List A → Set a where
     here  : ∀ {xs}       → x ◂ xs ≡ (x ∷ xs)
@@ -23,7 +23,7 @@ module RoutingLib.Data.List.Relation.Permutation {a} {A : Set a} where
   _∷ʳ_ : ∀ {x xs ys xys} → x ◂ ys ≡ xys → ys ⇿ xs → xys ⇿ (x ∷ xs)
   _∷ʳ_ here      p        = here ∷ p
   _∷ʳ_ (there y) (p ∷ ps) = there p ∷ (y ∷ʳ ps)
-  
+
   ◂≡-bridge : ∀ {x y xs xxs yxxs} → x ◂ xs ≡ xxs → y ◂ xxs ≡ yxxs → ∃ λ yxs → (y ◂ xs ≡ yxs) × (x ◂ yxs ≡ yxxs)
   ◂≡-bridge p         here      = _ , here , there p
   ◂≡-bridge here      (there q) = _ , q    , here
@@ -36,4 +36,3 @@ module RoutingLib.Data.List.Relation.Permutation {a} {A : Set a} where
   ... | ys' , r , rs with ◂≡-bridge r q
   ...   | ys'' , s , t = ys'' , t , s ∷ rs
 
-  

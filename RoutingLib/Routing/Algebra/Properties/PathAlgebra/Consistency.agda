@@ -124,8 +124,8 @@ abstract
 
   ∈-allCRoutes : ∀ r → r ∈ₗ allCRoutes
   ∈-allCRoutes (r , rᶜ) = ∈-resp-≈ Sᶜ {x = pathToCRoute (path r)} {r , rᶜ}
-    rᶜ (∈-map⁺ (ℙₛ n) Sᶜ weight-cong (∈-allPaths (path r))) 
-    
+    rᶜ (∈-map⁺ (ℙₛ n) Sᶜ weight-cong (∈-allPaths (path r)))
+
 ------------------------------------------------------------------------------
 -- Routing algebra
 
@@ -138,7 +138,7 @@ rawAlgebraᶜ = record
   ; _▷_   = _▷ᶜ_
   ; 0#    = C0#
   ; ∞     = C∞
-  
+
   ; ≈-isDecEquivalence = ≈ᶜ-isDecEquivalence
   ; ⊕-cong             = λ {w} {x} {y} {z} → ⊕ᶜ-cong {w} {x} {y} {z}
   ; ▷-cong             = ▷ᶜ-cong

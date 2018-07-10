@@ -12,14 +12,14 @@ import RoutingLib.Data.List.Membership.Setoid.Properties as SetoidProperties
 module RoutingLib.Data.List.Membership.DecSetoid.Properties where
 
   open SetoidProperties public
-  
+
   module _ {c ℓ} (DS : DecSetoid c ℓ) where
 
     open DecSetoid DS renaming (Carrier to A; refl to ≈-refl; setoid to S)
 
     open Membership S using (_∈_)
     open DecMembership DS using (deduplicate)
- 
+
     -- deduplicate
 
     ∈-deduplicate⁺ : ∀ {x xs} → x ∈ xs → x ∈ deduplicate xs

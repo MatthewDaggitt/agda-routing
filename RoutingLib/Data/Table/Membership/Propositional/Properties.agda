@@ -32,7 +32,7 @@ module RoutingLib.Data.Table.Membership.Propositional.Properties where
 
   min∞[t]∈t : ∀ ⊤ {n} (t : Table ℕ∞ n) → min∞ ⊤ t ≡ ⊤ ⊎ min∞ ⊤ t ∈ t
   min∞[t]∈t = sel⇒foldr[t]∈t ⊓∞-sel
-  
+
   max⁺[t]∈t : ∀ {n} (t : Table ℕ (suc n)) → max⁺ t ∈ t
   max⁺[t]∈t = sel⇒foldr⁺[t]∈t ⊔-sel
 

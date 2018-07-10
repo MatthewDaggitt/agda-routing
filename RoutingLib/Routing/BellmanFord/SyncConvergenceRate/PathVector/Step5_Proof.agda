@@ -20,7 +20,7 @@ open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Prelude as Prelude
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step1_NodeSets as Step1_NodeSets
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step2_ConvergedSubtree as Step2_ConvergedSubtree
-import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step4_InductiveStep as Step4_InductiveStep 
+import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step4_InductiveStep as Step4_InductiveStep
 import RoutingLib.Routing.BellmanFord.Properties as P
 
 module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step5_Proof
@@ -34,7 +34,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step5_Proof
     open Step1_NodeSets algebra X j
     open Step2_ConvergedSubtree algebra X j
     open Step4_InductiveStep algebra X j
-    
+
     mutual
 
       iᵗʰ : ∀ i → i < n → Fin n
@@ -98,38 +98,38 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step5_Proof
       ... | no  i≢k = x∈p∪q⁺ (inj₁ (iᵗʰ∈Cₖ (suc i) i<n k (≤⇒pred≤ k<n) (≤+≢⇒< i≤k i≢k)))
       ... | yes refl with ≤-irrelevance k<n i<n
       ...   | refl = x∈p∪q⁺ (inj₂ (x∈⁅x⁆ (iᵗʰ (suc i) i<n)))
-      
+
       iᵗʰ∉Cₖ : ∀ i (i<n : i < n) k (k<n : k < n) → k < i → iᵗʰ i i<n ∉ C k k<n
       iᵗʰ∉Cₖ zero    1<n    _   _   ()
       iᵗʰ∉Cₖ (suc i) 1+i<n zero k<n    k<i = i∉⁅j⁆ (iᵗʰ≢kᵗʰ (suc i) 0 1+i<n k<n k<i)
       iᵗʰ∉Cₖ (suc i) 1+i<n (suc k) 1+k<n k<i = x∉p∪q⁺
         (iᵗʰ∉Cₖ (suc i) 1+i<n k (≤⇒pred≤ 1+k<n) (≤⇒pred≤ k<i))
         (i∉⁅j⁆ (iᵗʰ≢kᵗʰ (suc i) (suc k) 1+i<n 1+k<n k<i))
-      
+
       |Cᵢ|≡i : ∀ i → (i<n : i < n) → ∣ C i i<n ∣ ≡ suc i
       |Cᵢ|≡i zero    _     = ∣⁅x⁆∣≡1 j
       |Cᵢ|≡i (suc i) 1+i<n = trans
         (∣p∪⁅i⁆∣≡1+∣p∣ (iᵗʰ∉Cₖ (suc i) 1+i<n i (≤⇒pred≤ 1+i<n) ≤-refl))
         (cong suc (|Cᵢ|≡i i (≤⇒pred≤ 1+i<n)))
-    
+
       Cᵢ-nonfull : ∀ i (1+i<n : suc i < n) → Nonfull (C i (≤⇒pred≤ 1+i<n))
       Cᵢ-nonfull i 1+i<n = ∣p∣<n⇒Nonfull (subst (_< n) (sym (|Cᵢ|≡i i (≤⇒pred≤ 1+i<n))) 1+i<n)
-     
 
-    
-    
-    Cₙ₋₁-complete : ∀ i → i ∈ C (n-1) ≤-refl 
-    Cₙ₋₁-complete i = subst (i ∈_) (sym (∣p∣≡n⇒p≡⊤ (|Cᵢ|≡i (n-1) ≤-refl))) ∈⊤ 
+
+
+
+    Cₙ₋₁-complete : ∀ i → i ∈ C (n-1) ≤-refl
+    Cₙ₋₁-complete i = subst (i ∈_) (sym (∣p∣≡n⇒p≡⊤ (|Cᵢ|≡i (n-1) ≤-refl))) ∈⊤
 
     Cₙ₋₁-converged′ : ∀ {i} → i ∈ C (n-1) ≤-refl → i ∈ᵤ 𝓒 (suc (n-1 * n))
     Cₙ₋₁-converged′ i∈Cₙ₋₁ = C-converged n-1 ≤-refl i∈Cₙ₋₁
-    
+
     Cₙ₋₁-converged : ∀ {i} → i ∈ C (n-1) ≤-refl → i ∈ᵤ 𝓒 (n ^ 2)
     Cₙ₋₁-converged i∈Cₙ₋₁ = 𝓒-cong (𝓒ₜ⊆𝓒ₛ₊ₜ (suc (n-1 * n)) n-1 (Cₙ₋₁-converged′ i∈Cₙ₋₁)) v
       where
       v : n-1 + suc (n-1 * n) ≡ n ^ 2
       v rewrite *-identityʳ n-1 = +-suc n-1 _
-    
+
   n²-convergence : ∀ X t → σ^ (n ^ 2 + t) X ≈ₘ σ^ (n ^ 2) X
   n²-convergence X t i j = proj₁ (Cₙ₋₁-converged X j (Cₙ₋₁-complete X j i)) t
 

@@ -14,12 +14,12 @@ open import RoutingLib.Data.List.AllPairs using (AllPairs)
 open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique; []; _∷_)
 
 module RoutingLib.Data.List.Relation.Permutation.Properties {a} {A : Set a} where
-  
+
 open import RoutingLib.Data.List.Relation.Permutation {a} {A}
 
 ------------------------------------------------------------------------
 -- _⇿_ forms an equivalence class
-  
+
 ⇿-refl : Reflexive _⇿_
 ⇿-refl {x = []}    = []
 ⇿-refl {x = _ ∷ _} = here ∷ ⇿-refl
@@ -39,7 +39,7 @@ open import RoutingLib.Data.List.Relation.Permutation {a} {A}
   ; sym   = ⇿-sym
   ; trans = ⇿-trans
   }
-  
+
 ⇿-setoid : Setoid a a
 ⇿-setoid = record
   { isEquivalence = ⇿-isEquivalence
@@ -100,7 +100,7 @@ module _ {ℓ} {_≤_ : Rel A ℓ} (total : Total _≤_) where
   ⇿-insert⁺ v {x ∷ xs} (x◂xs≡ys ∷ xs⇿ys) with total v x
   ... | inj₁ _ = here ∷ (x◂xs≡ys ∷ xs⇿ys)
   ... | inj₂ _ = there x◂xs≡ys ∷ ⇿-insert⁺ v xs⇿ys
-  
+
 ------------------------------------------------------------------------
 -- _++_
 

@@ -18,8 +18,8 @@ module RoutingLib.Routing.Algebra.Bisimulation where
     module B = RawRoutingAlgebra 𝓑
 
     infix 4 _~ᵣ_ _~ₛ_
-    
+
     field
       _~ᵣ_ : REL A.Route B.Route ℓ₃
-      
+
       σ-cong : ∀ {X Y} → (∀ i j → X i j ~ᵣ Y i j) → σ 𝓐 ? X ~ᵣ σ 𝓑 ? Y

@@ -68,7 +68,7 @@ record Parallelisation {a ℓ n} (𝕊 : Setoid (Fin n) a ℓ) : Set (lsuc a) wh
 module _ {a ℓ n} {𝕊 : Setoid (Fin n) a ℓ} where
 
   open Setoid 𝕊 using (_≈_) renaming (Carrierᵢ to Sᵢ; Carrier to S)
-  
+
   -- A record capturing the idea that P is a well behaved on some inputs.
   record IsPartiallyAsynchronouslySafe
     (P : Parallelisation 𝕊)         -- Parallelisation
@@ -101,9 +101,9 @@ module _ {a ℓ n} {𝕊 : Setoid (Fin n) a ℓ} where
     ; m*-reached = λ X∈W → m*-reached (W⊆V X∈W)
     }
     where open IsPartiallyAsynchronouslySafe V-safe
-    
+
   partialToTotalSafety : ∀ {P v} {V : Pred Sᵢ v}  →
-                         (∀ x → x ∈ V) → 
+                         (∀ x → x ∈ V) →
                          IsPartiallyAsynchronouslySafe P V →
                          IsAsynchronouslySafe P
   partialToTotalSafety total partiallySafe = record

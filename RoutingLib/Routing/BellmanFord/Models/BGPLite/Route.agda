@@ -35,7 +35,7 @@ infix 4 _≈ᵣ_ _≉ᵣ_
 
 data _≈ᵣ_ : Rel Route ℓ₀ where
   invalidEq : invalid ≈ᵣ invalid
-  validEq   : ∀ {k l cs ds p q} → k ≡ l → cs ≈ᶜˢ ds → p ≈ₚ q → valid k cs p ≈ᵣ valid l ds q 
+  validEq   : ∀ {k l cs ds p q} → k ≡ l → cs ≈ᶜˢ ds → p ≈ₚ q → valid k cs p ≈ᵣ valid l ds q
 
 _≉ᵣ_ : Rel Route ℓ₀
 r ≉ᵣ s = ¬ (r ≈ᵣ s)

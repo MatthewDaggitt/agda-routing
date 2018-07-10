@@ -26,7 +26,7 @@ module RoutingLib.Relation.Binary.Reasoning.StrictPartialOrder
 
   data _IsRelatedTo₂_ (x y : Carrier) : Set (ℓ₂ ⊔ ℓ₁) where
     relTo₂ : (x<y : x < y) → x IsRelatedTo₂ y
-    
+
   begin_ : ∀ {x y} → x IsRelatedTo₂ y → x < y
   begin relTo₂ x<y = x<y
 
@@ -41,7 +41,7 @@ module RoutingLib.Relation.Binary.Reasoning.StrictPartialOrder
 
   _<⟨_⟩≤_ : ∀ x {y z} → x < y → y IsRelatedTo₁ z → x IsRelatedTo₂ z
   _ <⟨ x∼y ⟩≤ relTo₁ y∼z = relTo₂ (<-≤-trans x∼y y∼z)
-  
+
 
 
   _≈⟨_⟩≤_ : ∀ x {y z} → x ≈ y → y IsRelatedTo₁ z → x IsRelatedTo₁ z
@@ -55,6 +55,6 @@ module RoutingLib.Relation.Binary.Reasoning.StrictPartialOrder
 
   _≡⟨_⟩<_ : ∀ x {y z} → x ≡ y → y IsRelatedTo₂ z → x IsRelatedTo₂ z
   _ ≡⟨ ≡-refl ⟩< relTo₂ y∼z = relTo₂ y∼z
-  
+
   _∎ : ∀ x → x IsRelatedTo₁ x
   _∎ _ = relTo₁ refl

@@ -25,11 +25,11 @@ module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTot
 
   open DecTotalOrder order renaming (Carrier to A)
   open Eq using () renaming (setoid to S; trans to ≈-trans; sym to ≈-sym)
-  
+
   open import RoutingLib.Data.List.Sorting _≤_
   open import Data.List.Membership.Setoid S using (_∈_)
   open import Relation.Binary.NonStrictToStrict _≈_ _≤_ using (_<_) renaming (irrefl to <-irrefl)
-  
+
   {-
   ↗-length : ∀ {xs ys} → xs ↗ ys → length xs ≡ length ys
   ↗-length (sorting xs⇿ys _) = ⇿-length xs⇿ys
@@ -43,21 +43,21 @@ module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTot
   ↗-∈ʳ : ∀ {x xs ys} → x ∈ ys → xs ↗ ys → x ∈ xs
   ↗-∈ʳ x∈ys (sorting xs⇿ys _) = ∈-perm S x∈ys (⇿-sym xs⇿ys)
   -}
-  
+
   private
 
     lemma : ∀ {x y xs} → All (x ≤_) xs → y ∈ xs → x ≤ y
     lemma [] ()
     lemma (px ∷ xs) (here  x≈z)  = proj₁ ≤-resp-≈ (≈-sym x≈z) px
     lemma (px ∷ xs) (there y∈xs) = lemma xs y∈xs
-    
+
   lookup-mono-≤ : ∀ {xs} → Sorted xs → ∀ {i j} → i ≤𝔽 j → lookup xs i ≤ lookup xs j
   lookup-mono-≤ {[]}     xs↗ {()}
   lookup-mono-≤ {x ∷ xs} (x≤xs ∷ xs↗) {zero}  {zero}  z≤n = refl
   lookup-mono-≤ {x ∷ xs} (x≤xs ∷ xs↗) {zero}  {suc j} z≤n = lemma x≤xs (∈-lookup S xs j)
   lookup-mono-≤ {x ∷ xs} (x≤xs ∷ xs↗) {suc i} {zero}  ()
   lookup-mono-≤ {x ∷ xs} (x≤xs ∷ xs↗) {suc i} {suc j} (s≤s i≤j) = lookup-mono-≤ xs↗ i≤j
-  
+
   index-mono-< : ∀ {xs} → Sorted xs → ∀ {x y} (x∈xs : x ∈ xs) (y∈xs : y ∈ xs) →
                  x < y → index x∈xs <𝔽 index y∈xs
   index-mono-< []           ()

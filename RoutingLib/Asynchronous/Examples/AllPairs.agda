@@ -90,7 +90,7 @@ module RoutingLib.Asynchronous.Examples.AllPairs (n : ℕ) where
 
   -- Cost of going from node i to j through k
   path-cost : Matrix → (i j k : Fin n) → ℕ∞
-  path-cost X i j k = (X i k) + (X k j) 
+  path-cost X i j k = (X i k) + (X k j)
 
   -- Shortest cost from node i to j in matrix
   F : Matrix → Fin n → Row

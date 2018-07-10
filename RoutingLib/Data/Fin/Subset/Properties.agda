@@ -24,15 +24,15 @@ module RoutingLib.Data.Fin.Subset.Properties where
 
 
   -- Intersection
-  
+
   module _ {n} (p q : Subset n) where
-  
+
     ∣p∩q∣≤∣p∣ : ∣ p ∩ q ∣ ≤ ∣ p ∣
     ∣p∩q∣≤∣p∣ = p⊆q⇒∣p∣<∣q∣ (p∩q⊆p p q)
 
     ∣p∩q∣≤∣q∣ : ∣ p ∩ q ∣ ≤ ∣ q ∣
     ∣p∩q∣≤∣q∣ = p⊆q⇒∣p∣<∣q∣ (p∩q⊆q p q)
-  
+
     ∣p∩q∣≤∣p∣⊓∣q∣ : ∣ p ∩ q ∣ ≤ ∣ p ∣ ⊓ ∣ q ∣
     ∣p∩q∣≤∣p∣⊓∣q∣ = m≤n×m≤o⇒m≤n⊓o ∣p∩q∣≤∣p∣ ∣p∩q∣≤∣q∣
 
@@ -44,13 +44,13 @@ module RoutingLib.Data.Fin.Subset.Properties where
   -- Union
 
   module _ {n} (p q : Subset n) where
-  
+
     ∣p∣≤∣p∪q∣ : ∣ p ∣ ≤ ∣ p ∪ q ∣
     ∣p∣≤∣p∪q∣ = p⊆q⇒∣p∣<∣q∣ (p⊆p∪q {p = p} q)
 
     ∣q∣≤∣p∪q∣ : ∣ q ∣ ≤ ∣ p ∪ q ∣
     ∣q∣≤∣p∪q∣ = p⊆q⇒∣p∣<∣q∣ (q⊆p∪q p q)
-  
+
     ∣p∣⊔∣q∣≤∣p∪q∣ : ∣ p ∣ ⊔ ∣ q ∣ ≤ ∣ p ∪ q ∣
     ∣p∣⊔∣q∣≤∣p∪q∣ = n≤m×o≤m⇒n⊔o≤m ∣p∣≤∣p∪q∣ ∣q∣≤∣p∪q∣
 
@@ -71,7 +71,7 @@ module RoutingLib.Data.Fin.Subset.Properties where
 
 
   module _ {n} (p q : Subset n) where
-  
+
     ∣p\\q∣≤∣p∣ : ∣ p \\ q ∣ ≤ ∣ p ∣
     ∣p\\q∣≤∣p∣ = p⊆q⇒∣p∣<∣q∣ (p\\q⊆p p q)
 
@@ -90,14 +90,14 @@ module RoutingLib.Data.Fin.Subset.Properties where
   ∣p\\q∣<∣p∣ {suc n} {outside ∷ p} {inside ∷ q} (suc i , i∈p∩q) = ∣p\\q∣<∣p∣ {n} {p} {q} (i , drop-there i∈p∩q)
   ∣p\\q∣<∣p∣ {suc n} {inside ∷ p} {outside ∷ q} (suc i , i∈p∩q) = s≤s (∣p\\q∣<∣p∣ {n} {p} {q} (i , drop-there i∈p∩q))
   ∣p\\q∣<∣p∣ {suc n} {inside ∷ p} {inside ∷ q} (i , i∈p∩q) = s≤s (∣p\\q∣≤∣p∣ p q)
-  
+
   ∣p∪⁅i⁆∣≡1+∣p∣ : ∀ {n} {p : Subset n} {i : Fin n} → i ∉ p → ∣ p ∪ ⁅ i ⁆ ∣ ≡ suc ∣ p ∣
   ∣p∪⁅i⁆∣≡1+∣p∣ {_} {outside ∷ p} {zero}  i∉p = cong (λ q → suc ∣ q ∣) (∪-identityʳ p)
   ∣p∪⁅i⁆∣≡1+∣p∣ {_} {inside  ∷ p} {zero}  i∉p = contradiction here i∉p
   ∣p∪⁅i⁆∣≡1+∣p∣ {_} {outside ∷ p} {suc i} i∉p = ∣p∪⁅i⁆∣≡1+∣p∣ (i∉p ∘ there)
   ∣p∪⁅i⁆∣≡1+∣p∣ {_} {inside  ∷ p} {suc i} i∉p = cong suc (∣p∪⁅i⁆∣≡1+∣p∣ (i∉p ∘ there))
-  
-  
+
+
   ∣∁p∣≡n∸∣p∣ : ∀ {n} (p : Subset n) → ∣ ∁ p ∣ ≡ n ∸ ∣ p ∣
   ∣∁p∣≡n∸∣p∣ []            = refl
   ∣∁p∣≡n∸∣p∣ (inside  ∷ p) = ∣∁p∣≡n∸∣p∣ p
@@ -117,7 +117,7 @@ module RoutingLib.Data.Fin.Subset.Properties where
   ∣p∣≡n⇒p≡⊤ {_} {[]}          _     = refl
   ∣p∣≡n⇒p≡⊤ {n} {outside ∷ p} ∣p∣≡n = contradiction (subst (_< n) ∣p∣≡n (s≤s (∣p∣≤n p))) (n≮n n)
   ∣p∣≡n⇒p≡⊤ {_} {inside  ∷ p} ∣p∣≡n = cong (inside ∷_) (∣p∣≡n⇒p≡⊤ (suc-injective ∣p∣≡n))
-  
+
   Nonfull⁅i⁆ : ∀ {n} (i : Fin (suc (suc n))) → Nonfull ⁅ i ⁆
   Nonfull⁅i⁆ zero    = suc zero , λ {(there ())}
   Nonfull⁅i⁆ (suc i) = zero     , λ()
@@ -144,7 +144,7 @@ module RoutingLib.Data.Fin.Subset.Properties where
       (proj₂ (x∷p\\y∷q≡z∷p\\q p q x y)) (there i∈p\\q))
   i∉p\\q⇒i∉p {.(suc _)} {inside ∷ p} {outside ∷ q} {zero} i∉p\\q i∉q here = i∉p\\q here
   i∉p\\q⇒i∉p {.(suc _)} {inside ∷ p} {inside ∷ q} {zero} i∉p\\q i∉q here = i∉q here
-  
+
   i∉⁅j⁆ : ∀ {n} {i j : Fin n} → i ≢ j → i ∉ ⁅ j ⁆
   i∉⁅j⁆ {zero}  {()}
   i∉⁅j⁆ {suc n} {zero}  {zero}  i≢j _             = contradiction refl i≢j

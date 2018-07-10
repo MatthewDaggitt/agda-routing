@@ -22,7 +22,7 @@ module RoutingLib.Data.List where
     insert v (x ∷ xs) with total v x
     ... | inj₁ v≤x = v ∷ x ∷ xs
     ... | inj₂ x≤v = x ∷ insert v xs
-    
+
     merge : List A → List A → List A
     merge []       ys       = ys
     merge xs       []       = xs

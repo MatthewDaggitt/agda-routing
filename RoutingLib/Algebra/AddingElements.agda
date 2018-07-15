@@ -56,8 +56,8 @@ module RoutingLib.Algebra.AddingElements {a} (A : Set a) where
     e-idₗ-⊕ₑ refl (val v) = Eq.just refl
 
     e-idᵣ-⊕ₑ : ∀ {ℓ} {_≈_ : Rel A ℓ} → Reflexive _≈_ → RightIdentity (Eq _≈_) e _⊕ₑ_
-    e-idᵣ-⊕ₑ refl {e}      = Eq.nothing
-    e-idᵣ-⊕ₑ refl {val v}  = Eq.just refl
+    e-idᵣ-⊕ₑ refl e       = Eq.nothing
+    e-idᵣ-⊕ₑ refl (val v) = Eq.just refl
 
     e-id-⊕ₑ : ∀ {ℓ} {_≈_ : Rel A ℓ} → Reflexive _≈_ → Identity (Eq _≈_) e _⊕ₑ_
     e-id-⊕ₑ refl = e-idₗ-⊕ₑ refl , e-idᵣ-⊕ₑ refl

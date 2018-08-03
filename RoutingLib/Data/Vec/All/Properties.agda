@@ -11,39 +11,24 @@ open import Relation.Binary using (Rel; _⇒_)
 open import Function using (_∘_)
 open import Algebra.FunctionProperties using (Op₂)
 
-open import RoutingLib.Data.Vec.All using (AllPairs; []; _∷_)
 open import RoutingLib.Data.List.AllPairs using ([]; _∷_) renaming (AllPairs to AllPairsₗ)
 
 module RoutingLib.Data.Vec.All.Properties where
-
-  AllPairs-lookup : ∀ {a ℓ} {A : Set a} {_~_ : Rel A ℓ} {n} {xs : Vec A n} →
-                    AllPairs _~_ xs → ∀ {i j} → i < j → lookup i xs ~ lookup j xs
-  AllPairs-lookup [] {()}
-  AllPairs-lookup (x~xs ∷ pxs) {_}      {fzero}  ()
-  AllPairs-lookup (x~xs ∷ pxs) {fzero}  {fsuc j} (s≤s i<j) = lookupₐ j x~xs
-  AllPairs-lookup (x~xs ∷ pxs) {fsuc i} {fsuc j} (s≤s i<j) = AllPairs-lookup pxs i<j
-
 
 
   -- All & fromList
 
   module _ {a p} {A : Set a} {P : A → Set p} where
 
+    -- stdlib
     All-fromList⁺ : ∀ {xs} → Allₗ P xs → All P (fromList xs)
     All-fromList⁺ []         = []
     All-fromList⁺ (px ∷ pxs) = px ∷ All-fromList⁺ pxs
 
+    -- stdlib
     All-fromList⁻ : ∀ {xs} → All P (fromList xs) → Allₗ P xs
     All-fromList⁻ {[]}     []         = []
     All-fromList⁻ {x ∷ xs} (px ∷ pxs) = px ∷ (All-fromList⁻ pxs)
-
-  -- AllPairs & fromList
-
-  module _ {a ℓ} {A : Set a} {_~_ : Rel A ℓ} where
-
-    AllPairs-fromList⁺ : ∀ {xs} → AllPairsₗ _~_ xs → AllPairs _~_ (fromList xs)
-    AllPairs-fromList⁺ [] = []
-    AllPairs-fromList⁺ (px ∷ pxs) = (All-fromList⁺ px) ∷ (AllPairs-fromList⁺ pxs)
 
 
 
@@ -51,10 +36,12 @@ module RoutingLib.Data.Vec.All.Properties where
 
   module _ {a p} {A : Set a} {P : A → Set p} where
 
+    -- stdlib
     All-toList⁺ : ∀ {n} {xs : Vec A n} → Allₗ P (toList xs) → All P xs
     All-toList⁺ {xs = []}     []         = []
     All-toList⁺ {xs = x ∷ xs} (px ∷ pxs) = px ∷ All-toList⁺ pxs
 
+    -- stdlib
     All-toList⁻ : ∀ {n} {xs : Vec A n} → All P xs → Allₗ P (toList xs)
     All-toList⁻ [] = []
     All-toList⁻ (px ∷ pxs) = px ∷ All-toList⁻ pxs

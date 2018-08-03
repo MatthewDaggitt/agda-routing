@@ -26,8 +26,8 @@ module RoutingLib.Data.List.All.Properties where
 
 module _ {a b ℓ} {A : Set a} {B : Set b} where
 
-  All-swap : ∀ {_~_ : REL (List A) B ℓ} →
-             ∀ {xss ys} → All (λ xs → All (xs ~_) ys) xss →
+  All-swap : ∀ {_~_ : REL (List A) B ℓ} {xss ys} →
+             All (λ xs → All (xs ~_) ys) xss →
              All (λ y → All (_~ y) xss) ys
   All-swap {ys = []}      _  = []
   All-swap {ys = _ ∷ _}  []  = All-universal (λ _ → []) _

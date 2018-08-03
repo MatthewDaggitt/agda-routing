@@ -11,6 +11,7 @@ module RoutingLib.Data.Vec.Relation.Pointwise.Inductive where
 
 module _ {a b} {A : Set a} {B : Set b} where
 
+  -- stdlib
   tabulate⁺ : ∀ {p} (P : A → B → Set p)
               {n} {f : Fin n → A} {g : Fin n → B} →
               (∀ i → P (f i) (g i)) →

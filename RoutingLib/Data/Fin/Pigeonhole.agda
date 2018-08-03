@@ -10,6 +10,7 @@ open import Function using (_∘_)
 
 module RoutingLib.Data.Fin.Pigeonhole where
 
+  -- stdlib
   pigeonhole : ∀ {m n} → m < n → (f : Fin n → Fin m) →
                ∃₂ λ i j → i ≢ j × f i ≡ f j
   pigeonhole (s≤s z≤n)       f = contradiction (f zero) λ()

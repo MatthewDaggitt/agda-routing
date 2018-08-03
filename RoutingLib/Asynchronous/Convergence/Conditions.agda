@@ -91,12 +91,15 @@ module RoutingLib.Asynchronous.Convergence.Conditions
     _≤_ = Lift Sᵢ _≤ᵢ_
 
     field
-      ξ                : S
-      ξ-fixed          : F ξ ≈ ξ
       F-monotone       : ∀ {x y} → x ∈ D₀ → y ∈ D₀ → x ≤ y → F x ≤ F y
       F-cong           : ∀ {x y} → x ≈ y → F x ≈ F y
       iter-decreasing  : ∀ {x} → x ∈ D₀ → ∀ K → syncIter x (suc K) ≤ syncIter x K
+      
+      ξ                : S
+      ξ-fixed          : F ξ ≈ ξ
       iter-converge    : ∀ {x} → x ∈ D₀ → ∃ λ T → syncIter x T ≈ ξ
+
+
 
 
 

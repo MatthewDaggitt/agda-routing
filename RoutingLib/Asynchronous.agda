@@ -47,8 +47,6 @@ record Parallelisation {a ℓ n} (𝕊 : Setoid (Fin n) a ℓ) : Set (lsuc a ⊔
 
   field
     F      : (∀ i → Sᵢ i) → ∀ i → Sᵢ i
-    F-cong : Congruent₁ _≈_ F
-
 
   asyncIter' : Schedule n → S → ∀ {t} → Acc _<_ t → S
   asyncIter' 𝓢 x[0] {zero}  _        i = x[0] i
@@ -103,10 +101,12 @@ module _ {a₁ a₂ ℓ₁ ℓ₂ n} {𝕊₁ : Setoid (Fin n) a₁ ℓ₁} {�
     field
       toᵢ      : ∀ {i} → P.Sᵢ i → Q.Sᵢ i
       fromᵢ    : ∀ {i} → Q.Sᵢ i → P.Sᵢ i
+      
+      F-cong  : Congruent₁ Q._≈_ Q.F
 
       toᵢ-cong : ∀ {i} {x y : P.Sᵢ i} → x P.≈ᵢ y → toᵢ x Q.≈ᵢ toᵢ y
-      toᵢ-F    : ∀ {i} (x : P.S) → toᵢ (P.F x i) Q.≈ᵢ Q.F (λ j → toᵢ (x j)) i
       toᵢ-fromᵢ : ∀ {i} (x : Q.Sᵢ i) → toᵢ (fromᵢ x) Q.≈ᵢ x
+      toᵢ-F    : ∀ {i} (x : P.S) → toᵢ (P.F x i) Q.≈ᵢ Q.F (λ j → toᵢ (x j)) i
       
     to : P.S → Q.S
     to x i = toᵢ (x i)

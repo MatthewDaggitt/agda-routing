@@ -1,7 +1,11 @@
 open import Algebra.FunctionProperties using (Op₂)
-open import Data.List using (foldr)
+open import Data.Fin using (Fin)
+open import Data.List using (foldr; map; tabulate)
 import Data.List.Relation.Equality.Setoid as SetoidEquality
+open import Function using (_∘_)
 open import Relation.Binary
+
+import RoutingLib.Data.List.Relation.Pointwise as PW
 
 module RoutingLib.Data.List.Relation.Equality.Setoid where
 
@@ -17,3 +21,6 @@ module _ {a ℓ} (S : Setoid a ℓ) where
   foldr⁺ _    e~f []            = e~f
   foldr⁺ pres e~f (x~y ∷ xs~ys) = pres x~y (foldr⁺ pres e~f xs~ys)
 
+  map-tabulate : ∀ {b} {B : Set b} {n} (f : B → A) (g : Fin n → B) →
+                 map f (tabulate g) ≋ tabulate (f ∘ g)
+  map-tabulate = PW.map-tabulate refl

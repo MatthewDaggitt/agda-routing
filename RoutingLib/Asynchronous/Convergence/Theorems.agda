@@ -4,6 +4,7 @@ open import RoutingLib.Relation.Unary.Indexed using (_∈_)
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (Setoid)
 
 open import RoutingLib.Asynchronous
+open import RoutingLib.Asynchronous.Properties
 import RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois1 as UresinDubois1
 import RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois3 as UresinDubois3
 -- import RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois4 as UresinDubois4

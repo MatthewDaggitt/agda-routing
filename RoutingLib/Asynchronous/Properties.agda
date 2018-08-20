@@ -49,10 +49,10 @@ module _ {a ℓ n} {𝕊 : Setoid (Fin n) a ℓ} where
     }
     where open IsPartiallyAsynchronouslySafe partiallySafe
 
-  -- The empty computation is safe (phew!)
-  0-IsSafe : ∀ {a ℓ} {T : Setoid (Fin 0) a ℓ} (P : Parallelisation T) →
-             IsAsynchronouslySafe P
-  0-IsSafe p = record { m* = λ() ; m*-reached = λ _ _ → 0 , λ _ () }
+-- The empty computation is safe (phew!)
+0-IsSafe : ∀ {a ℓ} {T : Setoid (Fin 0) a ℓ} (P : Parallelisation T) →
+           IsAsynchronouslySafe P
+0-IsSafe p = record { m* = λ() ; m*-reached = λ _ _ → 0 , λ _ () }
 
 
 
@@ -63,33 +63,35 @@ module _ {a₁ a₂ ℓ₁ ℓ₂ n} {𝕊₁ : Setoid (Fin n) a₁ ℓ₁} {�
          (P₁↭P₂ : Bisimilar P₁ P₂) (P₁-isSafe : IsAsynchronouslySafe P₁) where
 
 
-  module P = Parallelisation P₁
-  module Q = Parallelisation P₂
+  private
   
-  open Bisimilar P₁↭P₂
-  open IsAsynchronouslySafe P₁-isSafe
-    renaming (m* to m*₁; m*-reached to m*₁-reached)
+    module P = Parallelisation P₁
+    module Q = Parallelisation P₂
 
-  open Schedule
+    open Bisimilar P₁↭P₂
+    open IsAsynchronouslySafe P₁-isSafe
+      renaming (m* to m*₁; m*-reached to m*₁-reached)
 
-
-  asyncIter-eq : ∀ s X → ∀ {t} (tAcc : Acc _<_ t) →
-                 to (P.asyncIter' s (from X) tAcc) Q.≈ Q.asyncIter' s X tAcc
-  asyncIter-eq s X {zero}  _          i = toᵢ-fromᵢ (X i)
-  asyncIter-eq s X {suc t} (acc tAcc) i with i ∈? α s (suc t)
-  ... | yes _ = Q.≈ᵢ-trans (toᵢ-F _) (Q.F-cong (λ j → asyncIter-eq s X (tAcc (β s (suc t) i j) _) j) i)
-  ... | no  _ = asyncIter-eq s X (tAcc _ ≤-refl) i
+    open Schedule
 
 
-  m*₂ : Q.S
-  m*₂ = to m*₁
+    asyncIter-eq : ∀ s X → ∀ {t} (tAcc : Acc _<_ t) →
+                   to (P.asyncIter' s (from X) tAcc) Q.≈ Q.asyncIter' s X tAcc
+    asyncIter-eq s X {zero}  _          i = toᵢ-fromᵢ (X i)
+    asyncIter-eq s X {suc t} (acc tAcc) i with i ∈? α s (suc t)
+    ... | yes _ = Q.≈ᵢ-trans (toᵢ-F _) (F-cong (λ j → asyncIter-eq s X (tAcc (β s (suc t) i j) _) j) i)
+    ... | no  _ = asyncIter-eq s X (tAcc _ ≤-refl) i
 
-  m*₂-reached : ∀ X s → ∃ λ tᶜ → ∀ t → Q.asyncIter s X (tᶜ + t) Q.≈ m*₂
-  m*₂-reached X s with m*₁-reached (from X) s
-  ... | (tᶜ , converged) = tᶜ , (λ t i → Q.≈ᵢ-trans
-    (Q.≈-sym (asyncIter-eq s X (<-wellFounded (tᶜ + t))) i)
-    (toᵢ-cong (converged t i)))
-  
+
+    m*₂ : Q.S
+    m*₂ = to m*₁
+
+    m*₂-reached : ∀ X s → ∃ λ tᶜ → ∀ t → Q.asyncIter s X (tᶜ + t) Q.≈ m*₂
+    m*₂-reached X s with m*₁-reached (from X) s
+    ... | (tᶜ , converged) = tᶜ , (λ t i → Q.≈ᵢ-trans
+      (Q.≈-sym (asyncIter-eq s X (<-wellFounded (tᶜ + t))) i)
+      (toᵢ-cong (converged t i)))
+
 
   bisimulation : IsAsynchronouslySafe P₂
   bisimulation = record

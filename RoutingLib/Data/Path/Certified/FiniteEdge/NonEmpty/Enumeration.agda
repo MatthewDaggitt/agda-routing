@@ -75,7 +75,7 @@ module RoutingLib.Data.Path.Certified.FiniteEdge.NonEmpty.Enumeration (n : ℕ) 
 
 
 {-
-    extendAll-∉ : ∀ {i} {q : SimplePathⁿᵗ n} {i∉q ps} → All (q ≉_) ps → All (i ∷ q ∣ i∉q ≉_) (extendAll ps i)
+    extendAll-∉ : ∀ {i} {q :.Path.Certified.FiniteEdge.ᵗ n} {i∉q ps} → All (q ≉_) ps → All (i ∷ q ∣ i∉q ≉_) (extendAll ps i)
     extendAll-∉ {_} [] = []
     extendAll-∉ {i} {ps = p ∷ ps} (q≉p ∷ q≉ps) with i ∉? p
     ... | no  i∈p = extendAll-∉ q≉ps

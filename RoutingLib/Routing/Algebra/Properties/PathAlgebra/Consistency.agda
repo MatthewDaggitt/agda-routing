@@ -11,9 +11,9 @@ open import Relation.Nullary using (¬_)
 
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import Data.List.Membership.Setoid.Properties
-open import RoutingLib.Data.SimplePath using (SimplePath)
-open import RoutingLib.Data.SimplePath.Enumeration
-open import RoutingLib.Data.SimplePath.Relation.Equality using (ℙₛ)
+open import RoutingLib.Data.Path.Certified.FiniteEdge using (Path)
+open import RoutingLib.Data.Path.Certified.FiniteEdge.Enumeration
+open import RoutingLib.Data.Path.Certified.FiniteEdge.Properties using (ℙₛ)
 
 open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.Algebra.Properties.PathAlgebra
@@ -114,7 +114,7 @@ _▷ᶜ_ : CStep → CRoute → CRoute
 
 open Membership Sᶜ using () renaming (_∈_ to _∈ₗ_)
 
-pathToCRoute : SimplePath n → CRoute
+pathToCRoute : Path n → CRoute
 pathToCRoute p = weight p , weightᶜ p
 
 abstract

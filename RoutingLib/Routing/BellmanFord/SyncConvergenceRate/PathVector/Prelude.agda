@@ -5,9 +5,8 @@ open import Relation.Nullary using (Dec)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; sym; cong; module ≡-Reasoning)
 
-open import RoutingLib.Data.SimplePath renaming (_∈_ to _∈ₚ_)
-open import RoutingLib.Data.SimplePath.Relation.Equality
-open import RoutingLib.Data.SimplePath.Properties using (length-cong)
+open import RoutingLib.Data.Path.Certified.FiniteEdge hiding (Edge)
+open import RoutingLib.Data.Path.Certified.FiniteEdge.Properties using (length-cong)
 
 open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.Algebra.Properties.IncreasingPathAlgebra as IncreasingPathAlgebraProperties

@@ -6,9 +6,9 @@ open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary.PropositionalEquality using (inspect; [_])
 import Relation.Binary.EqReasoning as EqReasoning
 
-open import RoutingLib.Data.SimplePath
-open import RoutingLib.Data.SimplePath.NonEmpty.Properties
-open import RoutingLib.Data.SimplePath.Relation.Equality
+open import RoutingLib.Data.Path.Certified.FiniteEdge
+open import RoutingLib.Data.Path.Certified.FiniteEdge.Properties using (≈ₚ-reflexive; ≈ₚ-sym; p≉i∷p; ℙₛ)
+open import RoutingLib.Data.Path.Certified.FiniteEdge.NonEmpty.Properties using (_⇿?_; _∉?_)
 
 open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.Algebra.Properties.PathAlgebra

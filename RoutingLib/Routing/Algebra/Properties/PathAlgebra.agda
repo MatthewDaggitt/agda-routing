@@ -8,10 +8,9 @@ open import Relation.Binary.PropositionalEquality
 open import Relation.Unary using (Decidable)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Data.SimplePath
-open import RoutingLib.Data.SimplePath.Properties using (length<n; length≤1+n; length-cong)
-open import RoutingLib.Data.SimplePath.NonEmpty.Properties using (_⇿?_; _∉?_)
-open import RoutingLib.Data.SimplePath.Relation.Equality
+open import RoutingLib.Data.Path.Certified.FiniteEdge
+open import RoutingLib.Data.Path.Certified.FiniteEdge.Properties hiding (_⇿?_; _∉?_)
+open import RoutingLib.Data.Path.Certified.FiniteEdge.NonEmpty.Properties using (_⇿?_; _∉?_)
 
 open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
@@ -47,7 +46,7 @@ abstract
 --------------------------------------------------------------------------------
 -- Weight properties
 
-  weight-cong : ∀ {p q : SimplePath n} → p ≈ₚ q → weight p ≈ weight q
+  weight-cong : ∀ {p q : Path n} → p ≈ₚ q → weight p ≈ weight q
   weight-cong invalid              = ≈-refl
   weight-cong (valid [])           = ≈-refl
   weight-cong (valid (refl ∷ p≈q)) = ▷-cong _ (weight-cong (valid p≈q))
@@ -116,10 +115,10 @@ abstract
 -- Size properties
 
   size<n : 1 ≤ n → ∀ r → size r < n
-  size<n (s≤s _) r = length<n (path _)
+  size<n (s≤s _) r = |p|<n (path _)
 
   size≤n+1 : ∀ r → size r ≤ suc n
-  size≤n+1 r = length≤1+n (path r)
+  size≤n+1 r = |p|≤1+n (path r)
 
   size-cong : ∀ {r s} → r ≈ s → size r ≡ size s
   size-cong {r} {s} r≈s = length-cong (path-cong r≈s)

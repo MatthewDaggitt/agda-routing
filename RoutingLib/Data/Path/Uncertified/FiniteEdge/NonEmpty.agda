@@ -8,6 +8,7 @@ open import Level using () renaming (zero to ℓ₀)
 open import Relation.Nullary using (¬_)
 open import Relation.Binary using (Rel)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
+import Relation.Binary.NonStrictToStrict as ToStrict
 
 module RoutingLib.Data.Path.Uncertified.FiniteEdge.NonEmpty where
 
@@ -66,13 +67,18 @@ p ≉ₚ q = ¬ (p ≈ₚ q)
 ------------------------------------------------------------------------------
 -- Lexicographic order
 
-infix 4 _≤ₗₑₓ_
+module _ {n : ℕ} where
 
-data _≤ₗₑₓ_  {n} : Rel (Pathⁿᵗ n) ℓ₀ where
-  stop  : ∀ {p} → [] ≤ₗₑₓ p
-  here₁ : ∀ {i j k l p q} → i < k → (i , j) ∷ p ≤ₗₑₓ (k , l) ∷ q
-  here₂ : ∀ {i j k l p q} → i ≡ k → j < l → (i , j) ∷ p ≤ₗₑₓ (k , l) ∷ q
-  step  : ∀ {i j k l p q} → i ≡ k → j ≡ l → p ≤ₗₑₓ q  → (i , j) ∷ p  ≤ₗₑₓ (k , l) ∷ q
+  infix 4 _≤ₗₑₓ_
+
+  data _≤ₗₑₓ_ : Rel (Pathⁿᵗ n) ℓ₀ where
+    stop  : ∀ {p} → [] ≤ₗₑₓ p
+    here₁ : ∀ {i j k l p q} → i < k → (i , j) ∷ p ≤ₗₑₓ (k , l) ∷ q
+    here₂ : ∀ {i j k l p q} → i ≡ k → j < l → (i , j) ∷ p ≤ₗₑₓ (k , l) ∷ q
+    step  : ∀ {i j k l p q} → i ≡ k → j ≡ l → p ≤ₗₑₓ q  → (i , j) ∷ p  ≤ₗₑₓ (k , l) ∷ q
+
+  open ToStrict _≡_ _≤ₗₑₓ_ public
+    using () renaming (_<_ to _<ₗₑₓ_)
 
 ------------------------------------------------------------------------------
 -- Operations

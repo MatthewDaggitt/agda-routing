@@ -12,9 +12,8 @@ open import Relation.Nullary.Decidable using (⌊_⌋)
 open import Relation.Nullary.Negation using (contradiction)
 import Relation.Binary.PartialOrderReasoning as ≤-Reasoning
 
-open import RoutingLib.Data.SimplePath.NonEmpty using (_∷_∣_∣_)
-open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Equality using (_≈ₚ_; ≈ₚ-refl; ≈ₚ-sym; p≉i∷p)
-open import RoutingLib.Data.SimplePath.NonEmpty.Properties using (∉-resp-≈ₚ) renaming (_∈?_ to _∈ₚ?_)
+open import RoutingLib.Data.Path.Uncertified.FiniteEdge.NonEmpty using (_∷_)
+open import RoutingLib.Data.Path.Uncertified.FiniteEdge.NonEmpty.Properties using (∉-resp-≈ₚ; p≉i∷p) renaming (_∈?_ to _∈ₚ?_)
 open import RoutingLib.Data.Nat.Properties using (n≢1+n)
 
 import RoutingLib.Routing.BellmanFord.Models.BGPLite.Route as Routes
@@ -60,13 +59,11 @@ evaluate-cong (inComm  c) invalidEq = refl
 evaluate-cong (isLevel l) invalidEq = refl
 evaluate-cong (inComm  c) (validEq _ cs≈ds _)   = ∈-resp-≈ᶜˢ c cs≈ds
 evaluate-cong (isLevel l) (validEq refl _  _)   = refl
-evaluate-cong (inPath  i) {valid _ _ p} {valid _ _ q} (validEq _    _  p≈q) with i <? n
+evaluate-cong (inPath  i) {valid _ _ p} {valid _ _ q} (validEq _ _ refl) with i <? n
 ... | no _    = refl
-... | yes i<n with fromℕ≤ i<n ∈ₚ? p | fromℕ≤ i<n ∈ₚ? q
-...   | yes i∈p | yes i∈q = refl
-...   | yes i∈p | no  i∉q = contradiction (i∈p ∘ (∉-resp-≈ₚ (≈ₚ-sym p≈q))) i∉q
-...   | no  i∉p | yes i∈q = contradiction (i∈q ∘ ∉-resp-≈ₚ p≈q) i∉p
-...   | no  i∉p | no  i∉q = refl
+... | yes i<n with fromℕ≤ i<n ∈ₚ? p
+...   | yes i∈p = refl
+...   | no  i∉p = refl
 
 ------------
 -- Policy --
@@ -119,14 +116,14 @@ apply-increasing (compose r s) {l} {cs} {p} eq
 ... | valid j es o | [ eq′ ] with apply-increasing r eq′ | apply-increasing s eq
 ...   | (l≤j , p≡o) | (j≤k , o≡q) = ≤-trans l≤j j≤k , trans p≡o o≡q
 
-apply-nonDecreasing : ∀ pol {l cs e p e⇿p e∉p} →
-                      apply pol (valid l cs (e ∷ p ∣ e⇿p ∣ e∉p)) ≰ᵣ valid l cs p
-apply-nonDecreasing pol {l} {cs} {e} {p} {e⇿p} {e∉p} leq
-  with apply pol (valid l cs (e ∷ p ∣ e⇿p ∣ e∉p)) | inspect (apply pol) (valid l cs (e ∷ p ∣ e⇿p ∣ e∉p))
+apply-nonDecreasing : ∀ pol {l cs e p} →
+                      apply pol (valid l cs (e ∷ p)) ≰ᵣ valid l cs p
+apply-nonDecreasing pol {l} {cs} {e} {p} leq
+  with apply pol (valid l cs (e ∷ p)) | inspect (apply pol) (valid l cs (e ∷ p))
 ... | invalid      | _      = contradiction leq λ()
 ... | valid k ds q | [ eq ] with apply-increasing pol eq
 ...   | l≤k , refl with leq
 ...     | (level< k<l)          = contradiction k<l (≤⇒≯ l≤k)
 ...     | (length< _ 2+|p|<|p|) = contradiction 2+|p|<|p| (≤⇒≯ (n≤1+n _))
 ...     | (plex< _ 1+|p|≡|p| _) = contradiction 1+|p|≡|p| (n≢1+n _ ∘ sym)
-...     | (comm≤ _ e∷p≈p _)     = contradiction e∷p≈p (p≉i∷p ∘ ≈ₚ-sym)
+...     | (comm≤ _ e∷p≈p _)     = contradiction e∷p≈p (p≉i∷p ∘ sym)

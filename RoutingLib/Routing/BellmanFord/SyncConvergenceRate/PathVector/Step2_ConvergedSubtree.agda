@@ -18,9 +18,8 @@ open import RoutingLib.Data.Fin.Subset using (Nonfull)
 open import RoutingLib.Data.Fin.Subset.Cutset
 open import RoutingLib.Data.List using (allFinPairs)
 import RoutingLib.Data.List.Extrema as Extrema
-open import RoutingLib.Data.SimplePath hiding (_∈_; _∉_)
-open import RoutingLib.Data.SimplePath.Relation.Equality
-open import RoutingLib.Data.SimplePath.All
+open import RoutingLib.Data.Path.Certified.FiniteEdge hiding (Edge; _∈_; _∉_)
+open import RoutingLib.Data.Path.Certified.FiniteEdge.All
 
 open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Prelude as Prelude

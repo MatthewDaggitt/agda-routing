@@ -100,26 +100,22 @@ module _ (n : ℕ) where
   ℙₛ? : DecSetoid 0ℓ 0ℓ
   ℙₛ? = record { isDecEquivalence = ≡ₚ-isDecEquivalence }
 
-
-
-{-
 ----------------------------------------------------------------------------
 -- Lexicographic order
 
 module _ {n : ℕ} where
 
-  ≤ₗₑₓ-reflexive : _≈ₚ_ ⇒ (_≤ₗₑₓ_ {n})
-  ≤ₗₑₓ-reflexive []         = stop
-  ≤ₗₑₓ-reflexive (refl ∷ p≈q) = step refl refl (≤ₗₑₓ-reflexive p≈q)
-
   ≤ₗₑₓ-refl : Reflexive (_≤ₗₑₓ_ {n})
-  ≤ₗₑₓ-refl {[]}            = stop
-  ≤ₗₑₓ-refl {i ∷ p ∣ _ ∣ _} = step refl refl ≤ₗₑₓ-refl
+  ≤ₗₑₓ-refl {[]}    = stop
+  ≤ₗₑₓ-refl {i ∷ p} = step refl refl ≤ₗₑₓ-refl
+  
+  ≤ₗₑₓ-reflexive : _≡_ ⇒ (_≤ₗₑₓ_ {n})
+  ≤ₗₑₓ-reflexive refl = ≤ₗₑₓ-refl
 
   ≤ₗₑₓ-total : Total (_≤ₗₑₓ_ {n})
   ≤ₗₑₓ-total p [] = inj₂ stop
   ≤ₗₑₓ-total [] q = inj₁ stop
-  ≤ₗₑₓ-total ((i , j) ∷ p ∣ e⇿p ∣ e∉p) ((l , k) ∷ q ∣ f⇿q ∣ f∉q) with <-cmp i l
+  ≤ₗₑₓ-total ((i , j) ∷ p) ((l , k) ∷ q) with <-cmp i l
   ... | tri< i<l _ _ = inj₁ (here₁ i<l)
   ... | tri> _ _ l<i = inj₂ (here₁ l<i)
   ... | tri≈ _ i≡l _ with <-cmp j k
@@ -142,7 +138,7 @@ module _ {n : ℕ} where
   ≤ₗₑₓ-trans (step  refl refl p≤q) (step  refl refl q≤r) = step refl refl (≤ₗₑₓ-trans p≤q q≤r)
 
   ≤ₗₑₓ-antisym : Antisymmetric _≈ₚ_ (_≤ₗₑₓ_ {n})
-  ≤ₗₑₓ-antisym stop                  stop                  = []
+  ≤ₗₑₓ-antisym stop                  stop                  = refl
   ≤ₗₑₓ-antisym (here₁ i<j)           (here₁ j<i)           = contradiction i<j (<⇒≯ j<i)
   ≤ₗₑₓ-antisym (here₁ i<j)           (here₂ refl j<i)      = contradiction i<j 1+n≰n
   ≤ₗₑₓ-antisym (here₁ i<j)           (step  refl refl p≤q) = contradiction i<j 1+n≰n
@@ -151,12 +147,12 @@ module _ {n : ℕ} where
   ≤ₗₑₓ-antisym (here₂ refl i<j)      (step  refl refl p≤q) = contradiction i<j 1+n≰n
   ≤ₗₑₓ-antisym (step  refl refl i<j) (here₁ j<i)           = contradiction j<i 1+n≰n
   ≤ₗₑₓ-antisym (step  refl refl _)   (here₂ _ j<i)         = contradiction j<i 1+n≰n
-  ≤ₗₑₓ-antisym (step  refl refl p≤q) (step refl refl q≤p)  = refl ∷ ≤ₗₑₓ-antisym p≤q q≤p
-
+  ≤ₗₑₓ-antisym (step  refl refl p≤q) (step refl refl q≤p)  = cong (_ ∷_) (≤ₗₑₓ-antisym p≤q q≤p)
+  
   _≤ₗₑₓ?_ : Decidable (_≤ₗₑₓ_ {n})
   [] ≤ₗₑₓ? _ = yes stop
-  (i ∷ p ∣ _ ∣ _) ≤ₗₑₓ? []          = no λ()
-  ((i , j) ∷ p ∣ _ ∣ _) ≤ₗₑₓ? ((k , l) ∷ q ∣ _ ∣ _) with <-cmp i k | <-cmp j l | p ≤ₗₑₓ? q
+  (i ∷ p) ≤ₗₑₓ? []          = no λ()
+  ((i , j) ∷ p) ≤ₗₑₓ? ((k , l) ∷ q) with <-cmp i k | <-cmp j l | p ≤ₗₑₓ? q
   ... | tri< i<k _   _ | _              | _       = yes (here₁ i<k)
   ... | tri> i≮k i≢k _ | _              | _       = no λ
     { (here₁ i<k)     → i≮k i<k
@@ -185,24 +181,25 @@ module _ (n : ℕ) where
       { isTotalOrder = record
         { isPartialOrder = record
           { isPreorder = record
-            { isEquivalence = ≈ₚ-isEquivalence n
+            { isEquivalence = isEquivalence {A = Pathⁿᵗ n} 
             ; reflexive     = ≤ₗₑₓ-reflexive
             ; trans         = ≤ₗₑₓ-trans
             }
           ; antisym    = ≤ₗₑₓ-antisym
           }
-        ; total          = ≤ₗₑₓ-total
+        ; total        = ≤ₗₑₓ-total
         }
       ; _≟_          = _≟ₚ_
       ; _≤?_         = _≤ₗₑₓ?_
       }
     }
 
-  open ToStrict ≤ₗₑₓ-decTotalOrder public
+module _ {n : ℕ} where
+
+  open ToStrict (≤ₗₑₓ-decTotalOrder n) public
     using ()
     renaming
-    ( _<_       to _<ₗₑₓ_
-    ; <-trans   to <ₗₑₓ-trans
+    ( <-trans   to <ₗₑₓ-trans
     ; <-asym    to <ₗₑₓ-asym
     ; <-irrefl  to <ₗₑₓ-irrefl
     ; <-respˡ-≈ to <ₗₑₓ-respˡ-≈ₚ
@@ -210,10 +207,11 @@ module _ (n : ℕ) where
     ; <-cmp     to <ₗₑₓ-cmp
     )
 
-  p≮ₗₑₓ[] : ∀ {p} → ¬ (p <ₗₑₓ [])
-  p≮ₗₑₓ[] {[]}                (_ , []≉[]) = []≉[] []
-  p≮ₗₑₓ[] {e ∷ p ∣ e⇿p ∣ e∉p} (() , _)
+  p≮ₗₑₓ[] : ∀ {p : Pathⁿᵗ n} → ¬ (p <ₗₑₓ [])
+  p≮ₗₑₓ[] {[]}    (_ , []≉[]) = []≉[] refl
+  p≮ₗₑₓ[] {e ∷ p} (() , _)
 
+{-
 
 ----------------------------------------------------------------------------
 -- lookup

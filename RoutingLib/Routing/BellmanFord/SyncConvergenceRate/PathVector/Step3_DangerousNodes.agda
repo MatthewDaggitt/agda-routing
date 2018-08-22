@@ -19,14 +19,11 @@ import Relation.Binary.PartialOrderReasoning as POR
 open import Function.Reasoning
 
 open import RoutingLib.Data.Matrix using (SquareMatrix)
-open import RoutingLib.Data.SimplePath
-  using (SimplePath; []; _∷_∣_∣_; invalid; valid; notThere; notHere; continue; length)
+open import RoutingLib.Data.Path.Certified.FiniteEdge
+  using (Path; []; _∷_∣_∣_; invalid; valid; notThere; notHere; continue; length)
   renaming (_∈_ to _∈ₚ_)
-open import RoutingLib.Data.SimplePath.Relation.Equality
-open import RoutingLib.Data.SimplePath.Relation.Subpath
-open import RoutingLib.Data.SimplePath.All
-open import RoutingLib.Data.SimplePath.Properties
-  using (∉-resp-≈ₚ; length-cong)
+open import RoutingLib.Data.Path.Certified.FiniteEdge.All
+open import RoutingLib.Data.Path.Certified.FiniteEdge.Properties
 open import RoutingLib.Data.Fin.Subset using (Nonfull) renaming ()
 open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
 open import RoutingLib.Data.Fin.Dec using (any?)

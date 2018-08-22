@@ -1,3 +1,3 @@
 
 
-module RoutingLib.Data.SimplePath.Relation.Lex where
+module RoutingLib.Data.Path.Certified.FiniteEdge.Relation.Lex where

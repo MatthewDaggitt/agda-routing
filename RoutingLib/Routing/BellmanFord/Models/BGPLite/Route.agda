@@ -6,9 +6,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_)
 open import Relation.Nullary using (¬_)
 open import Relation.Unary using (Pred)
 
-open import RoutingLib.Data.SimplePath.NonEmpty using (SimplePathⁿᵗ; length)
-open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Equality using (_≈ₚ_)
-open import RoutingLib.Data.SimplePath.NonEmpty.Relation.Lex using (_<ₗₑₓ_)
+open import RoutingLib.Data.Path.Uncertified.FiniteEdge.NonEmpty using (Pathⁿᵗ; length; _≈ₚ_; _<ₗₑₓ_)
 open import RoutingLib.Routing.BellmanFord.Models.BGPLite.Communities
 
 module RoutingLib.Routing.BellmanFord.Models.BGPLite.Route (n : ℕ) where
@@ -25,7 +23,7 @@ Node = Fin n
 
 data Route : Set where
   invalid : Route
-  valid   : (l : ℕ) → (cs : CommunitySet) → (p : SimplePathⁿᵗ n) → Route
+  valid   : (l : ℕ) → (cs : CommunitySet) → (p : Pathⁿᵗ n) → Route
 
 --------------
 -- Equality --

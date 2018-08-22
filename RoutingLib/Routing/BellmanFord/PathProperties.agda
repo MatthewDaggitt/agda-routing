@@ -19,10 +19,9 @@ open import Induction.Nat using (<-wellFounded)
 open import RoutingLib.Data.List.Properties using (foldr-presᵇ)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
-open import RoutingLib.Data.SimplePath
-open import RoutingLib.Data.SimplePath.NonEmpty.Properties using (_∉?_; _⇿?_)
-open import RoutingLib.Data.SimplePath.Properties using (∉-resp-≈ₚ)
-open import RoutingLib.Data.SimplePath.Relation.Equality
+open import RoutingLib.Data.Path.Certified.FiniteEdge
+open import RoutingLib.Data.Path.Certified.FiniteEdge.NonEmpty.Properties using (_∉?_; _⇿?_)
+open import RoutingLib.Data.Path.Certified.FiniteEdge.Properties using (∉-resp-≈ₚ; ≈ₚ-trans; ≈ₚ-sym; ≈ₚ-reflexive; ℙₛ)
 
 open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.Algebra.Properties.PathAlgebra as PathAlgebraProperties

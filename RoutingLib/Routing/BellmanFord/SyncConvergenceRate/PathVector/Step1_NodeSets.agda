@@ -15,14 +15,11 @@ import Relation.Binary.PartialOrderReasoning as POR
 import Relation.Binary.EqReasoning as EqReasoning
 
 open import RoutingLib.Data.Matrix using (SquareMatrix)
-open import RoutingLib.Data.SimplePath
-  using (SimplePath; []; _∷_∣_∣_; invalid; valid; notThere; notHere; continue)
+open import RoutingLib.Data.Path.Certified.FiniteEdge
+  using (Path; []; _∷_∣_∣_; invalid; valid; notThere; notHere; continue; _≈ₚ_)
   renaming (_∈_ to _∈ₚ_)
-open import RoutingLib.Data.SimplePath.Relation.Equality
-open import RoutingLib.Data.SimplePath.Relation.Subpath
-open import RoutingLib.Data.SimplePath.All
-open import RoutingLib.Data.SimplePath.Properties
-  using (∉-resp-≈ₚ)
+open import RoutingLib.Data.Path.Certified.FiniteEdge.All
+open import RoutingLib.Data.Path.Certified.FiniteEdge.Properties
 
 open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Prelude as Prelude
@@ -67,13 +64,13 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step1_NodeS
   -- after time t)
 
   𝓒 : 𝕋 → Node → Set _
-  𝓒 t i = i ∈ᵤ 𝓕 t × Allₙ (𝓕 t) (path (σ^ t X i j))
+  𝓒 t i = i ∈ᵤ 𝓕 t × Allᵥ (𝓕 t) (path (σ^ t X i j))
 
   𝓒-cong : ∀ {s t k} → k ∈ᵤ 𝓒 s → s ≡ t → k ∈ᵤ 𝓒 t
   𝓒-cong k∈Fₛ refl = k∈Fₛ
 
   j∈𝓒₁ : j ∈ᵤ 𝓒 1
-  j∈𝓒₁ = j∈𝓕₁ , Allₙ-resp-≈ₚ (valid []) (≈ₚ-sym (begin
+  j∈𝓒₁ = j∈𝓕₁ , Allᵥ-resp-≈ₚ (valid []) (≈ₚ-sym (begin
     path (σ X j j) ≈⟨ path-cong (σXᵢᵢ≈Iᵢᵢ X j) ⟩
     path (I j j)   ≡⟨ cong path (Iᵢᵢ≡0# j) ⟩
     path 0#        ≈⟨ p[0]≈[] ⟩
@@ -83,18 +80,18 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step1_NodeS
   𝓒ₜ⊆𝓒ₜ₊ₛ : ∀ t s → 𝓒 t ⊆ᵤ 𝓒 (t + s)
   𝓒ₜ⊆𝓒ₜ₊ₛ t s (i∈Sₜ , p∈Sₜ) =
     𝓕ₜ⊆𝓕ₜ₊ₛ t s i∈Sₜ ,
-    mapₙ (𝓕ₜ⊆𝓕ₜ₊ₛ t s) (Allₙ-resp-≈ₚ p∈Sₜ (path-cong (≈-sym (i∈Sₜ s))) )
+    mapᵥ (𝓕ₜ⊆𝓕ₜ₊ₛ t s) (Allᵥ-resp-≈ₚ p∈Sₜ (path-cong (≈-sym (i∈Sₜ s))) )
 
   𝓒ₜ⊆𝓒ₛ₊ₜ : ∀ t s → 𝓒 t ⊆ᵤ 𝓒 (s + t)
   𝓒ₜ⊆𝓒ₛ₊ₜ t s rewrite +-comm s t = 𝓒ₜ⊆𝓒ₜ₊ₛ t s
 
-  𝓒-path : ∀ t {i p} → path (σ^ t X i j) ≈ₚ p → i ∈ᵤ 𝓒 t → Allₙ (𝓒 t) p
+  𝓒-path : ∀ t {i p} → path (σ^ t X i j) ≈ₚ p → i ∈ᵤ 𝓒 t → Allᵥ (𝓒 t) p
   𝓒-path t {i} {invalid}  _ _ = invalid
   𝓒-path t {i} {valid []} _ _ = valid []
   𝓒-path t {i} {valid ((_ , k) ∷ p ∣ _ ∣ _)} p[σᵗXᵢⱼ]≈ik∷p i∈𝓒ₜ@(i∈𝓕ₜ , ik∷p∈𝓕ₜ)
     with 𝓕-alignment t i∈𝓕ₜ p[σᵗXᵢⱼ]≈ik∷p
-  ... | refl , _ , p[σᵗXₖⱼ]≈p with Allₙ-resp-≈ₚ ik∷p∈𝓕ₜ p[σᵗXᵢⱼ]≈ik∷p
-  ...   | (valid ([ _ , k∈𝓕ₜ ]∷ p∈𝓕ₜ)) with Allₙ-resp-≈ₚ (valid p∈𝓕ₜ) (≈ₚ-sym p[σᵗXₖⱼ]≈p)
+  ... | refl , _ , p[σᵗXₖⱼ]≈p with Allᵥ-resp-≈ₚ ik∷p∈𝓕ₜ p[σᵗXᵢⱼ]≈ik∷p
+  ...   | (valid ([ _ , k∈𝓕ₜ ]∷ p∈𝓕ₜ)) with Allᵥ-resp-≈ₚ (valid p∈𝓕ₜ) (≈ₚ-sym p[σᵗXₖⱼ]≈p)
   ...     | k∈𝓒ₜ with 𝓒-path t p[σᵗXₖⱼ]≈p (k∈𝓕ₜ , k∈𝓒ₜ)
   ...       | valid p∈𝓒ₜ = valid ([ i∈𝓒ₜ , (k∈𝓕ₜ , k∈𝓒ₜ) ]∷ p∈𝓒ₜ)
 
@@ -144,7 +141,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step1_NodeS
 
 
   𝓡-path : ∀ {t i p} → path (σ^ (suc t) X i j) ≈ₚ p →
-          i ∈ᵤ 𝓡 (suc t) → Allₙ (𝓡 (suc t)) p
+          i ∈ᵤ 𝓡 (suc t) → Allᵥ (𝓡 (suc t)) p
   𝓡-path {_} {i} {invalid}  _ _ = invalid
   𝓡-path {_} {i} {valid []} _ _ = valid []
   𝓡-path {t} {i} {valid ((_ , k) ∷ p ∣ _ ∣ _)} p[σᵗXᵢⱼ]≈vk∷p i∈R₁₊ₜ

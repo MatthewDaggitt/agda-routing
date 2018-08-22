@@ -15,14 +15,11 @@ import Relation.Binary.PartialOrderReasoning as POR
 import Relation.Binary.EqReasoning as EqReasoning
 
 open import RoutingLib.Data.Matrix using (SquareMatrix)
-open import RoutingLib.Data.SimplePath
-  using (SimplePath; []; _∷_∣_∣_; invalid; valid; notThere; notHere; continue; length)
+open import RoutingLib.Data.Path.Certified.FiniteEdge
+  using (Path; []; _∷_∣_∣_; invalid; valid; notThere; notHere; continue; length; _≈ₚ_)
   renaming (_∈_ to _∈ₚ_)
-open import RoutingLib.Data.SimplePath.Relation.Equality
-open import RoutingLib.Data.SimplePath.Relation.Subpath
-open import RoutingLib.Data.SimplePath.All
-open import RoutingLib.Data.SimplePath.Properties
-  using (∉-resp-≈ₚ; length-cong)
+open import RoutingLib.Data.Path.Certified.FiniteEdge.All
+open import RoutingLib.Data.Path.Certified.FiniteEdge.Properties
 open import RoutingLib.Data.Fin.Subset using (Nonfull)
 open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
 
@@ -121,14 +118,14 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step4_Induc
       p                                                ∎
       where open EqReasoning (ℙₛ n)
 
-  p[iₘᵢₙ]∈𝓕ₜ₊ₙ : Allₙ (𝓕 (t + n)) (path (σ^ (t + n) X iₘᵢₙ j))
+  p[iₘᵢₙ]∈𝓕ₜ₊ₙ : Allᵥ (𝓕 (t + n)) (path (σ^ (t + n) X iₘᵢₙ j))
   p[iₘᵢₙ]∈𝓕ₜ₊ₙ with path (σ^ (t + n) X iₘᵢₙ j) | inspect path (σ^ (t + n) X iₘᵢₙ j)
   ... | invalid                     | _ = invalid
   ... | valid []                    | _ = valid []
   ... | valid ((_ , _) ∷ p ∣ _ ∣ _) | [ p[σᵗ⁺ⁿ]≡iₘk∷p ]
     with alignPathExtension (σ^ (t + n-1) X) iₘᵢₙ j kₘᵢₙ (lemma₄ p[σᵗ⁺ⁿ]≡iₘk∷p)
   ...   | refl , refl , p[σᵗ⁺ⁿ⁻¹Xₖⱼ]≈p with 𝓒ₜ⊆𝓒ₜ₊ₛ t n kₘᵢₙ∈𝓒ₜ
-  ...     | (k∈S , pₖ∈S) with Allₙ-resp-≈ₚ pₖ∈S (≈ₚ-trans (path-cong (𝓒-eq t _ n n-1 kₘᵢₙ∈𝓒ₜ)) p[σᵗ⁺ⁿ⁻¹Xₖⱼ]≈p)
+  ...     | (k∈S , pₖ∈S) with Allᵥ-resp-≈ₚ pₖ∈S (≈ₚ-trans (path-cong (𝓒-eq t _ n n-1 kₘᵢₙ∈𝓒ₜ)) p[σᵗ⁺ⁿ⁻¹Xₖⱼ]≈p)
   ...       | valid p∈S = valid ([ iₘᵢₙ∈𝓕ₜ₊ₙ , k∈S ]∷ p∈S)
 
   iₘᵢₙ∈𝓒ₜ₊ₙ : iₘᵢₙ ∈ᵤ 𝓒 (t + n)

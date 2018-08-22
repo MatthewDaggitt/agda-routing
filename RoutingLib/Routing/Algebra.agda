@@ -17,14 +17,10 @@ open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.Table using (Table)
 import RoutingLib.Data.Matrix.Relation.DecidableEquality as MatrixDecEquality
 import RoutingLib.Data.Table.Relation.DecidableEquality as TableDecEquality
-open import RoutingLib.Data.SimplePath
-  using (SimplePath; valid; invalid; []; _∷_∣_∣_)
-open import RoutingLib.Data.SimplePath.Relation.Equality
+open import RoutingLib.Data.Path.Certified.FiniteEdge
+  using (Path; valid; invalid; []; _∷_∣_∣_; _≈ₚ_; length)
 import RoutingLib.Relation.Binary.NaturalOrder.Right as RightNaturalOrder
-open import RoutingLib.Data.SimplePath
-  using (SimplePath; []; _∷_∣_∣_; valid; invalid; length)
-open import RoutingLib.Data.SimplePath.Relation.Equality
-open import RoutingLib.Data.SimplePath.NonEmpty using (_⇿_; _∈_)
+open import RoutingLib.Data.Path.Certified.FiniteEdge.NonEmpty using (_⇿_; _∈_)
 
 module RoutingLib.Routing.Algebra  where
 
@@ -226,7 +222,7 @@ record RawPathAlgebra a b ℓ n : Set (lsuc (a ⊔ b ⊔ ℓ)) where
 
   field
     A        : SquareMatrix Step n
-    path     : Route → SimplePath n
+    path     : Route → Path n
 
 --------------------------------------------------------------------------------
 -- Path algebra
@@ -254,7 +250,7 @@ record IsPathAlgebra {a b ℓ n} (algebra : RawPathAlgebra a b ℓ n) : Set (a �
   size : Route → ℕ
   size r = length (path r)
 
-  weight : SimplePath n → Route
+  weight : Path n → Route
   weight invalid                       = ∞
   weight (valid [])                    = 0#
   weight (valid ((i , j) ∷ p ∣ _ ∣ _)) = A i j ▷ weight (valid p)

@@ -17,8 +17,6 @@ import RoutingLib.Relation.Binary.Reasoning.StrictCore as StrictReasoning
 
 module RoutingLib.Data.Nat.Properties where
 
-  open import Data.Nat.Properties.Simple public
-
   --------------
   -- Equality --
   --------------
@@ -110,6 +108,10 @@ module RoutingLib.Data.Nat.Properties where
     m<n⇒n≡1+o {_} {zero} ()
     m<n⇒n≡1+o {_} {suc o} m<n = o , refl
 
+
+    <⇒≤suc : ∀ {x y} → x < y → x ≤ suc y
+    <⇒≤suc (s≤s z≤n)       = z≤n
+    <⇒≤suc (s≤s (s≤s x<y)) = s≤s (<⇒≤suc (s≤s x<y))
 
     ---------------------------------
     -- Addition and multiplication --

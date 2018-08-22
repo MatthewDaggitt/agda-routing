@@ -3,7 +3,8 @@ open import Data.Nat using (zero; suc; s≤s; z≤n; _^_; _+_; _≤_)
 open import Function using (case_of_)
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Asynchronous using (IsAsynchronouslySafe; 0-IsSafe)
+open import RoutingLib.Asynchronous using (IsAsynchronouslySafe)
+open import RoutingLib.Asynchronous.Properties using (0-IsSafe)
 open import RoutingLib.Asynchronous.Convergence.Theorems using (UltrametricConditions; ultra⇒safe)
 
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Prelude as DistanceVectorPrelude

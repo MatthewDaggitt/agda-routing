@@ -75,11 +75,6 @@ abstract
   ------------------------------------------------------------------------------
   -- Synchronous properties
 
-  -- σ respects the underlying matrix equality
-  σ-cong : ∀ {X Y} → X ≈ₘ Y → σ X ≈ₘ σ Y
-  σ-cong X≈Y i j = foldr⁺
-    _≈_ ⊕-cong ≈-refl (tabulate⁺ (λ k → ▷-cong (A i k) (X≈Y k j)))
-
   -- σ either extends the route by going through some k or it chooses a
   -- trivial route from the identity matrix
   σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ : ∀ X i j → (∃ λ k → σ X i j ≈ A i k ▷ X k j) ⊎ (σ X i j ≈ I i j)

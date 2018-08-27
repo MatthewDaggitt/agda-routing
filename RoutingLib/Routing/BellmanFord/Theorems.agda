@@ -7,13 +7,19 @@ open import RoutingLib.Asynchronous using (IsAsynchronouslySafe)
 open import RoutingLib.Asynchronous.Properties using (0-IsSafe)
 open import RoutingLib.Asynchronous.Convergence.Theorems using (UltrametricConditions; ultra⇒safe)
 
+import RoutingLib.Routing.BellmanFord as BellmanFord
+open import RoutingLib.Routing.BellmanFord.ConvergenceConditions
+
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Prelude as DistanceVectorPrelude
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Step3_StateMetric as DistanceVectorResults
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Prelude as PathVectorPrelude
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step5_StateMetric as PathVectorResults
 
 
-module RoutingLib.Routing.BellmanFord.Theorems where
+module RoutingLib.Routing.BellmanFord.Theorems
+  {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
+
+open BellmanFord algebra using (σ; σ^; σ-cong; σ∥; _≟ₜ_; _≈ₘ_; I)
 
 --------------------------------------------------------------------------------
 -- Theorem 1
@@ -21,24 +27,25 @@ module RoutingLib.Routing.BellmanFord.Theorems where
 -- σ is always guaranteed to converge asynchronously over any finite, strictly
 -- increasing routing algebra.
 
-module Theorem1 {a b ℓ n} (algebra : FiniteStrictlyIncreasingRoutingAlgebra a b ℓ)
-         (A : SquareMatrix (FiniteStrictlyIncreasingRoutingAlgebra.Step algebra) n)
-         where
+module _ (conditions : IsFiniteStrictlyIncreasingRoutingAlgebra algebra) where
 
-  open DistanceVectorPrelude algebra A
-  open DistanceVectorResults algebra A
+  open IsFiniteStrictlyIncreasingRoutingAlgebra conditions
+  
+  -- open DistanceVectorPrelude isRoutingAlgebra A
 
-  finiteStrictlyIncr-converges : IsAsynchronouslySafe σ∥
-  finiteStrictlyIncr-converges = ultra⇒safe record
+  finiteStrictlyIncr-converges : ∀ {n} (A : AdjacencyMatrix algebra n) → IsAsynchronouslySafe (σ∥ A)
+  finiteStrictlyIncr-converges A = ultra⇒safe record
     { dᵢ                 = dₜ
     ; dᵢ-isUltrametric   = dₜ-isUltrametric
     ; F-strContrOnOrbits = σ-strContr
     ; F-strContrOnFP     = σ-strContrOnFP
-    ; F-cong             = σ-cong
-    ; _≟ᵢ_               = _≟ₜ_
+    ; F-cong             = σ-cong A
+    ; _≟ᵢ_               = _≟ₜ_ A
     ; d-bounded          = D-bounded
-    ; element            = I
+    ; element            = I A
     }
+    where
+    open DistanceVectorResults isRoutingAlgebra isFinite isStrictlyIncreasing A
 
 --------------------------------------------------------------------------------
 -- Theorem 2
@@ -48,37 +55,39 @@ module Theorem1 {a b ℓ n} (algebra : FiniteStrictlyIncreasingRoutingAlgebra a 
 --
 -- A little bit messier than Theorem 1 as we need to deal with the zero case.
 
-module _ {a b ℓ} where
+module _ (conditions : IsIncreasingPathAlgebra algebra) where
 
-  open PathVectorPrelude using (σ∥)
-
-  incrPaths-converges :  ∀ {n} (algebra : IncreasingPathAlgebra a b ℓ n) →
-                         IsAsynchronouslySafe (σ∥ algebra)
-  incrPaths-converges {n = zero}  algebra = 0-IsSafe (σ∥ algebra)
-  incrPaths-converges {n = suc n} algebra = ultra⇒safe record
+  open IsIncreasingPathAlgebra conditions
+  
+  incrPaths-converges :  ∀ {n} (A : AdjacencyMatrix algebra n) → IsAsynchronouslySafe (σ∥ A)
+  incrPaths-converges {n = zero}  A = 0-IsSafe (σ∥ A)
+  incrPaths-converges {n = suc n} A = ultra⇒safe record
     { dᵢ                 = dₜ
     ; dᵢ-isUltrametric   = dₜ-isUltrametric
-    ; F-cong             = σ-cong
+    ; F-cong             = σ-cong A
     ; F-strContrOnOrbits = σ-strContrOrbits
     ; F-strContrOnFP     = σ-strContrOnFP
     ; d-bounded          = D-bounded
-    ; element            = I
-    ; _≟ᵢ_               = _≟ₜ_
+    ; element            = I A
+    ; _≟ᵢ_               = _≟ₜ_ A
     }
     where
-    open PathVectorResults algebra (s≤s z≤n)
-    open PathVectorPrelude algebra
-
+    open PathVectorResults (isCertifiedPathAlgebra (suc n)) isStrictlyIncreasing A (s≤s z≤n)
+    
 --------------------------------------------------------------------------------
 -- Theorem 3
 --
 -- σ is always guaranteed to converge synchronously in n² steps over any
 -- increasing path algebra
 
-module Theorem3 {a b ℓ n-1} (algebra : IncreasingPathAlgebra a b ℓ (suc n-1)) where
+module _ (conditions : IsIncreasingPathAlgebra algebra) where
 
-  open import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Prelude algebra
-  open import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step5_Proof algebra
-
-  σ-convergesIn-n² : ∀ X t → σ^ (n ^ 2 + t) X ≈ₘ σ^ (n ^ 2) X
-  σ-convergesIn-n² = n²-convergence
+  open IsIncreasingPathAlgebra conditions
+  
+  σ-convergesIn-n² : ∀ {n} (A : AdjacencyMatrix algebra n) →
+                     ∀ X t → _≈ₘ_ A (σ^ A (n ^ 2 + t) X)  (σ^ A (n ^ 2) X)
+  σ-convergesIn-n² {zero}    A X t ()
+  σ-convergesIn-n² {suc n-1} A = n²-convergence
+    where
+    open import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Prelude (isCertifiedPathAlgebra (suc n-1)) A
+    open import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step5_Proof (isCertifiedPathAlgebra (suc n-1)) isIncreasing A

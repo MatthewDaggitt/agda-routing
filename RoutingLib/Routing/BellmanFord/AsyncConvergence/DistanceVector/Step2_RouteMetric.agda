@@ -19,17 +19,21 @@ open import RoutingLib.Data.Nat.Properties using (ℕₛ; m≤n⇒m≤n⊔o; n�
 open import RoutingLib.Function.Metric using (Ultrametric; IsUltrametric; Bounded; MaxTriangleIneq)
 
 open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Algebra.RoutingAlgebra
+open import RoutingLib.Routing.BellmanFord.ConvergenceConditions
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Prelude as Prelude
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Step1_HeightFunction as Step1
-open FiniteStrictlyIncreasingRoutingAlgebra using (Step)
 
 module RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Step2_RouteMetric
-  {a b ℓ n} (algebra : FiniteStrictlyIncreasingRoutingAlgebra a b ℓ)
-  (A : SquareMatrix (Step algebra) n)
+  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  (isFinite : IsFinite algebra)
+  (isStrictlyIncreasing : IsStrictlyIncreasing algebra)
+  (A : AdjacencyMatrix algebra n)
   where
 
-open Prelude algebra A
-open Step1 algebra A
+open Prelude isRoutingAlgebra A
+open Step1 isRoutingAlgebra isFinite A
 
 abstract
 
@@ -117,7 +121,7 @@ abstract
   ...   | inj₁ (k , σXᵢⱼ≈AᵢₖXₖⱼ) = begin
     h (σ X i j) ⊔ h (σ Y i j) ≡⟨ m≤n⇒n⊔m≡n (h-resp-≤ σXᵢⱼ≤σYᵢⱼ) ⟩
     h (σ X i j)               ≡⟨ h-cong σXᵢⱼ≈AᵢₖXₖⱼ ⟩
-    h (A i k ▷ X k j)         <⟨ h-resp-< (▷-strictlyIncreasing (A i k) Xₖⱼ≉∞) ⟩
+    h (A i k ▷ X k j)         <⟨ h-resp-< (isStrictlyIncreasing (A i k) Xₖⱼ≉∞) ⟩
     h (X k j)                 ≤⟨ m≤m⊔n (h (X k j)) (h (Y k j)) ⟩
     h (X k j) ⊔ h (Y k j)     ≡⟨ sym (dxy≡hx⊔hy Xₖⱼ≉Yₖⱼ) ⟩
     d (X k j) (Y k j)         ≤⟨ d≤hXᵣₛ⊔hYᵣₛ k j Xₖⱼ≉Yₖⱼ ⟩
@@ -127,7 +131,7 @@ abstract
     Xₖⱼ≉∞ : X k j ≉ ∞
     Xₖⱼ≉∞ Xₖⱼ≈∞ = σXᵢⱼ≉σYᵢⱼ (≤₊-antisym σXᵢⱼ≤σYᵢⱼ (begin
       σ Y i j       ≤⟨ ⊕-identityˡ _ ⟩
-      ∞             ≈⟨ ≈-sym (▷-zero (A i k)) ⟩
+      ∞             ≈⟨ ≈-sym (▷-fixedPoint (A i k)) ⟩
       A i k ▷ ∞     ≈⟨ ▷-cong (A i k) (≈-sym Xₖⱼ≈∞) ⟩
       A i k ▷ X k j ≈⟨ ≈-sym σXᵢⱼ≈AᵢₖXₖⱼ ⟩
       σ X i j       ∎))

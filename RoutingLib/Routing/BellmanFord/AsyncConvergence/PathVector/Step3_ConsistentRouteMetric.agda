@@ -19,24 +19,24 @@ open import RoutingLib.Function.Metric using (Ultrametric; IsUltrametric; Bounde
 import RoutingLib.Function.Metric.MaxLift as MaxLift
 
 open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
 import RoutingLib.Routing.BellmanFord as BellmanFord
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Prelude as Prelude
-import RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Prelude as Preludeᶜ
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Step2_RouteMetric as Step2ᶜ
 
 module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step3_ConsistentRouteMetric
-  {a b ℓ n} (algebra : IncreasingPathAlgebra a b ℓ n)
+  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
+  (isStrictlyIncreasing : IsStrictlyIncreasing algebra)
+  (A : AdjacencyMatrix algebra n)
+  (1≤n : 1 ≤ n)
   where
 
-  open Prelude algebra
-  open BellmanFord rawAlgebraᶜ Ac using () renaming (σ to σᶜ)
+  open Prelude isPathAlgebra A
+  open BellmanFord algebraᶜ Aᶜ using () renaming (σ to σᶜ)
 
-  open Step2ᶜ finiteStrictlyIncreasingRoutingAlgebraᶜ Ac
-  open Preludeᶜ finiteStrictlyIncreasingRoutingAlgebraᶜ Ac using () renaming
-    ( H    to Hᶜ
-    ; 1≤H  to 1≤Hᶜ
-    )
-
+  open Step2ᶜ isRoutingAlgebraᶜ isFiniteᶜ (isStrictlyIncreasingᶜ isStrictlyIncreasing) Aᶜ
+  
   -------------------------------------------
   -- An ultrametric over consistent tables --
   -------------------------------------------
@@ -66,7 +66,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step3_Consiste
     dᵣᶜ-maxTriIneq xᶜ yᶜ zᶜ = d-maxTriIneq (toCRoute xᶜ) (toCRoute yᶜ) (toCRoute zᶜ)
 
     dᵣᶜ-bounded : ∃ λ n → ∀ {x y} (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → dᵣᶜ xᶜ yᶜ ≤ n
-    dᵣᶜ-bounded = Hᶜ , λ xᶜ yᶜ → d≤H (toCRoute xᶜ) (toCRoute yᶜ)
+    dᵣᶜ-bounded = _ , λ xᶜ yᶜ → d≤H (toCRoute xᶜ) (toCRoute yᶜ)
 
 
     dᵣᶜ-strContr : ∀ {X Y r s} → X r s ≉ Y r s →

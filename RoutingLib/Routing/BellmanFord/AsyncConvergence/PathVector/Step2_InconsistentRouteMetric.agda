@@ -23,20 +23,24 @@ open import RoutingLib.Data.Nat.Properties
 import RoutingLib.Function.Metric as Metric
 
 open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Prelude as Prelude
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step1_InconsistentHeightFunction as Step1
 
+open ≤-Reasoning
+  
 module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step2_InconsistentRouteMetric
-  {a b ℓ n} (algebra : IncreasingPathAlgebra a b ℓ n) (1≤n : 1 ≤ n)
+  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
+  (A : AdjacencyMatrix algebra n)
+  (1≤n : 1 ≤ n)
   where
 
-  open Prelude algebra
-  open Step1 algebra 1≤n using
+  open Prelude isPathAlgebra A
+  open Step1 isPathAlgebra A 1≤n using
     ( hⁱ ; Hⁱ ; hⁱ-cong ; 1≤hⁱ; hⁱ≤Hⁱ ; hⁱ-decr ; h[sᶜ]<h[rⁱ] )
 
   open Metric S
-
-  open ≤-Reasoning
 
   private
 

@@ -17,16 +17,21 @@ open import RoutingLib.Data.List.Sorting.Properties using (index-mono-<)
 open import RoutingLib.Data.Nat.Properties using (ℕₛ; suc∘pred[n]≡n)
 
 open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Algebra.RoutingAlgebra
+open import RoutingLib.Routing.BellmanFord.ConvergenceConditions
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Prelude as Prelude
-open FiniteStrictlyIncreasingRoutingAlgebra using (Step)
+import RoutingLib.Routing.Algebra.RoutingAlgebra.FiniteProperties as FiniteRoutingAlgebraProperties
 
 module RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Step1_HeightFunction
-  {a b ℓ n} (algebra : FiniteStrictlyIncreasingRoutingAlgebra a b ℓ)
-  (A : SquareMatrix (Step algebra) n)
+  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  (isFinite : IsFinite algebra)
+  (A : AdjacencyMatrix algebra n)
   where
 
-open Prelude algebra A
-
+open Prelude isRoutingAlgebra A
+open FiniteRoutingAlgebraProperties algebra isRoutingAlgebra isFinite public
+  
 abstract
 
   -- The height of an element x is h(x) = |{y | x ≤ y}|

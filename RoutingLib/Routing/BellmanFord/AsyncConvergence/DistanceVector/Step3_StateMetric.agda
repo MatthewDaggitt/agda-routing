@@ -17,17 +17,21 @@ open import RoutingLib.Function.Metric using (Ultrametric; IsUltrametric; Bounde
 import RoutingLib.Function.Metric.MaxLift as MaxLift
 
 open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Algebra.RoutingAlgebra
+open import RoutingLib.Routing.BellmanFord.ConvergenceConditions
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Prelude as Prelude
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Step2_RouteMetric as Step2
-open FiniteStrictlyIncreasingRoutingAlgebra using (Step)
 
 module RoutingLib.Routing.BellmanFord.AsyncConvergence.DistanceVector.Step3_StateMetric
-  {a b ℓ n} (algebra : FiniteStrictlyIncreasingRoutingAlgebra a b ℓ)
-  (A : SquareMatrix (Step algebra) n)
+  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  (isFinite : IsFinite algebra)
+  (isStrictlyIncreasing : IsStrictlyIncreasing algebra)
+  (A : AdjacencyMatrix algebra n)
   where
 
-open Prelude algebra A
-open Step2 algebra A using
+open Prelude isRoutingAlgebra A
+open Step2 isRoutingAlgebra isFinite isStrictlyIncreasing A using
   ( d
   ; x≈y⇒d≡0
   ; d≡0⇒x≈y

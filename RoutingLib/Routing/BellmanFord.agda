@@ -20,21 +20,14 @@ open import RoutingLib.Relation.Binary.Indexed.Homogeneous as I using (trivially
 open import RoutingLib.Routing.Algebra
 
 module RoutingLib.Routing.BellmanFord
-  {a b ℓ n}
-  (𝓡𝓐 : RawRoutingAlgebra a b ℓ)
-  (A : SquareMatrix (RawRoutingAlgebra.Step 𝓡𝓐) n)
+  {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)
+  {n} (A : AdjacencyMatrix algebra n)
   where
 
-open RawRoutingAlgebra 𝓡𝓐
+open RawRoutingAlgebra algebra
 
 --------------------------------------------------------------------------------
 -- Definitions
-
-Node : Set
-Node = Fin n
-
-Edge : Set
-Edge = Fin n × Fin n
 
 RTable : Set b
 RTable = Table Route n

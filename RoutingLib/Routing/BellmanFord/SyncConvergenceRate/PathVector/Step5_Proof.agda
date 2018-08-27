@@ -17,6 +17,7 @@ open import RoutingLib.Data.Fin.Subset.Properties
   using (∣p∣<n⇒Nonfull; ∣p∪⁅i⁆∣≡1+∣p∣; i∉⁅j⁆; Nonfull⁅i⁆′; x∉p∪q⁺; ∣p∣≡n⇒p≡⊤)
 
 open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Prelude as Prelude
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step1_NodeSets as Step1_NodeSets
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step2_ConvergedSubtree as Step2_ConvergedSubtree
@@ -24,16 +25,19 @@ import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step4_Induc
 import RoutingLib.Routing.BellmanFord.Properties as P
 
 module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step5_Proof
-  {a b ℓ n-1} (algebra : IncreasingPathAlgebra a b ℓ (suc n-1))
+  {a b ℓ n-1} {algebra : RawRoutingAlgebra a b ℓ}
+  (isPathAlgebra : IsCertifiedPathAlgebra algebra (suc n-1))
+  (isIncreasing : IsIncreasing algebra)
+  (A : AdjacencyMatrix algebra (suc n-1))
   where
 
-  open Prelude algebra
+  open Prelude isPathAlgebra A
 
   module _ (X : RMatrix) (j : Fin n) where
 
-    open Step1_NodeSets algebra X j
-    open Step2_ConvergedSubtree algebra X j
-    open Step4_InductiveStep algebra X j
+    open Step1_NodeSets isPathAlgebra A X j
+    open Step2_ConvergedSubtree isPathAlgebra isIncreasing A X j
+    open Step4_InductiveStep isPathAlgebra isIncreasing A X j
 
     mutual
 

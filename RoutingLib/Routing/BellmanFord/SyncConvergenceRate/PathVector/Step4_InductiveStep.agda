@@ -14,38 +14,37 @@ open import Relation.Binary.PropositionalEquality
 import Relation.Binary.PartialOrderReasoning as POR
 import Relation.Binary.EqReasoning as EqReasoning
 
-open import RoutingLib.Data.Matrix using (SquareMatrix)
-open import RoutingLib.Data.Path.Certified.FiniteEdge
-  using (Path; []; _∷_∣_∣_; invalid; valid; notThere; notHere; continue; length; _≈ₚ_)
-  renaming (_∈_ to _∈ₚ_)
-open import RoutingLib.Data.Path.Certified.FiniteEdge.All
-open import RoutingLib.Data.Path.Certified.FiniteEdge.Properties
+open import RoutingLib.Data.Path.CertifiedI.All
+open import RoutingLib.Data.Path.CertifiedI.Properties
 open import RoutingLib.Data.Fin.Subset using (Nonfull)
 open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
 
 open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Prelude as Prelude
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step1_NodeSets as Step1_NodeSets
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step2_ConvergedSubtree as Step2_ConvergedSubtree
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step3_DangerousNodes as Step3_DangerousNodes
-open IncreasingPathAlgebra using (Route)
 
 module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step4_InductiveStep
-  {a b ℓ n-1} (algebra : IncreasingPathAlgebra a b ℓ (suc n-1))
-  (X : SquareMatrix (Route algebra) (suc n-1))
+  {a b ℓ n-1} {algebra : RawRoutingAlgebra a b ℓ}
+  (isPathAlgebra : IsCertifiedPathAlgebra algebra (suc n-1))
+  (isIncreasing : IsIncreasing algebra)
+  (A : AdjacencyMatrix algebra (suc n-1))
+  (X : Prelude.RMatrix isPathAlgebra A)
   (j : Fin (suc n-1))
   (t-1 : ℕ)
   {C : Subset (suc n-1)}
   (j∈C : j ∈ C)
-  (C-nonfull : Nonfull C)
-  (C⊆𝓒ₜ : ∀ {i} → i ∈ C → i ∈ᵤ Step1_NodeSets.𝓒 algebra X j (suc t-1))
+  (C-nonFull : Nonfull C)
+  (C⊆𝓒ₜ : ∀ {i} → i ∈ C → i ∈ᵤ Step1_NodeSets.𝓒 isPathAlgebra A X j (suc t-1))
   where
 
-  open Prelude algebra
+  open Prelude isPathAlgebra A
   open Notation X j
-  open Step1_NodeSets algebra X j
-  open Step2_ConvergedSubtree algebra X j t-1 j∈C C-nonfull C⊆𝓒ₜ
-  open Step3_DangerousNodes algebra X j t-1 j∈C C-nonfull C⊆𝓒ₜ
+  open Step1_NodeSets isPathAlgebra A X j
+  open Step2_ConvergedSubtree isPathAlgebra isIncreasing A X j t-1 j∈C C-nonFull C⊆𝓒ₜ
+  open Step3_DangerousNodes isPathAlgebra isIncreasing A X j t-1 j∈C C-nonFull C⊆𝓒ₜ
 
   --------------------------------------------------------------------------
   -- Some lemmas

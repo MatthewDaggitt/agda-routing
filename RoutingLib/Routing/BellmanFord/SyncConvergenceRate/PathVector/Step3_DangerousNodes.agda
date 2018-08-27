@@ -19,11 +19,8 @@ import Relation.Binary.PartialOrderReasoning as POR
 open import Function.Reasoning
 
 open import RoutingLib.Data.Matrix using (SquareMatrix)
-open import RoutingLib.Data.Path.Certified.FiniteEdge
-  using (Path; []; _∷_∣_∣_; invalid; valid; notThere; notHere; continue; length)
-  renaming (_∈_ to _∈ₚ_)
-open import RoutingLib.Data.Path.Certified.FiniteEdge.All
-open import RoutingLib.Data.Path.Certified.FiniteEdge.Properties
+open import RoutingLib.Data.Path.CertifiedI.All
+open import RoutingLib.Data.Path.CertifiedI.Properties
 open import RoutingLib.Data.Fin.Subset using (Nonfull) renaming ()
 open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
 open import RoutingLib.Data.Fin.Dec using (any?)
@@ -32,25 +29,28 @@ open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-
 import RoutingLib.Relation.Binary.Reasoning.StrictPartialOrder as SPOR
 
 open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Prelude as Prelude
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step1_NodeSets as Step1_NodeSets
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step2_ConvergedSubtree as Step2_ConvergedSubtree
-open IncreasingPathAlgebra using (Route)
 
 module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step3_DangerousNodes
-  {a b ℓ n-1} (algebra : IncreasingPathAlgebra a b ℓ (suc n-1))
-  (X : SquareMatrix (Route algebra) (suc n-1))
+  {a b ℓ n-1} {algebra : RawRoutingAlgebra a b ℓ}
+  (isPathAlgebra : IsCertifiedPathAlgebra algebra (suc n-1))
+  (isIncreasing : IsIncreasing algebra)
+  (A : AdjacencyMatrix algebra (suc n-1))
+  (X : Prelude.RMatrix isPathAlgebra A)
   (j : Fin (suc n-1))
   (t-1 : ℕ)
   {C : Subset (suc n-1)}
   (j∈C : j ∈ C)
-  (C-nonfull : Nonfull C)
-  (C-fixed : ∀ {i} → i ∈ C → i ∈ᵤ Step1_NodeSets.𝓒 algebra X j (suc t-1))
+  (C-nonFull : Nonfull C)
+  (C⊆𝓒ₜ : ∀ {i} → i ∈ C → i ∈ᵤ Step1_NodeSets.𝓒 isPathAlgebra A X j (suc t-1))
   where
 
-  open Prelude algebra
+  open Prelude isPathAlgebra A
   open Notation X j
-  open Step1_NodeSets algebra X j
+  open Step1_NodeSets isPathAlgebra A X j
 
   ----------------------------------------------------------------------------
   -- Inductive proof
@@ -63,7 +63,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step3_Dange
   ¬𝓡⇒∉C : ∀ {s k} → k ∉ᵤ 𝓡 (t + s) → k ∉ C
   ¬𝓡⇒∉C {s} {k} k∉𝓡ₜ₊ₛ k∈C =
        k∈C                     ∶ k ∈ C
-    |> C-fixed                 ∶ k ∈ᵤ 𝓒 t
+    |> C⊆𝓒ₜ                   ∶ k ∈ᵤ 𝓒 t
     |> 𝓒ₜ⊆𝓒ₜ₊ₛ t s            ∶ k ∈ᵤ 𝓒 (t + s)
     |> 𝓒ₜ⊆𝓡ₜ (t + s) ≈ₚ-refl  ∶ k ∈ᵤ 𝓡 (t + s)
     |> k∉𝓡ₜ₊ₛ                 ∶ ⊥
@@ -72,7 +72,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step3_Dange
   --------------------------------------------------------------------------
   -- Compute the minimum cut edge (iₘᵢₙ , kₘᵢₙ) of C
 
-  open Step2_ConvergedSubtree algebra X j t-1 j∈C C-nonfull C-fixed
+  open Step2_ConvergedSubtree isPathAlgebra isIncreasing A X j t-1 j∈C C-nonFull C⊆𝓒ₜ
 
   -------------------------------------------------------------------------
   -- The only time that the source node of the minimal edge out of the fixed
@@ -97,7 +97,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step3_Dange
                              (i , k) ∈ᵤ Dangerous (suc s) → (k , l) ∈ᵤ Dangerous s
       Dangerous-retraction {i} {k} {l} {s} σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ ik∈D₁₊ₛ = begin
         A k l ▷ σ^ (t + s) X l j              ≈⟨ ≈-sym σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ ⟩<
-        σ^ (t + suc s) X k j                  ≤⟨ ▷-increasing (A i k) _ ⟩<
+        σ^ (t + suc s) X k j                  ≤⟨ isIncreasing (A i k) _ ⟩<
         A i    k    ▷ σ^ (t + suc s) X k   j  <⟨ ik∈D₁₊ₛ ⟩≤
         A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + suc s) X kₘᵢₙ j ≈⟨ ▷-cong _ (𝓒-eq t kₘᵢₙ (suc s) s kₘᵢₙ∈𝓒ₜ) ⟩≤
         A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + s)     X kₘᵢₙ j ∎
@@ -115,7 +115,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step3_Dange
   -- real, and therefore don't respect the minimal spanning tree
   -- constraints.
 
-  𝓓 : 𝕋 → Node → Set ℓ
+  𝓓 : 𝕋 → Vertex → Set ℓ
   𝓓 s k = k ∉ᵤ 𝓡 (t + s) × ∃ λ i → (i , k) ∈ᵤ Dangerous s
 
   abstract

@@ -27,17 +27,22 @@ import RoutingLib.Function.Metric as Metric
 import RoutingLib.Function.Metric.MaxLift as MaxLift
 
 open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Prelude as Prelude
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step2_InconsistentRouteMetric as Step2
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step3_ConsistentRouteMetric as Step3
 
 module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step4_RouteMetric
-  {a b ℓ n} (algebra : IncreasingPathAlgebra a b ℓ n) (1≤n : 1 ≤ n)
+  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
+  (isStrictlyIncreasing : IsStrictlyIncreasing algebra)
+  (A : AdjacencyMatrix algebra n)
+  (1≤n : 1 ≤ n)
   where
 
-  open Prelude algebra
-  open Step2 algebra 1≤n
-  open Step3 algebra
+  open Prelude isPathAlgebra A
+  open Step2 isPathAlgebra A 1≤n
+  open Step3 isPathAlgebra isStrictlyIncreasing A 1≤n
   open Metric S using (Ultrametric; IsUltrametric; Bounded; MaxTriangleIneq)
 
   abstract
@@ -230,7 +235,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step4_RouteMet
     chain₂ X i j k σXᵢⱼⁱ σXᵢⱼ≈AᵢₖXₖⱼ Xₖⱼ≈σXₖⱼ
       with ≈-trans σXᵢⱼ≈AᵢₖXₖⱼ (▷-cong (A i k) Xₖⱼ≈σXₖⱼ)
     ... | σXᵢⱼ≈Aᵢₖ▷σXₖⱼ = begin
-        size (σ X k j)         <⟨ ≤-reflexive (size-incr (𝑰-cong σXᵢⱼ≈Aᵢₖ▷σXₖⱼ σXᵢⱼⁱ)) ⟩
+        size (σ X k j)         <⟨ ≤-reflexive (sizeⁱ-incr (𝑰-cong σXᵢⱼ≈Aᵢₖ▷σXₖⱼ σXᵢⱼⁱ)) ⟩
         size (A i k ▷ σ X k j) ≡⟨ sym (size-cong σXᵢⱼ≈Aᵢₖ▷σXₖⱼ) ⟩
         size (σ X i j)         ∎
         where open ≤-Reasoning

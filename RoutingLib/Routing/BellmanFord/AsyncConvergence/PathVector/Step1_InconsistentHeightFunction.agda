@@ -9,13 +9,18 @@ open import RoutingLib.Data.Nat.Properties using (∸-monoʳ-<; m<n⇒0<n∸m; m
 open ≤-Reasoning
 
 open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Prelude as Prelude
 
 module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step1_InconsistentHeightFunction
-  {a b ℓ n} (pathAlgebra : IncreasingPathAlgebra a b ℓ n) (1≤n : 1 ≤ n)
+  {a b ℓ n}
+  {algebra : RawRoutingAlgebra a b ℓ}
+  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
+  (A : AdjacencyMatrix algebra n)
+  (1≤n : 1 ≤ n)
   where
 
-  open Prelude pathAlgebra
+  open Prelude isPathAlgebra A
 
   ------------------------------------------------------------------------------
   -- Inconsistent length
@@ -44,7 +49,7 @@ module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step1_Inconsis
     hⁱ-decr {i} {j} {x} Aᵢⱼxⁱ with 𝑪? x | 𝑪? (A i j ▷ x)
     ... | yes xᶜ | _        = contradiction xᶜ (▷-forces-𝑰 Aᵢⱼxⁱ)
     ... | no  _  | yes Aᵢⱼxᶜ = contradiction Aᵢⱼxᶜ Aᵢⱼxⁱ
-    ... | no  _  | no  _    = ∸-monoʳ-< (≤-reflexive (size-incr Aᵢⱼxⁱ)) (size≤n+1 _)
+    ... | no  _  | no  _    = ∸-monoʳ-< (≤-reflexive (sizeⁱ-incr Aᵢⱼxⁱ)) (size≤n+1 _)
 
     h[sᶜ]<h[rⁱ] : ∀ {s r} → 𝑪 s → 𝑰 r → hⁱ s < hⁱ r
     h[sᶜ]<h[rⁱ] {s} {r} sᶜ rⁱ with 𝑪? s | 𝑪? r

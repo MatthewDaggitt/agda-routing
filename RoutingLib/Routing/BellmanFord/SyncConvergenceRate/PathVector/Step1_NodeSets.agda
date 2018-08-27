@@ -15,28 +15,27 @@ import Relation.Binary.PartialOrderReasoning as POR
 import Relation.Binary.EqReasoning as EqReasoning
 
 open import RoutingLib.Data.Matrix using (SquareMatrix)
-open import RoutingLib.Data.Path.Certified.FiniteEdge
-  using (Path; []; _∷_∣_∣_; invalid; valid; notThere; notHere; continue; _≈ₚ_)
-  renaming (_∈_ to _∈ₚ_)
-open import RoutingLib.Data.Path.Certified.FiniteEdge.All
-open import RoutingLib.Data.Path.Certified.FiniteEdge.Properties
+open import RoutingLib.Data.Path.CertifiedI.All
+open import RoutingLib.Data.Path.CertifiedI.Properties
 
 open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Prelude as Prelude
-open IncreasingPathAlgebra using (Route)
 
 module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step1_NodeSets
-  {a b ℓ n-1} (algebra : IncreasingPathAlgebra a b ℓ (suc n-1))
-  (X : SquareMatrix (Route algebra) (suc n-1))
+  {a b ℓ n-1} {algebra : RawRoutingAlgebra a b ℓ}
+  (isPathAlgebra : IsCertifiedPathAlgebra algebra (suc n-1))
+  (A : AdjacencyMatrix algebra (suc n-1))
+  (X : Prelude.RMatrix isPathAlgebra A)
   (j : Fin (suc n-1))
   where
 
-  open Prelude algebra
-
+  open Prelude isPathAlgebra A
+  
   ------------------------------------------------------------------------------
-  -- Fixed nodes (nodes that don't change their value after time t)
+  -- Fixed vertices (vertices that don't change their value after time t)
 
-  𝓕 : 𝕋 → Node → Set _
+  𝓕 : 𝕋 → Vertex → Set _
   𝓕 t i = ∀ s → σ^ (t + s) X i j ≈ σ^ t X i j
 
   j∈𝓕₁ : j ∈ᵤ 𝓕 1
@@ -63,7 +62,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step1_NodeS
   -- Converged nodes (nodes for which all nodes they route through are fixed
   -- after time t)
 
-  𝓒 : 𝕋 → Node → Set _
+  𝓒 : 𝕋 → Vertex → Set _
   𝓒 t i = i ∈ᵤ 𝓕 t × Allᵥ (𝓕 t) (path (σ^ t X i j))
 
   𝓒-cong : ∀ {s t k} → k ∈ᵤ 𝓒 s → s ≡ t → k ∈ᵤ 𝓒 t
@@ -114,7 +113,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step1_NodeS
   ------------------------------------------------------------------------------
   -- Real paths
 
-  𝓡 : 𝕋 → Node → Set ℓ
+  𝓡 : 𝕋 → Vertex → Set ℓ
   𝓡 t i = Allₑ (Aligned t) (path (σ^ t X i j))
 
   𝓡? : ∀ t → Decidable (𝓡 t)

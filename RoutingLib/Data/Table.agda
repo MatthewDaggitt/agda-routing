@@ -74,4 +74,3 @@ module RoutingLib.Data.Table where
 
   sum : ∀ {n} → Table ℕ n → ℕ
   sum t = foldr _+_ 0 t
-

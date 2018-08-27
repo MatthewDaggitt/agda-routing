@@ -5,25 +5,31 @@ open import Relation.Nullary using (Dec)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; sym; cong; module ≡-Reasoning)
 
-open import RoutingLib.Data.Path.Certified.FiniteEdge hiding (Edge)
-open import RoutingLib.Data.Path.Certified.FiniteEdge.Properties using (length-cong)
+import RoutingLib.Data.Path.CertifiedI as CertifiedPaths
+open import RoutingLib.Data.Path.CertifiedI.Properties using (length-cong)
 
 open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing.Algebra.Properties.IncreasingPathAlgebra as IncreasingPathAlgebraProperties
+open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
+import RoutingLib.Routing.Algebra.CertifiedPathAlgebra.Properties as IncreasingPathAlgebraProperties
 import RoutingLib.Routing.BellmanFord as BellmanFord
 import RoutingLib.Routing.BellmanFord.Properties as BellmanFordProperties
 import RoutingLib.Routing.BellmanFord.PathProperties as BellmanFordPathProperties
 
 module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Prelude
-  {a b ℓ n-1} (algebra : IncreasingPathAlgebra a b ℓ (suc n-1))
+  {a b ℓ n-1} {algebra : RawRoutingAlgebra a b ℓ}
+  (isPathAlgebra : IsCertifiedPathAlgebra algebra (suc n-1))
+  (A : AdjacencyMatrix algebra (suc n-1))
   where
 
-  open IncreasingPathAlgebra algebra public
-  open IncreasingPathAlgebraProperties algebra public
+  open RawRoutingAlgebra algebra public
+  open IsCertifiedPathAlgebra isPathAlgebra public
+  open IncreasingPathAlgebraProperties algebra isPathAlgebra public
 
-  open BellmanFord rawRoutingAlgebra A public
-  open BellmanFordProperties routingAlgebra A public
-  open BellmanFordPathProperties pathAlgebra public
+  open CertifiedPaths public hiding (Edge; Vertex)
+  
+  open BellmanFord algebra A public
+  open BellmanFordProperties algebra isRoutingAlgebra A public
+  open BellmanFordPathProperties algebra isPathAlgebra A public
 
   n : ℕ
   n = suc n-1
@@ -31,6 +37,11 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Prelude
   𝕋 : Set
   𝕋 = ℕ
 
+  Edge : Set
+  Edge = CertifiedPaths.Edge n
+
+  Vertex : Set
+  Vertex = CertifiedPaths.Vertex n
 
   module Notation (X : RMatrix) (j : Fin n) where
 
@@ -77,7 +88,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Prelude
       where open ≡-Reasoning
 
 
-    lengthₙ : 𝕋 → Node → ℕ
+    lengthₙ : 𝕋 → Vertex → ℕ
     lengthₙ t k = size (σ^ t X k j)
 
     lengthₙ<n : ∀ s e → lengthₙ s e < n

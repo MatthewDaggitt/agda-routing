@@ -24,24 +24,26 @@ open import RoutingLib.Data.List.Relation.Pointwise
   using (foldr⁺)
 
 open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
+open import RoutingLib.Routing.Algebra.RoutingAlgebra
+import RoutingLib.Routing.Algebra.RoutingAlgebra.Properties as RoutingAlgebraProperties
 
 import RoutingLib.Routing.BellmanFord as BellmanFord
 
 module RoutingLib.Routing.BellmanFord.Properties
-  {a b ℓ n}
-  (algebra : RoutingAlgebra a b ℓ)
-  (A : SquareMatrix (RoutingAlgebra.Step algebra) n)
+  {a b ℓ n} (algebra : RawRoutingAlgebra a b ℓ)
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  (A : AdjacencyMatrix algebra n)
   where
 
 -----------
 -- Setup --
 -----------
 
-open RoutingAlgebra algebra
-open RoutingAlgebraProperties algebra
+open RawRoutingAlgebra algebra
+open IsRoutingAlgebra isRoutingAlgebra
+open RoutingAlgebraProperties algebra isRoutingAlgebra
 
-open BellmanFord rawRoutingAlgebra A
+open BellmanFord algebra A
 open FunctionProperties _≈_
 open import Relation.Binary.EqReasoning S
 

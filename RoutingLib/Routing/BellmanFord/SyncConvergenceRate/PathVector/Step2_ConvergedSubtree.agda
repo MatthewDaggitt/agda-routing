@@ -18,28 +18,32 @@ open import RoutingLib.Data.Fin.Subset using (Nonfull)
 open import RoutingLib.Data.Fin.Subset.Cutset
 open import RoutingLib.Data.List using (allFinPairs)
 import RoutingLib.Data.List.Extrema as Extrema
-open import RoutingLib.Data.Path.Certified.FiniteEdge hiding (Edge; _∈_; _∉_)
-open import RoutingLib.Data.Path.Certified.FiniteEdge.All
+open import RoutingLib.Data.Path.CertifiedI.All
 
 open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Prelude as Prelude
 import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step1_NodeSets as Step1_NodeSets
-open IncreasingPathAlgebra using (Route)
 
 module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step2_ConvergedSubtree
-  {a b ℓ n-1} (algebra : IncreasingPathAlgebra a b ℓ (suc n-1))
-  (X : SquareMatrix (Route algebra) (suc n-1))
+  {a b ℓ n-1} {algebra : RawRoutingAlgebra a b ℓ}
+  (isPathAlgebra : IsCertifiedPathAlgebra algebra (suc n-1))
+  (isIncreasing : IsIncreasing algebra)
+  (A : AdjacencyMatrix algebra (suc n-1))
+  (X : Prelude.RMatrix isPathAlgebra A)
   (j : Fin (suc n-1))
   (t-1 : ℕ)
   {C : Subset (suc n-1)}
   (j∈C : j ∈ C)
   (C-nonFull : Nonfull C)
-  (C⊆𝓒ₜ : ∀ {i} → i ∈ C → i ∈ᵤ Step1_NodeSets.𝓒 algebra X j (suc t-1))
+  (C⊆𝓒ₜ : ∀ {i} → i ∈ C → i ∈ᵤ Step1_NodeSets.𝓒 isPathAlgebra A X j (suc t-1))
   where
 
-  open Prelude algebra
+  open Prelude isPathAlgebra A
+
+
   open Notation X j
-  open Step1_NodeSets algebra X j
+  open Step1_NodeSets isPathAlgebra A X j
 
   open Extrema ≤₊-totalOrder
 
@@ -72,13 +76,13 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step2_Conve
     eₘᵢₙ↷C : eₘᵢₙ ↷ C
     eₘᵢₙ↷C = argmin-all (weightₑ t) eₐ↷C (∈cutset⇒↷ C)
 
-  iₘᵢₙ : Node
+  iₘᵢₙ : Vertex
   iₘᵢₙ = proj₁ eₘᵢₙ
 
   iₘᵢₙ∉C : iₘᵢₙ ∉ C
   iₘᵢₙ∉C = proj₁ eₘᵢₙ↷C
 
-  kₘᵢₙ : Node
+  kₘᵢₙ : Vertex
   kₘᵢₙ = proj₂ eₘᵢₙ
 
   kₘᵢₙ∈C : kₘᵢₙ ∈ C
@@ -114,7 +118,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step2_Conve
     safe-extension {s} {r} {i} {k} {l} σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ eₘᵢₙ≤kl = (begin
       A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + r) X kₘᵢₙ j   ≈⟨ ▷-cong (A iₘᵢₙ kₘᵢₙ) (𝓒-eq t kₘᵢₙ r s kₘᵢₙ∈𝓒ₜ) ⟩
       A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + s) X kₘᵢₙ j   ≤⟨ eₘᵢₙ≤kl ⟩
-      A k l ▷ σ^ (t + s) X l j           ≤⟨ ▷-increasing (A i k) (A k l ▷ σ^ (t + s) X l j) ⟩
+      A k l ▷ σ^ (t + s) X l j           ≤⟨ isIncreasing (A i k) (A k l ▷ σ^ (t + s) X l j) ⟩
       A i k ▷ (A k l ▷ σ^ (t + s) X l j) ≈⟨ ▷-cong (A i k) (≈-sym σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ) ⟩
       A i    k   ▷ σ^ (t + r) X k   j    ∎)
       where open POR ≤₊-poset
@@ -131,7 +135,7 @@ module RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step2_Conve
                   eₘᵢₙ ≤[ t + s ] (i , k)
   ∈𝓡-invalid s {i} {k} p[σᵗ⁺ˢXₖⱼ]≈∅ = begin
     A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + s) X kₘᵢₙ j ≤⟨ ⊕-identityˡ _ ⟩
-    ∞                                ≈⟨ ≈-sym (▷-zero (A i k)) ⟩
+    ∞                                ≈⟨ ≈-sym (▷-fixedPoint (A i k)) ⟩
     A i    k    ▷ ∞                  ≈⟨ ▷-cong (A i k) (≈-sym (path[r]≈∅⇒r≈∞ p[σᵗ⁺ˢXₖⱼ]≈∅)) ⟩
     A i    k    ▷ σ^ (t + s) X k j   ∎
     where open POR ≤₊-poset

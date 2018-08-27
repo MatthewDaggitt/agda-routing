@@ -14,15 +14,20 @@ open import RoutingLib.Function.Metric as Metric using (IsUltrametric; Bounded)
 import RoutingLib.Function.Metric.MaxLift as MaxLift
 
 open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Prelude as Prelude
 import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step4_RouteMetric as Step4
 
 module RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step5_StateMetric
-  {a b ℓ n} (algebra : IncreasingPathAlgebra a b ℓ n) (1≤n : 1 ≤ n)
+  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
+  (isStrictlyIncreasing : IsStrictlyIncreasing algebra)
+  (A : AdjacencyMatrix algebra n)
+  (1≤n : 1 ≤ n)
   where
 
-  open Prelude algebra
-  open Step4 algebra 1≤n
+  open Prelude isPathAlgebra A
+  open Step4 isPathAlgebra isStrictlyIncreasing A 1≤n
 
   ------------------
   -- Table metric --

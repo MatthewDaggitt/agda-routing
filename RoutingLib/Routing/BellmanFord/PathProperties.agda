@@ -19,23 +19,29 @@ open import Induction.Nat using (<-wellFounded)
 open import RoutingLib.Data.List.Properties using (foldr-presᵇ)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
-open import RoutingLib.Data.Path.Certified.FiniteEdge
-open import RoutingLib.Data.Path.Certified.FiniteEdge.NonEmpty.Properties using (_∉?_; _⇿?_)
-open import RoutingLib.Data.Path.Certified.FiniteEdge.Properties using (∉-resp-≈ₚ; ≈ₚ-trans; ≈ₚ-sym; ≈ₚ-reflexive; ℙₛ)
+open import RoutingLib.Data.Path.CertifiedI
+open import RoutingLib.Data.Path.CertifiedI.Properties using (∉ₚ-resp-≈ₚ; ≈ₚ-trans; ≈ₚ-sym; ≈ₚ-reflexive; ℙₛ; _∉ᵥₚ?_; _⇿ᵥ?_)
 
 open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing.Algebra.Properties.PathAlgebra as PathAlgebraProperties
-import RoutingLib.Routing.Algebra.Properties.PathAlgebra.Consistency as Consistency
+open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
+import RoutingLib.Routing.Algebra.CertifiedPathAlgebra.Properties as PathAlgebraProperties
+import RoutingLib.Routing.Algebra.CertifiedPathAlgebra.Consistency as Consistency
 import RoutingLib.Routing.BellmanFord as BellmanFord
 import RoutingLib.Routing.BellmanFord.Properties as BellmanFordProperties
 
 module RoutingLib.Routing.BellmanFord.PathProperties
-  {a b ℓ n} (algebra : PathAlgebra a b ℓ n) where
+  {a b ℓ n} (algebra : RawRoutingAlgebra a b ℓ)
+  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
+  (A : AdjacencyMatrix algebra n)
+  where
 
-open PathAlgebra algebra
-open PathAlgebraProperties algebra
-open BellmanFord rawRoutingAlgebra A
-open BellmanFordProperties routingAlgebra A
+open RawRoutingAlgebra algebra
+open IsCertifiedPathAlgebra isPathAlgebra
+open PathAlgebraProperties algebra isPathAlgebra
+open Consistency algebra isPathAlgebra A
+
+open BellmanFord algebra A
+open BellmanFordProperties algebra isRoutingAlgebra A
 
 ------------------------------------------------------------------------------
 -- Path properties
@@ -45,18 +51,18 @@ abstract
   p[Iᵢᵢ]≈[] : ∀ i → path (I i i) ≈ₚ valid []
   p[Iᵢᵢ]≈[] i = r≈0⇒path[r]≈[] (≈-reflexive (Iᵢᵢ≡0# i))
 
-  p[Iᵢⱼ]≈invalid : ∀ {i j} → j ≢ i → path (I i j) ≈ₚ invalid
-  p[Iᵢⱼ]≈invalid j≢i = r≈∞⇒path[r]≈∅ (≈-reflexive (Iᵢⱼ≡∞ j≢i))
+  p[Iᵢⱼ]≈∅ : ∀ {i j} → j ≢ i → path (I i j) ≈ₚ invalid
+  p[Iᵢⱼ]≈∅ j≢i = r≈∞⇒path[r]≈∅ (≈-reflexive (Iᵢⱼ≡∞ j≢i))
 
   p[Iᵢⱼ]≈[]⇒i≡j : ∀ {i j} → path (I i j) ≈ₚ valid [] → i ≡ j
   p[Iᵢⱼ]≈[]⇒i≡j {i} {j} p[Iᵢⱼ]≈[] with j ≟𝔽 i
   ... | yes refl = refl
   ... | no  _    = contradiction (≈ₚ-trans (≈ₚ-sym (r≈∞⇒path[r]≈∅ ≈-refl)) p[Iᵢⱼ]≈[]) λ()
 
-  k∉p[Iᵢⱼ] : ∀ i j k → k ∉ path (I i j)
+  k∉p[Iᵢⱼ] : ∀ i j k → k ∉ₚ path (I i j)
   k∉p[Iᵢⱼ] i j k with j ≟𝔽 i
-  ... | yes refl = ∉-resp-≈ₚ (≈ₚ-sym p[0]≈[]) (valid notThere)
-  ... | no  j≢i  = ∉-resp-≈ₚ (≈ₚ-sym p[∞]≈∅) invalid
+  ... | yes refl = ∉ₚ-resp-≈ₚ (≈ₚ-sym p[0]≈[]) (valid notThere)
+  ... | no  j≢i  = ∉ₚ-resp-≈ₚ (≈ₚ-sym p[∞]≈∅) invalid
 
   p[σXᵢᵢ]≈[] : ∀ X i → path (σ X i i) ≈ₚ valid []
   p[σXᵢᵢ]≈[] X i = ≈ₚ-trans (path-cong (σXᵢᵢ≈Iᵢᵢ X i)) (p[Iᵢᵢ]≈[] i)
@@ -68,10 +74,10 @@ abstract
   ...   | yes AᵢₖXₖⱼ≈∞ = contradiction
     (≈ₚ-trans (≈ₚ-trans (≈ₚ-sym (r≈∞⇒path[r]≈∅ AᵢₖXₖⱼ≈∞)) (path-cong (≈-sym σXᵢⱼ≈AᵢₖXₖⱼ))) p[σXᵢⱼ]≈[]) λ()
   ...   | no  AᵢₖXₖⱼ≉∞ with path (X k j) | inspect path (X k j)
-  ...       | invalid | [ p[Xₖⱼ]≡∅ ] = contradiction (p[r]≡∅⇒Aᵢⱼr≈∞ p[Xₖⱼ]≡∅) AᵢₖXₖⱼ≉∞
-  ...       | valid q | [ p[Xₖⱼ]≡q ] with ≈ₚ-reflexive p[Xₖⱼ]≡q | (i , k) ⇿? q | i ∉? q
-  ...         | pᵣ≈q | no ¬ik⇿q | _       = contradiction (path-reject pᵣ≈q (inj₁ ¬ik⇿q)) AᵢₖXₖⱼ≉∞
-  ...         | pᵣ≈q | _        | no  i∈q = contradiction (path-reject pᵣ≈q (inj₂ i∈q))   AᵢₖXₖⱼ≉∞
+  ...       | invalid | [ p[Xₖⱼ]≡∅ ] = contradiction (p[r]≡∅⇒f▷r≈∞ (A i k) p[Xₖⱼ]≡∅) AᵢₖXₖⱼ≉∞
+  ...       | valid q | [ p[Xₖⱼ]≡q ] with ≈ₚ-reflexive p[Xₖⱼ]≡q | (i , k) ⇿ᵥ? q | i ∉ᵥₚ? q
+  ...         | pᵣ≈q | no ¬ik⇿q | _       = contradiction (path-reject (A i k) pᵣ≈q (inj₁ ¬ik⇿q)) AᵢₖXₖⱼ≉∞
+  ...         | pᵣ≈q | _        | no  i∈q = contradiction (path-reject (A i k) pᵣ≈q (inj₂ i∈q))   AᵢₖXₖⱼ≉∞
   ...         | pᵣ≈q | yes ik⇿q | yes i∉q = contradiction (begin
     valid (_ ∷ q ∣ _ ∣ _) ≈⟨ ≈ₚ-sym (path-accept pᵣ≈q AᵢₖXₖⱼ≉∞ ik⇿q i∉q) ⟩
     path (A i k ▷ X k j)  ≈⟨ path-cong (≈-sym σXᵢⱼ≈AᵢₖXₖⱼ) ⟩
@@ -87,10 +93,10 @@ abstract
     ≈ₚ-trans (≈ₚ-sym p[AᵢₖXₖⱼ]≈uv∷p) (
       ≈ₚ-trans (path-cong AᵢₖXₖⱼ≈∞) p[∞]≈∅)) λ()
   ...     | no  AᵢₖXₖⱼ≉∞ with path (X k j) | inspect path (X k j)
-  ...       | invalid | [ p[Xₖⱼ]≡∅ ] = contradiction (p[r]≡∅⇒Aᵢⱼr≈∞ p[Xₖⱼ]≡∅) AᵢₖXₖⱼ≉∞
-  ...       | valid q | [ p[Xₖⱼ]≡q ] with ≈ₚ-reflexive p[Xₖⱼ]≡q | (i , k) ⇿? q | i ∉? q
-  ...         | pᵣ≈q | no ¬ik⇿q | _       = contradiction (path-reject pᵣ≈q (inj₁ ¬ik⇿q)) AᵢₖXₖⱼ≉∞
-  ...         | pᵣ≈q | _        | no  i∈q = contradiction (path-reject pᵣ≈q (inj₂ i∈q))   AᵢₖXₖⱼ≉∞
+  ...       | invalid | [ p[Xₖⱼ]≡∅ ] = contradiction (p[r]≡∅⇒f▷r≈∞ (A i k) p[Xₖⱼ]≡∅) AᵢₖXₖⱼ≉∞
+  ...       | valid q | [ p[Xₖⱼ]≡q ] with ≈ₚ-reflexive p[Xₖⱼ]≡q | (i , k) ⇿ᵥ? q | i ∉ᵥₚ? q
+  ...         | pᵣ≈q | no ¬ik⇿q | _       = contradiction (path-reject (A i k) pᵣ≈q (inj₁ ¬ik⇿q)) AᵢₖXₖⱼ≉∞
+  ...         | pᵣ≈q | _        | no  i∈q = contradiction (path-reject (A i k) pᵣ≈q (inj₂ i∈q))   AᵢₖXₖⱼ≉∞
   ...         | pᵣ≈q | yes ik⇿q | yes i∉q with
     ≈ₚ-trans (≈ₚ-sym p[AᵢₖXₖⱼ]≈uv∷p)
       (path-accept pᵣ≈q AᵢₖXₖⱼ≉∞ ik⇿q i∉q)
@@ -104,7 +110,7 @@ abstract
   ... | no  i≢j with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
   ...   | inj₂ σXᵢⱼ≈Iᵢⱼ           = contradiction (
     ≈ₚ-trans (≈ₚ-sym p[σXᵢⱼ]≈uv∷p) (
-      ≈ₚ-trans (path-cong σXᵢⱼ≈Iᵢⱼ) (p[Iᵢⱼ]≈invalid (i≢j ∘ sym)))) λ()
+      ≈ₚ-trans (path-cong σXᵢⱼ≈Iᵢⱼ) (p[Iᵢⱼ]≈∅ (i≢j ∘ sym)))) λ()
   ...   | inj₁ (m , σXᵢⱼ≈AᵢₘXₘⱼ) with alignPathExtension X i j m
     (≈ₚ-trans (≈ₚ-sym (path-cong σXᵢⱼ≈AᵢₘXₘⱼ)) p[σXᵢⱼ]≈uv∷p)
   ...     | refl , refl , p[Xₖⱼ]≈p = refl , σXᵢⱼ≈AᵢₘXₘⱼ , p[Xₖⱼ]≈p
@@ -161,7 +167,7 @@ abstract
     ...   | no  Xₖⱼ≉σXₖⱼ = k , Xₖⱼ≉σXₖⱼ , Xₖⱼⁱ
     ...   | yes Xₖⱼ≈σXₖⱼ = reduction k (𝑰-cong Xₖⱼ≈σXₖⱼ Xₖⱼⁱ) (rec (size (σ X k j)) (begin
       size (σ X k j)         ≡⟨ size-cong (≈-sym Xₖⱼ≈σXₖⱼ) ⟩
-      size (X k j)           <⟨ ≤-reflexive (size-incr (𝑰-cong σXₗⱼ≈AₗₖXₖⱼ σXₗⱼⁱ)) ⟩
+      size (X k j)           <⟨ ≤-reflexive (sizeⁱ-incr (𝑰-cong σXₗⱼ≈AₗₖXₖⱼ σXₗⱼⁱ)) ⟩
       size (A l k ▷ X k j)   ≡⟨ size-cong (≈-sym σXₗⱼ≈AₗₖXₖⱼ) ⟩
       size (σ X l j)         ∎))
 
@@ -176,8 +182,7 @@ abstract
 ------------------------------------------------------------------------------
 -- Consistent algebra properties
 
-open Consistency algebra
-open BellmanFord rawAlgebraᶜ Ac using () renaming
+open BellmanFord algebraᶜ Aᶜ using () renaming
   ( RMatrix to CMatrix
   ; _≈ₘ_ to _≈ᶜₘ_
   ; I    to Ic

@@ -1,4 +1,4 @@
-# Agda-routing for ITP 2018
+# Agda-routing for SIGCOMM 2018
 
 This library reasons about iterative asynchronous processes and network routing problems.
 It is organised in the same manner as the Agda standard library and contains extensions of
@@ -6,8 +6,8 @@ several of the Agda standard library modules. The core contributions of this lib
 can be found in the `RoutingLib.Asynchronous` and `RoutingLib.Routing` directories.
 
 This is the frozen version of the library accompanying the paper
-`An Agda Formalization of Üresin & Dubois' Asynchronous Fixed-Point Theory`
-by `Ran Zmigrod`, `Matthew L. Daggitt` and `Timothy G Griffin` in `ITP 2018`.
+`Asynchronous Convergence of Policy-Rich Distributed Bellman-Ford Routing Protocols`
+by `Matthew L. Daggitt`, `Alexander J. T. Gurney` and `Timothy G Griffin` in `SIGCOMM 2018`.
 The latest version of the library can be found on the
 [master](https://github.com/MatthewDaggitt/agda-routing/tree/master) branch in this
 repository.

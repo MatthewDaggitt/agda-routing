@@ -12,6 +12,7 @@ open import RoutingLib.Asynchronous using (Parallelisation)
 open import RoutingLib.Data.Table using (Table)
 open import RoutingLib.Data.List.Relation.Pointwise
   using (foldr⁺)
+open import RoutingLib.Function.Iteration
 import RoutingLib.Data.Table.Relation.DecidableEquality as TableDecEquality
 open import RoutingLib.Data.Matrix
 import RoutingLib.Data.Matrix.Relation.DecidableEquality as MatrixDecEquality
@@ -76,8 +77,7 @@ I i j with j ≟ᶠ i
 
 -- Multiple iterations
 σ^ : ℕ → RMatrix → RMatrix
-σ^ zero    X = X
-σ^ (suc t) X = σ (σ^ t X)
+σ^ = σ ^ˡ_
 
 -- Parallelisation of algorithm
 σ∥ : Parallelisation ℝ𝕄ₛⁱ

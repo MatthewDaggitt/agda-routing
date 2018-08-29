@@ -15,7 +15,6 @@ open import RoutingLib.Data.Path.Uncertified.Properties using (∉ₚ-resp-≈�
 open import RoutingLib.Data.Nat.Properties using (n≢1+n)
 
 open import RoutingLib.Routing.Protocols.BGPLite.Route
-open import RoutingLib.Routing.Protocols.BGPLite.Route.Properties
 open import RoutingLib.Routing.Protocols.BGPLite.Communities
 
 module RoutingLib.Routing.Protocols.BGPLite.Policy where
@@ -31,28 +30,15 @@ data Condition : Set where
   isLevel : (l : Level)     → Condition
 
 evaluate : Condition → Route → Bool
-evaluate true        _ = 𝔹.true
-evaluate false       _ = 𝔹.false
-evaluate (and s t)   r = evaluate s r ∧ evaluate t r
-evaluate (or  s t)   r = evaluate s r ∨ evaluate t r
-evaluate (not s)     r = 𝔹.not (evaluate s r)
-evaluate _           invalid = 𝔹.false
+evaluate true        _              = 𝔹.true
+evaluate false       _              = 𝔹.false
+evaluate (and s t)   r              = evaluate s r ∧ evaluate t r
+evaluate (or  s t)   r              = evaluate s r ∨ evaluate t r
+evaluate (not s)     r              = 𝔹.not (evaluate s r)
+evaluate _           invalid        = 𝔹.false
 evaluate (inComm  c) (valid l cs p) = c ∈? cs
 evaluate (isLevel k) (valid l cs p) = ⌊ k ≟ l ⌋
 evaluate (inPath  i) (valid l cs p) = ⌊ i ∈ₚ? p ⌋
-
-evaluate-cong : ∀ p {r s} → r ≈ᵣ s → evaluate p r ≡ evaluate p s
-evaluate-cong true        r≈s = refl
-evaluate-cong false       r≈s = refl
-evaluate-cong (and p q)   r≈s = cong₂ _∧_ (evaluate-cong p r≈s) (evaluate-cong q r≈s)
-evaluate-cong (or  p q)   r≈s = cong₂ _∨_ (evaluate-cong p r≈s) (evaluate-cong q r≈s)
-evaluate-cong (not p)     r≈s = cong 𝔹.not (evaluate-cong p r≈s)
-evaluate-cong (inPath  i) invalidEq = refl
-evaluate-cong (inComm  c) invalidEq = refl
-evaluate-cong (isLevel l) invalidEq = refl
-evaluate-cong (inComm  c) (validEq _ cs≈ds _) = ∈-resp-≈ᶜˢ c cs≈ds
-evaluate-cong (isLevel l) (validEq refl _  _) = refl
-evaluate-cong (inPath  i) (validEq _ _ refl)  = refl
 
 ------------
 -- Policy --
@@ -74,22 +60,6 @@ apply (delComm c)         (valid l cs p) = valid l (remove c cs) p
 apply reject              r              = invalid
 apply (compose pol₂ pol₁) r              = apply pol₁ (apply pol₂ r )
 apply (cond p pol)        r              = if (evaluate p r) then (apply pol r) else r
-
-apply-cong : ∀ pol {r s} → r ≈ᵣ s → apply pol r ≈ᵣ apply pol s
-apply-cong pol             invalidEq                = invalidEq
-apply-cong (raise x)       (validEq refl cs≈ds p≈q) = validEq refl cs≈ds p≈q
-apply-cong (addComm c)     (validEq k≡l cs≈ds p≈q)  = validEq k≡l (add-cong c cs≈ds) p≈q
-apply-cong (delComm c)     (validEq k≡l cs≈ds p≈q)  = validEq k≡l (remove-cong c cs≈ds) p≈q
-apply-cong reject          (validEq _   _     _)    = invalidEq
-apply-cong (compose p₂ p₁) (validEq k≡l cs≈ds p≈q)  = apply-cong p₁ (apply-cong p₂ (validEq k≡l cs≈ds p≈q))
-apply-cong (cond P? pol)    {r@(valid k cs p)} {s@(valid l ds q)} r≈s@(validEq k≡l cs≈ds p≈q)
-  with evaluate P? r | evaluate P? s | inspect (evaluate P?) r | inspect (evaluate P?) s
-... | 𝔹.true  | 𝔹.true  | _        | _        = apply-cong pol r≈s
-... | 𝔹.true  | 𝔹.false | [ Pr≡t ] | [ Ps≡f ] =
-  contradiction (trans (trans (sym Pr≡t) (evaluate-cong P? r≈s)) Ps≡f) λ()
-... | 𝔹.false | 𝔹.true  | [ Pr≡f ] | [ Ps≡t ] =
-  contradiction (trans (trans (sym Ps≡t) (sym (evaluate-cong P? r≈s))) Pr≡f) λ()
-... | 𝔹.false | 𝔹.false | _        | _        = r≈s
 
 apply-increasing : ∀ pol {l cs p k ds q} → apply pol (valid l cs p) ≡ valid k ds q → l ≤ k × p ≡ q
 apply-increasing reject        ()

@@ -79,7 +79,7 @@ abstract
   ...         | pᵣ≈q | no ¬ik⇿q | _       = contradiction (path-reject (A i k) pᵣ≈q (inj₁ ¬ik⇿q)) AᵢₖXₖⱼ≉∞
   ...         | pᵣ≈q | _        | no  i∈q = contradiction (path-reject (A i k) pᵣ≈q (inj₂ i∈q))   AᵢₖXₖⱼ≉∞
   ...         | pᵣ≈q | yes ik⇿q | yes i∉q = contradiction (begin
-    valid (_ ∷ q ∣ _ ∣ _) ≈⟨ ≈ₚ-sym (path-accept pᵣ≈q AᵢₖXₖⱼ≉∞ ik⇿q i∉q) ⟩
+    valid (_ ∷ q ∣ _ ∣ _) ≈⟨ ≈ₚ-sym (path-accept (A i k) pᵣ≈q AᵢₖXₖⱼ≉∞ ik⇿q i∉q) ⟩
     path (A i k ▷ X k j)  ≈⟨ path-cong (≈-sym σXᵢⱼ≈AᵢₖXₖⱼ) ⟩
     path (σ X i j)        ≈⟨ p[σXᵢⱼ]≈[] ⟩
     valid []              ∎) λ {(valid ())}
@@ -99,7 +99,7 @@ abstract
   ...         | pᵣ≈q | _        | no  i∈q = contradiction (path-reject (A i k) pᵣ≈q (inj₂ i∈q))   AᵢₖXₖⱼ≉∞
   ...         | pᵣ≈q | yes ik⇿q | yes i∉q with
     ≈ₚ-trans (≈ₚ-sym p[AᵢₖXₖⱼ]≈uv∷p)
-      (path-accept pᵣ≈q AᵢₖXₖⱼ≉∞ ik⇿q i∉q)
+      (path-accept (A i k) pᵣ≈q AᵢₖXₖⱼ≉∞ ik⇿q i∉q)
   ...           | valid (refl ∷ p≈q) = refl , refl , ≈ₚ-sym (valid p≈q)
 
   p[σXᵢⱼ]⇒σXᵢⱼ≈AᵢₖXₖⱼ : ∀ X i j {k l p e⇿p i∉p} →

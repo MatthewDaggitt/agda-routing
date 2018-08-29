@@ -6,6 +6,7 @@ open import RoutingLib.Routing.Algebra
 open import RoutingLib.Asynchronous using (IsAsynchronouslySafe)
 open import RoutingLib.Asynchronous.Properties using (0-IsSafe)
 open import RoutingLib.Asynchronous.Convergence.Theorems using (UltrametricConditions; ultra⇒safe)
+import RoutingLib.Function.Iteration.Convergence as Convergence
 
 import RoutingLib.Routing.BellmanFord as BellmanFord
 open import RoutingLib.Routing.BellmanFord.ConvergenceConditions
@@ -19,7 +20,8 @@ import RoutingLib.Routing.BellmanFord.AsyncConvergence.PathVector.Step5_StateMet
 module RoutingLib.Routing.BellmanFord.Theorems
   {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 
-open BellmanFord algebra using (σ; σ^; σ-cong; σ∥; _≟ₜ_; _≈ₘ_; I)
+open BellmanFord algebra
+open module Private {n} {A : AdjacencyMatrix algebra n} = Convergence (ℝ𝕄ₛ A)
 
 --------------------------------------------------------------------------------
 -- Theorem 1
@@ -84,10 +86,12 @@ module _ (conditions : IsIncreasingPathAlgebra algebra) where
 
   open IsIncreasingPathAlgebra conditions
   
-  σ-convergesIn-n² : ∀ {n} (A : AdjacencyMatrix algebra n) →
-                     ∀ X t → _≈ₘ_ A (σ^ A (n ^ 2 + t) X)  (σ^ A (n ^ 2) X)
-  σ-convergesIn-n² {zero}    A X t ()
+  σ-convergesIn-n² : ∀ {n} (A : AdjacencyMatrix algebra n) → (σ A) ConvergesIn (n ^ 2)
+  σ-convergesIn-n² = {!!}
+{-
+  {zero}    A X t ()
   σ-convergesIn-n² {suc n-1} A = n²-convergence
     where
     open import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Prelude (isCertifiedPathAlgebra (suc n-1)) A
     open import RoutingLib.Routing.BellmanFord.SyncConvergenceRate.PathVector.Step5_Proof (isCertifiedPathAlgebra (suc n-1)) isIncreasing A
+-}

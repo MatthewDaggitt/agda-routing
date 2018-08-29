@@ -13,14 +13,3 @@ module RoutingLib.Function where
   f ∘₂ g = λ x y → f (g x y)
 
 
-  -- Repeated application
-
-  infix 7 _^ˡ_ _^ʳ_
-
-  _^ˡ_ : ∀ {a} {A : Set a} → (A → A) → ℕ → (A → A)
-  f ^ˡ zero    = id
-  f ^ˡ (suc n) = f ∘ (f ^ˡ n)
-
-  _^ʳ_ : ∀ {a} {A : Set a} → (A → A) → ℕ → (A → A)
-  f ^ʳ zero    = id
-  f ^ʳ (suc n) = (f ^ˡ n) ∘ f

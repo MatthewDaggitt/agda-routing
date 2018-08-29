@@ -85,7 +85,7 @@ weight-cong (valid (refl ∷ p≈q)) = ▷-cong _ (weight-cong (valid p≈q))
 ...     | pᵣ≈q | no ¬ij⇿q | _       = 𝑪-cong (≈-sym (path-reject (A i j) pᵣ≈q (inj₁ ¬ij⇿q))) ∞ᶜ -- pᵣ≈q
 ...     | pᵣ≈q | _        | no  i∈q = 𝑪-cong (≈-sym (path-reject (A i j) pᵣ≈q (inj₂ i∈q))) ∞ᶜ -- pᵣ≈q
 ...     | pᵣ≈q | yes ij⇿q | yes i∉q = begin
-  weight A (path (A i j ▷ r))                   ≈⟨ weight-cong {path (A i j ▷ r)} (path-accept pᵣ≈q Aᵢⱼ▷r≉∞ ij⇿q i∉q) ⟩
+  weight A (path (A i j ▷ r))                   ≈⟨ weight-cong {path (A i j ▷ r)} (path-accept (A i j) pᵣ≈q Aᵢⱼ▷r≉∞ ij⇿q i∉q) ⟩
   weight A (valid ((i , j) ∷ q ∣ ij⇿q ∣ i∉q))   ≡⟨⟩
   A i j ▷ weight A (valid q)                    ≈⟨ ▷-cong (A i j) rᶜ ⟩
   A i j ▷ r                                     ∎
@@ -105,7 +105,7 @@ weightᶜ (valid ((i , j) ∷ p ∣ e⇿p ∣ e∉p)) with A i j ▷ weight A (v
 ...     | p[wₚ]≈q | no ¬ij⇿q | _       = 𝑪-cong (≈-sym (path-reject (A i j) p[wₚ]≈q (inj₁ ¬ij⇿q))) ∞ᶜ
 ...     | p[wₚ]≈q | _        | no  i∈q = 𝑪-cong (≈-sym (path-reject (A i j) p[wₚ]≈q (inj₂ i∈q))) ∞ᶜ
 ...     | p[wₚ]≈q | yes ij⇿q | yes i∉q = begin
-  weight A (path (A i j ▷ weight A (valid p)))  ≈⟨ weight-cong (path-accept p[wₚ]≈q Aᵢⱼ▷wₚ≉∞ ij⇿q i∉q) ⟩
+  weight A (path (A i j ▷ weight A (valid p)))  ≈⟨ weight-cong (path-accept (A i j) p[wₚ]≈q Aᵢⱼ▷wₚ≉∞ ij⇿q i∉q) ⟩
   weight A (valid ((i , j) ∷ q ∣ ij⇿q ∣ i∉q))   ≡⟨⟩
   A i j ▷ weight A (valid q)                    ≈⟨ ▷-cong (A i j) (weight-cong (≈ₚ-sym p[wₚ]≈q)) ⟩
   A i j ▷ weight A (path (weight A (valid p)))  ≈⟨ ▷-cong (A i j) (weightᶜ (valid p)) ⟩
@@ -120,7 +120,7 @@ sizeⁱ-incr {i} {j} {r} {f} f▷rⁱ with f ▷ r ≟ ∞
 ...   | valid q | [ pᵣ≡q ] with ≈ₚ-reflexive pᵣ≡q | (i , j) ⇿ᵥ? q | i ∉ᵥₚ? q
 ...     | pᵣ≈q | no ¬ij⇿q | _       = contradiction (path-reject f pᵣ≈q (inj₁ ¬ij⇿q)) f▷r≉∞
 ...     | pᵣ≈q | _        | no  i∈q = contradiction (path-reject f pᵣ≈q (inj₂ i∈q)) f▷r≉∞
-...     | pᵣ≈q | yes ij⇿q | yes i∉q = sym (length-cong (path-accept pᵣ≈q f▷r≉∞ ij⇿q i∉q))
+...     | pᵣ≈q | yes ij⇿q | yes i∉q = sym (length-cong (path-accept f pᵣ≈q f▷r≉∞ ij⇿q i∉q))
 
 ------------------------------------------------------------------------------
 -- Types

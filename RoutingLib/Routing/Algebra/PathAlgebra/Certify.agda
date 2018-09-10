@@ -57,10 +57,10 @@ pathᶜ-reject {r = r} {p} f p[r]≈p reason with path r | inspect path r | p[r]
 ...   | inj₁ ¬ij⇿p = path-reject f eq (inj₁ (¬ij⇿p ∘ ⇿ᵥ-resp-≈ᵥₚ qᶜ≈p ∘ ⇿-certify⁺ refl refl))
 ...   | inj₂ i∈p   = path-reject f eq (inj₂ (∈ₚ-certify⁻ refl (i∈p ∘ ∉ᵥₚ-resp-≈ᵥₚ qᶜ≈p)))
 
-pathᶜ-accept : ∀ {i j r p} (f : Step i j) → pathᶜ r ≈ₚ valid p → f ▷ r ≉ ∞ →
+pathᶜ-accept : ∀ {i j r p} {f : Step i j} → pathᶜ r ≈ₚ valid p → f ▷ r ≉ ∞ →
                (ij⇿p : (i , j) ⇿ᵛ p) (i∉p : i ∉ᵥₚ p) →
                pathᶜ (f ▷ r) ≈ₚ valid ((i , j) ∷ p ∣ ij⇿p ∣ i∉p)
-pathᶜ-accept {i} {j} {r} {p} f p[r]≈p fr≉∞ ij⇿p i∉p with path r | inspect path r | p[r]≈p
+pathᶜ-accept {i} {j} {r} {p} {f} p[r]≈p fr≉∞ ij⇿p i∉p with path r | inspect path r | p[r]≈p
 ... | invalid | _      | ()
 ... | valid q | [ eq ] | valid qᶜ≈p with (toℕ i , toℕ j) ⇿? q | toℕ i ∈ₚ? q
 ...   | no ¬ij⇿q | _       = contradiction (path-reject f eq (inj₁ ¬ij⇿q)) fr≉∞

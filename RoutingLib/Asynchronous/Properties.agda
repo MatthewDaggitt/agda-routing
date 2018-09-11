@@ -25,9 +25,9 @@ open import RoutingLib.Asynchronous.Schedule
 
 module RoutingLib.Asynchronous.Properties where
 
-module _ {a ℓ n} {𝕊 : Setoid (Fin n) a ℓ} where
+module _ {a ℓ n} {𝕊 : IndexedSetoid (Fin n) a ℓ} where
 
-  open Setoid 𝕊 using (_≈_) renaming (Carrierᵢ to Sᵢ; Carrier to S)
+  open IndexedSetoid 𝕊 using (_≈_) renaming (Carrierᵢ to Sᵢ; Carrier to S)
   
   shrinkSafety : ∀ {P : Parallelisation 𝕊} {v} {V : Pred Sᵢ v} {W : Pred Sᵢ v} →
                  _⊆_ {A = Sᵢ} W V →
@@ -50,7 +50,7 @@ module _ {a ℓ n} {𝕊 : Setoid (Fin n) a ℓ} where
     where open IsPartiallyAsynchronouslySafe partiallySafe
 
 -- The empty computation is safe (phew!)
-0-IsSafe : ∀ {a ℓ} {T : Setoid (Fin 0) a ℓ} (P : Parallelisation T) →
+0-IsSafe : ∀ {a ℓ} {T : IndexedSetoid (Fin 0) a ℓ} (P : Parallelisation T) →
            IsAsynchronouslySafe P
 0-IsSafe p = record { m* = λ() ; m*-reached = λ _ _ → 0 , λ _ () }
 
@@ -58,7 +58,7 @@ module _ {a ℓ n} {𝕊 : Setoid (Fin n) a ℓ} where
 
 
 
-module _ {a₁ a₂ ℓ₁ ℓ₂ n} {𝕊₁ : Setoid (Fin n) a₁ ℓ₁} {𝕊₂ : Setoid (Fin n) a₂ ℓ₂}
+module _ {a₁ a₂ ℓ₁ ℓ₂ n} {𝕊₁ : IndexedSetoid (Fin n) a₁ ℓ₁} {𝕊₂ : IndexedSetoid (Fin n) a₂ ℓ₂}
          {P₁ : Parallelisation 𝕊₁} {P₂ : Parallelisation 𝕊₂}
          (P₁↭P₂ : Bisimilar P₁ P₂) (P₁-isSafe : IsAsynchronouslySafe P₁) where
 

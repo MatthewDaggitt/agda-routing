@@ -14,54 +14,54 @@ module RoutingLib.Relation.Binary.Indexed.Homogeneous where
 
 -- Heterogenous, homogenously-indexed relations
 
-REL : ∀ {i a₁ a₂} {I : Set i} → (I → Set a₁) → (I → Set a₂) → (ℓ : Level) → Set _
-REL A₁ A₂ ℓ = ∀ {i} → A₁ i → A₂ i → Set ℓ
+IREL : ∀ {i a₁ a₂} {I : Set i} → (I → Set a₁) → (I → Set a₂) → (ℓ : Level) → Set _
+IREL A₁ A₂ ℓ = ∀ {i} → A₁ i → A₂ i → Set ℓ
 
 -- Homogeneous, homogenously-indexed relations
 
-Rel : ∀ {i a} {I : Set i} → (I → Set a) → (ℓ : Level) → Set _
-Rel A = REL A A
+IRel : ∀ {i a} {I : Set i} → (I → Set a) → (ℓ : Level) → Set _
+IRel A = IREL A A
 
 ------------------------------------------------------------------------
 -- Lifting to non-indexed relations
 
-Lift : ∀ {i a ℓ} {I : Set i} (A : I → Set a) → Rel A ℓ → B.Rel (∀ i → A i) _
+Lift : ∀ {i a ℓ} {I : Set i} (A : I → Set a) → IRel A ℓ → B.Rel (∀ i → A i) _
 Lift A _∼_ x y = ∀ i → x i ∼ y i
 
 ------------------------------------------------------------------------
 -- Properties
 
 private
-  Implies : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → Rel A ℓ₁ → Rel A ℓ₂ → Set _
+  Implies : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → IRel A ℓ₁ → IRel A ℓ₂ → Set _
   Implies A _∼₁_ _∼₂_ = ∀ {i} → (_∼₁_ {i}) B.⇒ (_∼₂_ {i})
 
 syntax Implies A _∼₁_ _∼₂_ = _∼₁_ ⇒[ A ] _∼₂_
 
-Reflexive : ∀ {i a ℓ} {I : Set i} (A : I → Set a) → Rel A ℓ → Set _
+Reflexive : ∀ {i a ℓ} {I : Set i} (A : I → Set a) → IRel A ℓ → Set _
 Reflexive _ _∼_ = ∀ {i} → B.Reflexive (_∼_ {i})
 
-Symmetric : ∀ {i a ℓ} {I : Set i} (A : I → Set a) → Rel A ℓ → Set _
+Symmetric : ∀ {i a ℓ} {I : Set i} (A : I → Set a) → IRel A ℓ → Set _
 Symmetric _ _∼_ = ∀ {i} → B.Symmetric (_∼_ {i})
 
-Transitive : ∀ {i a ℓ} {I : Set i} (A : I → Set a) → Rel A ℓ → Set _
+Transitive : ∀ {i a ℓ} {I : Set i} (A : I → Set a) → IRel A ℓ → Set _
 Transitive _ _∼_ = ∀ {i} → B.Transitive (_∼_ {i})
 
-Antisymmetric : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → Rel A ℓ₁ → Rel A ℓ₂ → Set _
+Antisymmetric : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → IRel A ℓ₁ → IRel A ℓ₂ → Set _
 Antisymmetric _ _≈_ _∼_ = ∀ {i} → B.Antisymmetric (_≈_ {i}) (_∼_ {i})
 
-Decidable : ∀ {i a ℓ} {I : Set i} (A : I → Set a) → Rel A ℓ → Set _
+Decidable : ∀ {i a ℓ} {I : Set i} (A : I → Set a) → IRel A ℓ → Set _
 Decidable A _∼_ = ∀ {i} → B.Decidable (_∼_ {i})
 
-Respects : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → Pred A ℓ₁ → Rel A ℓ₂ → Set _
+Respects : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → Pred A ℓ₁ → IRel A ℓ₂ → Set _
 Respects A P _∼_ = ∀ {i} {x y : A i} → x ∼ y → P x → P y
 
-Respectsˡ : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → Rel A ℓ₁ → Rel A ℓ₂ → Set _
+Respectsˡ : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → IRel A ℓ₁ → IRel A ℓ₂ → Set _
 Respectsˡ A P _∼_  = ∀ {i} {x y z : A i} → x ∼ y → P x z → P y z
 
-Respectsʳ : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → Rel A ℓ₁ → Rel A ℓ₂ → Set _
+Respectsʳ : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → IRel A ℓ₁ → IRel A ℓ₂ → Set _
 Respectsʳ A P _∼_ = ∀ {i} {x y z : A i} → x ∼ y → P z x → P z y
 
-Respects₂ : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → Rel A ℓ₁ → Rel A ℓ₂ → Set _
+Respects₂ : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → IRel A ℓ₁ → IRel A ℓ₂ → Set _
 Respects₂ A P _∼_ = (Respectsʳ A P _∼_) × (Respectsˡ A P _∼_)
 
 {-
@@ -73,8 +73,8 @@ Preserves A f P Q = ∀ {i} {x y : A i} → P x y → Q (f x) (f y)
 ------------------------------------------------------------------------
 -- Records
 
-record IsEquivalence {i a ℓ} {I : Set i} (A : I → Set a)
-                     (_≈_ : Rel A ℓ) : Set (i ⊔ a ⊔ ℓ) where
+record IsIndexedEquivalence {i a ℓ} {I : Set i} (A : I → Set a)
+                     (_≈_ : IRel A ℓ) : Set (i ⊔ a ⊔ ℓ) where
   field
     reflᵢ  : Reflexive A _≈_
     symᵢ   : Symmetric A _≈_
@@ -105,14 +105,14 @@ record IsEquivalence {i a ℓ} {I : Set i} (A : I → Set a)
     }
 
 
-record Setoid {i} (I : Set i) c ℓ : Set (suc (i ⊔ c ⊔ ℓ)) where
+record IndexedSetoid {i} (I : Set i) c ℓ : Set (suc (i ⊔ c ⊔ ℓ)) where
   infix 4 _≈ᵢ_ _≈_
   field
     Carrierᵢ       : I → Set c
-    _≈ᵢ_           : Rel Carrierᵢ ℓ
-    isEquivalenceᵢ : IsEquivalence Carrierᵢ _≈ᵢ_
+    _≈ᵢ_           : IRel Carrierᵢ ℓ
+    isEquivalenceᵢ : IsIndexedEquivalence Carrierᵢ _≈ᵢ_
 
-  open IsEquivalence isEquivalenceᵢ public
+  open IsIndexedEquivalence isEquivalenceᵢ public
 
   Carrier : Set _
   Carrier = ∀ i → Carrierᵢ i
@@ -129,14 +129,14 @@ record Setoid {i} (I : Set i) c ℓ : Set (suc (i ⊔ c ⊔ ℓ)) where
     }
 
 
-record IsPreorder {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a)
-                  (_≈ᵢ_ : Rel A ℓ₁) (_∼ᵢ_ : Rel A ℓ₂) : Set (i ⊔ a ⊔ ℓ₁ ⊔ ℓ₂) where
+record IsIndexedPreorder {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a)
+                  (_≈ᵢ_ : IRel A ℓ₁) (_∼ᵢ_ : IRel A ℓ₂) : Set (i ⊔ a ⊔ ℓ₁ ⊔ ℓ₂) where
   field
-    isEquivalenceᵢ : IsEquivalence A _≈ᵢ_
+    isEquivalenceᵢ : IsIndexedEquivalence A _≈ᵢ_
     reflexiveᵢ     : _≈ᵢ_ ⇒[ A ] _∼ᵢ_
     transᵢ         : Transitive A _∼ᵢ_
 
-  module Eq = IsEquivalence isEquivalenceᵢ
+  module Eq = IsIndexedEquivalence isEquivalenceᵢ
 
   reflᵢ : Reflexive A _∼ᵢ_
   reflᵢ = reflexiveᵢ Eq.reflᵢ
@@ -177,17 +177,17 @@ record IsPreorder {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a)
     ; trans         = trans
     }
 
-record Preorder {i} (I : Set i) c ℓ : Set (suc (i ⊔ c ⊔ ℓ)) where
+record IndexedPreorder {i} (I : Set i) c ℓ : Set (suc (i ⊔ c ⊔ ℓ)) where
 
   infix 4 _≈ᵢ_ _∼ᵢ_ _≈_ _∼_
 
   field
     Carrierᵢ    : I → Set c
-    _≈ᵢ_        : Rel Carrierᵢ ℓ
-    _∼ᵢ_        : Rel Carrierᵢ ℓ
-    isPreorderᵢ : IsPreorder Carrierᵢ _≈ᵢ_ _∼ᵢ_
+    _≈ᵢ_        : IRel Carrierᵢ ℓ
+    _∼ᵢ_        : IRel Carrierᵢ ℓ
+    isPreorderᵢ : IsIndexedPreorder Carrierᵢ _≈ᵢ_ _∼ᵢ_
 
-  open IsPreorder isPreorderᵢ public
+  open IsIndexedPreorder isPreorderᵢ public
 
   Carrier : Set _
   Carrier = ∀ i → Carrierᵢ i
@@ -201,13 +201,13 @@ record Preorder {i} (I : Set i) c ℓ : Set (suc (i ⊔ c ⊔ ℓ)) where
   preorder : B.Preorder _ _ _
   preorder = record { isPreorder = isPreorder }
 
-record IsPartialOrder {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a)
-                      (_≈ᵢ_ : Rel A ℓ₁) (_≤ᵢ_ : Rel A ℓ₂) : Set (i ⊔ a ⊔ ℓ₁ ⊔ ℓ₂) where
+record IsIndexedPartialOrder {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a)
+                      (_≈ᵢ_ : IRel A ℓ₁) (_≤ᵢ_ : IRel A ℓ₂) : Set (i ⊔ a ⊔ ℓ₁ ⊔ ℓ₂) where
   field
-    isPreorderᵢ : IsPreorder A _≈ᵢ_ _≤ᵢ_
+    isPreorderᵢ : IsIndexedPreorder A _≈ᵢ_ _≤ᵢ_
     antisymᵢ    : Antisymmetric A _≈ᵢ_ _≤ᵢ_
 
-  open IsPreorder isPreorderᵢ public
+  open IsIndexedPreorder isPreorderᵢ public
     renaming
     ( ∼ᵢ-respˡ-≈ᵢ to ≤ᵢ-respˡ-≈ᵢ
     ; ∼ᵢ-respʳ-≈ᵢ to ≤ᵢ-respʳ-≈ᵢ
@@ -226,20 +226,20 @@ record IsPartialOrder {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a)
     ; antisym    = antisym
     }
 
-record Poset {i} (I : Set i) c ℓ : Set (suc (i ⊔ c ⊔ ℓ)) where
+record IndexedPoset {i} (I : Set i) c ℓ : Set (suc (i ⊔ c ⊔ ℓ)) where
 
   field
     Carrierᵢ        : I → Set c
-    _≈ᵢ_            : Rel Carrierᵢ ℓ
-    _≤ᵢ_            : Rel Carrierᵢ ℓ
-    isPartialOrderᵢ : IsPartialOrder Carrierᵢ _≈ᵢ_ _≤ᵢ_
+    _≈ᵢ_            : IRel Carrierᵢ ℓ
+    _≤ᵢ_            : IRel Carrierᵢ ℓ
+    isPartialOrderᵢ : IsIndexedPartialOrder Carrierᵢ _≈ᵢ_ _≤ᵢ_
 
-  open IsPartialOrder isPartialOrderᵢ public
+  open IsIndexedPartialOrder isPartialOrderᵢ public
 
-  preorderᵢ : Preorder _ _ _
+  preorderᵢ : IndexedPreorder _ _ _
   preorderᵢ = record { isPreorderᵢ = isPreorderᵢ }
 
-  open Preorder preorderᵢ public
+  open IndexedPreorder preorderᵢ public
     using (Carrier; _≈_)
     renaming (_∼_ to _≤_)
 
@@ -249,7 +249,7 @@ record Poset {i} (I : Set i) c ℓ : Set (suc (i ⊔ c ⊔ ℓ)) where
 -------------------------------------------------------
 -- At lemmas
 
-Setoid_at_ : ∀ {i a ℓ} {I : Set i} → Setoid I a ℓ → I → B.Setoid _ _
+Setoid_at_ : ∀ {i a ℓ} {I : Set i} → IndexedSetoid I a ℓ → I → B.Setoid _ _
 Setoid S at i = record
   { Carrier       = Carrierᵢ i
   ; _≈_           = _≈ᵢ_
@@ -259,9 +259,9 @@ Setoid S at i = record
     ; trans = transᵢ
     }
   }
-  where open Setoid S
+  where open IndexedSetoid S
 
-triviallyIndexSetoid : ∀ {i a ℓ} → (I : Set i) →  B.Setoid a ℓ → Setoid I a ℓ
+triviallyIndexSetoid : ∀ {i a ℓ} → (I : Set i) →  B.Setoid a ℓ → IndexedSetoid I a ℓ
 triviallyIndexSetoid I S = record
   { Carrierᵢ       = λ _ → Carrier
   ; _≈ᵢ_           = _≈_

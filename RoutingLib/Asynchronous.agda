@@ -18,7 +18,7 @@ open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 open import RoutingLib.Data.Fin.Properties using ()
 open import RoutingLib.Data.Table using (Table)
 import RoutingLib.Data.Table.Relation.Equality as TableEquality
-open import RoutingLib.Relation.Binary.Indexed.Homogeneous -- as IndexedTypes
+open import RoutingLib.Relation.Binary.Indexed.Homogeneous
 open import RoutingLib.Relation.Unary.Indexed
 
 open import RoutingLib.Asynchronous.Schedule using (Schedule; 𝕋)
@@ -28,10 +28,10 @@ module RoutingLib.Asynchronous where
 ------------------------------------------------------------------------
 -- Parallelisable functions
 
-record Parallelisation {a ℓ n} (𝕊 : Setoid (Fin n) a ℓ) : Set (lsuc a ⊔ ℓ) where
+record Parallelisation {a ℓ n} (𝕊 : IndexedSetoid (Fin n) a ℓ) : Set (lsuc a ⊔ ℓ) where
 
   -- open IndexedTypes 𝕊ᵢ public
-  open Setoid 𝕊 public renaming
+  open IndexedSetoid 𝕊 public renaming
     ( Carrierᵢ      to Sᵢ
     ; Carrier       to S
     ; reflᵢ         to ≈ᵢ-refl
@@ -64,7 +64,7 @@ record Parallelisation {a ℓ n} (𝕊 : Setoid (Fin n) a ℓ) : Set (lsuc a ⊔
 -------------------------------------------------------------------------
 -- Safeness of parallelisations
 
-module _ {a ℓ n} {𝕊 : Setoid (Fin n) a ℓ} (P : Parallelisation 𝕊) where
+module _ {a ℓ n} {𝕊 : IndexedSetoid (Fin n) a ℓ} (P : Parallelisation 𝕊) where
 
   open Parallelisation P
 
@@ -84,13 +84,13 @@ module _ {a ℓ n} {𝕊 : Setoid (Fin n) a ℓ} (P : Parallelisation 𝕊) wher
 -------------------------------------------------------------------------
 -- Reachability
 
-module _ {a ℓ n} {𝕊 : Setoid (Fin n) a ℓ} (P : Parallelisation 𝕊) where
+module _ {a ℓ n} {𝕊 : IndexedSetoid (Fin n) a ℓ} (P : Parallelisation 𝕊) where
 
 
 -------------------------------------------------------------------------
 -- Bisimilarity
 
-module _ {a₁ a₂ ℓ₁ ℓ₂ n} {𝕊₁ : Setoid (Fin n) a₁ ℓ₁} {𝕊₂ : Setoid (Fin n) a₂ ℓ₂} where
+module _ {a₁ a₂ ℓ₁ ℓ₂ n} {𝕊₁ : IndexedSetoid (Fin n) a₁ ℓ₁} {𝕊₂ : IndexedSetoid (Fin n) a₂ ℓ₂} where
 
   record Bisimilar (P : Parallelisation 𝕊₁) (Q : Parallelisation 𝕊₂) : Set (a₁ ⊔ a₂ ⊔ ℓ₁ ⊔ ℓ₂) where
 

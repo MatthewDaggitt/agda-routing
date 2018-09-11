@@ -15,7 +15,7 @@ open import RoutingLib.Relation.Binary.Indexed.Homogeneous
 open import RoutingLib.Relation.Unary.Indexed
 
 module RoutingLib.Asynchronous.Convergence.Conditions
-  {a ℓ n} {𝕊 : Setoid (Fin n) a ℓ}
+  {a ℓ n} {𝕊 : IndexedSetoid (Fin n) a ℓ}
   (𝓟 : Parallelisation 𝕊)
   where
 
@@ -30,7 +30,7 @@ module RoutingLib.Asynchronous.Convergence.Conditions
     field
       D            : ℕ → Pred Sᵢ p
       D-decreasing : ∀ K → _⊆_ {A = Sᵢ} (D (suc K)) (D K)
-      F-monotonic  : ∀ K {t} → t ∈ D K → F t ∈ D (suc K)
+      F-monotonic  : ∀ {K t} → t ∈ D K → F t ∈ D (suc K)
       D-finish     : ∃₂ λ T ξ → ∀ K → ξ ∈ D (T + K) × (∀ {x} → x ∈ D (T + K) → ξ ≈ x)
 
 
@@ -73,10 +73,10 @@ module RoutingLib.Asynchronous.Convergence.Conditions
       D₀-cong          : ∀ {x y} → x ∈ D₀ → x ≈ y → y ∈ D₀
       D₀-closed        : ∀ {x} → x ∈ D₀ → F x ∈ D₀
 
-      _≤ᵢ_              : Rel Sᵢ o
-      ≤ᵢ-isPartialOrder : IsPartialOrder Sᵢ _≈ᵢ_ _≤ᵢ_
+      _≤ᵢ_              : IRel Sᵢ o
+      ≤ᵢ-isPartialOrder : IsIndexedPartialOrder Sᵢ _≈ᵢ_ _≤ᵢ_
 
-    open IsPartialOrder ≤ᵢ-isPartialOrder public
+    open IsIndexedPartialOrder ≤ᵢ-isPartialOrder public
       renaming
       ( reflexive  to ≤-reflexive
       ; refl       to ≤-refl
@@ -115,11 +115,11 @@ module RoutingLib.Asynchronous.Convergence.Conditions
 
       -- ξ∈D₀              : ξ ∈ D₀
 
-      _≤ᵢ_              : Rel Sᵢ o
-      ≤ᵢ-isPartialOrder : IsPartialOrder Sᵢ _≈ᵢ_ _≤ᵢ_
+      _≤ᵢ_              : IRel Sᵢ o
+      ≤ᵢ-isPartialOrder : IsIndexedPartialOrder Sᵢ _≈ᵢ_ _≤ᵢ_
       _≟ᵢ_              : Decidable Sᵢ _≈ᵢ_
 
-    open IsPartialOrder ≤ᵢ-isPartialOrder public
+    open IsIndexedPartialOrder ≤ᵢ-isPartialOrder public
       renaming
       ( reflexive  to ≤-reflexive
       ; refl       to ≤-refl

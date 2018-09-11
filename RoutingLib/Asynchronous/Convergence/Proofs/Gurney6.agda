@@ -40,13 +40,13 @@ open import RoutingLib.Function.Metric using (IsUltrametric)
 import RoutingLib.Function.Metric.MaxLift as MaxLift
 import RoutingLib.Function.Metric.FixedPoint as FixedPoints
 open import RoutingLib.Relation.Unary.Indexed
-open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (Setoid)
+open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (IndexedSetoid)
 
 open import RoutingLib.Asynchronous using (Parallelisation)
 open import RoutingLib.Asynchronous.Convergence.Conditions using (ACO; UltrametricConditions)
 
 module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
-  {a ℓ n} {𝕊 : Setoid (Fin n) a ℓ} {P : Parallelisation 𝕊}
+  {a ℓ n} {𝕊 : IndexedSetoid (Fin n) a ℓ} {P : Parallelisation 𝕊}
   (𝓤𝓒 : UltrametricConditions P) where
 
     open Parallelisation P
@@ -331,8 +331,8 @@ module RoutingLib.Asynchronous.Convergence.Proofs.Gurney6
       r[ K ]              ∎) i
       where open ≤-Reasoning
 
-    F-monotonic  : ∀ K {t} → t ∈ D K → F t ∈ D (suc K)
-    F-monotonic K {t} with t ≟ x*
+    F-monotonic  : ∀ {K t} → t ∈ D K → F t ∈ D (suc K)
+    F-monotonic {K} {t} with t ≟ x*
     ... | yes t≈x* = F-monotonic-x*≈ t≈x* {K}
     ... | no  t≉x* = F-monotonic-x*≉ t≉x* {K}
 

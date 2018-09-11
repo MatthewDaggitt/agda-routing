@@ -10,12 +10,12 @@ open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
 open import RoutingLib.Data.Table using (Table; max; zipWith)
 open import RoutingLib.Data.Table.Properties using (max-cong; t≤max[t]; max-constant; max[s]≤max[t]₂)
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
-open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (Setoid; Setoid_at_)
+open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (IndexedSetoid; Setoid_at_)
 open import RoutingLib.Function.Metric
 
-module RoutingLib.Function.Metric.MaxLift {a ℓ n} (𝕊 : Setoid (Fin n) a ℓ) where
+module RoutingLib.Function.Metric.MaxLift {a ℓ n} (𝕊 : IndexedSetoid (Fin n) a ℓ) where
 
-  open Setoid 𝕊
+  open IndexedSetoid 𝕊
     using (_≈_; _≈ᵢ_)
     renaming
     ( Carrier  to S

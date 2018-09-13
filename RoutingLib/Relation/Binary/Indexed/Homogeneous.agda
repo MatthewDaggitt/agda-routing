@@ -52,7 +52,7 @@ Antisymmetric _ _≈_ _∼_ = ∀ {i} → B.Antisymmetric (_≈_ {i}) (_∼_ {i}
 Decidable : ∀ {i a ℓ} {I : Set i} (A : I → Set a) → IRel A ℓ → Set _
 Decidable A _∼_ = ∀ {i} → B.Decidable (_∼_ {i})
 
-Respects : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → Pred A ℓ₁ → IRel A ℓ₂ → Set _
+Respects : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → IPred A ℓ₁ → IRel A ℓ₂ → Set _
 Respects A P _∼_ = ∀ {i} {x y : A i} → x ∼ y → P x → P y
 
 Respectsˡ : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → IRel A ℓ₁ → IRel A ℓ₂ → Set _
@@ -74,30 +74,30 @@ Preserves A f P Q = ∀ {i} {x y : A i} → P x y → Q (f x) (f y)
 -- Records
 
 record IsIndexedEquivalence {i a ℓ} {I : Set i} (A : I → Set a)
-                     (_≈_ : IRel A ℓ) : Set (i ⊔ a ⊔ ℓ) where
+                     (_≈ᵢ_ : IRel A ℓ) : Set (i ⊔ a ⊔ ℓ) where
   field
-    reflᵢ  : Reflexive A _≈_
-    symᵢ   : Symmetric A _≈_
-    transᵢ : Transitive A _≈_
+    reflᵢ  : Reflexive A _≈ᵢ_
+    symᵢ   : Symmetric A _≈ᵢ_
+    transᵢ : Transitive A _≈ᵢ_
 
-  reflexiveᵢ : ∀ {i} → _≡_ ⟨ B._⇒_ ⟩ _≈_ {i}
+  reflexiveᵢ : ∀ {i} → _≡_ ⟨ B._⇒_ ⟩ _≈ᵢ_ {i}
   reflexiveᵢ P.refl = reflᵢ
 
   -- Lift properties
 
-  reflexive : _≡_ B.⇒ (Lift A _≈_)
+  reflexive : _≡_ B.⇒ (Lift A _≈ᵢ_)
   reflexive P.refl i = reflᵢ
 
-  refl : B.Reflexive (Lift A _≈_)
+  refl : B.Reflexive (Lift A _≈ᵢ_)
   refl i = reflᵢ
 
-  sym : B.Symmetric (Lift A _≈_)
+  sym : B.Symmetric (Lift A _≈ᵢ_)
   sym x≈y i = symᵢ (x≈y i)
 
-  trans : B.Transitive (Lift A _≈_)
+  trans : B.Transitive (Lift A _≈ᵢ_)
   trans x≈y y≈z i = transᵢ (x≈y i) (y≈z i)
 
-  isEquivalence : B.IsEquivalence (Lift A _≈_)
+  isEquivalence : B.IsEquivalence (Lift A _≈ᵢ_)
   isEquivalence = record
     { refl  = refl
     ; sym   = sym
@@ -120,13 +120,30 @@ record IndexedSetoid {i} (I : Set i) c ℓ : Set (suc (i ⊔ c ⊔ ℓ)) where
   _≈_ : B.Rel Carrier _
   _≈_ = Lift Carrierᵢ _≈ᵢ_
 
-  _≉_ : B.Rel Carrier _
-  x ≉ y = ¬ (x ≈ y)
-
   setoid : B.Setoid _ _
   setoid = record
     { isEquivalence = isEquivalence
     }
+
+
+record IsIndexedDecEquivalence {i a ℓ} {I : Set i} (A : I → Set a)
+                               (_≈ᵢ_ : IRel A ℓ) : Set (i ⊔ a ⊔ ℓ) where
+  infix 4 _≟ᵢ_
+  field
+    _≟ᵢ_           : Decidable A _≈ᵢ_
+    isEquivalenceᵢ : IsIndexedEquivalence A _≈ᵢ_
+  
+record IndexedDecSetoid {i} (I : Set i) c ℓ : Set (suc (i ⊔ c ⊔ ℓ)) where
+  infix 4 _≈ᵢ_
+  field
+    Carrierᵢ          : I → Set c
+    _≈ᵢ_              : IRel Carrierᵢ ℓ
+    isDecEquivalenceᵢ : IsIndexedDecEquivalence Carrierᵢ _≈ᵢ_
+
+  open IsIndexedDecEquivalence isDecEquivalenceᵢ public
+
+  indexedSetoid : IndexedSetoid I c ℓ
+  indexedSetoid = record { isEquivalenceᵢ = isEquivalenceᵢ }
 
 
 record IsIndexedPreorder {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a)

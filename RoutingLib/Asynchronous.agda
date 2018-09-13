@@ -3,10 +3,11 @@ open import Level using (_⊔_) renaming (zero to lzero; suc to lsuc)
 open import Data.Fin using (Fin)
 open import Data.Fin.Dec using (_∈?_)
 open import Data.Fin.Properties using () renaming (setoid to 𝔽ₛ)
+open import Data.Maybe using (Maybe; just; nothing; Eq)
 open import Data.Nat using (ℕ; _≤_; _+_; s≤s; _<_; zero; suc)
 open import Data.Nat.Properties using (≤-refl)
 open import Data.Product using (∃; _×_; _,_)
---open import Relation.Binary.Indexed using (Setoid)
+open import Relation.Binary using (Rel)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
@@ -21,20 +22,65 @@ import RoutingLib.Data.Table.Relation.Equality as TableEquality
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous
 open import RoutingLib.Relation.Unary.Indexed
 
-open import RoutingLib.Asynchronous.Schedule using (Schedule; 𝕋)
+open import RoutingLib.Asynchronous.Schedule
 
 module RoutingLib.Asynchronous where
 
 ------------------------------------------------------------------------
 -- Parallelisable functions
 
-record Parallelisation {a ℓ n} (𝕊 : IndexedSetoid (Fin n) a ℓ) : Set (lsuc a ⊔ ℓ) where
+record IsParallelisation {a n ℓ} {Sᵢ : Fin n → Set a} (_≈ᵢ_ : IRel Sᵢ ℓ)
+                         (F : Epoch → (∀ i → Maybe (Sᵢ i)) → (∀ i → Maybe (Sᵢ i)))
+                         : Set (a ⊔ ℓ) where
+  field
+    isEquivalenceᵢ : IsIndexedEquivalence Sᵢ _≈ᵢ_
 
-  -- open IndexedTypes 𝕊ᵢ public
-  open IndexedSetoid 𝕊 public renaming
-    ( Carrierᵢ      to Sᵢ
-    ; Carrier       to S
-    ; reflᵢ         to ≈ᵢ-refl
+  S : Set _
+  S = ∀ i → Sᵢ i
+
+  Sᵐᵢ : Fin n → Set _
+  Sᵐᵢ i = Maybe (Sᵢ i)
+
+  Sᵐ : Set _
+  Sᵐ = ∀ i → Sᵐᵢ i
+
+  toSᵐ : S → Sᵐ
+  toSᵐ x i = just (x i)
+  
+  module _ (𝓢 : Schedule n) where
+    open Schedule 𝓢
+
+    -- The six cases (in-order)
+    -- 1. Initially: not participating
+    -- 2. Initially: participating
+    -- 3. Currently: not participating
+    -- 4. Currently: just started participating
+    -- 5. Currently: participating but inactive
+    -- 6. Currently: participating and active
+    asyncIter' : S → ∀ {t} → Acc _<_ t → Sᵐ
+    asyncIter' x₀ {zero} _ i with i ∈? ρ 0
+    ... | no  _ = nothing
+    ... | yes _ = just (x₀ i)  
+    asyncIter' x₀ {suc t} (acc rec) i with i ∈? ρ (suc t) | i ∈? ρ t | i ∈? α (suc t)
+    ... | no _  | _     | _     = nothing
+    ... | yes _ | no  _ | _     = just (x₀ i)
+    ... | yes _ | yes _ | no  _ = asyncIter' x₀ (rec t ≤-refl) i
+    ... | yes _ | yes _ | yes _ = F (η t) (λ j → asyncIter' x₀ (rec (β (suc t) i j) (s≤s (β-causality t i j))) j) i
+
+    asyncIter : S → 𝕋 → Sᵐ
+    asyncIter x₀ t = asyncIter' x₀ (<-wellFounded t)
+
+    {-
+    syncIter : Epoch → S → ℕ → S
+    syncIter e x₀ zero     = x₀
+    syncIter e x₀ (suc K)  = F e (syncIter x₀ K)
+    -}
+
+  _≈_ : Rel Sᵐ (a ⊔ ℓ)
+  x ≈ y = ∀ i → Eq _≈ᵢ_ (x i) (y i)
+  
+  open IsIndexedEquivalence isEquivalenceᵢ public renaming
+    ( reflᵢ         to ≈ᵢ-refl
     ; symᵢ          to ≈ᵢ-sym
     ; transᵢ        to ≈ᵢ-trans
     ; refl          to ≈-refl
@@ -43,50 +89,32 @@ record Parallelisation {a ℓ n} (𝕊 : IndexedSetoid (Fin n) a ℓ) : Set (lsu
     ; isEquivalence to ≈-isEquivalence
     )
 
-  open Schedule
-
+record Parallelisation a ℓ n : Set (lsuc a ⊔ lsuc ℓ) where
   field
-    F      : (∀ i → Sᵢ i) → ∀ i → Sᵢ i
+    Sᵢ                : Fin n → Set a
+    _≈ᵢ_              : IRel Sᵢ ℓ
+    F                 : Epoch → (∀ i → Maybe (Sᵢ i)) → (∀ i → Maybe (Sᵢ i))
+    isParallelisation : IsParallelisation _≈ᵢ_ F
 
-  asyncIter' : Schedule n → S → ∀ {t} → Acc _<_ t → S
-  asyncIter' 𝓢 x[0] {zero}  _        i = x[0] i
-  asyncIter' 𝓢 x[0] {suc t} (acc rs) i with i ∈? α 𝓢 (suc t)
-  ... | yes _ = F (λ j → asyncIter' 𝓢 x[0] (rs (β 𝓢 (suc t) i j) (s≤s (causality 𝓢 t i j))) j) i
-  ... | no  _ = asyncIter' 𝓢 x[0] (rs t ≤-refl) i
-
-  asyncIter : Schedule n → S → 𝕋 → S
-  asyncIter 𝓢 x[0] t = asyncIter' 𝓢 x[0] (<-wellFounded t)
-
-  syncIter : S → ℕ → S
-  syncIter x₀ zero     = x₀
-  syncIter x₀ (suc K)  = F (syncIter x₀ K)
-
+  open IsParallelisation isParallelisation public
+  
 -------------------------------------------------------------------------
 -- Safeness of parallelisations
 
-module _ {a ℓ n} {𝕊 : IndexedSetoid (Fin n) a ℓ} (P : Parallelisation 𝕊) where
+module _ {a ℓ n} (P : Parallelisation a ℓ n) where
 
   open Parallelisation P
 
-  -- P is a well behaved on the set of inputs V.
-  record IsPartiallyAsynchronouslySafe {v} (V : Pred Sᵢ v) : Set (lsuc (a ⊔ ℓ) ⊔ v) where
+  -- P is well behaved on the set of inputs V.
+  record IsPartiallyAsynchronouslySafe {v} (V : IPred Sᵢ v) : Set (lsuc (a ⊔ ℓ) ⊔ v) where
     field
-      m*         : S
+      m*         : Sᵐ
       m*-reached : ∀ {x₀} → x₀ ∈ V → ∀ s → ∃ λ tᶜ → ∀ t → asyncIter s x₀ (tᶜ + t) ≈ m*
 
-  -- P is a well behaved on all inputs.
-  record IsAsynchronouslySafe : Set (lsuc (a ⊔ ℓ)) where
-    field
-      m*         : S
-      m*-reached : ∀ X s → ∃ λ tᶜ → ∀ t → asyncIter s X (tᶜ + t) ≈ m*
+  IsAsynchronouslySafe : Set (lsuc (a ⊔ ℓ))
+  IsAsynchronouslySafe = IsPartiallyAsynchronouslySafe (U Sᵢ)
 
-
--------------------------------------------------------------------------
--- Reachability
-
-module _ {a ℓ n} {𝕊 : IndexedSetoid (Fin n) a ℓ} (P : Parallelisation 𝕊) where
-
-
+{-
 -------------------------------------------------------------------------
 -- Bisimilarity
 
@@ -113,5 +141,4 @@ module _ {a₁ a₂ ℓ₁ ℓ₂ n} {𝕊₁ : IndexedSetoid (Fin n) a₁ ℓ�
 
     from : Q.S → P.S
     from x i = fromᵢ (x i)
-    
-    
+-}

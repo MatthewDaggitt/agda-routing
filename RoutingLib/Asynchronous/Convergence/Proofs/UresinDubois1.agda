@@ -1,6 +1,7 @@
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset using () renaming (_∈_ to _∈ₛ_)
 open import Data.Fin.Dec using (_∈?_)
+open import Data.Maybe using (just; nothing)
 open import Data.Product using (∃; proj₂; proj₁; _,_)
 open import Induction.WellFounded using (Acc; acc)
 open import Induction.Nat using (<-wellFounded)
@@ -15,17 +16,35 @@ open import Relation.Unary using () renaming (_∈_ to _∈ᵤ_)
 
 open import RoutingLib.Asynchronous
 open import RoutingLib.Asynchronous.Schedule
-open import RoutingLib.Asynchronous.Schedule.Pseudoperiod.Properties using (pseudoperiodic)
+-- open import RoutingLib.Asynchronous.Schedule.Pseudoperiod.Properties using (pseudoperiodic)
 open import RoutingLib.Asynchronous.Convergence.Conditions using (ACO)
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous
 open import RoutingLib.Relation.Unary.Indexed
 
 module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois1
-  {a ℓ n p} {𝕊 : IndexedSetoid (Fin n) a ℓ} (𝓟 : Parallelisation 𝕊) (aco : ACO 𝓟 p) where
+  {a ℓ n p} (𝓟 : Parallelisation a ℓ n) (aco : ACO 𝓟 p) where
 
-  open Parallelisation 𝓟
-  open ACO aco
+open Parallelisation 𝓟
+open ACO aco
 
+module _ (𝓢 : Schedule n) where
+
+  open Schedule 𝓢
+  
+  module _ (x₀ : S) (x₀∈D₀₀ : (toSᵐ x₀) ∈ D (η 0) 0) where
+
+    asyncₜ∈D[ηₜ]₀ : ∀ {t} (accₜ : Acc _<_ t) → asyncIter' 𝓢 x₀ accₜ ∈ D (η t) 0
+    asyncₜ∈D[ηₜ]₀ {zero}  _ i with i ∈? ρ 0
+    ... | no  _ = D₀-null (η 0)
+    ... | yes _ = x₀∈D₀₀ i
+    asyncₜ∈D[ηₜ]₀ {suc t} (acc rec) i with i ∈? ρ (suc t) | i ∈? ρ t | i ∈? α (suc t) | 
+    ... | no _  | _     | _     = D₀-null (η (suc t))
+    ... | yes _ | no  _ | _     = Dₑ₀-mono (η-mono z≤n) x₀∈D₀₀ i
+    ... | yes _ | yes _ | no  _ = {!!} --async[t]'∈D₀ {!!} i --asyncIter' x₀ (rec t ≤-refl) i
+    ... | yes _ | yes _ | yes _ = {!!} --F (η t) (λ j → asyncIter' x₀ (rec (β (suc t) i j) (s≤s (β-causality t i j))) j) i
+    
+
+{-
   -- The final box number
   T : 𝕋
   T = proj₁ D-finish
@@ -33,14 +52,14 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois1
   -- The final state
   ξ : S
   ξ = proj₁ (proj₂ D-finish)
+-}
 
-
+{-
   module _ (𝓟𝓢 : PseudoperiodicSchedule n) where
 
     open PseudoperiodicSchedule 𝓟𝓢
     
-    β-decreasing : ∀ {t} i j → 1 ≤ t → β t i j ≤ t
-    β-decreasing i j (s≤s z≤n) = ≤-trans (causality _ i j) (n≤1+n _)
+    
 
     τ[1+K]-expired : ∀ {t K i j} → τ (suc K) i ≤ t → τ K j ≤ β t i j
     τ[1+K]-expired {t} {K} {i} {j} τ[1+K]≤t = begin
@@ -112,3 +131,4 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois1
     { m*         = ξ
     ; m*-reached = ξ-reached
     }
+-}

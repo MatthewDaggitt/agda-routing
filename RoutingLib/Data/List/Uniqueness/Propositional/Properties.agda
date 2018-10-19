@@ -38,6 +38,7 @@ module RoutingLib.Data.List.Uniqueness.Propositional.Properties where
   upTo!⁺ : ∀ n → Unique (upTo n)
   upTo!⁺ n = applyUpTo⁺₁ n (λ i<j _ → <⇒≢ i<j)
 
+  postulate downFrom!⁺ : ∀ n → Unique (downFrom n)
   {-
   between!⁺ : ∀ s e → Unique (between s e)
   between!⁺ s e = AllPairs-applyBetween⁺₁ id s e (λ _ i<j _ → <⇒≢ i<j)

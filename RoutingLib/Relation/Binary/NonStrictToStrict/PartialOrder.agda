@@ -1,4 +1,5 @@
 open import Data.Product using (proj₁; proj₂)
+open import Level using (_⊔_)
 open import Relation.Binary
 open import Relation.Nullary using (¬_)
 import Relation.Binary.NonStrictToStrict as NonStrictToStrict
@@ -11,6 +12,7 @@ module RoutingLib.Relation.Binary.NonStrictToStrict.PartialOrder
 
   open Poset poset
   open NonStrictToStrict _≈_ _≤_ using (_<_) public
+  open NonStrictToStrict′ _≈_ _≤_ using (<⇒≉; <⇒≤; ≤∧≉⇒<) public
 
   <-strictPartialOrder : StrictPartialOrder a ℓ₁ _
   <-strictPartialOrder = record
@@ -25,6 +27,7 @@ module RoutingLib.Relation.Binary.NonStrictToStrict.PartialOrder
     ( irrefl     to <-irrefl
     ; trans      to <-trans
     ; asymmetric to <-asym
+    ; isStrictPartialOrder to <-isStrictPartialOrder
     )
 
   <-≤-trans : ∀ {x y z} → x < y → y ≤ z → x < z
@@ -44,3 +47,17 @@ module RoutingLib.Relation.Binary.NonStrictToStrict.PartialOrder
 
   <-respʳ-≈ : _<_ Respectsʳ _≈_
   <-respʳ-≈ = NonStrictToStrict.<-respʳ-≈ _ _≤_ Eq.sym Eq.trans (proj₁ ≤-resp-≈)
+
+  ≤-<-isOrderingPair : IsOrderingPair _≈_ _≤_ _<_
+  ≤-<-isOrderingPair = record
+    { isEquivalence        = isEquivalence
+    ; isPartialOrder       = isPartialOrder
+    ; isStrictPartialOrder = <-isStrictPartialOrder
+    ; <⇒≤                  = <⇒≤
+    ; ≤∧≉⇒<                = ≤∧≉⇒<
+    ; <-≤-trans            = <-≤-trans
+    ; ≤-<-trans            = ≤-<-trans
+    }
+  
+  ≤-<-orderingPair : OrderingPair a ℓ₁ ℓ₂ (ℓ₁ ⊔ ℓ₂)
+  ≤-<-orderingPair = record { isOrderingPair = ≤-<-isOrderingPair }

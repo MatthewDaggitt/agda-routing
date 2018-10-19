@@ -4,6 +4,7 @@ open import Data.Fin as Fin using (Fin)
 open import Data.List using (List; map)
 import Data.List.Membership.Setoid as Membership
 open import Data.List.Membership.Setoid.Properties using (∈-resp-≈; ∈-map⁺)
+open import Data.Maybe using (Maybe; nothing; just)
 open import Data.Nat using (suc)
 open import Data.Product using (Σ; _×_; _,_; proj₁)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
@@ -23,6 +24,7 @@ open import RoutingLib.Data.Path.CertifiedI
 open import RoutingLib.Data.Path.CertifiedI.Enumeration
 open import RoutingLib.Data.Path.CertifiedI.Properties
 
+open import RoutingLib.Routing.Model using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Algebra.RoutingAlgebra
 open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
@@ -37,7 +39,7 @@ module RoutingLib.Routing.Algebra.CertifiedPathAlgebra.Consistency
 
 open RawRoutingAlgebra algebra
 open IsCertifiedPathAlgebra isPathAlgebra
-open PathAlgebraProperties algebra isPathAlgebra
+open PathAlgebraProperties isPathAlgebra
 
 --------------------------------------------------------------------------------
 -- Consistency
@@ -85,7 +87,7 @@ weight-cong (valid (refl ∷ p≈q)) = ▷-cong _ (weight-cong (valid p≈q))
 ...     | pᵣ≈q | no ¬ij⇿q | _       = 𝑪-cong (≈-sym (path-reject (A i j) pᵣ≈q (inj₁ ¬ij⇿q))) ∞ᶜ -- pᵣ≈q
 ...     | pᵣ≈q | _        | no  i∈q = 𝑪-cong (≈-sym (path-reject (A i j) pᵣ≈q (inj₂ i∈q))) ∞ᶜ -- pᵣ≈q
 ...     | pᵣ≈q | yes ij⇿q | yes i∉q = begin
-  weight A (path (A i j ▷ r))                   ≈⟨ weight-cong {path (A i j ▷ r)} (path-accept pᵣ≈q Aᵢⱼ▷r≉∞ ij⇿q i∉q) ⟩
+  weight A (path (A i j ▷ r))                   ≈⟨ weight-cong {path (A i j ▷ r)} (path-accept (A i j) pᵣ≈q Aᵢⱼ▷r≉∞ ij⇿q i∉q) ⟩
   weight A (valid ((i , j) ∷ q ∣ ij⇿q ∣ i∉q))   ≡⟨⟩
   A i j ▷ weight A (valid q)                    ≈⟨ ▷-cong (A i j) rᶜ ⟩
   A i j ▷ r                                     ∎
@@ -105,7 +107,7 @@ weightᶜ (valid ((i , j) ∷ p ∣ e⇿p ∣ e∉p)) with A i j ▷ weight A (v
 ...     | p[wₚ]≈q | no ¬ij⇿q | _       = 𝑪-cong (≈-sym (path-reject (A i j) p[wₚ]≈q (inj₁ ¬ij⇿q))) ∞ᶜ
 ...     | p[wₚ]≈q | _        | no  i∈q = 𝑪-cong (≈-sym (path-reject (A i j) p[wₚ]≈q (inj₂ i∈q))) ∞ᶜ
 ...     | p[wₚ]≈q | yes ij⇿q | yes i∉q = begin
-  weight A (path (A i j ▷ weight A (valid p)))  ≈⟨ weight-cong (path-accept p[wₚ]≈q Aᵢⱼ▷wₚ≉∞ ij⇿q i∉q) ⟩
+  weight A (path (A i j ▷ weight A (valid p)))  ≈⟨ weight-cong (path-accept (A i j) p[wₚ]≈q Aᵢⱼ▷wₚ≉∞ ij⇿q i∉q) ⟩
   weight A (valid ((i , j) ∷ q ∣ ij⇿q ∣ i∉q))   ≡⟨⟩
   A i j ▷ weight A (valid q)                    ≈⟨ ▷-cong (A i j) (weight-cong (≈ₚ-sym p[wₚ]≈q)) ⟩
   A i j ▷ weight A (path (weight A (valid p)))  ≈⟨ ▷-cong (A i j) (weightᶜ (valid p)) ⟩
@@ -120,7 +122,7 @@ sizeⁱ-incr {i} {j} {r} {f} f▷rⁱ with f ▷ r ≟ ∞
 ...   | valid q | [ pᵣ≡q ] with ≈ₚ-reflexive pᵣ≡q | (i , j) ⇿ᵥ? q | i ∉ᵥₚ? q
 ...     | pᵣ≈q | no ¬ij⇿q | _       = contradiction (path-reject f pᵣ≈q (inj₁ ¬ij⇿q)) f▷r≉∞
 ...     | pᵣ≈q | _        | no  i∈q = contradiction (path-reject f pᵣ≈q (inj₂ i∈q)) f▷r≉∞
-...     | pᵣ≈q | yes ij⇿q | yes i∉q = sym (length-cong (path-accept pᵣ≈q f▷r≉∞ ij⇿q i∉q))
+...     | pᵣ≈q | yes ij⇿q | yes i∉q = sym (length-cong (path-accept f pᵣ≈q f▷r≉∞ ij⇿q i∉q))
 
 ------------------------------------------------------------------------------
 -- Types
@@ -130,7 +132,7 @@ CRoute = Σ Route 𝑪
 
 -- Note: U i j is never used but is included so that i and j are inferrable
 CStep : ∀ {m} → Fin m → Fin m → Set
-CStep i j = Fin n × Fin n × (i ≡ j ⊎ i ≢ j)
+CStep i j = Maybe (Fin n × Fin n) × (i ≡ j ⊎ i ≢ j)
 
 ------------------------------------------------------------------------------
 -- Special routes
@@ -183,11 +185,18 @@ _⊕ᶜ_ : Op₂ CRoute
 infix 6 _▷ᶜ_
 
 _▷ᶜ_ : ∀{n} {i j : Fin n} → CStep i j → CRoute → CRoute
-_▷ᶜ_ {i = i} {j} (k , l , _) (r , rᶜ) = A k l ▷ r , ▷-pres-𝑪 k l rᶜ
+(nothing       , _) ▷ᶜ (r , rᶜ) = C∞
+(valid (k , l) , _) ▷ᶜ (r , rᶜ) = A k l ▷ r , ▷-pres-𝑪 k l rᶜ
 
-▷ᶜ-cong : ∀ {n} {i j : Fin n} (f : CStep i j) {r s} → r ≈ᶜ s →
-          _▷ᶜ_ {n} {i} {j} f r ≈ᶜ _▷ᶜ_ {n} {i} {j} f s
-▷ᶜ-cong (i , j , _) = ▷-cong (A i j)
+▷ᶜ-cong : ∀ {n} {i j : Fin n} (f : CStep i j) {r s} → r ≈ᶜ s → f ▷ᶜ r ≈ᶜ f ▷ᶜ s
+▷ᶜ-cong (nothing       , _) = λ _ → ≈-refl
+▷ᶜ-cong (valid (k , l) , _) = ▷-cong (A k l)
+
+f∞ᶜ : ∀ {n} (i j : Fin n) → CStep i j
+f∞ᶜ i j = nothing , toSum (i Fin.≟ j)
+
+f∞ᶜ-reject : ∀ {n} (i j : Fin n) → ∀ x → (f∞ᶜ i j) ▷ᶜ x ≈ᶜ C∞
+f∞ᶜ-reject _ _ _ = ≈-refl
 
 ------------------------------------------------------------------------------
 -- Raw routing algebra
@@ -201,9 +210,11 @@ algebraᶜ = record
   ; _▷_                = _▷ᶜ_
   ; 0#                 = C0#
   ; ∞                  = C∞
+  ; f∞                 = f∞ᶜ
   ; ≈-isDecEquivalence = ≈ᶜ-isDecEquivalence
-  ; ▷-cong             = ▷ᶜ-cong
   ; ⊕-cong             = ⊕-cong
+  ; ▷-cong             = ▷ᶜ-cong
+  ; f∞-reject          = f∞ᶜ-reject
   }
 
 ------------------------------------------------------------------------------
@@ -225,7 +236,8 @@ algebraᶜ = record
 ⊕ᶜ-identityʳ _ = ⊕-identityʳ _
 
 ▷ᶜ-fixedPoint : ∀ {n} {i j : Fin n} (f : CStep i j) → f ▷ᶜ C∞ ≈ᶜ C∞
-▷ᶜ-fixedPoint (i , j , _) = ▷-fixedPoint (A i j)
+▷ᶜ-fixedPoint (nothing       , _) = ≈-refl 
+▷ᶜ-fixedPoint (valid (k , l) , _) = ▷-fixedPoint (A k l)
 
 isRoutingAlgebraᶜ : IsRoutingAlgebra algebraᶜ
 isRoutingAlgebraᶜ = record
@@ -241,10 +253,12 @@ isRoutingAlgebraᶜ = record
 -- Optional properties
 
 isIncreasingᶜ : IsIncreasing algebra → IsIncreasing algebraᶜ
-isIncreasingᶜ incr (i , j , _) (r , _) = incr (A i j) r
+isIncreasingᶜ incr (valid (k , l) , _) (r , _) = incr (A k l) r
+isIncreasingᶜ incr (nothing       , _) (r , _) = ⊕-identityˡ r
 
 isStrictlyIncreasingᶜ : IsStrictlyIncreasing algebra → IsStrictlyIncreasing algebraᶜ
-isStrictlyIncreasingᶜ sIncr (i , j , f) r≉∞ = sIncr (A i j) r≉∞
+isStrictlyIncreasingᶜ sIncr (valid (k , l) , _)     = sIncr (A k l)
+isStrictlyIncreasingᶜ sIncr (nothing       , _) r≉∞ = (⊕-identityˡ _) , r≉∞
 
 isFiniteᶜ : IsFinite algebraᶜ
 isFiniteᶜ = allCRoutes , ∈-allCRoutes
@@ -263,37 +277,6 @@ isFiniteᶜ = allCRoutes , ∈-allCRoutes
     ∈-allCRoutes (r , rᶜ) = ∈-resp-≈ Sᶜ {x = pathToCRoute (path r)} {r , rᶜ}
       rᶜ (∈-map⁺ (ℙₛ n) Sᶜ weight-cong (∈-allPaths (path r)))
 
-{-
-------------------------------------------------------------------------------
--- Routing algebra
-
-rawAlgebraᶜ : RawRoutingAlgebra _ _ _
-rawAlgebraᶜ = record
-  { Step  = CStep
-  ; Route = CRoute
-  ; _≈_   = _≈ᶜ_
-  ; _⊕_   = _⊕ᶜ_
-  ; _▷_   = _▷ᶜ_
-  ; 0#    = C0#
-  ; ∞     = C∞
-
-  ; ≈-isDecEquivalence = ≈ᶜ-isDecEquivalence
-  ; ⊕-cong             = λ {w} {x} {y} {z} → ⊕ᶜ-cong {w} {x} {y} {z}
-  ; ▷-cong             = ▷ᶜ-cong
-  }
-
-isRoutingAlgebraᶜ : IsRoutingAlgebra rawAlgebraᶜ
-isRoutingAlgebraᶜ = record
-  { ⊕-sel              = ⊕ᶜ-sel
-  ; ⊕-comm             = ⊕ᶜ-comm
-  ; ⊕-assoc            = ⊕ᶜ-assoc
-  ; ⊕-zeroʳ            = ⊕ᶜ-zeroʳ
-  ; ⊕-identityʳ        = ⊕ᶜ-identityʳ
-  ; ▷-zero             = ▷ᶜ-zero
-  }
-
--}
-
 ------------------------------------------------------------------------------
 -- Conversion
 
@@ -307,4 +290,4 @@ fromCRoute (r , _ ) = r
 -- Adjacency matrix
 
 Aᶜ : AdjacencyMatrix algebraᶜ n
-Aᶜ i j = (i , j , toSum (i Fin.≟ j))
+Aᶜ i j = just (i , j) , toSum (i Fin.≟ j)

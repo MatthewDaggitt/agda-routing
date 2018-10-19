@@ -18,7 +18,7 @@ open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
 import RoutingLib.Routing.Algebra.RoutingAlgebra.Properties as RoutingAlgebraProperties
 
 module RoutingLib.Routing.Algebra.CertifiedPathAlgebra.Properties
-  {a b ℓ n} (algebra : RawRoutingAlgebra a b ℓ)
+  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
   (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
   where
 
@@ -28,7 +28,7 @@ open IsCertifiedPathAlgebra isPathAlgebra
 --------------------------------------------------------------------------------
 -- Import routing algebra properties
 
-open RoutingAlgebraProperties algebra isRoutingAlgebra public
+open RoutingAlgebraProperties isRoutingAlgebra public
 
 --------------------------------------------------------------------------------
 -- Path properties

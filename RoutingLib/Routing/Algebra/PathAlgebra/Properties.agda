@@ -21,7 +21,7 @@ module RoutingLib.Routing.Algebra.PathAlgebra.Properties
 
 open RawRoutingAlgebra algebra
 open IsPathAlgebra isPathAlgebra
-open RoutingAlgebraProperties algebra isRoutingAlgebra public
+open RoutingAlgebraProperties isRoutingAlgebra public
 
 incr⇒strIncr : IsIncreasing algebra → IsStrictlyIncreasing algebra
 incr⇒strIncr incr {i = i} {k} f {x} x≉∞ with f ▷ x ≟ ∞

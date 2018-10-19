@@ -10,7 +10,6 @@ open import Relation.Binary using (Rel; IsDecEquivalence; Setoid; DecSetoid)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 import Relation.Binary.EqReasoning as EqReasoning
 
-open import RoutingLib.Data.Maybe using (Eq')
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.Table using (Table)
 import RoutingLib.Data.Matrix.Relation.DecidableEquality as MatrixDecEquality
@@ -34,15 +33,19 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
   field
     Step             : ∀ {n} → Fin n → Fin n → Set a
     Route            : Set b
+    
     _≈_              : Rel Route ℓ
     _⊕_              : Op₂ Route
     _▷_              : ∀ {n} {i j : Fin n} → Step i j → Route → Route
     0#               : Route
     ∞                : Route
+    f∞               : ∀ {n} (i j : Fin n) → Step i j
 
     ≈-isDecEquivalence : IsDecEquivalence _≈_
-    ▷-cong             : ∀ {n} {i j : Fin n} (f : Step i j) → Congruent₁ _≈_ (f ▷_)
     ⊕-cong             : Congruent₂ _≈_ _⊕_
+    ▷-cong             : ∀ {n} {i j : Fin n} (f : Step i j) → Congruent₁ _≈_ (f ▷_)
+    f∞-reject          : ∀ {n} (i j : Fin n) x → f∞ i j ▷ x ≈ ∞
+
 
   infix 4 _≉_
   _≉_ : Rel Route ℓ
@@ -89,10 +92,3 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 
   IsFinite : Set _
   IsFinite = Σ (List Route) (λ rs → ∀ r → r ∈ₗ rs)
-
---------------------------------------------------------------------------------
--- Adjacency matrices for a given algebra and size
-
-AdjacencyMatrix : ∀ {a b ℓ} → RawRoutingAlgebra a b ℓ → ℕ → Set a
-AdjacencyMatrix algebra n = ∀ (i j : Fin n) → Step i j
-  where open RawRoutingAlgebra algebra

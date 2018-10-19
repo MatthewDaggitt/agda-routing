@@ -22,6 +22,27 @@ module RoutingLib.Data.Fin.Subset.Properties where
   ... | yes _ = n≤1+n ∣ p ∣
   ... | no  _ = ≤-refl
 
+  -- Complement
+
+  x∉p⇒x∈∁p : ∀ {n x} {p : Subset n} → x ∉ p → x ∈ ∁ p
+  x∉p⇒x∈∁p {_} {()}    {[]}    
+  x∉p⇒x∈∁p {_} {zero}  {outside ∷ p} x∉p = here
+  x∉p⇒x∈∁p {_} {zero}  {inside ∷ p}  x∉p = contradiction here x∉p
+  x∉p⇒x∈∁p {_} {suc x} {v ∷ p}       x∉p = there (x∉p⇒x∈∁p (x∉p ∘ there))
+
+  x∈p⇒x∉∁p : ∀ {n x} {p : Subset n} → x ∈ p → x ∉ ∁ p
+  x∈p⇒x∉∁p here        = λ()
+  x∈p⇒x∉∁p (there x∈p) = x∈p⇒x∉∁p x∈p ∘ drop-there
+
+  p∩∁p≡⊥ : ∀ {n} (p : Subset n) → p ∩ ∁ p ≡ ⊥
+  p∩∁p≡⊥ []            = refl
+  p∩∁p≡⊥ (outside ∷ p) = cong (outside ∷_) (p∩∁p≡⊥ p)
+  p∩∁p≡⊥ (inside  ∷ p) = cong (outside ∷_) (p∩∁p≡⊥ p)
+
+  -- Membership
+
+  ∉-contract : ∀ {n} {i : Fin n} {p} → i ∉ p → ∀ {x} → suc i ∉ x ∷ p
+  ∉-contract ∉p (there ∈p) = ∉p ∈p
 
   -- Intersection
 
@@ -35,11 +56,6 @@ module RoutingLib.Data.Fin.Subset.Properties where
 
     ∣p∩q∣≤∣p∣⊓∣q∣ : ∣ p ∩ q ∣ ≤ ∣ p ∣ ⊓ ∣ q ∣
     ∣p∩q∣≤∣p∣⊓∣q∣ = m≤n×m≤o⇒m≤n⊓o ∣p∩q∣≤∣p∣ ∣p∩q∣≤∣q∣
-
-  p∩∁p≡⊥ : ∀ {n} (p : Subset n) → p ∩ ∁ p ≡ ⊥
-  p∩∁p≡⊥ []            = refl
-  p∩∁p≡⊥ (outside ∷ p) = cong (outside ∷_) (p∩∁p≡⊥ p)
-  p∩∁p≡⊥ (inside  ∷ p) = cong (outside ∷_) (p∩∁p≡⊥ p)
 
   -- Union
 

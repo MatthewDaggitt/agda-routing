@@ -11,8 +11,9 @@ open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; subst; cong; isEquivalence; sym; trans; subst₂; module ≡-Reasoning)
 open import Relation.Binary.Consequences using (trans∧tri⟶resp≈)
 open import Function using (_on_; _∘_; flip)
+import Function.Bijection as Bijection
 
-open import RoutingLib.Data.Fin
+open import RoutingLib.Relation.Nullary using (Finite)
 
 module RoutingLib.Data.Fin.Properties where
 
@@ -113,8 +114,8 @@ toℕ-fromℕ≤″ {m} {n} m<n = begin
   where open ≡-Reasoning
 
 
-
-
+finite : ∀ n → Finite (Fin n)
+finite n = n , Bijection.id
 
 
 

@@ -13,14 +13,13 @@ open import RoutingLib.Routing.Algebra.RoutingAlgebra
 import RoutingLib.Routing.Algebra.RoutingAlgebra.Properties as RoutingAlgebraProperties
 
 module RoutingLib.Routing.Algebra.RoutingAlgebra.FiniteProperties
-  {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)
+  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (isFinite : IsFinite algebra)
   where
 
 open RawRoutingAlgebra algebra
-open IsRoutingAlgebra isRoutingAlgebra
-open RoutingAlgebraProperties algebra isRoutingAlgebra public
+open RoutingAlgebraProperties isRoutingAlgebra public
 
 open import RoutingLib.Data.List.Sorting (flip _≤₊_) using (Sorted)
 

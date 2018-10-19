@@ -9,6 +9,7 @@ open import Relation.Nullary using (¬_)
 
 open import RoutingLib.Data.Path.CertifiedI
 
+open import RoutingLib.Routing.Model using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Algebra.RoutingAlgebra
 

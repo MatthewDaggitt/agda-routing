@@ -1,7 +1,7 @@
 open import Level using () renaming (_⊔_ to _⊔ₗ_)
 open import Data.Nat using (ℕ; zero; suc; _≤_; _<_; _+_; _⊔_; _<′_)
 open import Data.Nat.Properties using (≤⇒≤′)
-open import Relation.Binary using (Setoid; Decidable; _Preserves_⟶_; _Preserves₂_⟶_⟶_)
+open import Relation.Binary using (Rel; Setoid; Decidable; _Preserves_⟶_; _Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality using (_≡_) renaming (sym to ≡-sym)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Unary using (Pred)
@@ -9,10 +9,17 @@ open import Data.Product using (∃; _,_)
 open import Induction.WellFounded using (Acc; acc)
 open import Algebra.FunctionProperties using (Op₁)
 
+open import RoutingLib.Iteration.Synchronous using (_^_)
+
 module RoutingLib.Function.Metric {a} {ℓ} (S : Setoid a ℓ) where
 
   open Setoid S renaming (Carrier to A)
 
+  private
+    infix 4 _≉_
+    _≉_ : Rel A ℓ
+    x ≉ y = ¬ (x ≈ y)
+    
   DistanceFunction : Set _
   DistanceFunction = A → A → ℕ
 
@@ -43,10 +50,17 @@ module RoutingLib.Function.Metric {a} {ℓ} (S : Setoid a ℓ) where
   f ContrOnOrbitsOver d = ∀ x → d (f x) (f (f x)) ≤ d x (f x)
 
   _StrContrOnOrbitsOver_ : Op₁ A → DistanceFunction → Set _
-  f StrContrOnOrbitsOver d = ∀ {x} → ¬ (f x ≈ x) → d (f x) (f (f x)) < d x (f x)
+  f StrContrOnOrbitsOver d = ∀ {x} → f x ≉ x → d (f x) (f (f x)) < d x (f x)
 
+  _StrContrOnOrbitsOver_After_ : Op₁ A → DistanceFunction → ℕ → Set _
+  f StrContrOnOrbitsOver d After k = ∀ {x} → fᵏ⁺¹ x ≉ fᵏ x → d (fᵏ⁺¹ x) (fᵏ⁺² x) < d (fᵏ x) (fᵏ⁺¹ x)
+    where fᵏ = f ^ k; fᵏ⁺¹ = f ^ (1 + k); fᵏ⁺² = f ^ (2 + k)
+    
   _StrContrOnFixedPointOver_ : Op₁ A → DistanceFunction → Set _
-  f StrContrOnFixedPointOver d = ∀ {x x*} → f x* ≈ x* → ¬ (x ≈ x*) → d x* (f x) < d x* x
+  f StrContrOnFixedPointOver d = ∀ {x x*} → f x* ≈ x* → x ≉ x* → d x* (f x) < d x* x
+
+  _StrContrOnFixedPointOver_After_ : Op₁ A → DistanceFunction → ℕ → Set _
+  f StrContrOnFixedPointOver d After k = ∀ {x x*} → f x* ≈ x* → (f ^ k) x ≉ x* → d x* ((f ^ (1 + k)) x) < d x* ((f ^ k) x)
 
   -- Balls
 

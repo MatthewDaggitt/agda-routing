@@ -1,4 +1,4 @@
-open import Level using () renaming (zero to lzero)
+open import Level using () renaming (zero to 0ℓ)
 open import Data.Nat
 open import Data.Nat.Properties hiding (module ≤-Reasoning; +-monoʳ-<)
 open import Data.Sum using (inj₁; inj₂)
@@ -21,10 +21,10 @@ module RoutingLib.Data.Nat.Properties where
   -- Equality --
   --------------
 
-  ℕₛ : Setoid lzero lzero
+  ℕₛ : Setoid 0ℓ 0ℓ
   ℕₛ = setoid ℕ
 
-  ℕᵈˢ : DecSetoid lzero lzero
+  ℕᵈˢ : DecSetoid 0ℓ 0ℓ
   ℕᵈˢ = decSetoid _≟_
 
   abstract
@@ -57,12 +57,42 @@ module RoutingLib.Data.Nat.Properties where
       ; _≤?_            = _≤?_
       }
 
-  ≤-decTotalPreorder : DecTotalPreorder lzero lzero lzero
+  <-resp₂-≡ : _<_ Respects₂ _≡_
+  <-resp₂-≡ = subst (_ <_) , subst (_< _)
+  
+  -- stdlib
+  <-isStrictPartialOrder : IsStrictPartialOrder _≡_ _<_
+  <-isStrictPartialOrder = record
+    { isEquivalence = isEquivalence
+    ; irrefl        = <-irrefl
+    ; trans         = <-trans
+    ; <-resp-≈      = <-resp₂-≡
+    }
+
+  -- stdlib
+  <-strictPartialOrder : StrictPartialOrder 0ℓ 0ℓ 0ℓ
+  <-strictPartialOrder = record { isStrictPartialOrder = <-isStrictPartialOrder }
+
+  ≤-decTotalPreorder : DecTotalPreorder 0ℓ 0ℓ 0ℓ
   ≤-decTotalPreorder = record { isDecTotalPreorder = ≤-isDecTotalPreorder }
 
-  ≥-decTotalOrder : DecTotalOrder lzero lzero lzero
+  ≥-decTotalOrder : DecTotalOrder 0ℓ 0ℓ 0ℓ
   ≥-decTotalOrder = Flip.decTotalOrder ≤-decTotalOrder
 
+  ≤-<-isOrderingPair : IsOrderingPair _≡_ _≤_ _<_
+  ≤-<-isOrderingPair = record
+    { isEquivalence        = isEquivalence
+    ; isPartialOrder       = ≤-isPartialOrder
+    ; isStrictPartialOrder = <-isStrictPartialOrder
+    ; <⇒≤                  = <⇒≤
+    ; ≤∧≉⇒<                = ≤+≢⇒<
+    ; <-≤-trans            = <-transˡ
+    ; ≤-<-trans            = <-transʳ
+    }
+
+  ≤-<-orderingPair : OrderingPair 0ℓ 0ℓ 0ℓ 0ℓ
+  ≤-<-orderingPair = record { isOrderingPair = ≤-<-isOrderingPair }
+  
   abstract
 
     >⇒≰ : _>_ ⇒ _≰_
@@ -82,9 +112,11 @@ module RoutingLib.Data.Nat.Properties where
     n≢0⇒0<n {zero} 0≢0 = contradiction refl 0≢0
     n≢0⇒0<n {suc n} n+1≢0 = s≤s z≤n
 
+    -- stdlib
     m<n⇒n≢0 : ∀ {m n} → m < n → n ≢ 0
     m<n⇒n≢0 (s≤s m≤n) ()
 
+    -- stdlib
     n≤0⇒n≡0 : ∀ {n} → n ≤ 0 → n ≡ 0
     n≤0⇒n≡0 z≤n = refl
 
@@ -92,14 +124,8 @@ module RoutingLib.Data.Nat.Properties where
     -- Equality reasoning
 
     module ≤-Reasoning where
-      open StrictReasoning ≤-trans ≤-reflexive <-trans <-transˡ <-transʳ public using
-        ( begin_
-        ; _≡⟨_⟩_
-        ; _≡⟨⟩_
-        ; _≤⟨_⟩_
-        ; _<⟨_⟩_
-        ; _∎
-        )
+      open StrictReasoning ≤-<-orderingPair public
+        hiding (_≈⟨_⟩_)
 
     n<1+n : ∀ n → n < suc n
     n<1+n n = ≤-refl
@@ -153,6 +179,7 @@ module RoutingLib.Data.Nat.Properties where
 
     -- _⊔_ and _≤_
 
+    -- stdlib
     n⊔m≡m⇒n≤m : ∀ {m n} → n ⊔ m ≡ m → n ≤ m
     n⊔m≡m⇒n≤m n⊔m≡m = subst (_ ≤_) n⊔m≡m (m≤m⊔n _ _)
 
@@ -191,12 +218,16 @@ module RoutingLib.Data.Nat.Properties where
 
     -- _⊓_ and _≤_
 
+    -- stdlib
     m⊓n≡n⇒n≤m : ∀ {m n} → m ⊓ n ≡ n → n ≤ m
     m⊓n≡n⇒n≤m m⊓n≡n = subst (_≤ _) m⊓n≡n (m⊓n≤m _ _)
 
     m⊔n≤o⇒m≤o : ∀ {m n o} → m ⊔ n ≤ o → m ≤ o
     m⊔n≤o⇒m≤o m⊔n≤o = ≤-trans (m≤m⊔n _ _) m⊔n≤o
 
+    m⊔n≤o⇒n≤o : ∀ {m n o} → m ⊔ n ≤ o → n ≤ o
+    m⊔n≤o⇒n≤o m⊔n≤o = ≤-trans (n≤m⊔n _ _) m⊔n≤o
+    
     n≤m⇒n⊓o≤m : ∀ {m} → _⊓_ Preservesˡ (_≤ m)
     n≤m⇒n⊓o≤m o m≤n = ≤-trans (m⊓n≤m _ o) m≤n
 
@@ -247,6 +278,16 @@ module RoutingLib.Data.Nat.Properties where
     -- Subtraction --
     -----------------
 
+    m+[n∸o]≤[m+n]∸o : ∀ m n o → (m + n) ∸ o ≤ m + (n ∸ o) 
+    m+[n∸o]≤[m+n]∸o m n       zero    = ≤-refl
+    m+[n∸o]≤[m+n]∸o m zero    (suc o) = n∸m≤n (suc o) (m + 0)
+    m+[n∸o]≤[m+n]∸o m (suc n) (suc o) = begin
+      (m + suc n) ∸ suc o ≡⟨ cong (_∸ suc o) (+-suc m n) ⟩
+      (suc m + n) ∸ suc o ≡⟨⟩
+      (m + n) ∸ o         ≤⟨ m+[n∸o]≤[m+n]∸o m n o ⟩
+      m + (n ∸ o)         ∎
+      where open ≤-Reasoning
+      
     ∸-monoʳ-< : ∀ {m n o} → o < n → n ≤ m → m ∸ n < m ∸ o
     ∸-monoʳ-< {_} {suc n} {zero}  (s≤s o<n) (s≤s n<m) = s≤s (n∸m≤n n _)
     ∸-monoʳ-< {_} {suc n} {suc o} (s≤s o<n) (s≤s n<m) = ∸-monoʳ-< o<n n<m

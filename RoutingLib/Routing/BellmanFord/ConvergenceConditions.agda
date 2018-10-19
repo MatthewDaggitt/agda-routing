@@ -1,8 +1,8 @@
 open import Level
-open import Data.Nat using (ℕ)
 
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Algebra.RoutingAlgebra
+import RoutingLib.Routing.Algebra.RoutingAlgebra.FiniteProperties as FiniteRoutingAlgebraProperties
 open import RoutingLib.Routing.Algebra.PathAlgebra
 open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
 open import RoutingLib.Routing.Algebra.PathAlgebra.Properties
@@ -18,12 +18,13 @@ record IsFiniteStrictlyIncreasingRoutingAlgebra
   (algebra : RawRoutingAlgebra a b ℓ) : Set (suc (a ⊔ b ⊔ ℓ)) where
   field
     isRoutingAlgebra     : IsRoutingAlgebra algebra
-    isStrictlyIncreasing : IsStrictlyIncreasing algebra
     isFinite             : IsFinite algebra
+    isStrictlyIncreasing : IsStrictlyIncreasing algebra
 
   open RawRoutingAlgebra algebra public
   open IsRoutingAlgebra isRoutingAlgebra public
-  
+  open FiniteRoutingAlgebraProperties isRoutingAlgebra isFinite public
+
 ------------------------------------------
 -- Conditions for path-vector protocols --
 ------------------------------------------

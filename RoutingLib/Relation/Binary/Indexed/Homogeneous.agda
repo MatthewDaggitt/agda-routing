@@ -53,7 +53,7 @@ Decidable : ∀ {i a ℓ} {I : Set i} (A : I → Set a) → IRel A ℓ → Set _
 Decidable A _∼_ = ∀ {i} → B.Decidable (_∼_ {i})
 
 Respects : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → IPred A ℓ₁ → IRel A ℓ₂ → Set _
-Respects A P _∼_ = ∀ {i} {x y : A i} → x ∼ y → P x → P y
+Respects A P _∼_ = ∀ {i} {x y : A i} → x ∼ y → x ∈ᵢ P → y ∈ᵢ P
 
 Respectsˡ : ∀ {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a) → IRel A ℓ₁ → IRel A ℓ₂ → Set _
 Respectsˡ A P _∼_  = ∀ {i} {x y z : A i} → x ∼ y → P x z → P y z
@@ -132,6 +132,8 @@ record IsIndexedDecEquivalence {i a ℓ} {I : Set i} (A : I → Set a)
   field
     _≟ᵢ_           : Decidable A _≈ᵢ_
     isEquivalenceᵢ : IsIndexedEquivalence A _≈ᵢ_
+
+  open IsIndexedEquivalence isEquivalenceᵢ public
   
 record IndexedDecSetoid {i} (I : Set i) c ℓ : Set (suc (i ⊔ c ⊔ ℓ)) where
   infix 4 _≈ᵢ_
@@ -145,6 +147,8 @@ record IndexedDecSetoid {i} (I : Set i) c ℓ : Set (suc (i ⊔ c ⊔ ℓ)) wher
   indexedSetoid : IndexedSetoid I c ℓ
   indexedSetoid = record { isEquivalenceᵢ = isEquivalenceᵢ }
 
+  open IndexedSetoid indexedSetoid public
+    using (Carrier; _≈_; setoid)
 
 record IsIndexedPreorder {i a ℓ₁ ℓ₂} {I : Set i} (A : I → Set a)
                   (_≈ᵢ_ : IRel A ℓ₁) (_∼ᵢ_ : IRel A ℓ₂) : Set (i ⊔ a ⊔ ℓ₁ ⊔ ℓ₂) where
@@ -289,3 +293,16 @@ triviallyIndexSetoid I S = record
     }
   }
   where open B.Setoid S
+
+triviallyIndexDecSetoid : ∀ {i a ℓ} → (I : Set i) → B.DecSetoid a ℓ → IndexedDecSetoid I a ℓ
+triviallyIndexDecSetoid I DS = record
+  { isDecEquivalenceᵢ = record
+    { _≟ᵢ_           = _≟_
+    ; isEquivalenceᵢ = record
+      { reflᵢ  = refl
+      ; symᵢ   = sym
+      ; transᵢ = trans
+      }
+    }
+  }
+  where open B.DecSetoid DS

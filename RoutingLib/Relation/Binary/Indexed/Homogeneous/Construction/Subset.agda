@@ -20,19 +20,19 @@ module _ {a p ℓ} {Aᵢ : I → Set a} (_∼ᵢ_ : IRel Aᵢ ℓ) (P : Pred I p
 ------------------------------------------------------------------------
 -- Types
 
-  _∼_ : B.Rel (∀ i → Aᵢ i) (i ⊔ p ⊔ ℓ)
-  x ∼ y = ∀ {i} → (i∈P : i ∈ P) → x i ∼ᵢ y i
+  _∼ₛ_ : B.Rel (∀ i → Aᵢ i) (i ⊔ p ⊔ ℓ)
+  x ∼ₛ y = ∀ {i} → (i∈P : i ∈ P) → x i ∼ᵢ y i
 
 ------------------------------------------------------------------------
 -- Properties
 
-  refl : Reflexive Aᵢ _∼ᵢ_ → B.Reflexive _∼_
+  refl : Reflexive Aᵢ _∼ᵢ_ → B.Reflexive _∼ₛ_
   refl refl _ = refl
 
-  sym : Symmetric Aᵢ _∼ᵢ_ → B.Symmetric _∼_
+  sym : Symmetric Aᵢ _∼ᵢ_ → B.Symmetric _∼ₛ_
   sym sym x∼y i∈P = sym (x∼y i∈P)
 
-  trans : Transitive Aᵢ _∼ᵢ_ → B.Transitive _∼_
+  trans : Transitive Aᵢ _∼ᵢ_ → B.Transitive _∼ₛ_
   trans trans x∼y y∼z i∈P = trans (x∼y i∈P) (y∼z i∈P)
 
   module _ (finite : Finite P) where
@@ -50,7 +50,7 @@ module _ {a p ℓ} {Aᵢ : I → Set a} (_∼ᵢ_ : IRel Aᵢ ℓ) (P : Pred I p
       from-to : ∀ {i} (i∈P : i ∈ P) → from (to (i , i∈P)) ≡ i
       from-to i∈P = ,-injectiveˡ (Bijection.left-inverse-of (proj₂ finite) (_ , i∈P))
 
-    decidable : Decidable Aᵢ _∼ᵢ_ → B.Decidable _∼_
+    decidable : Decidable Aᵢ _∼ᵢ_ → B.Decidable _∼ₛ_
     decidable _∼ᵢ?_ x y with all? (λ i → x (from i) ∼ᵢ? y (from i))
     ... | yes x∼y = yes (λ i∈P → subst (λ v → x v ∼ᵢ y v) (from-to i∈P) (x∼y (to (_ , i∈P))))
     ... | no ¬x∼y = no  (λ x~ₚy → ¬x∼y (λ i → x~ₚy (P-from i)))
@@ -58,7 +58,7 @@ module _ {a p ℓ} {Aᵢ : I → Set a} (_∼ᵢ_ : IRel Aᵢ ℓ) (P : Pred I p
 ------------------------------------------------------------------------
 -- Structures
 
-  isEquivalence : IsIndexedEquivalence Aᵢ _∼ᵢ_ → B.IsEquivalence _∼_
+  isEquivalence : IsIndexedEquivalence Aᵢ _∼ᵢ_ → B.IsEquivalence _∼ₛ_
   isEquivalence isEq = record
     { refl  = λ {x} → refl E.reflᵢ {x}
     ; sym   = sym   E.symᵢ
@@ -66,7 +66,7 @@ module _ {a p ℓ} {Aᵢ : I → Set a} (_∼ᵢ_ : IRel Aᵢ ℓ) (P : Pred I p
     }
     where module E = IsIndexedEquivalence isEq
 
-  isDecEquivalence : Finite P → IsIndexedDecEquivalence Aᵢ _∼ᵢ_ → B.IsDecEquivalence _∼_
+  isDecEquivalence : Finite P → IsIndexedDecEquivalence Aᵢ _∼ᵢ_ → B.IsDecEquivalence _∼ₛ_
   isDecEquivalence finite isDecEq = record
     { isEquivalence = isEquivalence E.isEquivalenceᵢ
     ; _≟_           = decidable finite E._≟ᵢ_

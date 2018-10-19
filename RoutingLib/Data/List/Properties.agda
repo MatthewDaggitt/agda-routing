@@ -1,4 +1,4 @@
-open import Data.Nat using (zero; suc; _+_)
+open import Data.Nat using (ℕ; zero; suc; _+_; _∸_)
 open import Data.Nat.Properties using (+-suc)
 open import Data.List
 open import Data.List.All using (All; []; _∷_)
@@ -6,7 +6,7 @@ open import Data.List.All.Properties using (All-universal)
 open import Data.List.Any using (Any; here; there)
 open import Data.List.Membership.Propositional using (_∈_)
 open import Data.List.Relation.Pointwise using (Pointwise; []; _∷_)
-open import Data.Fin using (Fin; zero; suc)
+open import Data.Fin using (Fin; toℕ; zero; suc)
 open import Data.Maybe using (Maybe; just; nothing; just-injective)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_,_)
@@ -108,6 +108,44 @@ module _ {a p} {A : Set a} {P : Pred A p} {_•_ : Op₂ A} where
   foldl-⊎pres : _•_ Preservesᵒ P → ∀ {xs} e → Any P xs → P (foldl _•_ e xs)
   foldl-⊎pres pres {x ∷ xs} e (here px)   = foldl-⊎presˡ (presᵒ⇒presˡ pres) (pres e _ (inj₂ px)) xs
   foldl-⊎pres pres {x ∷ xs} e (there pxs) = foldl-⊎pres pres _ pxs
+
+------------------------------------------------------------------------
+-- Properties of applyUpTo
+
+module _ {a} {A : Set a} where
+
+  length-applyUpTo : ∀ (f : ℕ → A) n → length (applyUpTo f n) ≡ n
+  length-applyUpTo f zero    = refl
+  length-applyUpTo f (suc n) = cong suc (length-applyUpTo (f ∘ suc) n)
+
+------------------------------------------------------------------------
+-- Properties of upTo
+
+length-upTo : ∀ n → length (upTo n) ≡ n
+length-upTo = length-applyUpTo id
+  
+------------------------------------------------------------------------
+-- Properties of applyDownFrom
+
+module _ {a} {A : Set a} (f : ℕ → A) where
+
+  length-applyDownFrom : ∀ n → length (applyDownFrom f n) ≡ n
+  length-applyDownFrom zero    = refl
+  length-applyDownFrom (suc n) = cong suc (length-applyDownFrom n)
+
+  applyDownFrom-lookup : ∀ n i → lookup (applyDownFrom f n) i ≡ f (n ∸ (suc (toℕ i)))
+  applyDownFrom-lookup zero  ()
+  applyDownFrom-lookup (suc n) zero    = refl
+  applyDownFrom-lookup (suc n) (suc i) = applyDownFrom-lookup n i
+  
+------------------------------------------------------------------------
+-- Properties of downFrom
+
+length-downFrom : ∀ n → length (downFrom n) ≡ n
+length-downFrom = length-applyDownFrom id
+
+downFrom-lookup : ∀ n i → lookup (downFrom n) i ≡ n ∸ (suc (toℕ i))
+downFrom-lookup = applyDownFrom-lookup id
 
 ------------------------------------------------------------------------
 -- Properties of lookup

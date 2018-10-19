@@ -7,8 +7,6 @@ open import Level using () renaming (zero to 0ℓ)
 open import Relation.Nullary using (¬_)
 open import Relation.Binary using (Rel; REL)
 
-open import RoutingLib.Data.Maybe using (Eq')
-
 import RoutingLib.Data.Path.Certified as Certified
 
 module RoutingLib.Data.Path.CertifiedI where

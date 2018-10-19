@@ -17,7 +17,7 @@ open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Algebra.RoutingAlgebra
 
 module RoutingLib.Routing.Algebra.RoutingAlgebra.Properties
-  {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)
+  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
   where
 
@@ -89,12 +89,14 @@ open NonStrictToStrict ≤₊-decTotalOrder public
   ( _<?_      to _<₊?_
   ; <-≤-trans to <-≤₊-trans
   ; ≤-<-trans to ≤-<₊-trans
+  ; <⇒≉       to <₊⇒≉
   ; <⇒≱       to <₊⇒≱₊
   ; ≤⇒≯       to ≤₊⇒≯₊
   ; ≰⇒>       to ≰₊⇒>₊
   ; <-asym    to <₊-asym
   ; <-respʳ-≈ to <₊-respʳ-≈
   ; <-respˡ-≈ to <₊-respˡ-≈
+  ; <-cmp     to <₊-cmp   
   ; <-strictPartialOrder to <₊-strictPartialOrder
   ; <-strictTotalOrder   to <₊-strictTotalOrder
   )

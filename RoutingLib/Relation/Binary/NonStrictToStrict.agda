@@ -1,4 +1,4 @@
-open import Data.Product using (_,_)
+open import Data.Product using (_,_; proj₂; proj₁)
 open import Data.Sum using (inj₁; inj₂)
 open import Function using (_∘_)
 open import Relation.Binary
@@ -13,6 +13,15 @@ module RoutingLib.Relation.Binary.NonStrictToStrict
 
   open import Relation.Binary.NonStrictToStrict _≈_ _≤_
 
+  <⇒≉ : ∀ {x y} → x < y → ¬ (x ≈ y)
+  <⇒≉ = proj₂
+
+  <⇒≤ : ∀ {x y} → x < y → x ≤ y
+  <⇒≤ = proj₁
+
+  ≤∧≉⇒< : ∀ {x y} → x ≤ y → ¬ (x ≈ y) → x < y
+  ≤∧≉⇒< = _,_
+  
   <⇒≱ : Antisymmetric _≈_ _≤_ → ∀ {x y} → x < y → ¬ (y ≤ x)
   <⇒≱ antisym (x≤y , x≉y) y≤x = x≉y (antisym x≤y y≤x)
 

@@ -8,8 +8,6 @@ open import Relation.Nullary using (¬_)
 open import Relation.Binary using (Rel; REL)
 open import Relation.Binary.PropositionalEquality using (_≡_)
 
-open import RoutingLib.Data.Maybe using (Eq')
-
 import RoutingLib.Data.Path.Uncertified as Uncertified
 
 module RoutingLib.Data.Path.UncertifiedI where

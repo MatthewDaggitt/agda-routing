@@ -1,20 +1,52 @@
+open import Data.Product
 open import Function using (flip)
 open import Relation.Binary
-open import Data.Unit using (⊤)
+open import Relation.Nullary using (¬_)
 open import Level
 
 module RoutingLib.Relation.Binary where
 
 --------------------------------------------------------------------------------
--- Specific relations
+-- Pairs of non-strict and strict partial orders
 
-U : ∀ {a b} {A : Set a} {B : Set b} → REL A B zero
-U i j = ⊤
+record IsOrderingPair
+  {a ℓ₁ ℓ₂ ℓ₃} {A : Set a}
+  (_≈_ : Rel A ℓ₁) (_≤_ : Rel A ℓ₂) (_<_ : Rel A ℓ₃)
+  : Set (a ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃) where
 
+  field
+    isEquivalence : IsEquivalence _≈_
+    isPartialOrder : IsPartialOrder _≈_ _≤_
+    isStrictPartialOrder : IsStrictPartialOrder _≈_ _<_
+    <⇒≤       : _<_ ⇒ _≤_
+    ≤∧≉⇒<     : ∀ {x y} → x ≤ y → ¬ (x ≈ y) → x < y
+    <-≤-trans : Trans _<_ _≤_ _<_
+    ≤-<-trans : Trans _≤_ _<_ _<_
+    
+  module Eq = IsEquivalence isEquivalence
+  module PO = IsPartialOrder isPartialOrder
+  module SPO = IsStrictPartialOrder isStrictPartialOrder
 
+  <-respʳ-≈ : _<_ Respectsʳ _≈_
+  <-respʳ-≈ = proj₁ SPO.<-resp-≈
+
+  <-respˡ-≈ : _<_ Respectsˡ _≈_
+  <-respˡ-≈ = proj₂ SPO.<-resp-≈
+  
+  
+record OrderingPair a ℓ₁ ℓ₂ ℓ₃ : Set (suc (a ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃)) where
+
+  field
+    Carrier        : Set a
+    _≈_            : Rel Carrier ℓ₁
+    _≤_            : Rel Carrier ℓ₂
+    _<_            : Rel Carrier ℓ₃
+    isOrderingPair : IsOrderingPair _≈_ _≤_ _<_
+
+  open IsOrderingPair isOrderingPair public
 
 --------------------------------------------------------------------------------
--- Extra record structures
+-- Decidable preorders
 
 record IsDecPreorder {a ℓ₁ ℓ₂} {A : Set a}
                        (_≈_ : Rel A ℓ₁) (_≤_ : Rel A ℓ₂) :
@@ -66,11 +98,6 @@ record DecPreorder c ℓ₁ ℓ₂ : Set (suc (c ⊔ ℓ₁ ⊔ ℓ₂)) where
     open DecSetoid decSetoid public
 
 
-
-
-
-
-
 record IsTotalPreorder {a ℓ₁ ℓ₂} {A : Set a}
                   (_≈_ : Rel A ℓ₁) (_≤_ : Rel A ℓ₂) :
                   Set (a ⊔ ℓ₁ ⊔ ℓ₂) where
@@ -80,6 +107,9 @@ record IsTotalPreorder {a ℓ₁ ℓ₂} {A : Set a}
 
   open IsPreorder isPreorder public
 
+
+--------------------------------------------------------------------------------
+-- Total preorders
 
 record TotalPreorder c ℓ₁ ℓ₂ : Set (suc (c ⊔ ℓ₁ ⊔ ℓ₂)) where
 
@@ -95,8 +125,6 @@ record TotalPreorder c ℓ₁ ℓ₂ : Set (suc (c ⊔ ℓ₁ ⊔ ℓ₂)) where
 
   preorder : Preorder c ℓ₁ ℓ₂
   preorder = record { isPreorder = isPreorder }
-
-
 
 
 record IsDecTotalPreorder {a ℓ₁ ℓ₂} {A : Set a}

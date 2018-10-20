@@ -5,6 +5,7 @@ open import Data.Vec using ([]; _∷_; here; there)
 open import Data.Nat using (ℕ; zero; suc)
 open import Relation.Binary as B
   using (Setoid; DecSetoid; IsEquivalence; IsDecEquivalence; REL; Rel)
+open import Relation.Binary.Indexed.Homogeneous hiding (REL; Rel)
 open import Relation.Binary.PropositionalEquality
   using (_≡_)
   renaming (refl to ≡-refl)
@@ -12,7 +13,6 @@ open import Function using (_∘_)
 open import Algebra.FunctionProperties using (Op₂)
 
 open import RoutingLib.Data.Table
-open import RoutingLib.Relation.Binary.Indexed.Homogeneous
 open import RoutingLib.Data.Fin.Subset.Properties using (∉-contract)
 
 module RoutingLib.Data.Table.Relation.Pointwise where

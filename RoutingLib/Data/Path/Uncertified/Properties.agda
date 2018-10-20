@@ -2,10 +2,11 @@ open import Level using () renaming (zero to 0ℓ)
 open import Data.List.Any using (any)
 open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; ≤-pred; _≟_) renaming (_≤?_ to _≤ℕ?_; _≤_ to _≤ℕ_; _<_ to _<ℕ_)
 open import Data.Nat.Properties using (<-trans; ≰⇒>; <⇒≢; <⇒≯; ≤-refl; ≤-trans; 1+n≰n; _<?_; ≰⇒≥; <-cmp)
+open import Data.Fin.Properties using (pigeonhole)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (_,_; _×_; proj₁; proj₂)
 open import Function using (_∘_)
-open import Relation.Binary.Product.Pointwise using (_×-≟_)
+open import Relation.Binary.Product.Pointwise using (≡?×≡?⇒≡?)
 open import Relation.Binary hiding (NonEmpty)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; trans; subst; cong; cong₂; setoid; isEquivalence)
 open import Relation.Nullary.Negation using (¬?)
@@ -13,8 +14,7 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.Nat.Properties using (<⇒≤suc)
-open import RoutingLib.Data.Fin.Pigeonhole using (pigeonhole)
-import RoutingLib.Relation.Binary.NonStrictToStrict.DecTotalOrder as ToStrict
+import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.DecTotalOrder as ToStrict
 
 open import RoutingLib.Data.Path.Uncertified
 
@@ -24,7 +24,7 @@ module RoutingLib.Data.Path.Uncertified.Properties where
 -- Edges
 
 _≟ₑ_ : Decidable {A = Edge} _≡_
-_≟ₑ_ = _≟_ ×-≟ _≟_
+_≟ₑ_ = ≡?×≡?⇒≡? _≟_ _≟_
 
 𝕍ₛ : Setoid _ _
 𝕍ₛ = setoid Vertex

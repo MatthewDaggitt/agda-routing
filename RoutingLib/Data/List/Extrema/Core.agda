@@ -6,7 +6,7 @@ open import RoutingLib.Algebra.FunctionProperties
 import RoutingLib.Algebra.Selectivity.NaturalChoice.Min.TotalOrder as Min
 import RoutingLib.Algebra.Selectivity.NaturalChoice.Max.TotalOrder as Max
 open import RoutingLib.Algebra.Selectivity.Lifting
-import RoutingLib.Relation.Binary.NonStrictToStrict.TotalOrder as NonStrictToStrict
+import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.TotalOrder as NonStrictToStrict
 
 module RoutingLib.Data.List.Extrema.Core
   {b ℓ₁ ℓ₂} (totalOrder : TotalOrder b ℓ₁ ℓ₂) where

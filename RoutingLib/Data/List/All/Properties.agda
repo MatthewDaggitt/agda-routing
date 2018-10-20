@@ -1,5 +1,5 @@
-open import Data.List hiding (any)
-open import Data.List.All as All using (All; []; _∷_; head; tail)
+open import Data.List hiding (any; head; tail)
+open import Data.List.All as All using (All; []; _∷_; head; tail; universal)
 open import Data.List.All.Properties
 open import Data.List.Any using (here; there)
 open import Data.Nat using (ℕ; suc; zero; z≤n; s≤s; _≤_; _<_)
@@ -30,7 +30,7 @@ module _ {a b ℓ} {A : Set a} {B : Set b} where
              All (λ xs → All (xs ~_) ys) xss →
              All (λ y → All (_~ y) xss) ys
   All-swap {ys = []}      _  = []
-  All-swap {ys = _ ∷ _}  []  = All-universal (λ _ → []) _
+  All-swap {ys = _ ∷ _}  []  = universal (λ _ → []) _
   All-swap {ys = y ∷ ys} ((x~y ∷ x~ys) ∷ pxss) =
     (x~y ∷ (All.map head pxss)) ∷ All-swap (x~ys ∷ (All.map tail pxss))
 

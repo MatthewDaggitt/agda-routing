@@ -5,18 +5,17 @@ open import Relation.Binary.List.Pointwise using ([]; _∷_) renaming (setoid to
 open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; ≤-pred) renaming (_≟_ to _≟ℕ_; _≤?_ to _≤ℕ?_; _≤_ to _≤ℕ_; _<_ to _<ℕ_)
 open import Data.Nat.Properties using (<-trans; ≰⇒>; <⇒≢; <⇒≯; ≤-refl; ≤-trans; 1+n≰n; _<?_; ≰⇒≥)
 open import Data.Fin using (Fin; _<_; _≤?_) renaming (zero to fzero; suc to fsuc)
-open import Data.Fin.Properties using (<-cmp; ≤-antisym; ≤-total) renaming (_≟_ to _≟𝔽_)
+open import Data.Fin.Properties using (<-cmp; ≤-antisym; ≤-total; pigeonhole) renaming (_≟_ to _≟𝔽_)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (_,_; _×_; proj₁; proj₂)
 open import Function using (_∘_)
-open import Relation.Binary.Product.Pointwise using (_×-≟_)
+open import Relation.Binary.Product.Pointwise using (≡?×≡?⇒≡?)
 open import Relation.Binary hiding (NonEmpty)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; trans; subst; cong; cong₂; setoid)
 open import Relation.Nullary.Negation using (¬?)
 
 open import RoutingLib.Data.Nat.Properties using (<⇒≤suc)
-open import RoutingLib.Data.Fin.Pigeonhole using (pigeonhole)
-import RoutingLib.Relation.Binary.NonStrictToStrict.DecTotalOrder as ToStrict
+import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.DecTotalOrder as ToStrict
 
 open import RoutingLib.Data.Path.Certified
 
@@ -26,7 +25,7 @@ module RoutingLib.Data.Path.Certified.Properties where
 -- Edges
 
 _≟ₑ_ : ∀ {n} → Decidable {A = Edge n} _≡_
-_≟ₑ_ = _≟𝔽_ ×-≟ _≟𝔽_
+_≟ₑ_ = ≡?×≡?⇒≡? _≟𝔽_ _≟𝔽_
 
 𝕍ₛ : ℕ → Setoid _ _
 𝕍ₛ n = setoid (Vertex n)

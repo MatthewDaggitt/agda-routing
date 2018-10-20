@@ -13,15 +13,16 @@ open import Function using (id)
 open import Level using (_⊔_) renaming (suc to lsuc)
 open import Relation.Binary as B using (DecSetoid; _Respects_; Total; _Preserves_⟶_; _Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
-import Relation.Binary.NonStrictToStrict as NonStrictToStrict
+import Relation.Binary.Construct.NonStrictToStrict as NonStrictToStrict
+open import Relation.Binary.Indexed.Homogeneous using (Decidable; IsIndexedDecEquivalence; IndexedDecSetoid)
 open import Relation.Unary using () renaming (_∈_ to _∈ᵤ_)
 open import Relation.Nullary.Decidable using (⌊_⌋)
 
 open import RoutingLib.Data.Table using (Table; max)
 open import RoutingLib.Data.Table.Relation.Pointwise using (Pointwise)
 open import RoutingLib.Function.Metric
-open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (Decidable; Setoid_at_; IsIndexedDecEquivalence; IndexedDecSetoid)
-import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construction.FiniteSubset.DecEquality as SubsetEq
+open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (Setoid_at_)
+import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as SubsetEq
 open import RoutingLib.Relation.Unary.Indexed hiding (_∉_)
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic

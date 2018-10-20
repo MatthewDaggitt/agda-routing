@@ -18,7 +18,6 @@ open import RoutingLib.Data.List.All.Properties as Allₚ
 open import RoutingLib.Data.List.AllPairs using ([]; _∷_)
 open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
 open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (perm!)
-open import RoutingLib.Data.List.Relation.Permutation.Properties using (⇿-sym; ⇿-length)
 open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-perm)
 
 module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTotalOrder a ℓ₁ ℓ₂) where
@@ -28,7 +27,7 @@ module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTot
 
   open import RoutingLib.Data.List.Sorting _≤_
   open import Data.List.Membership.Setoid S using (_∈_)
-  open import Relation.Binary.NonStrictToStrict _≈_ _≤_ using (_<_) renaming (irrefl to <-irrefl)
+  open import Relation.Binary.Construct.NonStrictToStrict _≈_ _≤_ using (_<_) renaming (irrefl to <-irrefl)
 
   {-
   ↗-length : ∀ {xs ys} → xs ↗ ys → length xs ≡ length ys

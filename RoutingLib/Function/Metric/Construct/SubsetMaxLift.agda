@@ -8,6 +8,7 @@ open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (∃; _,_; proj₁; proj₂)
 open import Relation.Binary using (_Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst)
+open import Relation.Binary.Indexed.Homogeneous using (IndexedSetoid)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Nullary.Decidable using (⌊_⌋)
@@ -16,12 +17,12 @@ open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
 open import RoutingLib.Data.Table using (Table; max; zipWith)
 open import RoutingLib.Data.Table.Properties using (max-cong; x≤max[t]; max-constant; max[s]≤max[t]₂)
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
-open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (IndexedSetoid; Setoid_at_)
-import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construction.FiniteSubset.Equality as SubsetEquality
+open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (Setoid_at_)
+import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.Equality as SubsetEquality
 open import RoutingLib.Function.Metric
-import RoutingLib.Function.Metric.MaxLift as MaxLift
+import RoutingLib.Function.Metric.Construct.MaxLift as MaxLift
 
-module RoutingLib.Function.Metric.SubsetMaxLift {a ℓ n} (𝕊 : IndexedSetoid (Fin n) a ℓ) where
+module RoutingLib.Function.Metric.Construct.SubsetMaxLift {a ℓ n} (𝕊 : IndexedSetoid (Fin n) a ℓ) where
 
 open IndexedSetoid 𝕊
   using (_≈_; _≈ᵢ_)

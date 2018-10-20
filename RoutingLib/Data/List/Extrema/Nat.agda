@@ -1,5 +1,5 @@
 open import Data.Nat using (ℕ; _≤_; _<_)
-open import Data.Nat.Properties using (≤-totalOrder; ≤+≢⇒<; <⇒≤; <⇒≢)
+open import Data.Nat.Properties using (≤-totalOrder; ≤∧≢⇒<; <⇒≤; <⇒≢)
 open import Data.Sum as Sum using (_⊎_)
 open import Data.List using (List)
 open import Data.List.Any as Any using (Any)
@@ -19,7 +19,7 @@ module RoutingLib.Data.List.Extrema.Nat where
     <⇒<× x<y = <⇒≤ x<y , <⇒≢ x<y
 
     <×⇒< : ∀ {x y} → x ≤ y × x ≢ y → x < y
-    <×⇒< (x≤y , x≢y) = ≤+≢⇒< x≤y x≢y
+    <×⇒< (x≤y , x≢y) = ≤∧≢⇒< x≤y x≢y
 
   open Extrema public hiding (f[argmin]<v⁺; v<f[argmin]⁺; argmin[xs]<argmin[ys]⁺)
 

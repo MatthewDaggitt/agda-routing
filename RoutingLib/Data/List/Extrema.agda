@@ -3,16 +3,16 @@ open import Data.List using (List; foldr)
 open import Data.List.Any as Any using (Any; here; there)
 open import Data.List.All using (All; []; _∷_; lookup; map; tabulate)
 open import Data.List.Membership.Propositional using (_∈_; lose)
-open import Data.List.Relation.Sublist.Propositional using (_⊆_)
+open import Data.List.Relation.Subset.Propositional using (_⊆_)
 open import Data.List.Properties using ()
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Function using (id; flip; _on_)
 open import Relation.Unary using (Pred)
 open import Relation.Binary using (TotalOrder; Setoid)
-import Relation.Binary.NonStrictToStrict as NonStrictToStrict
+import Relation.Binary.Construct.NonStrictToStrict as NonStrictToStrict
 open import Relation.Binary.PropositionalEquality
   using (_≡_; sym; subst) renaming (refl to ≡-refl)
-import Relation.Binary.On as On
+import Relation.Binary.Construct.On as On
 
 open import RoutingLib.Data.List.Properties
 import RoutingLib.Algebra.Selectivity.NaturalChoice.Min as Min

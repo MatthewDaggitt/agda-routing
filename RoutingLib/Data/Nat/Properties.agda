@@ -5,7 +5,7 @@ open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (∃; _,_; _×_; proj₁; map₂)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
-import Relation.Binary.Flip as Flip
+import Relation.Binary.Construct.Flip as Flip
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Nullary using (yes; no)
 open import Function using (_∘_)
@@ -57,22 +57,6 @@ module RoutingLib.Data.Nat.Properties where
       ; _≤?_            = _≤?_
       }
 
-  <-resp₂-≡ : _<_ Respects₂ _≡_
-  <-resp₂-≡ = subst (_ <_) , subst (_< _)
-  
-  -- stdlib
-  <-isStrictPartialOrder : IsStrictPartialOrder _≡_ _<_
-  <-isStrictPartialOrder = record
-    { isEquivalence = isEquivalence
-    ; irrefl        = <-irrefl
-    ; trans         = <-trans
-    ; <-resp-≈      = <-resp₂-≡
-    }
-
-  -- stdlib
-  <-strictPartialOrder : StrictPartialOrder 0ℓ 0ℓ 0ℓ
-  <-strictPartialOrder = record { isStrictPartialOrder = <-isStrictPartialOrder }
-
   ≤-decTotalPreorder : DecTotalPreorder 0ℓ 0ℓ 0ℓ
   ≤-decTotalPreorder = record { isDecTotalPreorder = ≤-isDecTotalPreorder }
 
@@ -85,7 +69,7 @@ module RoutingLib.Data.Nat.Properties where
     ; isPartialOrder       = ≤-isPartialOrder
     ; isStrictPartialOrder = <-isStrictPartialOrder
     ; <⇒≤                  = <⇒≤
-    ; ≤∧≉⇒<                = ≤+≢⇒<
+    ; ≤∧≉⇒<                = ≤∧≢⇒<
     ; <-≤-trans            = <-transˡ
     ; ≤-<-trans            = <-transʳ
     }
@@ -112,15 +96,8 @@ module RoutingLib.Data.Nat.Properties where
     n≢0⇒0<n {zero} 0≢0 = contradiction refl 0≢0
     n≢0⇒0<n {suc n} n+1≢0 = s≤s z≤n
 
-    -- stdlib
-    m<n⇒n≢0 : ∀ {m n} → m < n → n ≢ 0
-    m<n⇒n≢0 (s≤s m≤n) ()
-
-    -- stdlib
-    n≤0⇒n≡0 : ∀ {n} → n ≤ 0 → n ≡ 0
-    n≤0⇒n≡0 z≤n = refl
-
-
+    
+    
     -- Equality reasoning
 
     module ≤-Reasoning where
@@ -179,10 +156,7 @@ module RoutingLib.Data.Nat.Properties where
 
     -- _⊔_ and _≤_
 
-    -- stdlib
-    n⊔m≡m⇒n≤m : ∀ {m n} → n ⊔ m ≡ m → n ≤ m
-    n⊔m≡m⇒n≤m n⊔m≡m = subst (_ ≤_) n⊔m≡m (m≤m⊔n _ _)
-
+    
     m≤n⇒m≤n⊔o : ∀ {m} → _⊔_ Preservesˡ (m ≤_)
     m≤n⇒m≤n⊔o o m≤n = ≤-trans m≤n (m≤m⊔n _ o)
 
@@ -218,10 +192,7 @@ module RoutingLib.Data.Nat.Properties where
 
     -- _⊓_ and _≤_
 
-    -- stdlib
-    m⊓n≡n⇒n≤m : ∀ {m n} → m ⊓ n ≡ n → n ≤ m
-    m⊓n≡n⇒n≤m m⊓n≡n = subst (_≤ _) m⊓n≡n (m⊓n≤m _ _)
-
+    
     m⊔n≤o⇒m≤o : ∀ {m n o} → m ⊔ n ≤ o → m ≤ o
     m⊔n≤o⇒m≤o m⊔n≤o = ≤-trans (m≤m⊔n _ _) m⊔n≤o
 

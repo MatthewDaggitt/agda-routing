@@ -16,7 +16,7 @@ open import Data.Empty using (⊥-elim)
 open import Data.List hiding (any)
 open import Data.List.Any using (here; there; any) renaming (map to mapₐ)
 open import Data.List.Any.Properties
-open import Data.Vec using (Vec; toList; fromList) renaming (_∈_ to _∈ᵥ_; here to hereᵥ; there to thereᵥ)
+open import Data.List.Relation.Permutation.Inductive using (_↭_)
 open import Data.Product using (∃; ∃₂; _×_; _,_; swap) renaming (map to mapₚ)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Bool using (true; false; if_then_else_)
@@ -27,8 +27,6 @@ open import RoutingLib.Data.List
 open import RoutingLib.Data.Maybe using (Eq-reflexive)
 import RoutingLib.Data.List.Membership.Setoid as Membership
 open import RoutingLib.Data.List.Any.Properties
-open import RoutingLib.Data.List.Relation.Permutation using (_⇿_; _◂_≡_; _∷_; []; here; there)
-open import RoutingLib.Data.List.Relation.Permutation.Properties using (Any-⇿)
 open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique; _∷_)
 open import RoutingLib.Data.List.AllPairs using ([]; _∷_)
 
@@ -71,8 +69,8 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     ... | yes Px | here  v≈x     = ¬Pv (resp (sym v≈x) Px)
     ... | yes _  | there v∈f[xs] = ∉-filter₂ P? resp ¬Pv xs v∈f[xs]
 
-    ∈-perm : ∀ {x xs ys} → x ∈ xs → xs ⇿ ys → x ∈ ys
-    ∈-perm = Any-⇿
+    postulate ∈-perm : ∀ {x xs ys} → x ∈ xs → xs ↭ ys → x ∈ ys
+    --∈-perm = Any-↭
 
     index-cong : ∀ {x y xs} → (x∈xs : x ∈ xs) (y∈xs : y ∈ xs) → Unique S xs → x ≈ y → index x∈xs ≡ index y∈xs
     index-cong (here x≈z)   (here y≈z)   _            x≈y = refl

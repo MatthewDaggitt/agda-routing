@@ -11,7 +11,6 @@ open import RoutingLib.Data.List using (insert)
 open import RoutingLib.Data.List.AllPairs
 import RoutingLib.Data.List.All.Properties as All
 open import RoutingLib.Algebra.FunctionProperties
-open import RoutingLib.Data.List.Relation.Permutation
 
 module RoutingLib.Data.List.AllPairs.Properties where
 

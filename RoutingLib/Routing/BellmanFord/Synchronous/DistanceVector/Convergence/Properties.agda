@@ -1,7 +1,7 @@
 open import Data.Nat using (ℕ; suc; z≤n; s≤s; _≤_; _≥_; _<_; _⊔_)
-open import Data.Nat.Properties hiding (module ≤-Reasoning)
+open import Data.Nat.Properties hiding (module ≤-Reasoning; _≟_)
 open import Data.Fin using (Fin; toℕ) renaming (_<_ to _<𝔽_)
-open import Data.Fin.Properties using (prop-toℕ-≤)
+open import Data.Fin.Properties using (toℕ≤pred[n])
 open import Data.List using (List; length)
 open import Data.List.Any using (index)
 open import Data.Product using (_,_; _×_; map)
@@ -20,7 +20,7 @@ open import RoutingLib.Data.Nat.Properties using (ℕₛ; suc∘pred[n]≡n)
 open import RoutingLib.Data.Nat.Properties using (ℕₛ; m≤n⇒m≤n⊔o; n≤m×o≤m⇒n⊔o≤m; n≢0⇒0<n; module ≤-Reasoning)
 open import RoutingLib.Function.Reasoning
 open import RoutingLib.Function.Metric using (Ultrametric; IsUltrametric; Bounded; MaxTriangleIneq)
-import RoutingLib.Function.Metric.MaxLift as MaxLift
+import RoutingLib.Function.Metric.Construct.MaxLift as MaxLift
 
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Algebra.RoutingAlgebra
@@ -67,7 +67,7 @@ h-resp-≤ {u} {v} u≤v with u ≟ v
 1≤h _ = s≤s z≤n
 
 h≤H : ∀ x → h x ≤ H
-h≤H x = subst (h x ≤_) (suc∘pred[n]≡n 1≤H) (s≤s (prop-toℕ-≤ (index (∈-routes x))))
+h≤H x = subst (h x ≤_) (suc∘pred[n]≡n 1≤H) (s≤s (toℕ≤pred[n] (index (∈-routes x))))
 
 ------------------------------------------------------------------------
 -- Properties of d

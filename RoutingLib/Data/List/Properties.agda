@@ -1,8 +1,7 @@
 open import Data.Nat using (ℕ; zero; suc; _+_; _∸_)
 open import Data.Nat.Properties using (+-suc)
 open import Data.List
-open import Data.List.All using (All; []; _∷_)
-open import Data.List.All.Properties using (All-universal)
+open import Data.List.All using (All; []; _∷_; universal)
 open import Data.List.Any using (Any; here; there)
 open import Data.List.Membership.Propositional using (_∈_)
 open import Data.List.Relation.Pointwise using (Pointwise; []; _∷_)
@@ -185,7 +184,7 @@ module _ {a ℓ} (S : Semilattice a ℓ)  where
     x ∧ (e ∧ foldr _∧_ e xs) ≈⟨ ∙-cong ≈-refl (foldr≤ᵣe e xs) ⟩
     x ∧ foldr _∧_ e xs       ∎
 
-  open import RoutingLib.Relation.Binary.NaturalOrder.Right _≈_ _∧_
+  open import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right _≈_ _∧_
     using (≤-isTotalOrder) renaming (_≤_ to _≤ᵣ_)
 
   foldr≤ₗe : ∀ e xs → foldr _∧_ e xs ∧ e ≈ foldr _∧_ e xs
@@ -228,4 +227,4 @@ module _ {a ℓ} (S : Setoid a ℓ)  where
                       Congruent₂ _≈_ _•ᵃ_ →
                       (∀ x y → f x •ᵃ f y ≈ f (x •ᵇ y)) →
                       ∀ d xs → foldr _•ᵃ_ (f d) (map f xs) ≈  f (foldr _•ᵇ_ d xs)
-  foldr-map-commute cong pres d xs = foldr-map-commute-gen cong (λ _ _ → _) (λ _ _ → pres _ _) (U-Universal d) (All-universal U-Universal xs)
+  foldr-map-commute cong pres d xs = foldr-map-commute-gen cong (λ _ _ → _) (λ _ _ → pres _ _) (U-Universal d) (universal U-Universal xs)

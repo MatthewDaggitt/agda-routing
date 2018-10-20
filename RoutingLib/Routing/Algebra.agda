@@ -14,7 +14,7 @@ open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.Table using (Table)
 import RoutingLib.Data.Matrix.Relation.DecidableEquality as MatrixDecEquality
 import RoutingLib.Data.Table.Relation.DecidableEquality as TableDecEquality
-import RoutingLib.Relation.Binary.NaturalOrder.Right as RightNaturalOrder
+import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
 
 module RoutingLib.Routing.Algebra  where
 

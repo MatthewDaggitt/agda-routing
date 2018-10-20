@@ -8,7 +8,7 @@ open import Level using () renaming (zero to ℓ₀)
 open import Relation.Nullary using (¬_)
 open import Relation.Binary using (Rel)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
-import Relation.Binary.NonStrictToStrict as ToStrict
+import Relation.Binary.Construct.NonStrictToStrict as ToStrict
 
 module RoutingLib.Data.Path.Uncertified where
 

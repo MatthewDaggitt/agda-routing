@@ -105,14 +105,6 @@ fromℕ≤″-injective i<n j<n eq = fromℕ≤-injective _ _ (subst₂ _≡_
     (sym (fromℕ≤≡fromℕ≤″ (ℕₚ.≤″⇒≤ j<n) j<n))
     eq)
 
--- stdlib
-toℕ-fromℕ≤″ : ∀ {m n} (m<n : m ℕ.<″ n) → toℕ (fromℕ≤″ m m<n) ≡ m
-toℕ-fromℕ≤″ {m} {n} m<n = begin
-  toℕ (fromℕ≤″ m m<n)  ≡⟨ cong toℕ (sym (fromℕ≤≡fromℕ≤″ _ m<n)) ⟩
-  toℕ (fromℕ≤ _)       ≡⟨ toℕ-fromℕ≤ (ℕₚ.≤″⇒≤ m<n) ⟩
-  m ∎
-  where open ≡-Reasoning
-
 
 finite : ∀ n → Finite (Fin n)
 finite n = n , Bijection.id

@@ -1,10 +1,10 @@
 open import Data.Nat using (ℕ)
 open import Relation.Binary using (DecSetoid; Setoid; Rel)
+open import Relation.Binary.Indexed.Homogeneous using (IndexedSetoid)
 open import Relation.Nullary using (¬_)
 
 open import RoutingLib.Data.Table
 open import RoutingLib.Data.Table.Relation.Pointwise using (Pointwise; setoid)
-open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (IndexedSetoid)
 
 module RoutingLib.Data.Table.Relation.Equality {a ℓ} (S : Setoid a ℓ) where
 

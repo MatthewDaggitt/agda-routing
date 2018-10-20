@@ -7,11 +7,11 @@ open import Data.Product using (proj₁)
 open import Data.Fin using (Fin)
 open import Relation.Nullary using (yes; no)
 open import Relation.Binary using (DecTotalOrder; StrictTotalOrder)
+import Relation.Binary.Construct.Converse as Converse
 import Relation.Binary.EqReasoning as EqReasoning
 
-import RoutingLib.Relation.Binary.NaturalOrder.Right as RightNaturalOrder
-import RoutingLib.Relation.Binary.NonStrictToStrict.DecTotalOrder as NonStrictToStrict
-import RoutingLib.Relation.Binary.Flip as Flip
+import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
+import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.DecTotalOrder as NonStrictToStrict
 
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Algebra.RoutingAlgebra
@@ -66,7 +66,7 @@ open FunctionProperties _≈_
   RightNaturalOrder.≤-decTotalOrder _≈_ _⊕_ ⊕-isSemigroup _≟_ ⊕-comm ⊕-sel
 
 ≥₊-decTotalOrder : DecTotalOrder _ _ _
-≥₊-decTotalOrder = Flip.decTotalOrderᵘ ≤₊-decTotalOrder
+≥₊-decTotalOrder = Converse.decTotalOrder ≤₊-decTotalOrder
 
 open DecTotalOrder ≤₊-decTotalOrder public
   using ()

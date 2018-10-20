@@ -9,6 +9,7 @@ open import Data.Nat.Properties using (≤-refl)
 open import Data.Product using (∃; _×_; _,_)
 open import Relation.Binary as B using (Setoid; Rel; _Preserves_⟶_; Reflexive)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
+open import Relation.Binary.Indexed.Homogeneous hiding (Rel)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Induction.WellFounded using (Acc; acc)
@@ -18,9 +19,8 @@ open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 open import RoutingLib.Data.Fin.Properties using ()
 open import RoutingLib.Data.Table using (Table)
 import RoutingLib.Data.Table.Relation.Equality as TableEquality
-open import RoutingLib.Relation.Binary.Indexed.Homogeneous
-import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construction.FiniteSubset as FiniteSubset
-import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construction.FiniteSubset.DecEquality as FiniteSubsetEquality
+import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset as FiniteSubset
+import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as FiniteSubsetEquality
 open import RoutingLib.Relation.Unary.Indexed
 
 open import RoutingLib.Iteration.Asynchronous.Schedule
@@ -61,7 +61,7 @@ record IsAsyncIterable
     using (_≟ᵢ_)
     renaming
     ( reflexiveᵢ    to ≈ᵢ-reflexive
-    ; reflexive    to ≈-reflexive
+    ; reflexive     to ≈-reflexive
     ; reflᵢ         to ≈ᵢ-refl
     ; refl          to ≈-refl
     ; symᵢ          to ≈ᵢ-sym

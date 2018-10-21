@@ -97,7 +97,6 @@ d≤H x y with x ≟ y
 d-bounded : Bounded S d
 d-bounded = H , d≤H
 
--- Unnecessary ?
 d-sym : ∀ x y → d x y ≡ d y x
 d-sym x y with x ≟ y | y ≟ x
 ... | yes _   | yes _   = refl
@@ -140,14 +139,16 @@ d-ultrametric = record
 ------------------------------------------------------------------------
 -- Properties of dₜ
 
+private module MaxLiftₜ n = MaxLift (ℝ𝕋ₛⁱ n) (λ _ → d)
+
 d≤dₜ : ∀ {n} x y i → d (x i) (y i) ≤ dₜ {n} x y
-d≤dₜ = MaxLift.dᵢ≤d (ℝ𝕋ₛⁱ _) d
+d≤dₜ = MaxLiftₜ.dᵢ≤d _
 
 dₜ-bounded : ∀ n → Bounded (ℝ𝕋ₛ n) dₜ
-dₜ-bounded n = MaxLift.bounded (ℝ𝕋ₛⁱ n) d-bounded
+dₜ-bounded n = MaxLiftₜ.bounded n d-bounded
 
 dₜ-isUltrametric : ∀ n → IsUltrametric _ (dₜ {n})
-dₜ-isUltrametric n = MaxLift.isUltrametric _ d-isUltrametric
+dₜ-isUltrametric n = MaxLiftₜ.isUltrametric n d-isUltrametric
 
 module _ {n : ℕ} where
   open IsUltrametric (dₜ-isUltrametric n) public
@@ -162,17 +163,19 @@ module _ {n : ℕ} where
 ------------------------------------------------------------------------
 -- Properties of D
 
+private module MaxLiftₘ n = MaxLift (ℝ𝕄ₛⁱ n) (λ _ → dₜ)
+
 dₜ≤D : ∀ {n} X Y i → dₜ (X i) (Y i) ≤ D {n} X Y
-dₜ≤D = MaxLift.dᵢ≤d (ℝ𝕄ₛⁱ _) dₜ
+dₜ≤D = MaxLiftₘ.dᵢ≤d _
 
 d≤D : ∀ {n} X Y i j → d (X i j) (Y i j) ≤ D {n} X Y
 d≤D X Y i j = ≤-trans (d≤dₜ (X i) (Y i) j) (dₜ≤D X Y i)
 
 D-bounded : ∀ n → Bounded (ℝ𝕄ₛ n) D
-D-bounded n = MaxLift.bounded (ℝ𝕄ₛⁱ n) (dₜ-bounded n)
+D-bounded n = MaxLiftₘ.bounded n (dₜ-bounded n)
 
 D-isUltrametric : ∀ n → IsUltrametric _ (D {n})
-D-isUltrametric n = MaxLift.isUltrametric _ (dₜ-isUltrametric n)
+D-isUltrametric n = MaxLiftₘ.isUltrametric n (dₜ-isUltrametric n)
 
 module _ {n : ℕ} where
   open IsUltrametric (D-isUltrametric n) public

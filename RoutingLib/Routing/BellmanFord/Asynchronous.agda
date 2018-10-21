@@ -1,15 +1,15 @@
+open import Data.List.Relation.Pointwise using (tabulate⁺)
 open import Data.Fin using () renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Dec using (_∈?_)
 open import Data.Fin.Subset using (Subset; _∉_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Relation.Binary.Indexed.Homogeneous using (IndexedDecSetoid)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
-open import Data.List.Relation.Pointwise using (tabulate⁺)
 
 import RoutingLib.Data.Table.Relation.DecidableEquality as TableDecEquality
 import RoutingLib.Data.Matrix.Relation.DecidableEquality as MatrixDecEquality
-open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (IndexedDecSetoid)
-import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construction.FiniteSubset.Equality as SubsetEquality
+import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.Equality as SubsetEquality
 
 open import RoutingLib.Data.List.Relation.Pointwise using (foldr⁺)
 open import RoutingLib.Iteration.Asynchronous.Dynamic

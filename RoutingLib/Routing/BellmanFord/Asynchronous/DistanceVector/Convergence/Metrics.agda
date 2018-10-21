@@ -4,17 +4,20 @@ open import Data.Fin.Dec using (_∈?_)
 open import Data.Nat hiding (_≟_)
 open import Data.Nat.Properties hiding (module ≤-Reasoning)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Data.Bool using (if_then_else_)
 open import Data.Product using (∃; _,_; proj₂)
 open import Function using (_∘_)
 open import Relation.Binary using (_Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; sym)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
+open import Relation.Nullary.Decidable using (⌊_⌋)
 
 open import RoutingLib.Data.Table using (max)
 open import RoutingLib.Data.Table.Properties using (max[t]<x; x≤max[t])
 open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning; n≢0⇒0<n)
-import RoutingLib.Function.Metric.SubsetMaxLift as SubsetMaxLift
+import RoutingLib.Function.Metric.Construct.Condition as Condition
+import RoutingLib.Function.Metric.Construct.MaxLift as MaxLift
 import RoutingLib.Function.Metric as Metric
 import RoutingLib.Relation.Binary.Reasoning.PartialOrder as PO-Reasoning
 
@@ -39,13 +42,11 @@ module RoutingLib.Routing.BellmanFord.Asynchronous.DistanceVector.Convergence.Me
   
   where
 
-
 open Model algebra n
-open SyncMetrics isRoutingAlgebra isFinite public
-  using (dₜ)
+open SyncMetrics isRoutingAlgebra isFinite public using (dₜ)
 
-dₜᶜ : ∀ {i : Fin n} → RoutingTable → RoutingTable → ℕ
-dₜᶜ {i} = SubsetMaxLift.cond ℝ𝕄ₛⁱ dₜ p {i}
+dₜᶜ : ∀ (i : Fin n) → RoutingTable → RoutingTable → ℕ
+dₜᶜ i x y = if ⌊ i ∈? p ⌋ then dₜ x y else 0
 
 Dˢ : RoutingMatrix → RoutingMatrix → ℕ
-Dˢ = SubsetMaxLift.dˢ ℝ𝕄ₛⁱ dₜ p
+Dˢ X Y = max 0 (λ i → dₜᶜ i (X i) (Y i))

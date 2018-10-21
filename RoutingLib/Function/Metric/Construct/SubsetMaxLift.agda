@@ -38,7 +38,7 @@ open MaxLift 𝕊 using (d)
 module _ (dᵢ : ∀ {i} → Sᵢ i → Sᵢ i → ℕ) (p : Subset n) where
 
   
-
+{-
 
   dˢ : S → S → ℕ
   dˢ x y = max 0 (λ i → cond (x i) (y i))
@@ -115,4 +115,5 @@ ultrametric um = record
   { d             = d (λ {i} → Ultrametric.d (um i))
   ; isUltrametric = isUltrametric (λ {i} → Ultrametric.isUltrametric (um i))
   }
+-}
 -}

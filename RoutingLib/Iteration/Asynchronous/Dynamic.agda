@@ -49,7 +49,6 @@ record IsAsyncIterable
   field
     isDecEquivalenceᵢ : IsIndexedDecEquivalence Sᵢ _≈ᵢ_
     F-cong           : ∀ e p → (F e p) Preserves _≈[ p ]_ ⟶ _≈[ p ]_
-    F-inactive       : ∀ e {p} x → WellFormed p (F e p x)
     
   _≈_ : Rel S ℓ
   x ≈ y = ∀ i → x i ≈ᵢ y i

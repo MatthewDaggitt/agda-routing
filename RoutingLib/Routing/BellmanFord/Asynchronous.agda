@@ -10,17 +10,18 @@ open import Relation.Nullary.Negation using (contradiction)
 import RoutingLib.Data.Table.Relation.DecidableEquality as TableDecEquality
 import RoutingLib.Data.Matrix.Relation.DecidableEquality as MatrixDecEquality
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.Equality as SubsetEquality
-
 open import RoutingLib.Data.List.Relation.Pointwise using (foldr⁺)
+open import RoutingLib.Data.List
+
 open import RoutingLib.Iteration.Asynchronous.Dynamic
 open import RoutingLib.Iteration.Asynchronous.Schedule using (Schedule; 𝕋; Epoch)
 open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing.Model as Model
+open import RoutingLib.Routing.Model as Model using (Network)
 import RoutingLib.Routing.BellmanFord.Synchronous as SynchronousBellmanFord
 
 module RoutingLib.Routing.BellmanFord.Asynchronous
   {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)
-  {n} (network : Epoch → Model.AdjacencyMatrix algebra n)
+  {n} (network : Network algebra n)
   where
 
 open RawRoutingAlgebra algebra
@@ -32,6 +33,7 @@ open Model algebra n public
 -- The adjacency matrix in each epoch, adjusted for participants
 
 abstract
+-- Needs to be abstract otherwise unfolding causes all sorts of problems
 
   Aₜ : Epoch → Subset n → AdjacencyMatrix
   Aₜ e p i j with i ∈? p | j ∈? p 
@@ -62,42 +64,29 @@ abstract
 -- The synchronous routing iteration being computed during epoch e
 -- with participanets p
 
-Fₜ : Epoch → Subset n → RoutingMatrix → RoutingMatrix
-Fₜ e p X = σ (Aₜ e p) X
+σₜ : Epoch → Subset n → RoutingMatrix → RoutingMatrix
+σₜ e p X = σ (Aₜ e p) X
 
-Fₜ-cong : ∀ e p {X Y} → X ≈ₘ[ p ] Y → Fₜ e p X ≈ₘ[ p ] Fₜ e p Y
-Fₜ-cong e p X≈Y _ j = foldr⁺ _≈_ ⊕-cong ≈-refl (tabulate⁺ (Aₜ-cong e p X≈Y))
-
-Fₜ-cong' : ∀ e p {X Y} → X ≈ₘ[ p ] Y → Fₜ e p X ≈ₘ Fₜ e p Y
-Fₜ-cong' e p X≈Y _ j = foldr⁺ _≈_ ⊕-cong ≈-refl (tabulate⁺ (Aₜ-cong e p X≈Y))
-
-Fₜ-cong-∉ : ∀ e p {X Y} {i} → i ∉ p → Fₜ e p X i ≈ₜ Fₜ e p Y i
-Fₜ-cong-∉ e p {X} {Y} i∉p j = foldr⁺ _≈_ ⊕-cong ≈-refl (tabulate⁺ (λ k → Aₜ-reject-eq e _ k i∉p (X k j) (Y k j)))
-
-postulate Fₜ-inactive : ∀ e {p} X → WellFormed p (Fₜ e p X)
--- Fₜ-inactive e {p} X {i} i∉p j = {!!}
-
-------------------------------------------------------------------------
--- States in which the inactive nodes are actually inactive
-
-X*-wf : ∀ e p {X*} → Fₜ e p X* ≈ₘ X* → WellFormed p X*
-X*-wf e p {X*} FX*≈X* {i} i∉p = ≈ₜ-trans (≈ₘ-sym FX*≈X* i) (Fₜ-inactive e X* i∉p)
+σₜ-cong : ∀ e p {X Y} → X ≈ₘ[ p ] Y → σₜ e p X ≈ₘ[ p ] σₜ e p Y
+σₜ-cong e p X≈Y _ j = foldr⁺ _≈_ ⊕-cong ≈-refl (tabulate⁺ (Aₜ-cong e p X≈Y))
 
 ------------------------------------------------------------------------
 -- F forms a dynamic asynchronous iteration
 
-σ-isAsyncIterable : IsAsyncIterable _≈ₜ_ Fₜ I
-σ-isAsyncIterable = record
+σₜ-isAsyncIterable : IsAsyncIterable _≈ₜ_ σₜ I
+σₜ-isAsyncIterable = record
   { isDecEquivalenceᵢ = IndexedDecSetoid.isDecEquivalenceᵢ Decℝ𝕄ₛⁱ
-  ; F-cong           = Fₜ-cong
-  ; F-inactive       = Fₜ-inactive
+  ; F-cong           = σₜ-cong
   }
 
 δ∥ : AsyncIterable b ℓ n
-δ∥ = record { isAsyncIterable = σ-isAsyncIterable }
+δ∥ = record { isAsyncIterable = σₜ-isAsyncIterable }
 
 ------------------------------------------------------------------------
 -- The asynchronous state function
+--
+-- Given a schedule "𝓢" and an initial state "X₀" then "δ 𝓢 X₀ t" is
+-- the resulting state at time "t"
 
 δ : Schedule n → RoutingMatrix → 𝕋 → RoutingMatrix
 δ = asyncIter δ∥

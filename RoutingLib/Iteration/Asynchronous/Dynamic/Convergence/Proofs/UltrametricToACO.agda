@@ -245,14 +245,16 @@ aco = record
   { B            = B
   ; B-cong       = B-cong
   ; B-null       = B-null
-  ; F-resp-B     = λ {x} → F-resp-B {x}
 
   ; D            = D
   ; D-cong       = D-cong
   ; D-null       = D-null
   ; D-from-B     = D-from-B
   ; D-finish     = D-finish
+
+  ; F-resp-B     = λ {x} → F-resp-B {x}
   ; F-mono-D     = F-mono-D
+  ; F-inactive   = F-inactive
   }
 
 

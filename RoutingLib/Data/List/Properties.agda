@@ -20,8 +20,9 @@ open import Relation.Unary using (∁; U)
 open import Relation.Unary.Properties using (U-Universal)
 open import Function using (id; _∘_)
 open import Algebra using (Semilattice)
-open import Algebra.FunctionProperties using (Op₂; Idempotent; Associative; Commutative; Congruent₂; Selective)
+open import Algebra.FunctionProperties
 
+open import RoutingLib.Algebra
 open import RoutingLib.Data.List
 open import RoutingLib.Data.Nat.Properties
 open import RoutingLib.Algebra.FunctionProperties
@@ -84,6 +85,25 @@ module _ {a p} {A : Set a} {P : Pred A p} {_•_ : Op₂ A} where
   foldr-presᵒ pres e (x ∷ xs) (inj₂ (here px))   = pres _ _ (inj₁ px)
   foldr-presᵒ pres e (x ∷ xs) (inj₂ (there pxs)) = pres _ _ (inj₂ (foldr-presᵒ pres e xs (inj₂ pxs)))
 
+module _ {a ℓ} (M : Magma a ℓ) where
+
+  open Magma M
+  open import Relation.Binary.EqReasoning setoid
+  
+  foldr-zeroʳ  : ∀ {e} → RightZero _≈_ e _∙_ → ∀ xs → foldr _∙_ e xs ≈ e
+  foldr-zeroʳ {e} zeroʳ []       = Magma.refl M
+  foldr-zeroʳ {e} zeroʳ (x ∷ xs) = begin
+    x ∙ foldr _∙_ e xs ≈⟨ ∙-cong (Magma.refl M) (foldr-zeroʳ zeroʳ xs) ⟩
+    x ∙ e              ≈⟨ zeroʳ x ⟩
+    e                  ∎
+
+  foldr-constant : ∀ {e} → _IdempotentOn_ _≈_ _∙_ e → ∀ {xs} → All (_≈ e) xs → foldr _∙_ e xs ≈ e
+  foldr-constant {e} idem {[]}     []            = Magma.refl M
+  foldr-constant {e} idem {x ∷ xs} (x≈e ∷ xs≈e) = begin
+    x ∙ foldr _∙_ e xs ≈⟨ ∙-cong x≈e (foldr-constant idem xs≈e) ⟩
+    e ∙ e              ≈⟨ idem ⟩
+    e                  ∎
+  
 ------------------------------------------------------------------------
 -- Properties of foldl
 
@@ -184,8 +204,7 @@ module _ {a ℓ} (S : Semilattice a ℓ)  where
     x ∧ (e ∧ foldr _∧_ e xs) ≈⟨ ∙-cong ≈-refl (foldr≤ᵣe e xs) ⟩
     x ∧ foldr _∧_ e xs       ∎
 
-  open import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right _≈_ _∧_
-    using (≤-isTotalOrder) renaming (_≤_ to _≤ᵣ_)
+  open import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right _≈_ _∧_ renaming (_≤_ to _≤ᵣ_)
 
   foldr≤ₗe : ∀ e xs → foldr _∧_ e xs ∧ e ≈ foldr _∧_ e xs
   foldr≤ₗe e xs = ≈-trans (comm _ e) (foldr≤ᵣe e xs)

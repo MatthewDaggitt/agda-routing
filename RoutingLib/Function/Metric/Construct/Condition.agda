@@ -1,6 +1,7 @@
 open import Data.Nat using (ℕ; _≤_; z≤n)
 open import Data.Nat.Properties using (≤-refl)
 open import Data.Bool using (if_then_else_)
+open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Relation.Binary hiding (Decidable)
 open import Relation.Binary.PropositionalEquality as P using (_≡_; refl)
 open import Relation.Unary using (Pred; Decidable)
@@ -32,15 +33,24 @@ x≈y⇒≡0 eq {c} x≈y with P? c
 ... | yes _ = eq x≈y
 ... | no  _ = refl
 
+≡0⇒x≈y : ∀ {ℓ} {_≈_ : Rel A ℓ} →
+         (∀ {x y} → d x y ≡ 0 → x ≈ y) →
+         ∀ {c x y} → P c → dᶜ c x y ≡ 0 → x ≈ y
+≡0⇒x≈y eq {c} {x} {y} Pc dᶜ≡0 with P? c
+... | yes _  = eq dᶜ≡0
+... | no ¬Pc = contradiction Pc ¬Pc
+
 sym : (∀ x y → d x y ≡ d y x) → ∀ c x y → dᶜ c x y ≡ dᶜ c y x
 sym sym c x y with P? c
 ... | yes _ = sym x y
 ... | no  _ = refl
 
-P⇒dᶜ≡d : ∀ {c} → P c → ∀ x y → dᶜ c x y ≡ d x y
-P⇒dᶜ≡d {c} P x y with P? c
+dᶜ≡d⁺ : ∀ c x y → P c ⊎ d x y ≡ 0 → dᶜ c x y ≡ d x y
+dᶜ≡d⁺ c x y cd with P? c
 ... | yes _ = refl
-... | no ¬P = contradiction P ¬P
+... | no ¬P with cd
+...   | inj₁ P  = contradiction P ¬P
+...   | inj₂ eq = P.sym eq
 
 cond-eq' : ∀ c {x y : A} → (¬ P c → d x y ≡ 0) → dᶜ c x y ≡ d x y
 cond-eq' c eq with P? c

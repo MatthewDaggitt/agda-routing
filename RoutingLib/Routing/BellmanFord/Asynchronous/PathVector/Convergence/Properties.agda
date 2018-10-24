@@ -20,31 +20,32 @@ import RoutingLib.Function.Metric as Metric
 import RoutingLib.Relation.Binary.Reasoning.PartialOrder as PO-Reasoning
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.RoutingAlgebra
+open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
 import RoutingLib.Routing.Algebra.RoutingAlgebra.Properties as RoutingAlgebraProperties
-import RoutingLib.Routing.Model as Model
+open import RoutingLib.Routing.Model as Model using (AdjacencyMatrix)
+open import RoutingLib.Iteration.Asynchronous.Schedule using (Epoch)
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
 
-import RoutingLib.Routing.BellmanFord.Synchronous.DistanceVector.Properties as SyncBellmanFordProperties
+import RoutingLib.Routing.BellmanFord.Synchronous.PathVector.Properties as SyncBellmanFordProperties
 import RoutingLib.Routing.BellmanFord.Asynchronous as AsyncBellmanFord
-import RoutingLib.Routing.BellmanFord.Asynchronous.DistanceVector.Convergence.Metrics as Metrics
-import RoutingLib.Routing.BellmanFord.Synchronous.DistanceVector.Convergence.Properties as SyncMetricProperties
+import RoutingLib.Routing.BellmanFord.Asynchronous.PathVector.Convergence.Metrics as Metrics
+import RoutingLib.Routing.BellmanFord.Synchronous.PathVector.Convergence.Properties as SyncMetricProperties
 
-module RoutingLib.Routing.BellmanFord.Asynchronous.DistanceVector.Convergence.Properties
-  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  (isFinite : IsFinite algebra)
-  {n} (p : Subset n)
+module RoutingLib.Routing.BellmanFord.Asynchronous.PathVector.Convergence.Properties
+  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
+  (A : AdjacencyMatrix algebra n)
+  (1≤n : 1 ≤ n) (p : Subset n)
   where
 
 open Model algebra n
-open Metrics isRoutingAlgebra isFinite p 
-open SyncMetricProperties isRoutingAlgebra isFinite
+open Metrics isPathAlgebra A p 
+open SyncMetricProperties isPathAlgebra A 1≤n public
 
 ------------------------------------------------------------------------
 -- Properties of dₜᶜ
 
-private module Conditionₜ = Condition (dₜ {n}) (_∈? p)
+private module Conditionₜ = Condition dₜ (_∈? p)
 
 dₜᶜ-cong : ∀ i → dₜᶜ i Preserves₂ _≈ₜ_ ⟶ _≈ₜ_ ⟶ _≡_
 dₜᶜ-cong = Conditionₜ.cong′ dₜ-cong

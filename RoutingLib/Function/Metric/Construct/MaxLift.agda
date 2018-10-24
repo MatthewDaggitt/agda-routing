@@ -40,8 +40,11 @@ cong : (∀ {i} → (dᵢ i) Preserves₂ _≈ᵢ_ ⟶ _≈ᵢ_ ⟶ _≡_) →
          d Preserves₂ _≈_ ⟶ _≈_ ⟶ _≡_
 cong dᵢ-cong m≈n p≈q = max-cong refl (λ i → dᵢ-cong (m≈n i) (p≈q i))
 
+d≡0⇒dᵢ≡0 : ∀ {x y} → d x y ≡ 0 → ∀ i → dᵢ i (x i) (y i) ≡ 0
+d≡0⇒dᵢ≡0 d≡0 i = ≤-antisym (subst (_ ≤_) d≡0 (dᵢ≤d _ _ i)) z≤n
+
 d≡0⇒x≈y : (∀ {i} {xᵢ yᵢ : Sᵢ i} → dᵢ i xᵢ yᵢ ≡ 0 → xᵢ ≈ᵢ yᵢ) → ∀ {x y} → d x y ≡ 0 → x ≈ y
-d≡0⇒x≈y dᵢ≡0⇒x≈y {x} {y} d≡0 i = dᵢ≡0⇒x≈y (≤-antisym (subst (dᵢ i (x i) (y i) ≤_) d≡0 (dᵢ≤d x y i)) z≤n)
+d≡0⇒x≈y dᵢ≡0⇒x≈y {x} {y} d≡0 i = dᵢ≡0⇒x≈y (d≡0⇒dᵢ≡0 d≡0 i)
 
 x≈y⇒d≡0 : (∀ {i} {xᵢ yᵢ : Sᵢ i} → xᵢ ≈ᵢ yᵢ → dᵢ i xᵢ yᵢ ≡ 0) → ∀ {x y} → x ≈ y → d x y ≡ 0
 x≈y⇒d≡0 x≈y⇒dᵢ≡0 x≈y = max-constant refl (λ i → x≈y⇒dᵢ≡0 (x≈y i))

@@ -16,6 +16,7 @@ import RoutingLib.Data.Table.Relation.DecidableEquality as TableDecEquality
 open import RoutingLib.Data.Table using (Table)
 
 open import RoutingLib.Routing.Algebra
+open import RoutingLib.Iteration.Asynchronous.Schedule using (Epoch)
 
 module RoutingLib.Routing.Model
   {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) (n : ℕ)
@@ -24,10 +25,16 @@ module RoutingLib.Routing.Model
 open RawRoutingAlgebra algebra hiding (_≟_)
 
 --------------------------------------------------------------------------------
--- Adjacency matrices represent the network topology at a point in time
+-- Adjacency matrices represent the topology of the network at a point in time
 
 AdjacencyMatrix : Set a
 AdjacencyMatrix = ∀ (i j : Fin n) → Step i j
+
+--------------------------------------------------------------------------------
+-- A network is a epoch indexed family of topologies
+
+Network : Set a
+Network = Epoch → AdjacencyMatrix
 
 --------------------------------------------------------------------------------
 -- Routing tables store a node's routing decisions
@@ -75,6 +82,9 @@ open SubsetEquality ℝ𝕄ₛⁱ public
 
 --------------------------------------------------------------------------------
 -- The initial state (the identity matrix)
+--
+-- In the initial state everyone knows the trivial route to themselves and has
+-- an invalid route for everyone else
 
 I : RoutingMatrix
 I i j with j ≟ i
@@ -99,7 +109,6 @@ Iᵢⱼ≡∞ {i} {j} i≢j with j ≟ i
 
 Iᵢⱼ≡Iₖₗ : ∀ {i j k l} → j ≢ i → l ≢ k → I i j ≡ I k l
 Iᵢⱼ≡Iₖₗ j≢i l≢k = trans (Iᵢⱼ≡∞ j≢i) (sym (Iᵢⱼ≡∞ l≢k))
-
 
 --------------------------------------------------------------------------------
 -- WellFormed

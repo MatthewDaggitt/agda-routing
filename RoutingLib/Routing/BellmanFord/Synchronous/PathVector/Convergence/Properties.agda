@@ -368,6 +368,9 @@ open IsUltrametric dₜ-isUltrametric public
 dₜ-bounded : Bounded ℝ𝕋ₛ dₜ
 dₜ-bounded = MaxLiftₜ.bounded dᵣ-bounded
 
+d≤dₜ : ∀ x y i → dᵣ (x i) (y i) ≤ dₜ x y
+d≤dₜ = MaxLiftₜ.dᵢ≤d
+
 ------------------------------------------------------------------------
 -- Properties of D
 

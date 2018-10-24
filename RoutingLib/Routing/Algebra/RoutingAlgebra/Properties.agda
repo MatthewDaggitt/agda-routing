@@ -10,6 +10,8 @@ open import Relation.Binary using (DecTotalOrder; StrictTotalOrder)
 import Relation.Binary.Construct.Converse as Converse
 import Relation.Binary.EqReasoning as EqReasoning
 
+open import RoutingLib.Algebra
+open import RoutingLib.Algebra.Structures
 import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
 import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.DecTotalOrder as NonStrictToStrict
 
@@ -33,6 +35,17 @@ open FunctionProperties _≈_
 
 ⊕-identityˡ : LeftIdentity ∞ _⊕_
 ⊕-identityˡ x = ≈-trans (⊕-comm ∞ x) (⊕-identityʳ x)
+
+⊕-isMagma : IsMagma _≈_ _⊕_
+⊕-isMagma = record
+  { isEquivalence = ≈-isEquivalence
+  ; ∙-cong        = ⊕-cong
+  }
+
+⊕-magma : Magma _ _
+⊕-magma = record
+  { isMagma = ⊕-isMagma
+  }
 
 ⊕-isSemigroup : IsSemigroup _≈_ _⊕_
 ⊕-isSemigroup = record

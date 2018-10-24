@@ -27,7 +27,7 @@ Epoch : Set
 Epoch = ℕ
 
 --------------------------------------------------------------------------------
--- Mono schedules --
+-- Data schedules --
 --------------------------------------------------------------------------------
 -- A schedule dictating the flow of inforamtion within a computation
 -- (ala Uresin & Dubois)

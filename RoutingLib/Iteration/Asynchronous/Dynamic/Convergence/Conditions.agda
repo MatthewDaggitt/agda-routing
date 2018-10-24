@@ -45,15 +45,17 @@ record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
     B          : IPred Sᵢ p
     B-cong     : ∀ {i} → (_∈ᵤ B i) Respects _≈ᵢ_
     B-null     : ⊥ ∈ B
-    F-resp-B   : ∀ {x} → x ∈ B → ∀ {e p} → F e p x ∈ B
     
     D          : Epoch → Subset n → ℕ → IPred Sᵢ p
     D-cong     : ∀ {e p b i} → (_∈ᵤ D e p b i) Respects _≈ᵢ_
     D-null     : ∀ {e p b i} → i ∉ p → ⊥ i ∈ᵤ D e p b i
     D-from-B   : ∀ {e p x} → x ∈ B → F e p x ∈ D e p 0
     D-finish   : ∀ e p → ∃₂ λ bᶠ ξ → (∀ {x} → x ∈ D e p bᶠ → x ≈ ξ)
-    F-mono-D   : ∀ {e p b x} → WellFormed p x → x ∈ D e p b → F e p x ∈ D e p (suc b)
 
+    F-resp-B   : ∀ {x} → x ∈ B → ∀ {e p} → F e p x ∈ B
+    F-mono-D   : ∀ {e p b x} → WellFormed p x → x ∈ D e p b → F e p x ∈ D e p (suc b)
+    F-inactive : ∀ e {p} x → WellFormed p (F e p x)
+    
 --------------------------------------------------------------------------------
 -- Ultrametric spaces --
 --------------------------------------------------------------------------------
@@ -78,21 +80,9 @@ record UltrametricConditions : Set (a ⊔ ℓ) where
   field
     F-strContrOnOrbits  : ∀ e p {x} → WellFormed p x → F e p x ≉[ p ] x → d e p (F e p x) (F e p (F e p x)) < d e p x (F e p x)
     F-strContrOnFP      : ∀ e p {x} → WellFormed p x → ∀ {x*} → F e p x* ≈ x* → x ≉[ p ] x* → d e p x* (F e p x) < d e p x* x
+    F-inactive          : ∀ e {p} x → WellFormed p (F e p x)
 
-{-
-  𝕊? : DecSetoid _ _
-  𝕊? = record
-    { Carrier          = S
-    ; _≈_              = _≈_
-    ; isDecEquivalence = record
-      { isEquivalence = ≈-isEquivalence
-      ; _≟_           = _≟_
-      }
-    }
 
-  𝕊ₚ? : Subset n → DecSetoid _ _
-  𝕊ₚ? p = SubsetEq.≈ₛ-decSetoid DecS p
--}
 
 {-
 ---------------------------------

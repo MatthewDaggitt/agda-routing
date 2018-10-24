@@ -4,7 +4,8 @@ open import Data.Fin using (Fin; toℕ) renaming (_<_ to _<𝔽_)
 open import Data.Fin.Properties using (toℕ≤pred[n])
 open import Data.List using (List; length)
 open import Data.List.Any using (index)
-open import Data.Product using (_,_; _×_; map)
+open import Data.Product using (∃₂; _,_; _×_; map)
+open import Data.Sum using (inj₁; inj₂)
 open import Relation.Binary using (_Preserves_⟶_; _Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality
 open import Function using (_∘_; id; _$_)
@@ -18,6 +19,7 @@ open import RoutingLib.Data.List.Membership.Setoid.Properties using (index-cong)
 import RoutingLib.Data.List.Sorting.Properties as Sorting
 open import RoutingLib.Data.Nat.Properties using (ℕₛ; suc∘pred[n]≡n)
 open import RoutingLib.Data.Nat.Properties using (ℕₛ; m≤n⇒m≤n⊔o; n≤m×o≤m⇒n⊔o≤m; n≢0⇒0<n; module ≤-Reasoning)
+open import RoutingLib.Data.Table.Properties using (max[t]<x; x<max[t])
 open import RoutingLib.Function.Reasoning
 open import RoutingLib.Function.Metric using (Ultrametric; IsUltrametric; Bounded; MaxTriangleIneq)
 import RoutingLib.Function.Metric.Construct.MaxLift as MaxLift
@@ -35,7 +37,6 @@ module RoutingLib.Routing.BellmanFord.Synchronous.DistanceVector.Convergence.Pro
   (isFinite : IsFinite algebra)
   where
 
-open Model algebra
 open Metrics isRoutingAlgebra isFinite
 open RawRoutingAlgebra algebra
 open FiniteProperties isRoutingAlgebra isFinite hiding (H)
@@ -108,13 +109,9 @@ d-maxTriIneq : MaxTriangleIneq S d
 d-maxTriIneq x y z with x ≟ y | y ≟ z | x ≟ z
 ... | _       | _       | yes _  = z≤n
 ... | yes x≈y | yes y≈z | no x≉z = contradiction (≈-trans x≈y y≈z) x≉z
-... | yes x≈y | no  _   | no _   = ≤-reflexive (cong₂ _⊔_ (h-cong x≈y) (refl {x = h z}))
+... | yes x≈y | no  _   | no _   = ≤-reflexive (cong (_⊔ h z) (h-cong x≈y))
+... | no  _   | yes y≈z | no _   = ≤-reflexive (cong (h x ⊔_) (h-cong (≈-sym y≈z)))
 ... | no  _   | no  _   | no _   = ⊔-mono-≤ (m≤m⊔n (h x) (h y)) (n≤m⊔n (h y) (h z))
-... | no  _   | yes y≈z | no _   = begin
-  h x ⊔ h z     ≡⟨ cong (h x ⊔_) (h-cong (≈-sym y≈z)) ⟩
-  h x ⊔ h y     ≡⟨ sym (⊔-identityʳ _) ⟩
-  h x ⊔ h y ⊔ 0 ∎
-  where open ≤-Reasoning
 
 dxy≡hx⊔hy : ∀ {x y} → x ≉ y → d x y ≡ h x ⊔ h y
 dxy≡hx⊔hy {x} {y} x≉y with x ≟ y
@@ -139,19 +136,15 @@ d-ultrametric = record
 ------------------------------------------------------------------------
 -- Properties of dₜ
 
-private module MaxLiftₜ n = MaxLift (ℝ𝕋ₛⁱ n) (λ _ → d)
-
-d≤dₜ : ∀ {n} x y i → d (x i) (y i) ≤ dₜ {n} x y
-d≤dₜ = MaxLiftₜ.dᵢ≤d _
-
-dₜ-bounded : ∀ n → Bounded (ℝ𝕋ₛ n) dₜ
-dₜ-bounded n = MaxLiftₜ.bounded n d-bounded
-
-dₜ-isUltrametric : ∀ n → IsUltrametric _ (dₜ {n})
-dₜ-isUltrametric n = MaxLiftₜ.isUltrametric n d-isUltrametric
-
 module _ {n : ℕ} where
-  open IsUltrametric (dₜ-isUltrametric n) public
+
+  open Model algebra n
+  private module MaxLiftₜ = MaxLift ℝ𝕋ₛⁱ (λ _ → d)
+
+  dₜ-isUltrametric : IsUltrametric _ dₜ
+  dₜ-isUltrametric = MaxLiftₜ.isUltrametric d-isUltrametric
+
+  open IsUltrametric dₜ-isUltrametric public
     using ()
     renaming
     ( cong to dₜ-cong
@@ -160,25 +153,24 @@ module _ {n : ℕ} where
     ; eq⇒0 to x≈y⇒dₜ≡0
     )
 
+  d≤dₜ : ∀ x y i → d (x i) (y i) ≤ dₜ {n} x y
+  d≤dₜ = MaxLiftₜ.dᵢ≤d
+
+  dₜ-bounded : Bounded ℝ𝕋ₛ dₜ
+  dₜ-bounded = MaxLiftₜ.bounded d-bounded
+
 ------------------------------------------------------------------------
 -- Properties of D
 
-private module MaxLiftₘ n = MaxLift (ℝ𝕄ₛⁱ n) (λ _ → dₜ)
-
-dₜ≤D : ∀ {n} X Y i → dₜ (X i) (Y i) ≤ D {n} X Y
-dₜ≤D = MaxLiftₘ.dᵢ≤d _
-
-d≤D : ∀ {n} X Y i j → d (X i j) (Y i j) ≤ D {n} X Y
-d≤D X Y i j = ≤-trans (d≤dₜ (X i) (Y i) j) (dₜ≤D X Y i)
-
-D-bounded : ∀ n → Bounded (ℝ𝕄ₛ n) D
-D-bounded n = MaxLiftₘ.bounded n (dₜ-bounded n)
-
-D-isUltrametric : ∀ n → IsUltrametric _ (D {n})
-D-isUltrametric n = MaxLiftₘ.isUltrametric n (dₜ-isUltrametric n)
-
 module _ {n : ℕ} where
-  open IsUltrametric (D-isUltrametric n) public
+
+  open Model algebra n
+  private module MaxLiftₘ = MaxLift ℝ𝕄ₛⁱ (λ _ → dₜ)
+
+  D-isUltrametric : IsUltrametric _ (D {n})
+  D-isUltrametric = MaxLiftₘ.isUltrametric dₜ-isUltrametric
+
+  open IsUltrametric D-isUltrametric public
     using ()
     renaming
     ( cong to D-cong
@@ -186,3 +178,23 @@ module _ {n : ℕ} where
     ; 0⇒eq to D≡0⇒X≈Y
     ; eq⇒0 to X≈Y⇒D≡0
     )
+
+  dₜ≤D : ∀ X Y i → dₜ (X i) (Y i) ≤ D {n} X Y
+  dₜ≤D = MaxLiftₘ.dᵢ≤d
+
+  d≤D : ∀ X Y i j → d (X i j) (Y i j) ≤ D {n} X Y
+  d≤D X Y i j = ≤-trans (d≤dₜ (X i) (Y i) j) (dₜ≤D X Y i)
+
+  D-bounded : Bounded ℝ𝕄ₛ D
+  D-bounded = MaxLiftₘ.bounded dₜ-bounded
+
+  module _ {X Y : RoutingMatrix} where
+  
+    Y≉X⇒0<DXY : Y ≉ₘ X → 0 < D X Y
+    Y≉X⇒0<DXY Y≉X = n≢0⇒0<n (Y≉X ∘ ≈ₘ-sym ∘ D≡0⇒X≈Y)
+
+    D<v : ∀ {v} → 0 < v → (∀ i j → d (X i j) (Y i j) < v) → D X Y < v
+    D<v 0<v dXY<v = max[t]<x 0<v (λ i → max[t]<x 0<v (λ j → dXY<v i j))
+
+    v<D : ∀ {v} → (∃₂ λ i j → v < d (X i j) (Y i j)) → v < D X Y
+    v<D (i , j , v<dXY) = x<max[t] 0 (inj₂ (i , x<max[t] 0 (inj₂ (j , v<dXY))))

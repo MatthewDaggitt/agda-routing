@@ -37,13 +37,12 @@ module RoutingLib.Routing.BellmanFord.Asynchronous.DistanceVector.Convergence.Me
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (isFinite : IsFinite algebra)
-  (isStrictlyIncreasing : IsStrictlyIncreasing algebra)
   {n} (p : Subset n)
   
   where
 
 open Model algebra n
-open SyncMetrics isRoutingAlgebra isFinite public using (dₜ)
+open SyncMetrics isRoutingAlgebra isFinite public using (d; dₜ)
 
 dₜᶜ : ∀ (i : Fin n) → RoutingTable → RoutingTable → ℕ
 dₜᶜ i x y = if ⌊ i ∈? p ⌋ then dₜ x y else 0

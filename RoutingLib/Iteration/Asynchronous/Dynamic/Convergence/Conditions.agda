@@ -62,22 +62,22 @@ record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
 
 record UltrametricConditions : Set (a ⊔ ℓ) where
   field
-    dᵢ                 : ∀ {i} → Sᵢ i → Sᵢ i → ℕ
-    dᵢ-cong            : ∀ {i} → (dᵢ {i}) Preserves₂ _≈ᵢ_ ⟶ _≈ᵢ_ ⟶ _≡_
-    x≈y⇒dᵢ≡0           : ∀ {i} {x y : Sᵢ i} → x ≈ᵢ y → dᵢ x y ≡ 0
-    dᵢ≡0⇒x≈y           : ∀ {i} {x y : Sᵢ i} → dᵢ x y ≡ 0 → x ≈ᵢ y
-    dᵢ-bounded         : ∃ λ dₘₐₓ → ∀ {i} x y → dᵢ {i} x y ≤ dₘₐₓ
+    dᵢ                 : Epoch → Subset n → ∀ {i} → Sᵢ i → Sᵢ i → ℕ
+    dᵢ-cong            : ∀ e p {i} → (dᵢ e p {i}) Preserves₂ _≈ᵢ_ ⟶ _≈ᵢ_ ⟶ _≡_
+    x≈y⇒dᵢ≡0           : ∀ e p {i} {x y : Sᵢ i} → x ≈ᵢ y → dᵢ e p x y ≡ 0
+    dᵢ≡0⇒x≈y           : ∀ e p {i} {x y : Sᵢ i} → dᵢ e p x y ≡ 0 → x ≈ᵢ y
+    dᵢ-bounded         : ∀ e p → ∃ λ dₘₐₓ → ∀ {i} x y → dᵢ e p {i} x y ≤ dₘₐₓ
     element            : S
 
-  dₛᵢ : Subset n → ∀ {i} → Sᵢ i → Sᵢ i → ℕ
-  dₛᵢ p {i} x y = if ⌊ i ∈? p ⌋ then dᵢ x y else 0
+  dₛᵢ : Epoch → Subset n → ∀ {i} → Sᵢ i → Sᵢ i → ℕ
+  dₛᵢ e p {i} x y = if ⌊ i ∈? p ⌋ then dᵢ e p x y else 0
   
-  d : Subset n → S → S → ℕ
-  d p x y = max 0 (λ i → dₛᵢ p (x i) (y i))
+  d : Epoch → Subset n → S → S → ℕ
+  d e p x y = max 0 (λ i → dₛᵢ e p (x i) (y i))
 
   field
-    F-strContrOnOrbits  : ∀ e p {x} → WellFormed p x → F e p x ≉[ p ] x → d p (F e p x) (F e p (F e p x)) < d p x (F e p x)
-    F-strContrOnFP      : ∀ e p {x} → WellFormed p x → ∀ {x*} → F e p x* ≈ x* → x ≉[ p ] x* → d p x* (F e p x) < d p x* x
+    F-strContrOnOrbits  : ∀ e p {x} → WellFormed p x → F e p x ≉[ p ] x → d e p (F e p x) (F e p (F e p x)) < d e p x (F e p x)
+    F-strContrOnFP      : ∀ e p {x} → WellFormed p x → ∀ {x*} → F e p x* ≈ x* → x ≉[ p ] x* → d e p x* (F e p x) < d e p x* x
 
 {-
   𝕊? : DecSetoid _ _

@@ -47,24 +47,24 @@ infixr 2 _<⟨_⟩_ _≤⟨_⟩_ _≈⟨_⟩_ _≡⟨_⟩_ _≡⟨⟩_
 infix  1 begin_
 
 begin_ : ∀ {x y} → (p : x ≲ y) → ⟦ p ⟧
-begin strict    p = p
-begin nonstrict p = p
 begin eq        p = p
+begin nonstrict p = p
+begin strict    p = p
 
 _<⟨_⟩_ : ∀ (x : A) {y z} → x < y → y ≲ z → x ≲ z
 x <⟨ x<y ⟩ eq        y≈z = strict (<-respʳ-≈ y≈z x<y)
-x <⟨ x<y ⟩ strict    y<z = strict (SPO.trans x<y y<z)
 x <⟨ x<y ⟩ nonstrict y≤z = strict (<-≤-trans x<y y≤z)
+x <⟨ x<y ⟩ strict    y<z = strict (SPO.trans x<y y<z)
 
 _≤⟨_⟩_ : ∀ (x : A) {y z} → x ≤ y → y ≲ z → x ≲ z
 x ≤⟨ x≤y ⟩ eq        y≈z = nonstrict (PO.≤-respʳ-≈ y≈z x≤y)
-x ≤⟨ x≤y ⟩ strict    y<z = strict    (≤-<-trans x≤y y<z)
 x ≤⟨ x≤y ⟩ nonstrict y≤z = nonstrict (PO.trans x≤y y≤z)
+x ≤⟨ x≤y ⟩ strict    y<z = strict    (≤-<-trans x≤y y<z)
 
 _≈⟨_⟩_ : ∀ (x : A) {y z} → x ≈ y → y ≲ z → x ≲ z
 x ≈⟨ x≈y ⟩ eq        y≈z = eq (Eq.trans x≈y y≈z)
-x ≈⟨ x≈y ⟩ strict    y<z = strict    (<-respˡ-≈ (Eq.sym x≈y) y<z)
 x ≈⟨ x≈y ⟩ nonstrict y≤z = nonstrict (PO.≤-respˡ-≈ (Eq.sym x≈y) y≤z)
+x ≈⟨ x≈y ⟩ strict    y<z = strict    (<-respˡ-≈ (Eq.sym x≈y) y<z)
 
 -- Note: the proof of propostional equality is not matched on in the
 -- combinator below as we need to decide strict vs nonstrict for
@@ -72,49 +72,50 @@ x ≈⟨ x≈y ⟩ nonstrict y≤z = nonstrict (PO.≤-respˡ-≈ (Eq.sym x≈y)
 
 _≡⟨_⟩_ : ∀ (x : A) {y z} → x ≡ y → y ≲ z → x ≲ z
 x ≡⟨ x≡y ⟩ eq        y≈z = eq        (case x≡y of λ where refl → y≈z)
-x ≡⟨ x≡y ⟩ strict    y<z = strict    (case x≡y of λ where refl → y<z)
 x ≡⟨ x≡y ⟩ nonstrict y≤z = nonstrict (case x≡y of λ where refl → y≤z)
+x ≡⟨ x≡y ⟩ strict    y<z = strict    (case x≡y of λ where refl → y<z)
 
 _≡⟨⟩_ : ∀ (x : A) {y} → x ≲ y → x ≲ y
 x ≡⟨⟩ x≲y = x≲y
 
 _∎ : ∀ (x : A) → x ≲ x
-x ∎ = nonstrict PO.refl
+x ∎ = eq PO.Eq.refl
 
 
 
+private
+
+  -- Tests
+  postulate
+    u v w x y z b c : A
+    u≈v : u ≈ v
+    v≡w : v ≡ w
+    w<x : w < x
+    x≤y : x ≤ y
+    y<z : y < z
+    z≡b : z ≡ b
+    b≈c : b ≈ c
 
 {-
--- Tests
-postulate
-  u v w x y z b c : A
-  u≈v : u ≈ v
-  v≡w : v ≡ w
-  w<x : w < x
-  x≤y : x ≤ y
-  y<z : y < z
-  z≡b : z ≡ b
-  b≈c : b ≈ c
-
-u≤c : u ≤ c
-u≤c = begin
-  u ≈⟨ u≈v ⟩
-  v ≡⟨ v≡w ⟩
-  w <⟨ w<x ⟩
-  x ≤⟨ x≤y ⟩
-  y <⟨ y<z ⟩
-  z ≡⟨ z≡b ⟩
-  b ≈⟨ b≈c ⟩
-  c ∎
-
-u<c : u < c
-u<c = begin-strict
-  u ≈⟨ u≈v ⟩
-  v ≡⟨ v≡w ⟩
-  w <⟨ w<x ⟩
-  x ≤⟨ x≤y ⟩
-  y <⟨ y<z ⟩
-  z ≡⟨ z≡b ⟩
-  b ≈⟨ b≈c ⟩
-  c ∎
+  u≤c : u ≤ c
+  u≤c = begin
+    u ≈⟨ u≈v ⟩
+    v ≡⟨ v≡w ⟩
+    w <⟨ w<x ⟩
+    x ≤⟨ x≤y ⟩
+    y <⟨ y<z ⟩
+    z ≡⟨ z≡b ⟩
+    b ≈⟨ b≈c ⟩
+    c ∎
 -}
+
+  u<c : u < c
+  u<c = begin
+    u ≈⟨ u≈v ⟩
+    v ≡⟨ v≡w ⟩
+    w <⟨ w<x ⟩
+    x ≤⟨ x≤y ⟩
+    y <⟨ y<z ⟩
+    z ≡⟨ z≡b ⟩
+    b ≈⟨ b≈c ⟩
+    c ∎

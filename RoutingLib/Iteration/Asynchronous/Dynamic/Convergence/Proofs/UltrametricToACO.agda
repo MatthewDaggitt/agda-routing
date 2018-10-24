@@ -22,7 +22,7 @@ import RoutingLib.Function.Metric.FixedPoint as FixedPoints
 import RoutingLib.Function.Metric.Construct.SubsetMaxLift as SubsetMaxLift
 open import RoutingLib.Relation.Unary.Indexed
 open import RoutingLib.Relation.Binary.PropositionalEquality using (inspect′)
-import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construction.FiniteSubset.DecEquality as SubsetEquality
+import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as SubsetEquality
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic using (AsyncIterable)
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions using (ACO; UltrametricConditions)
@@ -47,88 +47,84 @@ abstract
   ... | yes i∈p = x≈ₚy i∈p
   ... | no  i∉p = ≈ᵢ-trans (⊥x i∉p) (≈ᵢ-sym (⊥y i∉p))
 
-abstract
+module _ (e : Epoch) (p : Subset n) where
 
   dₘₐₓ : ℕ
-  dₘₐₓ = proj₁ dᵢ-bounded
+  dₘₐₓ = proj₁ (dᵢ-bounded e p)
 
-  dᵢ≤dₘₐₓ : ∀ {i} (x y : Sᵢ i) → dᵢ x y ≤ dₘₐₓ
-  dᵢ≤dₘₐₓ = proj₂ dᵢ-bounded
-
-module _ (p : Subset n) where
-
-  dₛᵢ-cong : ∀ {i} → dₛᵢ p {i} Preserves₂ _≈ᵢ_ ⟶ _≈ᵢ_ ⟶ _≡_
+  dᵢ≤dₘₐₓ : ∀ {i} (x y : Sᵢ i) → dᵢ e p x y ≤ dₘₐₓ
+  dᵢ≤dₘₐₓ = proj₂ (dᵢ-bounded e p)
+  
+  dₛᵢ-cong : ∀ {i} → dₛᵢ e p {i} Preserves₂ _≈ᵢ_ ⟶ _≈ᵢ_ ⟶ _≡_
   dₛᵢ-cong {i} with i ∈? p
-  ... | yes i∈p = dᵢ-cong
+  ... | yes i∈p = dᵢ-cong e p
   ... | no  i∉p = λ _ _ → refl
 
-  dₛ-cong : d p Preserves₂ _≈[ p ]_ ⟶ _≈[ p ]_ ⟶ _≡_
-  dₛ-cong = SubsetMaxLift.dˢ-congˢ ≈ᵢ-setoidᵢ dᵢ p dᵢ-cong
+  postulate dₛ-cong : d e p Preserves₂ _≈[ p ]_ ⟶ _≈[ p ]_ ⟶ _≡_
+  -- dₛ-cong = SubsetMaxLift.dˢ-congˢ ≈ᵢ-setoidᵢ dᵢ p dᵢ-cong
   
-  d-cong : d p Preserves₂ _≈_ ⟶ _≈_ ⟶ _≡_
+  d-cong : d e p Preserves₂ _≈_ ⟶ _≈_ ⟶ _≡_
   d-cong x≈y u≈v = max-cong refl (λ i → dₛᵢ-cong (x≈y i) (u≈v i))
   
-  i∈p⇒dₛᵢ≡dᵢ : ∀ {i} (x y : Sᵢ i) → i ∈ₛ p → dₛᵢ p x y ≡ dᵢ x y 
+  i∈p⇒dₛᵢ≡dᵢ : ∀ {i} (x y : Sᵢ i) → i ∈ₛ p → dₛᵢ e p x y ≡ dᵢ e p x y 
   i∈p⇒dₛᵢ≡dᵢ {i} x y i∈p with i ∈? p
   ... | yes _   = refl
   ... | no  i∉p = contradiction i∈p i∉p
 
-  dₛᵢ≤dᵢ : ∀ {i} (x y : Sᵢ i) → dₛᵢ p x y ≤ dᵢ x y
+  dₛᵢ≤dᵢ : ∀ {i} (x y : Sᵢ i) → dₛᵢ e p x y ≤ dᵢ e p x y
   dₛᵢ≤dᵢ {i} x y with i ∈? p
   ... | yes _ = ≤-refl
   ... | no  _ = z≤n
 
-  dᵢ≤d : ∀ x y {i} → i ∈ₛ p → dᵢ (x i) (y i) ≤ d p x y
+  dᵢ≤d : ∀ x y {i} → i ∈ₛ p → dᵢ e p (x i) (y i) ≤ d e p x y
   dᵢ≤d x y {i} i∈p = x≤max[t] 0 _ (inj₂ (i , ≤-reflexive (sym (i∈p⇒dₛᵢ≡dᵢ (x i) (y i) i∈p))))
 
-  d≤dₘₐₓ : ∀ x y → d p x y ≤ dₘₐₓ
+  d≤dₘₐₓ : ∀ x y → d e p x y ≤ dₘₐₓ
   d≤dₘₐₓ x y = max[t]≤x z≤n (λ i → ≤-trans (dₛᵢ≤dᵢ (x i) (y i)) (dᵢ≤dₘₐₓ (x i) (y i)))
   
 ---------------------
 -- The biggest box --
 ---------------------
 
-abstract
-  
-  bᶠ : ℕ
-  bᶠ = suc dₘₐₓ
+  abstract
 
-  dᵢ≤bᶠ : ∀ {i} (x y : Sᵢ i) → dᵢ x y ≤ bᶠ
-  dᵢ≤bᶠ x y = begin
-    dᵢ x y    ≤⟨ dᵢ≤dₘₐₓ x y ⟩
-    dₘₐₓ      ≤⟨ n≤1+n dₘₐₓ ⟩
-    bᶠ        ∎
+    bᶠ : ℕ
+    bᶠ = suc dₘₐₓ
+
+    dᵢ≤bᶠ : ∀ {i} (x y : Sᵢ i) → dᵢ e p x y ≤ bᶠ
+    dᵢ≤bᶠ x y = begin
+      dᵢ e p x y ≤⟨ dᵢ≤dₘₐₓ x y ⟩
+      dₘₐₓ      ≤⟨ n≤1+n dₘₐₓ ⟩
+      bᶠ         ∎
 
 ---------------------------
 -- Radius index function --
 ---------------------------
 
-abstract
+  abstract
 
-  r[_] : ℕ → ℕ
-  r[ k ] = dₘₐₓ ∸ k
-  
-  v<r[k]⇒v≤r[1+k] : ∀ {v k} → v < r[ k ] → v ≤ r[ suc k ]
-  v<r[k]⇒v≤r[1+k] {v} {k} v<r[k] = ≤-pred (begin
-    suc v              ≤⟨ v<r[k] ⟩
-    dₘₐₓ ∸ k           ≡⟨⟩
-    suc dₘₐₓ ∸ suc k   ≤⟨ m+[n∸o]≤[m+n]∸o 1 dₘₐₓ (suc k) ⟩
-    suc (dₘₐₓ ∸ suc k) ∎)
+    r[_] : ℕ → ℕ
+    r[ k ] = dₘₐₓ ∸ k
 
-  r[bᶠ]≡0 : r[ bᶠ ] ≡ 0
-  r[bᶠ]≡0 = m≤n⇒m∸n≡0 (n≤1+n dₘₐₓ)
-  
-  dᵢ≤r[0] : ∀ {i} (x y : Sᵢ i) → dᵢ x y ≤ r[ 0 ]
-  dᵢ≤r[0] x y = dᵢ≤dₘₐₓ x y
+    v<r[k]⇒v≤r[1+k] : ∀ {v k} → v < r[ k ] → v ≤ r[ suc k ]
+    v<r[k]⇒v≤r[1+k] {v} {k} v<r[k] = ≤-pred (begin
+      suc v              ≤⟨ v<r[k] ⟩
+      dₘₐₓ ∸ k           ≡⟨⟩
+      suc dₘₐₓ ∸ suc k   ≤⟨ m+[n∸o]≤[m+n]∸o 1 dₘₐₓ (suc k) ⟩
+      suc (dₘₐₓ ∸ suc k) ∎)
 
-  d≤r[0] : ∀ p x y → d p x y ≤ r[ 0 ]
-  d≤r[0] p x y = d≤dₘₐₓ p x y
+    r[bᶠ]≡0 : r[ bᶠ ] ≡ 0
+    r[bᶠ]≡0 = m≤n⇒m∸n≡0 (n≤1+n dₘₐₓ)
+
+    dᵢ≤r[0] : ∀ {i} (x y : Sᵢ i) → dᵢ e p x y ≤ r[ 0 ]
+    dᵢ≤r[0] x y = dᵢ≤dₘₐₓ x y
+
+    d≤r[0] : ∀ x y → d e p x y ≤ r[ 0 ]
+    d≤r[0] x y = d≤dₘₐₓ x y
 
 ------------------------------
 -- Existence of fixed point --
 ------------------------------
-
-module _ (e : Epoch) (p : Subset n) where
 
   abstract
     
@@ -138,9 +134,9 @@ module _ (e : Epoch) (p : Subset n) where
       f = F e p
 
       fixedPoint : S → ∃ (λ x → f x ≈ x)
-      fixedPoint v = inner (F-inactive e v) (<-wellFounded (d p (f v) (f (f v))))
+      fixedPoint v = inner (F-inactive e v) (<-wellFounded (d e p (f v) (f (f v))))
         where
-        inner : ∀ {x} → WellFormed p x → Acc _<_ (d p x (f x)) → ∃ (λ x* → f x* ≈ x*)
+        inner : ∀ {x} → WellFormed p x → Acc _<_ (d e p x (f x)) → ∃ (λ x* → f x* ≈ x*)
         inner {x} ≈⊥ (acc x-acc) with F e p x ≟[ p ] x
         ... | yes fx≈ₚx = x , inactiveEq p (F-inactive e x) ≈⊥ fx≈ₚx
         ... | no  fx≉ₚx = inner (F-inactive e x) (x-acc _ (F-strContrOnOrbits e p ≈⊥ fx≉ₚx))
@@ -163,7 +159,7 @@ module _ (e : Epoch) (p : Subset n) where
 -- Definition and properties of the initial box B
 
 B : IPred Sᵢ ℓ
-B i xᵢ = Lift ⊤
+B i xᵢ = Lift ℓ ⊤
 
 B-cong : ∀ {i} → (_∈ᵤ B i) Respects _≈ᵢ_
 B-cong _ _ = lift tt
@@ -182,12 +178,12 @@ F-resp-B x∈B i = x∈B i
 
 D : Epoch → Subset n → ℕ → IPred Sᵢ _
 D e p b i xᵢ with i ∈? p
-... | yes i∈p = Lift (dᵢ (x* e p i) xᵢ ≤ r[ b ])
+... | yes i∈p = Lift ℓ (dᵢ e p (x* e p i) xᵢ ≤ r[_] e p b)
 ... | no  i∉p = xᵢ ≈ᵢ ⊥ i
 
 D-cong : ∀ {e p b i} → (_∈ᵤ D e p b i) Respects _≈ᵢ_
 D-cong {e} {p} {b} {i} x≈y x∈D with i ∈? p
-... | yes i∈p = lift (subst (_≤ r[ b ]) (dᵢ-cong ≈ᵢ-refl x≈y) (lower x∈D))
+... | yes i∈p = lift (subst (_≤ r[_] e p b) (dᵢ-cong e p ≈ᵢ-refl x≈y) (lower x∈D))
 ... | no  i∉p = ≈ᵢ-trans (≈ᵢ-sym x≈y) x∈D
 
 D-null : ∀ {e p b i} → i ∉ₛ p → ⊥ i ∈ᵤ D e p b i
@@ -197,31 +193,31 @@ D-null {e} {p} {b} {i} i∉p with i ∈? p
 
 D-from-B   : ∀ {e p x} → x ∈ B → F e p x ∈ D e p 0
 D-from-B {e} {p} {x} _ i with i ∈? p
-... | yes i∈p = lift (dᵢ≤r[0] (x* e p i) (F e p x i))
+... | yes i∈p = lift (dᵢ≤r[0] e p (x* e p i) (F e p x i))
 ... | no  i∉p = F-inactive e x i∉p
 
 D-finish : ∀ e p → ∃₂ λ bᶠ ξ → (∀ {x} → x ∈ D e p bᶠ → x ≈ ξ)
-D-finish e p = bᶠ , x* e p , x∈D[bᶠ]⇒x*≈x
+D-finish e p = bᶠ e p , x* e p , x∈D[bᶠ]⇒x*≈x
   where
-  x∈D[bᶠ]⇒x*≈x : ∀ {x} → x ∈ D e p bᶠ → x ≈ x* e p
-  x∈D[bᶠ]⇒x*≈x {x} x∈D[bᶠ] i with inspect′ bᶠ
-  ... | (zero     , bᶠ≡0)     = dᵢ≡0⇒x≈y (n≤0⇒n≡0 (subst (dᵢ (x i) (x* e p i) ≤_) bᶠ≡0 (dᵢ≤bᶠ (x i) (x* e p i))))
+  x∈D[bᶠ]⇒x*≈x : ∀ {x} → x ∈ D e p (bᶠ e p) → x ≈ x* e p
+  x∈D[bᶠ]⇒x*≈x {x} x∈D[bᶠ] i with inspect′ (bᶠ e p)
+  ... | (zero     , bᶠ≡0)     = dᵢ≡0⇒x≈y e p (n≤0⇒n≡0 (subst (dᵢ e p (x i) (x* e p i) ≤_) bᶠ≡0 (dᵢ≤bᶠ e p (x i) (x* e p i))))
   ... | (suc bᶠ-1 , bᶠ≡1+bᶠ-1) rewrite bᶠ≡1+bᶠ-1 with x∈D[bᶠ] i
   ...   | xᵢ∈D with i ∈? p
   ...     | no i∉p = ≈ᵢ-trans xᵢ∈D (≈ᵢ-sym (x*-inactive e p i∉p))
-  ...     | yes _  = ≈ᵢ-sym (dᵢ≡0⇒x≈y (n≤0⇒n≡0 (begin
-    dᵢ (x* e p i) (x i) ≤⟨ lower xᵢ∈D ⟩
-    r[ suc bᶠ-1 ]       ≡⟨ cong r[_] (sym bᶠ≡1+bᶠ-1) ⟩
-    r[ bᶠ ]             ≡⟨ r[bᶠ]≡0 ⟩
-    0                   ∎)))
+  ...     | yes _  = ≈ᵢ-sym (dᵢ≡0⇒x≈y e p (n≤0⇒n≡0 (begin
+    dᵢ e p (x* e p i) (x i) ≤⟨ lower xᵢ∈D ⟩
+    r[_] e p (suc bᶠ-1)     ≡⟨ cong (r[_] e p) (sym bᶠ≡1+bᶠ-1) ⟩
+    r[_] e p (bᶠ e p)       ≡⟨ r[bᶠ]≡0 e p ⟩
+    0                       ∎)))
 
-∈Dᵢ⇒dᵢ≤r : ∀ {e p b i xᵢ} → xᵢ ∈ᵤ D e p (suc b) i → dₛᵢ p (x* e p i) xᵢ ≤ r[ suc b ]
+∈Dᵢ⇒dᵢ≤r : ∀ {e p b i xᵢ} → xᵢ ∈ᵤ D e p (suc b) i → dₛᵢ e p (x* e p i) xᵢ ≤ r[_] e p (suc b)
 ∈Dᵢ⇒dᵢ≤r {e} {p} {b} {i} {xᵢ} xᵢ∈D with i ∈? p
 ... | yes _ = lower xᵢ∈D
 ... | no  _ = z≤n
 
-∈D⇒d≤r : ∀ {e p b x} → x ∈ D e p b → d p (x* e p) x ≤ r[ b ]
-∈D⇒d≤r {e} {p} {zero}  {x} x∈D = d≤r[0] p (x* e p) x
+∈D⇒d≤r : ∀ {e p b x} → x ∈ D e p b → d e p (x* e p) x ≤ r[_] e p b
+∈D⇒d≤r {e} {p} {zero}  {x} x∈D = d≤r[0] e p (x* e p) x
 ∈D⇒d≤r {e} {p} {suc b} {x} x∈D = max[t]≤x z≤n (λ i → ∈Dᵢ⇒dᵢ≤r (x∈D i))
 
 F-mono-D  : ∀ {e p b x} → WellFormed p x → x ∈ D e p b → F e p x ∈ D e p (suc b)
@@ -229,16 +225,16 @@ F-mono-D {e} {p} {b} {x} wf x∈D i with i ∈? p
 ... | no  i∉p = F-inactive e x i∉p
 ... | yes i∈p with x ≟[ p ] x* e p
 ...   | yes x≈ₚx* = lift (begin
-  dᵢ (x* e p i) (F e p x        i) ≡⟨ dᵢ-cong ≈ᵢ-refl (F-cong e p x≈ₚx* i∈p) ⟩
-  dᵢ (x* e p i) (F e p (x* e p) i) ≡⟨ dᵢ-cong ≈ᵢ-refl (Fx*≈ₚx* e p i∈p) ⟩
-  dᵢ (x* e p i) (x* e p i)         ≡⟨ x≈y⇒dᵢ≡0 ≈ᵢ-refl ⟩
-  0                                ≤⟨ z≤n ⟩
-  r[ suc b ]                       ∎)
-...   | no  x≉ₚx* = lift (v<r[k]⇒v≤r[1+k] (begin
-  dᵢ (x* e p i) (F e p x i) ≤⟨ dᵢ≤d p (x* e p) (F e p x) i∈p ⟩
-  d p (x* e p)  (F e p x)   <⟨ F-strContrOnFP e p wf (Fx*≈ₚx* e p) x≉ₚx* ⟩
-  d p (x* e p)  x           ≤⟨ ∈D⇒d≤r x∈D ⟩
-  r[ b ]                    ∎))
+  dᵢ e p (x* e p i) (F e p x        i) ≡⟨ dᵢ-cong e p ≈ᵢ-refl (F-cong e p x≈ₚx* i∈p) ⟩
+  dᵢ e p (x* e p i) (F e p (x* e p) i) ≡⟨ dᵢ-cong e p ≈ᵢ-refl (Fx*≈ₚx* e p i∈p) ⟩
+  dᵢ e p (x* e p i) (x* e p i)         ≡⟨ x≈y⇒dᵢ≡0 e p ≈ᵢ-refl ⟩
+  0                                   ≤⟨ z≤n ⟩
+  r[_] e p (suc b)                    ∎)
+...   | no  x≉ₚx* = lift (v<r[k]⇒v≤r[1+k] e p (begin
+  dᵢ e p (x* e p i) (F e p x i) ≤⟨ dᵢ≤d e p (x* e p) (F e p x) i∈p ⟩
+  d e p (x* e p)  (F e p x)   <⟨ F-strContrOnFP e p wf (Fx*≈x* e p) x≉ₚx* ⟩
+  d e p (x* e p)  x           ≤⟨ ∈D⇒d≤r x∈D ⟩
+  r[_] e p b                  ∎))
 
 ----------------------
 -- ACO construction --

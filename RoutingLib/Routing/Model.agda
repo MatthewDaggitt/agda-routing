@@ -1,4 +1,5 @@
 open import Data.Fin using (Fin; _≟_)
+open import Data.Fin.Subset using (Subset; _∉_)
 open import Data.Nat using (ℕ)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Relation.Binary using (Setoid; DecSetoid)
@@ -8,6 +9,7 @@ open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous
+import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.Equality as SubsetEquality
 open import RoutingLib.Data.Matrix
 import RoutingLib.Data.Matrix.Relation.DecidableEquality as MatrixDecEquality
 import RoutingLib.Data.Table.Relation.DecidableEquality as TableDecEquality
@@ -22,7 +24,7 @@ module RoutingLib.Routing.Model
 open RawRoutingAlgebra algebra hiding (_≟_)
 
 --------------------------------------------------------------------------------
--- Adjacency matrices represent the network topology
+-- Adjacency matrices represent the network topology at a point in time
 
 AdjacencyMatrix : Set a
 AdjacencyMatrix = ∀ (i j : Fin n) → Step i j
@@ -51,7 +53,7 @@ Decℝ𝕋ₛ = Dec𝕋ₛ n
 RoutingMatrix : Set b
 RoutingMatrix = SquareMatrix Route n
 
--- Properties
+-- Standard equality
 open MatrixDecEquality DS public
 
 ℝ𝕄ₛ : Setoid b ℓ
@@ -65,6 +67,11 @@ Decℝ𝕄ₛ = Dec𝕄ₛ n n
 
 Decℝ𝕄ₛⁱ : IndexedDecSetoid (Fin n) b ℓ
 Decℝ𝕄ₛⁱ = triviallyIndexDecSetoid (Fin n) Decℝ𝕋ₛ
+
+-- Equality over only a subset of routing tables
+open SubsetEquality ℝ𝕄ₛⁱ public
+  using (≈ₛ-refl; ≈ₛ-sym; ≈ₛ-trans)
+  renaming (_≈[_]_ to _≈ₘ[_]_; _≉[_]_ to _≉ₘ[_]_; ≈ₛ-setoid to ℝ𝕄ₛₛ)
 
 --------------------------------------------------------------------------------
 -- The initial state (the identity matrix)
@@ -92,3 +99,17 @@ Iᵢⱼ≡∞ {i} {j} i≢j with j ≟ i
 
 Iᵢⱼ≡Iₖₗ : ∀ {i j k l} → j ≢ i → l ≢ k → I i j ≡ I k l
 Iᵢⱼ≡Iₖₗ j≢i l≢k = trans (Iᵢⱼ≡∞ j≢i) (sym (Iᵢⱼ≡∞ l≢k))
+
+
+--------------------------------------------------------------------------------
+-- WellFormed
+
+-- Let p be the set of active nodes, then a routing matrix is well-formed if
+-- every entry not in the subset is inactive
+
+WellFormed : Subset n → RoutingMatrix → Set ℓ
+WellFormed p X = ∀ {i} → i ∉ p → X i ≈ₜ I i
+
+WellFormed-cong : ∀ {X Y p} → WellFormed p X → WellFormed p Y →
+                  ∀ {i} → i ∉ p → X i ≈ₜ Y i
+WellFormed-cong wfX wfY i∉p = ≈ₜ-trans (wfX i∉p) (≈ₜ-sym (wfY i∉p))

@@ -4,7 +4,7 @@ open import Data.List using (List; foldr)
 import Data.List.All.Properties as All
 open import Data.List.Relation.Pointwise as Pointwise using (Pointwise; []; _∷_)
 open import Data.Nat using (_<_)
-open import Data.Nat.Properties using (≤-reflexive)
+open import Data.Nat.Properties using (≤-reflexive; <-trans)
 open import Data.Product using (∃; ∃₂; _×_; _,_; proj₁)
 open import Data.Sum using (inj₁; inj₂)
 open import Function using (_∘_)
@@ -157,21 +157,21 @@ abstract
   ... | inj₁ (k , σXᵢⱼ≈Aᵢₖ▷Xₖⱼ) = k , σXᵢⱼ≈Aᵢₖ▷Xₖⱼ , ▷-forces-𝑰 (𝑰-cong σXᵢⱼ≈Aᵢₖ▷Xₖⱼ σXᵢⱼⁱ)
   ... | inj₂ σXᵢⱼ≈Iᵢⱼ           = contradiction (𝑪-cong (≈-sym σXᵢⱼ≈Iᵢⱼ) (Iᶜ i j)) σXᵢⱼⁱ
 
-  σXᵢⱼⁱ⇒Xₖⱼⁱ≉σXₖⱼ : ∀ X i j → 𝑰 (σ X i j) → ∃ λ k → X k j ≉ σ X k j × 𝑰 (X k j)
+
+  σXᵢⱼⁱ⇒Xₖⱼⁱ≉σXₖⱼ : ∀ X i j → 𝑰 (σ X i j) →
+                    ∃ λ k → X k j ≉ σ X k j × 𝑰 (X k j) × size (X k j) < size (σ X i j)
   σXᵢⱼⁱ⇒Xₖⱼⁱ≉σXₖⱼ X i j σXᵢⱼⁱ = reduction i σXᵢⱼⁱ (<-wellFounded (size (σ X i j)))
     where
-    open ≤-Reasoning
     reduction : ∀ l → 𝑰 (σ X l j) → Acc _<_ (size (σ X l j)) →
-                ∃ λ k → X k j ≉ σ X k j × 𝑰 (X k j)
-    reduction l σXₗⱼⁱ (acc rec) with σXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ X _ _ σXₗⱼⁱ
-    ... | (k , σXₗⱼ≈AₗₖXₖⱼ , Xₖⱼⁱ) with X k j ≟ σ X k j
-    ...   | no  Xₖⱼ≉σXₖⱼ = k , Xₖⱼ≉σXₖⱼ , Xₖⱼⁱ
-    ...   | yes Xₖⱼ≈σXₖⱼ = reduction k (𝑰-cong Xₖⱼ≈σXₖⱼ Xₖⱼⁱ) (rec (size (σ X k j)) (begin
-      size (σ X k j)         ≡⟨ size-cong (≈-sym Xₖⱼ≈σXₖⱼ) ⟩
-      size (X k j)           <⟨ ≤-reflexive (sizeⁱ-incr (𝑰-cong σXₗⱼ≈AₗₖXₖⱼ σXₗⱼⁱ)) ⟩
-      size (A l k ▷ X k j)   ≡⟨ size-cong (≈-sym σXₗⱼ≈AₗₖXₖⱼ) ⟩
-      size (σ X l j)         ∎))
-
+                ∃ λ k → X k j ≉ σ X k j × 𝑰 (X k j) × size (X k j) < size (σ X l j)
+    reduction l σXₗⱼⁱ (acc rec) with σXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ X l j σXₗⱼⁱ
+    ... | (k , σXₗⱼ≈AₗₖXₖⱼ , Xₖⱼⁱ) with ≤-reflexive (sizeⁱ-incr′ σXₗⱼⁱ σXₗⱼ≈AₗₖXₖⱼ)
+    ...   | |Xₖⱼ|<|σXₗⱼ| with X k j ≟ σ X k j
+    ...     | no  Xₖⱼ≉σXₖⱼ = k , Xₖⱼ≉σXₖⱼ , Xₖⱼⁱ , |Xₖⱼ|<|σXₗⱼ|
+    ...     | yes Xₖⱼ≈σXₖⱼ with subst (_< size (σ X l j)) (size-cong Xₖⱼ≈σXₖⱼ) |Xₖⱼ|<|σXₗⱼ|
+    ...       | |σXₖⱼ|<|σXₗⱼ| with reduction k (𝑰-cong Xₖⱼ≈σXₖⱼ Xₖⱼⁱ) (rec _ (|σXₖⱼ|<|σXₗⱼ|))
+    ...         | (m , ≉ , i , lt) = m , ≉ , i , <-trans lt |σXₖⱼ|<|σXₗⱼ|
+      
   fixedPointᶜ : ∀ {X} → σ X ≈ₘ X → 𝑪ₘ X
   fixedPointᶜ {X} σX≈X with 𝑪ₘ? (σ X)
   ... | yes σXᶜ = 𝑪ₘ-cong σX≈X σXᶜ

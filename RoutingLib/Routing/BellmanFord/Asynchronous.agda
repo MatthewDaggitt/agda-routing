@@ -27,10 +27,6 @@ open RawRoutingAlgebra algebra
 open SynchronousBellmanFord algebra using (σ; σ-cong)
 
 open Model algebra n public
-open SubsetEquality ℝ𝕄ₛⁱ public
-  using (≈ₛ-refl; ≈ₛ-sym; ≈ₛ-trans)
-  renaming (_≈[_]_ to _≈ₘ[_]_; _≉[_]_ to _≉ₘ[_]_; ≈ₛ-setoid to ℝ𝕄ₛₛ)
-
 
 ------------------------------------------------------------------------
 -- The adjacency matrix in each epoch, adjusted for participants
@@ -78,23 +74,14 @@ Fₜ-cong' e p X≈Y _ j = foldr⁺ _≈_ ⊕-cong ≈-refl (tabulate⁺ (Aₜ-c
 Fₜ-cong-∉ : ∀ e p {X Y} {i} → i ∉ p → Fₜ e p X i ≈ₜ Fₜ e p Y i
 Fₜ-cong-∉ e p {X} {Y} i∉p j = foldr⁺ _≈_ ⊕-cong ≈-refl (tabulate⁺ (λ k → Aₜ-reject-eq e _ k i∉p (X k j) (Y k j)))
 
+postulate Fₜ-inactive : ∀ e {p} X → WellFormed p (Fₜ e p X)
+-- Fₜ-inactive e {p} X {i} i∉p j = {!!}
 
 ------------------------------------------------------------------------
 -- States in which the inactive nodes are actually inactive
 
-WellFormed : Subset n → RoutingMatrix → Set ℓ
-WellFormed p X = ∀ {i} → i ∉ p → X i ≈ₜ I i
-
-postulate Fₜ-inactive : ∀ e {p} X → WellFormed p (Fₜ e p X)
-{-
-Fₜ-inactive e {p} x {i} i∉p j with j ≟𝔽 i
-... | yes j≡i = {!!}
-... | no  j≢i = {!!}
--}
-
-WellFormed-cong : ∀ {X Y p} → WellFormed p X → WellFormed p Y →
-                  ∀ {i} → i ∉ p → X i ≈ₜ Y i
-WellFormed-cong wfX wfY i∉p = ≈ₜ-trans (wfX i∉p) (≈ₜ-sym (wfY i∉p))
+X*-wf : ∀ e p {X*} → Fₜ e p X* ≈ₘ X* → WellFormed p X*
+X*-wf e p {X*} FX*≈X* {i} i∉p = ≈ₜ-trans (≈ₘ-sym FX*≈X* i) (Fₜ-inactive e X* i∉p)
 
 ------------------------------------------------------------------------
 -- F forms a dynamic asynchronous iteration
@@ -106,11 +93,11 @@ WellFormed-cong wfX wfY i∉p = ≈ₜ-trans (wfX i∉p) (≈ₜ-sym (wfY i∉p)
   ; F-inactive       = Fₜ-inactive
   }
 
-σ∥ : AsyncIterable b ℓ n
-σ∥ = record { isAsyncIterable = σ-isAsyncIterable }
+δ∥ : AsyncIterable b ℓ n
+δ∥ = record { isAsyncIterable = σ-isAsyncIterable }
 
 ------------------------------------------------------------------------
 -- The asynchronous state function
 
 δ : Schedule n → RoutingMatrix → 𝕋 → RoutingMatrix
-δ = asyncIter σ∥
+δ = asyncIter δ∥

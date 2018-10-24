@@ -11,8 +11,8 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Function using (_on_)
 open import Level using (_⊔_) renaming (zero to 0ℓ)
 open import Relation.Binary as B hiding (Decidable)
-open import Relation.Binary.PropositionalEquality using (inspect; [_]; _≡_; _≢_; refl; sym)
-import Relation.Binary.On as On
+open import Relation.Binary.PropositionalEquality using (inspect; [_]; _≡_; _≢_; refl; sym; trans)
+import Relation.Binary.Construct.On as On
 import Relation.Binary.EqReasoning as EqReasoning
 open import Relation.Unary as U hiding (Decidable; U)
 open import Relation.Nullary using (¬_; yes; no)
@@ -123,6 +123,9 @@ sizeⁱ-incr {i} {j} {r} {f} f▷rⁱ with f ▷ r ≟ ∞
 ...     | pᵣ≈q | no ¬ij⇿q | _       = contradiction (path-reject f pᵣ≈q (inj₁ ¬ij⇿q)) f▷r≉∞
 ...     | pᵣ≈q | _        | no  i∈q = contradiction (path-reject f pᵣ≈q (inj₂ i∈q)) f▷r≉∞
 ...     | pᵣ≈q | yes ij⇿q | yes i∉q = sym (length-cong (path-accept f pᵣ≈q f▷r≉∞ ij⇿q i∉q))
+
+sizeⁱ-incr′ : ∀ {i j : Fin n} {r s} {f : Step i j} → 𝑰 s → s ≈ f ▷ r → suc (size r) ≡ size s
+sizeⁱ-incr′ sⁱ s≈f▷r = trans (sizeⁱ-incr (𝑰-cong s≈f▷r sⁱ)) (size-cong (≈-sym s≈f▷r))
 
 ------------------------------------------------------------------------------
 -- Types

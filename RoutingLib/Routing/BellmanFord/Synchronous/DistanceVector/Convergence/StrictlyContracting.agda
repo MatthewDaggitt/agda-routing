@@ -1,7 +1,7 @@
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Binary using (_Preserves_⟶_; _Preserves₂_⟶_⟶_)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; trans; cong; cong₂; subst₂; module ≡-Reasoning)
+open import Relation.Binary using (Rel; _Preserves_⟶_; _Preserves₂_⟶_⟶_)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; trans; cong; cong₂; subst; subst₂; module ≡-Reasoning)
 open import Data.List using (List; _∷_)
 open import Data.List.Membership.Propositional using (_∈_)
 open import Data.Nat using (ℕ; suc; zero; z≤n; s≤s; _⊔_; _≤_; _≥_; _<_)
@@ -19,6 +19,7 @@ open import RoutingLib.Data.Table.Properties using (max[t]<x)
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
 open import RoutingLib.Data.Nat.Properties using (ℕₛ; m≤n⇒m≤n⊔o; n≤m×o≤m⇒n⊔o≤m; n≢0⇒0<n; module ≤-Reasoning)
 open import RoutingLib.Function.Metric using (Ultrametric; IsUltrametric; Bounded; MaxTriangleIneq)
+-- open import RoutingLib.Algebra.FunctionProperties.Consequences.Propositional using (wlog)
 
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Algebra.RoutingAlgebra
@@ -53,30 +54,19 @@ open import RoutingLib.Function.Metric ℝ𝕄ₛ
 ------------------------------------------------------------------------
 -- Properties of D
 
-σXᵢⱼ≉Iᵢⱼ : ∀ X {i j} x → i ≢ j → σ X i j <₊ x → σ X i j ≉ I i j
-σXᵢⱼ≉Iᵢⱼ X {i} {j} x i≢j σXᵢⱼ<x = <₊⇒≉ (begin
-  σ X i j <⟨ σXᵢⱼ<x ⟩
-  x       ≤⟨ ⊕-identityˡ x ⟩
-  ∞       ≡⟨ sym (Iᵢⱼ≡∞ (i≢j ∘ sym)) ⟩
-  I i j   ∎)
-  where open PO-Reasoning ≤₊-poset
-
-Y≉X⇒0<DXY : ∀ {X Y : RoutingMatrix} → Y ≉ₘ X → 0 < D X Y
-Y≉X⇒0<DXY Y≉X = n≢0⇒0<n (Y≉X ∘ ≈ₘ-sym ∘ D≡0⇒X≈Y)
-
-hσXᵢⱼ⊔σYᵢⱼ<DXY : ∀ {X Y i j} → σ X i j <₊ σ Y i j → h (σ X i j) ⊔ h (σ Y i j) < D X Y
-hσXᵢⱼ⊔σYᵢⱼ<DXY {X} {Y} {i} {j} σXᵢⱼ<σYᵢⱼ@(σXᵢⱼ≤σYᵢⱼ , σXᵢⱼ≉σYᵢⱼ) with i ≟𝔽 j
-... | yes i≡j = contradiction (σXᵢᵢ≈σYᵢᵢ X Y i≡j) σXᵢⱼ≉σYᵢⱼ
-... | no  i≢j with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
-...   | inj₂ σXᵢⱼ≈Iᵢⱼ = contradiction σXᵢⱼ≈Iᵢⱼ (σXᵢⱼ≉Iᵢⱼ X (σ Y i j) i≢j σXᵢⱼ<σYᵢⱼ)
+hσXᵢⱼ⊔σYᵢⱼ<v : ∀ X Y {i j v} → σ X i j <₊ σ Y i j →
+              (∀ k → X k j ≉ Y k j → d (X k j) (Y k j) ≤ v) →
+              h (σ X i j) ⊔ h (σ Y i j) < v
+hσXᵢⱼ⊔σYᵢⱼ<v X Y {i} {j} {v} σXᵢⱼ<σYᵢⱼ@(σXᵢⱼ≤σYᵢⱼ , σXᵢⱼ≉σYᵢⱼ) d≤v with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
+...   | inj₂ σXᵢⱼ≈Iᵢⱼ = contradiction σXᵢⱼ≈Iᵢⱼ (σXᵢⱼ<σYᵢⱼ⇒σXᵢⱼ≉Iᵢⱼ X Y σXᵢⱼ<σYᵢⱼ)
 ...   | inj₁ (k , σXᵢⱼ≈AᵢₖXₖⱼ) = begin
   h (σ X i j) ⊔ h (σ Y i j) ≡⟨ m≤n⇒n⊔m≡n (h-resp-≤ σXᵢⱼ≤σYᵢⱼ) ⟩
   h (σ X i j)               ≡⟨ h-cong σXᵢⱼ≈AᵢₖXₖⱼ ⟩
   h (A i k ▷ X k j)         <⟨ h-resp-< (isStrictlyIncreasing (A i k) Xₖⱼ≉∞) ⟩
   h (X k j)                 ≤⟨ m≤m⊔n (h (X k j)) (h (Y k j)) ⟩
   h (X k j) ⊔ h (Y k j)     ≡⟨ sym (dxy≡hx⊔hy Xₖⱼ≉Yₖⱼ) ⟩
-  d (X k j) (Y k j)         ≤⟨ d≤D X Y k j ⟩
-  D X Y                     ∎
+  d (X k j) (Y k j)         ≤⟨ d≤v k Xₖⱼ≉Yₖⱼ ⟩
+  v                         ∎
   where
 
   σYᵢⱼ≰AᵢₖXₖⱼ : σ Y i j ≰₊ A i k ▷ X k j
@@ -103,23 +93,40 @@ hσXᵢⱼ⊔σYᵢⱼ<DXY {X} {Y} {i} {j} σXᵢⱼ<σYᵢⱼ@(σXᵢⱼ≤σY�
 
   open ≤-Reasoning
 
-dσXᵢⱼσYᵢⱼ<DXY : ∀ {X Y} → Y ≉ₘ X → ∀ i j → d (σ X i j) (σ Y i j) < D X Y
-dσXᵢⱼσYᵢⱼ<DXY {X} {Y} Y≉X i j with σ X i j ≟ σ Y i j
-... | yes σXᵢⱼ≈σYᵢⱼ = Y≉X⇒0<DXY Y≉X
+
+
+flip : ∀ {a b} {A : Set a} {B : Set b} {f : A → A → ℕ} {g : B → B → ℕ} →
+       (∀ x y → f x y ≡ f y x) → (∀ x y → g x y ≡ g y x) →
+       ∀ {ℓ} {_~_ : Rel ℕ ℓ} →
+       ∀ {x y u v} → f x y ~ g u v → f y x ~ g v u 
+flip f-sym g-sym {_~_ = _~_} = subst₂ _~_ (f-sym _ _) (g-sym _ _)
+
+
+{-
+wlog : ∀ {a b} {A : Set a} {B : Set b} {f : A → A → ℕ} {g : B → B → ℕ} →
+       ∀ {c d} {C : Set c} {D : Set d} {h : C → C → ℕ} {i : D → D → ℕ} →
+       (∀ x y → f x y ≡ f y x) → (∀ x y → g x y ≡ g y x) →
+       (∀ x y → h x y ≡ h y x) → (∀ x y → i x y ≡ i y x) →
+       (res : ∀ {x y u v p q s t} → f x y ≤ g u v → h p q < i s t) →
+       ∀ {x y u v p q s t} → f y x ≤ g v u → (h q p) < (i t s)
+wlog f-sym g-sym h-sym i-sym res f≤g = flip h-sym i-sym (res (flip f-sym g-sym f≤g))
+-}
+
+dσXᵢⱼσYᵢⱼ<v : ∀ X Y i j → ∀ {v} → 0 < v → (∀ k → X k j ≉ Y k j → d (X k j) (Y k j) ≤ v) →
+             d (σ X i j) (σ Y i j) < v
+dσXᵢⱼσYᵢⱼ<v X Y i j {v} 0<v d≤v with σ X i j ≟ σ Y i j
+... | yes σXᵢⱼ≈σYᵢⱼ = 0<v
 ... | no  σXᵢⱼ≉σYᵢⱼ with ≤₊-total (σ X i j) (σ Y i j)
-...   | inj₁ σXᵢⱼ≤σYᵢⱼ = hσXᵢⱼ⊔σYᵢⱼ<DXY (σXᵢⱼ≤σYᵢⱼ , σXᵢⱼ≉σYᵢⱼ)
+...   | inj₁ σXᵢⱼ≤σYᵢⱼ = hσXᵢⱼ⊔σYᵢⱼ<v X Y (σXᵢⱼ≤σYᵢⱼ , σXᵢⱼ≉σYᵢⱼ) d≤v
 ...   | inj₂ σYᵢⱼ≤σXᵢⱼ = begin
   h (σ X i j) ⊔ h (σ Y i j) ≡⟨ ⊔-comm (h (σ X i j)) (h (σ Y i j)) ⟩
-  h (σ Y i j) ⊔ h (σ X i j) <⟨ hσXᵢⱼ⊔σYᵢⱼ<DXY (σYᵢⱼ≤σXᵢⱼ , σXᵢⱼ≉σYᵢⱼ ∘ ≈-sym) ⟩
-  D Y X                     ≡⟨ D-sym Y X ⟩
-  D X Y                     ∎
+  h (σ Y i j) ⊔ h (σ X i j) <⟨ hσXᵢⱼ⊔σYᵢⱼ<v Y X (σYᵢⱼ≤σXᵢⱼ , σXᵢⱼ≉σYᵢⱼ ∘ ≈-sym) (λ k Yₖⱼ≉Xₖⱼ → subst (_≤ v) (d-sym (X k j) (Y k j)) (d≤v k (Yₖⱼ≉Xₖⱼ ∘ ≈-sym))) ⟩
+  v                         ∎
   where open ≤-Reasoning
 
 σ-strContr : σ StrContrOver D
-σ-strContr {X} {Y} Y≉X =
-  max[t]<x (Y≉X⇒0<DXY Y≉X) (λ i →
-    max[t]<x (Y≉X⇒0<DXY Y≉X) (λ j →
-      dσXᵢⱼσYᵢⱼ<DXY Y≉X i j))
+σ-strContr {X} {Y} Y≉X = D<v 0<DXY (λ i j → dσXᵢⱼσYᵢⱼ<v X Y i j 0<DXY (λ k _ → d≤D X Y k j))
+  where 0<DXY = Y≉X⇒0<DXY Y≉X
 
 σ-strContrOnFP : σ StrContrOnFixedPointOver D
 σ-strContrOnFP {X} {X*} σX*≈X* X≉X* = begin

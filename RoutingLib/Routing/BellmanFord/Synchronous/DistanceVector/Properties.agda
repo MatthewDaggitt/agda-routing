@@ -1,6 +1,7 @@
 open import Algebra using (Semilattice)
 open import Algebra.Structures using (IsSemilattice)
 import Algebra.FunctionProperties as FunctionProperties
+open import Algebra.FunctionProperties.Consequences using (sel⇒idem)
 open import Data.Nat using (suc; zero; _+_)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
@@ -12,16 +13,18 @@ open import Data.List.Membership.Setoid.Properties
   using (foldr-selective; ∈-tabulate⁻; ∈-tabulate⁺)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (∃; ∃₂; _,_; _×_; proj₁; proj₂)
+open import Function using (_∘_)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; sym; trans)
-open import Algebra.FunctionProperties.Consequences using (sel⇒idem)
+import Relation.Binary.EqReasoning as EqReasoning
 
 open import RoutingLib.Data.List.Properties using (foldr≤ₗe; foldr≤ᵣxs)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.List.Relation.Pointwise
   using (foldr⁺)
+import RoutingLib.Relation.Binary.Reasoning.PartialOrder as POR
 
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Algebra.RoutingAlgebra
@@ -42,7 +45,7 @@ open RoutingAlgebraProperties isRoutingAlgebra
 
 open BellmanFord algebra A
 open FunctionProperties _≈_
-open import Relation.Binary.EqReasoning S
+-- open import Relation.Binary.EqReasoning S
 
 ------------------------------------------------------------------------------
 -- Identity matrix
@@ -73,7 +76,19 @@ Iᵢᵢ-zeᵣ-⊕ i x rewrite Iᵢᵢ≡0# i = ⊕-zeroʳ x
   σ X i i         ≈⟨ ≈-sym (foldr≤ₗe ⊕-semilattice (I i i) (tabulate (λ k → A i k ▷ X k i))) ⟩
   σ X i i ⊕ I i i ≈⟨ Iᵢᵢ-zeᵣ-⊕ i (σ X i i) ⟩
   I i i           ∎
+  where open EqReasoning S
 
 -- After an iteration, the diagonals of any two RMatrices are equal
 σXᵢᵢ≈σYᵢᵢ : ∀ X Y {i j} → i ≡ j → σ X i j ≈ σ Y i j
 σXᵢᵢ≈σYᵢᵢ X Y {i} refl = ≈-trans (σXᵢᵢ≈Iᵢᵢ X i) (≈-sym (σXᵢᵢ≈Iᵢᵢ Y i))
+
+-- After an iteration, if one entry is less than the other than it cannot be the identity matrix
+σXᵢⱼ<σYᵢⱼ⇒σXᵢⱼ≉Iᵢⱼ : ∀ X Y {i j} → σ X i j <₊ σ Y i j → σ X i j ≉ I i j
+σXᵢⱼ<σYᵢⱼ⇒σXᵢⱼ≉Iᵢⱼ X Y {i} {j} σXᵢⱼ<σYᵢⱼ@(σXᵢⱼ≤σYᵢⱼ , σXᵢⱼ≉σYᵢⱼ) with i ≟𝔽 j
+... | yes i≡j = contradiction (σXᵢᵢ≈σYᵢᵢ X Y i≡j) σXᵢⱼ≉σYᵢⱼ
+... | no  i≢j = <₊⇒≉ (begin
+  σ X i j <⟨ σXᵢⱼ<σYᵢⱼ ⟩
+  σ Y i j ≤⟨ ⊕-identityˡ (σ Y i j) ⟩
+  ∞       ≡⟨ sym (Iᵢⱼ≡∞ (i≢j ∘ sym)) ⟩
+  I i j   ∎)
+  where open POR ≤₊-poset

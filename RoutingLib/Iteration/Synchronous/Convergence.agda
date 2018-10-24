@@ -2,9 +2,9 @@ open import Data.Nat using (ℕ; _≤_; _+_)
 open import Relation.Binary using (Setoid)
 import Relation.Binary.EqReasoning as EqReasoning
 
-open import RoutingLib.Function.Iteration
+--open import RoutingLib.Function.Iteration
 
-module RoutingLib.Function.Iteration.Convergence
+module RoutingLib.Iteration.Synchronous.Convergence
   {a ℓ} (S : Setoid a ℓ) where
 
 open Setoid S renaming (Carrier to A)

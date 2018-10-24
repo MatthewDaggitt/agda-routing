@@ -1,21 +1,26 @@
-import RoutingLib.Routing.BellmanFord.Theorems as ConvergenceTheorems
-import RoutingLib.Routing.BellmanFord as BellmanFord
+import RoutingLib.Routing.BellmanFord.Asynchronous.Results as ConvergenceTheorems
+import RoutingLib.Routing.BellmanFord.Asynchronous as BellmanFord
 
-open import RoutingLib.Asynchronous
+open import RoutingLib.Iteration.Asynchronous.Dynamic using (IsSafe)
+open import RoutingLib.Iteration.Asynchronous.Schedule using (Epoch)
+
+open import RoutingLib.Routing.Model
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Protocols.BGPLite.Algebra
 
 module RoutingLib.Routing.Protocols.BGPLite
-  {n} (A : AdjacencyMatrix algebra n) where
+  {n} (network : Epoch → AdjacencyMatrix algebra n) where
 
-open BellmanFord algebra A public using (σ; δ; σ^; σ∥)
+open BellmanFord algebra network public using (δ∥)
 
 -----------------
 -- Convergence --
 -----------------
 
-δ-convergesAbsolutely : IsAsynchronouslySafe σ∥
-δ-convergesAbsolutely = ConvergenceTheorems.incrPaths-converges algebra isIncreasingPathAlgebra A
+δ-convergesAbsolutely : IsSafe δ∥
+δ-convergesAbsolutely = ConvergenceTheorems.incrPaths-converges algebra isIncreasingPathAlgebra network
 
+{-
 σ-convergesIn-n² : {!!}
 σ-convergesIn-n² = {!!}
+-}

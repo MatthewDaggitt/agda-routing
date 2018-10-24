@@ -1,12 +1,12 @@
 open import Data.Product using (∃; _,_; _×_)
 open import Data.Sum using (_⊎_; inj₁; inj₂; [_,_]′; map; swap)
 open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _<_; _≤_; _⊔_; _+_; _∸_)
-open import Data.Nat.Properties hiding (module ≤-Reasoning)
+open import Data.Nat.Properties hiding (module ≤-Reasoning; _≟_)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Subset using (Subset; _∈_; _∉_; ⁅_⁆; ∣_∣; ⊤)
 open import Data.Fin.Subset.Properties using (x∈p∩q⁺; x∈⁅x⁆; ∈⊤)
 open import Data.Fin.Dec using (_∈?_)
-open import Data.Product using (proj₂)
+open import Data.Product using (∃₂; proj₂)
 open import Relation.Binary using (_Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; refl; sym; trans; cong; cong₂; subst; subst₂)
@@ -19,8 +19,9 @@ open import Induction.Nat using () renaming (<-well-founded to <-wellFounded)
 open import RoutingLib.Data.Fin.Subset using (_\\_)
 open import RoutingLib.Data.Fin.Subset.Properties using (∣p\\q∣<∣p∣; i∉p\\q⇒i∉p; i∉⁅j⁆)
 open import RoutingLib.Data.Nat.Properties
+open import RoutingLib.Data.Table.Properties using (max[t]<x; x<max[t])
 open import RoutingLib.Function.Metric
-import RoutingLib.Function.Metric.MaxLift as MaxLift
+import RoutingLib.Function.Metric.Construct.MaxLift as MaxLift
 
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
@@ -28,6 +29,8 @@ import RoutingLib.Routing.Algebra.CertifiedPathAlgebra.Consistency as Consistenc
 import RoutingLib.Routing.Algebra.CertifiedPathAlgebra.Properties as PathAlgebraProperties
 open import RoutingLib.Routing.Model as Model using (AdjacencyMatrix)
 import RoutingLib.Routing.BellmanFord.Synchronous.PathVector.Convergence.Metrics as PathVectorMetrics
+import RoutingLib.Routing.BellmanFord.Synchronous.PathVector.Properties as PathVectorProperties
+import RoutingLib.Routing.BellmanFord.Synchronous.DistanceVector.Convergence.Metrics as DistanceVectorMetrics
 import RoutingLib.Routing.BellmanFord.Synchronous.DistanceVector.Convergence.Properties as DistanceVectorProperties
 
 open ≤-Reasoning
@@ -44,9 +47,12 @@ open RawRoutingAlgebra algebra
 open IsCertifiedPathAlgebra isPathAlgebra
 open Consistency algebra isPathAlgebra A
 open PathAlgebraProperties isPathAlgebra
+open PathVectorProperties algebra isPathAlgebra A
 
 open PathVectorMetrics isPathAlgebra A
+
 private module DVP = DistanceVectorProperties isRoutingAlgebraᶜ isFiniteᶜ
+-- private module DV = DistanceVectorMetrics isRoutingAlgebraᶜ isFiniteᶜ
 
 ------------------------------------------------------------------------
 -- General properties
@@ -71,17 +77,15 @@ hⁱ-cong {r} {s} r≈s with 𝑪? r | 𝑪? s
 ... | yes rᶜ | no  sⁱ = contradiction (𝑪-cong r≈s rᶜ) sⁱ
 ... | no  _  | no  _  = cong (suc n ∸_) (size-cong r≈s)
 
+postulate hⁱ-mono : ∀ {x y} → 𝑰 x → 𝑰 y → size x < size y → hⁱ y < hⁱ x
+-- hⁱ-mono = ?
+
 hⁱ-decr : ∀ {i j x} → 𝑰 (A i j ▷ x) → hⁱ (A i j ▷ x) < hⁱ x
 hⁱ-decr {i} {j} {x} Aᵢⱼxⁱ with 𝑪? x | 𝑪? (A i j ▷ x)
 ... | yes xᶜ | _        = contradiction xᶜ (▷-forces-𝑰 Aᵢⱼxⁱ)
 ... | no  _  | yes Aᵢⱼxᶜ = contradiction Aᵢⱼxᶜ Aᵢⱼxⁱ
 ... | no  _  | no  _    = ∸-monoʳ-< (≤-reflexive (sizeⁱ-incr Aᵢⱼxⁱ)) (size≤n+1 _)
 
-h[sᶜ]<h[rⁱ] : ∀ {s r} → 𝑪 s → 𝑰 r → hⁱ s < hⁱ r
-h[sᶜ]<h[rⁱ] {s} {r} sᶜ rⁱ with 𝑪? s | 𝑪? r
-... | no sⁱ | _      = contradiction sᶜ sⁱ
-... | _     | yes rᶜ = contradiction rᶜ rⁱ
-... | yes _ | no  _  = 1<1+n∸∣x∣
 
 1≤hⁱ : ∀ r → 1 ≤ hⁱ r
 1≤hⁱ r with 𝑪? r
@@ -92,6 +96,18 @@ hⁱ≤Hⁱ : ∀ r → hⁱ r ≤ Hⁱ
 hⁱ≤Hⁱ r with 𝑪? r
 ... | yes _ = s≤s z≤n
 ... | no  _ = n∸m≤n (size r) Hⁱ
+
+
+h[sᶜ]≤h[r] : ∀ {s} → 𝑪 s → ∀ r → hⁱ s ≤ hⁱ r
+h[sᶜ]≤h[r] {s} sᶜ r with 𝑪? s
+... | no sⁱ  = contradiction sᶜ sⁱ
+... | yes _  = 1≤hⁱ r
+
+h[sᶜ]<h[rⁱ] : ∀ {s r} → 𝑪 s → 𝑰 r → hⁱ s < hⁱ r
+h[sᶜ]<h[rⁱ] {s} {r} sᶜ rⁱ with 𝑪? s | 𝑪? r
+... | no sⁱ | _      = contradiction sᶜ sⁱ
+... | _     | yes rᶜ = contradiction rᶜ rⁱ
+... | yes _ | no  _  = 1<1+n∸∣x∣
 
 hⁱ-force-𝑰 : ∀ {x y} → 𝑰 x ⊎ 𝑰 y → hⁱ x ≤ hⁱ y → 𝑰 y
 hⁱ-force-𝑰 (inj₂ yⁱ) hx≤hy yᶜ = yⁱ yᶜ
@@ -131,6 +147,8 @@ dᵣⁱxⁱyᶜ≡hⁱxⁱ {x} {y} xⁱ yᶜ with x ≟ y
 ...   | yes xᶜ | _      = contradiction xᶜ xⁱ
 ...   | no  _  | no yⁱ = contradiction yᶜ yⁱ
 ...   | no  _  | yes _ = m≤n⇒n⊔m≡n (<⇒≤ 1<1+n∸∣x∣)
+
+postulate dᵣⁱxᶜyⁱ≡hⁱyⁱ : ∀ {x y} → 𝑪 x → 𝑰 y → dᵣⁱ x y ≡ hⁱ y
 
 xⁱyᶜzᶜ⇒dᵣⁱxz≤dᵣⁱxy : ∀ {x y z} → 𝑰 x → 𝑪 y → 𝑪 z → dᵣⁱ x z ≤ dᵣⁱ x y
 xⁱyᶜzᶜ⇒dᵣⁱxz≤dᵣⁱxy xⁱ yᶜ zᶜ =
@@ -307,6 +325,12 @@ dᵣᶜ≤dᵣ {x} {y} x≉y xᶜ yᶜ with x ≟ y
   DV.d (toCRoute xᶜ') (toCRoute yᶜ')      ≤⟨ ≤-refl ⟩
   dᵣᶜ _ _                                 ∎
 
+dᵣᶜ≡dᵣ : ∀ {x y p q} (pᶜ : 𝑪 p) (qᶜ : 𝑪 q) → x ≈ p → y ≈ q → x ≉ y → dᵣᶜ pᶜ qᶜ ≡ dᵣ x y
+dᵣᶜ≡dᵣ {x} {y} {p} {q} pᶜ qᶜ x≈p y≈q x≉y with x ≟ y | 𝑪? x | 𝑪? y
+... | yes x≈y | _      | _      = contradiction x≈y x≉y
+... | _       | no  xⁱ | _      = contradiction (𝑪-cong (≈-sym x≈p) pᶜ) xⁱ
+... | _       | _      | no  yⁱ = contradiction (𝑪-cong (≈-sym y≈q) qᶜ) yⁱ
+... | no _    | yes xᶜ | yes yᶜ = dᵣᶜ-cong pᶜ qᶜ xᶜ yᶜ (≈-sym x≈p) (≈-sym y≈q)
 
 H+dᵣⁱ≡dᵣ : ∀ {x y} {w z} → w ≈ x → z ≈ y → x ≉ y → 𝑰 x ⊎ 𝑰 y → Hᶜ + dᵣⁱ w z ≡ dᵣ x y
 H+dᵣⁱ≡dᵣ {x} {y} w≈x z≈y x≉y xⁱ⊎yⁱ with x ≟ y
@@ -327,20 +351,33 @@ dᵣ-force-dᵣⁱ X Y {r} {s} dᵣ≤Hᶜ+dᵣⁱXₗYₗ {u} {v} Xᵤᵥ≉Y�
 ------------------------------------------------------------------------
 -- Properties of dₜ
 
+private module MaxLiftₜ = MaxLift ℝ𝕋ₛⁱ (λ _ → dᵣ)
+
 dₜ-isUltrametric : IsUltrametric _ dₜ
-dₜ-isUltrametric = MaxLift.isUltrametric {n = n} _ dᵣ-isUltrametric
+dₜ-isUltrametric = MaxLiftₜ.isUltrametric dᵣ-isUltrametric
+
+open IsUltrametric dₜ-isUltrametric public
+  using ()
+  renaming
+  ( cong to dₜ-cong
+  ; sym  to dₜ-sym
+  ; eq⇒0 to x≈y⇒dₜ≡0
+  ; 0⇒eq to dₜ≡0⇒x≈y
+  )
 
 dₜ-bounded : Bounded ℝ𝕋ₛ dₜ
-dₜ-bounded = MaxLift.bounded ℝ𝕋ₛⁱ dᵣ-bounded
+dₜ-bounded = MaxLiftₜ.bounded dᵣ-bounded
 
 ------------------------------------------------------------------------
 -- Properties of D
 
+private module MaxLiftₘ = MaxLift ℝ𝕄ₛⁱ (λ _ → dₜ)
+
 D-isUltrametric : IsUltrametric _ D
-D-isUltrametric = MaxLift.isUltrametric {n = n} _ dₜ-isUltrametric
+D-isUltrametric = MaxLiftₘ.isUltrametric dₜ-isUltrametric
 
 D-bounded : Bounded ℝ𝕄ₛ D
-D-bounded = MaxLift.bounded ℝ𝕄ₛⁱ dₜ-bounded
+D-bounded = MaxLiftₘ.bounded dₜ-bounded
 
 open IsUltrametric D-isUltrametric public using ()
   renaming
@@ -349,3 +386,17 @@ open IsUltrametric D-isUltrametric public using ()
   ; eq⇒0 to X≈Y⇒D≡0
   ; sym to D-sym
   )
+
+D<v : ∀ {X Y v} → 0 < v → (∀ i j → dᵣ (X i j) (Y i j) < v) → D X Y < v
+D<v 0<v dXY<v = max[t]<x 0<v (λ i → max[t]<x 0<v (λ j → dXY<v i j))
+
+v<D : ∀ {X Y v} → (∃₂ λ i j → v < dᵣ (X i j) (Y i j)) → v < D X Y
+v<D (i , j , v<dXY) = x<max[t] 0 (inj₂ (i , x<max[t] 0 (inj₂ (j , v<dXY))))
+
+Y≉X⇒0<DXY : ∀ {X Y} → Y ≉ₘ X → 0 < D X Y
+Y≉X⇒0<DXY Y≉X = n≢0⇒0<n (Y≉X ∘ ≈ₘ-sym ∘ D≡0⇒X≈Y)
+
+postulate dᵣ≤D : ∀ X Y i j → dᵣ (X i j) (Y i j) ≤ D X Y
+
+postulate DXᶜYᶜ≡DᶜXY : ∀ {X Y} (Xᶜ : 𝑪ₘ X) (Yᶜ : 𝑪ₘ Y) → D X Y ≡ DV.D (toCMatrix Xᶜ) (toCMatrix Yᶜ)
+-- DXᶜYᶜ≡DᶜXY {X} {Y} Xᶜ Yᶜ = {!!}

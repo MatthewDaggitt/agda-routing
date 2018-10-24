@@ -1,8 +1,8 @@
 open import Data.Fin using (Fin)
 open import Level using () renaming (zero to 0ℓ)
+open import Relation.Binary.Indexed.Homogeneous using (IndexedSetoid)
 
 open import RoutingLib.Relation.Unary.Indexed using (_∈_)
-open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (IndexedSetoid)
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Properties

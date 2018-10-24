@@ -74,7 +74,7 @@ record IsExpiryPeriod (period : TimePeriod) : Set where
     expiryᵢ   : ∀ {i} → i ∈ ρ start → ∀ {t} → end ≤ t → ∀ j → start ≤ β t i j
 
   open IsSubEpoch isEpochal public
-  
+
 -- A time period that "emulates" one synchronous iteration. During a
 -- pseudoperiod every node activates and then we wait until all data before
 -- those activation points are flushed from the system.
@@ -96,6 +96,9 @@ record IsPseudoperiodic (period : TimePeriod) : Set₁ where
 
   ηₛ≡ηₑ : η start ≡ η end
   ηₛ≡ηₑ = trans ηₛ≡ηₘ ηₘ≡ηₑ
+
+  [s,e]-isEpochal : IsSubEpoch [ start , end ]
+  [s,e]-isEpochal = mkₛₑ start≤end ηₛ≡ηₑ
   
 -- A time period that contains k pseudoperiods
 data IsMultiPseudoperiodic : ℕ → TimePeriod → Set₁ where
@@ -113,28 +116,34 @@ s≤e-mpp (next m pp mpp) = ≤-trans (IsPseudoperiodic.start≤end pp) (s≤e-m
 record IsConvergentPeriod (k : ℕ) (p : TimePeriod) : Set₁ where
   open TimePeriod p
   field
-    mid    : 𝕋
-    mpp    : IsMultiPseudoperiodic (k ∸ 1) [ start , mid ]
-    active : IsActivationPeriod            [ mid   , end ]
+    mid₁ mid₂ : 𝕋
+    expiry : IsExpiryPeriod                [ start , mid₁ ]
+    mpp    : IsMultiPseudoperiodic (k ∸ 1) [ mid₁  , mid₂ ]
+    active : IsActivationPeriod            [ mid₂  , end  ]
 
-  start≤mid : start ≤ mid
-  start≤mid = s≤e-mpp mpp
+  start≤mid₁ : start ≤ mid₁
+  start≤mid₁ = IsExpiryPeriod.start≤end expiry
 
-  mid≤end : mid ≤ end
-  mid≤end = IsActivationPeriod.start≤end active
+  mid₁≤mid₂ : mid₁ ≤ mid₂
+  mid₁≤mid₂ = s≤e-mpp mpp
+  
+  mid₂≤end : mid₂ ≤ end
+  mid₂≤end = IsActivationPeriod.start≤end active
 
   start≤end : start ≤ end
-  start≤end = ≤-trans start≤mid mid≤end
+  start≤end = ≤-trans start≤mid₁ (≤-trans mid₁≤mid₂ mid₂≤end)
 
-  ηₛ≡ηₑ : η start ≡ η end
-  ηₛ≡ηₑ = trans (ηₛ≡ηₑ-mpp mpp) (IsActivationPeriod.ηₛ≡ηₑ active)
+  ηₘ₁≡ηₘ₂ : η mid₁ ≡ η mid₂
+  ηₘ₁≡ηₘ₂ = ηₛ≡ηₑ-mpp mpp
   
-  open IsActivationPeriod active public using () renaming (isEpochal to [m,e]-isEpochal)
-{-  
-  mid∈[s,e] : mid ∈ₜ [ start , end ]
-  mid∈[s,e] = start≤mid , <⇒≤ mid<end
--}
+  ηₛ≡ηₑ : η start ≡ η end
+  ηₛ≡ηₑ = trans (trans (IsExpiryPeriod.ηₛ≡ηₑ expiry) ηₘ₁≡ηₘ₂) (IsActivationPeriod.ηₛ≡ηₑ active)
 
+  open IsExpiryPeriod expiry public using () renaming (isEpochal to [s,m₁]-isEpochal)
+  open IsActivationPeriod active public using () renaming (isEpochal to [m₂,e]-isEpochal)
+
+  [m₁,m₂]-isEpochal : IsSubEpoch [ mid₁ , mid₂ ]
+  [m₁,m₂]-isEpochal = mkₛₑ mid₁≤mid₂ ηₘ₁≡ηₘ₂
 
 
 {-

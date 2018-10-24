@@ -16,7 +16,7 @@ open import Relation.Binary.PropositionalEquality
 open import Relation.Binary using (Minimum; Maximum)
 open import Level using () renaming (zero to ℓ₀; suc to lsuc)
 
-import RoutingLib.Relation.Binary.NaturalOrder.Right as RightNaturalOrder
+import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
 import RoutingLib.Algebra.Selectivity.NaturalChoice.Min.TotalOrder as NaturalChoice
 
 open import RoutingLib.Data.Path.UncertifiedI
@@ -67,6 +67,16 @@ _▷_ {_} {i} {j} (step pol) (valid x c p) with (toℕ i , toℕ j) ⇿ᵥ? p | 
 ▷-cong : ∀ {n} {i j : Fin n} (f : Step i j) {r s} → r ≡ s → f ▷ r ≡ f ▷ s
 ▷-cong f refl = refl
 
+f∞ : ∀ {n} (i j : Fin n) → Step i j
+f∞ i j = step reject
+
+f∞-reject : ∀ {n : ℕ} (i j : Fin n) (x : Route) → f∞ i j ▷ x ≡ invalid
+f∞-reject i j invalid        = refl
+f∞-reject i j (valid l cs p) with (toℕ i , toℕ j) ⇿ᵥ? p | toℕ i ∈ᵥₚ? p
+... | no  _    | _       = refl
+... | yes _    | yes _   = refl
+... | yes ij⇿p | no  i∈p = refl
+
 algebra : RawRoutingAlgebra _ _ _
 algebra = record
   { Step               = Step
@@ -76,6 +86,8 @@ algebra = record
   ; _▷_                = _▷_
   ; 0#                 = 0#
   ; ∞                  = ∞
+  ; f∞                 = f∞
+  ; f∞-reject          = f∞-reject
   ; ≈-isDecEquivalence = ≡ᵣ-isDecEquivalence
   ; ▷-cong             = ▷-cong
   ; ⊕-cong             = ⊕-cong

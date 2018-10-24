@@ -2,7 +2,7 @@ open import Data.Product using (∃; _,_; proj₁; proj₂)
 open import Data.Nat using (_<_)
 open import Data.Nat.Properties using (<⇒≢)
 open import Induction.WellFounded using (Acc; acc)
-open import Induction.Nat using (<-well-founded)
+open import Induction.Nat using (<-wellFounded)
 open import Relation.Binary using (DecSetoid; _Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality using (_≡_)
 open import Relation.Nullary using (yes; no)
@@ -21,7 +21,7 @@ open import RoutingLib.Function.FixedPoint S using (FixedPoint)
 abstract
 
   fixedPoint : A → ∃ (λ x → FixedPoint f x)
-  fixedPoint x = inner x (<-well-founded (d x (f x)))
+  fixedPoint x = inner x (<-wellFounded (d x (f x)))
     where
     inner : ∀ x → Acc _<_ (d x (f x)) → ∃ (λ x → FixedPoint f x)
     inner x (acc x-acc) with f x ≟ x

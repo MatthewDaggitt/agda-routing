@@ -75,6 +75,10 @@ record IsExpiryPeriod (period : TimePeriod) : Set where
 
   open IsSubEpoch isEpochal public
 
+--------------------------------------------------------------------------------
+-- Pseudoperiod
+--------------------------------------------------------------------------------
+--
 -- A time period that "emulates" one synchronous iteration. During a
 -- pseudoperiod every node activates and then we wait until all data before
 -- those activation points are flushed from the system.

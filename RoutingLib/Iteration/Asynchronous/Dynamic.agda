@@ -42,7 +42,8 @@ record IsAsyncIterable
 
   S : Set _
   S = ∀ i → Sᵢ i
-  
+
+  -- IsConsistentState / Legal / Sane
   WellFormed : Subset n → S → Set _
   WellFormed p x = ∀ {i} → i ∉ₛ p → x i ≈ᵢ ⊥ i
   
@@ -127,6 +128,7 @@ module _ {a ℓ n} (𝓘 : AsyncIterable a ℓ n) where
 
   open AsyncIterable 𝓘
 
+  -- AsynchronouslyCorrectOver
   record IsSafeOver {b} (X : IPred Sᵢ b) : Set (lsuc lzero ⊔ a ⊔ ℓ ⊔ b) where
     field
       m*         : Epoch → Subset n → S

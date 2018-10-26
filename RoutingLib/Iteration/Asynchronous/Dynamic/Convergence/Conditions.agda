@@ -38,20 +38,23 @@ open AsyncIterable 𝓘
 -- Asynchronously contracting operator --
 --------------------------------------------------------------------------------
 -- Sufficient (and necessary conditions) for convergence
--- as defined by Üresin and Dubois
+-- as inspired by Üresin and Dubois
 
 record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
   field
+    -- BoxSpace
     B          : IPred Sᵢ p
     B-cong     : ∀ {i} → (_∈ᵤ B i) Respects _≈ᵢ_
     B-null     : ⊥ ∈ B
-    
+
+    -- Box
     D          : Epoch → Subset n → ℕ → IPred Sᵢ p
     D-cong     : ∀ {e p b i} → (_∈ᵤ D e p b i) Respects _≈ᵢ_
-    D-null     : ∀ {e p b i} → i ∉ p → ⊥ i ∈ᵤ D e p b i
-    D-from-B   : ∀ {e p x} → x ∈ B → F e p x ∈ D e p 0
-    D-finish   : ∀ e p → ∃₂ λ bᶠ ξ → (∀ {x} → x ∈ D e p bᶠ → x ≈ ξ)
+    D-finish   : ∀ e p → ∃₂ λ bᶠ ξ → (∀ {x} → x ∈ D e p bᶠ → x ≈ ξ) -- bᶠ = k*
+    D-null     : ∀ {e p b i} → i ∉ p → ⊥ i ∈ᵤ D e p b i -- New
 
+    -- F in name
+    D-from-B   : ∀ {e p x} → x ∈ B → F e p x ∈ D e p 0 --New
     F-resp-B   : ∀ {x} → x ∈ B → ∀ {e p} → F e p x ∈ B
     F-mono-D   : ∀ {e p b x} → WellFormed p x → x ∈ D e p b → F e p x ∈ D e p (suc b)
     F-inactive : ∀ e {p} x → WellFormed p (F e p x)
@@ -68,7 +71,7 @@ record UltrametricConditions : Set (a ⊔ ℓ) where
     dᵢ-cong            : ∀ e p {i} → (dᵢ e p {i}) Preserves₂ _≈ᵢ_ ⟶ _≈ᵢ_ ⟶ _≡_
     x≈y⇒dᵢ≡0           : ∀ e p {i} {x y : Sᵢ i} → x ≈ᵢ y → dᵢ e p x y ≡ 0
     dᵢ≡0⇒x≈y           : ∀ e p {i} {x y : Sᵢ i} → dᵢ e p x y ≡ 0 → x ≈ᵢ y
-    dᵢ-bounded         : ∀ e p → ∃ λ dₘₐₓ → ∀ {i} x y → dᵢ e p {i} x y ≤ dₘₐₓ
+    dᵢ-bounded         : ∀ e p → ∃ λ dₘₐₓ → ∀ {i} x y → dᵢ e p {i} x y ≤ dₘₐₓ -- TO-DO
     element            : S
 
   dₛᵢ : Epoch → Subset n → ∀ {i} → Sᵢ i → Sᵢ i → ℕ

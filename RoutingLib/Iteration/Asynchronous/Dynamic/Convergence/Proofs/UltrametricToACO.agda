@@ -89,12 +89,12 @@ module _ (e : Epoch) (p : Subset n) where
   abstract
 
     bᶠ : ℕ
-    bᶠ = suc dₘₐₓ
+    bᶠ = dₘₐₓ
 
     dᵢ≤bᶠ : ∀ {i} (x y : Sᵢ i) → dᵢ e p x y ≤ bᶠ
     dᵢ≤bᶠ x y = begin
       dᵢ e p x y ≤⟨ dᵢ≤dₘₐₓ x y ⟩
-      dₘₐₓ      ≤⟨ n≤1+n dₘₐₓ ⟩
+      -- dₘₐₓ      ≤⟨ n≤1+n dₘₐₓ ⟩
       bᶠ         ∎
 
 ---------------------------
@@ -114,7 +114,7 @@ module _ (e : Epoch) (p : Subset n) where
       suc (dₘₐₓ ∸ suc k) ∎)
 
     r[bᶠ]≡0 : r[ bᶠ ] ≡ 0
-    r[bᶠ]≡0 = m≤n⇒m∸n≡0 (n≤1+n dₘₐₓ)
+    r[bᶠ]≡0 = n∸n≡0 dₘₐₓ
 
     dᵢ≤r[0] : ∀ {i} (x y : Sᵢ i) → dᵢ e p x y ≤ r[ 0 ]
     dᵢ≤r[0] x y = dᵢ≤dₘₐₓ x y
@@ -232,9 +232,9 @@ F-mono-D {e} {p} {b} {x} wf x∈D i with i ∈? p
   r[_] e p (suc b)                    ∎)
 ...   | no  x≉ₚx* = lift (v<r[k]⇒v≤r[1+k] e p (begin
   dᵢ e p (x* e p i) (F e p x i) ≤⟨ dᵢ≤d e p (x* e p) (F e p x) i∈p ⟩
-  d e p (x* e p)  (F e p x)   <⟨ F-strContrOnFP e p wf (Fx*≈x* e p) x≉ₚx* ⟩
-  d e p (x* e p)  x           ≤⟨ ∈D⇒d≤r x∈D ⟩
-  r[_] e p b                  ∎))
+  d e p (x* e p)   (F e p x)   <⟨ F-strContrOnFP e p wf (Fx*≈x* e p) x≉ₚx* ⟩
+  d e p (x* e p)    x          ≤⟨ ∈D⇒d≤r x∈D ⟩
+  r[_] e p b                   ∎))
 
 ----------------------
 -- ACO construction --

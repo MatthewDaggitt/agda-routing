@@ -6,7 +6,6 @@ open import RoutingLib.Routing.Algebra
 open import RoutingLib.Iteration.Asynchronous.Dynamic using (IsSafe)
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Properties using (0-IsSafe)
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Theorems using (UltrametricConditions; ultra⇒safety)
-open import RoutingLib.Iteration.Asynchronous.Schedule using (Epoch)
 
 import RoutingLib.Routing.BellmanFord.Asynchronous as BellmanFord
 open import RoutingLib.Routing.BellmanFord.ConvergenceConditions

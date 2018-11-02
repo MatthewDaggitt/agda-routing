@@ -50,14 +50,13 @@ record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
     -- Box
     D          : Epoch → Subset n → ℕ → IPred Sᵢ p
     D-cong     : ∀ {e p b i} → (_∈ᵤ D e p b i) Respects _≈ᵢ_
-    D-finish   : ∀ e p → ∃₂ λ bᶠ ξ → (∀ {x} → x ∈ D e p bᶠ → x ≈ ξ) -- bᶠ = k*
+    D-finish   : ∀ e p → ∃₂ λ k* x* → (∀ {x} → x ∈ D e p k* → x ≈ x*)
     D-null     : ∀ {e p b i} → i ∉ p → ⊥ i ∈ᵤ D e p b i -- New
 
     -- F in name
-    D-from-B   : ∀ {e p x} → x ∈ B → F e p x ∈ D e p 0 --New
     F-resp-B   : ∀ {x} → x ∈ B → ∀ {e p} → F e p x ∈ B
-    F-mono-D   : ∀ {e p b x} → WellFormed p x → x ∈ D e p b → F e p x ∈ D e p (suc b)
-    F-inactive : ∀ e {p} x → WellFormed p (F e p x)
+    F-mono-B   : ∀ {e p x}   → WellFormed p x → x ∈ B       → F e p x ∈ D e p 0
+    F-mono-D   : ∀ {e p k x} → WellFormed p x → x ∈ D e p k → F e p x ∈ D e p (suc k)
     
 --------------------------------------------------------------------------------
 -- Ultrametric spaces --

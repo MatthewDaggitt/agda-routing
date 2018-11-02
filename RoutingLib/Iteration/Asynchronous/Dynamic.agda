@@ -32,25 +32,33 @@ module RoutingLib.Iteration.Asynchronous.Dynamic where
 -- Parallelisable functions
 
 record IsAsyncIterable
-  {a n ℓ} {Sᵢ : Fin n → Set a}
+  {a n ℓ}
+  -- Types for state of each node
+  {Sᵢ : Fin n → Set a}
+  -- Equality for the type of each node
   (_≈ᵢ_ : IRel Sᵢ ℓ)
+  -- The set of functions indexed by epoch and participants
   (F : Epoch → Subset n → (∀ i → Sᵢ i) → (∀ i → Sᵢ i))
-  (⊥ : (∀ i → Sᵢ i))
+  -- The special state representing non-participation
+  (⊥ : (∀ i → Sᵢ i))   
   : Set (a ⊔ ℓ) where
   
   open FiniteSubset Sᵢ _≈ᵢ_ using () renaming (_∼[_]_ to _≈[_]_) public
 
-  S : Set _
-  S = ∀ i → Sᵢ i
-
-  -- IsConsistentState / Legal / Sane
-  WellFormed : Subset n → S → Set _
-  WellFormed p x = ∀ {i} → i ∉ₛ p → x i ≈ᵢ ⊥ i
-  
+  -- Required assumptions
   field
     isDecEquivalenceᵢ : IsIndexedDecEquivalence Sᵢ _≈ᵢ_
     F-cong           : ∀ e p → (F e p) Preserves _≈[ p ]_ ⟶ _≈[ p ]_
-    
+
+  -- The type of the global state of the computation
+  S : Set _
+  S = ∀ i → Sᵢ i
+  
+  -- IsConsistentState / Legal / Sane
+  WellFormed : Subset n → S → Set _
+  WellFormed p x = ∀ {i} → i ∉ₛ p → x i ≈ᵢ ⊥ i
+
+  -- Re-export various forms of equality
   _≈_ : Rel S ℓ
   x ≈ y = ∀ i → x i ≈ᵢ y i
 
@@ -134,7 +142,7 @@ module _ {a ℓ n} (𝓘 : AsyncIterable a ℓ n) where
       m*         : Epoch → Subset n → S
       m*-reached : ∀ {x₀} → x₀ ∈ X → (𝓢 : Schedule n) → {s : 𝕋} →
                    ∃ λ k → ∀ {m e : 𝕋} → 
-                   IsConvergentPeriod 𝓢 k [ s , m ] →
+                   IsMultiPseudoperiodic 𝓢 k [ s , m ] →
                    IsSubEpoch 𝓢 [ m , e ] →
                    asyncIter 𝓘 𝓢 x₀ e ≈ m* (Schedule.η 𝓢 s) (Schedule.ρ 𝓢 s)
 
@@ -144,7 +152,10 @@ module _ {a ℓ n} (𝓘 : AsyncIterable a ℓ n) where
 -------------------------------------------------------------------------
 -- Bisimilarity
 
-module _ {a₁ a₂ ℓ₁ ℓ₂ n} (𝓘₁ : AsyncIterable a₂ ℓ₂ n) (𝓘₂ : AsyncIterable a₂ ℓ₂ n) where
+module _ {a₁ a₂ ℓ₁ ℓ₂ n}
+         (𝓘₁ : AsyncIterable a₂ ℓ₂ n)
+         (𝓘₂ : AsyncIterable a₂ ℓ₂ n)
+         where
 
   record Bisimilar : Set (a₁ ⊔ a₂ ⊔ ℓ₁ ⊔ ℓ₂) where
 

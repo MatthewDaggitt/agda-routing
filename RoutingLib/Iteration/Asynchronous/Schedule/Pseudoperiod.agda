@@ -8,7 +8,6 @@ open import Data.Product using (∃; _×_; _,_; proj₁)
 open import Function using (_∘_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; subst)
 open import Relation.Nullary using (¬_; yes; no)
--- open import Relation.Unary using (_∈_)
 open import Induction.WellFounded using (Acc; acc)
 open import Induction.Nat using (<-wellFounded)
 
@@ -22,8 +21,11 @@ module RoutingLib.Iteration.Asynchronous.Schedule.Pseudoperiod {n} (𝓢 : Sched
 open Schedule 𝓢
 
 --------------------------------------------------------------------------------
--- Time periods within the same epoch --
+-- Sub epochs --
 --------------------------------------------------------------------------------
+--
+-- Periods of time within an epoch.
+-- These are typically named η[s,e].
 
 record IsSubEpoch (period : TimePeriod) : Set where
   constructor mkₛₑ
@@ -41,9 +43,12 @@ _++ₛₑ_ : ∀ {s m e} → IsSubEpoch [ s , m ] → IsSubEpoch [ m , e ] → I
 --------------------------------------------------------------------------------
 -- Activation periods --
 --------------------------------------------------------------------------------
+--
+-- In activation period every participating node is activated at least once.
+-- These are typically named α[s,e]
 
 record _IsActiveIn_ (i : Fin n) (period : TimePeriod) : Set where
-  constructor mkₐ
+  constructor mkₐᵢ
   open TimePeriod period
   field
     ηₛ≡ηₑ         : η start ≡ η end
@@ -52,28 +57,38 @@ record _IsActiveIn_ (i : Fin n) (period : TimePeriod) : Set where
     α+≤e          : α+ ≤ end
     i∈α+[i]       : i ∈ α α+
 
+  η[s,e] : IsSubEpoch [ start , end ]
+  η[s,e] = mkₛₑ (≤-trans (<⇒≤ s<α+) α+≤e) ηₛ≡ηₑ
+
 record IsActivationPeriod (period : TimePeriod) : Set where
+  constructor mkₐ
   open TimePeriod period
   field
-    isEpochal     : IsSubEpoch period
+    η[s,e]        : IsSubEpoch period
     isActivation  : ∀ {i} → i ∈ ρ start → i IsActiveIn period
 
-  open IsSubEpoch isEpochal public
+  open IsSubEpoch η[s,e] public
 
   module _ {i} (i∈ρ : i ∈ ρ start) where
-    open _IsActiveIn_ (isActivation i∈ρ) public hiding (ηₛ≡ηₑ)
+    open _IsActiveIn_ (isActivation i∈ρ) public hiding (ηₛ≡ηₑ; η[s,e])
 
 --------------------------------------------------------------------------------
 -- Expiry periods --
 --------------------------------------------------------------------------------
-  
+--
+-- After the end of an expiry period, there are no messages left in flight that
+-- originate from before the start of the expiry period.
+--
+-- These are typically named β[s,e]
+
 record IsExpiryPeriod (period : TimePeriod) : Set where
+  constructor mkₑ
   open TimePeriod period
   field
-    isEpochal : IsSubEpoch period
-    expiryᵢ   : ∀ {i} → i ∈ ρ start → ∀ {t} → end ≤ t → ∀ j → start ≤ β t i j
+    η[s,e]  : IsSubEpoch period
+    expiryᵢ  : ∀ {i} → i ∈ ρ start → ∀ {t} → end ≤ t → ∀ j → start ≤ β t i j
 
-  open IsSubEpoch isEpochal public
+  open IsSubEpoch η[s,e] public
 
 --------------------------------------------------------------------------------
 -- Pseudoperiod
@@ -82,18 +97,18 @@ record IsExpiryPeriod (period : TimePeriod) : Set where
 -- A time period that "emulates" one synchronous iteration. During a
 -- pseudoperiod every node activates and then we wait until all data before
 -- those activation points are flushed from the system.
+
 record IsPseudoperiodic (period : TimePeriod) : Set₁ where
   open TimePeriod period
   field
-    mid                : 𝕋
-    isActivationPeriod : IsActivationPeriod [ start , mid ]
-    isExpiryPeriod     : IsExpiryPeriod     [ mid   , end ]
+    m      : 𝕋
+    β[s,m] : IsExpiryPeriod     [ start , m   ]
+    α[m,e] : IsActivationPeriod [ m     , end ]
 
-  open IsActivationPeriod isActivationPeriod public renaming (start≤end to start≤mid; ηₛ≡ηₑ to ηₛ≡ηₘ)
-  open IsExpiryPeriod     isExpiryPeriod     public renaming (start≤end to mid≤end;   ηₛ≡ηₑ to ηₘ≡ηₑ)
-  
-  α+≤β : ∀ i {j t} (i∈ρₛ : i ∈ ρ start) (j∈ρₛ : j ∈ ρ start) → end ≤ suc t → α+ j∈ρₛ ≤ β (suc t) i j
-  α+≤β i {j} i∈ρₛ j∈ρₛ e≤t = ≤-trans (α+≤e j∈ρₛ) (expiryᵢ (subst (λ v → i ∈ π v) ηₛ≡ηₘ i∈ρₛ) e≤t j)
+  open IsExpiryPeriod β[s,m] public
+    renaming (start≤end to start≤mid; ηₛ≡ηₑ to ηₛ≡ηₘ; η[s,e] to η[s,m])
+  open IsActivationPeriod α[m,e] public
+    renaming (start≤end to mid≤end;   ηₛ≡ηₑ to ηₘ≡ηₑ; η[s,e] to η[m,e])
   
   start≤end : start ≤ end
   start≤end = ≤-trans start≤mid mid≤end
@@ -101,10 +116,15 @@ record IsPseudoperiodic (period : TimePeriod) : Set₁ where
   ηₛ≡ηₑ : η start ≡ η end
   ηₛ≡ηₑ = trans ηₛ≡ηₘ ηₘ≡ηₑ
 
-  [s,e]-isEpochal : IsSubEpoch [ start , end ]
-  [s,e]-isEpochal = mkₛₑ start≤end ηₛ≡ηₑ
-  
+  η[s,e] : IsSubEpoch [ start , end ]
+  η[s,e] = mkₛₑ start≤end ηₛ≡ηₑ
+
+--------------------------------------------------------------------------------
+-- Multi-pseudoperiods
+--------------------------------------------------------------------------------
+--
 -- A time period that contains k pseudoperiods
+
 data IsMultiPseudoperiodic : ℕ → TimePeriod → Set₁ where
   none : ∀ {s}         → IsMultiPseudoperiodic 0 [ s , s ]
   next : ∀ {s} m {e k} → IsPseudoperiodic [ s , m ] → IsMultiPseudoperiodic k [ m , e ] → IsMultiPseudoperiodic (suc k) [ s , e ]
@@ -117,37 +137,6 @@ s≤e-mpp : ∀ {s e k} → IsMultiPseudoperiodic k [ s , e ] → s ≤ e
 s≤e-mpp none            = ≤-refl
 s≤e-mpp (next m pp mpp) = ≤-trans (IsPseudoperiodic.start≤end pp) (s≤e-mpp mpp)
 
-record IsConvergentPeriod (k : ℕ) (p : TimePeriod) : Set₁ where
-  open TimePeriod p
-  field
-    mid₁ mid₂ : 𝕋
-    expiry : IsExpiryPeriod                [ start , mid₁ ]
-    mpp    : IsMultiPseudoperiodic (k ∸ 1) [ mid₁  , mid₂ ]
-    active : IsActivationPeriod            [ mid₂  , end  ]
-
-  start≤mid₁ : start ≤ mid₁
-  start≤mid₁ = IsExpiryPeriod.start≤end expiry
-
-  mid₁≤mid₂ : mid₁ ≤ mid₂
-  mid₁≤mid₂ = s≤e-mpp mpp
-  
-  mid₂≤end : mid₂ ≤ end
-  mid₂≤end = IsActivationPeriod.start≤end active
-
-  start≤end : start ≤ end
-  start≤end = ≤-trans start≤mid₁ (≤-trans mid₁≤mid₂ mid₂≤end)
-
-  ηₘ₁≡ηₘ₂ : η mid₁ ≡ η mid₂
-  ηₘ₁≡ηₘ₂ = ηₛ≡ηₑ-mpp mpp
-  
-  ηₛ≡ηₑ : η start ≡ η end
-  ηₛ≡ηₑ = trans (trans (IsExpiryPeriod.ηₛ≡ηₑ expiry) ηₘ₁≡ηₘ₂) (IsActivationPeriod.ηₛ≡ηₑ active)
-
-  open IsExpiryPeriod expiry public using () renaming (isEpochal to [s,m₁]-isEpochal)
-  open IsActivationPeriod active public using () renaming (isEpochal to [m₂,e]-isEpochal)
-
-  [m₁,m₂]-isEpochal : IsSubEpoch [ mid₁ , mid₂ ]
-  [m₁,m₂]-isEpochal = mkₛₑ mid₁≤mid₂ ηₘ₁≡ηₘ₂
 
 
 {-

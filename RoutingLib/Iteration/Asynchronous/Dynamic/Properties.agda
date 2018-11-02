@@ -25,7 +25,7 @@ open import RoutingLib.Iteration.Asynchronous.Schedule
 module RoutingLib.Iteration.Asynchronous.Dynamic.Properties where
 
 -------------------------------------------------------------------------
--- Simple properties concerning the asynchronous state function
+-- Basic properties of the asynchronous state function
 
 module _ {a ℓ n} (𝓘 : AsyncIterable a ℓ n) (𝓢 : Schedule n) where
 
@@ -54,7 +54,7 @@ module _ {a ℓ n} (𝓘 : AsyncIterable a ℓ n) (𝓢 : Schedule n) where
   ... | yes i∈ρ₁₊ₜ = contradiction i∈ρ₁₊ₜ i∉ρ₁₊ₜ
   
 -------------------------------------------------------------------------
--- Some simple properties concerning the safety
+-- Basic properties of safety
 
 -- The empty computation is safe
 0-IsSafe : ∀ {a ℓ} (𝓘 : AsyncIterable a ℓ 0) → IsSafe 𝓘
@@ -72,7 +72,13 @@ isSafeOver-universal univ safeOver = record
   ; m*-reached = λ {x₀} _ → m*-reached (univ x₀)
   }
   where open IsSafeOver safeOver
-    
+
+
+
+
+
+
+
 {-
 -- The safe set can always be shrunk
 shrinkSafety : ∀ {a ℓ n} {𝓘 : AsyncIterable a ℓ n} → 

@@ -37,7 +37,7 @@ on the Distributed Bellman Ford (DBF) algorithm.
 
 ## Requirements
 
-Requires Agda 2.5.4 and Standard Library 0.16
+Requires Agda 2.5.4 and Standard Library 0.17
 
 ## Postulates
 

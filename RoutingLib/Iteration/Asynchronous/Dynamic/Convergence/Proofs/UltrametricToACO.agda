@@ -156,45 +156,28 @@ module _ (e : Epoch) (p : Subset n) where
 -----------
 -- Boxes --
 -----------
--- Definition and properties of the initial box B
-
-B : IPred Sᵢ ℓ
-B i xᵢ = Lift ℓ ⊤
-
-B-cong : ∀ {i} → (_∈ᵤ B i) Respects _≈ᵢ_
-B-cong _ _ = lift tt
-
-B-null : ⊥ ∈ B
-B-null _ = lift tt
-
-B-univ : ∀ x → x ∈ B
-B-univ _ _ = lift tt
-
-F-resp-B : ∀ {x} → x ∈ B → ∀ {e p} → F e p x ∈ B
-F-resp-B x∈B i = x∈B i
-
-
 -- Definition and properties of the subboxes D
 
 D : Epoch → Subset n → ℕ → IPred Sᵢ _
-D e p b i xᵢ with i ∈? p
-... | yes i∈p = Lift ℓ (dᵢ e p (x* e p i) xᵢ ≤ r[_] e p b)
+D e p zero    i xᵢ = Lift ℓ ⊤
+D e p (suc k) i xᵢ with i ∈? p
+... | yes i∈p = Lift ℓ (dᵢ e p (x* e p i) xᵢ ≤ r[_] e p (suc k))
 ... | no  i∉p = xᵢ ≈ᵢ ⊥ i
 
-D-cong : ∀ {e p b i} → (_∈ᵤ D e p b i) Respects _≈ᵢ_
-D-cong {e} {p} {b} {i} x≈y x∈D with i ∈? p
-... | yes i∈p = lift (subst (_≤ r[_] e p b) (dᵢ-cong e p ≈ᵢ-refl x≈y) (lower x∈D))
+D-cong : ∀ {e p k i} → (_∈ᵤ D e p k i) Respects _≈ᵢ_
+D-cong {e} {p} {zero}  {i} _   _ = lift tt
+D-cong {e} {p} {suc k} {i} x≈y x∈D with i ∈? p
+... | yes i∈p = lift (subst (_≤ r[_] e p (suc k)) (dᵢ-cong e p ≈ᵢ-refl x≈y) (lower x∈D))
 ... | no  i∉p = ≈ᵢ-trans (≈ᵢ-sym x≈y) x∈D
 
-D-null : ∀ {e p b i} → i ∉ₛ p → ⊥ i ∈ᵤ D e p b i
-D-null {e} {p} {b} {i} i∉p with i ∈? p
+D-null : ∀ {e p k i} → i ∉ₛ p → ⊥ i ∈ᵤ D e p k i
+D-null {e} {p} {zero}  {i} _ = lift tt
+D-null {e} {p} {suc k} {i} i∉p with i ∈? p
 ... | yes i∈p = contradiction i∈p i∉p
 ... | no  _   = ≈ᵢ-refl
 
-D-from-B   : ∀ {e p x} → x ∈ B → F e p x ∈ D e p 0
-D-from-B {e} {p} {x} _ i with i ∈? p
-... | yes i∈p = lift (dᵢ≤r[0] e p (x* e p i) (F e p x i))
-... | no  i∉p = F-inactive e x i∉p
+D₀-eq : ∀ {e p x} f q → x ∈ D e p 0 → x ∈ D f q 0
+D₀-eq f q x∈D₀ i = lift tt
 
 D-finish : ∀ e p → ∃₂ λ bᶠ ξ → (∀ {x} → x ∈ D e p bᶠ → x ≈ ξ)
 D-finish e p = bᶠ e p , x* e p , x∈D[bᶠ]⇒x*≈x
@@ -210,6 +193,10 @@ D-finish e p = bᶠ e p , x* e p , x∈D[bᶠ]⇒x*≈x
     r[_] e p (suc bᶠ-1)     ≡⟨ cong (r[_] e p) (sym bᶠ≡1+bᶠ-1) ⟩
     r[_] e p (bᶠ e p)       ≡⟨ r[bᶠ]≡0 e p ⟩
     0                       ∎)))
+
+
+F-resp-D₀ : ∀ {e p x} → x ∈ D e p 0 → F e p x ∈ D e p 0
+F-resp-D₀ x∈B i = x∈B i
 
 ∈Dᵢ⇒dᵢ≤r : ∀ {e p b i xᵢ} → xᵢ ∈ᵤ D e p (suc b) i → dₛᵢ e p (x* e p i) xᵢ ≤ r[_] e p (suc b)
 ∈Dᵢ⇒dᵢ≤r {e} {p} {b} {i} {xᵢ} xᵢ∈D with i ∈? p
@@ -242,19 +229,14 @@ F-mono-D {e} {p} {b} {x} wf x∈D i with i ∈? p
 
 aco : ACO 𝓘 ℓ
 aco = record
-  { B            = B
-  ; B-cong       = B-cong
-  ; B-null       = B-null
-
-  ; D            = D
-  ; D-cong       = D-cong
-  ; D-null       = D-null
-  ; D-from-B     = D-from-B
+  { D              = D
+  ; D-cong       = λ {e p k} → D-cong {e} {p} {k}
+  ; D₀-eq        = λ {e p x} → D₀-eq {e} {p} {x}
+  ; D-null       = λ {e p k} → D-null {e} {p} {k}
   ; D-finish     = D-finish
 
-  ; F-resp-B     = λ {x} → F-resp-B {x}
+  ; F-resp-D₀    = λ {e p x} → F-resp-D₀ {e} {p} {x}
   ; F-mono-D     = F-mono-D
-  ; F-inactive   = F-inactive
   }
 
 

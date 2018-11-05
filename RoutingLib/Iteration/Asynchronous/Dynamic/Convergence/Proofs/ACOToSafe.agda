@@ -1,5 +1,5 @@
 open import Data.Fin using (Fin)
-open import Data.Fin.Subset using (Subset) renaming (_∈_ to _∈ₛ_; _∉_ to _∉ₛ_)
+open import Data.Fin.Subset using (Subset; ⊤) renaming (_∈_ to _∈ₛ_; _∉_ to _∉ₛ_)
 open import Data.Fin.Dec using (_∈?_)
 open import Data.Maybe using (just; nothing)
 open import Data.Nat renaming (_≟_ to _≟ℕ_) hiding (_⊔_)
@@ -42,7 +42,13 @@ open ACO aco
 k* : Epoch → Subset n → ℕ
 k* e p = proj₁ (D-finish e p)
 
-module _ {x₀ : S} (x₀∈B : x₀ ∈ B) (𝓢 : Schedule n) where
+D₀ : IPred Sᵢ p
+D₀ = D 0 ⊤ 0
+
+D₀-eqᵢ : ∀ {e p} f q i {x} → x ∈ᵤ D e p 0 i → x ∈ᵤ D f q 0 i
+D₀-eqᵢ f q i x∈D₀ᵢ = D₀-eq f q {!!} i
+
+module _ {x₀ : S} (x₀∈B : x₀ ∈ D₀) (𝓢 : Schedule n) where
 
   open Schedule 𝓢
   open Pseudoperiod 𝓢
@@ -129,47 +135,31 @@ module _ {x₀ : S} (x₀∈B : x₀ ∈ B) (𝓢 : Schedule n) where
   ------------------------------------------------------------------------
   -- Base case: the asynchronous iteration is always in the initial box
   
-  state∈B : ∀ t → StateIn B AtTime t
-  state∈B zero    i (acc rec) with i ∈? ρ 0
-  ... | no  _ = B-null i
-  ... | yes _ = x₀∈B i
-  state∈B (suc t) i (acc rec) with i ∈? ρ (suc t) | i ∈? ρ t | i ∈? α (suc t)
-  ... | no  _ | _     | _     = B-null i
-  ... | yes _ | no  _ | _     = x₀∈B i
-  ... | yes _ | yes _ | no  _ = state∈B t i (rec t ≤-refl)
-  ... | yes _ | yes _ | yes _ = F-resp-B (λ j → state∈B (β (suc t) i j) j (rec (β (suc t) i j) _)) i
-
+  state∈D₀ : ∀ t → StateIn (Dₜ t 0) AtTime t
+  state∈D₀ zero    i (acc rec) with i ∈? ρ 0
+  ... | no  i∉ρ₀ = D-null i∉ρ₀
+  ... | yes _    = D₀-eq (η 0) (ρ 0) x₀∈B i
+  state∈D₀ (suc t) i (acc rec) with i ∈? ρ (suc t) | i ∈? ρ t | i ∈? α (suc t)
+  ... | no  i∉ρ₁₊ₜ | _     | _     = D-null i∉ρ₁₊ₜ
+  ... | yes _       | no  _ | _     = D₀-eq (η (suc t)) (ρ (suc t)) x₀∈B i
+  ... | yes _       | yes _ | no  _ = D₀-eq (η (suc t)) (ρ (suc t)) (λ j → state∈D₀ t j (rec t _)) i 
+  ... | yes _       | yes _ | yes _ = F-resp-D₀ {η (suc t)} {ρ (suc t)} {λ j → async (rec (β (suc t) i j) _) j} (test) i
+    where
+    test : ∀ j → async (rec (β (suc t) i j) _) j ∈ᵤ Dₜ (suc t) 0 j
+    test j = D₀-eq {η (β (suc t) i j)} {ρ (β (suc t) i j)} (η (suc t)) (ρ (suc t)) {!!} j
+      where
+      test2 : async (rec (β (suc t) i j) _) j ∈ᵤ Dₜ (β (suc t) i j) 0 j
+      test2 = {!!}
+      
+    -- D₀-eq {η (β (suc t) i j)} {ρ (β (suc t) i j)} (η (suc t)) (ρ (suc t)) ? ?
+--(D₀-eq (η (suc t)) (ρ (suc t)) (λ j → state∈D₀ (β (suc t) i j) j (rec _ _))) i
+  
   expiry⇒wellFormed : ∀ {s e} →
                       IsExpiryPeriod [ s , e ] →
                       MessagesWellFormedAt e
   expiry⇒wellFormed {s} {e} (mkₑ (mkₛₑ s≤e ηₛ≡ηₑ) expiryᵢ) {i} {t} (mkₛₑ e≤1+t ηₑ≡η₁₊ₜ) {j} {accβ} i∈ρ₁₊ₑ j∉ρ₁₊ₜ =
     ≈ᵢ-reflexive (asyncIter-inactive 𝓘 𝓢 x₀ accβ (j∉ρ₁₊ₜ ∘ ∈ρ-subst (η-inRangeₑ (trans ηₛ≡ηₑ ηₑ≡η₁₊ₜ) (expiryᵢ (∈ρ-subst (sym (trans ηₛ≡ηₑ ηₑ≡η₁₊ₜ)) i∈ρ₁₊ₑ) e≤1+t j , β-decreasing i j (s≤s z≤n)))))
 
-  advance-first-stateᵢ : ∀ {s e i} →
-                         MessagesWellFormedAt s →
-                         i IsActiveIn [ s , e ] → 
-                         StateOfNode i In (Dₜ e 0) AtTime e
-  advance-first-stateᵢ {s} {zero}  {i} wf (mkₐᵢ ηₛ≡η₁₊ₑ m ()  z≤n   i∈αₘ)
-  advance-first-stateᵢ {s} {suc e} {i} wf (mkₐᵢ ηₛ≡η₁₊ₑ m s<m m≤1+e i∈αₘ) (acc recₑ)
-    with η-inRange ηₛ≡η₁₊ₑ (≤-pred (≤-trans s<m m≤1+e) , n≤1+n _)
-  ... | ηₛ≡ηₑ , ηₑ≡η₁₊ₑ with i ∈? ρ (suc e) | i ∈? ρ e | i ∈? α (suc e)
-  ...   | no  i∉ρ₁₊ₑ | _       | _     = D-null i∉ρ₁₊ₑ
-  ...   | yes i∈ρ₁₊ₑ | no i∉ρₑ | _     = contradiction (∈ρ-subst (sym ηₑ≡η₁₊ₑ) i∈ρ₁₊ₑ) i∉ρₑ
-  ...   | yes i∈ρ₁₊ₑ | yes _   | yes _ = F-mono-B (wf (mkₛₑ s≤1+e ηₛ≡η₁₊ₑ) i∈ρ₁₊ₑ) (λ j → state∈B (β (suc e) i j) j _) i
-    where s≤1+e = ≤-trans (n≤1+n s) (≤-trans s<m m≤1+e)
-  ...   | yes _       | yes _   | no  i∉α₁₊ₑ with m ≟ℕ suc e
-  ...     | yes refl  = contradiction i∈αₘ i∉α₁₊ₑ
-  ...     | no  m≢1+e = async∈-resp-Dₜᵢ e ηₑ≡η₁₊ₑ (advance-first-stateᵢ wf (mkₐᵢ ηₛ≡ηₑ m s<m m≤e i∈αₘ) _)
-    where m≤e = ≤-pred (≤∧≢⇒< m≤1+e m≢1+e)
-
-  advance-first-state : ∀ {s e} →
-                      MessagesWellFormedAt s →
-                      IsActivationPeriod [ s , e ] →
-                      StateIn (Dₜ e 0) AtTime e
-  advance-first-state {s} {e} wf (mkₐ (mkₛₑ _ ηₛ≡ηₑ) activeᵢ) i with i ∈? ρ s
-  ... | no  i∉ρₛ = i∉ρ⇒sᵢ∈Bₖᵢ (i∉ρₛ ∘ ∈ρ-subst (sym ηₛ≡ηₑ))
-  ... | yes i∈ρₛ = advance-first-stateᵢ wf (activeᵢ i∈ρₛ)
-  
   ------------------------------------------------------------------------
   -- Preservation: if the asynchronous iteration is in a box and
   -- information recieved is in that box then assuming the epoch is the
@@ -199,7 +189,7 @@ module _ {x₀ : S} (x₀∈B : x₀ ∈ B) (𝓢 : Schedule n) where
     ⇒ asyncₜ e i ∈ᵤ Dₜ e       k i ∴⟨ async∈-resp-Dₜᵢ e ηₑ≡η₁₊ₑ ⟩
     ⇒ asyncₜ e i ∈ᵤ Dₜ (suc e) k i ∎
   ...     | yes i∈ρ₁₊ₑ | yes _   | yes _ with c∈Bₖ
-  ...       | zeroᵇ wf s∈D₀   = F-mono-B (wf η[s,e] i∈ρ₁₊ₑ) (λ j → state∈B (β (suc e) i j) j _) i
+  ...       | zeroᵇ wf s∈D₀   = {!!} --F-mono-B (wf η[s,e] i∈ρ₁₊ₑ) (λ j → state∈D₀ (β (suc e) i j) j _) i
   ...       | sucᵇ  wf m∈Bₖ _ = F-mono-D (wf η[s,e] i∈ρ₁₊ₑ) (λ j → async∈-resp-Dₜᵢ (β (suc e) i j) ηₛ≡η₁₊ₑ (m∈Bₖ i η[s,e] i∈ρ₁₊ₑ _)) i
   
   message-steps : ∀ {k s e} →
@@ -255,7 +245,6 @@ module _ {x₀ : S} (x₀∈B : x₀ ∈ B) (𝓢 : Schedule n) where
   -- Steps : after k pseudoperiods all nodes are guaranteed to have
   -- advanced at least k boxes
 
-  
   start-pp : ∀ {s e} →
              IsPseudoperiodic [ s , e ] →
              ComputationInBox 0 AtTime e
@@ -264,7 +253,7 @@ module _ {x₀ : S} (x₀∈B : x₀ ∈ B) (𝓢 : Schedule n) where
     open IsPseudoperiodic pp
     m∈wfᵐ = expiry⇒wellFormed β[s,m]
     m∈wfᵉ = wellFormed-steps η[m,e] m∈wfᵐ
-    s∈D₀  = advance-first-state m∈wfᵐ α[m,e]
+    s∈D₀  = state∈D₀ e
 
   messages-pp : ∀ {s e k} →
                 IsPseudoperiodic [ s , e ] →
@@ -322,7 +311,7 @@ module _ {x₀ : S} (x₀∈B : x₀ ∈ B) (𝓢 : Schedule n) where
             async (<-wellFounded e) ≈ ξ (η s) (ρ s)
   ξ-reached {s} = suc (k* (η s) (ρ s)) , ξ-reached′
 
-isSafe : IsSafeOver 𝓘 B
+isSafe : IsSafeOver 𝓘 D₀
 isSafe = record
   { m*         = ξ
   ; m*-reached = ξ-reached

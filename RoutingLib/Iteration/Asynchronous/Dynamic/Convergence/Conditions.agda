@@ -42,20 +42,15 @@ open AsyncIterable 𝓘
 
 record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
   field
-    -- BoxSpace
-    B          : IPred Sᵢ p
-    B-cong     : ∀ {i} → (_∈ᵤ B i) Respects _≈ᵢ_
-    B-null     : ⊥ ∈ B
-
-    -- Box
+    -- Boxes
     D          : Epoch → Subset n → ℕ → IPred Sᵢ p
+    D₀-eq      : ∀ {e p x} f q → x ∈ D e p 0 → x ∈ D f q 0
     D-cong     : ∀ {e p b i} → (_∈ᵤ D e p b i) Respects _≈ᵢ_
     D-finish   : ∀ e p → ∃₂ λ k* x* → (∀ {x} → x ∈ D e p k* → x ≈ x*)
     D-null     : ∀ {e p b i} → i ∉ p → ⊥ i ∈ᵤ D e p b i -- New
 
-    -- F in name
-    F-resp-B   : ∀ {x} → x ∈ B → ∀ {e p} → F e p x ∈ B
-    F-mono-B   : ∀ {e p x}   → WellFormed p x → x ∈ B       → F e p x ∈ D e p 0
+    -- F
+    F-resp-D₀   : ∀ {e p x} → x ∈ D e p 0 → F e p x ∈ D e p 0
     F-mono-D   : ∀ {e p k x} → WellFormed p x → x ∈ D e p k → F e p x ∈ D e p (suc k)
     
 --------------------------------------------------------------------------------

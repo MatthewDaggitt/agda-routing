@@ -8,6 +8,7 @@ open import Level using (_⊔_) renaming (suc to lsuc)
 open import Relation.Nullary using (¬_)
 open import Relation.Binary using (Rel; IsDecEquivalence; Setoid; DecSetoid)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
+import Relation.Binary.Construct.NonStrictToStrict as NonStrictToStrict
 import Relation.Binary.EqReasoning as EqReasoning
 
 open import RoutingLib.Data.Matrix using (SquareMatrix)
@@ -47,17 +48,20 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
     f∞-reject          : ∀ {n} (i j : Fin n) x → f∞ i j ▷ x ≈ ∞
 
 
+  open RightNaturalOrder _≈_ _⊕_ public
+    using () renaming ( _≤_ to _≤₊_ )
+
+  open NonStrictToStrict _≈_ _≤₊_ public
+    using () renaming ( _<_ to _<₊_)
+
   infix 4 _≉_
   _≉_ : Rel Route ℓ
   x ≉ y = ¬ (x ≈ y)
 
-  open RightNaturalOrder _≈_ _⊕_ public
-    using () renaming
-    ( _≤_ to _≤₊_
-    ; _≰_ to _≰₊_
-    ; _<_ to _<₊_
-    )
-
+  infix 4 _≰₊_
+  _≰₊_ : Rel Route ℓ
+  x ≰₊ y = ¬ (x ≤₊ y) 
+    
   open IsDecEquivalence ≈-isDecEquivalence public
     renaming
     ( refl          to ≈-refl

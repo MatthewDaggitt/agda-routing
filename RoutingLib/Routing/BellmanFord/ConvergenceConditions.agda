@@ -38,8 +38,8 @@ record IsIncreasingPathAlgebra
   open RawRoutingAlgebra algebra public
   open IsPathAlgebra isPathAlgebra public
 
-  isCertifiedPathAlgebra : ∀ n → IsCertifiedPathAlgebra algebra n
-  isCertifiedPathAlgebra = certifiedPathAlgebra algebra isPathAlgebra
+  isCertified : ∀ n → IsCertifiedPathAlgebra algebra n
+  isCertified = certifiedPathAlgebra algebra isPathAlgebra
 
   isStrictlyIncreasing : IsStrictlyIncreasing algebra
   isStrictlyIncreasing = incr⇒strIncr isPathAlgebra isIncreasing

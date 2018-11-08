@@ -1,5 +1,5 @@
 open import Data.Fin.Dec using (_∈?_)
-open import Data.Fin.Subset using (Subset) renaming (_∈_ to _∈ₛ_; _∉_ to _∉ₛ_)
+open import Data.Fin.Subset using (Subset) renaming (_∈_ to _∈ₛ_; _∉_ to _∉ₛ_; ⊤ to ⊤ₛ)
 open import Data.Nat using (ℕ; _≤_; _<_; z≤n; s≤s; zero; suc; _+_; _∸_; ≤-pred)
 open import Data.Nat.Properties hiding (module ≤-Reasoning)
 open import Data.Product using (∃; ∃₂; _×_; _,_; proj₁; proj₂)
@@ -88,14 +88,11 @@ module _ (e : Epoch) (p : Subset n) where
 
   abstract
 
-    bᶠ : ℕ
-    bᶠ = dₘₐₓ
+    k* : ℕ
+    k* = dₘₐₓ
 
-    dᵢ≤bᶠ : ∀ {i} (x y : Sᵢ i) → dᵢ e p x y ≤ bᶠ
-    dᵢ≤bᶠ x y = begin
-      dᵢ e p x y ≤⟨ dᵢ≤dₘₐₓ x y ⟩
-      -- dₘₐₓ      ≤⟨ n≤1+n dₘₐₓ ⟩
-      bᶠ         ∎
+    dᵢ≤k* : ∀ {i} (x y : Sᵢ i) → dᵢ e p x y ≤ k*
+    dᵢ≤k* x y = dᵢ≤dₘₐₓ x y
 
 ---------------------------
 -- Radius index function --
@@ -113,8 +110,8 @@ module _ (e : Epoch) (p : Subset n) where
       suc dₘₐₓ ∸ suc k   ≤⟨ m+[n∸o]≤[m+n]∸o 1 dₘₐₓ (suc k) ⟩
       suc (dₘₐₓ ∸ suc k) ∎)
 
-    r[bᶠ]≡0 : r[ bᶠ ] ≡ 0
-    r[bᶠ]≡0 = n∸n≡0 dₘₐₓ
+    k*≤k⇒r[k]≡0 : ∀ {k} → k* ≤ k → r[ k ] ≡ 0
+    k*≤k⇒r[k]≡0 k*≤k = m≤n⇒m∸n≡0 k*≤k
 
     dᵢ≤r[0] : ∀ {i} (x y : Sᵢ i) → dᵢ e p x y ≤ r[ 0 ]
     dᵢ≤r[0] x y = dᵢ≤dₘₐₓ x y
@@ -156,59 +153,65 @@ module _ (e : Epoch) (p : Subset n) where
 -----------
 -- Boxes --
 -----------
--- Definition and properties of the subboxes D
+-- Definition and properties of the subboxes B
 
-D : Epoch → Subset n → ℕ → IPred Sᵢ _
-D e p zero    i xᵢ = Lift ℓ ⊤
-D e p (suc k) i xᵢ with i ∈? p
+B : Epoch → Subset n → ℕ → IPred Sᵢ _
+B e p zero    i xᵢ = Lift ℓ ⊤
+B e p (suc k) i xᵢ with i ∈? p
 ... | yes i∈p = Lift ℓ (dᵢ e p (x* e p i) xᵢ ≤ r[_] e p (suc k))
 ... | no  i∉p = xᵢ ≈ᵢ ⊥ i
 
-D-cong : ∀ {e p k i} → (_∈ᵤ D e p k i) Respects _≈ᵢ_
-D-cong {e} {p} {zero}  {i} _   _ = lift tt
-D-cong {e} {p} {suc k} {i} x≈y x∈D with i ∈? p
-... | yes i∈p = lift (subst (_≤ r[_] e p (suc k)) (dᵢ-cong e p ≈ᵢ-refl x≈y) (lower x∈D))
-... | no  i∉p = ≈ᵢ-trans (≈ᵢ-sym x≈y) x∈D
+B₀-univ : ∀ x → x ∈ B 0 ⊤ₛ 0
+B₀-univ x i = lift tt
 
-D-null : ∀ {e p k i} → i ∉ₛ p → ⊥ i ∈ᵤ D e p k i
-D-null {e} {p} {zero}  {i} _ = lift tt
-D-null {e} {p} {suc k} {i} i∉p with i ∈? p
+B-cong : ∀ {e p k i} → (_∈ᵤ B e p k i) Respects _≈ᵢ_
+B-cong {e} {p} {zero}  {i} _   _ = lift tt
+B-cong {e} {p} {suc k} {i} x≈y x∈B with i ∈? p
+... | yes i∈p = lift (subst (_≤ r[_] e p (suc k)) (dᵢ-cong e p ≈ᵢ-refl x≈y) (lower x∈B))
+... | no  i∉p = ≈ᵢ-trans (≈ᵢ-sym x≈y) x∈B
+
+B-null : ∀ {e p k i} → i ∉ₛ p → ⊥ i ∈ᵤ B e p k i
+B-null {e} {p} {zero}  {i} _ = lift tt
+B-null {e} {p} {suc k} {i} i∉p with i ∈? p
 ... | yes i∈p = contradiction i∈p i∉p
 ... | no  _   = ≈ᵢ-refl
 
-D₀-eq : ∀ {e p x} f q → x ∈ D e p 0 → x ∈ D f q 0
-D₀-eq f q x∈D₀ i = lift tt
+B₀-eqᵢ : ∀ {e p} f q {i xᵢ} → xᵢ ∈ᵤ B e p 0 i → xᵢ ∈ᵤ B f q 0 i
+B₀-eqᵢ f q x∈B₀ = lift tt
 
-D-finish : ∀ e p → ∃₂ λ bᶠ ξ → (∀ {x} → x ∈ D e p bᶠ → x ≈ ξ)
-D-finish e p = bᶠ e p , x* e p , x∈D[bᶠ]⇒x*≈x
+B-finish : ∀ e p → ∃₂ λ k* x* → ∀ {k} → k* ≤ k → (x* ∈ B e p k × (∀ {x} → x ∈ B e p k → x ≈ x*))
+B-finish e p = k* e p , x* e p , λ k*≤k → x*∈B[k] k*≤k , x∈B[k]⇒x*≈x k*≤k
   where
-  x∈D[bᶠ]⇒x*≈x : ∀ {x} → x ∈ D e p (bᶠ e p) → x ≈ x* e p
-  x∈D[bᶠ]⇒x*≈x {x} x∈D[bᶠ] i with inspect′ (bᶠ e p)
-  ... | (zero     , bᶠ≡0)     = dᵢ≡0⇒x≈y e p (n≤0⇒n≡0 (subst (dᵢ e p (x i) (x* e p i) ≤_) bᶠ≡0 (dᵢ≤bᶠ e p (x i) (x* e p i))))
-  ... | (suc bᶠ-1 , bᶠ≡1+bᶠ-1) rewrite bᶠ≡1+bᶠ-1 with x∈D[bᶠ] i
-  ...   | xᵢ∈D with i ∈? p
-  ...     | no i∉p = ≈ᵢ-trans xᵢ∈D (≈ᵢ-sym (x*-inactive e p i∉p))
-  ...     | yes _  = ≈ᵢ-sym (dᵢ≡0⇒x≈y e p (n≤0⇒n≡0 (begin
-    dᵢ e p (x* e p i) (x i) ≤⟨ lower xᵢ∈D ⟩
-    r[_] e p (suc bᶠ-1)     ≡⟨ cong (r[_] e p) (sym bᶠ≡1+bᶠ-1) ⟩
-    r[_] e p (bᶠ e p)       ≡⟨ r[bᶠ]≡0 e p ⟩
+  x∈B[k]⇒x*≈x : ∀ {k} → k* e p ≤ k → ∀ {x} → x ∈ B e p k → x ≈ x* e p
+  x∈B[k]⇒x*≈x {zero}  k*≤0   {x} x∈B[k] i = dᵢ≡0⇒x≈y e p (n≤0⇒n≡0 (≤-trans (dᵢ≤k* e p (x i) _) k*≤0))
+  x∈B[k]⇒x*≈x {suc k} k*≤1+k {x} x∈B[k] i with x∈B[k] i
+  ... | xᵢ∈B with i ∈? p
+  ...   | no i∉p = ≈ᵢ-trans xᵢ∈B (≈ᵢ-sym (x*-inactive e p i∉p))
+  ...   | yes _  = ≈ᵢ-sym (dᵢ≡0⇒x≈y e p (n≤0⇒n≡0 (begin
+    dᵢ e p (x* e p i) (x i) ≤⟨ lower xᵢ∈B ⟩
+    r[_] e p (suc k)        ≡⟨ k*≤k⇒r[k]≡0 e p k*≤1+k ⟩
     0                       ∎)))
 
+  x*∈B[k] : ∀ {k} → k* e p ≤ k → x* e p ∈ B e p k
+  x*∈B[k] {zero}  k*≤k i = lift tt
+  x*∈B[k] {suc k} k*≤k i with i ∈? p
+  ... | yes _   = lift (subst (_≤ r[_] e p (suc k)) (sym (x≈y⇒dᵢ≡0 e p ≈ᵢ-refl)) z≤n)
+  ... | no  i∉p = x*-inactive e p i∉p
+  
+F-resp-B₀ : ∀ {e p x} → x ∈ B e p 0 → F e p x ∈ B e p 0
+F-resp-B₀ x∈B i = x∈B i
 
-F-resp-D₀ : ∀ {e p x} → x ∈ D e p 0 → F e p x ∈ D e p 0
-F-resp-D₀ x∈B i = x∈B i
-
-∈Dᵢ⇒dᵢ≤r : ∀ {e p b i xᵢ} → xᵢ ∈ᵤ D e p (suc b) i → dₛᵢ e p (x* e p i) xᵢ ≤ r[_] e p (suc b)
-∈Dᵢ⇒dᵢ≤r {e} {p} {b} {i} {xᵢ} xᵢ∈D with i ∈? p
-... | yes _ = lower xᵢ∈D
+∈Bᵢ⇒dᵢ≤r : ∀ {e p b i xᵢ} → xᵢ ∈ᵤ B e p (suc b) i → dₛᵢ e p (x* e p i) xᵢ ≤ r[_] e p (suc b)
+∈Bᵢ⇒dᵢ≤r {e} {p} {b} {i} {xᵢ} xᵢ∈B with i ∈? p
+... | yes _ = lower xᵢ∈B
 ... | no  _ = z≤n
 
-∈D⇒d≤r : ∀ {e p b x} → x ∈ D e p b → d e p (x* e p) x ≤ r[_] e p b
-∈D⇒d≤r {e} {p} {zero}  {x} x∈D = d≤r[0] e p (x* e p) x
-∈D⇒d≤r {e} {p} {suc b} {x} x∈D = max[t]≤x z≤n (λ i → ∈Dᵢ⇒dᵢ≤r (x∈D i))
+∈B⇒d≤r : ∀ {e p b x} → x ∈ B e p b → d e p (x* e p) x ≤ r[_] e p b
+∈B⇒d≤r {e} {p} {zero}  {x} x∈B = d≤r[0] e p (x* e p) x
+∈B⇒d≤r {e} {p} {suc b} {x} x∈B = max[t]≤x z≤n (λ i → ∈Bᵢ⇒dᵢ≤r (x∈B i))
 
-F-mono-D  : ∀ {e p b x} → WellFormed p x → x ∈ D e p b → F e p x ∈ D e p (suc b)
-F-mono-D {e} {p} {b} {x} wf x∈D i with i ∈? p
+F-mono-B  : ∀ {e p b x} → WellFormed p x → x ∈ B e p b → F e p x ∈ B e p (suc b)
+F-mono-B {e} {p} {b} {x} wf x∈B i with i ∈? p
 ... | no  i∉p = F-inactive e x i∉p
 ... | yes i∈p with x ≟[ p ] x* e p
 ...   | yes x≈ₚx* = lift (begin
@@ -220,7 +223,7 @@ F-mono-D {e} {p} {b} {x} wf x∈D i with i ∈? p
 ...   | no  x≉ₚx* = lift (v<r[k]⇒v≤r[1+k] e p (begin
   dᵢ e p (x* e p i) (F e p x i) ≤⟨ dᵢ≤d e p (x* e p) (F e p x) i∈p ⟩
   d e p (x* e p)   (F e p x)   <⟨ F-strContrOnFP e p wf (Fx*≈x* e p) x≉ₚx* ⟩
-  d e p (x* e p)    x          ≤⟨ ∈D⇒d≤r x∈D ⟩
+  d e p (x* e p)    x          ≤⟨ ∈B⇒d≤r x∈B ⟩
   r[_] e p b                   ∎))
 
 ----------------------
@@ -229,14 +232,14 @@ F-mono-D {e} {p} {b} {x} wf x∈D i with i ∈? p
 
 aco : ACO 𝓘 ℓ
 aco = record
-  { D              = D
-  ; D-cong       = λ {e p k} → D-cong {e} {p} {k}
-  ; D₀-eq        = λ {e p x} → D₀-eq {e} {p} {x}
-  ; D-null       = λ {e p k} → D-null {e} {p} {k}
-  ; D-finish     = D-finish
+  { B            = B
+  ; B₀-eqᵢ       = λ {e p} → B₀-eqᵢ {e} {p}
+  ; Bᵢ-cong       = λ {e p k} → B-cong {e} {p} {k}
+  ; B-null       = λ {e p k} → B-null {e} {p} {k}
+  ; B-finish     = B-finish
 
-  ; F-resp-D₀    = λ {e p x} → F-resp-D₀ {e} {p} {x}
-  ; F-mono-D     = F-mono-D
+  ; F-resp-B₀    = λ {e p x} → F-resp-B₀ {e} {p} {x}
+  ; F-mono-B     = F-mono-B
   }
 
 
@@ -247,19 +250,19 @@ aco = record
 
 -- Failure 1
 --
--- D e p b i xᵢ = dₛᵢ p (x* e p i) xᵢ ≤ r[ b ]
+-- B e p b i xᵢ = dₛᵢ p (x* e p i) xᵢ ≤ r[ b ]
 --
 -- causes the following lemma to fail when i ∉ p
 --
--- x∈D[bᶠ]⇒x*≈x : ∀ e p {x} → x ∈ D e p bᶠ → x ≈ x* e p
+-- x∈B[k*]⇒x*≈x : ∀ e p {x} → x ∈ B e p k* → x ≈ x* e p
 
 
 -- Failure 2
 --
--- D e p b i xᵢ with i ∈? p
+-- B e p b i xᵢ with i ∈? p
 -- ... | yes i∈p = Lift (dᵢ (x* e p i) xᵢ ≤ r[ suc b ])
 -- ... | no  i∉p = xᵢ ≈ᵢ ⊥ i
 --
 -- causes the following lemma to fail
 --
--- D₀-mono : ∀ {e f p q} → e ≤ f → D e p 0 ⊆[ Sᵢ ] D f q 0
+-- B₀-mono : ∀ {e f p q} → e ≤ f → B e p 0 ⊆[ Sᵢ ] B f q 0

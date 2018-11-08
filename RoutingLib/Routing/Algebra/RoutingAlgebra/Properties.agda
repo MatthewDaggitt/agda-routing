@@ -75,8 +75,7 @@ open FunctionProperties _≈_
 -- The induced right natural ordering over routes
 
 ≤₊-decTotalOrder : DecTotalOrder b ℓ ℓ
-≤₊-decTotalOrder =
-  RightNaturalOrder.≤-decTotalOrder _≈_ _⊕_ ⊕-isSemigroup _≟_ ⊕-comm ⊕-sel
+≤₊-decTotalOrder = RightNaturalOrder.decTotalOrder _ _ ⊕-isSemilattice ⊕-sel _≟_
 
 ≥₊-decTotalOrder : DecTotalOrder _ _ _
 ≥₊-decTotalOrder = Converse.decTotalOrder ≤₊-decTotalOrder

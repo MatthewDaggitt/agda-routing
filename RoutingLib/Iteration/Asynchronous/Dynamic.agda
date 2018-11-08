@@ -23,10 +23,15 @@ import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset as 
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as FiniteSubsetEquality
 open import RoutingLib.Relation.Unary.Indexed
 
-open import RoutingLib.Iteration.Asynchronous.Schedule
+open import RoutingLib.Iteration.Asynchronous.Schedule as Schedules
 open import RoutingLib.Iteration.Asynchronous.Schedule.Pseudoperiod
 
 module RoutingLib.Iteration.Asynchronous.Dynamic where
+
+------------------------------------------------------------------------
+-- Re-export the Epoch type publically
+
+open Schedules public using (Epoch)
 
 ------------------------------------------------------------------------
 -- Parallelisable functions
@@ -130,24 +135,29 @@ module _ {a ℓ n} (𝓘 : AsyncIterable a ℓ n) (𝓢 : Schedule n) where
 
 
 -------------------------------------------------------------------------
--- Safeness of parallelisations
+-- The notion of correctness of parallelisations
+--
+-- Note that this does *not* guarantee that the process will converge,
+-- only that it'll converge if the iteration is stable for a suitably
+-- long enough period of time.
 
 module _ {a ℓ n} (𝓘 : AsyncIterable a ℓ n) where
 
   open AsyncIterable 𝓘
-
-  -- AsynchronouslyCorrectOver
-  record IsSafeOver {b} (X : IPred Sᵢ b) : Set (lsuc lzero ⊔ a ⊔ ℓ ⊔ b) where
+  open Schedule
+  
+  record ConvergentOver {b} (X : IPred Sᵢ b) : Set (lsuc lzero ⊔ a ⊔ ℓ ⊔ b) where
     field
-      m*         : Epoch → Subset n → S
-      m*-reached : ∀ {x₀} → x₀ ∈ X → (𝓢 : Schedule n) → {s : 𝕋} →
+      x*         : Epoch → Subset n → S
+      x*-fixed   : ∀ e p → F e p (x* e p) ≈ x* e p
+      x*-reached : ∀ {x₀} → x₀ ∈ X → (𝓢 : Schedule n) → {s : 𝕋} →
                    ∃ λ k → ∀ {m e : 𝕋} → 
                    IsMultiPseudoperiodic 𝓢 k [ s , m ] →
                    IsSubEpoch 𝓢 [ m , e ] →
-                   asyncIter 𝓘 𝓢 x₀ e ≈ m* (Schedule.η 𝓢 s) (Schedule.ρ 𝓢 s)
+                   asyncIter 𝓘 𝓢 x₀ e ≈ x* (η 𝓢 s) (ρ 𝓢 s)
 
-  IsSafe : Set (lsuc lzero ⊔ a ⊔ ℓ)
-  IsSafe = IsSafeOver (U Sᵢ)
+  Convergent : Set (lsuc lzero ⊔ a ⊔ ℓ)
+  Convergent = ConvergentOver (U Sᵢ)
 
 -------------------------------------------------------------------------
 -- Bisimilarity

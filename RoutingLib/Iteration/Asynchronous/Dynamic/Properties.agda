@@ -56,27 +56,16 @@ module _ {a ℓ n} (𝓘 : AsyncIterable a ℓ n) (𝓢 : Schedule n) where
 -------------------------------------------------------------------------
 -- Basic properties of safety
 
--- The empty computation is safe
-0-IsSafe : ∀ {a ℓ} (𝓘 : AsyncIterable a ℓ 0) → IsSafe 𝓘
-0-IsSafe p = record
-  { m*         = λ _ _ ()
-  ; m*-reached = λ _ _ → 0 , λ _ _ ()
-  }
-
-isSafeOver-universal : ∀ {a ℓ p} {𝓘 : AsyncIterable a ℓ p}
+convergentOver-universal : ∀ {a ℓ p} {𝓘 : AsyncIterable a ℓ p}
                        {q} {X : IPred _ q} → (∀ x → x ∈ X) →
-                       IsSafeOver 𝓘 X →
-                       IsSafe 𝓘
-isSafeOver-universal univ safeOver = record
-  { m*         = m*
-  ; m*-reached = λ {x₀} _ → m*-reached (univ x₀)
+                       ConvergentOver 𝓘 X →
+                       Convergent 𝓘
+convergentOver-universal univ convergentOver = record
+  { x*         = x*
+  ; x*-fixed   = x*-fixed
+  ; x*-reached = λ {x₀} _ → x*-reached (univ x₀)
   }
-  where open IsSafeOver safeOver
-
-
-
-
-
+  where open ConvergentOver convergentOver
 
 
 {-
@@ -87,8 +76,8 @@ shrinkSafety : ∀ {a ℓ n} {𝓘 : AsyncIterable a ℓ n} →
                IsPartiallyAsynchronouslySafe P V →
                IsPartiallyAsynchronouslySafe P W
 shrinkSafety W⊆V V-safe = record
-  { m*         = m*
-  ; m*-reached = λ X∈W → m*-reached (W⊆V X∈W)
+  { x*         = x*
+  ; x*-reached = λ X∈W → x*-reached (W⊆V X∈W)
   }
   where open IsPartiallyAsynchronouslySafe V-safe
 -}
@@ -104,8 +93,8 @@ module _ {a ℓ n} where
                  IsPartiallyAsynchronouslySafe P V →
                  IsPartiallyAsynchronouslySafe P W
   shrinkSafety W⊆V V-safe = record
-    { m*         = m*
-    ; m*-reached = λ X∈W → m*-reached (W⊆V X∈W)
+    { x*         = x*
+    ; x*-reached = λ X∈W → x*-reached (W⊆V X∈W)
     }
     where open IsPartiallyAsynchronouslySafe V-safe
 
@@ -126,7 +115,7 @@ module _ {a₁ a₂ ℓ₁ ℓ₂ n} {𝕊₁ : IndexedSetoid (Fin n) a₁ ℓ�
 
     open Bisimilar P₁↭P₂
     open IsAsynchronouslySafe P₁-isSafe
-      renaming (m* to m*₁; m*-reached to m*₁-reached)
+      renaming (x* to x*₁; x*-reached to x*₁-reached)
 
     open Schedule
 
@@ -139,11 +128,11 @@ module _ {a₁ a₂ ℓ₁ ℓ₂ n} {𝕊₁ : IndexedSetoid (Fin n) a₁ ℓ�
     ... | no  _ = asyncIter-eq s X (tAcc _ ≤-refl) i
 
 
-    m*₂ : Q.S
-    m*₂ = to m*₁
+    x*₂ : Q.S
+    x*₂ = to x*₁
 
-    m*₂-reached : ∀ X s → ∃ λ tᶜ → ∀ t → Q.asyncIter s X (tᶜ + t) Q.≈ m*₂
-    m*₂-reached X s with m*₁-reached (from X) s
+    x*₂-reached : ∀ X s → ∃ λ tᶜ → ∀ t → Q.asyncIter s X (tᶜ + t) Q.≈ x*₂
+    x*₂-reached X s with x*₁-reached (from X) s
     ... | (tᶜ , converged) = tᶜ , (λ t i → Q.≈ᵢ-trans
       (Q.≈-sym (asyncIter-eq s X (<-wellFounded (tᶜ + t))) i)
       (toᵢ-cong (converged t i)))
@@ -151,7 +140,7 @@ module _ {a₁ a₂ ℓ₁ ℓ₂ n} {𝕊₁ : IndexedSetoid (Fin n) a₁ ℓ�
 
   bisimulation : IsAsynchronouslySafe P₂
   bisimulation = record
-    { m*         = m*₂
-    ; m*-reached = m*₂-reached
+    { x*         = x*₂
+    ; x*-reached = x*₂-reached
     }
 -}

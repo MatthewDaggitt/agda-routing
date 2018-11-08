@@ -1,5 +1,5 @@
 open import Data.Fin using (Fin)
-open import Data.Fin.Subset using (Subset; _∉_)
+open import Data.Fin.Subset using (Subset; _∉_; ⊤)
 open import Data.Fin.Dec using (_∈?_)
 open import Data.Maybe using (Eq; nothing)
 open import Data.Nat using (ℕ; suc; _<_; _≤_)
@@ -43,16 +43,19 @@ open AsyncIterable 𝓘
 record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
   field
     -- Boxes
-    D          : Epoch → Subset n → ℕ → IPred Sᵢ p
-    D₀-eq      : ∀ {e p x} f q → x ∈ D e p 0 → x ∈ D f q 0
-    D-cong     : ∀ {e p b i} → (_∈ᵤ D e p b i) Respects _≈ᵢ_
-    D-finish   : ∀ e p → ∃₂ λ k* x* → (∀ {x} → x ∈ D e p k* → x ≈ x*)
-    D-null     : ∀ {e p b i} → i ∉ p → ⊥ i ∈ᵤ D e p b i -- New
+    B          : Epoch → Subset n → ℕ → IPred Sᵢ p
+    B₀-eqᵢ     : ∀ {e p} f q {i xᵢ} → xᵢ ∈ᵤ B e p 0 i → xᵢ ∈ᵤ B f q 0 i
+    Bᵢ-cong     : ∀ {e p b i} → (_∈ᵤ B e p b i) Respects _≈ᵢ_
+    B-finish   : ∀ e p → ∃₂ λ k* x* → ∀ {k} → k* ≤ k → (x* ∈ B e p k × (∀ {x} → x ∈ B e p k → x ≈ x*))
+    B-null     : ∀ {e p b i} → i ∉ p → ⊥ i ∈ᵤ B e p b i
 
     -- F
-    F-resp-D₀   : ∀ {e p x} → x ∈ D e p 0 → F e p x ∈ D e p 0
-    F-mono-D   : ∀ {e p k x} → WellFormed p x → x ∈ D e p k → F e p x ∈ D e p (suc k)
-    
+    F-resp-B₀  : ∀ {e p x} → x ∈ B e p 0 → F e p x ∈ B e p 0
+    F-mono-B   : ∀ {e p k x} → WellFormed p x → x ∈ B e p k → F e p x ∈ B e p (suc k)
+
+  B₀ : IPred Sᵢ p
+  B₀ = B 0 ⊤ 0
+  
 --------------------------------------------------------------------------------
 -- Ultrametric spaces --
 --------------------------------------------------------------------------------

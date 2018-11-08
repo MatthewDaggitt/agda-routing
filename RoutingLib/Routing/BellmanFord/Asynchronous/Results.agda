@@ -1,11 +1,10 @@
-open import Data.Nat using (zero; suc; s≤s; z≤n; _≤_)
-open import Function using (case_of_)
+open import Data.Nat using (zero; suc; s≤s; z≤n)
 
 import RoutingLib.Routing.Model as Model
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Iteration.Asynchronous.Dynamic using (IsSafe)
-open import RoutingLib.Iteration.Asynchronous.Dynamic.Properties using (0-IsSafe)
-open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Theorems using (UltrametricConditions; ultra⇒safety)
+open import RoutingLib.Iteration.Asynchronous.Dynamic using (Convergent)
+open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Theorems
+  using (UltrametricConditions; ultra⇒convergent; |0|-convergent)
 
 import RoutingLib.Routing.BellmanFord.Asynchronous as BellmanFord
 open import RoutingLib.Routing.BellmanFord.ConvergenceConditions
@@ -30,8 +29,8 @@ module _ (conditions : IsFiniteStrictlyIncreasingRoutingAlgebra algebra) where
 
   open IsFiniteStrictlyIncreasingRoutingAlgebra conditions
 
-  finiteStrictlyIncr-converges : ∀ {n} (network : Network n) → IsSafe (δ∥ network)
-  finiteStrictlyIncr-converges network = ultra⇒safety ultrametricConditions
+  finiteStrictlyIncr-converges : ∀ {n} (network : Network n) → Convergent (δ∥ network)
+  finiteStrictlyIncr-converges network = ultra⇒convergent ultrametricConditions
     where open DistanceVectorResults isRoutingAlgebra isFinite isStrictlyIncreasing network
 
 --------------------------------------------------------------------------------
@@ -44,7 +43,7 @@ module _ (conditions : IsIncreasingPathAlgebra algebra) where
 
   open IsIncreasingPathAlgebra conditions
   
-  incrPaths-converges :  ∀ {n} (network : Network n) → IsSafe (δ∥ network)
-  incrPaths-converges {n = zero}  network = 0-IsSafe (δ∥ network)
-  incrPaths-converges {n = suc n} network = ultra⇒safety ultrametricConditions
-    where open PathVectorResults (isCertifiedPathAlgebra (suc n)) isStrictlyIncreasing network (s≤s z≤n)
+  incrPaths-converges :  ∀ {n} (network : Network n) → Convergent (δ∥ network)
+  incrPaths-converges {zero}  network = |0|-convergent (δ∥ network)
+  incrPaths-converges {suc n} network = ultra⇒convergent ultrametricConditions
+    where open PathVectorResults (isCertified (suc n)) isStrictlyIncreasing network (s≤s z≤n)

@@ -24,6 +24,7 @@ open import RoutingLib.Function.Reasoning
 open import RoutingLib.Iteration.Asynchronous.Dynamic
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions using (ACO)
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Properties using (asyncIter-cong; asyncIter-inactive)
+import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Properties.ACO as ACOProperties
 open import RoutingLib.Iteration.Asynchronous.Schedule
 import RoutingLib.Iteration.Asynchronous.Schedule.Pseudoperiod as Pseudoperiod
 
@@ -34,21 +35,15 @@ module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Proofs.ACOToSafe
 open AsyncIterable 𝓘
 open ACO aco
 
--- The final state
-ξ : Epoch → Subset n → S
-ξ e p = proj₁ (proj₂ (D-finish e p))
+------------------------------------------------------------------------
+-- Fixed points
 
--- The final box number
-k* : Epoch → Subset n → ℕ
-k* e p = proj₁ (D-finish e p)
+open ACOProperties 𝓘 aco 
 
-D₀ : IPred Sᵢ p
-D₀ = D 0 ⊤ 0
+------------------------------------------------------------------------
+-- Initial boxes
 
-D₀-eqᵢ : ∀ {e p} f q i {x} → x ∈ᵤ D e p 0 i → x ∈ᵤ D f q 0 i
-D₀-eqᵢ f q i x∈D₀ᵢ = D₀-eq f q {!!} i
-
-module _ {x₀ : S} (x₀∈B : x₀ ∈ D₀) (𝓢 : Schedule n) where
+module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ B₀) (𝓢 : Schedule n) where
 
   open Schedule 𝓢
   open Pseudoperiod 𝓢
@@ -59,8 +54,8 @@ module _ {x₀ : S} (x₀∈B : x₀ ∈ D₀) (𝓢 : Schedule n) where
   Fₜ : 𝕋 → S → S
   Fₜ t = F (η t) (ρ t)
   
-  Dₜ : 𝕋 → ℕ → IPred Sᵢ p
-  Dₜ t = D (η t) (ρ t)
+  Bₜ : 𝕋 → ℕ → IPred Sᵢ p
+  Bₜ t = B (η t) (ρ t)
 
   async : ∀ {t} → Acc _<_ t → S
   async = asyncIter' 𝓘 𝓢 x₀
@@ -71,17 +66,17 @@ module _ {x₀ : S} (x₀∈B : x₀ ∈ D₀) (𝓢 : Schedule n) where
 
   -- Membership substitution for equal times
   
-  ∈Dₜᵢ-resp-rec : ∀ {t b} (rec₁ rec₂ : Acc _<_ t) →
-                  ∀ {i} → async rec₁ i ∈ᵤ Dₜ t b i → async rec₂ i ∈ᵤ Dₜ t b i
-  ∈Dₜᵢ-resp-rec rec₁ rec₂ = D-cong (asyncIter-cong 𝓘 𝓢 x₀ rec₁ rec₂ refl _)
+  ∈Bₜᵢ-resp-rec : ∀ {t b} (rec₁ rec₂ : Acc _<_ t) →
+                  ∀ {i} → async rec₁ i ∈ᵤ Bₜ t b i → async rec₂ i ∈ᵤ Bₜ t b i
+  ∈Bₜᵢ-resp-rec rec₁ rec₂ = Bᵢ-cong (asyncIter-cong 𝓘 𝓢 x₀ rec₁ rec₂ refl _)
 
-  async∈-resp-Dₜᵢ : ∀ t {s e k} {rec : Acc _<_ t} → η s ≡ η e →
-                    ∀ {i} → async rec i ∈ᵤ Dₜ s k i → async rec i ∈ᵤ Dₜ e k i
-  async∈-resp-Dₜᵢ t {rec = rec} ηₛ≡ηₑ rewrite ηₛ≡ηₑ = id
+  async∈-resp-Bₜᵢ : ∀ t {s e k} {rec : Acc _<_ t} → η s ≡ η e →
+                    ∀ {i} → async rec i ∈ᵤ Bₜ s k i → async rec i ∈ᵤ Bₜ e k i
+  async∈-resp-Bₜᵢ t {rec = rec} ηₛ≡ηₑ rewrite ηₛ≡ηₑ = id
 
-  async∈-resp-Dₜ : ∀ t {b s e} {rec : Acc _<_ t} → η s ≡ η e →
-                   async rec ∈ Dₜ s b → async rec ∈ Dₜ e b
-  async∈-resp-Dₜ t ηₛ≡ηₑ ∈b i = async∈-resp-Dₜᵢ t ηₛ≡ηₑ (∈b i)
+  async∈-resp-Bₜ : ∀ t {b s e} {rec : Acc _<_ t} → η s ≡ η e →
+                   async rec ∈ Bₜ s b → async rec ∈ Bₜ e b
+  async∈-resp-Bₜ t ηₛ≡ηₑ ∈b i = async∈-resp-Bₜᵢ t ηₛ≡ηₑ (∈b i)
   
   -- The concept of being locally safe
   
@@ -106,15 +101,15 @@ module _ {x₀ : S} (x₀∈B : x₀ ∈ D₀) (𝓢 : Schedule n) where
   
   data ComputationInBox_AtTime_ : ℕ → 𝕋 → Set (p ⊔ ℓ) where
     zeroᵇ : ∀ {t} → MessagesWellFormedAt t →
-            StateIn (Dₜ t 0) AtTime t →
+            StateIn (Bₜ t 0) AtTime t →
             ComputationInBox 0 AtTime t
     sucᵇ  : ∀ {t k} → MessagesWellFormedAt t →
-            MessagesIn (Dₜ t k) AtTime t →
-            StateIn (Dₜ t (suc k)) AtTime t →
+            MessagesIn (Bₜ t k) AtTime t →
+            StateIn (Bₜ t (suc k)) AtTime t →
             ComputationInBox (suc k) AtTime t
 
   
-  c∈Bₖ⇒s∈Bₖ : ∀ {t k} → ComputationInBox k AtTime t → StateIn (Dₜ t k) AtTime t
+  c∈Bₖ⇒s∈Bₖ : ∀ {t k} → ComputationInBox k AtTime t → StateIn (Bₜ t k) AtTime t
   c∈Bₖ⇒s∈Bₖ (zeroᵇ _ s∈Bₖ)   = s∈Bₖ
   c∈Bₖ⇒s∈Bₖ (sucᵇ  _ _ s∈Bₖ) = s∈Bₖ
 
@@ -127,33 +122,24 @@ module _ {x₀ : S} (x₀∈B : x₀ ∈ D₀) (𝓢 : Schedule n) where
   ------------------------------------------------------------------------
   -- Not participating
 
-  i∉ρ⇒sᵢ∈Bₖᵢ : ∀ {i t k} → i ∉ₛ ρ t → StateOfNode i In (Dₜ t k) AtTime t
-  i∉ρ⇒sᵢ∈Bₖᵢ {i} {t} {k} i∉ρₜ recₑ = begin⟨ D-null i∉ρₜ ⟩
-    ⇒ ⊥ i        ∈ᵤ Dₜ t k i ∴⟨ D-cong (≈ᵢ-sym (≈ᵢ-reflexive (asyncIter-inactive 𝓘 𝓢 x₀ recₑ i∉ρₜ))) ⟩
-    ⇒ asyncₜ t i ∈ᵤ Dₜ t k i ∎
+  i∉ρ⇒sᵢ∈Bₖᵢ : ∀ {i t k} → i ∉ₛ ρ t → StateOfNode i In (Bₜ t k) AtTime t
+  i∉ρ⇒sᵢ∈Bₖᵢ {i} {t} {k} i∉ρₜ recₑ = begin⟨ B-null i∉ρₜ ⟩
+    ⇒ ⊥ i        ∈ᵤ Bₜ t k i ∴⟨ Bᵢ-cong (≈ᵢ-sym (≈ᵢ-reflexive (asyncIter-inactive 𝓘 𝓢 x₀ recₑ i∉ρₜ))) ⟩
+    ⇒ asyncₜ t i ∈ᵤ Bₜ t k i ∎
 
   ------------------------------------------------------------------------
   -- Base case: the asynchronous iteration is always in the initial box
   
-  state∈D₀ : ∀ t → StateIn (Dₜ t 0) AtTime t
-  state∈D₀ zero    i (acc rec) with i ∈? ρ 0
-  ... | no  i∉ρ₀ = D-null i∉ρ₀
-  ... | yes _    = D₀-eq (η 0) (ρ 0) x₀∈B i
-  state∈D₀ (suc t) i (acc rec) with i ∈? ρ (suc t) | i ∈? ρ t | i ∈? α (suc t)
-  ... | no  i∉ρ₁₊ₜ | _     | _     = D-null i∉ρ₁₊ₜ
-  ... | yes _       | no  _ | _     = D₀-eq (η (suc t)) (ρ (suc t)) x₀∈B i
-  ... | yes _       | yes _ | no  _ = D₀-eq (η (suc t)) (ρ (suc t)) (λ j → state∈D₀ t j (rec t _)) i 
-  ... | yes _       | yes _ | yes _ = F-resp-D₀ {η (suc t)} {ρ (suc t)} {λ j → async (rec (β (suc t) i j) _) j} (test) i
-    where
-    test : ∀ j → async (rec (β (suc t) i j) _) j ∈ᵤ Dₜ (suc t) 0 j
-    test j = D₀-eq {η (β (suc t) i j)} {ρ (β (suc t) i j)} (η (suc t)) (ρ (suc t)) {!!} j
-      where
-      test2 : async (rec (β (suc t) i j) _) j ∈ᵤ Dₜ (β (suc t) i j) 0 j
-      test2 = {!!}
-      
-    -- D₀-eq {η (β (suc t) i j)} {ρ (β (suc t) i j)} (η (suc t)) (ρ (suc t)) ? ?
---(D₀-eq (η (suc t)) (ρ (suc t)) (λ j → state∈D₀ (β (suc t) i j) j (rec _ _))) i
-  
+  state∈B₀ : ∀ t → StateIn (Bₜ t 0) AtTime t
+  state∈B₀ zero    i (acc rec) with i ∈? ρ 0
+  ... | no  i∉ρ₀ = B-null i∉ρ₀
+  ... | yes _    = B₀-eqᵢ (η 0) (ρ 0) (x₀∈B₀ i)
+  state∈B₀ (suc t) i (acc rec) with i ∈? ρ (suc t) | i ∈? ρ t | i ∈? α (suc t)
+  ... | no  i∉ρ₁₊ₜ | _     | _     = B-null i∉ρ₁₊ₜ
+  ... | yes _       | no  _ | _     = B₀-eqᵢ (η (suc t)) (ρ (suc t)) (x₀∈B₀ i)
+  ... | yes _       | yes _ | no  _ = B₀-eqᵢ (η (suc t)) (ρ (suc t)) (state∈B₀ t i (rec t _))
+  ... | yes _       | yes _ | yes _ = F-resp-B₀ (λ j → B₀-eqᵢ (η (suc t)) (ρ (suc t)) (state∈B₀ (β (suc t) i j) j _)) i
+    
   expiry⇒wellFormed : ∀ {s e} →
                       IsExpiryPeriod [ s , e ] →
                       MessagesWellFormedAt e
@@ -174,59 +160,59 @@ module _ {x₀ : S} (x₀∈B : x₀ ∈ D₀) (𝓢 : Schedule n) where
   state-steps : ∀ {k s e} →
                 IsSubEpoch [ s , e ] →
                 ComputationInBox k AtTime s →
-                StateIn (Dₜ e k) AtTime e
+                StateIn (Bₜ e k) AtTime e
   state-steps {k} {s} {zero}  η[s,e]@(mkₛₑ z≤n   _)        c∈Bₖ = c∈Bₖ⇒s∈Bₖ c∈Bₖ
   state-steps {k} {s} {suc e} η[s,e]@(mkₛₑ s≤1+e ηₛ≡η₁₊ₑ) c∈Bₖ i (acc rec) with <-cmp s (suc e)
   ... | tri≈ _ refl _      = c∈Bₖ⇒s∈Bₖ c∈Bₖ i (acc rec)
   ... | tri> _ _ s>1+e     = contradiction s≤1+e (<⇒≱ s>1+e)
   ... | tri< (s≤s s≤e) _ _ with η-inRange ηₛ≡η₁₊ₑ (s≤e , n≤1+n _)
   ...   | ηₛ≡ηₑ , ηₑ≡η₁₊ₑ with i ∈? ρ (suc e) | i ∈? ρ e | i ∈? α (suc e)
-  ...     | no  i∉ρ₁₊ₑ | _       | _     = D-null i∉ρ₁₊ₑ
+  ...     | no  i∉ρ₁₊ₑ | _       | _     = B-null i∉ρ₁₊ₑ
   ...     | yes i∈ρ₁₊ₑ | no i∉ρₑ | _     = contradiction (∈ρ-subst (sym ηₑ≡η₁₊ₑ) i∈ρ₁₊ₑ) i∉ρₑ
   ...     | yes _      | yes _   | no  _ = begin⟨ rec e ≤-refl ⟩
     ⇒ Acc _<_ e                    ∴⟨ state-steps (mkₛₑ s≤e ηₛ≡ηₑ) c∈Bₖ i  ⟩
-    ⇒ asyncₜ e i ∈ᵤ Dₜ e       k i ∴⟨ ∈Dₜᵢ-resp-rec _ (rec e ≤-refl) ⟩
-    ⇒ asyncₜ e i ∈ᵤ Dₜ e       k i ∴⟨ async∈-resp-Dₜᵢ e ηₑ≡η₁₊ₑ ⟩
-    ⇒ asyncₜ e i ∈ᵤ Dₜ (suc e) k i ∎
+    ⇒ asyncₜ e i ∈ᵤ Bₜ e       k i ∴⟨ ∈Bₜᵢ-resp-rec _ (rec e ≤-refl) ⟩
+    ⇒ asyncₜ e i ∈ᵤ Bₜ e       k i ∴⟨ async∈-resp-Bₜᵢ e ηₑ≡η₁₊ₑ ⟩
+    ⇒ asyncₜ e i ∈ᵤ Bₜ (suc e) k i ∎
   ...     | yes i∈ρ₁₊ₑ | yes _   | yes _ with c∈Bₖ
-  ...       | zeroᵇ wf s∈D₀   = {!!} --F-mono-B (wf η[s,e] i∈ρ₁₊ₑ) (λ j → state∈D₀ (β (suc e) i j) j _) i
-  ...       | sucᵇ  wf m∈Bₖ _ = F-mono-D (wf η[s,e] i∈ρ₁₊ₑ) (λ j → async∈-resp-Dₜᵢ (β (suc e) i j) ηₛ≡η₁₊ₑ (m∈Bₖ i η[s,e] i∈ρ₁₊ₑ _)) i
+  ...       | zeroᵇ wf s∈B₀   = F-resp-B₀ (λ j → B₀-eqᵢ (η (suc e)) (ρ (suc e)) (state∈B₀ (β (suc e) i j) j _)) i
+  ...       | sucᵇ  wf m∈Bₖ _ = F-mono-B (wf η[s,e] i∈ρ₁₊ₑ) (λ j → async∈-resp-Bₜᵢ (β (suc e) i j) ηₛ≡η₁₊ₑ (m∈Bₖ i η[s,e] i∈ρ₁₊ₑ _)) i
   
   message-steps : ∀ {k s e} →
                   IsSubEpoch [ s , e ] → 
-                  MessagesIn (Dₜ s k) AtTime s →
-                  MessagesIn (Dₜ e k) AtTime e
+                  MessagesIn (Bₜ s k) AtTime s →
+                  MessagesIn (Bₜ e k) AtTime e
   message-steps η[s,e]@(mkₛₑ _ ηₛ≡ηₑ) m∈b i η[e,1+t] i∈ρ₁₊ₜ recβ =
-    async∈-resp-Dₜᵢ (β _ _ _) ηₛ≡ηₑ (m∈b i (η[s,e] ++ₛₑ η[e,1+t]) i∈ρ₁₊ₜ recβ)
+    async∈-resp-Bₜᵢ (β _ _ _) ηₛ≡ηₑ (m∈b i (η[s,e] ++ₛₑ η[e,1+t]) i∈ρ₁₊ₜ recβ)
 
   ------------------------------------------------------------------------
   -- Step: after one pseudoperiod the node is guaranteed to have
   -- advanced at least one box
-  -- (Dₜ s k)
+  -- (Bₜ s k)
   
   advance-stateᵢ : ∀ {s e i k} →
                    MessagesWellFormedAt s →
                    i IsActiveIn [ s , e ] → 
-                   MessagesOfNode i In (Dₜ s k) AtTime s →
-                   StateOfNode i In (Dₜ e (suc k)) AtTime e
+                   MessagesOfNode i In (Bₜ s k) AtTime s →
+                   StateOfNode i In (Bₜ e (suc k)) AtTime e
   advance-stateᵢ {s} {zero}  {i} wf (mkₐᵢ ηₛ≡η₁₊ₑ m ()  z≤n   i∈αₘ)
   advance-stateᵢ {s} {suc e} {i} wf (mkₐᵢ ηₛ≡η₁₊ₑ m s<m m≤1+e i∈αₘ) m∈Bₖ (acc recₑ)
     with η-inRange ηₛ≡η₁₊ₑ (≤-pred (≤-trans s<m m≤1+e) , n≤1+n _)
   ... | ηₛ≡ηₑ , ηₑ≡η₁₊ₑ with i ∈? ρ (suc e) | i ∈? ρ e | i ∈? α (suc e)
-  ...   | no  i∉ρ₁₊ₑ | _       | _     = D-null i∉ρ₁₊ₑ
+  ...   | no  i∉ρ₁₊ₑ | _       | _     = B-null i∉ρ₁₊ₑ
   ...   | yes i∈ρ₁₊ₑ | no i∉ρₑ | _     = contradiction (∈ρ-subst (sym ηₑ≡η₁₊ₑ) i∈ρ₁₊ₑ) i∉ρₑ
-  ...   | yes i∈ρ₁₊ₑ | yes _   | yes _ = F-mono-D (wf (mkₛₑ s≤1+e ηₛ≡η₁₊ₑ) i∈ρ₁₊ₑ) (λ j → async∈-resp-Dₜᵢ (β (suc e) i j) ηₛ≡η₁₊ₑ (m∈Bₖ (mkₛₑ s≤1+e ηₛ≡η₁₊ₑ) i∈ρ₁₊ₑ _)) i
+  ...   | yes i∈ρ₁₊ₑ | yes _   | yes _ = F-mono-B (wf (mkₛₑ s≤1+e ηₛ≡η₁₊ₑ) i∈ρ₁₊ₑ) (λ j → async∈-resp-Bₜᵢ (β (suc e) i j) ηₛ≡η₁₊ₑ (m∈Bₖ (mkₛₑ s≤1+e ηₛ≡η₁₊ₑ) i∈ρ₁₊ₑ _)) i
     where s≤1+e = ≤-trans (n≤1+n s) (≤-trans s<m m≤1+e)
   ...   | yes _       | yes _   | no  i∉α₁₊ₑ with m ≟ℕ suc e
   ...     | yes refl  = contradiction i∈αₘ i∉α₁₊ₑ
-  ...     | no  m≢1+e = async∈-resp-Dₜᵢ e ηₑ≡η₁₊ₑ (advance-stateᵢ wf (mkₐᵢ ηₛ≡ηₑ m s<m m≤e i∈αₘ) m∈Bₖ _)
+  ...     | no  m≢1+e = async∈-resp-Bₜᵢ e ηₑ≡η₁₊ₑ (advance-stateᵢ wf (mkₐᵢ ηₛ≡ηₑ m s<m m≤e i∈αₘ) m∈Bₖ _)
     where m≤e = ≤-pred (≤∧≢⇒< m≤1+e m≢1+e)
 
   advance-state : ∀ {s e k} →
                   MessagesWellFormedAt s →
                   IsActivationPeriod [ s , e ] →
-                  MessagesIn (Dₜ s k) AtTime s →
-                  StateIn (Dₜ e (suc k)) AtTime e
+                  MessagesIn (Bₜ s k) AtTime s →
+                  StateIn (Bₜ e (suc k)) AtTime e
   advance-state {s} {e} {k} wf (mkₐ (mkₛₑ _ ηₛ≡ηₑ) activeᵢ) m∈Bₖ i with i ∈? ρ s
   ... | no  i∉ρₛ = i∉ρ⇒sᵢ∈Bₖᵢ (i∉ρₛ ∘ ∈ρ-subst (sym ηₛ≡ηₑ))
   ... | yes i∈ρₛ = advance-stateᵢ wf (activeᵢ i∈ρₛ) (m∈Bₖ i)
@@ -234,12 +220,12 @@ module _ {x₀ : S} (x₀∈B : x₀ ∈ D₀) (𝓢 : Schedule n) where
   advance-messages : ∀ {s e k} →
                      IsExpiryPeriod [ s , e ] →
                      ComputationInBox k AtTime s →
-                     MessagesIn (Dₜ e k) AtTime e
+                     MessagesIn (Bₜ e k) AtTime e
   advance-messages (mkₑ (mkₛₑ _ ηₛ≡ηₑ) expiryᵢ) c∈Bₖ i {j} (mkₛₑ e≤1+t ηₑ≡η₁₊ₜ) i∈ρ₁₊ₜ recβ
     with trans ηₛ≡ηₑ ηₑ≡η₁₊ₜ
   ... | ηₛ≡η₁₊ₜ with expiryᵢ (∈ρ-subst (sym ηₛ≡η₁₊ₜ) i∈ρ₁₊ₜ) e≤1+t j
   ...   | s≤β with η-inRange ηₛ≡η₁₊ₜ (s≤β , (β-decreasing i j (s≤s z≤n)))
-  ...     | (ηₛ≡ηβ , ηβ≡η₁₊ₜ) = async∈-resp-Dₜᵢ (β _ _ _) (trans ηβ≡η₁₊ₜ (sym ηₑ≡η₁₊ₜ)) (state-steps (mkₛₑ s≤β ηₛ≡ηβ) c∈Bₖ j recβ)
+  ...     | (ηₛ≡ηβ , ηβ≡η₁₊ₜ) = async∈-resp-Bₜᵢ (β _ _ _) (trans ηβ≡η₁₊ₜ (sym ηₑ≡η₁₊ₜ)) (state-steps (mkₛₑ s≤β ηₛ≡ηβ) c∈Bₖ j recβ)
   
   ------------------------------------------------------------------------
   -- Steps : after k pseudoperiods all nodes are guaranteed to have
@@ -248,12 +234,12 @@ module _ {x₀ : S} (x₀∈B : x₀ ∈ D₀) (𝓢 : Schedule n) where
   start-pp : ∀ {s e} →
              IsPseudoperiodic [ s , e ] →
              ComputationInBox 0 AtTime e
-  start-pp {s} {e} pp = zeroᵇ m∈wfᵉ s∈D₀
+  start-pp {s} {e} pp = zeroᵇ m∈wfᵉ s∈B₀
     where
     open IsPseudoperiodic pp
     m∈wfᵐ = expiry⇒wellFormed β[s,m]
     m∈wfᵉ = wellFormed-steps η[m,e] m∈wfᵐ
-    s∈D₀  = state∈D₀ e
+    s∈B₀  = state∈B₀ e
 
   messages-pp : ∀ {s e k} →
                 IsPseudoperiodic [ s , e ] →
@@ -290,29 +276,30 @@ module _ {x₀ : S} (x₀∈B : x₀ ∈ D₀) (𝓢 : Schedule n) where
     ⇒ ComputationInBox 0       AtTime m ∴⟨ messages-mpp mpp ⟩
     ⇒ ComputationInBox (k + 0) AtTime e ∴⟨ subst (ComputationInBox_AtTime e) (+-identityʳ k) ⟩
     ⇒ ComputationInBox k       AtTime e ∎
-
-  ξ-reached′ : ∀ {s m e} →
-               IsMultiPseudoperiodic (suc (k* (η s) (ρ s))) [ s , m ] →
-               IsSubEpoch [ m , e ] →
-               async (<-wellFounded e) ≈ ξ (η s) (ρ s)
-  ξ-reached′ {s} {m} {e} mpp η[m,e]@(mkₛₑ m≤e ηₘ≡ηₑ) = begin⟨ mpp ⟩
+  
+  x*-reached′ : ∀ {s m e} →
+                IsMultiPseudoperiodic (suc (k* (η s) (ρ s))) [ s , m ] →
+                IsSubEpoch [ m , e ] →
+                async (<-wellFounded e) ≈ x* (η s) (ρ s)
+  x*-reached′ {s} {m} {e} mpp η[m,e]@(mkₛₑ m≤e ηₘ≡ηₑ) = begin⟨ mpp ⟩
     ⇒ IsMultiPseudoperiodic _ [ s , m ] ∴⟨ computation∈Bₖ ⟩
     ⇒ ComputationInBox k*' AtTime m     ∴⟨ state-steps η[m,e] ⟩
-    ⇒ StateIn (Dₜ e k*') AtTime e       ∴⟨ (λ prf i → prf i (<-wellFounded e)) ⟩
-    ⇒ asyncₜ e ∈ Dₜ e k*'               ∴⟨ async∈-resp-Dₜ e (sym (trans (ηₛ≡ηₑ-mpp mpp) ηₘ≡ηₑ)) ⟩
-    ⇒ asyncₜ e ∈ Dₜ s k*'               ∴⟨ proj₂ (proj₂ (D-finish (η s) (ρ s))) ⟩
-    ⇒ asyncₜ e ≈ ξ (η s) (ρ s)          ∎
+    ⇒ StateIn (Bₜ e k*') AtTime e       ∴⟨ (λ prf i → prf i (<-wellFounded e)) ⟩
+    ⇒ asyncₜ e ∈ Bₜ e k*'               ∴⟨ async∈-resp-Bₜ e (sym (trans (ηₛ≡ηₑ-mpp mpp) ηₘ≡ηₑ)) ⟩
+    ⇒ asyncₜ e ∈ Bₜ s k*'               ∴⟨ k*≤k∧x∈Bₖ⇒x≈x* (η s) (ρ s) ≤-refl ⟩
+    ⇒ asyncₜ e ≈ x* (η s) (ρ s)         ∎
     where
     k*' = k* (η s) (ρ s)
 
-  ξ-reached : ∀ {s} → ∃ λ k → ∀ {m e} →
-            IsMultiPseudoperiodic k [ s , m ] →
-            IsSubEpoch [ m , e ] →
-            async (<-wellFounded e) ≈ ξ (η s) (ρ s)
-  ξ-reached {s} = suc (k* (η s) (ρ s)) , ξ-reached′
+  x*-reached : ∀ {s} → ∃ λ k → ∀ {m e} →
+               IsMultiPseudoperiodic k [ s , m ] →
+               IsSubEpoch [ m , e ] →
+               async (<-wellFounded e) ≈ x* (η s) (ρ s)
+  x*-reached {s} = suc (k* (η s) (ρ s)) , x*-reached′
 
-isSafe : IsSafeOver 𝓘 D₀
+isSafe : ConvergentOver 𝓘 B₀
 isSafe = record
-  { m*         = ξ
-  ; m*-reached = ξ-reached
+  { x*         = x*
+  ; x*-fixed   = x*-fixed
+  ; x*-reached = x*-reached
   }

@@ -1,4 +1,6 @@
 open import Data.Fin using (Fin)
+open import Data.Fin.Subset using (⊤)
+open import Data.Product using (_,_)
 open import Level using () renaming (zero to 0ℓ)
 open import Relation.Binary.Indexed.Homogeneous using (IndexedSetoid)
 
@@ -11,10 +13,7 @@ import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Proofs.ACOToSafe as
 import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Proofs.UltrametricToACO as UltrametricToACO
 
 
-module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Theorems
-  {a ℓ n} {𝓘 : AsyncIterable a ℓ n} where
-
-open AsyncIterable 𝓘
+module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Theorems where
 
 ------------------------------------------------------------------------
 -- Export core publically
@@ -22,19 +21,35 @@ open AsyncIterable 𝓘
 open Conditions public
 
 ------------------------------------------------------------------------
--- ACO implications
+-- The empty computation is always convergent
 
-ACO⇒safety : ∀ {p} (aco : ACO 𝓘 p) → IsSafeOver 𝓘 (ACO.B aco)
-ACO⇒safety aco = ACOToSafe.isSafe 𝓘 aco
+|0|-convergent : ∀ {a ℓ} (𝓘 : AsyncIterable a ℓ 0) → Convergent 𝓘
+|0|-convergent p = record
+  { x*         = λ _ _ ()
+  ; x*-fixed   = λ _ _ ()
+  ; x*-reached = λ _ _ → 0 , λ _ _ ()
+  }
 
 ------------------------------------------------------------------------
--- Ultrametric conditions implications
+-- Asynchronously contracting operators (ACOs)
 
-ultra⇒ACO : UltrametricConditions 𝓘 → ACO 𝓘 ℓ
-ultra⇒ACO ultra = UltrametricToACO.aco ultra
+module _ {a ℓ n} {𝓘 : AsyncIterable a ℓ n} where
 
-ultra⇒safety : UltrametricConditions 𝓘 → IsSafe 𝓘
-ultra⇒safety ultra = isSafeOver-universal (UltrametricToACO.B-univ ultra) (ACO⇒safety (ultra⇒ACO ultra))
+  ACO⇒convergent : ∀ {p} (aco : ACO 𝓘 p) → ConvergentOver 𝓘 (ACO.B₀ aco)
+  ACO⇒convergent aco = ACOToSafe.isSafe 𝓘 aco
+
+------------------------------------------------------------------------
+-- Ultrametric conditions
+
+module _ {a ℓ n} {𝓘 : AsyncIterable a ℓ n} where
+
+  ultra⇒ACO : UltrametricConditions 𝓘 → ACO 𝓘 ℓ
+  ultra⇒ACO ultra = UltrametricToACO.aco ultra
+
+  ultra⇒convergent : UltrametricConditions 𝓘 → Convergent 𝓘
+  ultra⇒convergent ultra = convergentOver-universal
+    (UltrametricToACO.B₀-univ ultra)
+    (ACO⇒convergent (ultra⇒ACO ultra))
 
 ------------------------------------------------------------------------
 -- Synchronous conditions implications

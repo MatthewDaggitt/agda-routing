@@ -1,4 +1,4 @@
-module AgdaBasics where
+module RoutingLib.lmv34.AgdaBasics where
 
   data Bool : Set where
     true  : Bool

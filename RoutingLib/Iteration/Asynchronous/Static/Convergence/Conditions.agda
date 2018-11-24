@@ -25,11 +25,11 @@ open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (Setoid_at_)
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as SubsetEq
 open import RoutingLib.Relation.Unary.Indexed hiding (_∉_)
 
-open import RoutingLib.Iteration.Asynchronous.Dynamic
-open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
-open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudoperiod
+open import RoutingLib.Iteration.Asynchronous.Static
+open import RoutingLib.Iteration.Asynchronous.Static.Schedule
+open import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod
 
-module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
+module RoutingLib.Iteration.Asynchronous.Static.Convergence.Conditions
   {a ℓ n} (𝓘 : AsyncIterable a ℓ n) where
 
 open AsyncIterable 𝓘
@@ -43,18 +43,13 @@ open AsyncIterable 𝓘
 record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
   field
     -- Boxes
-    B          : Epoch → Subset n → ℕ → IPred Sᵢ p
-    B₀-eqᵢ     : ∀ {e p} f q {i xᵢ} → xᵢ ∈ᵤ B e p 0 i → xᵢ ∈ᵤ B f q 0 i
-    Bᵢ-cong     : ∀ {e p k i} → (_∈ᵤ B e p k i) Respects _≈ᵢ_
-    B-finish   : ∀ e p → ∃₂ λ k* x* → ∀ {k} → k* ≤ k → (x* ∈ B e p k × (∀ {x} → x ∈ B e p k → x ≈ x*))
-    B-null     : ∀ {e p k i} → i ∉ p → ⊥ i ∈ᵤ B e p k i
-
+    B          : ℕ → IPred Sᵢ p
+    Bᵢ-cong    : ∀ {k i} → (_∈ᵤ B k i) Respects _≈ᵢ_
+    B-finish   : ∃₂ λ k* x* → ∀ {k} → k* ≤ k → (x* ∈ B k × (∀ {x} → x ∈ B k → x ≈ x*))
+    
     -- F
-    F-resp-B₀  : ∀ {e p x} → x ∈ B e p 0 → F e p x ∈ B e p 0
-    F-mono-B   : ∀ {e p k x} → WellFormed p x → x ∈ B e p k → F e p x ∈ B e p (suc k)
-
-  B₀ : IPred Sᵢ p
-  B₀ = B 0 ⊤ 0
+    F-resp-B₀  : ∀ {x} → x ∈ B 0 → F x ∈ B 0
+    F-mono-B   : ∀ {k x} → x ∈ B k → F x ∈ B (suc k)
   
 --------------------------------------------------------------------------------
 -- Ultrametric spaces --
@@ -64,23 +59,19 @@ record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
 
 record UltrametricConditions : Set (a ⊔ ℓ) where
   field
-    dᵢ                 : Epoch → Subset n → ∀ {i} → Sᵢ i → Sᵢ i → ℕ
-    dᵢ-cong            : ∀ e p {i} → (dᵢ e p {i}) Preserves₂ _≈ᵢ_ ⟶ _≈ᵢ_ ⟶ _≡_
-    x≈y⇒dᵢ≡0           : ∀ e p {i} {x y : Sᵢ i} → x ≈ᵢ y → dᵢ e p x y ≡ 0
-    dᵢ≡0⇒x≈y           : ∀ e p {i} {x y : Sᵢ i} → dᵢ e p x y ≡ 0 → x ≈ᵢ y
-    dᵢ-bounded         : ∀ e p → ∃ λ dₘₐₓ → ∀ {i} x y → dᵢ e p {i} x y ≤ dₘₐₓ -- TO-DO
+    dᵢ                 : ∀ {i} → Sᵢ i → Sᵢ i → ℕ
+    dᵢ-cong            : ∀ {i} → (dᵢ {i}) Preserves₂ _≈ᵢ_ ⟶ _≈ᵢ_ ⟶ _≡_
+    x≈y⇒dᵢ≡0           : ∀ {i} {x y : Sᵢ i} → x ≈ᵢ y → dᵢ x y ≡ 0
+    dᵢ≡0⇒x≈y           : ∀ {i} {x y : Sᵢ i} → dᵢ x y ≡ 0 → x ≈ᵢ y
+    dᵢ-bounded         : ∃ λ dₘₐₓ → ∀ {i} x y → dᵢ {i} x y ≤ dₘₐₓ -- TO-DO
     element            : S
 
-  dₛᵢ : Epoch → Subset n → ∀ {i} → Sᵢ i → Sᵢ i → ℕ
-  dₛᵢ e p {i} x y = if ⌊ i ∈? p ⌋ then dᵢ e p x y else 0
-  
-  d : Epoch → Subset n → S → S → ℕ
-  d e p x y = max 0 (λ i → dₛᵢ e p (x i) (y i))
+  d : S → S → ℕ
+  d x y = max 0 (λ i → dᵢ (x i) (y i))
 
   field
-    F-strContrOnOrbits  : ∀ e p {x} → WellFormed p x → F e p x ≉[ p ] x → d e p (F e p x) (F e p (F e p x)) < d e p x (F e p x)
-    F-strContrOnFP      : ∀ e p {x} → WellFormed p x → ∀ {x*} → F e p x* ≈ x* → x ≉[ p ] x* → d e p x* (F e p x) < d e p x* x
-    F-inactive          : ∀ e {p} x → WellFormed p (F e p x)
+    F-strContrOnOrbits  : ∀ {x} → F x ≉ x → d (F x) (F (F x)) < d x (F x)
+    F-strContrOnFP      : ∀ {x x*} → F x* ≈ x* → x ≉ x* → d x* (F x) < d x* x
 
 
 

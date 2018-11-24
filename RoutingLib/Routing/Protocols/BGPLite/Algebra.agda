@@ -1,12 +1,14 @@
 open import Algebra.FunctionProperties
-open import Data.Nat using (ℕ)
+open import Data.Nat using (ℕ; _≟_)
 open import Data.Nat.Properties
-  using (_<?_; <-cmp; <-trans; <-irrefl; <-asym; m+n≮n; m≤m+n; <⇒≱; ≤-refl; ≤-trans)
+  using (_<?_; <-trans; <-irrefl; <-asym; m+n≮n; m≤m+n; <⇒≱; ≤-refl; ≤-trans)
+  renaming (<-cmp to compare)
 open import Data.List using (List)
 open import Data.Bool as 𝔹 using (Bool; _∧_; _∨_)
 open import Data.Product using (_,_; _×_; proj₁; proj₂)
 open import Data.Fin using (Fin; toℕ; fromℕ≤)
 open import Data.Sum using (_⊎_; [_,_]′; inj₁; inj₂)
+open import Function using (_∘_)
 open import Relation.Unary using (Pred)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
@@ -19,7 +21,9 @@ open import Level using () renaming (zero to ℓ₀; suc to lsuc)
 import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
 import RoutingLib.Algebra.Selectivity.NaturalChoice.Min.TotalOrder as NaturalChoice
 
-open import RoutingLib.Data.Path.UncertifiedI
+open import RoutingLib.Data.Path.Uncertified using (inflate; deflate; length)
+open import RoutingLib.Data.Path.Uncertified.Properties using (∈-deflate⁻; ij⇿p⇒i≢j; _≤ₗₑₓ?_)
+open import RoutingLib.Data.Path.UncertifiedI hiding (length)
 open import RoutingLib.Data.Path.UncertifiedI.Properties
 
 open import RoutingLib.Routing.Algebra
@@ -30,7 +34,7 @@ open import RoutingLib.Routing.Protocols.BGPLite.Route
 open import RoutingLib.Routing.Protocols.BGPLite.Policy
 open import RoutingLib.Routing.Protocols.BGPLite.Communities
 
-open import RoutingLib.Routing.BellmanFord.ConvergenceConditions
+-- open import RoutingLib.Routing..ConvergenceConditions
 
 module RoutingLib.Routing.Protocols.BGPLite.Algebra where
 
@@ -51,10 +55,20 @@ data Step {n} (i j : Fin n) : Set₁ where
 
 infix 5 _⊕_
 _⊕_ : Op₂ Route
-_⊕_ = Choice._⊓_
+x@invalid        ⊕ y            = y
+x                ⊕ y@invalid    = x
+x@(valid l cs p) ⊕ y@(valid m ds q) with compare l m
+... | tri< x<y _ _  = x
+... | tri> _ _ y<x  = y
+... | tri≈ _ x=y _  with compare (length p) (length q)
+...   | tri< |p|<|q| _ _  = x
+...   | tri> _ _ |q|<|p|  = y
+...   | tri≈ _ |p|=|q| _  with p ≤ₗₑₓ? q
+...     | yes p≤q = x
+...     | no  q≤p = y
 
 ⊕-cong : Congruent₂ _≡_ _⊕_
-⊕-cong = Choice.⊓-cong
+⊕-cong = {!!} --Choice.⊓-cong
 
 infix 5 _▷_
 _▷_ : ∀ {n} {i j : Fin n} → Step i j → Route → Route
@@ -97,6 +111,7 @@ algebra = record
 -- Routing algebra --
 ---------------------
 
+{-
 ⊕-sel : Selective _≡_ _⊕_
 ⊕-sel = Choice.⊓-sel
 
@@ -131,7 +146,7 @@ isRoutingAlgebra = record
 
 path : Route → Path
 path invalid       = invalid
-path (valid _ _ p) = valid p
+path (valid _ _ p) = valid (deflate p)
 
 r≈0⇒path[r]≈[] : ∀ {r} → r ≡ 0# → path r ≡ valid []
 r≈0⇒path[r]≈[] refl = refl
@@ -150,25 +165,32 @@ path-reject {_} {i} {j} {valid l cs p} (step pol) refl inv with (toℕ i , toℕ
 ... | no  _    | _       = refl
 ... | yes _    | yes _   = refl
 ... | yes ij⇿p | no  i∉p with inv
-...   | inj₁ ¬ij⇿p = contradiction ij⇿p ¬ij⇿p
-...   | inj₂ i∈p   = contradiction i∈p i∉p
+...   | inj₁ ¬ij⇿d[p] = contradiction ij⇿p {!!} --¬ij⇿p
+...   | inj₂ i∈d[p]   = contradiction (∈-deflate⁻ i∈d[p]) i∉p
+
 
 path-accept : ∀ {n} {i j : Fin n} {r q} (f : Step i j) → path r ≡ valid q → f ▷ r ≢ invalid →
               path (f ▷ r) ≡ valid ((toℕ i , toℕ j) ∷ q)
 path-accept {_} {i} {j} {invalid}      (step pol) pᵣ≈q f▷r≉0 = contradiction refl f▷r≉0
-path-accept {_} {i} {j} {valid l cs p} (step pol) refl f▷r≉0 with (toℕ i , toℕ j) ⇿ᵥ? p | toℕ i ∈ᵥₚ? p
+path-accept {_} {i} {j} {valid l cs p} (step pol) eq f▷r≉0 with (toℕ i , toℕ j) ⇿ᵥ? p | toℕ i ∈ᵥₚ? p
 ... | no ¬e⇿p | _       = contradiction refl f▷r≉0
 ... | yes _   | yes i∈p = contradiction refl f▷r≉0
 ... | yes e⇿p | no  i∉p
   with apply pol (valid l cs ((toℕ i , toℕ j) ∷ p))
        | inspect (apply pol) (valid l cs ((toℕ i , toℕ j) ∷ p))
-... | invalid     | _      = contradiction refl f▷r≉0
-... | valid _ _ _ | [ eq ] with apply-increasing pol eq
-...   | _ , refl = refl
+... | invalid     | _       = contradiction refl f▷r≉0
+... | valid _ _ q | [ eq₂ ] with apply-increasing pol eq₂
+...   | _ , |p|≤|q| , d[p]≡d[q] = {!!}
+{-
+with toℕ i ≟ toℕ j
+...     | yes i≡j = contradiction i≡j (ij⇿p⇒i≢j e⇿p)  --refl
+...     | no  _   = {!contradiction (trans d[p]≡d[q] (deflate) ?!} --contradiction {!!} {!!}
+-}
 
 isPathAlgebra : IsPathAlgebra algebra
 isPathAlgebra = record
   { isRoutingAlgebra = isRoutingAlgebra
+  ; path             = path
   ; path-cong        = cong path
   ; r≈0⇒path[r]≈[]   = r≈0⇒path[r]≈[]
   ; r≈∞⇒path[r]≈∅    = r≈∞⇒path[r]≈∅
@@ -192,8 +214,11 @@ isIncreasing {_} {i} {j} (step pol) (valid l cs p) with (toℕ i , toℕ j) ⇿�
 ...   | inj₂ r≤e▷r = refl
 ...   | inj₁ e▷r≤r = contradiction e▷r≤r (apply-nonDecreasing pol)
 
+{-
 isIncreasingPathAlgebra : IsIncreasingPathAlgebra algebra
 isIncreasingPathAlgebra = record
   { isPathAlgebra = isPathAlgebra
   ; isIncreasing  = isIncreasing
   }
+-}
+-}

@@ -25,8 +25,8 @@ open import RoutingLib.Iteration.Asynchronous.Dynamic
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions using (ACO)
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Properties using (asyncIter-cong; asyncIter-inactive)
 import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Properties.ACO as ACOProperties
-open import RoutingLib.Iteration.Asynchronous.Schedule
-import RoutingLib.Iteration.Asynchronous.Schedule.Pseudoperiod as Pseudoperiod
+open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
+import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudoperiod as Pseudoperiod
 
 
 module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Proofs.ACOToSafe

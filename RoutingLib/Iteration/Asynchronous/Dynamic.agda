@@ -23,8 +23,8 @@ import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset as 
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as FiniteSubsetEquality
 open import RoutingLib.Relation.Unary.Indexed
 
-open import RoutingLib.Iteration.Asynchronous.Schedule as Schedules
-open import RoutingLib.Iteration.Asynchronous.Schedule.Pseudoperiod
+open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule as Schedules
+open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudoperiod
 
 module RoutingLib.Iteration.Asynchronous.Dynamic where
 
@@ -53,7 +53,7 @@ record IsAsyncIterable
   -- Required assumptions
   field
     isDecEquivalenceᵢ : IsIndexedDecEquivalence Sᵢ _≈ᵢ_
-    F-cong           : ∀ e p → (F e p) Preserves _≈[ p ]_ ⟶ _≈[ p ]_
+    F-cong            : ∀ e p → (F e p) Preserves _≈[ p ]_ ⟶ _≈[ p ]_
 
   -- The type of the global state of the computation
   S : Set _
@@ -163,7 +163,7 @@ module _ {a ℓ n} (𝓘 : AsyncIterable a ℓ n) where
 -- Bisimilarity
 
 module _ {a₁ a₂ ℓ₁ ℓ₂ n}
-         (𝓘₁ : AsyncIterable a₂ ℓ₂ n)
+         (𝓘₁ : AsyncIterable a₁ ℓ₁ n)
          (𝓘₂ : AsyncIterable a₂ ℓ₂ n)
          where
 
@@ -173,20 +173,25 @@ module _ {a₁ a₂ ℓ₁ ℓ₂ n}
       module P = AsyncIterable 𝓘₁
       module Q = AsyncIterable 𝓘₂
 
-{-
     field
-      toᵢ      : ∀ {i} → P.Sᵢ i → Q.Sᵢ i
-      fromᵢ    : ∀ {i} → Q.Sᵢ i → P.Sᵢ i
+      toᵢ       : ∀ {i} → P.Sᵢ i → Q.Sᵢ i
+      fromᵢ     : ∀ {i} → Q.Sᵢ i → P.Sᵢ i
       
-      F-cong  : Congruent₁ Q._≈_ Q.F
+      -- F-cong    : ∀ e p → Congruent₁ Q._≈_ (Q.F e p)
 
-      toᵢ-cong : ∀ {i} {x y : P.Sᵢ i} → x P.≈ᵢ y → toᵢ x Q.≈ᵢ toᵢ y
+      toᵢ-⊥     : ∀ {i} → toᵢ (P.⊥ i) Q.≈ᵢ Q.⊥ i 
+      toᵢ-cong  : ∀ {i} {x y : P.Sᵢ i} → x P.≈ᵢ y → toᵢ x Q.≈ᵢ toᵢ y
       toᵢ-fromᵢ : ∀ {i} (x : Q.Sᵢ i) → toᵢ (fromᵢ x) Q.≈ᵢ x
-      toᵢ-F    : ∀ {i} (x : P.S) → toᵢ (P.F x i) Q.≈ᵢ Q.F (λ j → toᵢ (x j)) i
+      toᵢ-F     : ∀ {i e p} (x : P.S) → toᵢ (P.F e p x i) Q.≈ᵢ Q.F e p (λ j → toᵢ (x j)) i
       
     to : P.S → Q.S
     to x i = toᵢ (x i)
 
     from : Q.S → P.S
     from x i = fromᵢ (x i)
--}
+
+    to-cong : ∀ {x y : P.S} → x P.≈ y → to x Q.≈ to y
+    to-cong x≈y i = toᵢ-cong (x≈y i)
+    
+    to-F : ∀ {e p} (x : P.S) → to (P.F e p x) Q.≈ Q.F e p (to x)
+    to-F x i = toᵢ-F x

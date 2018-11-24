@@ -15,93 +15,99 @@ open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.List.Properties using (foldr-map-commute-gen)
 open import RoutingLib.Data.List.Relation.Equality.Setoid using (foldr⁺; map-tabulate)
 
-open import RoutingLib.Asynchronous
-import RoutingLib.Asynchronous.Properties as Async
+open import RoutingLib.Iteration.Asynchronous.Dynamic as Async using (Convergent)
+import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Theorems as Async
+
+open import RoutingLib.Routing using (Network)
 open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing.Algebra.WellFormed as WellFormed
-import RoutingLib.Routing.BellmanFord as BellmanFord
+import RoutingLib.Routing.Algebra.Comparable as Comparable
+import RoutingLib.Routing.VectorBased.Asynchronous as BellmanFord
 
 open RawRoutingAlgebra hiding (_≟_)
 
-module RoutingLib.Routing.Algebra.Bisimulation
-  {a₁ b₁ ℓ₁ a₂ b₂ ℓ₂}
-  (𝓐 : RawRoutingAlgebra a₁ b₁ ℓ₁)
-  (𝓑 : RawRoutingAlgebra a₂ b₂ ℓ₂)
-  where
+module RoutingLib.Routing.Algebra.Bisimulation {a₁ b₁ ℓ₁ a₂ b₂ ℓ₂} where
 
-  open RawRoutingAlgebra 𝓐 using () renaming (_≈_ to _≈ᵃ_; _⊕_ to _⊕ᵃ_; _▷_ to _▷ᵃ_; 0# to 0#ᵃ; ∞ to ∞ᵃ)
-  open RawRoutingAlgebra 𝓑 using () renaming (_≈_ to _≈ᵇ_; _⊕_ to _⊕ᵇ_; _▷_ to _▷ᵇ_; 0# to 0#ᵇ; ∞ to ∞ᵇ)
-  open WellFormed 𝓐
+  record Bisimilar 
+    (A : RawRoutingAlgebra a₁ b₁ ℓ₁)
+    (B : RawRoutingAlgebra a₂ b₂ ℓ₂)
+    : Set (lsuc (a₁ ⊔ a₂ ⊔ b₁ ⊔ b₂ ⊔ ℓ₁ ⊔ ℓ₂))where
+
+    open RawRoutingAlgebra A using () renaming (_≈_ to _≈ᵃ_; _⊕_ to _⊕ᵃ_; _▷_ to _▷ᵃ_; 0# to 0#ᵃ; ∞ to ∞ᵃ)
+    open RawRoutingAlgebra B using () renaming (_≈_ to _≈ᵇ_; _⊕_ to _⊕ᵇ_; _▷_ to _▷ᵇ_; 0# to 0#ᵇ; ∞ to ∞ᵇ)
+    open Comparable A
   
-  record Bisimilar₁ : Set (lsuc (a₁ ⊔ a₂ ⊔ b₁ ⊔ b₂ ⊔ ℓ₁ ⊔ ℓ₂))where
-    
     field
-      to   : Route 𝓐 → Route 𝓑
-      from : Route 𝓑 → Route 𝓐
+      to        : Route A → Route B
+      from      : Route B → Route A
 
-      toₛ  : ∀ {n} {i j : Fin n} → Step 𝓐 i j → Step 𝓑 i j
+      toₛ       : ∀ {n} {i j : Fin n} → Step A i j → Step B i j
       
       to-0#     : to 0#ᵃ ≈ᵇ 0#ᵇ
       to-∞      : to ∞ᵃ  ≈ᵇ ∞ᵇ
       to-cong   : ∀ {x y} → x ≈ᵃ y → to x ≈ᵇ to y
-      to-⊕      : ∀ {x y} → WellFormed x → WellFormed y → to x ⊕ᵇ to y ≈ᵇ to (x ⊕ᵃ y)
-      to-▷      : ∀ {n} {i j : Fin n} (f : Step 𝓐 i j) x → to (f  ▷ᵃ x) ≈ᵇ toₛ f ▷ᵇ to x
+      to-⊕      : ∀ {x y} → Comparable x y → to x ⊕ᵇ to y ≈ᵇ to (x ⊕ᵃ y)
+      to-▷      : ∀ {n} {i j : Fin n} (f : Step A i j) x → to (f  ▷ᵃ x) ≈ᵇ toₛ f ▷ᵇ to x
       to-from   : ∀ x → to (from x) ≈ᵇ x
 
-      ⊕-pres-WF : ∀ {x y} → WellFormed x → WellFormed y → WellFormed (x ⊕ᵃ y)
+      -- ⊕-pres-WF : ∀ {x y} → Comparable x y → WellFormed (x ⊕ᵃ y)
 
 
 
   module _ {n}
-    (𝓐↭𝓑 : Bisimilar₁) 
-    (Aᵃ : AdjacencyMatrix 𝓐 n)
-    (Aᵇ : AdjacencyMatrix 𝓑 n)
+    {A : RawRoutingAlgebra a₁ b₁ ℓ₁}
+    {B : RawRoutingAlgebra a₂ b₂ ℓ₂}
+    (A∼B : Bisimilar A B) 
+    (Nᵃ : Network A n)
+    (Nᵇ : Network B n)
     where
-
-    open Bisimilar₁ 𝓐↭𝓑
-    open BellmanFord 𝓐 Aᵃ using () renaming (σ to σᵃ; σ∥ to σ∥ᵃ; I to Iᵃ)
-    open BellmanFord 𝓑 Aᵇ using () renaming (σ to σᵇ; σ∥ to σ∥ᵇ; I to Iᵇ; σ-cong to σᵇ-cong)
+    
+    open RawRoutingAlgebra A using () renaming (_≈_ to _≈ᵃ_; _⊕_ to _⊕ᵃ_; _▷_ to _▷ᵃ_; 0# to 0#ᵃ; ∞ to ∞ᵃ)
+    open RawRoutingAlgebra B using () renaming (_≈_ to _≈ᵇ_; _⊕_ to _⊕ᵇ_; _▷_ to _▷ᵇ_; 0# to 0#ᵇ; ∞ to ∞ᵇ)
+    open Bisimilar A∼B
+    open BellmanFord A Nᵃ using () renaming (F′ to Fᵃ; F∥ to F∥ᵃ; I to Iᵃ; Aₜ to Aᵃ)
+    open BellmanFord B Nᵇ using () renaming (F′ to Fᵇ; F∥ to F∥ᵇ; I to Iᵇ; Aₜ to Aᵇ; F-cong to Fᵇ-cong)
     
     toIᵃ≈Iᵇ : ∀ i j → to (Iᵃ i j) ≈ᵇ Iᵇ i j
     toIᵃ≈Iᵇ i j with j ≟ i
     ... | yes _ = to-0#
     ... | no  _ = to-∞
-    
+    {-
     Iᵢⱼ-wf : ∀ i j → WellFormed (Iᵃ i j)
     Iᵢⱼ-wf i j with j ≟ i
     ... | yes _ = trivial
     ... | no  _ = invalid
-
-    module _ (Aᵃ≡Aᵇ : (∀ i j → toₛ (Aᵃ i j) ≡ Aᵇ i j)) where
+    -}
     
-      to-σ : ∀ {i} X j → to (σᵃ X i j) ≈ᵇ σᵇ (λ k l → to (X k l)) i j
-      to-σ {i} X j = begin
-          to (σᵃ X i j)
+    module _ {e p} (Aᵃ≡Aᵇ : (∀ i j → toₛ (Aᵃ e p i j) ≡ Aᵇ e p i j)) where
+    
+      to-F : ∀ {i} X j → to (Fᵃ e p X i j) ≈ᵇ Fᵇ e p (λ k l → to (X k l)) i j
+      to-F {i} X j = begin
+          to (Fᵃ e p X i j)
         ≡⟨⟩
-          to (foldr _⊕ᵃ_ (Iᵃ i j) (tabulate (λ k → Aᵃ i k ▷ᵃ X k j)))
-        ≈⟨ ≈-sym 𝓑 (foldr-map-commute-gen (S 𝓑) {f = to} (⊕-cong 𝓑) ⊕-pres-WF to-⊕ (Iᵢⱼ-wf i j) (tabulate⁺ λ k → extend (Aᵃ i k) (X k j))) ⟩
-          foldr _⊕ᵇ_ (to (Iᵃ i j)) (map to (tabulate λ k → Aᵃ i k ▷ᵃ X k j))
-        ≈⟨ foldr⁺ (S 𝓑) (⊕-cong 𝓑) (toIᵃ≈Iᵇ i j) (map-tabulate (S 𝓑) to (λ k → Aᵃ i k ▷ᵃ X k j)) ⟩
-          foldr _⊕ᵇ_ (Iᵇ i j) (tabulate (λ k → to (Aᵃ i k ▷ᵃ X k j)))
-        ≈⟨ foldr⁺ (S 𝓑) (⊕-cong 𝓑) (≈-refl 𝓑) (ListEq.tabulate⁺ (λ k → to-▷ (Aᵃ i k) (X k j)) ) ⟩
-          foldr _⊕ᵇ_ (Iᵇ i j) (tabulate (λ k → toₛ (Aᵃ i k) ▷ᵇ to (X k j)))
-        ≡⟨ cong (foldr _⊕ᵇ_ (Iᵇ i j)) (tabulate-cong λ k → cong (_▷ᵇ _) (Aᵃ≡Aᵇ i k) ) ⟩
-          foldr _⊕ᵇ_ (Iᵇ i j) (tabulate (λ k → Aᵇ i k ▷ᵇ to (X k j)))
+          to (foldr _⊕ᵃ_ (Iᵃ i j) (tabulate (λ k → Aᵃ e p i k ▷ᵃ X k j)))
+        ≈⟨ ≈-sym B ? ⟩ --(foldr-map-commute-gen (S B) {f = to} (⊕-cong B) ⊕-pres-WF to-⊕ (Iᵢⱼ-wf i j) (tabulate⁺ λ k → extend (Aᵃ i k) (X k j))) ⟩
+          foldr _⊕ᵇ_ (to (Iᵃ i j)) (map to (tabulate λ k → Aᵃ e p i k ▷ᵃ X k j))
+        ≈⟨ foldr⁺ (S B) (⊕-cong B) (toIᵃ≈Iᵇ i j) (map-tabulate (S B) to (λ k → Aᵃ e p i k ▷ᵃ X k j)) ⟩
+          foldr _⊕ᵇ_ (Iᵇ i j) (tabulate (λ k → to (Aᵃ e p i k ▷ᵃ X k j)))
+        ≈⟨ foldr⁺ (S B) (⊕-cong B) (≈-refl B) (ListEq.tabulate⁺ (λ k → to-▷ (Aᵃ e p i k) (X k j)) ) ⟩
+          foldr _⊕ᵇ_ (Iᵇ i j) (tabulate (λ k → toₛ (Aᵃ e p i k) ▷ᵇ to (X k j)))
+        ≡⟨ cong (foldr _⊕ᵇ_ (Iᵇ i j)) (tabulate-cong {n = n} λ k → cong (_▷ᵇ _) (Aᵃ≡Aᵇ i k) ) ⟩
+          foldr _⊕ᵇ_ (Iᵇ i j) (tabulate (λ k → Aᵇ e p i k ▷ᵇ to (X k j)))
         ≡⟨⟩
-          σᵇ (λ k l → to (X k l)) i j
+          Fᵇ e p (λ k l → to (X k l)) i j
         ∎
-        where open EqReasoning (S 𝓑)
+        where open EqReasoning (S B)
 
-      σ∥↭ : Bisimilar σ∥ᵃ σ∥ᵇ
-      σ∥↭ = record
-        { toᵢ       = to ∘_
-        ; fromᵢ     = from ∘_
-        ; F-cong    = σᵇ-cong
+    F∥↭ : Async.Bisimilar F∥ᵃ F∥ᵇ
+    F∥↭ = record
+      { toᵢ       = to ∘_
+      ; fromᵢ     = from ∘_
 
-        ; toᵢ-cong  = to-cong ∘_
-        ; toᵢ-F     = to-σ
-        ; toᵢ-fromᵢ = to-from ∘_
-        }
+      ; toᵢ-⊥     = toIᵃ≈Iᵇ _
+      ; toᵢ-cong  = to-cong ∘_
+      ; toᵢ-F     = to-F {!!}
+      ; toᵢ-fromᵢ = to-from ∘_
+      }
 
-      bisimulation : IsAsynchronouslySafe σ∥ᵃ → IsAsynchronouslySafe σ∥ᵇ
-      bisimulation = Async.bisimulation σ∥↭
+    bisimulation : Convergent F∥ᵃ → Bisimilar A B → Convergent F∥ᵇ
+    bisimulation convergent bisim = Async.bisimilar convergent {!!} --(F∥↭ ? {!!})

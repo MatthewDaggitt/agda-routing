@@ -48,11 +48,10 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
     f∞-reject          : ∀ {n} (i j : Fin n) x → f∞ i j ▷ x ≈ ∞
 
 
-  open RightNaturalOrder _≈_ _⊕_ public
-    using () renaming ( _≤_ to _≤₊_ )
-
-  open NonStrictToStrict _≈_ _≤₊_ public
-    using () renaming ( _<_ to _<₊_)
+  -- Publicly export some useful terminology
+  
+  open RightNaturalOrder _≈_ _⊕_ public using () renaming ( _≤_ to _≤₊_ )
+  open NonStrictToStrict _≈_ _≤₊_ public using () renaming ( _<_ to _<₊_)
 
   infix 4 _≉_
   _≉_ : Rel Route ℓ
@@ -61,7 +60,9 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
   infix 4 _≰₊_
   _≰₊_ : Rel Route ℓ
   x ≰₊ y = ¬ (x ≤₊ y) 
-    
+  
+  -- Publicly export equality proofs
+  
   open IsDecEquivalence ≈-isDecEquivalence public
     renaming
     ( refl          to ≈-refl
@@ -78,7 +79,7 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
   DS = record { isDecEquivalence = ≈-isDecEquivalence }
 
 --------------------------------------------------------------------------------
--- Other (non-standard) additional properties raw routing algebras may have
+-- Other additional properties that a raw routing algebra may possess
 
 module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 

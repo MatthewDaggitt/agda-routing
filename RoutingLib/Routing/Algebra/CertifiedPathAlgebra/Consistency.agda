@@ -24,7 +24,7 @@ open import RoutingLib.Data.Path.CertifiedI
 open import RoutingLib.Data.Path.CertifiedI.Enumeration
 open import RoutingLib.Data.Path.CertifiedI.Properties
 
-open import RoutingLib.Routing.Model using (AdjacencyMatrix)
+open import RoutingLib.Routing using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Algebra.RoutingAlgebra
 open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra

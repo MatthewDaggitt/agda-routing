@@ -24,9 +24,8 @@ open import RoutingLib.Relation.Unary.Indexed
 open import RoutingLib.Relation.Binary.PropositionalEquality using (inspect′)
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as SubsetEquality
 
-open import RoutingLib.Iteration.Asynchronous.Dynamic using (AsyncIterable)
+open import RoutingLib.Iteration.Asynchronous.Dynamic using (AsyncIterable; Epoch)
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions using (ACO; UltrametricConditions)
-open import RoutingLib.Iteration.Asynchronous.Schedule using (Epoch)
 
 open ≤-Reasoning
 

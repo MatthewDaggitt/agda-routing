@@ -1,15 +1,14 @@
-import RoutingLib.Routing.BellmanFord.Asynchronous.Results as ConvergenceTheorems
-import RoutingLib.Routing.BellmanFord.Asynchronous as BellmanFord
+import RoutingLib.Routing.VectorBased.Asynchronous.Results as ConvergenceTheorems
+import RoutingLib.Routing.VectorBased.Asynchronous as VectorBasedRouting
 
-open import RoutingLib.Iteration.Asynchronous.Dynamic using (IsSafe)
-open import RoutingLib.Iteration.Asynchronous.Schedule using (Epoch)
+open import RoutingLib.Iteration.Asynchronous.Dynamic using (Epoch; Convergent)
 
-open import RoutingLib.Routing.Model
+open import RoutingLib.Routing
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Protocols.BGPLite.Algebra
 
 module RoutingLib.Routing.Protocols.BGPLite
-  {n} (network : Epoch → AdjacencyMatrix algebra n) where
+  {n} (network : Network algebra n) where
 
 open BellmanFord algebra network public using (δ∥)
 

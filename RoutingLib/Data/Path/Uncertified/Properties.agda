@@ -1,10 +1,10 @@
-open import Level using () renaming (zero to 0ℓ)
-open import Data.List.Any using (any)
-open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; ≤-pred; _≟_) renaming (_≤?_ to _≤ℕ?_; _≤_ to _≤ℕ_; _<_ to _<ℕ_)
-open import Data.Nat.Properties using (<-trans; ≰⇒>; <⇒≢; <⇒≯; ≤-refl; ≤-trans; 1+n≰n; _<?_; ≰⇒≥; <-cmp)
+open import Data.List.Any using (any; there; here)
+open import Data.Nat
+open import Data.Nat.Properties
 open import Data.Fin.Properties using (pigeonhole)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (_,_; _×_; proj₁; proj₂)
+open import Level using (0ℓ)
 open import Function using (_∘_)
 open import Relation.Binary.Product.Pointwise using (≡?×≡?⇒≡?)
 open import Relation.Binary hiding (NonEmpty)
@@ -199,3 +199,56 @@ open ToStrict ≤ₗₑₓ-decTotalOrder public
 p≮ₗₑₓ[] : ∀ {p} → ¬ (p <ₗₑₓ [])
 p≮ₗₑₓ[] {[]}    (_ , []≉[]) = []≉[] refl
 p≮ₗₑₓ[] {e ∷ p} (() , _)
+
+
+----------------------------------------------------------------------------
+-- length
+
+|p|≢|q|⇒p≉q : ∀ {p q} → length p ≢ length q → p ≉ₚ q
+|p|≢|q|⇒p≉q {[]}    {[]}    0≢0     = contradiction refl 0≢0 
+|p|≢|q|⇒p≉q {[]}    {y ∷ q} |p|≢|q| = λ()
+|p|≢|q|⇒p≉q {x ∷ p} {[]}    |p|≢|q| = λ()
+|p|≢|q|⇒p≉q {x ∷ p} {y ∷ q} |p|≢|q| = λ { refl → |p|≢|q| refl }
+
+----------------------------------------------------------------------------
+-- inflate
+
+inflate-length : ∀ p n → length p ≤ length (inflate p n)
+inflate-length p       zero    = ≤-refl
+inflate-length []      (suc n) = ≤-refl
+inflate-length (x ∷ p) (suc n) = ≤-trans (inflate-length (x ∷ p) n) (n≤1+n _)
+
+----------------------------------------------------------------------------
+-- deflate
+
+p≡[]⇒deflate[p]≡[] : ∀ {p} → p ≡ [] → deflate p ≡ []
+p≡[]⇒deflate[p]≡[] refl = refl
+
+deflate-inflate : ∀ p n → deflate p ≡ deflate (inflate p n)
+deflate-inflate p             zero    = refl
+deflate-inflate []            (suc n) = refl
+deflate-inflate ((i , j) ∷ p) (suc n) with i ≟ i
+... | yes _   = deflate-inflate ((i , j) ∷ p) n
+... | no  i≢i = contradiction refl i≢i
+
+deflate-idem : ∀ p → deflate (deflate p) ≡ deflate p
+deflate-idem []            = refl
+deflate-idem ((i , j) ∷ p) with i ≟ j
+... | yes _ = deflate-idem p
+... | no  i≢j with i ≟ j
+...   | yes i≡j = contradiction i≡j i≢j
+...   | no  _   = refl
+
+∈-deflate⁻ : ∀ {i p} → i ∈ₚ deflate p → i ∈ₚ p
+∈-deflate⁻ {i} {[]}          ()
+∈-deflate⁻ {i} {(k , j) ∷ p} i∈p with k ≟ j
+... | yes _ = there (∈-deflate⁻ i∈p)
+... | no  _ = i∈p
+
+{-
+⇿-deflate⁺ : ∀ {e p} → e ⇿ p → e ⇿ deflate p
+⇿-deflate⁺ (start i≢j)                = start i≢j
+⇿-deflate⁺ (continue {_} {j} {k} i≢j) with j ≟ k
+... | yes j≡k = {!!}
+... | no  _   = continue i≢j
+-}

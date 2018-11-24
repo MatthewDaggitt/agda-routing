@@ -2,20 +2,20 @@ open import Data.Fin using (Fin; zero)
 open import Data.Fin.Subset using (Subset; _∉_)
 open import Data.Nat using (ℕ; zero; suc; _+_; _≤_; _≤′_; ≤′-refl; ≤′-step)
 open import Data.Nat.Properties
-open import Data.Product using (∃; _×_; _,_; proj₁; proj₂)
+open import Data.Product using (∃; ∃₂; _×_; _,_; proj₁; proj₂)
 open import Data.Sum using (inj₁; inj₂)
-open import Function using (_∘_)
+open import Function using (_∘_; id)
 open import Level using (_⊔_)
 open import Relation.Binary.PropositionalEquality using (_≡_; subst; sym)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
--- open import Relation.Unary
+open import Relation.Unary using () renaming (_∈_ to _∈ᵤ_)
 
 open import RoutingLib.Function.Reasoning
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions using (ACO)
-open import RoutingLib.Iteration.Asynchronous.Schedule using (Epoch)
+import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Properties.ACO as ACOProperties
 open import RoutingLib.Relation.Unary.Indexed hiding (_∉_)
 
 module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Proofs.UnstructuredToStructured
@@ -29,86 +29,68 @@ n = suc n-1
 
 module _ (e : Epoch) (q : Subset n) where
 
-  B : ℕ → IPred Sᵢ p
-  B = D e q
+  open ACOProperties 𝓘 aco e q
 
-  F' : S → S
-  F' = F e q
+  B′ : ℕ → IPred Sᵢ p
+  B′ = B e q
+
+  F′ : S → S
+  F′ = F e q
 
   σ : ℕ → S → S
   σ zero    x = x
-  σ (suc i) x = F' (σ i x)
+  σ (suc i) x = F′ (σ i x)
   
 
   -- Fixed points
   
-  k* : ℕ
-  k* = proj₁ (D-finish e q)
-
-  x* : S
-  x* = proj₁ (proj₂ (D-finish e q))
-
-  k*≤k⇒x*∈Bᵏ : ∀ {k} → k* ≤ k → x* ∈ B k
-  k*≤k⇒x*∈Bᵏ k*≤k = proj₁ ((proj₂ (proj₂ (D-finish e q))) k*≤k)
   
-  k*≤k∧x∈Bᵏ⇒x≈x* : ∀ {k} → k* ≤ k → ∀ {x} → x ∈ B k → x ≈ x*
-  k*≤k∧x∈Bᵏ⇒x≈x* k*≤k x∈Bₖ = proj₂ (proj₂ (proj₂ (D-finish e q)) k*≤k) x∈Bₖ
 
 
 
-  -- New box definitions
+
+
+  C : ℕ → IPred Sᵢ p
+  C zero    = B′ 0
+  C (suc k) = B′ k ∩ B′ (suc k)  
+
+  Cₖ⊆Bₖ : ∀ k → C k ⊆[ Sᵢ ] B′ k
+  Cₖ⊆Bₖ zero    x∈C₀   = x∈C₀
+  Cₖ⊆Bₖ (suc k) x∈C₁₊ₖ = proj₂ ∘ x∈C₁₊ₖ
+
+  k*≤k⇒x*∈Cᵏ : ∀ {k} → k* ≤ k → x* ∈ C k
+  k*≤k⇒x*∈Cᵏ {zero}  k*≤0   i = x*∈Bₖ {!!} 0 i
+  k*≤k⇒x*∈Cᵏ {suc k} k*≤1+k i = x*∈Bₖ {!!} k i , x*∈Bₖ {!!} (suc k) i
   
-  M : ℕ → IPred Sᵢ p
-  M k = ⋃ ℕ (λ l → B (k + suc l) / B (k + l))
+  k*≤k∧x∈Cᵏ⇒x≈x* : ∀ {k} → k* ≤ k → ∀ {x} → x ∈ C k → x ≈ x*
+  k*≤k∧x∈Cᵏ⇒x≈x* {zero}  k*≤0   x∈C₀   i = k*≤k∧x∈Bₖ⇒x≈x* k*≤0 x∈C₀ i
+  k*≤k∧x∈Cᵏ⇒x≈x* {suc k} k*≤1+k x∈C₁₊ₖ i = k*≤k∧x∈Bₖ⇒x≈x* k*≤1+k (proj₂ ∘ x∈C₁₊ₖ) i
   
-  N : ℕ → IPred Sᵢ (a ⊔ p ⊔ ℓ)
-  N k = ⋃ ℕ (λ l i x → (∃ λ y → (y ∈ M k) × (σ l y i ≈ᵢ x)))
+  C-finish : ∃₂ λ k* x* → ∀ {k} → k* ≤ k → (x* ∈ C k × (∀ {x} → x ∈ C k → x ≈ x*))
+  C-finish = k* , x* , (λ k*≤k → k*≤k⇒x*∈Cᵏ k*≤k , k*≤k∧x∈Cᵏ⇒x≈x* k*≤k)
 
-  C : ℕ → IPred Sᵢ (a ⊔ p ⊔ ℓ)
-  C k = B k ∪ N k
+  C-null : ∀ {k i} → i ∉ q → ⊥ i ∈ᵤ C k i
+  C-null {zero}  i∉q = B-null i∉q
+  C-null {suc k} i∉q = B-null i∉q , B-null i∉q
 
+  F-resp-C₀ : ∀ {x} → x ∈ C 0 → F′ x ∈ C 0
+  F-resp-C₀ = F-resp-B₀
 
-
-
-{-
-  M[k*]=∅ : ∀ {k} → k* ≤ k → Empty (M k)  
-  M[k*]=∅ {k} k*≤k x x∈Mᵏ with x∈Mᵏ zero
-  ... | (l , x∈B₁₊ₖ₊₁₊ₗ , x∉B₁₊ₖ₊ₗ) = x∉B₁₊ₖ₊ₗ (begin⟨ k*≤k⇒x*∈Bᵏ (≤-stepsʳ l k*≤k) zero ⟩
-    ⇒ x* zero ∈ᵢ B (k + l) ∴⟨ Dᵢ-cong (≈ᵢ-sym (k*≤k∧x∈Bᵏ⇒x≈x* {!!} {!!} zero)) ⟩
-    ⇒ x zero  ∈ᵢ B (k + l) ∎)
-
-  N[k*]=∅ : ∀ {k} → k* ≤′ k → Empty (N k)
-  N[k*]=∅ k*≤k x x∈Nᵏ = {!!}
--}
-
-  N? : ∀ k → Decidable (N k)
-  N? = {!!}
-
-
-
-
-
-  M₁₊ₖ⊆Mₖ : ∀ k → M (suc k) ⊆[ Sᵢ ] M k
-  M₁₊ₖ⊆Mₖ k {x} x∈M₁₊ₖ i with x∈M₁₊ₖ i
-  ... | (l , x∈B₁₊ₖ₊₁₊ₗ , x∉B₁₊ₖ₊ₗ) =
-    suc l ,
-    subst (λ v → x i ∈ᵢ B v) (sym (+-suc k (suc l))) x∈B₁₊ₖ₊₁₊ₗ ,
-    subst (λ v → x i ∉ᵢ B v) (sym (+-suc k l)) x∉B₁₊ₖ₊ₗ
-
-  N₁₊ₖ⊆Nₖ : ∀ k → N (suc k) ⊆[ Sᵢ ] N k
-  N₁₊ₖ⊆Nₖ k {x} x∈N₁₊ₖ i with x∈N₁₊ₖ i
-  ... | (l , y , y∈M¹⁺ᵏ , σˡyᵢ≈xᵢ) = l , y , M₁₊ₖ⊆Mₖ k y∈M¹⁺ᵏ , σˡyᵢ≈xᵢ
-
-  C₁₊ₖ⊆Cₖ : (∀ k → Decidable (B k)) → ∀ k → C (suc k) ⊆[ Sᵢ ] C k
-  C₁₊ₖ⊆Cₖ B? k {x} x∈C₁₊ₖ i with N? (suc k) x
-  ... | yes x∈N₁₊ₖ = inj₂ (N₁₊ₖ⊆Nₖ k x∈N₁₊ₖ i)
-  ... | no  x∉N₁₊ₖ with x∈C₁₊ₖ i
-  ...   | inj₂ x∈N₁₊ₖ = contradiction x∈N₁₊ₖ {!x∉N₁₊ₖ!}
-  ...   | inj₁ x∈B₁₊ₖ = {!!}
-
-
-
-
-  x∈Cₖ⇒Fx∈C₁₊ₖ : ∀ {k x} → WellFormed q x → x ∈ C k → F' x ∈ C (suc k)
-  x∈Cₖ⇒Fx∈C₁₊ₖ {k} {x} q x∈Cₖ i = {!!}
+  F-mono-C : ∀ {k x} → WellFormed q x → x ∈ C k → F′ x ∈ C (suc k)
+  F-mono-C {zero}  x-wf x∈C₀   i = F-resp-B₀ x∈C₀ i , F-mono-B {!!} x∈C₀ i
+  F-mono-C {suc k} x-wf x∈C₁₊ₖ i = F-mono-B {!!} (proj₁ ∘ x∈C₁₊ₖ) i , F-mono-B {!!} (proj₂ ∘ x∈C₁₊ₖ) i
   
+  C₁₊ₖ⊆Cₖ : ∀ k → C (suc k) ⊆[ Sᵢ ] C k
+  C₁₊ₖ⊆Cₖ zero    x∈C₁   i = proj₁ (x∈C₁ i)
+  C₁₊ₖ⊆Cₖ (suc k) x∈C₂₊ₖ i = {!!} , proj₁ (x∈C₂₊ₖ i)
+
+nested-aco : ACO 𝓘 p
+nested-aco = record
+  { B         = C
+  ; B₀-eqᵢ    = {!!}
+  ; Bᵢ-cong   = {!!}
+  ; B-finish  = C-finish
+  ; B-null    = λ {e p k} → C-null e p {k}
+  ; F-resp-B₀ = λ {e p} → F-resp-C₀ e p
+  ; F-mono-B  = λ {e p} → F-mono-C e p
+  }

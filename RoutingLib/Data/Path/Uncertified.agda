@@ -1,11 +1,10 @@
 open import Data.Fin using (Fin; _≤_) renaming (zero to fzero; suc to fsuc)
-open import Data.Fin.Properties using (_≟_)
-open import Data.Nat using (ℕ; _<_; zero; suc)
+open import Data.Nat using (ℕ; _<_; zero; suc; _≟_)
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
 open import Data.List using (List; []; _∷_; map)
 open import Data.List.Any using (Any)
 open import Level using () renaming (zero to ℓ₀)
-open import Relation.Nullary using (¬_)
+open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Binary using (Rel)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
 import Relation.Binary.Construct.NonStrictToStrict as ToStrict
@@ -50,8 +49,8 @@ i ∉ₚ p = ¬ (i ∈ₚ p)
 infix 4 _⇿_
 
 data _⇿_ : Edge → Path → Set where
-  start     : ∀ {i j}     → i ≢ j → (i , j) ⇿ []
-  continue  : ∀ {i j k p} → i ≢ j → (i , j) ⇿ (j , k) ∷ p
+  start     : ∀ {i j}     (i≢j : i ≢ j) → (i , j) ⇿ []
+  continue  : ∀ {i j k p} (i≢j : i ≢ j) → (i , j) ⇿ (j , k) ∷ p
 
 ------------------------------------------------------------------------------
 -- Equality
@@ -84,3 +83,14 @@ open ToStrict _≡_ _≤ₗₑₓ_ public
 length : Path → ℕ
 length []      = 0
 length (_ ∷ p) = suc (length p)
+
+inflate : Path → ℕ → Path
+inflate p               zero    = p
+inflate []              (suc n) = []
+inflate q@((i , j) ∷ p) (suc n) = (i , i) ∷ inflate q n
+
+deflate : Path → Path
+deflate [] = []
+deflate ((i , j) ∷ p) with i ≟ j
+... | yes _ = deflate p
+... | no  _ = (i , j) ∷ p

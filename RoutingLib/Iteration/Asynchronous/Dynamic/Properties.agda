@@ -20,7 +20,7 @@ open import RoutingLib.Relation.Binary.Indexed.Homogeneous
 open import RoutingLib.Relation.Unary.Indexed using (IPred; _∈_)
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic
-open import RoutingLib.Iteration.Asynchronous.Schedule
+open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
 
 module RoutingLib.Iteration.Asynchronous.Dynamic.Properties where
 
@@ -102,45 +102,4 @@ module _ {a ℓ n} where
 -}
 
 
-{-
-module _ {a₁ a₂ ℓ₁ ℓ₂ n} {𝕊₁ : IndexedSetoid (Fin n) a₁ ℓ₁} {𝕊₂ : IndexedSetoid (Fin n) a₂ ℓ₂}
-         {P₁ : Parallelisation 𝕊₁} {P₂ : Parallelisation 𝕊₂}
-         (P₁↭P₂ : Bisimilar P₁ P₂) (P₁-isSafe : IsAsynchronouslySafe P₁) where
 
-
-  private
-  
-    module P = Parallelisation P₁
-    module Q = Parallelisation P₂
-
-    open Bisimilar P₁↭P₂
-    open IsAsynchronouslySafe P₁-isSafe
-      renaming (x* to x*₁; x*-reached to x*₁-reached)
-
-    open Schedule
-
-
-    asyncIter-eq : ∀ s X → ∀ {t} (tAcc : Acc _<_ t) →
-                   to (P.asyncIter' s (from X) tAcc) Q.≈ Q.asyncIter' s X tAcc
-    asyncIter-eq s X {zero}  _          i = toᵢ-fromᵢ (X i)
-    asyncIter-eq s X {suc t} (acc tAcc) i with i ∈? α s (suc t)
-    ... | yes _ = Q.≈ᵢ-trans (toᵢ-F _) (F-cong (λ j → asyncIter-eq s X (tAcc (β s (suc t) i j) _) j) i)
-    ... | no  _ = asyncIter-eq s X (tAcc _ ≤-refl) i
-
-
-    x*₂ : Q.S
-    x*₂ = to x*₁
-
-    x*₂-reached : ∀ X s → ∃ λ tᶜ → ∀ t → Q.asyncIter s X (tᶜ + t) Q.≈ x*₂
-    x*₂-reached X s with x*₁-reached (from X) s
-    ... | (tᶜ , converged) = tᶜ , (λ t i → Q.≈ᵢ-trans
-      (Q.≈-sym (asyncIter-eq s X (<-wellFounded (tᶜ + t))) i)
-      (toᵢ-cong (converged t i)))
-
-
-  bisimulation : IsAsynchronouslySafe P₂
-  bisimulation = record
-    { x*         = x*₂
-    ; x*-reached = x*₂-reached
-    }
--}

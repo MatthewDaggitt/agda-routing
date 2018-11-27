@@ -38,7 +38,6 @@ module RoutingLib.lmv34.Exercises2 where
   M = ((suc zero) :: (suc (suc zero)) :: []) :: ((suc (suc (suc zero))) :: (suc (suc (suc (suc zero)))) :: []) :: []
 
   -- Exercise 2.2
-
   _∘_ : {A B C : Set} -> (B -> C) -> (A -> B) -> (A -> C)
   (f ∘ g) x = f (g x)
 
@@ -50,9 +49,6 @@ module RoutingLib.lmv34.Exercises2 where
               ((tabulate f) ! i) == f i
   lem-!-tab f fzero = refl
   lem-!-tab f (fsuc j) = lem-!-tab (f ∘ fsuc) j
-
-  cong : ∀ {A B} {m n : A} -> (f : A -> B) -> m == n -> f m == f n
-  cong f refl = refl
 
   lem-tab-! : forall {A n} (xs : Vec A n) -> tabulate (_!_ xs) == xs
   lem-tab-! [] = refl

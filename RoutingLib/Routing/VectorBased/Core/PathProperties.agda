@@ -24,22 +24,22 @@ open import RoutingLib.Data.Path.CertifiedI.Properties using (∉ₚ-resp-≈ₚ
 
 open import RoutingLib.Routing using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
-import RoutingLib.Routing.Algebra.CertifiedPathAlgebra.Properties as PathAlgebraProperties
-import RoutingLib.Routing.Algebra.CertifiedPathAlgebra.Consistency as Consistency
+import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra as PathAlgebraProperties
+import RoutingLib.Routing.Algebra.Consistency as Consistency
 import RoutingLib.Routing.VectorBased.Synchronous as VectorBased
 import RoutingLib.Routing.VectorBased.Core.Properties as CoreProperties
 
 module RoutingLib.Routing.VectorBased.Core.PathProperties
   {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
   (A : AdjacencyMatrix algebra n)
   where
 
 open RawRoutingAlgebra algebra
 open IsCertifiedPathAlgebra isPathAlgebra
-open PathAlgebraProperties isPathAlgebra
-open Consistency algebra isPathAlgebra A
+open PathAlgebraProperties isRoutingAlgebra isPathAlgebra
+open Consistency isRoutingAlgebra isPathAlgebra A
 
 open VectorBased algebra A
 open CoreProperties isRoutingAlgebra A

@@ -16,23 +16,23 @@ open import RoutingLib.Data.List.Relation.Pointwise using (foldr⁺)
 open import RoutingLib.Data.List.Properties
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
 import RoutingLib.Routing.VectorBased.Asynchronous as VectorBased
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Properties as DistanceVectorProperties
 import RoutingLib.Routing.VectorBased.Core.PathProperties as CorePathProperties
 
 module RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Properties
-  {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)
-  {n} (isCertifiedPathAlgebra : IsCertifiedPathAlgebra algebra n)
+  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
   (A : AdjacencyMatrix algebra n)
   where
 
-open IsCertifiedPathAlgebra isCertifiedPathAlgebra
+open IsCertifiedPathAlgebra isPathAlgebra
 
 ------------------------------------------------------------------------
 -- Publicly re-export core properties
 
 open DistanceVectorProperties isRoutingAlgebra public
-open CorePathProperties isCertifiedPathAlgebra A public
+open CorePathProperties isRoutingAlgebra isPathAlgebra A public
 

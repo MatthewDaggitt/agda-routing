@@ -9,10 +9,9 @@ open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (deduplicate
 open import RoutingLib.Data.List.Membership.DecSetoid.Properties using (∈-deduplicate⁺)
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.RoutingAlgebra
-import RoutingLib.Routing.Algebra.RoutingAlgebra.Properties as RoutingAlgebraProperties
+import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
 
-module RoutingLib.Routing.Algebra.RoutingAlgebra.FiniteProperties
+module RoutingLib.Routing.Algebra.Properties.FiniteRoutingAlgebra
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (isFinite : IsFinite algebra)

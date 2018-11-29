@@ -19,6 +19,9 @@ open import RoutingLib.Routing.Protocols.BGPLite.Communities
 
 module RoutingLib.Routing.Protocols.BGPLite.Policy where
 
+------------------------------------------------------------------------
+-- A language for writing conditional expressions
+
 data Condition : Set where
   _and_     : Condition → Condition → Condition
   _or_      : Condition → Condition → Condition
@@ -29,7 +32,7 @@ data Condition : Set where
 
 evaluate : Condition → Route → Bool
 evaluate (s and t)   r              = evaluate s r ∧ evaluate t r
-evaluate (s or  t)   r              = evaluate s r ∨ evaluate t r
+evaluate (s or t)    r              = evaluate s r ∨ evaluate t r
 evaluate (not s)     r              = 𝔹.not (evaluate s r)
 evaluate (inComm  c) (valid l cs p) = c ∈? cs
 evaluate (isLevel k) (valid l cs p) = ⌊ k ≟ l ⌋
@@ -38,13 +41,12 @@ evaluate (inComm  c) invalid        = false
 evaluate (isLevel k) invalid        = false
 evaluate (inPath  i) invalid        = false
 
-------------
--- Policy --
-------------
+------------------------------------------------------------------------
+-- A language for writing policies
 
 data Policy : Set₁ where
   reject   : Policy
-  cond     : Condition → Policy → Policy
+  if_then_ : Condition → Policy → Policy
   compose  : Policy → Policy → Policy
   raise    : ℕ → Policy
   inflate  : ℕ → Policy
@@ -59,7 +61,7 @@ apply (delComm c)         (valid l cs p) = valid l (remove c cs) p
 apply (inflate n)         (valid l cs p) = valid l cs (Path.inflate p n)
 apply reject              r              = invalid
 apply (compose pol₂ pol₁) r              = apply pol₁ (apply pol₂ r )
-apply (cond p pol)        r              = if (evaluate p r) then (apply pol r) else r
+apply (if p then pol)     r              = if (evaluate p r) then (apply pol r) else r
 
 apply-increasing : ∀ pol {l cs p k ds q} → apply pol (valid l cs p) ≡ valid k ds q →
                    l ≤ k × length p ≤ length q × deflate p ≡ deflate q
@@ -68,7 +70,7 @@ apply-increasing (raise x)     refl = n≤m+n x _ , ≤-refl , refl
 apply-increasing (addComm c)   refl = ≤-refl    , ≤-refl , refl
 apply-increasing (delComm c)   refl = ≤-refl    , ≤-refl , refl
 apply-increasing (inflate n)   refl = ≤-refl    , inflate-length _ n , deflate-inflate _ n
-apply-increasing (cond x pol)  {l} {cs} {p} eq with evaluate x (valid l cs p) | eq
+apply-increasing (if x then pol) {l} {cs} {p} eq with evaluate x (valid l cs p) | eq
 ... | 𝔹.true  | e    = apply-increasing pol e
 ... | 𝔹.false | refl = ≤-refl , ≤-refl , refl
 apply-increasing (compose r s) {l} {cs} {p} eq

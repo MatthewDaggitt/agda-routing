@@ -27,6 +27,7 @@ open Uncertified public
   ; _∈ₚ_   to _∈ᵥₚ_
   ; _⇿_    to _⇿ᵥ_
   ; length to lengthᵥ
+  ; source to sourceᵥ
   )
 
 ----------------------------------------------------------------------------
@@ -65,3 +66,7 @@ i ∉ₚ p = ¬ (i ∈ₚ p)
 length : Path → ℕ
 length invalid   = 0
 length (valid p) = lengthᵥ p
+
+source : Path → Maybe ℕ
+source invalid   = nothing
+source (valid p) = sourceᵥ p

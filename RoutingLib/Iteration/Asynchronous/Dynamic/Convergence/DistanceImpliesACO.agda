@@ -19,7 +19,7 @@ open import RoutingLib.Data.Table.Properties using (max[t]≤x; x≤max[t]; max-
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
 open import RoutingLib.Data.Nat.Properties using (m+[n∸o]≤[m+n]∸o; module ≤-Reasoning)
 import RoutingLib.Function.Metric.FixedPoint as FixedPoints
-import RoutingLib.Function.Metric.Construct.SubsetMaxLift as SubsetMaxLift
+import RoutingLib.Function.Metric.Construct.Condition as Condition
 open import RoutingLib.Relation.Unary.Indexed
 open import RoutingLib.Relation.Binary.PropositionalEquality using (inspect′)
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as SubsetEquality
@@ -29,7 +29,7 @@ open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions usi
 
 open ≤-Reasoning
 
-module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Proofs.UltrametricToACO
+module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.DistanceImpliesACO
   {a ℓ n} {𝓘 : AsyncIterable a ℓ n} (UC : UltrametricConditions 𝓘) where
 
 open AsyncIterable 𝓘
@@ -59,9 +59,6 @@ module _ (e : Epoch) (p : Subset n) where
   ... | yes i∈p = dᵢ-cong e p
   ... | no  i∉p = λ _ _ → refl
 
-  postulate dₛ-cong : d e p Preserves₂ _≈[ p ]_ ⟶ _≈[ p ]_ ⟶ _≡_
-  -- dₛ-cong = SubsetMaxLift.dˢ-congˢ ≈ᵢ-setoidᵢ dᵢ p dᵢ-cong
-  
   d-cong : d e p Preserves₂ _≈_ ⟶ _≈_ ⟶ _≡_
   d-cong x≈y u≈v = max-cong refl (λ i → dₛᵢ-cong (x≈y i) (u≈v i))
   

@@ -15,15 +15,17 @@ open import Relation.Unary.Properties using (∁?)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; cong; cong₂; trans)
+open import Algebra using (Semilattice)
+open import Algebra.FunctionProperties
+open import Function using (id; _∘_)
+import Relation.Binary.EqReasoning as EqReasoning
 open import Relation.Nullary using (¬_)
 open import Relation.Unary using (∁; U)
 open import Relation.Unary.Properties using (U-Universal)
-open import Function using (id; _∘_)
-open import Algebra using (Semilattice)
-open import Algebra.FunctionProperties
 
 open import RoutingLib.Algebra
 open import RoutingLib.Data.List
+open import RoutingLib.Data.List.AllPairs using (AllPairs; []; _∷_)
 open import RoutingLib.Data.Nat.Properties
 open import RoutingLib.Algebra.FunctionProperties
 
@@ -231,19 +233,31 @@ module _ {a ℓ} (S : Semilattice a ℓ)  where
 module _ {a ℓ} (S : Setoid a ℓ)  where
 
   open Setoid S renaming (Carrier to A; refl to ≈-refl; sym to ≈-sym; trans to ≈-trans)
-
-  foldr-map-commute-gen : ∀ {b} {B : Set b} {_•ᵃ_ _•ᵇ_} {f : B → A} → Congruent₂ _≈_ _•ᵃ_ →
-                          ∀ {p} {P : Pred B p} → _•ᵇ_ Preservesᵇ P →
-                          (∀ {x y} → P x → P y → f x •ᵃ f y ≈ f (x •ᵇ y)) →
-                          ∀ {d : B} {xs : List B} → P d → All P xs →
-                          foldr _•ᵃ_ (f d) (map f xs) ≈ f (foldr _•ᵇ_ d xs)
-  foldr-map-commute-gen cong •-pres-P P-pres-f pd []         = ≈-refl
-  foldr-map-commute-gen cong •-pres-P P-pres-f pd (px ∷ pxs) = ≈-trans
-    (cong ≈-refl (foldr-map-commute-gen cong •-pres-P P-pres-f pd pxs))
+  open EqReasoning S
+  
+  foldr-map-commute-gen₁ : ∀ {b} {B : Set b} {_•ᵃ_ _•ᵇ_} {f : B → A} → Congruent₂ _≈_ _•ᵃ_ →
+                           ∀ {p} {P : Pred B p} → _•ᵇ_ Preservesᵇ P →
+                           (∀ {x y} → P x → P y → f x •ᵃ f y ≈ f (x •ᵇ y)) →
+                           ∀ {d : B} {xs : List B} → P d → All P xs →
+                           foldr _•ᵃ_ (f d) (map f xs) ≈ f (foldr _•ᵇ_ d xs)
+  foldr-map-commute-gen₁ cong •-pres-P P-pres-f pd []         = ≈-refl
+  foldr-map-commute-gen₁ cong •-pres-P P-pres-f pd (px ∷ pxs) = ≈-trans
+    (cong ≈-refl (foldr-map-commute-gen₁ cong •-pres-P P-pres-f pd pxs))
     (P-pres-f px (foldr-presᵇ •-pres-P pd pxs))
+
+  foldr-map-commute-gen₂ : ∀ {b} {B : Set b} {_•ᵃ_ _•ᵇ_} {f : B → A} → Congruent₂ _≈_ _•ᵃ_ →
+                           ∀ {ℓ} {_~_ : Rel B ℓ} → (∀ {x} → _•ᵇ_ Preservesᵇ (x ~_)) →
+                           (∀ {x y} → x ~ y → f x •ᵃ f y ≈ f (x •ᵇ y)) →
+                           ∀ {d : B} {xs : List B} → All (_~ d) xs → AllPairs _~_ xs →
+                           foldr _•ᵃ_ (f d) (map f xs) ≈ f (foldr _•ᵇ_ d xs)
+  foldr-map-commute-gen₂ {_}           {_}    {_} cong •ᵇ-pres-~ ~-pres-f {_} pd []       = ≈-refl
+  foldr-map-commute-gen₂ {_•ᵃ_ = _•ᵃ_} {_•ᵇ_} {f} cong {_} {_~_} •ᵇ-pres-~ ~-pres-f {d} {x ∷ xs} (x~d ∷ xs~d) (px ∷ pxs) = begin
+    (f x •ᵃ foldr _•ᵃ_ (f d) (map f xs)) ≈⟨ cong ≈-refl (foldr-map-commute-gen₂ cong •ᵇ-pres-~ ~-pres-f xs~d pxs) ⟩
+    (f x •ᵃ f (foldr _•ᵇ_ d xs))         ≈⟨ ~-pres-f (foldr-presᵇ •ᵇ-pres-~ x~d px) ⟩
+    f (x •ᵇ foldr _•ᵇ_ d xs)             ∎
 
   foldr-map-commute : ∀ {b} {B : Set b} {_•ᵃ_ _•ᵇ_} {f : B → A} →
                       Congruent₂ _≈_ _•ᵃ_ →
                       (∀ x y → f x •ᵃ f y ≈ f (x •ᵇ y)) →
                       ∀ d xs → foldr _•ᵃ_ (f d) (map f xs) ≈  f (foldr _•ᵇ_ d xs)
-  foldr-map-commute cong pres d xs = foldr-map-commute-gen cong (λ _ _ → _) (λ _ _ → pres _ _) (U-Universal d) (universal U-Universal xs)
+  foldr-map-commute cong pres d xs = foldr-map-commute-gen₁ cong (λ _ _ → _) (λ _ _ → pres _ _) (U-Universal d) (universal U-Universal xs)

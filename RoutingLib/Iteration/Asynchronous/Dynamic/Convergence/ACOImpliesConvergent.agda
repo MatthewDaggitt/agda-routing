@@ -29,19 +29,15 @@ open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
 import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudoperiod as Pseudoperiod
 
 
-module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Proofs.ACOToSafe
+module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.ACOImpliesConvergent
   {a ℓ n p} (𝓘 : AsyncIterable a ℓ n) (aco : ACO 𝓘 p) where
 
 open AsyncIterable 𝓘
 open ACO aco
-
-------------------------------------------------------------------------
--- Fixed points
-
 open ACOProperties 𝓘 aco 
 
 ------------------------------------------------------------------------
--- Initial boxes
+-- Notation
 
 module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ B₀) (𝓢 : Schedule n) where
 
@@ -117,18 +113,18 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ B₀) (𝓢 : Schedule n) where
   c∈Bₖ⇒m∈wf (zeroᵇ m∈wf _)   = m∈wf
   c∈Bₖ⇒m∈wf (sucᵇ  m∈wf _ _) = m∈wf
   
-  ------------------------------------------------------------------------
-  -- Actual proofs
-  ------------------------------------------------------------------------
-  -- Not participating
+--------------------------------------------------------------------------
+-- Actual proofs
+--------------------------------------------------------------------------
+-- Not participating
 
   i∉ρ⇒sᵢ∈Bₖᵢ : ∀ {i t k} → i ∉ₛ ρ t → StateOfNode i In (Bₜ t k) AtTime t
   i∉ρ⇒sᵢ∈Bₖᵢ {i} {t} {k} i∉ρₜ recₑ = begin⟨ B-null i∉ρₜ ⟩
     ⇒ ⊥ i        ∈ᵤ Bₜ t k i ∴⟨ Bᵢ-cong (≈ᵢ-sym (≈ᵢ-reflexive (asyncIter-inactive 𝓘 𝓢 x₀ recₑ i∉ρₜ))) ⟩
     ⇒ asyncₜ t i ∈ᵤ Bₜ t k i ∎
 
-  ------------------------------------------------------------------------
-  -- Base case: the asynchronous iteration is always in the initial box
+--------------------------------------------------------------------------
+-- Base case: the asynchronous iteration is always in the initial box
   
   state∈B₀ : ∀ t → StateIn (Bₜ t 0) AtTime t
   state∈B₀ zero    i (acc rec) with i ∈? ρ 0
@@ -146,10 +142,10 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ B₀) (𝓢 : Schedule n) where
   expiry⇒wellFormed {s} {e} (mkₑ (mkₛₑ s≤e ηₛ≡ηₑ) expiryᵢ) {i} {t} (mkₛₑ e≤1+t ηₑ≡η₁₊ₜ) {j} {accβ} i∈ρ₁₊ₑ j∉ρ₁₊ₜ =
     ≈ᵢ-reflexive (asyncIter-inactive 𝓘 𝓢 x₀ accβ (j∉ρ₁₊ₜ ∘ ∈ρ-subst (η-inRangeₑ (trans ηₛ≡ηₑ ηₑ≡η₁₊ₜ) (expiryᵢ (∈ρ-subst (sym (trans ηₛ≡ηₑ ηₑ≡η₁₊ₜ)) i∈ρ₁₊ₑ) e≤1+t j , β-decreasing i j (s≤s z≤n)))))
 
-  ------------------------------------------------------------------------
-  -- Preservation: if the asynchronous iteration is in a box and
-  -- information recieved is in that box then assuming the epoch is the
-  -- same, it will still be in that box in the future.
+--------------------------------------------------------------------------
+-- Preservation: if the asynchronous iteration is in a box and
+-- information recieved is in that box then assuming the epoch is the
+-- same, it will still be in that box in the future.
 
   wellFormed-steps : ∀ {s e} →
                      IsSubEpoch [ s , e ] →
@@ -185,10 +181,10 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ B₀) (𝓢 : Schedule n) where
   message-steps η[s,e]@(mkₛₑ _ ηₛ≡ηₑ) m∈b i η[e,1+t] i∈ρ₁₊ₜ recβ =
     async∈-resp-Bₜᵢ (β _ _ _) ηₛ≡ηₑ (m∈b i (η[s,e] ++ₛₑ η[e,1+t]) i∈ρ₁₊ₜ recβ)
 
-  ------------------------------------------------------------------------
-  -- Step: after one pseudoperiod the node is guaranteed to have
-  -- advanced at least one box
-  -- (Bₜ s k)
+--------------------------------------------------------------------------
+-- Step: after one pseudoperiod the node is guaranteed to have
+-- advanced at least one box
+-- (Bₜ s k)
   
   advance-stateᵢ : ∀ {s e i k} →
                    MessagesWellFormedAt s →
@@ -227,9 +223,9 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ B₀) (𝓢 : Schedule n) where
   ...   | s≤β with η-inRange ηₛ≡η₁₊ₜ (s≤β , (β-decreasing i j (s≤s z≤n)))
   ...     | (ηₛ≡ηβ , ηβ≡η₁₊ₜ) = async∈-resp-Bₜᵢ (β _ _ _) (trans ηβ≡η₁₊ₜ (sym ηₑ≡η₁₊ₜ)) (state-steps (mkₛₑ s≤β ηₛ≡ηβ) c∈Bₖ j recβ)
   
-  ------------------------------------------------------------------------
-  -- Steps : after k pseudoperiods all nodes are guaranteed to have
-  -- advanced at least k boxes
+--------------------------------------------------------------------------
+-- Steps : after k pseudoperiods all nodes are guaranteed to have
+-- advanced at least k boxes
 
   start-pp : ∀ {s e} →
              IsPseudoperiodic [ s , e ] →
@@ -265,8 +261,8 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ B₀) (𝓢 : Schedule n) where
     ⇒ ComputationInBox (n + suc k) AtTime e ∴⟨ subst (ComputationInBox_AtTime e) (+-suc n k) ⟩
     ⇒ ComputationInBox (suc n + k) AtTime e ∎
 
-  ------------------------------------------------------------------------
-  -- Convergence
+--------------------------------------------------------------------------
+-- Convergence
 
   computation∈Bₖ : ∀ {s e k} →
                    IsMultiPseudoperiodic (suc k) [ s , e ] →
@@ -297,8 +293,8 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ B₀) (𝓢 : Schedule n) where
                async (<-wellFounded e) ≈ x* (η s) (ρ s)
   x*-reached {s} = suc (k* (η s) (ρ s)) , x*-reached′
 
-isSafe : ConvergentOver 𝓘 B₀
-isSafe = record
+convergent : ConvergentOver 𝓘 B₀
+convergent = record
   { x*         = x*
   ; x*-fixed   = x*-fixed
   ; x*-reached = x*-reached

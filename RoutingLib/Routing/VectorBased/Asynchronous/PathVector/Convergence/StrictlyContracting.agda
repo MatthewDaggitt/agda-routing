@@ -19,10 +19,9 @@ open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
 
 open import RoutingLib.Routing using (Network)
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
-import RoutingLib.Routing.Algebra.RoutingAlgebra.Properties as RoutingAlgebraProperties
-import RoutingLib.Routing.Algebra.CertifiedPathAlgebra.Properties as PathAlgebraProperties
-import RoutingLib.Routing.Algebra.CertifiedPathAlgebra.Consistency as Consistency
+import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
+import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra as PathAlgebraProperties
+import RoutingLib.Routing.Algebra.Consistency as Consistency
 import RoutingLib.Routing.VectorBased.Core as VectorBasedRoutingCore
 import RoutingLib.Routing.VectorBased.Asynchronous as PathVector
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Properties as DistanceVectorProperties
@@ -36,6 +35,7 @@ open ≤-Reasoning
 
 module RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.StrictlyContracting
   {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
   (isStrictlyIncreasing : IsStrictlyIncreasing algebra)
   (network : Network algebra n)
@@ -44,7 +44,7 @@ module RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.Strict
 
 open RawRoutingAlgebra algebra
 open IsCertifiedPathAlgebra isPathAlgebra
-open PathAlgebraProperties isPathAlgebra
+open PathAlgebraProperties isRoutingAlgebra isPathAlgebra
 
 open PathVector algebra network hiding (F)
 
@@ -58,12 +58,12 @@ module _ (e : Epoch) (p : Subset n) where
     A = Aₜ e p
 
   
-  open Metrics isPathAlgebra A public
-  open MetricProperties isPathAlgebra A 1≤n p public
+  open Metrics isRoutingAlgebra isPathAlgebra A public
+  open MetricProperties isRoutingAlgebra isPathAlgebra A 1≤n p public
   
-  open Consistency algebra isPathAlgebra A
+  open Consistency isRoutingAlgebra isPathAlgebra A
   open VectorBasedRoutingCore algebraᶜ Aᶜ using () renaming (F to Fᶜ)
-  open PathVectorProperties algebra isPathAlgebra A
+  open PathVectorProperties isRoutingAlgebra isPathAlgebra A
 
   private
     module DVP  = DistanceVectorMetricProperties isRoutingAlgebraᶜ isFiniteᶜ
@@ -87,12 +87,12 @@ module _ (e : Epoch) (p : Subset n) where
                            ∀ {v} → (∀ k l → r (X k l) (F X k l) ≤ v) →
                            Hᶜ + hⁱ (F (F X) i j) < v
   rⁱ-strContrOrbits-F²X {X} {i} {j} F²Xᵢⱼⁱ {v} r≤v with FXᵢⱼⁱ⇒Xₖⱼⁱ≉FXₖⱼ (F X) i j F²Xᵢⱼⁱ
-  ... | (k , _ , FXₖⱼⁱ , |FXₖⱼ|<|F²Xᵢⱼ|) with FXᵢⱼⁱ⇒Xₖⱼⁱ≉FXₖⱼ X k j FXₖⱼⁱ
-  ...   | (l , Xₗⱼ≉FXₗⱼ , Xₗⱼⁱ , |Xₗⱼ|<|FXₖⱼ|) = begin
-    Hᶜ + hⁱ (F (F X) i j)             <⟨ +-monoʳ-< Hᶜ (hⁱ-mono Xₗⱼⁱ F²Xᵢⱼⁱ (<-trans |Xₗⱼ|<|FXₖⱼ| |FXₖⱼ|<|F²Xᵢⱼ|)) ⟩
-    Hᶜ + hⁱ (X l j)                   ≤⟨ +-monoʳ-≤ Hᶜ (m≤m⊔n _ _) ⟩
-    Hᶜ + (hⁱ (X l j) ⊔ hⁱ (F X l j))  ≡⟨ H+rⁱ≡r ≈-refl ≈-refl Xₗⱼ≉FXₗⱼ (inj₁ Xₗⱼⁱ) ⟩ 
-    r (X l j) (F X l j)              ≤⟨ r≤v l j ⟩
+  ... | (l , _ , FXₗⱼⁱ , |FXₗⱼ|<|F²Xₗⱼ|) with FXᵢⱼⁱ⇒Xₖⱼⁱ≉FXₖⱼ X l j FXₗⱼⁱ
+  ...   | (k , Xₖⱼ≉FXₖⱼ , Xₖⱼⁱ , |Xₖⱼ|<|FXₖⱼ|) = begin
+    Hᶜ + hⁱ (F (F X) i j)             <⟨ +-monoʳ-< Hᶜ (hⁱ-mono Xₖⱼⁱ F²Xᵢⱼⁱ (<-trans |Xₖⱼ|<|FXₖⱼ| |FXₗⱼ|<|F²Xₗⱼ|)) ⟩
+    Hᶜ + hⁱ (X k j)                   ≤⟨ +-monoʳ-≤ Hᶜ (m≤m⊔n _ _) ⟩
+    Hᶜ + (hⁱ (X k j) ⊔ hⁱ (F X k j))  ≡⟨ H+rⁱ≡r ≈-refl ≈-refl Xₖⱼ≉FXₖⱼ (inj₁ Xₖⱼⁱ) ⟩ 
+    r (X k j) (F X k j)               ≤⟨ r≤v k j ⟩
     v                                 ∎
 
   rⁱ-strContrOn𝑪 : ∀ {X Y i j} → 𝑪ₘ X → 𝑰 (F Y i j) →
@@ -100,13 +100,13 @@ module _ (e : Epoch) (p : Subset n) where
                     Hᶜ + rⁱ (F X i j) (F Y i j) < v
   rⁱ-strContrOn𝑪 {X} {Y} {i} {j} Xᶜ FYᵢⱼⁱ {v} r≤v with FXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ Y i j FYᵢⱼⁱ
   ... | (k , FYᵢⱼ≈AᵢₖYₖⱼ , Yₖⱼⁱ) = begin
-    Hᶜ + rⁱ (F X i j) (F Y i j) ≡⟨ cong (Hᶜ +_) (rⁱxᶜyⁱ≡hⁱyⁱ (F-pres-𝑪ₘ Xᶜ i j) FYᵢⱼⁱ) ⟩
+    Hᶜ + rⁱ (F X i j) (F Y i j)  ≡⟨ cong (Hᶜ +_) (rⁱxᶜyⁱ≡hⁱyⁱ (F-pres-𝑪ₘ Xᶜ i j) FYᵢⱼⁱ) ⟩
     Hᶜ + hⁱ (F Y i j)            ≡⟨ cong (Hᶜ +_) (hⁱ-cong FYᵢⱼ≈AᵢₖYₖⱼ) ⟩
     Hᶜ + hⁱ (A i k ▷ Y k j)      <⟨ +-monoʳ-< Hᶜ (hⁱ-decr (𝑰-cong FYᵢⱼ≈AᵢₖYₖⱼ FYᵢⱼⁱ)) ⟩
     Hᶜ + hⁱ (Y k j)              ≡⟨ cong (Hᶜ +_) (sym (rⁱxᶜyⁱ≡hⁱyⁱ (Xᶜ k j) Yₖⱼⁱ)) ⟩
-    Hᶜ + rⁱ (X k j) (Y k j)     ≡⟨ H+rⁱ≡r ≈-refl ≈-refl (𝑪𝑰⇒≉ (Xᶜ k j) Yₖⱼⁱ) (inj₂ Yₖⱼⁱ) ⟩
-    r (X k j) (Y k j)           ≤⟨ r≤v k j ⟩
-    v                           ∎
+    Hᶜ + rⁱ (X k j) (Y k j)      ≡⟨ H+rⁱ≡r ≈-refl ≈-refl (𝑪𝑰⇒≉ (Xᶜ k j) Yₖⱼⁱ) (inj₂ Yₖⱼⁱ) ⟩
+    r (X k j) (Y k j)            ≤⟨ r≤v k j ⟩
+    v                            ∎
     where open ≤-Reasoning
 
   rⁱ-strContrOrbits : ∀ {X i j} → 𝑰 (F X i j) ⊎ 𝑰 (F (F X) i j) →
@@ -149,16 +149,16 @@ module _ (e : Epoch) (p : Subset n) where
                    rᶜ FXᵢⱼᶜ FYᵢⱼᶜ < v
   rᶜ-strContr-𝑪𝑰 {X} {Y} (inj₁ (Xⁱ , Yᶜ)) FXᵢⱼᶜ FYᵢⱼᶜ {v} r≤v with 𝑰ₘ-witness Xⁱ
   ...   | (k , l , Xₖₗⁱ) = begin
-    rᶜ FXᵢⱼᶜ  FYᵢⱼᶜ         <⟨ rᶜ<Hᶜ+x FXᵢⱼᶜ FYᵢⱼᶜ _ ⟩
-    Hᶜ + rⁱ (X k l) (Y k l) ≡⟨ H+rⁱ≡r ≈-refl ≈-refl (𝑪𝑰⇒≉ (Yᶜ k l) Xₖₗⁱ ∘ ≈-sym) (inj₁ Xₖₗⁱ) ⟩
-    r (X k l) (Y k l)       ≤⟨ r≤v k l ⟩
+    rᶜ FXᵢⱼᶜ  FYᵢⱼᶜ            <⟨ rᶜ<Hᶜ+x FXᵢⱼᶜ FYᵢⱼᶜ _ ⟩
+    Hᶜ + rⁱ (X k l) (Y k l)  ≡⟨ H+rⁱ≡r ≈-refl ≈-refl (𝑪𝑰⇒≉ (Yᶜ k l) Xₖₗⁱ ∘ ≈-sym) (inj₁ Xₖₗⁱ) ⟩
+    r (X k l) (Y k l)        ≤⟨ r≤v k l ⟩
     v                        ∎
     where open ≤-Reasoning
   rᶜ-strContr-𝑪𝑰 {X} {Y} (inj₂ (Xᶜ , Yⁱ)) FXᵢⱼᶜ FYᵢⱼᶜ {v} r≤v with 𝑰ₘ-witness Yⁱ
   ... | (k , l , Yₖₗⁱ) = begin
-    rᶜ FXᵢⱼᶜ  FYᵢⱼᶜ           <⟨ rᶜ<Hᶜ+x FXᵢⱼᶜ FYᵢⱼᶜ _ ⟩
-    Hᶜ + rⁱ (X k l) (Y k l) ≡⟨ H+rⁱ≡r ≈-refl ≈-refl (𝑪𝑰⇒≉ (Xᶜ k l) Yₖₗⁱ) (inj₂ Yₖₗⁱ) ⟩
-    r (X k l) (Y k l)       ≤⟨ r≤v k l ⟩
+    rᶜ FXᵢⱼᶜ  FYᵢⱼᶜ            <⟨ rᶜ<Hᶜ+x FXᵢⱼᶜ FYᵢⱼᶜ _ ⟩
+    Hᶜ + rⁱ (X k l) (Y k l)  ≡⟨ H+rⁱ≡r ≈-refl ≈-refl (𝑪𝑰⇒≉ (Xᶜ k l) Yₖₗⁱ) (inj₂ Yₖₗⁱ) ⟩
+    r (X k l) (Y k l)        ≤⟨ r≤v k l ⟩
     v                        ∎
     where open ≤-Reasoning
 
@@ -176,7 +176,7 @@ module _ (e : Epoch) (p : Subset n) where
     rᶜ FXᵢⱼᶜ  F²Xᵢⱼᶜ            <⟨ rᶜ<Hᶜ+x FXᵢⱼᶜ F²Xᵢⱼᶜ _ ⟩
     Hᶜ + rⁱ (X k n) (F X k n) ≡⟨ H+rⁱ≡r ≈-refl ≈-refl Xₖₙ≉FXₖₙ (inj₁ Xₖₙⁱ) ⟩
     r (X k n) (F X k n)       ≤⟨ r≤v k n ⟩
-    v                          ∎
+    v                         ∎
     where open ≤-Reasoning
 
   rᶜ-strContrOn𝑪 : ∀ {X Y} → 𝑪ₘ X →
@@ -192,12 +192,12 @@ module _ (e : Epoch) (p : Subset n) where
   -- r is contracting in the right way
 
   r-strContrOrbits : ∀ {X} →
-                      ∀ {v} → 0 < v → (∀ k l → r (X k l) (F X k l) ≤ v) →
-                      ∀ i j → r (F X i j) (F (F X) i j) < v
+                     ∀ {v} → 0 < v → (∀ k l → r (X k l) (F X k l) ≤ v) →
+                     ∀ i j → r (F X i j) (F (F X) i j) < v
   r-strContrOrbits {X} 0<v r≤v i j
     with F X i j ≟ F (F X) i j | 𝑪? (F X i j) | 𝑪? (F (F X) i j)
   ... | yes FXᵢⱼ≈F²Xᵢⱼ | _         | _          = 0<v
-  ... | no  _          | yes FXᵢⱼᶜ | yes F²Xᵢⱼᶜ = rᶜ-strContrOrbits FXᵢⱼᶜ F²Xᵢⱼᶜ 0<v r≤v
+  ... | no  _          | yes FXᵢⱼᶜ | yes F²Xᵢⱼᶜ  = rᶜ-strContrOrbits FXᵢⱼᶜ F²Xᵢⱼᶜ 0<v r≤v
   ... | no  _          | no  FXᵢⱼⁱ | _          = rⁱ-strContrOrbits (inj₁ FXᵢⱼⁱ) r≤v
   ... | no  _          | yes _     | no  F²Xᵢⱼⁱ = rⁱ-strContrOrbits (inj₂ F²Xᵢⱼⁱ) r≤v
 

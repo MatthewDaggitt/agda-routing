@@ -26,10 +26,9 @@ open import RoutingLib.Data.List.Relation.Pointwise
   using (foldr⁺)
 import RoutingLib.Relation.Binary.Reasoning.PartialOrder as POR
 
-open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.RoutingAlgebra
 open import RoutingLib.Routing using (AdjacencyMatrix)
-import RoutingLib.Routing.Algebra.RoutingAlgebra.Properties as RoutingAlgebraProperties
+open import RoutingLib.Routing.Algebra
+import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
 
 import RoutingLib.Routing.VectorBased.Synchronous as VectorBased
 

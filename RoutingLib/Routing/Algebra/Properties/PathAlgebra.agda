@@ -11,11 +11,11 @@ open import RoutingLib.Data.Path.Uncertified
 open import RoutingLib.Data.Path.Uncertified.Properties
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.PathAlgebra
-import RoutingLib.Routing.Algebra.RoutingAlgebra.Properties as RoutingAlgebraProperties
+import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
 
-module RoutingLib.Routing.Algebra.PathAlgebra.Properties
-  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
+module RoutingLib.Routing.Algebra.Properties.PathAlgebra
+  {a b ℓ} {algebra  : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (isPathAlgebra : IsPathAlgebra algebra)
   where
 

@@ -36,8 +36,6 @@ abstract
   _∈?_ : Community → CommunitySet → Bool
   c ∈? cs = ⌊ c ∈ₛ? cs ⌋
 
-  -- We assume there is decidable total order over community sets
-
   _≤ᶜˢ_ : Rel CommunitySet ℓ₀
   _≤ᶜˢ_ = Lex _<_
 

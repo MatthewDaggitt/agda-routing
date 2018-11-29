@@ -10,11 +10,9 @@ open import Relation.Nullary.Decidable using (⌊_⌋)
 
 open import RoutingLib.Data.Table using (max; zipWith)
 
-open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.RoutingAlgebra
-import RoutingLib.Routing.Algebra.RoutingAlgebra.Properties as RoutingAlgebraProperties
 import RoutingLib.Routing as Routing
-import RoutingLib.Routing.Algebra.RoutingAlgebra.FiniteProperties as FiniteProperties
+open import RoutingLib.Routing.Algebra
+import RoutingLib.Routing.Algebra.Properties.FiniteRoutingAlgebra as FiniteRoutingAlgebraProperties
 
 module RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Metrics
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
@@ -24,7 +22,7 @@ module RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Me
 
 open Routing algebra
 open RawRoutingAlgebra algebra
-open FiniteProperties isRoutingAlgebra isFinite
+open FiniteRoutingAlgebraProperties isRoutingAlgebra isFinite
 
 -- Some notational shorthand for the index of route u in the list of routes
 i[_] : Route → Fin (length routes)

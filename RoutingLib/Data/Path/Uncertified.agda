@@ -1,4 +1,5 @@
 open import Data.Fin using (Fin; _≤_) renaming (zero to fzero; suc to fsuc)
+open import Data.Maybe using (Maybe; just; nothing)
 open import Data.Nat using (ℕ; _<_; zero; suc; _≟_)
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
 open import Data.List using (List; []; _∷_; map)
@@ -83,6 +84,10 @@ open ToStrict _≡_ _≤ₗₑₓ_ public
 length : Path → ℕ
 length []      = 0
 length (_ ∷ p) = suc (length p)
+
+source : Path → Maybe ℕ
+source []            = nothing
+source ((i , j) ∷ p) = just i
 
 inflate : Path → ℕ → Path
 inflate p               zero    = p

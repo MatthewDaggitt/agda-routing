@@ -12,11 +12,11 @@ import Relation.Binary.EqReasoning as EqReasoning
 open import Relation.Binary.PropositionalEquality using (_≡_; cong)
 
 open import RoutingLib.Data.Matrix using (SquareMatrix)
-open import RoutingLib.Data.List.Properties using (foldr-map-commute-gen)
+open import RoutingLib.Data.List.Properties using (foldr-map-commute-gen₂)
 open import RoutingLib.Data.List.Relation.Equality.Setoid using (foldr⁺; map-tabulate)
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic as Async using (Convergent)
-import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Theorems as Async
+import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence as Async
 
 open import RoutingLib.Routing using (Network)
 open import RoutingLib.Routing.Algebra
@@ -49,7 +49,7 @@ module RoutingLib.Routing.Algebra.Bisimulation {a₁ b₁ ℓ₁ a₂ b₂ ℓ�
       to-▷      : ∀ {n} {i j : Fin n} (f : Step A i j) x → to (f  ▷ᵃ x) ≈ᵇ toₛ f ▷ᵇ to x
       to-from   : ∀ x → to (from x) ≈ᵇ x
 
-      -- ⊕-pres-WF : ∀ {x y} → Comparable x y → WellFormed (x ⊕ᵃ y)
+      ⊕-pres-WF : ∀ {x y z} → Comparable x y → Comparable x z → Comparable x (y ⊕ᵃ z)
 
 
 
@@ -85,7 +85,8 @@ module RoutingLib.Routing.Algebra.Bisimulation {a₁ b₁ ℓ₁ a₂ b₂ ℓ�
           to (Fᵃ e p X i j)
         ≡⟨⟩
           to (foldr _⊕ᵃ_ (Iᵃ i j) (tabulate (λ k → Aᵃ e p i k ▷ᵃ X k j)))
-        ≈⟨ ≈-sym B ? ⟩ --(foldr-map-commute-gen (S B) {f = to} (⊕-cong B) ⊕-pres-WF to-⊕ (Iᵢⱼ-wf i j) (tabulate⁺ λ k → extend (Aᵃ i k) (X k j))) ⟩
+        ≈⟨ ≈-sym B (foldr-map-commute-gen₂ (S B) {f = to} (⊕-cong B) ⊕-pres-WF to-⊕ {!!} {!!}) ⟩
+          --(foldr-map-commute-gen (S B) {f = to} (⊕-cong B) ⊕-pres-WF to-⊕ (Iᵢⱼ-wf i j) (tabulate⁺ λ k → extend (Aᵃ i k) (X k j))) ⟩
           foldr _⊕ᵇ_ (to (Iᵃ i j)) (map to (tabulate λ k → Aᵃ e p i k ▷ᵃ X k j))
         ≈⟨ foldr⁺ (S B) (⊕-cong B) (toIᵃ≈Iᵇ i j) (map-tabulate (S B) to (λ k → Aᵃ e p i k ▷ᵃ X k j)) ⟩
           foldr _⊕ᵇ_ (Iᵇ i j) (tabulate (λ k → to (Aᵃ e p i k ▷ᵃ X k j)))
@@ -110,4 +111,4 @@ module RoutingLib.Routing.Algebra.Bisimulation {a₁ b₁ ℓ₁ a₂ b₂ ℓ�
       }
 
     bisimulation : Convergent F∥ᵃ → Bisimilar A B → Convergent F∥ᵇ
-    bisimulation convergent bisim = Async.bisimilar convergent {!!} --(F∥↭ ? {!!})
+    bisimulation convergent bisim = Async.bisimilar convergent F∥↭

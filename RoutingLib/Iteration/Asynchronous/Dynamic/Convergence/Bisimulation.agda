@@ -14,12 +14,12 @@ open import RoutingLib.Iteration.Asynchronous.Dynamic
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudoperiod
 
-module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Proofs.Bisimulation
+module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Bisimulation
   {a₁ a₂ ℓ₁ ℓ₂ n}
   {P∥ : AsyncIterable a₁ ℓ₁ n}
   {Q∥ : AsyncIterable a₂ ℓ₂ n}
-  (P∥-convergent : Convergent P∥)
-  (P∥∼Q∥ : Bisimilar P∥ Q∥)
+  (P-convergent : Convergent P∥)
+  (P∼Q : Bisimilar P∥ Q∥)
   where
 
   private
@@ -27,11 +27,14 @@ module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Proofs.Bisimulation
     module P = AsyncIterable P∥
     module Q = AsyncIterable Q∥
 
-    open Bisimilar P∥∼Q∥
-    open ConvergentOver P∥-convergent
-      renaming (x* to y*; x*-fixed to y*-fixed; x*-reached to y*-reached)
-
     open Schedule
+    open Bisimilar P∼Q
+    open ConvergentOver P-convergent
+      renaming
+      ( x*         to y*
+      ; x*-fixed   to y*-fixed
+      ; x*-reached to y*-reached
+      )
 
     asyncIter-eq : ∀ s x₀ → ∀ {t} (tAcc : Acc _<_ t) →
                    to (asyncIter' P∥ s (from x₀) tAcc) Q.≈ asyncIter' Q∥ s x₀ tAcc
@@ -43,6 +46,7 @@ module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Proofs.Bisimulation
     ... | yes _      | no  _ | _     = toᵢ-fromᵢ (x₀ i)
     ... | yes _      | yes _ | no  _ = asyncIter-eq s x₀ (tAcc _ ≤-refl) i
     ... | yes i∈ρ₁₊ₜ | yes _ | yes _ = Q.≈ᵢ-trans (toᵢ-F _) (Q.F-cong (η s (suc t)) (ρ s (suc t)) (λ {j} _ → asyncIter-eq s x₀ (tAcc (β s (suc t) i j) _) j) i∈ρ₁₊ₜ)
+
     x* : Epoch → Subset n → Q.S
     x* e p = to (y* e p)
 

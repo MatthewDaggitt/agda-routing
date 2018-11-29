@@ -17,8 +17,7 @@ import RoutingLib.Function.Metric as Metric
 import RoutingLib.Relation.Binary.Reasoning.PartialOrder as POR
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.RoutingAlgebra
-import RoutingLib.Routing.Algebra.RoutingAlgebra.Properties as RoutingAlgebraProperties
+import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix; Network)
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
 
@@ -26,7 +25,7 @@ import RoutingLib.Routing.VectorBased.Core as CoreVectorBasedRouting
 import RoutingLib.Routing.VectorBased.Core.Properties as CoreVectorBasedRoutingProperties
 import RoutingLib.Routing.VectorBased.Asynchronous as DistanceVectorRouting
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Properties as DistanceVectorRoutingProperties
-import RoutingLib.Routing.Algebra.RoutingAlgebra.FiniteProperties as FiniteProperties
+import RoutingLib.Routing.Algebra.Properties.FiniteRoutingAlgebra as FiniteRoutingAlgebraProperties
 import RoutingLib.Routing.VectorBased.Asynchronous as AsyncVectorBased
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Metrics as Metrics
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Properties as MetricsProperties
@@ -40,7 +39,7 @@ module RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.St
 
 open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
-open FiniteProperties isRoutingAlgebra isFinite
+open FiniteRoutingAlgebraProperties isRoutingAlgebra isFinite
 
 open Metrics isRoutingAlgebra isFinite
 open MetricsProperties isRoutingAlgebra isFinite

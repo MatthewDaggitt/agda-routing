@@ -9,12 +9,12 @@ open import RoutingLib.Relation.Unary.Indexed using (_∈_; U)
 open import RoutingLib.Iteration.Asynchronous.Dynamic
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Properties
 import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions as Conditions
-import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Proofs.ACOToSafe as ACOToSafe
-import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Proofs.Bisimulation as Bisimulation
-import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Proofs.UltrametricToACO as UltrametricToACO
+import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.ACOImpliesConvergent as ACOImpliesConvergent
+import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Bisimulation as Bisimulation
+import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.DistanceImpliesACO as DistanceImpliesACO
 
 
-module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Theorems where
+module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence where
 
 ------------------------------------------------------------------------
 -- Export convergence conditions publically
@@ -32,12 +32,24 @@ open Conditions public
   }
 
 ------------------------------------------------------------------------
+-- If a convergent iteration is bisimilar to a second iteration then
+-- that iteration is also convergent
+
+module _ {a b ℓ₁ ℓ₂ n}
+         {P∥ : AsyncIterable a ℓ₁ n}
+         {Q∥ : AsyncIterable b ℓ₂ n}
+         where
+
+  bisimilar : Convergent P∥ → Bisimilar P∥ Q∥ → Convergent Q∥
+  bisimilar = Bisimulation.bisimulation
+
+------------------------------------------------------------------------
 -- The operator being ACO implies that the iteration is convergent
 
 module _ {a ℓ n} {P∥ : AsyncIterable a ℓ n} where
 
   ACO⇒convergent : ∀ {p} (aco : ACO P∥ p) → ConvergentOver P∥ (ACO.B₀ aco)
-  ACO⇒convergent aco = ACOToSafe.isSafe P∥ aco
+  ACO⇒convergent aco = ACOImpliesConvergent.convergent P∥ aco
 
 ------------------------------------------------------------------------
 -- The operator fulfilling the ultrametric conditions implies the
@@ -46,21 +58,9 @@ module _ {a ℓ n} {P∥ : AsyncIterable a ℓ n} where
 module _ {a ℓ n} {P∥ : AsyncIterable a ℓ n} where
 
   ultra⇒ACO : UltrametricConditions P∥ → ACO P∥ ℓ
-  ultra⇒ACO ultra = UltrametricToACO.aco ultra
+  ultra⇒ACO ultra = DistanceImpliesACO.aco ultra
 
   ultra⇒convergent : UltrametricConditions P∥ → Convergent P∥
   ultra⇒convergent ultra = convergentOver-universal
-    (UltrametricToACO.B₀-univ ultra)
+    (DistanceImpliesACO.B₀-univ ultra)
     (ACO⇒convergent (ultra⇒ACO ultra))
-
-------------------------------------------------------------------------
--- If a convergent iteration is bisimilar to a second iteration then
--- that iteration is also convergent
-
-module _ {a₁ a₂ ℓ₁ ℓ₂ n}
-         {P∥ : AsyncIterable a₁ ℓ₁ n}
-         {Q∥ : AsyncIterable a₂ ℓ₂ n}
-         where
-
-  bisimilar : Convergent P∥ → Bisimilar P∥ Q∥ → Convergent Q∥
-  bisimilar = Bisimulation.bisimulation

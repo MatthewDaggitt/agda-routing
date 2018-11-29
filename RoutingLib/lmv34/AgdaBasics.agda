@@ -74,6 +74,22 @@ module RoutingLib.lmv34.AgdaBasics where
   data _==_ {A : Set}(x : A) : A -> Set where
     refl : x == x
 
+  sym : {A : Set} -> {a b : A} ->
+        a == b -> b == a
+  sym refl = refl
+
+  trans : {A : Set} -> {a b c : A} ->
+        a == b -> b == c -> a == c
+  trans refl refl = refl
+
+  cong : {A B : Set} -> {a a' : A} ->
+        (f : A -> B) -> (a == a') -> (f a == f a')
+  cong f refl = refl
+
+  sym-inv-lemma : {A : Set} -> {a b : A} ->
+        (p : a == b) -> (sym (sym p) == p)
+  sym-inv-lemma refl = refl
+
   data _≤_ : Nat -> Nat -> Set where
     leq-zero : {n : Nat} -> zero ≤ n
     leq-suc  : {m n : Nat} -> m ≤ n -> suc m ≤ suc n
@@ -102,22 +118,22 @@ module RoutingLib.lmv34.AgdaBasics where
   ... | true  = x :: filter p xs
   ... | false = filter p xs
 
-  data _≠_ : Nat -> Nat -> Set where
-    z≠s : {n : Nat} -> zero ≠ suc n
-    s≠z : {n : Nat} -> suc n ≠ zero
-    s≠s : {m n : Nat} -> m ≠ n -> suc m ≠ suc n
+  data _≠₁_ : Nat -> Nat -> Set where
+    z≠s : {n : Nat} -> zero ≠₁ suc n
+    s≠z : {n : Nat} -> suc n ≠₁ zero
+    s≠s : {m n : Nat} -> m ≠₁ n -> suc m ≠₁ suc n
 
-  data Equal? (m n : Nat) : Set where
-    eq  : m == n -> Equal? m n
-    neq : m ≠ n -> Equal? m n
+  data Equal₁? (m n : Nat) : Set where
+    eq  : m == n -> Equal₁? m n
+    neq : m ≠₁ n -> Equal₁? m n
 
-  equal? : (m n : Nat) -> Equal? m n
-  equal? zero zero    = eq refl
-  equal? zero (suc n) = neq z≠s
-  equal? (suc m) zero = neq s≠z
-  equal? (suc m) (suc n)  with equal? m n
-  equal? (suc m) (suc .m) | eq refl = eq refl
-  equal? (suc m) (suc n)  | neq p   = neq (s≠s p)
+  equal₁? : (m n : Nat) -> Equal₁? m n
+  equal₁? zero zero    = eq refl
+  equal₁? zero (suc n) = neq z≠s
+  equal₁? (suc m) zero = neq s≠z
+  equal₁? (suc m) (suc n)  with equal₁? m n
+  equal₁? (suc m) (suc .m) | eq refl = eq refl
+  equal₁? (suc m) (suc n)  | neq p   = neq (s≠s p)
 
   infix 20 _⊆_
   data _⊆_ {A : Set} : List A -> List A -> Set where

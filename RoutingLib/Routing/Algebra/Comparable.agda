@@ -32,8 +32,8 @@ data _≎_ : Rel Route (a ⊔ b) where
   0∞# : 0# ≎ ∞
   ∞0# : ∞ ≎ 0#
   ∞∞# : ∞ ≎ ∞
-  e0# : ∀ {n} {i j : Fin n} (f : Step i j) (x : Route) → 0# ≎ f ▷ x
-  0e# : ∀ {n} {i j : Fin n} (f : Step i j) (x : Route) → f ▷ x ≎ 0#
+  0e# : ∀ {n} {i j : Fin n} (f : Step i j) (x : Route) → 0# ≎ f ▷ x
+  e0# : ∀ {n} {i j : Fin n} (f : Step i j) (x : Route) → f ▷ x ≎ 0#
   ∞e# : ∀ {n} {i j : Fin n} (f : Step i j) (x : Route) → ∞ ≎ f ▷ x
   e∞# : ∀ {n} {i j : Fin n} (f : Step i j) (x : Route) → f ▷ x ≎ ∞
   ee# : ∀ {n} {i j k : Fin n} (f : Step i j) (g : Step i k) (x y : Route) → j ≢ k → f ▷ x ≎ g ▷ y

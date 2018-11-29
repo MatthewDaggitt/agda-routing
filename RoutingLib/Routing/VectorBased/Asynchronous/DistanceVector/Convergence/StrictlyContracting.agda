@@ -12,9 +12,10 @@ open import Relation.Nullary.Negation using (contradiction)
 open import RoutingLib.Data.Table using (max)
 open import RoutingLib.Data.Table.Properties using (max[t]<x; x≤max[t])
 open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning; n≢0⇒0<n)
-import RoutingLib.Function.Metric.Construct.MaxLift as MaxLift
+import RoutingLib.Function.Metric.Construct.Condition as Condition
 import RoutingLib.Function.Metric as Metric
 import RoutingLib.Relation.Binary.Reasoning.PartialOrder as POR
+open import RoutingLib.Relation.Nullary.Decidable using ([_,_])
 
 open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
@@ -115,11 +116,16 @@ module _ {n} (network : Network algebra n) where
       F : RoutingMatrix → RoutingMatrix
       F = F′ e p
 
+    -- This lemma is a mess as can't pattern match on `i ∈? p` directly
+    -- as it unfolds the adjacency matrix
     d[FXᵢ,FYᵢ]<DXY : ∀ {X Y} → WellFormed p X → WellFormed p Y →
                      Y ≉ₘ[ p ] X → ∀ i → dᶜ p i (F X i) (F Y i) < D p X Y
-    d[FXᵢ,FYᵢ]<DXY {X} {Y} wfX wfY Y≉X i with Y≉ₚX⇒0<DXY p Y≉X | i ∈? p
-    ... | 0<DXY | no  _ = 0<DXY
-    ... | 0<DXY | yes _ = max[t]<x 0<DXY (λ j → r[FXᵢⱼ,FYᵢⱼ]<v A X Y i j 0<DXY (λ k _ → r≤D-wf p wfX wfY k j))
+    d[FXᵢ,FYᵢ]<DXY {X} {Y} wfX wfY Y≉X i with Y≉ₚX⇒0<DXY p Y≉X
+    ... | 0<DXY with max[t]<x 0<DXY (λ j → r[FXᵢⱼ,FYᵢⱼ]<v A X Y i j 0<DXY (λ k _ → r≤D-wf p wfX wfY k j))
+    ...   | d[FXᵢ,FYᵢ]<DXY = [
+        (λ i∈p → subst (_< D p X Y) (sym (Condition.accept (d {n}) (_∈? p) i∈p)) d[FXᵢ,FYᵢ]<DXY) ,
+        (λ i∉p → subst (_< D p X Y) (sym (Condition.reject (d {n}) (_∈? p) i∉p)) 0<DXY)
+      ] (i ∈? p)
 
     F-strContr : ∀ {X Y} → WellFormed p X → WellFormed p Y → Y ≉ₘ[ p ] X →
                  D p (F X) (F Y) < D p X Y

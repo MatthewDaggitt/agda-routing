@@ -8,49 +8,66 @@ import RoutingLib.Routing as Routing
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Algebra.Properties.PathAlgebra
 open import RoutingLib.Routing.Algebra.Certification
+open import RoutingLib.Routing.Algebra.Bisimulation as Algebra using (Bisimilar)
 import RoutingLib.Routing.VectorBased.Asynchronous as VectorBased
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.StrictlyContracting as DistanceVectorResults
 import RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.StrictlyContracting as PathVectorResults
 
-module RoutingLib.Routing.VectorBased.Asynchronous.Convergence
-  {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
+module RoutingLib.Routing.VectorBased.Asynchronous.Convergence where
 
-open Routing algebra using (Network)
-open VectorBased algebra using (F∥)
+open Routing using (Network)
+open VectorBased using (F∥)
 
 --------------------------------------------------------------------------------
 -- Definition of correctness
 
-AlwaysConvergent : Set _
-AlwaysConvergent = ∀ {n} (network : Network n) → Convergent (F∥ network)
+AlwaysConvergent : ∀ {a b ℓ} → RawRoutingAlgebra a b ℓ → Set _
+AlwaysConvergent A = ∀ {n} (network : Network A n) → Convergent (F∥ A network)
 
 --------------------------------------------------------------------------------
--- Theorem 1
+-- Finite strictly increasing distance vector protocols
 --
 -- The asynchronous state function δ is always guaranteed to converge
 -- asynchronously over any finite, strictly increasing routing algebra. This
 -- therefore applies to distance vector protocols.
 
-finiteStrictlyIncr-converges : IsRoutingAlgebra algebra →
-                               IsFinite algebra →
-                               IsStrictlyIncreasing algebra →
-                               AlwaysConvergent
+finiteStrictlyIncr-converges : ∀ {a b ℓ} {A : RawRoutingAlgebra a b ℓ} →
+                               IsRoutingAlgebra A →
+                               IsFinite A →
+                               IsStrictlyIncreasing A →
+                               AlwaysConvergent A
 finiteStrictlyIncr-converges routingAlg finite strIncr network =
   ultra⇒convergent (DistanceVectorResults.ultrametricConditions
     routingAlg finite strIncr network)
 
 --------------------------------------------------------------------------------
--- Theorem 2
+-- Strictly increasing path vector protocols
 --
 -- The asynchronous state function δ is always guaranteed to converge over any
 -- strictly increasing path algebra. This therefore applies to path vector
 -- algebras.
 
-incrPaths-converges : IsRoutingAlgebra algebra →
-                      IsPathAlgebra algebra →
-                      IsIncreasing algebra →
-                      AlwaysConvergent
-incrPaths-converges _          _       _    {zero}  network = |0|-convergent (F∥ network)
-incrPaths-converges routingAlg pathAlg incr {suc n} network =
+incrPaths-converges : ∀ {a b ℓ} {A : RawRoutingAlgebra a b ℓ} →
+                      IsRoutingAlgebra A →
+                      IsPathAlgebra A →
+                      IsIncreasing A →
+                      AlwaysConvergent A
+incrPaths-converges {A = A} _          _       _    {zero}  network = |0|-convergent (F∥ A network)
+incrPaths-converges {A = A} routingAlg pathAlg incr {suc n} network =
   ultra⇒convergent (PathVectorResults.ultrametricConditions
     routingAlg (certifiedPathAlgebra pathAlg (suc n)) (incr⇒strIncr routingAlg pathAlg incr) network (s≤s z≤n))
+
+--------------------------------------------------------------------------------
+-- Bisimilarity
+--
+-- If an algebra is always convergent then all algebras that are bisimilar to it
+-- are also convergent
+
+bisimulate : ∀ {a b c d ℓ₁ ℓ₂}
+             {A : RawRoutingAlgebra a b ℓ₁}
+             {B : RawRoutingAlgebra c d ℓ₂} →
+             Bisimilar A B →
+             AlwaysConvergent A →
+             AlwaysConvergent B
+bisimulate A∼B conv = Algebra.bisimulate A∼B conv
+

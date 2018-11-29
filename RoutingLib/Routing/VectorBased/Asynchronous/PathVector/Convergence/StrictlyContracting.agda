@@ -12,8 +12,9 @@ open import Relation.Nullary.Negation using (contradiction)
 open import RoutingLib.Data.Table using (max)
 open import RoutingLib.Data.Table.Properties using (max[t]<x; x≤max[t])
 open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning; n≢0⇒0<n)
-import RoutingLib.Function.Metric.Construct.MaxLift as MaxLift
+import RoutingLib.Function.Metric.Construct.Condition as Condition
 import RoutingLib.Function.Metric as Metric
+import RoutingLib.Relation.Nullary.Decidable as Dec
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
 
@@ -214,19 +215,26 @@ module _ (e : Epoch) (p : Subset n) where
 ------------------------------------------------------------------------
 -- d is contracting in the right ways
 
+-- These two lemmas are a mess as can't pattern match on `i ∈? p` directly
+-- as it unfolds the adjacency matrix
+    
   d[FXᵢ,F²Xᵢ]<D[X,FX] : ∀ {X} → WellFormed p X → F X ≉ₘ[ p ] X →
                   ∀ i → dᶜ p i (F X i) (F (F X) i) < D p X (F X)
-  d[FXᵢ,F²Xᵢ]<D[X,FX] {X} wfX FX≉X i with i ∈? p
-  ... | no  _ = Y≉ₚX⇒0<DXY p FX≉X
-  ... | yes _ = max[t]<x 0<DXY (r-strContrOrbits 0<DXY (r≤D-wf p wfX (F′-inactive network e X)) i)
-    where 0<DXY = Y≉ₚX⇒0<DXY p FX≉X
+  d[FXᵢ,F²Xᵢ]<D[X,FX] {X} wfX FX≉X i with Y≉ₚX⇒0<DXY p FX≉X
+  ... | 0<DXY with max[t]<x 0<DXY (r-strContrOrbits 0<DXY (r≤D-wf p wfX (F′-inactive network e X)) i)
+  ...   | d[FXᵢ,F²Xᵢ]<D[X,FX] = Dec.[
+        (λ i∈p → subst (_< D p X (F X)) (sym (Condition.accept d (_∈? p) i∈p)) d[FXᵢ,F²Xᵢ]<D[X,FX]) ,
+        (λ i∉p → subst (_< D p X (F X)) (sym (Condition.reject d (_∈? p) i∉p)) 0<DXY)
+      ] (i ∈? p)
 
   dₜFXᵢFYᵢ<DXY : ∀ {X Y} → WellFormed p X → WellFormed p Y → Y ≉ₘ[ p ] X →
                  𝑪ₘ X → ∀ i → dᶜ p i (F X i) (F Y i) < D p X Y
-  dₜFXᵢFYᵢ<DXY {X} {Y} wfX wfY Y≉X Xᶜ i with i ∈? p
-  ... | no  _ = Y≉ₚX⇒0<DXY p Y≉X
-  ... | yes _ = max[t]<x 0<DXY (r-strContrOn𝑪 Xᶜ 0<DXY (r≤D-wf p wfX wfY) i)
-    where 0<DXY = Y≉ₚX⇒0<DXY p Y≉X
+  dₜFXᵢFYᵢ<DXY {X} {Y} wfX wfY Y≉X Xᶜ i with Y≉ₚX⇒0<DXY p Y≉X
+  ... | 0<DXY with max[t]<x 0<DXY (r-strContrOn𝑪 Xᶜ 0<DXY (r≤D-wf p wfX wfY) i)
+  ...   | d[FXᵢ,F²Xᵢ]<D[X,FX] = Dec.[
+        (λ i∈p → subst (_< D p X Y) (sym (Condition.accept d (_∈? p) i∈p)) d[FXᵢ,F²Xᵢ]<D[X,FX]) ,
+        (λ i∉p → subst (_< D p X Y) (sym (Condition.reject d (_∈? p) i∉p)) 0<DXY)
+      ] (i ∈? p)
 
 ------------------------------------------------------------------------
 -- D is contracting in the right ways

@@ -1,9 +1,12 @@
 open import Data.List hiding (any)
 open import Data.List.All as All using (All; []; _∷_)
 import Data.List.All.Properties as All
+open import Data.Fin using (Fin)
+open import Data.Fin.Properties using (suc-injective)
 open import Data.Nat using (zero; suc; _<_; z≤n; s≤s)
 open import Function using (_∘_)
 open import Relation.Binary using (Rel; Total; Symmetric; DecSetoid)
+open import Relation.Binary.PropositionalEquality using (_≢_)
 open import Relation.Unary using (Pred; Decidable)
 open import Relation.Nullary using (yes; no)
 
@@ -111,6 +114,16 @@ module _ {a ℓ} {A : Set a} {_~_ : Rel A ℓ} where
 
   applyUpTo⁺₂ : ∀ f n → (∀ i j → f i ~ f j) → AllPairs _~_ (applyUpTo f n)
   applyUpTo⁺₂ f n f~ = applyUpTo⁺₁ n (λ _ _ → f~ _ _)
+
+------------------------------------------------------------------------
+-- tabulate
+
+module _ {a ℓ} {A : Set a} {_~_ : Rel A ℓ} where
+
+  tabulate⁺ : ∀ {n} {f : Fin n → A} → (∀ {i j} → i ≢ j → f i ~ f j) →
+              AllPairs _~_ (tabulate f)
+  tabulate⁺ {zero}  fᵢ~fⱼ = []
+  tabulate⁺ {suc n} fᵢ~fⱼ = All.tabulate⁺ (λ j → fᵢ~fⱼ λ()) ∷ tabulate⁺ (fᵢ~fⱼ ∘ (_∘ suc-injective))
 
 {-
 ------------------------------------------------------------------------

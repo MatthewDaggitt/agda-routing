@@ -1,4 +1,4 @@
-import RoutingLib.Routing.VectorBased.Asynchronous.Results as ConvergenceTheorems
+import RoutingLib.Routing.VectorBased.Asynchronous.Convergence as Convergence
 import RoutingLib.Routing.VectorBased.Asynchronous as VectorBasedRouting
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic using (Epoch; Convergent)

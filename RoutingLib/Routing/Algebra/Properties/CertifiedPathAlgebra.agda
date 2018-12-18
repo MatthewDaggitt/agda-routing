@@ -14,16 +14,17 @@ open import RoutingLib.Data.Path.CertifiedI
 open import RoutingLib.Data.Path.CertifiedI.Properties
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
-import RoutingLib.Routing.Algebra.RoutingAlgebra.Properties as RoutingAlgebraProperties
+import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
 
-module RoutingLib.Routing.Algebra.CertifiedPathAlgebra.Properties
+module RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra
   {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
   where
 
 open RawRoutingAlgebra algebra
 open IsCertifiedPathAlgebra isPathAlgebra
+open IsRoutingAlgebra isRoutingAlgebra
 
 --------------------------------------------------------------------------------
 -- Import routing algebra properties

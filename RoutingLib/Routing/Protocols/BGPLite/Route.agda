@@ -17,9 +17,8 @@ open import RoutingLib.Routing.Protocols.BGPLite.Communities
 
 module RoutingLib.Routing.Protocols.BGPLite.Route where
 
------------
--- Types --
------------
+------------------------------------------------------------------------
+-- Types
 
 Level : Set
 Level = ℕ
@@ -27,10 +26,9 @@ Level = ℕ
 data Route : Set where
   invalid : Route
   valid   : (l : Level) → (cs : CommunitySet) → (p : Path) → Route
-  
---------------
--- Equality --
---------------
+
+------------------------------------------------------------------------
+-- Equality over routes
 
 _≟ᵣ_ : Decidable {A = Route} _≡_
 invalid      ≟ᵣ invalid      = yes refl
@@ -51,9 +49,8 @@ valid l cs p ≟ᵣ valid k ds q with l ≟ k | cs ≟ᶜˢ ds | p ≟ₚ q
   ; _≟_           = _≟ᵣ_
   }
 
-----------------------
--- Preference order --
-----------------------
+------------------------------------------------------------------------
+-- A total ordering over routes
 
 infix 4 _≤ᵣ_ _≰ᵣ_
 

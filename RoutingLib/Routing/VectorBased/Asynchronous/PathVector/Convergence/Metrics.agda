@@ -23,15 +23,15 @@ import RoutingLib.Relation.Binary.Reasoning.PartialOrder as PO-Reasoning
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
-import RoutingLib.Routing.Algebra.RoutingAlgebra.FiniteProperties as RoutingAlgebraProperties
+import RoutingLib.Routing.Algebra.Properties.FiniteRoutingAlgebra as FiniteRoutingAlgebraProperties
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Metrics as DistanceVectorMetrics
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Properties as DistanceVectorMetricProperties
-import RoutingLib.Routing.Algebra.CertifiedPathAlgebra.Consistency as Consistency
+import RoutingLib.Routing.Algebra.Consistency as Consistency
 
 module RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.Metrics
   {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
   (A : AdjacencyMatrix algebra n)
   where
@@ -39,16 +39,16 @@ module RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.Metric
 open Routing algebra n
 open RawRoutingAlgebra algebra
 open IsCertifiedPathAlgebra isPathAlgebra
-open Consistency algebra isPathAlgebra A
-open RoutingAlgebraProperties isRoutingAlgebraᶜ isFiniteᶜ using (H)
+open Consistency isRoutingAlgebra isPathAlgebra A
+open FiniteRoutingAlgebraProperties isRoutingAlgebraᶜ isFiniteᶜ using (H)
 
 module DV = DistanceVectorMetrics isRoutingAlgebraᶜ isFiniteᶜ
 
 -- Height of inconsistent routes
 hⁱ : Route → ℕ
-hⁱ r with 𝑪? r
+hⁱ x with 𝑪? x
 ... | yes _ = 1
-... | no  _ = suc n ∸ size r
+... | no  _ = suc n ∸ size x
 
 -- Distance between inconsistent routes
 rⁱ : Route → Route → ℕ

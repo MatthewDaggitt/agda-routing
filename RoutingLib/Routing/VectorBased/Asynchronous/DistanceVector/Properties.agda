@@ -16,8 +16,7 @@ open import RoutingLib.Data.List.Relation.Pointwise using (foldr⁺)
 open import RoutingLib.Data.List.Properties
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.RoutingAlgebra
-import RoutingLib.Routing.Algebra.RoutingAlgebra.Properties as RoutingAlgebraProperties
+import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
 open import RoutingLib.Routing as Routing using (Network)
 import RoutingLib.Routing.VectorBased.Asynchronous as VectorBased
 import RoutingLib.Routing.VectorBased.Core.Properties as CoreProperties

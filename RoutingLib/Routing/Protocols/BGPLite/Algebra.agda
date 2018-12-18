@@ -27,14 +27,10 @@ open import RoutingLib.Data.Path.UncertifiedI hiding (length)
 open import RoutingLib.Data.Path.UncertifiedI.Properties
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.PathAlgebra
-open import RoutingLib.Routing.Algebra.RoutingAlgebra
 
 open import RoutingLib.Routing.Protocols.BGPLite.Route
 open import RoutingLib.Routing.Protocols.BGPLite.Policy
 open import RoutingLib.Routing.Protocols.BGPLite.Communities
-
--- open import RoutingLib.Routing..ConvergenceConditions
 
 module RoutingLib.Routing.Protocols.BGPLite.Algebra where
 
@@ -68,7 +64,7 @@ x@(valid l cs p) ⊕ y@(valid m ds q) with compare l m
 ...     | no  q≤p = y
 
 ⊕-cong : Congruent₂ _≡_ _⊕_
-⊕-cong = {!!} --Choice.⊓-cong
+⊕-cong = cong₂ _⊕_
 
 infix 5 _▷_
 _▷_ : ∀ {n} {i j : Fin n} → Step i j → Route → Route
@@ -111,21 +107,31 @@ algebra = record
 -- Routing algebra --
 ---------------------
 
-{-
 ⊕-sel : Selective _≡_ _⊕_
-⊕-sel = Choice.⊓-sel
+⊕-sel invalid        invalid        = inj₁ refl
+⊕-sel invalid        (valid m ds q) = inj₂ refl
+⊕-sel (valid l cs p) invalid        = inj₁ refl
+⊕-sel (valid l cs p) (valid m ds q) with compare l m
+... | tri< _ _ _ = inj₁ refl
+... | tri> _ _ _ = inj₂ refl
+... | tri≈ _ _ _ with compare (length p) (length q)
+...   | tri< _ _ _  = inj₁ refl
+...   | tri> _ _ _  = inj₂ refl
+...   | tri≈ _ _ _  with p ≤ₗₑₓ? q
+...     | yes p≤q = inj₁ refl
+...     | no  q≤p = inj₂ refl
 
 ⊕-assoc : Associative _≡_ _⊕_
-⊕-assoc = Choice.⊓-assoc
+⊕-assoc = {!!} --Choice.⊓-assoc
 
 ⊕-comm : Commutative _≡_ _⊕_
-⊕-comm = Choice.⊓-comm
+⊕-comm = {!!} --Choice.⊓-comm
 
 ⊕-identityʳ  : RightIdentity _≡_ invalid _⊕_
-⊕-identityʳ = Choice.⊓-identityʳ ≤ᵣ-maximum
+⊕-identityʳ = {!!} --Choice.⊓-identityʳ ≤ᵣ-maximum
 
 ⊕-zeroʳ : RightZero _≡_ 0# _⊕_
-⊕-zeroʳ = Choice.⊓-zeroʳ ≤ᵣ-minimum
+⊕-zeroʳ = {!!} --Choice.⊓-zeroʳ ≤ᵣ-minimum
 
 ▷-fixedPoint : ∀ {n} {i j : Fin n} (f : Step i j) → f ▷ invalid ≡ invalid
 ▷-fixedPoint (step _) = refl
@@ -189,8 +195,7 @@ with toℕ i ≟ toℕ j
 
 isPathAlgebra : IsPathAlgebra algebra
 isPathAlgebra = record
-  { isRoutingAlgebra = isRoutingAlgebra
-  ; path             = path
+  { path             = path
   ; path-cong        = cong path
   ; r≈0⇒path[r]≈[]   = r≈0⇒path[r]≈[]
   ; r≈∞⇒path[r]≈∅    = r≈∞⇒path[r]≈∅
@@ -203,16 +208,17 @@ isPathAlgebra = record
 -- Other properties --
 ----------------------
 
-open RightNaturalOrder _≡_ _⊕_ using () renaming (_≤_ to _≤₊_)
-
 isIncreasing : IsIncreasing algebra
 isIncreasing {_} {_} {_} f          invalid        = refl
 isIncreasing {_} {i} {j} (step pol) (valid l cs p) with (toℕ i , toℕ j) ⇿ᵥ? p | toℕ i ∈ᵥₚ? p
 ... | no  _   | _       = refl
 ... | yes _   | yes _   = refl
-... | yes i⇿p | no  i∉p with ≤ᵣ-total (apply pol (valid l cs ((toℕ i , toℕ j) ∷ p))) (valid l cs p)
-...   | inj₂ r≤e▷r = refl
+... | yes i⇿p | no  i∉p = {!!}
+{-
+with ≤ᵣ-total (apply pol (valid l cs ((toℕ i , toℕ j) ∷ p))) (valid l cs p)
+...   | inj₂ r≤e▷r = {!!} --refl
 ...   | inj₁ e▷r≤r = contradiction e▷r≤r (apply-nonDecreasing pol)
+-}
 
 {-
 isIncreasingPathAlgebra : IsIncreasingPathAlgebra algebra
@@ -220,5 +226,4 @@ isIncreasingPathAlgebra = record
   { isPathAlgebra = isPathAlgebra
   ; isIncreasing  = isIncreasing
   }
--}
 -}

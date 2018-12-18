@@ -26,8 +26,7 @@ open import RoutingLib.Data.List.Membership.Setoid.Properties using (index-cong)
 open import RoutingLib.Function.Reasoning
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.RoutingAlgebra
-import RoutingLib.Routing.Algebra.RoutingAlgebra.FiniteProperties as RoutingAlgebraProperties
+import RoutingLib.Routing.Algebra.Properties.FiniteRoutingAlgebra as FiniteRoutingAlgebraProperties
 import RoutingLib.Routing as Routing
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Metrics as Metrics
 
@@ -39,7 +38,7 @@ module RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Pr
 
 open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
-open RoutingAlgebraProperties isRoutingAlgebra isFinite
+open FiniteRoutingAlgebraProperties isRoutingAlgebra isFinite
 open Metrics isRoutingAlgebra isFinite
 
 open Sorting ≥₊-decTotalOrder using (index-mono-<)

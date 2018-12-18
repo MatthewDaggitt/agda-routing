@@ -20,10 +20,9 @@ open import RoutingLib.Function.Metric
 import RoutingLib.Relation.Binary.Reasoning.PartialOrder as PO-Reasoning
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
-import RoutingLib.Routing.Algebra.CertifiedPathAlgebra.Consistency as Consistency
-import RoutingLib.Routing.Algebra.CertifiedPathAlgebra.Properties as PathAlgebraProperties
-import RoutingLib.Routing.Algebra.RoutingAlgebra.FiniteProperties as RoutingAlgebraProperties
+import RoutingLib.Routing.Algebra.Consistency as Consistency
+import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra as PathAlgebraProperties
+import RoutingLib.Routing.Algebra.Properties.FiniteRoutingAlgebra as FiniteRoutingAlgebraProperties
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
 
 import RoutingLib.Routing.VectorBased.Asynchronous as AsyncVectorBased
@@ -34,6 +33,7 @@ open ≤-Reasoning
 
 module RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.Properties
   {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
   (A : AdjacencyMatrix algebra n)
   (1≤n : 1 ≤ n) (p : Subset n)
@@ -41,11 +41,11 @@ module RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.Proper
 
 open RawRoutingAlgebra algebra
 open IsCertifiedPathAlgebra isPathAlgebra
-open PathAlgebraProperties isPathAlgebra
-open Consistency algebra isPathAlgebra A
+open PathAlgebraProperties isRoutingAlgebra isPathAlgebra
+open Consistency isRoutingAlgebra isPathAlgebra A
 
 open Routing algebra n
-open Metrics isPathAlgebra A
+open Metrics isRoutingAlgebra isPathAlgebra A
 private module DVP = DistanceVectorMetricProperties isRoutingAlgebraᶜ isFiniteᶜ
 
 ------------------------------------------------------------------------
@@ -156,7 +156,7 @@ xᶜyᶜzⁱ⇒rⁱxz≤rⁱyz {x} {y} {z} xᶜ yᶜ zⁱ =
 -- Properties of rᶜ
 
 Hᶜ : ℕ
-Hᶜ = suc (RoutingAlgebraProperties.H isRoutingAlgebraᶜ isFiniteᶜ)
+Hᶜ = suc (FiniteRoutingAlgebraProperties.H isRoutingAlgebraᶜ isFiniteᶜ)
 
 rᶜ-cong : ∀ {x y w z} (wᶜ : 𝑪 w) (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) (zᶜ : 𝑪 z) →
            w ≈ y → x ≈ z → rᶜ wᶜ xᶜ ≡ rᶜ yᶜ zᶜ

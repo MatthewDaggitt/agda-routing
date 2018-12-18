@@ -122,7 +122,7 @@ Iᵢⱼ≡Iₖₗ j≢i l≢k = trans (Iᵢⱼ≡∞ j≢i) (sym (Iᵢⱼ≡∞ 
 
 module _ (network : Network) where
 
-  abstract
+  -- abstract
 
     -- Needs to be abstract otherwise unfolding causes all sorts of problems
 

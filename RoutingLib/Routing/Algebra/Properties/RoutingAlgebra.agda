@@ -16,9 +16,8 @@ import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOr
 import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.DecTotalOrder as NonStrictToStrict
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.RoutingAlgebra
 
-module RoutingLib.Routing.Algebra.RoutingAlgebra.Properties
+module RoutingLib.Routing.Algebra.Properties.RoutingAlgebra
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
   where

@@ -1,4 +1,3 @@
-
 import Algebra.FunctionProperties as AlgebraicProperties
 open import Data.Fin as Fin using (Fin)
 open import Data.List using (List; map)
@@ -26,20 +25,20 @@ open import RoutingLib.Data.Path.CertifiedI.Properties
 
 open import RoutingLib.Routing using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.RoutingAlgebra
-open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
-import RoutingLib.Routing.Algebra.CertifiedPathAlgebra.Properties
+import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra
   as PathAlgebraProperties
 
-module RoutingLib.Routing.Algebra.CertifiedPathAlgebra.Consistency
-  {a b ℓ n} (algebra : RawRoutingAlgebra a b ℓ)
+module RoutingLib.Routing.Algebra.Consistency
+  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
   (A : AdjacencyMatrix algebra n)
   where
 
 open RawRoutingAlgebra algebra
+open IsRoutingAlgebra isRoutingAlgebra
 open IsCertifiedPathAlgebra isPathAlgebra
-open PathAlgebraProperties isPathAlgebra
+open PathAlgebraProperties isRoutingAlgebra isPathAlgebra
 
 --------------------------------------------------------------------------------
 -- Consistency

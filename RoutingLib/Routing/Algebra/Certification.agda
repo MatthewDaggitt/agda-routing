@@ -15,16 +15,14 @@ open import Relation.Nullary.Negation using (contradiction)
 open import RoutingLib.Data.Maybe
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.PathAlgebra
-open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
 open import RoutingLib.Data.Path.Uncertified using ([]; _∷_)
 open import RoutingLib.Data.Path.Uncertified.Properties using (_⇿?_; _∈ₚ?_)
 open import RoutingLib.Data.Path.Uncertified.Certify
 open import RoutingLib.Data.Path.CertifiedI
 open import RoutingLib.Data.Path.CertifiedI.Properties hiding (_⇿?_)
 
-module RoutingLib.Routing.Algebra.PathAlgebra.Certify
-  {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)
+module RoutingLib.Routing.Algebra.Certification
+  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isPathAlgebra : IsPathAlgebra algebra)
   (n : ℕ)
   where
@@ -77,8 +75,7 @@ pathᶜ-accept {i} {j} {r} {p} f p[r]≈p fr≉∞ ij⇿p i∉p with path r | in
 
 certifiedPathAlgebra : IsCertifiedPathAlgebra algebra n
 certifiedPathAlgebra = record
-  { isRoutingAlgebra = isRoutingAlgebra
-  ; path             = pathᶜ
+  { path             = pathᶜ
   ; path-cong        = pathᶜ-cong
   ; r≈0⇒path[r]≈[]   = r≈0⇒pathᶜ[r]≈[]
   ; r≈∞⇒path[r]≈∅    = r≈∞⇒pathᶜ[r]≈∅

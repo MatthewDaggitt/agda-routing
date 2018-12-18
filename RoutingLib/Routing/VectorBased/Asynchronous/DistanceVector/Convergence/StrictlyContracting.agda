@@ -12,13 +12,13 @@ open import Relation.Nullary.Negation using (contradiction)
 open import RoutingLib.Data.Table using (max)
 open import RoutingLib.Data.Table.Properties using (max[t]<x; x≤max[t])
 open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning; n≢0⇒0<n)
-import RoutingLib.Function.Metric.Construct.MaxLift as MaxLift
+import RoutingLib.Function.Metric.Construct.Condition as Condition
 import RoutingLib.Function.Metric as Metric
 import RoutingLib.Relation.Binary.Reasoning.PartialOrder as POR
+open import RoutingLib.Relation.Nullary.Decidable using ([_,_])
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.RoutingAlgebra
-import RoutingLib.Routing.Algebra.RoutingAlgebra.Properties as RoutingAlgebraProperties
+import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix; Network)
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
 
@@ -26,7 +26,7 @@ import RoutingLib.Routing.VectorBased.Core as CoreVectorBasedRouting
 import RoutingLib.Routing.VectorBased.Core.Properties as CoreVectorBasedRoutingProperties
 import RoutingLib.Routing.VectorBased.Asynchronous as DistanceVectorRouting
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Properties as DistanceVectorRoutingProperties
-import RoutingLib.Routing.Algebra.RoutingAlgebra.FiniteProperties as FiniteProperties
+import RoutingLib.Routing.Algebra.Properties.FiniteRoutingAlgebra as FiniteRoutingAlgebraProperties
 import RoutingLib.Routing.VectorBased.Asynchronous as AsyncVectorBased
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Metrics as Metrics
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Properties as MetricsProperties
@@ -40,7 +40,7 @@ module RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.St
 
 open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
-open FiniteProperties isRoutingAlgebra isFinite
+open FiniteRoutingAlgebraProperties isRoutingAlgebra isFinite
 
 open Metrics isRoutingAlgebra isFinite
 open MetricsProperties isRoutingAlgebra isFinite
@@ -116,11 +116,16 @@ module _ {n} (network : Network algebra n) where
       F : RoutingMatrix → RoutingMatrix
       F = F′ e p
 
+    -- This lemma is a mess as can't pattern match on `i ∈? p` directly
+    -- as it unfolds the adjacency matrix
     d[FXᵢ,FYᵢ]<DXY : ∀ {X Y} → WellFormed p X → WellFormed p Y →
                      Y ≉ₘ[ p ] X → ∀ i → dᶜ p i (F X i) (F Y i) < D p X Y
-    d[FXᵢ,FYᵢ]<DXY {X} {Y} wfX wfY Y≉X i with Y≉ₚX⇒0<DXY p Y≉X | i ∈? p
-    ... | 0<DXY | no  _ = 0<DXY
-    ... | 0<DXY | yes _ = max[t]<x 0<DXY (λ j → r[FXᵢⱼ,FYᵢⱼ]<v A X Y i j 0<DXY (λ k _ → r≤D-wf p wfX wfY k j))
+    d[FXᵢ,FYᵢ]<DXY {X} {Y} wfX wfY Y≉X i with Y≉ₚX⇒0<DXY p Y≉X
+    ... | 0<DXY with max[t]<x 0<DXY (λ j → r[FXᵢⱼ,FYᵢⱼ]<v A X Y i j 0<DXY (λ k _ → r≤D-wf p wfX wfY k j))
+    ...   | d[FXᵢ,FYᵢ]<DXY = [
+        (λ i∈p → subst (_< D p X Y) (sym (Condition.accept (d {n}) (_∈? p) i∈p)) d[FXᵢ,FYᵢ]<DXY) ,
+        (λ i∉p → subst (_< D p X Y) (sym (Condition.reject (d {n}) (_∈? p) i∉p)) 0<DXY)
+      ] (i ∈? p)
 
     F-strContr : ∀ {X Y} → WellFormed p X → WellFormed p Y → Y ≉ₘ[ p ] X →
                  D p (F X) (F Y) < D p X Y

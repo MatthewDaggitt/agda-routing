@@ -49,7 +49,7 @@ record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
     B-finish   : ∀ e p → ∃₂ λ k* x* → ∀ {k} → k* ≤ k → (x* ∈ B e p k × (∀ {x} → x ∈ B e p k → x ≈ x*))
     B-null     : ∀ {e p k i} → i ∉ p → ⊥ i ∈ᵤ B e p k i
 
-    -- F
+    -- Properties of F in relation to the boxes
     F-resp-B₀  : ∀ {e p x} → x ∈ B e p 0 → F e p x ∈ B e p 0
     F-mono-B   : ∀ {e p k x} → WellFormed p x → x ∈ B e p k → F e p x ∈ B e p (suc k)
 

@@ -4,6 +4,10 @@ module RoutingLib.lmv34.Exercises3 where
   import RoutingLib.lmv34.AgdaBasics
   open RoutingLib.lmv34.AgdaBasics
 
+  isFalse : Bool → Set
+  isFalse true = False
+  isFalse false = True
+
   -- Exerise 3.1
   data Compare : Nat -> Nat -> Set where
     less : forall {n} k -> Compare n (n + suc k)
@@ -76,6 +80,20 @@ module RoutingLib.lmv34.Exercises3 where
 
   inspect : {A : Set}(x : A) → Inspect x
   inspect x = it x refl
+
+  trueIsTrue : {x : Bool} -> x == true -> isTrue x
+  trueIsTrue refl = _
+
+  falseIsFalse : {x : Bool} → x == false → isFalse x
+  falseIsFalse refl = _
+
+  lem-filter-sound : {A : Set}(p : A → Bool)(xs : List A) →
+                       All (satisfies p) (filter p xs)
+  lem-filter-sound p [] = []
+  lem-filter-sound p (x :: xs) with inspect (p x)
+  lem-filter-sound p (x :: xs) | it y prf      with p x | prf
+  lem-filter-sound p (x :: xs) | it .true prf  | true   | refl = trueIsTrue prf ::₁ lem-filter-sound p xs
+  lem-filter-sound p (x :: xs) | it .false prf | false  | refl = lem-filter-sound p xs
   
   lem-filter-complete : {A : Set}(p : A → Bool)(x : A){xs : List A} →
                         x ∈ xs → satisfies p x → x ∈ filter p xs

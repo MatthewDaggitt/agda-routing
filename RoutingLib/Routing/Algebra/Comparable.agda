@@ -52,11 +52,12 @@ data _≎_ : Rel Route (a ⊔ b) where
 -----------------------------------------------------------------------
 -- Some standard algebraic properties lifted to comparability
 
-≎-Associative : Op₂ Route → Set (a ⊔ b ⊔ ℓ)
-≎-Associative _⊕_ = ∀ {x y z} → x ≎ y → y ≎ z → x ≎ z → (x ⊕ y) ⊕ z ≈ x ⊕ (y ⊕ z)
+≎-Associative : Rel Route ℓ → Op₂ Route → Set (a ⊔ b ⊔ ℓ)
+≎-Associative _≈_ _⊕_ = ∀ {x y z} → x ≎ y → y ≎ z → x ≎ z →
+                        ((x ⊕ y) ⊕ z) ≈ (x ⊕ (y ⊕ z))
 
-≎-Commutative : Op₂ Route → Set (a ⊔ b ⊔ ℓ)
-≎-Commutative _⊕_ = ∀ {x y} → x ≎ y → x ⊕ y ≈ y ⊕ x
+ComparablyCommutative : Rel Route ℓ → Op₂ Route → Set (a ⊔ b ⊔ ℓ)
+ComparablyCommutative _≈_ _⊕_ = ∀ {x y} → x ≎ y → (x ⊕ y) ≈ (y ⊕ x)
 
 -----------------------------------------------------------------------
 -- Properties
@@ -68,13 +69,9 @@ module _ (_⊚_ : Op₂ Route) (_≎?_ : Decidable _≎_) where
   ... | yes _ = x ⊕ y
   ... | no  _ = x ⊚ y
 
-  fromCompComm : ≎-Commutative _⊕_ → Commutative _⊚_ → Commutative _⊗_
+  fromCompComm : ComparablyCommutative _≈_ _⊕_ → Commutative _⊚_ → Commutative _⊗_
   fromCompComm ccomm comm x y with x ≎? y | y ≎? x
   ... | yes x≎y | yes _   = ccomm x≎y
   ... | yes x≎y | no ¬y≎x = contradiction (≎-sym x≎y) ¬y≎x
   ... | no ¬x≎y | yes y≎x = contradiction (≎-sym y≎x) ¬x≎y
   ... | no  _   | no  _   = comm x y
-{-
-sel⇒pres-comparable : Selective _⊕_ → _⊕_ Preservesᵇ WellFormed
-sel⇒pres-comparable = {!!}
--}

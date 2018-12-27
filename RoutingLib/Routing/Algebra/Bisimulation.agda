@@ -139,4 +139,4 @@ module RoutingLib.Routing.Algebra.Bisimulation {a₁ b₁ ℓ₁ a₂ b₂ ℓ�
     bisimulate : ∀ {n : ℕ} →
                  (∀ N → Convergent {n = n} (F∥ A N)) →
                  (∀ N → Convergent {n = n} (F∥ B N))
-    bisimulate convergent Nᵇ = Async.bisimilar (convergent (fromNetwork Nᵇ)) (F∥↭ Nᵇ) --Async.bisimilar {!!} (F∥↭ A∼B {!N!}) --F∥↭
+    bisimulate convergent Nᵇ = Async.bisimilar (convergent (fromNetwork Nᵇ)) (F∥↭ Nᵇ)

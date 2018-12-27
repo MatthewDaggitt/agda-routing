@@ -22,11 +22,12 @@ import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOr
 import RoutingLib.Algebra.Selectivity.NaturalChoice.Min.TotalOrder as NaturalChoice
 
 open import RoutingLib.Data.Path.Uncertified using (inflate; deflate; length)
-open import RoutingLib.Data.Path.Uncertified.Properties using (∈-deflate⁻; ij⇿p⇒i≢j; _≤ₗₑₓ?_)
+open import RoutingLib.Data.Path.Uncertified.Properties using (∈-deflate⁻; ij⇿p⇒i≢j; _≤ₗₑₓ?_; ≤ₗₑₓ-total; ≤ₗₑₓ-antisym)
 open import RoutingLib.Data.Path.UncertifiedI hiding (length)
 open import RoutingLib.Data.Path.UncertifiedI.Properties
 
 open import RoutingLib.Routing.Algebra
+import RoutingLib.Routing.Algebra.Comparable as Comparable
 
 open import RoutingLib.Routing.Protocols.BGPLite.Route
 open import RoutingLib.Routing.Protocols.BGPLite.Policy
@@ -103,48 +104,6 @@ algebra = record
   ; ⊕-cong             = ⊕-cong
   }
 
----------------------
--- Routing algebra --
----------------------
-
-⊕-sel : Selective _≡_ _⊕_
-⊕-sel invalid        invalid        = inj₁ refl
-⊕-sel invalid        (valid m ds q) = inj₂ refl
-⊕-sel (valid l cs p) invalid        = inj₁ refl
-⊕-sel (valid l cs p) (valid m ds q) with compare l m
-... | tri< _ _ _ = inj₁ refl
-... | tri> _ _ _ = inj₂ refl
-... | tri≈ _ _ _ with compare (length p) (length q)
-...   | tri< _ _ _  = inj₁ refl
-...   | tri> _ _ _  = inj₂ refl
-...   | tri≈ _ _ _  with p ≤ₗₑₓ? q
-...     | yes p≤q = inj₁ refl
-...     | no  q≤p = inj₂ refl
-
-⊕-assoc : Associative _≡_ _⊕_
-⊕-assoc = {!!} --Choice.⊓-assoc
-
-⊕-comm : Commutative _≡_ _⊕_
-⊕-comm = {!!} --Choice.⊓-comm
-
-⊕-identityʳ  : RightIdentity _≡_ invalid _⊕_
-⊕-identityʳ = {!!} --Choice.⊓-identityʳ ≤ᵣ-maximum
-
-⊕-zeroʳ : RightZero _≡_ 0# _⊕_
-⊕-zeroʳ = {!!} --Choice.⊓-zeroʳ ≤ᵣ-minimum
-
-▷-fixedPoint : ∀ {n} {i j : Fin n} (f : Step i j) → f ▷ invalid ≡ invalid
-▷-fixedPoint (step _) = refl
-
-isRoutingAlgebra : IsRoutingAlgebra algebra
-isRoutingAlgebra = record
-  { ⊕-sel        = ⊕-sel
-  ; ⊕-comm       = ⊕-comm
-  ; ⊕-assoc      = ⊕-assoc
-  ; ⊕-zeroʳ      = ⊕-zeroʳ
-  ; ⊕-identityʳ  = ⊕-identityʳ
-  ; ▷-fixedPoint = ▷-fixedPoint
-  }
 
 ------------------
 -- Path algebra --
@@ -204,6 +163,82 @@ isPathAlgebra = record
   ; path-accept      = path-accept
   }
 
+---------------------
+-- Routing algebra --
+---------------------
+
+open Comparable algebra
+
+≎⇒path≢ : ∀ {k l cs ds p q} → valid k cs p ≎ valid l ds q → p ≢ q
+≎⇒path≢ eq = {!!}
+
+⊕-sel : Selective _≡_ _⊕_
+⊕-sel invalid        invalid        = inj₁ refl
+⊕-sel invalid        (valid m ds q) = inj₂ refl
+⊕-sel (valid l cs p) invalid        = inj₁ refl
+⊕-sel (valid l cs p) (valid m ds q) with compare l m
+... | tri< _ _ _ = inj₁ refl
+... | tri> _ _ _ = inj₂ refl
+... | tri≈ _ _ _ with compare (length p) (length q)
+...   | tri< _ _ _  = inj₁ refl
+...   | tri> _ _ _  = inj₂ refl
+...   | tri≈ _ _ _  with p ≤ₗₑₓ? q
+...     | yes p≤q = inj₁ refl
+...     | no  q≤p = inj₂ refl
+
+⊕-assoc : Associative _≡_ _⊕_
+⊕-assoc x y z = {!!} --Choice.⊓-assoc
+
+⊕-comm : ComparablyCommutative _≡_ _⊕_
+⊕-comm {invalid}      {invalid}      x≎y = refl
+⊕-comm {invalid}      {valid l cs p} x≎y = refl
+⊕-comm {valid l cs p} {invalid}      x≎y = refl
+⊕-comm {valid l cs p} {valid k ds q} x≎y with compare l k | compare k l
+... | tri< _   _ _ | tri> _ _ _ = refl --Choice.⊓-comm
+... | tri< l<k _ _ | tri≈ _ _ l≮k = contradiction l<k l≮k
+... | tri< l<k _ _ | tri< _ _ l≮k = contradiction l<k l≮k
+... | tri> _   _ _ | tri< _ _ _   = refl
+... | tri> _ _ k<l | tri≈ k≮l _ _ = contradiction k<l k≮l
+... | tri> _ _ k<l | tri> k≮l _ _ = contradiction k<l k≮l
+... | tri≈ _ l≡k _ | tri< _ k≢l _ = contradiction (sym l≡k) k≢l
+... | tri≈ _ l≡k _ | tri> _ k≢l _ = contradiction (sym l≡k) k≢l
+... | tri≈ _ l≡k _ | tri≈ _ _ _   with compare (lengthᵥ p) (lengthᵥ q) | compare (lengthᵥ q) (lengthᵥ p)
+...   | tri< _ _ _       | tri> _ _ _       = refl
+...   | tri< |p|<|q| _ _ | tri≈ _ _ |p|≮|q| = contradiction |p|<|q| |p|≮|q|
+...   | tri< |p|<|q| _ _ | tri< _ _ |p|≮|q| = contradiction |p|<|q| |p|≮|q|
+...   | tri> _ _ _       | tri< _ _ _       = refl
+...   | tri> _ _ |q|<|p| | tri≈ |q|≮|p| _ _ = contradiction |q|<|p| |q|≮|p|
+...   | tri> _ _ |q|<|p| | tri> |q|≮|p| _ _ = contradiction |q|<|p| |q|≮|p|
+...   | tri≈ _ |p|≡|q| _ | tri< _ |q|≢|p| _ = contradiction (sym |p|≡|q|) |q|≢|p|
+...   | tri≈ _ |p|≡|q| _ | tri> _ |q|≢|p| _ = contradiction (sym |p|≡|q|) |q|≢|p|
+...   | tri≈ _ |p|≡|q| _ | tri≈ _ _ _       with p ≤ₗₑₓ? q | q ≤ₗₑₓ? p
+...     | yes p≤q | yes q≤p = contradiction (≤ₗₑₓ-antisym p≤q q≤p) {!!}
+...     | yes p≤q | no  q≤p = refl
+...     | no  p≰q | yes q≤p = refl
+...     | no  p≰q | no  q≰p with ≤ₗₑₓ-total p q
+...       | inj₁ p≤q = contradiction p≤q p≰q
+...       | inj₂ q≤p = contradiction q≤p q≰p
+
+⊕-identityʳ  : RightIdentity _≡_ invalid _⊕_
+⊕-identityʳ = {!!} --Choice.⊓-identityʳ ≤ᵣ-maximum
+
+⊕-zeroʳ : RightZero _≡_ 0# _⊕_
+⊕-zeroʳ = {!!} --Choice.⊓-zeroʳ ≤ᵣ-minimum
+
+▷-fixedPoint : ∀ {n} {i j : Fin n} (f : Step i j) → f ▷ invalid ≡ invalid
+▷-fixedPoint (step _) = refl
+
+{-
+isRoutingAlgebra : IsRoutingAlgebra algebra
+isRoutingAlgebra = record
+  { ⊕-sel        = ⊕-sel
+  ; ⊕-comm       = ⊕-comm
+  ; ⊕-assoc      = ⊕-assoc
+  ; ⊕-zeroʳ      = ⊕-zeroʳ
+  ; ⊕-identityʳ  = ⊕-identityʳ
+  ; ▷-fixedPoint = ▷-fixedPoint
+  }
+
 ----------------------
 -- Other properties --
 ----------------------
@@ -226,4 +261,5 @@ isIncreasingPathAlgebra = record
   { isPathAlgebra = isPathAlgebra
   ; isIncreasing  = isIncreasing
   }
+-}
 -}

@@ -3,9 +3,9 @@ open import Relation.Binary using (TotalOrder; Setoid)
 open import Relation.Binary.PropositionalEquality using (_≡_)
 
 open import RoutingLib.Algebra.FunctionProperties
-import RoutingLib.Algebra.Selectivity.NaturalChoice.Min.TotalOrder as Min
-import RoutingLib.Algebra.Selectivity.NaturalChoice.Max.TotalOrder as Max
-open import RoutingLib.Algebra.Selectivity.Lifting
+import RoutingLib.Algebra.Construct.NaturalChoice.Min.TotalOrder as Min
+import RoutingLib.Algebra.Construct.NaturalChoice.Max.TotalOrder as Max
+open import RoutingLib.Algebra.Construct.Lifting
 import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.TotalOrder as NonStrictToStrict
 
 module RoutingLib.Data.List.Extrema.Core

@@ -10,9 +10,9 @@ import Relation.Binary.Construct.Converse as Converse
 
 open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Relation.Binary
-import RoutingLib.Algebra.Selectivity.NaturalChoice.Min as Min
+import RoutingLib.Algebra.Construct.NaturalChoice.Min as Min
 
-module RoutingLib.Algebra.Selectivity.NaturalChoice.Max
+module RoutingLib.Algebra.Construct.NaturalChoice.Max
   {a ℓ} {A : Set a} {_≤_ : Rel A ℓ} (≤-total : Total _≤_) where
 
 private

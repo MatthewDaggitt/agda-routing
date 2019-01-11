@@ -15,9 +15,9 @@ open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Construct.On as On
 
 open import RoutingLib.Data.List.Properties
-import RoutingLib.Algebra.Selectivity.NaturalChoice.Min as Min
-import RoutingLib.Algebra.Selectivity.NaturalChoice.Max as Max
-open import RoutingLib.Algebra.Selectivity.Lifting
+import RoutingLib.Algebra.Construct.NaturalChoice.Min as Min
+import RoutingLib.Algebra.Construct.NaturalChoice.Max as Max
+open import RoutingLib.Algebra.Construct.Lifting
 open import Data.List.Membership.Propositional.Properties
   using (foldr-selective)
 

@@ -27,27 +27,25 @@ open FunctionProperties _≈_
 
 infix 4 _≎_
 
-data _≎_ : Rel Route (a ⊔ b) where
-  00# : 0# ≎ 0#
-  0∞# : 0# ≎ ∞
-  ∞0# : ∞ ≎ 0#
-  ∞∞# : ∞ ≎ ∞
-  0e# : ∀ {n} {i j : Fin n} (f : Step i j) (x : Route) → 0# ≎ f ▷ x
-  e0# : ∀ {n} {i j : Fin n} (f : Step i j) (x : Route) → f ▷ x ≎ 0#
-  ∞e# : ∀ {n} {i j : Fin n} (f : Step i j) (x : Route) → ∞ ≎ f ▷ x
-  e∞# : ∀ {n} {i j : Fin n} (f : Step i j) (x : Route) → f ▷ x ≎ ∞
-  ee# : ∀ {n} {i j k : Fin n} (f : Step i j) (g : Step i k) (x y : Route) → j ≢ k → f ▷ x ≎ g ▷ y
+data _≎_ : Rel Route (a ⊔ b ⊔ ℓ) where
+  0∞# : ∀ {x y} → x ≈ 0# → y ≈ ∞  → x ≎ y
+  ∞0# : ∀ {x y} → x ≈ ∞  → y ≈ 0# → x ≎ y
+  ∞∞# : ∀ {x y} → x ≈ ∞  → y ≈ ∞  → x ≎ y
+  0e# : ∀ {x y} → ∀ {n} {i j : Fin n} (g : Step i j) (w : Route) → x ≈ 0# → y ≈ g ▷ w → x ≎ y
+  e0# : ∀ {x y} → ∀ {n} {i j : Fin n} (f : Step i j) (v : Route) → x ≈ f ▷ v → y ≈ 0# → x ≎ y
+  ∞e# : ∀ {x y} → ∀ {n} {i j : Fin n} (g : Step i j) (w : Route) → x ≈ ∞ → y ≈ g ▷ w → x ≎ y
+  e∞# : ∀ {x y} → ∀ {n} {i j : Fin n} (f : Step i j) (v : Route) → x ≈ f ▷ v → y ≈ ∞ → x ≎ y
+  ee# : ∀ {x y} → ∀ {n} {i j k : Fin n} (f : Step i j) (g : Step i k) (v w : Route) → j ≢ k → x ≈ f ▷ v → y ≈ g ▷ w → x ≎ y
 
 ≎-sym : Symmetric _≎_
-≎-sym 00#               = 00#
-≎-sym 0∞#               = ∞0#
-≎-sym ∞0#               = 0∞#
-≎-sym ∞∞#               = ∞∞#
-≎-sym (e0# f x)         = 0e# f x
-≎-sym (0e# f x)         = e0# f x
-≎-sym (∞e# f x)         = e∞# f x
-≎-sym (e∞# f x)         = ∞e# f x
-≎-sym (ee# f g x y j≢k) = ee# g f y x (j≢k ∘ sym)
+≎-sym (0∞# x≈0 y≈∞)               = ∞0# y≈∞ x≈0
+≎-sym (∞0# x≈∞ y≈0)               = 0∞# y≈0 x≈∞
+≎-sym (∞∞# x≈∞ y≈∞)               = ∞∞# y≈∞ x≈∞
+≎-sym (e0# f v x≈fv y≈0)          = 0e# f v y≈0 x≈fv
+≎-sym (0e# g w x≈0 y≈gw)          = e0# g w y≈gw x≈0
+≎-sym (∞e# f v x≈∞ y≈gw)          = e∞# f v y≈gw x≈∞
+≎-sym (e∞# g w x≈fv y≈∞)          = ∞e# g w y≈∞ x≈fv
+≎-sym (ee# f g x y j≢k x≈fv y≈gw) = ee# g f y x (j≢k ∘ sym) y≈gw x≈fv
 
 -----------------------------------------------------------------------
 -- Some standard algebraic properties lifted to comparability

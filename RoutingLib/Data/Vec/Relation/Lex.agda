@@ -7,7 +7,7 @@ open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Data.Vec.Properties using (≟-Vec)
+open import RoutingLib.Data.Vec.Properties using (≡-dec)
 
 module RoutingLib.Data.Vec.Relation.Lex {a ℓ} {A : Set a} (_<_ : Rel A ℓ) where
 
@@ -80,7 +80,7 @@ module RoutingLib.Data.Vec.Relation.Lex {a ℓ} {A : Set a} (_<_ : Rel A ℓ) wh
         }
       ; total        = ≤-total compare
       }
-    ; _≟_          = ≟-Vec _≟_
+    ; _≟_          = ≡-dec _≟_
     ; _≤?_         = ≤-dec compare
     }
     where open IsStrictTotalOrder order hiding (isEquivalence)

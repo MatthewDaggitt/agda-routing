@@ -3,9 +3,9 @@ open import Algebra.FunctionProperties
 open import Algebra.Structures
 open import Relation.Binary.Lattice using (Minimum; Maximum)
 
-import RoutingLib.Algebra.Selectivity.NaturalChoice.Min as Min
+import RoutingLib.Algebra.Construct.NaturalChoice.Min as Min
 
-module RoutingLib.Algebra.Selectivity.NaturalChoice.Min.TotalOrder
+module RoutingLib.Algebra.Construct.NaturalChoice.Min.TotalOrder
   {a ℓ₁ ℓ₂} (TO : TotalOrder a ℓ₁ ℓ₂) where
 
   open TotalOrder TO renaming (Carrier to A)

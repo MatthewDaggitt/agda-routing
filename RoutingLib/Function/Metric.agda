@@ -1,104 +1,84 @@
-open import Level using () renaming (_⊔_ to _⊔ₗ_)
-open import Data.Nat using (ℕ; zero; suc; _≤_; _<_; _+_; _⊔_; _<′_)
+open import Algebra.FunctionProperties using (Op₁; Op₂)
 open import Data.Nat.Properties using (≤⇒≤′)
-open import Relation.Binary using (Rel; Setoid; Decidable; _Preserves_⟶_; _Preserves₂_⟶_⟶_)
+open import Level using (suc; _⊔_)
+open import Relation.Binary hiding (Symmetric)
 open import Relation.Binary.PropositionalEquality using (_≡_) renaming (sym to ≡-sym)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Unary using (Pred)
 open import Data.Product using (∃; _,_)
 open import Induction.WellFounded using (Acc; acc)
-open import Algebra.FunctionProperties using (Op₁)
 
-open import RoutingLib.Iteration.Synchronous using (_^_)
+open import RoutingLib.Function.Metric.Structures
 
-module RoutingLib.Function.Metric {a} {ℓ} (S : Setoid a ℓ) where
+module RoutingLib.Function.Metric where
 
-  open Setoid S renaming (Carrier to A)
+------------------------------------------------------------------------
+-- PreMetric
 
-  private
-    infix 4 _≉_
-    _≉_ : Rel A ℓ
-    x ≉ y = ¬ (x ≈ y)
-    
-  DistanceFunction : Set _
-  DistanceFunction = A → A → ℕ
+record PreMetric a i ℓ₁ ℓ₂ ℓ₃ : Set (suc (a ⊔ i ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃)) where
+  field
+    Carrier     : Set a
+    Image       : Set i
+    _≈_         : Rel Carrier ℓ₁
+    _≈ᵢ_        : Rel Image ℓ₂
+    _≤_         : Rel Image ℓ₃
+    0#          : Image
+    d           : Carrier → Carrier → Image
+    isPreMetric : IsPreMetric _≈_ _≈ᵢ_ _≤_ 0# d
 
+  open IsPreMetric isPreMetric public
 
-  -- Predicates over distance functions
+------------------------------------------------------------------------
+-- QuasiSemiMetric
 
-  Symmetric : Pred DistanceFunction a
-  Symmetric d = ∀ x y → d x y ≡ d y x
+record QuasiSemiMetric a i ℓ₁ ℓ₂ ℓ₃ : Set (suc (a ⊔ i ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃)) where
+  field
+    Carrier           : Set a
+    Image             : Set i
+    _≈_               : Rel Carrier ℓ₁
+    _≈ᵢ_              : Rel Image ℓ₂
+    _≤_               : Rel Image ℓ₃
+    0#                : Image
+    d                 : Carrier → Carrier → Image
+    isQuasiSemiMetric : IsQuasiSemiMetric _≈_ _≈ᵢ_ _≤_ 0# d
 
-  TriangleIneq : Pred DistanceFunction a
-  TriangleIneq d = ∀ x y z → d x z ≤ d x y + d y z
+  open IsQuasiSemiMetric isQuasiSemiMetric public
 
-  MaxTriangleIneq : Pred DistanceFunction a
-  MaxTriangleIneq d = ∀ x y z → d x z ≤ d x y ⊔ d y z
+------------------------------------------------------------------------
+-- SemiMetric
 
-  Bounded : Pred DistanceFunction a
-  Bounded d = ∃ λ n → ∀ x y → d x y ≤ n
+record SemiMetric a i ℓ₁ ℓ₂ ℓ₃ : Set (suc (a ⊔ i ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃)) where
+  field
+    Carrier      : Set a
+    Image        : Set i
+    _≈_          : Rel Carrier ℓ₁
+    _≈ᵢ_         : Rel Image ℓ₂
+    _≤_          : Rel Image ℓ₃
+    0#           : Image
+    d            : Carrier → Carrier → Image
+    isSemiMetric : IsSemiMetric _≈_ _≈ᵢ_ _≤_ 0# d
 
-  -- Contractions
+  open IsSemiMetric isSemiMetric public
 
-  _ContrOver_ : Op₁ A → DistanceFunction → Set _
-  f ContrOver d = ∀ x y → d (f x) (f y) ≤ d x y
+------------------------------------------------------------------------
+-- GeneralMetric
 
-  _StrContrOver_ : Op₁ A → DistanceFunction → Set _
-  f StrContrOver d = ∀ {x y} → ¬ (y ≈ x) → d (f x) (f y) < d x y
+-- Note that this package is not necessarily a metric in the classical
+-- sense as there is no way to ensure that the _∙_ operator really
+-- represents addition. See `Function.Metric.Nat` and
+-- `Function.Metric.Rational` for more specialised `Metric` and
+-- `UltraMetric` packages.
 
-  _ContrOnOrbitsOver_ : Op₁ A → DistanceFunction → Set _
-  f ContrOnOrbitsOver d = ∀ x → d (f x) (f (f x)) ≤ d x (f x)
+record GeneralMetric a i ℓ₁ ℓ₂ ℓ₃ : Set (suc (a ⊔ i ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃)) where
+  field
+    Carrier         : Set a
+    Image           : Set i
+    _≈_             : Rel Carrier ℓ₁
+    _≈ᵢ_            : Rel Image ℓ₂
+    _≤_             : Rel Image ℓ₃
+    0#              : Image
+    _∙_             : Op₂ Image
+    d               : Carrier → Carrier → Image
+    isGeneralMetric : IsGeneralMetric _≈_ _≈ᵢ_ _≤_ 0# _∙_ d
 
-  _StrContrOnOrbitsOver_ : Op₁ A → DistanceFunction → Set _
-  f StrContrOnOrbitsOver d = ∀ {x} → f x ≉ x → d (f x) (f (f x)) < d x (f x)
-
-  _StrContrOnOrbitsOver_After_ : Op₁ A → DistanceFunction → ℕ → Set _
-  f StrContrOnOrbitsOver d After k = ∀ {x} → fᵏ⁺¹ x ≉ fᵏ x → d (fᵏ⁺¹ x) (fᵏ⁺² x) < d (fᵏ x) (fᵏ⁺¹ x)
-    where fᵏ = f ^ k; fᵏ⁺¹ = f ^ (1 + k); fᵏ⁺² = f ^ (2 + k)
-    
-  _StrContrOnFixedPointOver_ : Op₁ A → DistanceFunction → Set _
-  f StrContrOnFixedPointOver d = ∀ {x x*} → f x* ≈ x* → x ≉ x* → d x* (f x) < d x* x
-
-  _StrContrOnFixedPointOver_After_ : Op₁ A → DistanceFunction → ℕ → Set _
-  f StrContrOnFixedPointOver d After k = ∀ {x x*} → f x* ≈ x* → (f ^ k) x ≉ x* → d x* ((f ^ (1 + k)) x) < d x* ((f ^ k) x)
-
-  -- Balls
-
-  -- x is in the ball of radius r around point y
-  _∈[_∥_,_] : A → DistanceFunction → A → ℕ → Set _
-  x ∈[ d ∥ y , r ] = d x y ≤ r
-
-
-
-  -- Types of distance spaces
-
-  record IsMetric (d : DistanceFunction) : Set (a ⊔ₗ ℓ) where
-    field
-      cong     : d Preserves₂ _≈_ ⟶ _≈_ ⟶ _≡_
-      eq⇒0     : ∀ {x y} → x ≈ y → d x y ≡ 0
-      0⇒eq     : ∀ {x y} → d x y ≡ 0 → x ≈ y
-      sym      : ∀ x y → d x y ≡ d y x
-      triangle : TriangleIneq d
-
-  record Metric : Set (a ⊔ₗ ℓ) where
-    field
-      d        : DistanceFunction
-      isMetric : IsMetric d
-
-    open IsMetric isMetric public
-
-
-  record IsUltrametric (d : A → A → ℕ) : Set (a ⊔ₗ ℓ) where
-    field
-      cong        : d Preserves₂ _≈_ ⟶ _≈_ ⟶ _≡_
-      eq⇒0        : ∀ {x y} → x ≈ y → d x y ≡ 0
-      0⇒eq        : ∀ {x y} → d x y ≡ 0 → x ≈ y
-      sym         : ∀ x y → d x y ≡ d y x
-      maxTriangle : MaxTriangleIneq d
-
-  record Ultrametric : Set (a ⊔ₗ ℓ) where
-    field
-      d : A → A → ℕ
-      isUltrametric : IsUltrametric d
-
-    open IsUltrametric isUltrametric public
+  open IsGeneralMetric isGeneralMetric public

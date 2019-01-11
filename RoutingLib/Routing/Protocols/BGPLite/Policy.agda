@@ -1,11 +1,12 @@
+open import Data.Bool as 𝔹 using (Bool; true; false; _∧_; _∨_; if_then_else_)
+open import Data.Fin using (fromℕ≤)
 open import Data.Nat using (ℕ; _≟_; _+_; _≤_; zero; suc; s≤s)
 open import Data.Nat.Properties using (_<?_; n≤m+n; ≤-refl; ≤-trans; n≮n; ≤⇒≯; n≤1+n; <⇒≯; <⇒≢)
-open import Data.Fin using (fromℕ≤)
-open import Data.Bool as 𝔹 using (Bool; true; false; _∧_; _∨_; if_then_else_)
-open import Data.Product using (_×_; _,_)
+open import Data.Product using (∃; ∃₂; _×_; _,_)
+open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Function using (_∘_)
 open import Relation.Binary.PropositionalEquality
-  using (_≡_; refl; sym; trans; cong; cong₂; inspect; [_])
+  using (_≡_; refl; sym; trans; cong; cong₂; inspect; [_]; module ≡-Reasoning)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Decidable using (⌊_⌋)
 open import Relation.Nullary.Negation using (contradiction)
@@ -63,22 +64,33 @@ apply reject              r              = invalid
 apply (compose pol₂ pol₁) r              = apply pol₁ (apply pol₂ r )
 apply (if p then pol)     r              = if (evaluate p r) then (apply pol r) else r
 
+apply-result : ∀ pol l cs p → apply pol (valid l cs p) ≡ invalid ⊎
+             ∃₂ λ k ds → ∃ λ i → l ≤ k × apply pol (valid l cs p) ≡ valid k ds (Path.inflate p i)
+apply-result reject             l cs p = inj₁ refl
+apply-result (raise x)          l cs p = inj₂ (x + l , cs          , 0 , n≤m+n x l , refl)
+apply-result (inflate n)        l cs p = inj₂ (l     , cs          , n , ≤-refl    , refl)
+apply-result (addComm c)        l cs p = inj₂ (l     , add    c cs , 0 , ≤-refl    , refl)
+apply-result (delComm c)        l cs p = inj₂ (l     , remove c cs , 0 , ≤-refl    , refl)
+apply-result (if c then pol)    l cs p with evaluate c (valid l cs p)
+... | true  = apply-result pol l cs p
+... | false = inj₂ (l , cs , 0 , ≤-refl , refl)
+apply-result (compose pol₁ pol₂) l cs p with apply-result pol₁ l cs p
+... | inj₁ eq₁ rewrite eq₁         = inj₁ refl
+... | inj₂ (k , ds , i , l≤k , eq₁) with apply-result pol₂ k ds (Path.inflate p i)
+...   | inj₁ eq₂ = inj₁ (trans (cong (apply pol₂) eq₁) eq₂)
+...   | inj₂ (m , es , j , k≤m , eq₂) = inj₂ (m , es , i + j , ≤-trans l≤k k≤m , (begin
+  apply pol₂ (apply pol₁ (valid l cs p))         ≡⟨ cong (apply pol₂) eq₁ ⟩
+  apply pol₂ (valid k ds (Path.inflate p i))     ≡⟨ eq₂ ⟩
+  valid m es (Path.inflate (Path.inflate p i) j) ≡⟨ cong (valid m es) (inflate-inflate p i j) ⟩
+  valid m es (Path.inflate p (i + j))            ∎))
+  where open ≡-Reasoning
+
+{-
 apply-increasing : ∀ pol {l cs p k ds q} → apply pol (valid l cs p) ≡ valid k ds q →
                    l ≤ k × length p ≤ length q × deflate p ≡ deflate q
-apply-increasing reject        ()
-apply-increasing (raise x)     refl = n≤m+n x _ , ≤-refl , refl
-apply-increasing (addComm c)   refl = ≤-refl    , ≤-refl , refl
-apply-increasing (delComm c)   refl = ≤-refl    , ≤-refl , refl
-apply-increasing (inflate n)   refl = ≤-refl    , inflate-length _ n , deflate-inflate _ n
-apply-increasing (if x then pol) {l} {cs} {p} eq with evaluate x (valid l cs p) | eq
-... | 𝔹.true  | e    = apply-increasing pol e
-... | 𝔹.false | refl = ≤-refl , ≤-refl , refl
-apply-increasing (compose r s) {l} {cs} {p} eq
-  with apply r (valid l cs p) | inspect (apply r) (valid l cs p)
-... | invalid | _ = contradiction eq λ()
-... | valid j es o | [ eq′ ] with apply-increasing r eq′ | apply-increasing s eq
-...   | (l≤j , |p|≤|o| , d[p]≡d[o]) | (j≤k , |o|≤|q| , d[o]≡d[q]) =
-  ≤-trans l≤j j≤k , ≤-trans |p|≤|o| |o|≤|q| , trans d[p]≡d[o] d[o]≡d[q]
+apply-increasing pol {l} {cs} {p} ≡valid with apply-result pol l cs p
+... | inj₁ ≡invalid = {!!}
+... | inj₂ (
 
 apply-nonDecreasing : ∀ pol {l cs e p} →
                       apply pol (valid l cs (e ∷ p)) ≰ᵣ valid l cs p
@@ -91,3 +103,4 @@ apply-nonDecreasing pol {l} {cs} {e} {p} leq
 ...     | (length< _ 2+|p|<|p|) = contradiction 2+|p|<|p| (<⇒≯ |p|<|q|)
 ...     | (plex< _ 1+|p|≡|p| _) = contradiction 1+|p|≡|p| (<⇒≢ |p|<|q| ∘ sym)
 ...     | (comm≤ _ e∷p≈p _)     = contradiction e∷p≈p (|p|≢|q|⇒p≉q (<⇒≢ |p|<|q| ∘ sym))
+-}

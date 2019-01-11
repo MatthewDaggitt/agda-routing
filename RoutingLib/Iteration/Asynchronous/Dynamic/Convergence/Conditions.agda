@@ -45,7 +45,7 @@ record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
     -- Boxes
     B          : Epoch → Subset n → ℕ → IPred Sᵢ p
     B₀-eqᵢ     : ∀ {e p} f q {i xᵢ} → xᵢ ∈ᵤ B e p 0 i → xᵢ ∈ᵤ B f q 0 i
-    Bᵢ-cong     : ∀ {e p k i} → (_∈ᵤ B e p k i) Respects _≈ᵢ_
+    Bᵢ-cong    : ∀ {e p k i} → (_∈ᵤ B e p k i) Respects _≈ᵢ_
     B-finish   : ∀ e p → ∃₂ λ k* x* → ∀ {k} → k* ≤ k → (x* ∈ B e p k × (∀ {x} → x ∈ B e p k → x ≈ x*))
     B-null     : ∀ {e p k i} → i ∉ p → ⊥ i ∈ᵤ B e p k i
 

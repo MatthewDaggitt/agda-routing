@@ -71,4 +71,3 @@ dᶜ≤d : ∀ {c} (x y : A) → dᶜ c x y ≤ d x y
 dᶜ≤d {c} x y with P? c
 ... | yes _ = ≤-refl
 ... | no  _ = z≤n
-

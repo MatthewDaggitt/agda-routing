@@ -10,16 +10,14 @@ open import Data.List.All.Properties using (All¬⇒¬Any)
 open import Data.List.Any using (index)
 open import Data.Nat using (_≤_; _<_; zero; suc; s≤s; z≤n)
 open import Data.Nat.Properties using (suc-injective; <⇒≤; ≤-trans; n≤1+n)
-open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
+open import Data.Fin using (Fin)
 open import Data.Maybe using (nothing; just; Maybe; Eq; Eq-refl; Eq-sym; Eq-trans; drop-just; just-injective)
 open import Data.Empty using (⊥-elim)
 open import Data.List hiding (any)
 open import Data.List.Any using (here; there; any) renaming (map to mapₐ)
-open import Data.List.Any.Properties
 open import Data.List.Relation.Permutation.Inductive using (_↭_)
-open import Data.Product using (∃; ∃₂; _×_; _,_; swap) renaming (map to mapₚ)
+open import Data.Product using (∃; ∃₂; _×_; _,_; swap)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
-open import Data.Bool using (true; false; if_then_else_)
 open import Relation.Unary using (Decidable; _⇒_) renaming (_⊆_ to _⋐_)
 open import Algebra.FunctionProperties using (Op₂; RightIdentity; Selective)
 
@@ -76,7 +74,7 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     index-cong (here x≈z)   (here y≈z)   _            x≈y = refl
     index-cong (here x≈z)   (there y∈xs) (z≉xs ∷ xs!) x≈y = contradiction (∈-resp-≈ S (trans (sym x≈y) x≈z) y∈xs) (All¬⇒¬Any z≉xs)
     index-cong (there x∈xs) (here y≈z)   (z≉xs ∷ xs!) x≈y = contradiction (∈-resp-≈ S (trans x≈y y≈z) x∈xs) (All¬⇒¬Any z≉xs)
-    index-cong (there x∈xs) (there y∈xs) (_ ∷ xs!)    x≈y = cong fsuc (index-cong x∈xs y∈xs xs! x≈y)
+    index-cong (there x∈xs) (there y∈xs) (_ ∷ xs!)    x≈y = cong Fin.suc (index-cong x∈xs y∈xs xs! x≈y)
 
 
 

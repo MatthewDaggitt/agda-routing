@@ -8,7 +8,7 @@ open import Relation.Binary.Lattice using (Minimum; Maximum)
 open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Relation.Binary
 
-module RoutingLib.Algebra.Selectivity.NaturalChoice.Min
+module RoutingLib.Algebra.Construct.NaturalChoice.Min
   {a ℓ} {A : Set a} {_≤_ : Rel A ℓ} (total : Total _≤_) where
   
 min : Op₂ A

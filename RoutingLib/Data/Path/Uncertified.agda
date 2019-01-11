@@ -97,5 +97,9 @@ inflate q@((i , j) ∷ p) (suc n) = (i , i) ∷ inflate q n
 deflate : Path → Path
 deflate [] = []
 deflate ((i , j) ∷ p) with i ≟ j
-... | yes _ = deflate p
-... | no  _ = (i , j) ∷ p
+... | no  _ = (i , j) ∷ deflate p
+... | yes _ with source (deflate p)
+...   | nothing = []
+...   | just k with i ≟ k
+...     | yes _ = deflate p
+...     | no  _ = (i , k) ∷ deflate p

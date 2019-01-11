@@ -22,8 +22,3 @@ flip f = λ y x → f x y
 -- infixl 1 _̲_
 
 syntax flip f x = f ◌ x
-{-
-_̲_ : ∀ {a b c} {A : Set a} {B : Set b} {C : A → B → Set c} →
-      ((x : A) (y : B) → C x y) → ((y : B) (x : A) → C x y)
-_̲_ = flip
--}

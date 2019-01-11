@@ -135,6 +135,7 @@ module _ {a p} {A : Set a} {P : Pred A p} {_•_ : Op₂ A} where
 
 module _ {a} {A : Set a} where
 
+  -- stdlib
   length-applyUpTo : ∀ (f : ℕ → A) n → length (applyUpTo f n) ≡ n
   length-applyUpTo f zero    = refl
   length-applyUpTo f (suc n) = cong suc (length-applyUpTo (f ∘ suc) n)
@@ -142,6 +143,7 @@ module _ {a} {A : Set a} where
 ------------------------------------------------------------------------
 -- Properties of upTo
 
+-- stdlib
 length-upTo : ∀ n → length (upTo n) ≡ n
 length-upTo = length-applyUpTo id
   
@@ -150,10 +152,12 @@ length-upTo = length-applyUpTo id
 
 module _ {a} {A : Set a} (f : ℕ → A) where
 
+  -- stdlib
   length-applyDownFrom : ∀ n → length (applyDownFrom f n) ≡ n
   length-applyDownFrom zero    = refl
   length-applyDownFrom (suc n) = cong suc (length-applyDownFrom n)
 
+  -- stdlib
   applyDownFrom-lookup : ∀ n i → lookup (applyDownFrom f n) i ≡ f (n ∸ (suc (toℕ i)))
   applyDownFrom-lookup zero  ()
   applyDownFrom-lookup (suc n) zero    = refl
@@ -162,9 +166,11 @@ module _ {a} {A : Set a} (f : ℕ → A) where
 ------------------------------------------------------------------------
 -- Properties of downFrom
 
+-- stdlib
 length-downFrom : ∀ n → length (downFrom n) ≡ n
 length-downFrom = length-applyDownFrom id
 
+-- stdlib
 downFrom-lookup : ∀ n i → lookup (downFrom n) i ≡ n ∸ (suc (toℕ i))
 downFrom-lookup = applyDownFrom-lookup id
 
@@ -183,6 +189,7 @@ module _ {a} {A : Set a} where
 
 module _ {a b} {A : Set a} {B : Set b} where
 
+  -- stdlib
   map-tabulate : ∀ {n} (g : Fin n → A) (f : A → B) →
                  map f (tabulate g) ≡ tabulate (f ∘ g)
   map-tabulate {zero}  g f = refl

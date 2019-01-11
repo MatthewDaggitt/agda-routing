@@ -93,11 +93,11 @@ module RoutingLib.Routing.Algebra.Bisimulation {a₁ b₁ ℓ₁ a₂ b₂ ℓ�
 
         All-≎-tabulate : ∀ (X : RoutingMatrix) j → All (_≎ Iᵃ i j) (tabulate (λ k → Aᵃ e p i k ▷ᵃ X k j))
         All-≎-tabulate X j with j ≟ i
-        ... | yes _ = tabulate⁺ (λ k → e0# (Aᵃ e p i k) (X k j))
-        ... | no  _ = tabulate⁺ (λ k → e∞# (Aᵃ e p i k) (X k j))
+        ... | yes _ = tabulate⁺ (λ k → e0# (Aᵃ e p i k) (X k j) ? ?)
+        ... | no  _ = tabulate⁺ (λ k → e∞# (Aᵃ e p i k) (X k j) ? ?)
 
         AllPairs-≎-tabulate : ∀ (X : RoutingMatrix) j → AllPairs _≎_ (tabulate (λ k → Aᵃ e p i k ▷ᵃ X k j))
-        AllPairs-≎-tabulate X j = AllPairs.tabulate⁺ (ee# (Aᵃ e p i _) (Aᵃ e p i _) (X _ j) (X _ j))
+        AllPairs-≎-tabulate X j = AllPairs.tabulate⁺ (ee# (Aᵃ e p i _) (Aᵃ e p i _) (X _ j) (X _ j) ? ?)
 
         toA : ∀ k → toₛ (Aᵃ e p i k) ≡ Aᵇ e p i k
         toA k with i ∈? p | k ∈? p

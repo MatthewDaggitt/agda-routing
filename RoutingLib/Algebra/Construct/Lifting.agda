@@ -15,7 +15,7 @@ open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Algebra.FunctionProperties
 
-module RoutingLib.Algebra.Selectivity.Lifting
+module RoutingLib.Algebra.Construct.Lifting
   {a b ℓ} {A : Set a} {B : Set b} {_•_ : Op₂ B}
   (_≈ᵇ_ : Rel B ℓ) (•-sel : Selective _≈ᵇ_ _•_) (f : A → B)
   where

@@ -18,7 +18,6 @@ open import RoutingLib.Data.Table using (max)
 open import RoutingLib.Data.Table.Properties using (max[t]≤x; x≤max[t]; max-cong)
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
 open import RoutingLib.Data.Nat.Properties using (m+[n∸o]≤[m+n]∸o; module ≤-Reasoning)
-import RoutingLib.Function.Metric.FixedPoint as FixedPoints
 import RoutingLib.Function.Metric.Construct.Condition as Condition
 open import RoutingLib.Relation.Unary.Indexed
 open import RoutingLib.Relation.Binary.PropositionalEquality using (inspect′)

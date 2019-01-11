@@ -14,15 +14,16 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
-  using (_≡_; _≢_; refl; sym; trans; subst; cong; cong₂; inspect; [_])
+  using (_≡_; _≢_; refl; sym; trans; subst; cong; cong₂; inspect; [_]; module ≡-Reasoning)
 open import Relation.Binary using (Minimum; Maximum)
 open import Level using () renaming (zero to ℓ₀; suc to lsuc)
 
 import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
-import RoutingLib.Algebra.Selectivity.NaturalChoice.Min.TotalOrder as NaturalChoice
+import RoutingLib.Algebra.Construct.NaturalChoice.Min.TotalOrder as NaturalChoice
 
 open import RoutingLib.Data.Path.Uncertified using (inflate; deflate; length)
-open import RoutingLib.Data.Path.Uncertified.Properties using (∈-deflate⁻; ij⇿p⇒i≢j; _≤ₗₑₓ?_; ≤ₗₑₓ-total; ≤ₗₑₓ-antisym)
+open import RoutingLib.Data.Path.Uncertified.Properties
+  using (∈-deflate⁻; deflate-inflate; deflate-skip; ij⇿p⇒i≢j; _≤ₗₑₓ?_; ≤ₗₑₓ-total; ≤ₗₑₓ-antisym)
 open import RoutingLib.Data.Path.UncertifiedI hiding (length)
 open import RoutingLib.Data.Path.UncertifiedI.Properties
 
@@ -30,7 +31,7 @@ open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.Algebra.Comparable as Comparable
 
 open import RoutingLib.Routing.Protocols.BGPLite.Route
-open import RoutingLib.Routing.Protocols.BGPLite.Policy
+open import RoutingLib.Routing.Protocols.BGPLite.Policy using (Policy; apply; reject; apply-result)
 open import RoutingLib.Routing.Protocols.BGPLite.Communities
 
 module RoutingLib.Routing.Protocols.BGPLite.Algebra where
@@ -124,7 +125,7 @@ path[r]≈∅⇒r≈∞ {invalid}      refl = refl
 path[r]≈∅⇒r≈∞ {valid l cs p} ()
 
 path-reject : ∀ {n} {i j : Fin n} {r q} (f : Step i j) → path r ≡ valid q →
-              ¬ (toℕ i , toℕ j) ⇿ᵥ q ⊎ toℕ i ∈ᵥₚ q → f ▷ r ≡ invalid
+              (¬ (toℕ i , toℕ j) ⇿ᵥ q) ⊎ (toℕ i ∈ᵥₚ q) → f ▷ r ≡ invalid
 path-reject {_} {i} {j} {invalid}      (step pol) pᵣ≈p inv = refl
 path-reject {_} {i} {j} {valid l cs p} (step pol) refl inv with (toℕ i , toℕ j) ⇿ᵥ? p | toℕ i ∈ᵥₚ? p
 ... | no  _    | _       = refl
@@ -133,24 +134,22 @@ path-reject {_} {i} {j} {valid l cs p} (step pol) refl inv with (toℕ i , toℕ
 ...   | inj₁ ¬ij⇿d[p] = contradiction ij⇿p {!!} --¬ij⇿p
 ...   | inj₂ i∈d[p]   = contradiction (∈-deflate⁻ i∈d[p]) i∉p
 
-
 path-accept : ∀ {n} {i j : Fin n} {r q} (f : Step i j) → path r ≡ valid q → f ▷ r ≢ invalid →
               path (f ▷ r) ≡ valid ((toℕ i , toℕ j) ∷ q)
-path-accept {_} {i} {j} {invalid}      (step pol) pᵣ≈q f▷r≉0 = contradiction refl f▷r≉0
-path-accept {_} {i} {j} {valid l cs p} (step pol) eq f▷r≉0 with (toℕ i , toℕ j) ⇿ᵥ? p | toℕ i ∈ᵥₚ? p
+path-accept {_} {i} {j} {invalid}      {_} (step pol) pᵣ≈q f▷r≉0 = contradiction refl f▷r≉0
+path-accept {_} {i} {j} {valid l cs p} {q} (step pol) eq f▷r≉0 with (toℕ i , toℕ j) ⇿ᵥ? p | toℕ i ∈ᵥₚ? p
 ... | no ¬e⇿p | _       = contradiction refl f▷r≉0
 ... | yes _   | yes i∈p = contradiction refl f▷r≉0
-... | yes e⇿p | no  i∉p
-  with apply pol (valid l cs ((toℕ i , toℕ j) ∷ p))
-       | inspect (apply pol) (valid l cs ((toℕ i , toℕ j) ∷ p))
-... | invalid     | _       = contradiction refl f▷r≉0
-... | valid _ _ q | [ eq₂ ] with apply-increasing pol eq₂
-...   | _ , |p|≤|q| , d[p]≡d[q] = {!!}
-{-
-with toℕ i ≟ toℕ j
-...     | yes i≡j = contradiction i≡j (ij⇿p⇒i≢j e⇿p)  --refl
-...     | no  _   = {!contradiction (trans d[p]≡d[q] (deflate) ?!} --contradiction {!!} {!!}
--}
+... | yes e⇿p | no  i∉p with apply-result pol l cs ((toℕ i , toℕ j) ∷ p)
+...   | inj₁ ≡invalid = contradiction ≡invalid f▷r≉0
+...   | inj₂ (k , ds , m , l≤k , ≡valid) = begin
+  path (apply pol (valid l cs ((toℕ i , toℕ j) ∷ p))) ≡⟨ cong path ≡valid ⟩
+  path (valid k ds (inflate ((toℕ i , toℕ j) ∷ p) m)) ≡⟨⟩
+  valid (deflate (inflate ((toℕ i , toℕ j) ∷ p) m))   ≡⟨ cong valid (deflate-inflate _ m) ⟩
+  valid (deflate ((toℕ i , toℕ j) ∷ p))               ≡⟨ cong valid (deflate-skip p (ij⇿p⇒i≢j e⇿p)) ⟩
+  valid ((toℕ i , toℕ j) ∷ deflate p)                 ≡⟨ cong (λ p → valid (_ ∷ p)) (valid-injective eq) ⟩
+  valid ((toℕ i , toℕ j) ∷ q)                         ∎
+  where open ≡-Reasoning
 
 isPathAlgebra : IsPathAlgebra algebra
 isPathAlgebra = record
@@ -169,8 +168,36 @@ isPathAlgebra = record
 
 open Comparable algebra
 
-≎⇒path≢ : ∀ {k l cs ds p q} → valid k cs p ≎ valid l ds q → p ≢ q
-≎⇒path≢ eq = {!!}
+x≡fv⇒p[x]≢[] : ∀ {k cs p} {n} {i j : Fin n} (f : Step i j) v →
+               valid k cs p ≡ f ▷ v → p ≢ []
+x≡fv⇒p[x]≢[] f          invalid        ()
+x≡fv⇒p[x]≢[] {i = i} {j} (step pol) (valid l cs p) x≈fv with (toℕ i , toℕ j) ⇿ᵥ? p | toℕ i ∈ᵥₚ? p
+... | no  _    | _       = contradiction x≈fv λ()
+... | yes _    | yes _   = contradiction x≈fv λ()
+... | yes ij⇿p | no  i∈p = {!!} --apply pol (valid l cs ((toℕ i , toℕ j) ∷ p))
+
+x≡fv∧y≈gw⇒p≢q : ∀ {k l cs ds p q} {n} {i j m : Fin n} (f : Step i j) (g : Step i m) v w →
+                valid k cs p ≡ f ▷ v → valid l ds q ≡ g ▷ w →
+                j ≢ m → p ≢ q
+x≡fv∧y≈gw⇒p≢q {i = i} {j} {m} f g invalid w () y≈gw j≢m
+x≡fv∧y≈gw⇒p≢q {i = i} {j} {m} f g (valid l cs p) invalid x≈fv () j≢m
+x≡fv∧y≈gw⇒p≢q {i = i} {j} {m} (step pol₁) (step pol₂) (valid l cs p) (valid k ds q) x≈fv y≈gw j≢m
+  with (toℕ i , toℕ j) ⇿ᵥ? p | toℕ i ∈ᵥₚ? p | (toℕ i , toℕ m) ⇿ᵥ? q | toℕ i ∈ᵥₚ? q
+... | no  _ | _     | _     | _     = contradiction x≈fv λ()
+... | yes _ | yes _ | _     | _     = contradiction x≈fv λ()
+... | yes _ | no  _ | no  _ | _     = contradiction y≈gw λ()
+... | yes _ | no  _ | yes _ | yes _ = contradiction y≈gw λ()
+... | yes _ | no  _ | yes _ | no  _ = {!!}
+
+≎⇒path≢ : ∀ {k l cs ds p q} → k ≡ l → valid k cs p ≎ valid l ds q → p ≢ q
+≎⇒path≢ refl (0∞# refl ())
+≎⇒path≢ refl (∞0# () refl)
+≎⇒path≢ refl (∞∞# () ())
+≎⇒path≢ refl (0e# g w refl ≈gw) = x≡fv⇒p[x]≢[] g w ≈gw ∘ sym
+≎⇒path≢ refl (e0# f v ≈fv refl) = x≡fv⇒p[x]≢[] f v ≈fv
+≎⇒path≢ refl (∞e# g w () x)
+≎⇒path≢ refl (e∞# f v x ())
+≎⇒path≢ refl (ee# f g v w j≢k x≈fv y≈gw) = x≡fv∧y≈gw⇒p≢q f g v w x≈fv y≈gw j≢k
 
 ⊕-sel : Selective _≡_ _⊕_
 ⊕-sel invalid        invalid        = inj₁ refl
@@ -194,7 +221,7 @@ open Comparable algebra
 ⊕-comm {invalid}      {valid l cs p} x≎y = refl
 ⊕-comm {valid l cs p} {invalid}      x≎y = refl
 ⊕-comm {valid l cs p} {valid k ds q} x≎y with compare l k | compare k l
-... | tri< _   _ _ | tri> _ _ _ = refl --Choice.⊓-comm
+... | tri< _   _ _ | tri> _ _ _   = refl
 ... | tri< l<k _ _ | tri≈ _ _ l≮k = contradiction l<k l≮k
 ... | tri< l<k _ _ | tri< _ _ l≮k = contradiction l<k l≮k
 ... | tri> _   _ _ | tri< _ _ _   = refl
@@ -212,7 +239,7 @@ open Comparable algebra
 ...   | tri≈ _ |p|≡|q| _ | tri< _ |q|≢|p| _ = contradiction (sym |p|≡|q|) |q|≢|p|
 ...   | tri≈ _ |p|≡|q| _ | tri> _ |q|≢|p| _ = contradiction (sym |p|≡|q|) |q|≢|p|
 ...   | tri≈ _ |p|≡|q| _ | tri≈ _ _ _       with p ≤ₗₑₓ? q | q ≤ₗₑₓ? p
-...     | yes p≤q | yes q≤p = contradiction (≤ₗₑₓ-antisym p≤q q≤p) {!!}
+...     | yes p≤q | yes q≤p = contradiction (≤ₗₑₓ-antisym p≤q q≤p) (≎⇒path≢ l≡k x≎y)
 ...     | yes p≤q | no  q≤p = refl
 ...     | no  p≰q | yes q≤p = refl
 ...     | no  p≰q | no  q≰p with ≤ₗₑₓ-total p q
@@ -220,10 +247,20 @@ open Comparable algebra
 ...       | inj₂ q≤p = contradiction q≤p q≰p
 
 ⊕-identityʳ  : RightIdentity _≡_ invalid _⊕_
-⊕-identityʳ = {!!} --Choice.⊓-identityʳ ≤ᵣ-maximum
+⊕-identityʳ invalid        = refl
+⊕-identityʳ (valid l cs p) = refl
 
 ⊕-zeroʳ : RightZero _≡_ 0# _⊕_
-⊕-zeroʳ = {!!} --Choice.⊓-zeroʳ ≤ᵣ-minimum
+⊕-zeroʳ invalid = refl
+⊕-zeroʳ (valid l cs p) with compare l 0
+... | tri< l<0 _ _ = contradiction l<0 λ()
+... | tri> _   _ _ = refl
+... | tri≈ _   _ _ with compare (length p) 0
+...   | tri< |p|<0 _ _ = contradiction |p|<0 λ()
+...   | tri> _     _ _ = refl
+...   | tri≈ _     _ _ with p ≤ₗₑₓ? []
+...     | yes []≤p = {!!}
+...     | no  _    = refl
 
 ▷-fixedPoint : ∀ {n} {i j : Fin n} (f : Step i j) → f ▷ invalid ≡ invalid
 ▷-fixedPoint (step _) = refl

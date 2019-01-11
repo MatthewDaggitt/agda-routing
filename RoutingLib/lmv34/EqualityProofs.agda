@@ -12,7 +12,7 @@ data _≡_ {A : Set} (x : A) : A → Set where
 
 infix 4 _≡_
 
-≡-refl : ∀ {A} (a : A) → a ≡ a
+≡-refl : forall {A} (a : A) → a ≡ a
 ≡-refl a = refl
 
 ≡-sym : ∀ {A} {a b : A} → a ≡ b → b ≡ a
@@ -25,6 +25,7 @@ infix 4 _≡_
 ≡-cong f refl = refl
 
 -- + : Properties
+
 +-right-identity : ∀ n → n + 0 ≡ n
 +-right-identity zero = refl
 +-right-identity (suc n) = ≡-cong suc (+-right-identity n)
@@ -117,3 +118,91 @@ distribʳ-*-+ (suc a) b c =
      ≡⟨ refl ⟩
         (suc a * b) * c
      ▪
+
+*-left-identity : ∀ a → 1 * a ≡ a
+*-left-identity a = +-right-identity a
+
+*-right-identity : ∀ a → a * 1 ≡ a
+*-right-identity zero = refl
+*-right-identity (suc a) = ≡-cong suc (*-right-identity a)
+
+n*0≡0 : ∀ n → n * 0 ≡ 0
+n*0≡0 zero = refl
+n*0≡0 (suc n) = n*0≡0 n
+
++-suc : ∀ m n → suc (m + n) ≡ m + suc n
++-suc zero n = refl
++-suc (suc m) n = ≡-cong suc (+-suc m n)
+
+*-suc : ∀ m n → m + m * n ≡ m * suc n
+*-suc zero n = refl
+*-suc (suc m) n =
+      suc m + suc m * n
+    ≡⟨ refl ⟩
+      suc m + (n + m * n)
+    ≡⟨ +-associative (suc m) n (m * n) ⟩
+      suc m + n + m * n
+    ≡⟨ ≡-cong (λ x → x + m * n) (+-suc m n) ⟩
+      m + suc n + m * n
+    ≡⟨ ≡-cong (λ x → x + m * n) (+-commutative m (suc n)) ⟩
+      suc n + m + m * n
+    ≡⟨ ≡-sym (+-associative (suc n) m (m * n)) ⟩
+      suc n + (m + m * n)
+    ≡⟨ ≡-cong (λ x → suc n + x) (*-suc m n) ⟩
+      suc n + m * suc n
+    ≡⟨ refl ⟩
+      suc m * suc n
+    ▪
+
+*-comm : ∀ m n → m * n ≡ n * m
+*-comm zero n = ≡-sym (n*0≡0 n)
+*-comm (suc m) n = 
+       suc m * n
+     ≡⟨ refl ⟩
+       n + m * n
+     ≡⟨ ≡-cong (λ x → n + x) (*-comm m n) ⟩
+       n + n * m
+     ≡⟨ *-suc n m ⟩
+       n * suc m
+     ▪
+
+id : ∀ {A : Set} → A → A
+id x = x
+
+Σ : ℕ → (ℕ → ℕ) → ℕ
+Σ zero f = zero
+Σ (suc n) f = f (suc n) + Σ n f
+
+infixr 10 Σ
+
+x+x=2*x : ∀ n → n + n ≡ 2 * n
+x+x=2*x n = ≡-cong (n +_) (≡-sym (+-right-identity n))
+
+sumOfNats : ∀ n → 2 * Σ n id ≡ n * suc n
+sumOfNats zero = refl
+sumOfNats (suc n) = 
+      2 * (Σ (suc n) id)
+    ≡⟨ refl ⟩
+      2 * (suc n + Σ n id)
+    ≡⟨ refl ⟩
+      suc n + Σ n id + (suc n + Σ n id + 0)
+    ≡⟨ ≡-cong (λ x → suc n + Σ n id + x) (+-right-identity (suc n + Σ n id)) ⟩
+      suc n + Σ n id + (suc n + Σ n id)
+    ≡⟨ +-associative ((suc n) + Σ n id) (suc n) (Σ n id) ⟩
+      suc n + Σ n id + suc n + Σ n id
+    ≡⟨ ≡-cong (_+ Σ n id) (+-commutative (suc n + Σ n id) (suc n))  ⟩
+      suc n + (suc n + Σ n id) + Σ n id
+    ≡⟨ ≡-cong (_+ Σ n id) (+-associative (suc n) (suc n) (Σ n id)) ⟩
+      (suc n + suc n) + Σ n id + Σ n id
+    ≡⟨ ≡-sym (+-associative (suc n + suc n) (Σ n id) (Σ n id)) ⟩
+      suc n + suc n + (Σ n id + Σ n id)
+    ≡⟨ ≡-cong (λ x → suc n + suc n + x) (x+x=2*x (Σ n id)) ⟩
+      suc n + suc n + 2 * Σ n id
+    ≡⟨ ≡-cong (suc n + suc n +_) (sumOfNats n) ⟩
+      suc n + suc n + n * suc n
+    ≡⟨ ≡-sym (+-associative (suc n) (suc n) (n * suc n)) ⟩
+      suc n + (suc n + n * suc n)
+    ≡⟨ refl ⟩
+      suc (suc n) * suc n
+    ≡⟨ *-comm (suc (suc n)) (suc n) ⟩
+      suc n * suc (suc n) ▪

@@ -14,9 +14,9 @@ open import Relation.Nullary.Negation using (contradiction)
 open import RoutingLib.Data.Table using (max)
 open import RoutingLib.Data.Table.Properties using (max[t]<x; x≤max[t])
 open import RoutingLib.Data.Nat.Properties
+open import RoutingLib.Function.Metric.Nat
 import RoutingLib.Function.Metric.Construct.Condition as Condition
 import RoutingLib.Function.Metric.Construct.MaxLift as MaxLift
-open import RoutingLib.Function.Metric
 import RoutingLib.Relation.Binary.Reasoning.PartialOrder as PO-Reasoning
 
 open import RoutingLib.Routing.Algebra
@@ -118,7 +118,7 @@ rⁱ-sym x y = ⊔-comm (hⁱ x) (hⁱ y)
 rⁱ≡0⇒x≈y : ∀ {x y} → rⁱ x y ≡ 0 → x ≈ y
 rⁱ≡0⇒x≈y {x} {y} rⁱ≡0 = contradiction rⁱ≡0 (m<n⇒n≢0 (m≤o⇒m≤n⊔o (hⁱ x) (1≤hⁱ y)))
 
-rⁱ-maxTriIneq : MaxTriangleIneq S rⁱ
+rⁱ-maxTriIneq : MaxTriangleInequality rⁱ
 rⁱ-maxTriIneq x y z = begin
   hⁱ x ⊔ hⁱ z                   ≤⟨ ⊔-monoˡ-≤ (hⁱ z) (m≤m⊔n (hⁱ x) (hⁱ y)) ⟩
   hⁱ x ⊔ hⁱ y ⊔ hⁱ z            ≡⟨ ⊔-triangulate (hⁱ x) (hⁱ y) (hⁱ z) ⟩
@@ -130,7 +130,7 @@ rⁱ-maxTriIneq x y z = begin
 rⁱ≤Hⁱ : ∀ x y → rⁱ x y ≤ Hⁱ
 rⁱ≤Hⁱ x y = n≤m×o≤m⇒n⊔o≤m (hⁱ≤Hⁱ x) (hⁱ≤Hⁱ y)
 
-rⁱ-bounded : Bounded S rⁱ
+rⁱ-bounded : Bounded rⁱ
 rⁱ-bounded = Hⁱ , rⁱ≤Hⁱ
 
 rⁱxⁱyᶜ≡hⁱxⁱ : ∀ {x y} → 𝑰 x → 𝑪 y → rⁱ x y ≡ hⁱ x
@@ -238,7 +238,7 @@ r-maxTriIneq-lemma X Y Z = begin
   (Hᶜ + rⁱ X Y) ⊔ (Hᶜ + rⁱ Y Z) ∎
   where open ≤-Reasoning
 
-r-maxTriIneq : MaxTriangleIneq S r
+r-maxTriIneq : MaxTriangleInequality r
 r-maxTriIneq x y z with x ≟ z | x ≟ y | y ≟ z
 r-maxTriIneq x y z | yes _   | _       | _       = z≤n
 r-maxTriIneq x y z | no  x≉z | yes x≈y | yes y≈z = contradiction (≈-trans x≈y y≈z) x≉z
@@ -275,22 +275,40 @@ r≤Hᶜ+Hⁱ x y with x ≟ y
 ...   | yes _  | no  _  = +-monoʳ-≤ Hᶜ (rⁱ≤Hⁱ x y)
 ...   | yes xᶜ | yes yᶜ = ≤-trans (<⇒≤ (rᶜ<Hᶜ xᶜ yᶜ)) (m≤m+n Hᶜ Hⁱ)
 
-r-bounded : Bounded S r
+r-bounded : Bounded r
 r-bounded = Hᶜ + Hⁱ , r≤Hᶜ+Hⁱ
 
-r-isUltrametric : IsUltrametric S r
-r-isUltrametric = record
-  { cong        = r-cong
-  ; eq⇒0        = x≈y⇒r≡0
-  ; 0⇒eq        = r≡0⇒x≈y
-  ; sym         = r-sym
-  ; maxTriangle = r-maxTriIneq
+r-isPreMetric : IsPreMetric _≈_ r
+r-isPreMetric = record
+  { isTotalOrder    = ≤-isTotalOrder
+  ; 0#-minimum      = z≤n
+  ; ≈-isEquivalence = ≈-isEquivalence
+  ; cong            = r-cong
+  ; eq⇒0            = x≈y⇒r≡0
   }
 
-r-ultrametric : Ultrametric S
-r-ultrametric = record
+r-isQuasiSemiMetric : IsQuasiSemiMetric _≈_ r
+r-isQuasiSemiMetric = record
+  { isPreMetric = r-isPreMetric
+  ; 0⇒eq        = r≡0⇒x≈y
+  }
+
+r-isSemiMetric : IsSemiMetric _≈_ r
+r-isSemiMetric = record
+  { isQuasiSemiMetric = r-isQuasiSemiMetric
+  ; sym               = r-sym
+  }
+
+r-isUltraMetric : IsUltraMetric _≈_ r
+r-isUltraMetric = record
+  { isSemiMetric = r-isSemiMetric
+  ; triangle     = r-maxTriIneq
+  }
+
+r-ultraMetric : UltraMetric b ℓ
+r-ultraMetric = record
   { d             = r
-  ; isUltrametric = r-isUltrametric
+  ; isUltraMetric = r-isUltraMetric
   }
 
 H<r : ∀ {x y} → x ≉ y → 𝑰 x ⊎ 𝑰 y → Hᶜ < r x y
@@ -345,19 +363,20 @@ r-force-rⁱ X Y r≤Hᶜ+rⁱXₗYₗ {u} {v} Xᵤᵥ≉Yᵤᵥ Xᵤᵥⁱ⊎Y�
 
 private module MaxLiftₜ = MaxLift ℝ𝕋ₛⁱ (λ _ → r)
 
-d-isUltrametric : IsUltrametric _ d
-d-isUltrametric = MaxLiftₜ.isUltrametric r-isUltrametric
+d-isUltraMetric : IsUltraMetric _ d
+d-isUltraMetric = MaxLiftₜ.isUltraMetric r-isUltraMetric
 
-open IsUltrametric d-isUltrametric public
+open IsUltraMetric d-isUltraMetric public
   using ()
   renaming
-  ( cong to d-cong
-  ; sym  to d-sym
-  ; eq⇒0 to x≈y⇒d≡0
-  ; 0⇒eq to d≡0⇒x≈y
+  ( cong              to d-cong
+  ; sym               to d-sym
+  ; eq⇒0              to x≈y⇒d≡0
+  ; 0⇒eq              to d≡0⇒x≈y
+  ; isQuasiSemiMetric to d-isQuasiSemiMetric
   )
 
-d-bounded : Bounded ℝ𝕋ₛ d
+d-bounded : Bounded d
 d-bounded = MaxLiftₜ.bounded r-bounded
 
 r≤d : ∀ x y i → r (x i) (y i) ≤ d x y

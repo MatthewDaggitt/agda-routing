@@ -47,8 +47,8 @@ F′-cong' e p X≈Y _ j = foldr⁺ _≈_ ⊕-cong ≈-refl (tabulate⁺ (Aₜ-c
 F′-cong-∉ : ∀ e p {X Y} {i} → i ∉ p → F′ e p X i ≈ₜ F′ e p Y i
 F′-cong-∉ e p {X} {Y} i∉p j = foldr⁺ _≈_ ⊕-cong ≈-refl (tabulate⁺ (λ k → Aₜ-reject-eq network e _ k i∉p (X k j) (Y k j)))
 
-F′-inactive : ∀ e {p} X → WellFormed p (F′ e p X)
-F′-inactive e {p} X {i} i∉p j with j ≟𝔽 i
+F′-inactive : ∀ e p X → WellFormed p (F′ e p X)
+F′-inactive e p X {i} i∉p j with j ≟𝔽 i
 ... | yes j≡i = foldr-zeroʳ ⊕-magma ⊕-zeroʳ (tabulate λ k → Aₜ e p i k ▷ X k j)
 ... | no  j≢i = foldr-constant ⊕-magma (⊕-idem ∞) (All.tabulate⁺ (λ k → Aₜ-reject network e i k (inj₁ i∉p) (X k j)))
 
@@ -56,4 +56,4 @@ F′-inactive e {p} X {i} i∉p j with j ≟𝔽 i
 -- States in which the inactive nodes are actually inactive
 
 X*-wf : ∀ e p {X*} → F′ e p X* ≈ₘ X* → WellFormed p X*
-X*-wf e p {X*} FX*≈X* {i} i∉p = ≈ₜ-trans (≈ₘ-sym FX*≈X* i) (F′-inactive e X* i∉p)
+X*-wf e p {X*} FX*≈X* {i} i∉p = ≈ₜ-trans (≈ₘ-sym FX*≈X* i) (F′-inactive e p X* i∉p)

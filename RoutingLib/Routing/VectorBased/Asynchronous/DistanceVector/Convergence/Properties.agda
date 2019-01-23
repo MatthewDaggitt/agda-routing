@@ -165,10 +165,11 @@ module _ {n : ℕ} where
   open IsUltraMetric d-isUltraMetric public
     using ()
     renaming
-    ( cong to d-cong
-    ; sym  to d-sym
-    ; 0⇒eq to d≡0⇒x≈y
-    ; eq⇒0 to x≈y⇒d≡0
+    ( cong              to d-cong
+    ; sym               to d-sym
+    ; 0⇒eq              to d≡0⇒x≈y
+    ; eq⇒0              to x≈y⇒d≡0
+    ; isQuasiSemiMetric to d-isQuasiSemiMetric
     )
 
   r≤d : ∀ x y i → r (x i) (y i) ≤ d x y
@@ -221,5 +222,5 @@ module _ {n : ℕ} (p : Subset n) where
   ... | yes i∈p = r≤D X Y i j (inj₁ i∈p)
   ... | no  i∉p = r≤D X Y i j (inj₂ (WellFormed-cong wfX wfY i∉p))
 
-  Y≉ₚX⇒0<DXY : ∀ {X Y} → Y ≉ₘ X → 0 < Dₚ X Y
+  Y≉ₚX⇒0<DXY : ∀ {X Y} → Y ≉ₘ[ p ] X → 0 < Dₚ X Y
   Y≉ₚX⇒0<DXY Y≉X = n≢0⇒0<n (Y≉X ∘ ≈ₛ-sym ∘ D≡0⇒X≈ₛY)

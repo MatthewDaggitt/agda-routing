@@ -49,7 +49,7 @@ open PathAlgebraProperties isRoutingAlgebra isPathAlgebra
 
 open PathVector algebra network hiding (F)
 
-module _ (e : Epoch) (p : Subset n) where
+module _ {e : Epoch} {p : Subset n} where
 
   private
     F : RoutingMatrix → RoutingMatrix
@@ -221,7 +221,7 @@ module _ (e : Epoch) (p : Subset n) where
   d[FXᵢ,F²Xᵢ]<D[X,FX] : ∀ {X} → WellFormed p X → F X ≉ₘ[ p ] X →
                   ∀ i → dᶜ p i (F X i) (F (F X) i) < D p X (F X)
   d[FXᵢ,F²Xᵢ]<D[X,FX] {X} wfX FX≉X i with Y≉ₚX⇒0<DXY p FX≉X
-  ... | 0<DXY with max[t]<x 0<DXY (r-strContrOrbits 0<DXY (r≤D-wf p wfX (F′-inactive network e X)) i)
+  ... | 0<DXY with max[t]<x 0<DXY (r-strContrOrbits 0<DXY (r≤D-wf p wfX (F′-inactive network e p X)) i)
   ...   | d[FXᵢ,F²Xᵢ]<D[X,FX] = Dec.[
         (λ i∈p → subst (_< D p X (F X)) (sym (Condition.accept d (_∈? p) i∈p)) d[FXᵢ,F²Xᵢ]<D[X,FX]) ,
         (λ i∉p → subst (_< D p X (F X)) (sym (Condition.reject d (_∈? p) i∉p)) 0<DXY)
@@ -257,16 +257,12 @@ module _ (e : Epoch) (p : Subset n) where
 
 open DistanceVectorProperties isRoutingAlgebra network
 
-ultrametricConditions : UltrametricConditions F∥
-ultrametricConditions = record
-  { dᵢ                 = λ e p → d e p
-  ; dᵢ-cong            = λ e p → d-cong e p
-  ; x≈y⇒dᵢ≡0           = λ e p → x≈y⇒d≡0 e p
-  ; dᵢ≡0⇒x≈y           = λ e p → d≡0⇒x≈y e p
-  ; dᵢ-bounded         = λ e p → proj₁ (d-bounded e p) , proj₂ (d-bounded e p)
-  ; element            = I
-
-  ; F-strContrOnOrbits = Fₜ-strContrOnOrbits
-  ; F-strContrOnFP     = Fₜ-strContrOnFP
-  ; F-inactive         = F′-inactive
+F∥-isAMCO : AMCO F∥
+F∥-isAMCO = record
+  { dᵢ                   = λ e p → d {e} {p}
+  ; dᵢ-isQuasiSemiMetric = λ e p i → d-isQuasiSemiMetric
+  ; dᵢ-bounded           = λ e p → proj₁ d-bounded , proj₂ d-bounded
+  ; F-strContrOnOrbits  = Fₜ-strContrOnOrbits
+  ; F-strContrOnFP      = Fₜ-strContrOnFP
+  ; F-inactive          = F′-inactive
   }

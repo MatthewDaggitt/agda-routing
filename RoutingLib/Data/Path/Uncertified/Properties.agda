@@ -269,7 +269,7 @@ deflate-inflate-[] ((i , j) ∷ p) (suc n) eq with i ≟ i
 ...   | just k  | [ i₀≡k ] with i ≟ k
 ...     | yes _ = deflate-inflate-[] _ n eq
 ...     | no  _ = contradiction eq λ()
-
+{-
 deflate-inflate : ∀ p n → deflate (inflate p n) ≡ deflate p
 deflate-inflate p             zero    = refl
 deflate-inflate []            (suc n) = refl
@@ -280,7 +280,7 @@ deflate-inflate ((i , j) ∷ p) (suc n) with i ≟ i
 ...   | just k  | [ i₀≡k ]       with i ≟ k
 ...     | yes refl = deflate-inflate ((i , j) ∷ p) n
 ...     | no  i≢k  = {!!} --contradiction {!!} i≢k
-
+-}
 deflate-skip : ∀ p {i j} → i ≢ j → deflate ((i , j) ∷ p) ≡ (i , j) ∷ deflate p
 deflate-skip p {i} {j} i≢j with i ≟ j
 ... | yes i≡j = contradiction i≡j i≢j

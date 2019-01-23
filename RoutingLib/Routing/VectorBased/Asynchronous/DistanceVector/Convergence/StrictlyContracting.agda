@@ -1,3 +1,19 @@
+--------------------------------------------------------------------------------
+-- Proof that the metrics associated with a strictly increasing finite routing
+-- algebra are strictly contracting in the right ways so as to ensure that
+-- F∥ is an asynchronously metrically contracting operator (AMCO).
+--------------------------------------------------------------------------------
+
+open import RoutingLib.Routing.Algebra
+
+module RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.StrictlyContracting
+  {a b ℓ}
+  {algebra              : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra     : IsRoutingAlgebra algebra)
+  (isFinite             : IsFinite algebra)
+  (isStrictlyIncreasing : IsStrictlyIncreasing algebra)
+  where
+
 open import Data.Fin.Subset using (Subset; _∈_)
 open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Nat hiding (_≟_)
@@ -13,15 +29,12 @@ open import RoutingLib.Data.Table using (max)
 open import RoutingLib.Data.Table.Properties using (max[t]<x; x≤max[t])
 open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning; n≢0⇒0<n)
 import RoutingLib.Function.Metric.Construct.Condition as Condition
-import RoutingLib.Function.Metric as Metric
 import RoutingLib.Relation.Binary.Reasoning.PartialOrder as POR
 open import RoutingLib.Relation.Nullary.Decidable using ([_,_])
 
-open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
-open import RoutingLib.Routing as Routing using (AdjacencyMatrix; Network)
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
-
+open import RoutingLib.Routing as Routing using (AdjacencyMatrix; Network)
+import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
 import RoutingLib.Routing.VectorBased.Core as CoreVectorBasedRouting
 import RoutingLib.Routing.VectorBased.Core.Properties as CoreVectorBasedRoutingProperties
 import RoutingLib.Routing.VectorBased.Asynchronous as DistanceVectorRouting
@@ -31,19 +44,15 @@ import RoutingLib.Routing.VectorBased.Asynchronous as AsyncVectorBased
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Metrics as Metrics
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Properties as MetricsProperties
 
-module RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.StrictlyContracting
-  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  (isFinite : IsFinite algebra)
-  (isStrictlyIncreasing : IsStrictlyIncreasing algebra)
-  where
-
 open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
 open FiniteRoutingAlgebraProperties isRoutingAlgebra isFinite
 
 open Metrics isRoutingAlgebra isFinite
 open MetricsProperties isRoutingAlgebra isFinite
+
+--------------------------------------------------------------------------------
+-- Proof for an individual adjacency matrix
 
 module _ {n} (A : AdjacencyMatrix algebra n) where
 
@@ -101,13 +110,15 @@ module _ {n} (A : AdjacencyMatrix algebra n) where
     v                         ∎
     where open ≤-Reasoning
 
+--------------------------------------------------------------------------------
+-- Proof for a dynamic network
 
 module _ {n} (network : Network algebra n) where
 
   open DistanceVectorRouting algebra network hiding (F)
   open DistanceVectorRoutingProperties isRoutingAlgebra network
 
-  module _ (e : Epoch) (p : Subset n) where
+  module _ {e : Epoch} {p : Subset n} where
 
     private
       A : _
@@ -133,7 +144,7 @@ module _ {n} (network : Network algebra n) where
 
     F-strContrOnOrbits : ∀ {X} → WellFormed p X → (F X) ≉ₘ[ p ] X →
                           D p (F X) (F (F X)) < D p X (F X)
-    F-strContrOnOrbits {X} wfX FX≉X = F-strContr wfX (F′-inactive e X) FX≉X
+    F-strContrOnOrbits {X} wfX FX≉X = F-strContr wfX (F′-inactive e p X) FX≉X
 
     F-strContrOnFP : ∀ {X} → WellFormed p X → ∀ {X*} → F X* ≈ₘ X* → X ≉ₘ[ p ] X* →
                      D p X* (F X) < D p X* X
@@ -143,17 +154,12 @@ module _ {n} (network : Network algebra n) where
       D p X*     X     ∎
       where open ≤-Reasoning
 
-
-  ultrametricConditions : UltrametricConditions F∥
-  ultrametricConditions = record
-    { dᵢ                 = λ e p → d
-    ; dᵢ-cong            = λ e p → d-cong
-    ; x≈y⇒dᵢ≡0           = λ e p → x≈y⇒d≡0
-    ; dᵢ≡0⇒x≈y           = λ e p → d≡0⇒x≈y
-    ; dᵢ-bounded         = λ e p → proj₁ (d-bounded {n}) , proj₂ d-bounded
-    ; element            = I
-
-    ; F-strContrOnOrbits = F-strContrOnOrbits
-    ; F-strContrOnFP     = F-strContrOnFP
-    ; F-inactive         = F′-inactive
+  F∥-isAMCO : AMCO F∥
+  F∥-isAMCO = record
+    { dᵢ                   = λ e p → d
+    ; dᵢ-isQuasiSemiMetric = λ e p i → d-isQuasiSemiMetric
+    ; dᵢ-bounded           = λ e p → proj₁ (d-bounded {n}) , proj₂ d-bounded
+    ; F-strContrOnOrbits   = F-strContrOnOrbits
+    ; F-strContrOnFP       = F-strContrOnFP
+    ; F-inactive           = F′-inactive
     }

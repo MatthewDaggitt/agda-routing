@@ -32,7 +32,7 @@ module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.St
   where
 
   open Prelude isPathAlgebra A
-  
+
   ------------------------------------------------------------------------------
   -- Fixed vertices (vertices that don't change their value after time t)
 

@@ -97,7 +97,7 @@ infix 3 _▪
 
 distribʳ-*-+ : ∀ a b c → (a + b) * c ≡ a * c + b * c
 distribʳ-*-+ zero b c = refl
-distribʳ-*-+ (suc a) b c = 
+distribʳ-*-+ (suc a) b c =
        c + (a + b) * c
      ≡⟨ ≡-cong (λ x → c + x) (distribʳ-*-+ a b c) ⟩
        c + (a * c + b * c)
@@ -107,7 +107,7 @@ distribʳ-*-+ (suc a) b c =
 
 *-associative : ∀ a b c → a * (b * c) ≡ (a * b) * c
 *-associative zero b c = refl
-*-associative (suc a) b c = 
+*-associative (suc a) b c =
        suc a * (b * c)
      ≡⟨ refl ⟩
        b * c + a * (b * c)
@@ -156,7 +156,7 @@ n*0≡0 (suc n) = n*0≡0 n
 
 *-comm : ∀ m n → m * n ≡ n * m
 *-comm zero n = ≡-sym (n*0≡0 n)
-*-comm (suc m) n = 
+*-comm (suc m) n =
        suc m * n
      ≡⟨ refl ⟩
        n + m * n
@@ -180,7 +180,7 @@ x+x=2*x n = ≡-cong (n +_) (≡-sym (+-right-identity n))
 
 sumOfNats : ∀ n → 2 * Σ n id ≡ n * suc n
 sumOfNats zero = refl
-sumOfNats (suc n) = 
+sumOfNats (suc n) =
       2 * (Σ (suc n) id)
     ≡⟨ refl ⟩
       2 * (suc n + Σ n id)

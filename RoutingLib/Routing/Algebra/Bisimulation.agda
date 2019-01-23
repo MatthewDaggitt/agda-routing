@@ -32,7 +32,7 @@ open RawRoutingAlgebra hiding (_≟_)
 
 module RoutingLib.Routing.Algebra.Bisimulation {a₁ b₁ ℓ₁ a₂ b₂ ℓ₂} where
 
-  record Bisimilar
+  record Simulates
     (A : RawRoutingAlgebra a₁ b₁ ℓ₁)
     (B : RawRoutingAlgebra a₂ b₂ ℓ₂)
     : Set (lsuc (a₁ ⊔ a₂ ⊔ b₁ ⊔ b₂ ⊔ ℓ₁ ⊔ ℓ₂))where
@@ -40,16 +40,16 @@ module RoutingLib.Routing.Algebra.Bisimulation {a₁ b₁ ℓ₁ a₂ b₂ ℓ�
     open RawRoutingAlgebra A using () renaming (_≈_ to _≈ᵃ_; _⊕_ to _⊕ᵃ_; _▷_ to _▷ᵃ_; 0# to 0#ᵃ; ∞ to ∞ᵃ; f∞ to f∞ᵃ)
     open RawRoutingAlgebra B using () renaming (_≈_ to _≈ᵇ_; _⊕_ to _⊕ᵇ_; _▷_ to _▷ᵇ_; 0# to 0#ᵇ; ∞ to ∞ᵇ; f∞ to f∞ᵇ)
     open Comparable A
-  
+
     field
       to        : Route A → Route B
       from      : Route B → Route A
       to-from   : ∀ x → to (from x) ≈ᵇ x
-      
+
       toₛ       : ∀ {n} {i j : Fin n} → Step A i j → Step B i j
       fromₛ     : ∀ {n} {i j : Fin n} → Step B i j → Step A i j
       toₛ-fromₛ : ∀ {n} {i j : Fin n} (e : Step B i j) → toₛ (fromₛ e) ≡ e
-      
+
       to-0#     : to 0#ᵃ ≈ᵇ 0#ᵇ
       to-∞      : to ∞ᵃ  ≈ᵇ ∞ᵇ
       to-cong   : ∀ {x y} → x ≈ᵃ y → to x ≈ᵇ to y
@@ -62,12 +62,12 @@ module RoutingLib.Routing.Algebra.Bisimulation {a₁ b₁ ℓ₁ a₂ b₂ ℓ�
   module _
     {A : RawRoutingAlgebra a₁ b₁ ℓ₁}
     {B : RawRoutingAlgebra a₂ b₂ ℓ₂}
-    (A∼B : Bisimilar A B)
+    (A⇉B : Simulates A B)
     where
 
     open RawRoutingAlgebra A using () renaming (_≈_ to _≈ᵃ_; _⊕_ to _⊕ᵃ_; _▷_ to _▷ᵃ_; 0# to 0#ᵃ; ∞ to ∞ᵃ)
     open RawRoutingAlgebra B using () renaming (_≈_ to _≈ᵇ_; _⊕_ to _⊕ᵇ_; _▷_ to _▷ᵇ_; 0# to 0#ᵇ; ∞ to ∞ᵇ)
-    open Bisimilar A∼B
+    open Simulates A⇉B
 
     toNetwork : ∀ {n} → Network A n → Network B n
     toNetwork N e i j = toₛ (N e i j)
@@ -79,7 +79,7 @@ module RoutingLib.Routing.Algebra.Bisimulation {a₁ b₁ ℓ₁ a₂ b₂ ℓ�
 
       Nᵃ : Network A n
       Nᵃ = fromNetwork Nᵇ
-      
+
       open BellmanFord A Nᵃ using (RoutingMatrix) renaming (F′ to Fᵃ; F∥ to F∥ᵃ; I to Iᵃ; Aₜ to Aᵃ)
       open BellmanFord B Nᵇ using () renaming (F′ to Fᵇ; F∥ to F∥ᵇ; I to Iᵇ; Aₜ to Aᵇ; F-cong to Fᵇ-cong)
       open Comparable A
@@ -93,18 +93,18 @@ module RoutingLib.Routing.Algebra.Bisimulation {a₁ b₁ ℓ₁ a₂ b₂ ℓ�
 
         All-≎-tabulate : ∀ (X : RoutingMatrix) j → All (_≎ Iᵃ i j) (tabulate (λ k → Aᵃ e p i k ▷ᵃ X k j))
         All-≎-tabulate X j with j ≟ i
-        ... | yes _ = tabulate⁺ (λ k → e0# (Aᵃ e p i k) (X k j) ? ?)
-        ... | no  _ = tabulate⁺ (λ k → e∞# (Aᵃ e p i k) (X k j) ? ?)
+        ... | yes _ = tabulate⁺ (λ k → e0# (Aᵃ e p i k) (X k j) {!!} {!!})
+        ... | no  _ = tabulate⁺ (λ k → e∞# (Aᵃ e p i k) (X k j) {!!} {!!})
 
         AllPairs-≎-tabulate : ∀ (X : RoutingMatrix) j → AllPairs _≎_ (tabulate (λ k → Aᵃ e p i k ▷ᵃ X k j))
-        AllPairs-≎-tabulate X j = AllPairs.tabulate⁺ (ee# (Aᵃ e p i _) (Aᵃ e p i _) (X _ j) (X _ j) ? ?)
+        AllPairs-≎-tabulate X j = AllPairs.tabulate⁺ {!!} --(ee# (Aᵃ e p i _) (Aᵃ e p i _) (X _ j) (X _ j) ? ? ?)
 
         toA : ∀ k → toₛ (Aᵃ e p i k) ≡ Aᵇ e p i k
         toA k with i ∈? p | k ∈? p
         ... | no  _ | _     = to-f∞
         ... | yes _ | no  _ = to-f∞
         ... | yes _ | yes _ = toₛ-fromₛ (Nᵇ e i k)
-        
+
         to-F : ∀ X j → to (Fᵃ e p X i j) ≈ᵇ Fᵇ e p (λ k l → to (X k l)) i j
         to-F X j = begin
             to (Fᵃ e p X i j)
@@ -123,7 +123,7 @@ module RoutingLib.Routing.Algebra.Bisimulation {a₁ b₁ ℓ₁ a₂ b₂ ℓ�
           ∎
           where open EqReasoning (S B)
 
-      F∥↭ : Async.Bisimilar F∥ᵃ F∥ᵇ
+      F∥↭ : Async.Simulates F∥ᵃ F∥ᵇ
       F∥↭ = record
         { toᵢ       = to ∘_
         ; fromᵢ     = from ∘_
@@ -135,8 +135,8 @@ module RoutingLib.Routing.Algebra.Bisimulation {a₁ b₁ ℓ₁ a₂ b₂ ℓ�
         }
 
     open BellmanFord
-    
+
     bisimulate : ∀ {n : ℕ} →
                  (∀ N → Convergent {n = n} (F∥ A N)) →
                  (∀ N → Convergent {n = n} (F∥ B N))
-    bisimulate convergent Nᵇ = Async.bisimilar (convergent (fromNetwork Nᵇ)) (F∥↭ Nᵇ)
+    bisimulate convergent Nᵇ = Async.simulate {!!} {!!} --(convergent (fromNetwork Nᵇ)) (F∥↭ Nᵇ)

@@ -74,7 +74,7 @@ module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.St
   -- Compute the minimum cut edge (iₘᵢₙ , kₘᵢₙ) of C
 
   open Step2_ConvergedSubtree isPathAlgebra isIncreasing A X j t-1 j∈C C-nonFull C⊆𝓒ₜ
-  
+
   -------------------------------------------------------------------------
   -- The only time that the source node of the minimal edge out of the fixed
   -- tree will not become fixed itself is if there is some non-real routes

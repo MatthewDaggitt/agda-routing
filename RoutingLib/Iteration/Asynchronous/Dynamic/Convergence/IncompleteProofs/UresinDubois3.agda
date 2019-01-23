@@ -29,7 +29,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois3
 
   module _ {x₀} (x₀∈D₀ : x₀ ∈ D₀) where
 
-    
+
     -- Synchronous iterations
     σ : ℕ → S
     σ = syncIter x₀
@@ -42,7 +42,7 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois3
     σT≈ξ = proj₂ (iter-converge x₀∈D₀)
 
     -- Proofs
-    
+
     σ-mono : ∀ {k t} → k ≤ℕ t → σ t ≤ σ k
     σ-mono {_} {zero}  z≤n = ≤-refl
     σ-mono {k} {suc t} k≤t with k ≟ suc t
@@ -68,9 +68,9 @@ module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois3
 
     ξ∈D₀ : ξ ∈ D₀
     ξ∈D₀ = D₀-cong (σ∈D₀ T) σT≈ξ
-    
+
     -- Sequence of sets
-    
+
     D : ℕ → Pred Sᵢ _
     D K {i} = (λ x → (ξ i ≤ᵢ x) × (x ≤ᵢ σ K i)) ∩ D₀
 

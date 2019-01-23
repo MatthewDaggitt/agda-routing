@@ -7,6 +7,7 @@ open import Data.Product using (∃; _×_; _,_)
 open import Function using (const)
 open import Relation.Binary using (_Preserves_⟶_)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; sym; trans; subst)
+open import Relation.Unary using (Pred) renaming (_∈_ to _∈ᵤ_)
 
 import RoutingLib.Iteration.Asynchronous.Static.Schedule as StaticSchedules
 
@@ -33,7 +34,7 @@ record EpochSchedule (n : ℕ) : Set where
     -- Epochs increase monotonically
     η-mono         : η Preserves _≤_ ⟶ _≤_
 
-  -- "ρ t" is the set of participants at time t 
+  -- "ρ t" is the set of participants at time t
   ρ : 𝕋 → Subset n
   ρ t = π (η t)
 
@@ -50,13 +51,6 @@ record EpochSchedule (n : ℕ) : Set where
   η-inRange : ∀ {s e} → η s ≡ η e → ∀ {t} → t ∈ₜ [ s , e ] → η s ≡ η t × η t ≡ η e
   η-inRange ηₛ≡ηₑ t∈[s,e] = η-inRangeₛ ηₛ≡ηₑ t∈[s,e] , η-inRangeₑ ηₛ≡ηₑ t∈[s,e]
 
-trivialEpochSchedule : ∀ n → EpochSchedule n
-trivialEpochSchedule n = record
-  { η      = const 0
-  ; π      = const ⊤
-  ; η-mono = const z≤n
-  }
-
 --------------------------------------------------------------------------------
 -- A dynamic schedule is a static schedule combined with an epoch schedule
 
@@ -64,6 +58,14 @@ record Schedule (n : ℕ) : Set where
   field
     staticSchedule : StaticSchedule n
     epochSchedule  : EpochSchedule n
-    
+
   open StaticSchedule staticSchedule public
   open EpochSchedule epochSchedule public
+
+--------------------------------------------------------------------------------
+-- Sometimes it is necessary to restrict the allowable sets of participants
+-- in the schedule.
+
+_satisfies_ : ∀ {n} → Schedule n → ∀ {p} → Pred (Subset n) p → Set p
+S satisfies P = ∀ (t : 𝕋) → ρ t ∈ᵤ P
+  where open Schedule S

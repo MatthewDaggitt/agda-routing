@@ -23,8 +23,8 @@ open Schedule 𝓢
 --------------------------------------------------------------------------------
 -- Sub epochs --
 --------------------------------------------------------------------------------
---
 -- Periods of time within an epoch.
+--
 -- These are typically named η[s,e].
 
 record IsSubEpoch (period : TimePeriod) : Set where
@@ -43,8 +43,8 @@ _++ₛₑ_ : ∀ {s m e} → IsSubEpoch [ s , m ] → IsSubEpoch [ m , e ] → I
 --------------------------------------------------------------------------------
 -- Activation periods --
 --------------------------------------------------------------------------------
---
 -- In activation period every participating node is activated at least once.
+--
 -- These are typically named α[s,e]
 
 record _IsActiveIn_ (i : Fin n) (period : TimePeriod) : Set where
@@ -75,7 +75,6 @@ record IsActivationPeriod (period : TimePeriod) : Set where
 --------------------------------------------------------------------------------
 -- Expiry periods --
 --------------------------------------------------------------------------------
---
 -- After the end of an expiry period, there are no messages left in flight that
 -- originate from before the start of the expiry period.
 --
@@ -86,7 +85,7 @@ record IsExpiryPeriod (period : TimePeriod) : Set where
   open TimePeriod period
   field
     η[s,e]  : IsSubEpoch period
-    expiryᵢ  : ∀ {i} → i ∈ ρ start → ∀ {t} → end ≤ t → ∀ j → start ≤ β t i j
+    expiryᵢ  : ∀ {i} → i ∈ ρ start → ∀ {t} → end < t → ∀ j → start ≤ β t i j
 
   open IsSubEpoch η[s,e] public
 
@@ -109,7 +108,7 @@ record IsPseudoperiodic (period : TimePeriod) : Set₁ where
     renaming (start≤end to start≤mid; ηₛ≡ηₑ to ηₛ≡ηₘ; η[s,e] to η[s,m])
   open IsActivationPeriod α[m,e] public
     renaming (start≤end to mid≤end;   ηₛ≡ηₑ to ηₘ≡ηₑ; η[s,e] to η[m,e])
-  
+
   start≤end : start ≤ end
   start≤end = ≤-trans start≤mid mid≤end
 
@@ -123,11 +122,14 @@ record IsPseudoperiodic (period : TimePeriod) : Set₁ where
 -- Multi-pseudoperiods
 --------------------------------------------------------------------------------
 --
--- A time period that contains k pseudoperiods
+-- A time period that contains k pseudoperiods.
 
 data IsMultiPseudoperiodic : ℕ → TimePeriod → Set₁ where
   none : ∀ {s}         → IsMultiPseudoperiodic 0 [ s , s ]
-  next : ∀ {s} m {e k} → IsPseudoperiodic [ s , m ] → IsMultiPseudoperiodic k [ m , e ] → IsMultiPseudoperiodic (suc k) [ s , e ]
+  next : ∀ {s} m {e k} →
+         IsPseudoperiodic [ s , m ] →
+         IsMultiPseudoperiodic k [ m , e ] →
+         IsMultiPseudoperiodic (suc k) [ s , e ]
 
 ηₛ≡ηₑ-mpp : ∀ {s e k} → IsMultiPseudoperiodic k [ s , e ] → η s ≡ η e
 ηₛ≡ηₑ-mpp none            = refl
@@ -136,8 +138,6 @@ data IsMultiPseudoperiodic : ℕ → TimePeriod → Set₁ where
 s≤e-mpp : ∀ {s e k} → IsMultiPseudoperiodic k [ s , e ] → s ≤ e
 s≤e-mpp none            = ≤-refl
 s≤e-mpp (next m pp mpp) = ≤-trans (IsPseudoperiodic.start≤end pp) (s≤e-mpp mpp)
-
-
 
 {-
 -----------------

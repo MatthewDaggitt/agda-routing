@@ -1,8 +1,8 @@
 open import Level using (_⊔_)
 open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _≟_; _≤_; _+_)
-open import Data.Nat.Properties using (n≤1+n; ≤-trans)
+open import Data.Nat.Properties using (n≤1+n; ≤-refl; ≤-trans)
 open import Data.Fin using (Fin; zero; suc)
-open import Data.Fin.Subset using (Subset)
+open import Data.Fin.Subset using (Subset; ⊤)
 
 module RoutingLib.Iteration.Asynchronous.Static.Schedule where
 
@@ -24,6 +24,8 @@ open import RoutingLib.Data.Range public
 --------------------------------------------------------------------------------
 -- A schedule dictating the flow of inforamtion within a computation
 -- (ala Uresin & Dubois)
+--
+-- Schedules are represented as ψ
 
 record Schedule (n : ℕ) : Set where
   field

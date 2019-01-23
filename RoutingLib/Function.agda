@@ -12,7 +12,7 @@ _∘₂_ : ∀ {a b c d} → {A : Set a} {B : Set b} {C : Set c} {D : Set d} →
        (f : C → D) → (g : A → B → C) → (A → B → D)
 f ∘₂ g = λ x y → f (g x y)
 
--- infixl 1 
+-- infixl 1
 
 
 flip : ∀ {a b c} {A : Set a} {B : Set b} {C : A → B → Set c} →

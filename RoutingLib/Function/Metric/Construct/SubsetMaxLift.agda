@@ -37,7 +37,7 @@ open MaxLift 𝕊 using (d)
 
 module _ (dᵢ : ∀ {i} → Sᵢ i → Sᵢ i → ℕ) (p : Subset n) where
 
-  
+
 {-
 
   dˢ : S → S → ℕ
@@ -51,7 +51,7 @@ module _ (dᵢ : ∀ {i} → Sᵢ i → Sᵢ i → ℕ) (p : Subset n) where
   ... | yes _   = {!!}
   ... | no  i∉p = {!contradiction !}
   -}
-  
+
   dᵢ≤dˢ : ∀ x y {i} → i ∈ p → dᵢ (x i) (y i) ≤ dˢ x y
   dᵢ≤dˢ x y {i} i∈p = x≤max[t] 0 _ (inj₂ (i , ≤-reflexive (sym (cond-eq (x i) (y i) i∈p))))
 
@@ -61,14 +61,14 @@ module _ (dᵢ : ∀ {i} → Sᵢ i → Sᵢ i → ℕ) (p : Subset n) where
   dˢ-congˢ : (∀ {i} → dᵢ {i} Preserves₂ _≈ᵢ_ ⟶ _≈ᵢ_ ⟶ _≡_) →
              dˢ Preserves₂ _≈[ p ]_ ⟶ _≈[ p ]_ ⟶ _≡_
   dˢ-congˢ dᵢ-cong m≈n p≈q = max-cong refl (λ i → cond-cong dᵢ-cong i m≈n p≈q)
-  
+
   dˢ-cong : (∀ {i} → dᵢ {i} Preserves₂ _≈ᵢ_ ⟶ _≈ᵢ_ ⟶ _≡_) →
            dˢ Preserves₂ _≈_ ⟶ _≈_ ⟶ _≡_
   dˢ-cong dᵢ-cong m≈n p≈q = dˢ-congˢ dᵢ-cong (≈⇒≈ₛ m≈n) (≈⇒≈ₛ p≈q)
 
-  
+
   -- Relation to normal max lift
-  
+
   dˢ≤d : ∀ x y → dˢ x y ≤ d dᵢ x y
   dˢ≤d x y = max[s]≤max[t]₂ z≤n (λ i → cond-leq (x i) (y i))
 

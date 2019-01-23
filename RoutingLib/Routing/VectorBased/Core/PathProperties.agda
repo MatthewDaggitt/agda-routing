@@ -171,7 +171,7 @@ abstract
     ...     | yes Xₖⱼ≈FXₖⱼ with subst (_< size (F X l j)) (size-cong Xₖⱼ≈FXₖⱼ) |Xₖⱼ|<|FXₗⱼ|
     ...       | |FXₖⱼ|<|FXₗⱼ| with reduction k (𝑰-cong Xₖⱼ≈FXₖⱼ Xₖⱼⁱ) (rec _ (|FXₖⱼ|<|FXₗⱼ|))
     ...         | (m , ≉ , i , lt) = m , ≉ , i , <-trans lt |FXₖⱼ|<|FXₗⱼ|
-      
+
   fixedPointᶜ : ∀ {X} → F X ≈ₘ X → 𝑪ₘ X
   fixedPointᶜ {X} FX≈X with 𝑪ₘ? (F X)
   ... | yes FXᶜ = 𝑪ₘ-cong FX≈X FXᶜ

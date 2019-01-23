@@ -44,7 +44,7 @@ module _ {p : Subset n} where
     ; trans to ≈ₛ-trans
     )
 
- 
+
   ≈⇒≈ₛ : _≈_ B.⇒ (_≈[ p ]_)
   ≈⇒≈ₛ x≈y {i} i∈p = x≈y i
 

@@ -197,7 +197,7 @@ m≤∣m-n∣+n m n = subst (m ≤_) (+-comm n _) (m≤n+∣m-n∣ m n)
   ; triangle     = ∣-∣-triangle
   }
 
-∣-∣-metric : Metric 0ℓ 0ℓ 
+∣-∣-metric : Metric 0ℓ 0ℓ
 ∣-∣-metric = record
   { isMetric = ∣-∣-isMetric
   }
@@ -332,7 +332,7 @@ m<n×m<o⇒m<n⊓o m<n m<o = subst (_< _) (⊓-idem _) (⊓-mono-< m<n m<o)
 ------------------------------------------------------------------------
 -- Subtraction
 
-m+[n∸o]≤[m+n]∸o : ∀ m n o → (m + n) ∸ o ≤ m + (n ∸ o) 
+m+[n∸o]≤[m+n]∸o : ∀ m n o → (m + n) ∸ o ≤ m + (n ∸ o)
 m+[n∸o]≤[m+n]∸o m n       zero    = ≤-refl
 m+[n∸o]≤[m+n]∸o m zero    (suc o) = n∸m≤n (suc o) (m + 0)
 m+[n∸o]≤[m+n]∸o m (suc n) (suc o) = begin

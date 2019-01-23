@@ -106,18 +106,3 @@ fold⁺-cong : ∀ {a b ℓ} {A : Set a} {B : Set b} {_~_ : REL A B ℓ}
               Pointwise _~_ M N → fold⁺ _•_ M ~ fold⁺ _◦_ N
 fold⁺-cong •◦-cong {zero}  M~N = Table.foldr⁺-cong (λ {w x y z} → •◦-cong {w} {x} {y} {z}) (M~N fzero)
 fold⁺-cong •◦-cong {suc m} M~N = •◦-cong (Table.foldr⁺-cong (λ {w x y z} → •◦-cong {w} {x} {y} {z}) (M~N fzero)) (fold⁺-cong (λ {w x y z} → •◦-cong {w} {x} {y} {z}) (M~N ∘ fsuc))
-
-------------------------------------------------------------------------------
--- strip & grow
-
-module _ {a ℓ} {A : Set a} {_~_ : Rel A ℓ} (~-refl : Reflexive _~_) where
-  
-  postulate grow-strip : ∀ {m n} (p : Subset m) (q : Subset n) (T : Matrix A m n) (M : Matrix A m n) →
-               (∀ {i j} → i ∉ p → j ∉ q → T i j ~ M i j) →
-               Pointwise _~_ (grow p q T (strip p q M)) M
-  -- grow-strip p q T M ∉⇒~ = {!!}
-  
-
-  postulate strip-grow : ∀ {m n} (p : Subset m) (q : Subset n) (T : Matrix A m n) (M : Matrix A ∣ p ∣ ∣ q ∣) →
-               Pointwise _~_ (strip p q (grow p q T M)) M
-  -- strip-grow p q T M i j = {!!} --Table.strip-grow {!!} p T {!!}

@@ -58,10 +58,10 @@ module _ (e : Epoch) (p : Subset n) where
     A : AdjacencyMatrix
     A = Aₜ e p
 
-  
+
   open Metrics isRoutingAlgebra isPathAlgebra A public
   open MetricProperties isRoutingAlgebra isPathAlgebra A 1≤n p public
-  
+
   open Consistency isRoutingAlgebra isPathAlgebra A
   open VectorBasedRoutingCore algebraᶜ Aᶜ using () renaming (F to Fᶜ)
   open PathVectorProperties isRoutingAlgebra isPathAlgebra A
@@ -69,7 +69,7 @@ module _ (e : Epoch) (p : Subset n) where
   private
     module DVP  = DistanceVectorMetricProperties isRoutingAlgebraᶜ isFiniteᶜ
     module DVSC = DistanceVectorStrictlyContracting isRoutingAlgebraᶜ isFiniteᶜ (isStrictlyIncreasingᶜ isStrictlyIncreasing)
-  
+
   ------------------------------------------------------------------------
   -- rⁱ is contracting in the right way
 
@@ -80,7 +80,7 @@ module _ (e : Epoch) (p : Subset n) where
   ... | (k , Xₖⱼ≉FXₖⱼ , Xₖⱼⁱ , |Xₖⱼ|<|FXᵢⱼ|) = begin
     Hᶜ + hⁱ (F X i j)                 <⟨ +-monoʳ-< Hᶜ (hⁱ-mono Xₖⱼⁱ FXᵢⱼⁱ |Xₖⱼ|<|FXᵢⱼ|) ⟩
     Hᶜ + hⁱ (X k j)                   ≤⟨ +-monoʳ-≤ Hᶜ (m≤m⊔n _ _) ⟩
-    Hᶜ + (hⁱ (X k j) ⊔ hⁱ (F X k j))  ≡⟨ H+rⁱ≡r ≈-refl ≈-refl Xₖⱼ≉FXₖⱼ (inj₁ Xₖⱼⁱ) ⟩ 
+    Hᶜ + (hⁱ (X k j) ⊔ hⁱ (F X k j))  ≡⟨ H+rⁱ≡r ≈-refl ≈-refl Xₖⱼ≉FXₖⱼ (inj₁ Xₖⱼⁱ) ⟩
     r (X k j) (F X k j)               ≤⟨ r≤v k j ⟩
     v                                 ∎
 
@@ -92,7 +92,7 @@ module _ (e : Epoch) (p : Subset n) where
   ...   | (k , Xₖⱼ≉FXₖⱼ , Xₖⱼⁱ , |Xₖⱼ|<|FXₖⱼ|) = begin
     Hᶜ + hⁱ (F (F X) i j)             <⟨ +-monoʳ-< Hᶜ (hⁱ-mono Xₖⱼⁱ F²Xᵢⱼⁱ (<-trans |Xₖⱼ|<|FXₖⱼ| |FXₗⱼ|<|F²Xₗⱼ|)) ⟩
     Hᶜ + hⁱ (X k j)                   ≤⟨ +-monoʳ-≤ Hᶜ (m≤m⊔n _ _) ⟩
-    Hᶜ + (hⁱ (X k j) ⊔ hⁱ (F X k j))  ≡⟨ H+rⁱ≡r ≈-refl ≈-refl Xₖⱼ≉FXₖⱼ (inj₁ Xₖⱼⁱ) ⟩ 
+    Hᶜ + (hⁱ (X k j) ⊔ hⁱ (F X k j))  ≡⟨ H+rⁱ≡r ≈-refl ≈-refl Xₖⱼ≉FXₖⱼ (inj₁ Xₖⱼⁱ) ⟩
     r (X k j) (F X k j)               ≤⟨ r≤v k j ⟩
     v                                 ∎
 
@@ -217,7 +217,7 @@ module _ (e : Epoch) (p : Subset n) where
 
 -- These two lemmas are a mess as can't pattern match on `i ∈? p` directly
 -- as it unfolds the adjacency matrix
-    
+
   d[FXᵢ,F²Xᵢ]<D[X,FX] : ∀ {X} → WellFormed p X → F X ≉ₘ[ p ] X →
                   ∀ i → dᶜ p i (F X i) (F (F X) i) < D p X (F X)
   d[FXᵢ,F²Xᵢ]<D[X,FX] {X} wfX FX≉X i with Y≉ₚX⇒0<DXY p FX≉X
@@ -254,9 +254,9 @@ module _ (e : Epoch) (p : Subset n) where
     D p (F X*) (F X) <⟨ Fₜ-strContrOn𝑪 (X*-wf network e p FX*≈X*) wfX X≉X* (fixedPointᶜ FX*≈X*) ⟩
     D p X*     X     ∎
     where open ≤-Reasoning
- 
+
 open DistanceVectorProperties isRoutingAlgebra network
-  
+
 ultrametricConditions : UltrametricConditions F∥
 ultrametricConditions = record
   { dᵢ                 = λ e p → d e p
@@ -265,7 +265,7 @@ ultrametricConditions = record
   ; dᵢ≡0⇒x≈y           = λ e p → d≡0⇒x≈y e p
   ; dᵢ-bounded         = λ e p → proj₁ (d-bounded e p) , proj₂ (d-bounded e p)
   ; element            = I
-  
+
   ; F-strContrOnOrbits = Fₜ-strContrOnOrbits
   ; F-strContrOnFP     = Fₜ-strContrOnFP
   ; F-inactive         = F′-inactive

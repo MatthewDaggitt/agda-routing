@@ -16,7 +16,7 @@ module RoutingLib.lmv34.ShortestPathsAlgebra where
 ⊓-mono : ∀ {a b c d} → a ≡ c → b ≡ d → a ⊓ b ≡ c ⊓ d
 ⊓-mono refl refl = refl
 
-ShortestPathAlgebra : RawRoutingAlgebra _ _ _ 
+ShortestPathAlgebra : RawRoutingAlgebra _ _ _
 ShortestPathAlgebra = record
   { Route = ℕ∞
   ; Step = λ i j → ℕ∞ → ℕ∞
@@ -31,6 +31,6 @@ ShortestPathAlgebra = record
     ; _≟_ = _≟_ }
   ; ⊕-cong = ⊓-mono
   ; ▷-cong = ▷-cong
-  ; f∞-reject = λ i j x → refl 
+  ; f∞-reject = λ i j x → refl
   }
 

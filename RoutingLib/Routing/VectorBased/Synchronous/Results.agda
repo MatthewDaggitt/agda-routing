@@ -13,7 +13,7 @@ module RoutingLib.Routing.VectorBased.Synchronous.Results
   {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 
 open VectorBased algebra
-    
+
 --------------------------------------------------------------------------------
 -- Theorem 3
 --
@@ -23,7 +23,7 @@ open VectorBased algebra
 module _ (conditions : IsIncreasingPathAlgebra algebra) where
 
   open IsIncreasingPathAlgebra conditions
-  
+
   σ-convergesIn-n² : ∀ {n} (A : AdjacencyMatrix algebra n) → (σ A) ConvergesIn (n ^ 2)
   σ-convergesIn-n² = {!!}
 {-

@@ -53,7 +53,7 @@ open IsCertifiedPathAlgebra isPathAlgebra
 open Consistency algebra isPathAlgebra A
 open PathAlgebraProperties isPathAlgebra
 
-open BellmanFord algebra A 
+open BellmanFord algebra A
 open BellmanFord algebraᶜ Aᶜ using () renaming (σ to σᶜ)
 open BellmanFordProperties algebra isPathAlgebra A
 open PathVectorMetrics isPathAlgebra A
@@ -86,7 +86,7 @@ rᶜ-strContr-𝑪𝑪 {X} {Y} Xᶜ Yᶜ {i} {j} σXᵢⱼᶜ σYᵢⱼᶜ {v} 0
     r   (X k j)  (Y k j)  ≤⟨ r≤v k j ⟩
     v                      ∎
     where open ≤-Reasoning
-  
+
 rᶜ-strContr-𝑪𝑰 : ∀ {X Y i j} → (𝑰ₘ X × 𝑪ₘ Y) ⊎ (𝑪ₘ X × 𝑰ₘ Y) →
                  (σXᵢⱼᶜ : 𝑪 (σ X i j)) (σYᵢⱼᶜ : 𝑪 (σ Y i j)) →
                  ∀ {v} → (∀ k l → r (X k l) (Y k l) ≤ v) →
@@ -122,7 +122,7 @@ rᶜ-strContrOrbits {X} {i} {j} σXᵢⱼᶜ σ²Xᵢⱼᶜ {v} 0<v r≤v with �
   r (X k n) (σ X k n)       ≤⟨ r≤v k n ⟩
   v                          ∎
   where open ≤-Reasoning
-  
+
 rᶜ-strContrOn𝑪 : ∀ {X Y} → 𝑪ₘ X →
                   ∀ {i j} → (σXᵢⱼᶜ : 𝑪 (σ X i j)) (σYᵢⱼᶜ : 𝑪 (σ Y i j)) →
                   ∀ {v} → 0 < v → (∀ k l → r (X k l) (Y k l) ≤ v) →
@@ -141,7 +141,7 @@ rⁱ-strContrOrbits-σX {X} {i} {j} σXᵢⱼⁱ {v} r≤v with σXᵢⱼⁱ⇒X
 ... | (k , Xₖⱼ≉σXₖⱼ , Xₖⱼⁱ , |Xₖⱼ|<|σXᵢⱼ|) = begin
   Hᶜ + hⁱ (σ X i j)                 <⟨ +-monoʳ-< Hᶜ (hⁱ-mono Xₖⱼⁱ σXᵢⱼⁱ |Xₖⱼ|<|σXᵢⱼ|) ⟩
   Hᶜ + hⁱ (X k j)                   ≤⟨ +-monoʳ-≤ Hᶜ (m≤m⊔n _ _) ⟩
-  Hᶜ + (hⁱ (X k j) ⊔ hⁱ (σ X k j))  ≡⟨ H+rⁱ≡r ≈-refl ≈-refl Xₖⱼ≉σXₖⱼ (inj₁ Xₖⱼⁱ) ⟩ 
+  Hᶜ + (hⁱ (X k j) ⊔ hⁱ (σ X k j))  ≡⟨ H+rⁱ≡r ≈-refl ≈-refl Xₖⱼ≉σXₖⱼ (inj₁ Xₖⱼⁱ) ⟩
   r (X k j) (σ X k j)              ≤⟨ r≤v k j ⟩
   v                                 ∎
 
@@ -153,7 +153,7 @@ rⁱ-strContrOrbits-σ²X {X} {i} {j} σ²Xᵢⱼⁱ {v} r≤v with σXᵢⱼⁱ
 ...   | (l , Xₗⱼ≉σXₗⱼ , Xₗⱼⁱ , |Xₗⱼ|<|σXₖⱼ|) = begin
   Hᶜ + hⁱ (σ (σ X) i j)             <⟨ +-monoʳ-< Hᶜ (hⁱ-mono Xₗⱼⁱ σ²Xᵢⱼⁱ (<-trans |Xₗⱼ|<|σXₖⱼ| |σXₖⱼ|<|σ²Xᵢⱼ|)) ⟩
   Hᶜ + hⁱ (X l j)                   ≤⟨ +-monoʳ-≤ Hᶜ (m≤m⊔n _ _) ⟩
-  Hᶜ + (hⁱ (X l j) ⊔ hⁱ (σ X l j))  ≡⟨ H+rⁱ≡r ≈-refl ≈-refl Xₗⱼ≉σXₗⱼ (inj₁ Xₗⱼⁱ) ⟩ 
+  Hᶜ + (hⁱ (X l j) ⊔ hⁱ (σ X l j))  ≡⟨ H+rⁱ≡r ≈-refl ≈-refl Xₗⱼ≉σXₗⱼ (inj₁ Xₗⱼⁱ) ⟩
   r (X l j) (σ X l j)              ≤⟨ r≤v l j ⟩
   v                                 ∎
 
@@ -177,7 +177,7 @@ rⁱ-strContrOrbits : ∀ {X i j} → 𝑰 (σ X i j) ⊎ 𝑰 (σ (σ X) i j) �
 rⁱ-strContrOrbits {X} {i} {j} σXᵢⱼⁱ⊎σ²Xᵢⱼⁱ {v} r≤v with ≤-total (hⁱ (σ X i j)) (hⁱ (σ (σ X) i j))
 ... | inj₁ hⁱσXᵢⱼ≤hⁱσ²Xᵢⱼ = subst (_< v) (sym (cong (Hᶜ +_) (m≤n⇒m⊔n≡n hⁱσXᵢⱼ≤hⁱσ²Xᵢⱼ))) (rⁱ-strContrOrbits-σ²X (hⁱ-force-𝑰 σXᵢⱼⁱ⊎σ²Xᵢⱼⁱ hⁱσXᵢⱼ≤hⁱσ²Xᵢⱼ) r≤v)
 ... | inj₂ hⁱσ²Xᵢⱼ≤hⁱσXᵢⱼ = subst (_< v) (sym (cong (Hᶜ +_) (m≤n⇒n⊔m≡n hⁱσ²Xᵢⱼ≤hⁱσXᵢⱼ))) (rⁱ-strContrOrbits-σX {X} {i} {j} (hⁱ-force-𝑰 (swap σXᵢⱼⁱ⊎σ²Xᵢⱼⁱ) hⁱσ²Xᵢⱼ≤hⁱσXᵢⱼ) r≤v)
-  
+
 ------------------------------------------------------------------------
 -- r is contracting in the right way
 

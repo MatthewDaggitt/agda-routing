@@ -107,7 +107,7 @@ open NonStrictToStrict ≤₊-decTotalOrder public
   ; <-asym    to <₊-asym
   ; <-respʳ-≈ to <₊-respʳ-≈
   ; <-respˡ-≈ to <₊-respˡ-≈
-  ; <-cmp     to <₊-cmp   
+  ; <-cmp     to <₊-cmp
   ; <-strictPartialOrder to <₊-strictPartialOrder
   ; <-strictTotalOrder   to <₊-strictTotalOrder
   )

@@ -37,7 +37,7 @@ Any P r = ∃ λ t → t ∈ r × P t
 --------------------------------------------------------------------------------
 -- Properties
 
-occupied : ∀ {x s e} → x ∈ [ s , e ] → s ≤ e 
+occupied : ∀ {x s e} → x ∈ [ s , e ] → s ≤ e
 occupied (s≤x , x≤e) = ≤-trans s≤x x≤e
 
 ∈-growʳ : ∀ {x s e₁ e₂} → e₁ ≤ e₂ → x ∈ [ s , e₁ ] → x ∈ [ s , e₂ ]

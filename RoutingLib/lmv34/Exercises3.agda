@@ -44,7 +44,7 @@ module RoutingLib.lmv34.Exercises3 where
 
   data Equal? : Type -> Type -> Set where
     yes : forall {τ}   → Equal? τ τ
-    no  : forall {σ τ} → σ ≠ τ  → Equal? σ τ 
+    no  : forall {σ τ} → σ ≠ τ  → Equal? σ τ
 
   _=?=_ : (σ τ : Type) -> Equal? σ τ
   ₁ =?= ₁ = yes
@@ -94,7 +94,7 @@ module RoutingLib.lmv34.Exercises3 where
   lem-filter-sound p (x :: xs) | it y prf      with p x | prf
   lem-filter-sound p (x :: xs) | it .true prf  | true   | refl = trueIsTrue prf ::₁ lem-filter-sound p xs
   lem-filter-sound p (x :: xs) | it .false prf | false  | refl = lem-filter-sound p xs
-  
+
   lem-filter-complete : {A : Set}(p : A → Bool)(x : A){xs : List A} →
                         x ∈ xs → satisfies p x → x ∈ filter p xs
   lem-filter-complete p x {[]} el px = el

@@ -27,13 +27,13 @@ private
 
   help₂ : ∀ {i} {i' : Fin n} (i<n : i < n) → toℕ i' ≡ i → i' ≡ fromℕ≤ i<n
   help₂ i<n eq = toℕ-injective (trans eq (sym (toℕ-fromℕ≤ i<n)))
-  
+
 mutual
 
   certify : U.Path → Path n
   certify []            = []
   certify ((i , j) ∷ p) with i Uₚ.∈ₚ? p | (i , j) Uₚ.⇿? p | i <? n | j <? n
-  ... | yes _   | _        | _       | _       = [] 
+  ... | yes _   | _        | _       | _       = []
   ... | no  _   | no  _    | _       | _       = []
   ... | no  _   | yes _    | no  _   | _       = []
   ... | no  _   | yes _    | yes _   | no  _   = []
@@ -48,7 +48,7 @@ mutual
   ... | no  _ | yes _ | no _     | _     = start (help₁ i≡i j≡j i≢j)
   ... | no  _ | yes _ | yes _    | no _  = start (help₁ i≡i j≡j i≢j)
   ... | no  _ | yes _ | yes j<n' | yes _ rewrite help₂ j<n' j≡j = continue (help₁ i≡i (toℕ-fromℕ≤ j<n') i≢j)
-  
+
 
   ∉ₚ-certify⁺ : ∀ {p k k'} → toℕ k' ≡ k → k U.∉ₚ p → k' ∉ₚ certify p
   ∉ₚ-certify⁺ {[]}          k≡k k∉p = notThere
@@ -62,7 +62,7 @@ mutual
     (k∉p ∘ (λ { refl → here (subst (U._∈ₑ _) (trans (sym (toℕ-fromℕ≤ j<n)) k≡k) right)}))
     (∉ₚ-certify⁺ k≡k (k∉p ∘ there))
 
-  ∈ₚ-certify⁻ : ∀ {p k k'} → toℕ k' ≡ k → k' ∈ₚ certify p → k U.∈ₚ p 
+  ∈ₚ-certify⁻ : ∀ {p k k'} → toℕ k' ≡ k → k' ∈ₚ certify p → k U.∈ₚ p
   ∈ₚ-certify⁻ {[]}          {_} k≡k  k∈pᶜ = contradiction notThere k∈pᶜ
   ∈ₚ-certify⁻ {(i , j) ∷ p} {k} refl k∈pᶜ with i Uₚ.∈ₚ? p | (i , j) Uₚ.⇿? p | i <? n | j <? n
   ... | yes _ | _     | _       | _       = contradiction notThere k∈pᶜ
@@ -74,7 +74,7 @@ mutual
   ...   | no  k∉ij = there (∈ₚ-certify⁻ refl (k∈pᶜ ∘ notHere
     (k∉ij ∘ λ { refl → subst (U._∈ₑ _) (sym (toℕ-fromℕ≤ i<n)) left })
     ((k∉ij ∘ λ { refl → subst (U._∈ₑ _) (sym (toℕ-fromℕ≤ j<n)) right }))))
-  
+
   certify-accept : ∀ {i j p} (ij⇿p : (toℕ i , toℕ j) U.⇿ p) (i∉p : toℕ i U.∉ₚ p) →
                    certify ((toℕ i , toℕ j) ∷ p) ≈ₚ (i , j) ∷ certify p ∣ ⇿-certify⁺ refl refl ij⇿p ∣ ∉ₚ-certify⁺ refl i∉p
   certify-accept {i} {j} {p} ij⇿p i∉p with toℕ i Uₚ.∈ₚ? p | (toℕ i , toℕ j) Uₚ.⇿? p | toℕ i <? n | toℕ j <? n

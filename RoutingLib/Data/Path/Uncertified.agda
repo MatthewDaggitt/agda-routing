@@ -37,7 +37,7 @@ infix 4 _∈ₑ_ _∈ₚ_ _∉ₚ_
 data _∈ₑ_ : Vertex → Edge → Set where
   left  : ∀ {i j} → i ∈ₑ (i , j)
   right : ∀ {i j} → j ∈ₑ (i , j)
-  
+
 _∈ₚ_ : Vertex → Path → Set
 i ∈ₚ p = Any (i ∈ₑ_) p
 

@@ -91,7 +91,7 @@ weight-cong (valid (refl ∷ p≈q)) = ▷-cong _ (weight-cong (valid p≈q))
   A i j ▷ weight A (valid q)                    ≈⟨ ▷-cong (A i j) rᶜ ⟩
   A i j ▷ r                                     ∎
   where open EqReasoning S
-  
+
 ▷-forces-𝑰 : ∀ {i j r} → 𝑰 (A i j ▷ r) → 𝑰 r
 ▷-forces-𝑰 f▷rⁱ rᶜ = f▷rⁱ (▷-pres-𝑪 _ _ rᶜ)
 
@@ -238,7 +238,7 @@ algebraᶜ = record
 ⊕ᶜ-identityʳ _ = ⊕-identityʳ _
 
 ▷ᶜ-fixedPoint : ∀ {n} {i j : Fin n} (f : CStep i j) → f ▷ᶜ C∞ ≈ᶜ C∞
-▷ᶜ-fixedPoint (nothing       , _) = ≈-refl 
+▷ᶜ-fixedPoint (nothing       , _) = ≈-refl
 ▷ᶜ-fixedPoint (valid (k , l) , _) = ▷-fixedPoint (A k l)
 
 isRoutingAlgebraᶜ : IsRoutingAlgebra algebraᶜ

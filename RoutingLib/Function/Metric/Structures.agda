@@ -29,6 +29,8 @@ record IsQuasiSemiMetric (d : A → A → I) : Set (a ⊔ i ⊔ ℓ₁ ⊔ ℓ�
     isPreMetric      : IsPreMetric d
     0⇒eq             : ∀ {x y} → d x y ≈ᵢ 0# → x ≈ y
 
+  open IsPreMetric isPreMetric public
+
 record IsSemiMetric (d : A → A → I) : Set (a ⊔ i ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃) where
   field
     isQuasiSemiMetric : IsQuasiSemiMetric d
@@ -41,7 +43,7 @@ record IsSemiMetric (d : A → A → I) : Set (a ⊔ i ⊔ ℓ₁ ⊔ ℓ₂ ⊔
 -- providing the correct operator.
 
 record IsGeneralMetric (_∙_ : Op₂ I) (d : A → A → I) : Set (a ⊔ i ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃) where
-  
+
   field
     isSemiMetric : IsSemiMetric d
     triangle     : ∀ x y z → d x z ≤ (d x y ∙ d y z)

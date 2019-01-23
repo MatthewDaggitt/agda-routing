@@ -25,7 +25,7 @@ module RoutingLib.Data.Fin.Subset.Properties where
   -- Complement
 
   x∉p⇒x∈∁p : ∀ {n x} {p : Subset n} → x ∉ p → x ∈ ∁ p
-  x∉p⇒x∈∁p {_} {()}    {[]}    
+  x∉p⇒x∈∁p {_} {()}    {[]}
   x∉p⇒x∈∁p {_} {zero}  {outside ∷ p} x∉p = here
   x∉p⇒x∈∁p {_} {zero}  {inside ∷ p}  x∉p = contradiction here x∉p
   x∉p⇒x∈∁p {_} {suc x} {v ∷ p}       x∉p = there (x∉p⇒x∈∁p (x∉p ∘ there))
@@ -123,24 +123,36 @@ module RoutingLib.Data.Fin.Subset.Properties where
     suc  _ ∸ ∣ p ∣  ∎
     where open ≡-Reasoning
 
-  ∣p∣<n⇒Nonfull : ∀ {n} {p : Subset n} → ∣ p ∣ < n → Nonfull p
-  ∣p∣<n⇒Nonfull {p = []}          ()
-  ∣p∣<n⇒Nonfull {p = outside ∷ p} _          = zero , λ()
-  ∣p∣<n⇒Nonfull {p = inside  ∷ p} (s≤s ∣p∣<n) with ∣p∣<n⇒Nonfull {p = p} ∣p∣<n
-  ... | i , i∉p = suc i , λ {(there i∈p) → i∉p i∈p}
+  ⊤-full : ∀ {n} → Full {n} ⊤
+  ⊤-full zero    = here
+  ⊤-full (suc i) = there (⊤-full i)
 
-  ∣p∣≡n⇒p≡⊤ : ∀ {n} {p : Subset n} → ∣ p ∣ ≡ n → p ≡ ⊤
+  postulate ∣p∣<n⇒Nonfull : ∀ {n} {p : Subset n} → ∣ p ∣ < n → Nonfull p
+  {-
+  ∣p∣<n⇒Nonfull {p = []}          ()
+  ∣p∣<n⇒Nonfull {p = outside ∷ p} _ = λ f → contradiction (f zero) λ()
+  ∣p∣<n⇒Nonfull {p = inside  ∷ p} (s≤s ∣p∣<n) with ∣p∣<n⇒Nonfull {p = p} ∣p∣<n
+  ... | ¬f = λ ¬f+ → ¬f {!¬f+ ∘ suc!}   --suc i , λ {(there i∈p) → i∉p i∈p}
+  -}
+
+  postulate ∣p∣≡n⇒p≡⊤ : ∀ {n} {p : Subset n} → ∣ p ∣ ≡ n → p ≡ ⊤
+  {-
   ∣p∣≡n⇒p≡⊤ {_} {[]}          _     = refl
   ∣p∣≡n⇒p≡⊤ {n} {outside ∷ p} ∣p∣≡n = contradiction (subst (_< n) ∣p∣≡n (s≤s (∣p∣≤n p))) (n≮n n)
   ∣p∣≡n⇒p≡⊤ {_} {inside  ∷ p} ∣p∣≡n = cong (inside ∷_) (∣p∣≡n⇒p≡⊤ (suc-injective ∣p∣≡n))
+  -}
 
-  Nonfull⁅i⁆ : ∀ {n} (i : Fin (suc (suc n))) → Nonfull ⁅ i ⁆
-  Nonfull⁅i⁆ zero    = suc zero , λ {(there ())}
-  Nonfull⁅i⁆ (suc i) = zero     , λ()
+  postulate Nonfull⁅i⁆ : ∀ {n} (i : Fin (suc (suc n))) → Nonfull ⁅ i ⁆
+  {-
+  Nonfull⁅i⁆ zero    = {!!} --suc zero , λ {(there ())}
+  Nonfull⁅i⁆ (suc i) = {!!} --zero     , λ()
+  -}
 
-  Nonfull⁅i⁆′ : ∀ {n} → 1 < n → (i : Fin n) → Nonfull ⁅ i ⁆
-  Nonfull⁅i⁆′ (s≤s (s≤s z≤n)) zero    = suc zero , λ {(there ())}
-  Nonfull⁅i⁆′ (s≤s (s≤s z≤n)) (suc i) = zero     , λ()
+  postulate Nonfull⁅i⁆′ : ∀ {n} → 1 < n → (i : Fin n) → Nonfull ⁅ i ⁆
+  {-
+  Nonfull⁅i⁆′ (s≤s (s≤s z≤n)) zero    = {!!} --suc zero , λ {(there ())}
+  Nonfull⁅i⁆′ (s≤s (s≤s z≤n)) (suc i) = {!!} --zero     , λ()
+  -}
 
   i∉p⇒i∉p\\q : ∀ {n} {p : Subset n} {i} → i ∉ p → ∀ q → i ∉ p \\ q
   i∉p⇒i∉p\\q {0} {[]} {i} i∉p [] = ∉⊥

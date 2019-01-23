@@ -15,9 +15,8 @@ _\\_ : ∀ {n} → Subset n → Subset n → Subset n
 (x ∷ p) \\ (inside ∷ q)  = outside ∷ (p \\ q)
 (x ∷ p) \\ (outside ∷ q) = x       ∷ (p \\ q)
 
+Full : ∀ {n} → Subset n → Set
+Full p = ∀ i → i ∈ p
 
 Nonfull : ∀ {n} → Subset n → Set
-Nonfull p = ∃ λ i → i ∉ p
-
-Full : ∀ {n} → Subset n → Set
-Full p = ¬ (Nonfull p)
+Nonfull p = ¬ (Full p)

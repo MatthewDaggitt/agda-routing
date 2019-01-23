@@ -37,7 +37,7 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
   field
     Route            : Set b
     Step             : ∀ {n} → Fin n → Fin n → Set a
-    
+
     _≈_              : Rel Route ℓ
     _⊕_              : Op₂ Route
     _▷_              : ∀ {n} {i j : Fin n} → Step i j → Route → Route
@@ -51,7 +51,7 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
     f∞-reject          : ∀ {n} (i j : Fin n) x → f∞ i j ▷ x ≈ ∞
 
   -- Publicly re-export some useful terminology
-  
+
   open RightNaturalOrder _≈_ _⊕_ public using () renaming ( _≤_ to _≤₊_ )
   open NonStrictToStrict _≈_ _≤₊_ public using () renaming ( _<_ to _<₊_)
 
@@ -61,10 +61,10 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
 
   infix 4 _≰₊_
   _≰₊_ : Rel Route ℓ
-  x ≰₊ y = ¬ (x ≤₊ y) 
-  
+  x ≰₊ y = ¬ (x ≤₊ y)
+
   -- Publicly export equality proofs
-  
+
   open IsDecEquivalence ≈-isDecEquivalence public
     renaming
     ( refl          to ≈-refl
@@ -90,7 +90,7 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 
   IsDistributive : Set _
   IsDistributive = ∀ {n} {i j : Fin n} (f : Step i j) x y → f ▷ (x ⊕ y) ≈ (f ▷ x) ⊕ (f ▷ y)
-  
+
   IsIncreasing : Set _
   IsIncreasing = ∀ {n} {i j : Fin n} (f : Step i j) x → x ≤₊ (f ▷ x)
 
@@ -106,7 +106,7 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 
   open RawRoutingAlgebra algebra
-  
+
   record IsRoutingAlgebra : Set (a ⊔ b ⊔ ℓ) where
     no-eta-equality -- Needed due to bug #2732 in Agda
 
@@ -116,7 +116,7 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
       ⊕-assoc      : Associative _≈_ _⊕_
       ⊕-zeroʳ      : RightZero _≈_ 0# _⊕_
       ⊕-identityʳ  : RightIdentity _≈_ ∞ _⊕_
-      ▷-fixedPoint : ∀ {n} {i j : Fin n} (f : Step i j) → f ▷ ∞ ≈ ∞    
+      ▷-fixedPoint : ∀ {n} {i j : Fin n} (f : Step i j) → f ▷ ∞ ≈ ∞
 
 --------------------------------------------------------------------------------
 -- Algebras that represent path-vector protocols
@@ -125,7 +125,7 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 
   open RawRoutingAlgebra algebra
   open UncertifiedPaths
-  
+
   record IsPathAlgebra : Set (a ⊔ b ⊔ ℓ) where
     no-eta-equality -- Needed due to bug #2732 in Agda
 
@@ -148,7 +148,7 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 
   open RawRoutingAlgebra algebra
   open CertifiedPaths
-  
+
   record IsCertifiedPathAlgebra (n : ℕ) : Set (a ⊔ b ⊔ ℓ) where
     no-eta-equality -- Needed due to bug #2732 in Agda
 

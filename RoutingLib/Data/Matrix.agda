@@ -61,12 +61,3 @@ module _ {a} {A : Set a} where
 
   grow : ∀ {m n} (p : Subset m) (q : Subset n) → Matrix A m n → Matrix A ∣ p ∣ ∣ q ∣ → Matrix A m n
   grow p q T M = Table.grow p T (λ i → Table.grow q (Table.strip p T i) (M i))
-  
-{-
-  grow : A → ∀ {n} (p : Subset n) → SquareMatrix A ∣ p ∣ → SquareMatrix A n
-  grow a []            f ()
-  grow a (outside ∷ p) f zero    = a
-  grow a (outside ∷ p) f (suc i) = grow a p f i
-  grow a (inside  ∷ p) f zero    = f zero
-  grow a (inside  ∷ p) f (suc i) = grow a p (f ∘ suc) i
--}

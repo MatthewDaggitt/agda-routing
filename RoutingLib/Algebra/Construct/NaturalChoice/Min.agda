@@ -10,7 +10,7 @@ open import RoutingLib.Relation.Binary
 
 module RoutingLib.Algebra.Construct.NaturalChoice.Min
   {a ℓ} {A : Set a} {_≤_ : Rel A ℓ} (total : Total _≤_) where
-  
+
 min : Op₂ A
 min x y with total x y
 ... | inj₁ x≤y = x

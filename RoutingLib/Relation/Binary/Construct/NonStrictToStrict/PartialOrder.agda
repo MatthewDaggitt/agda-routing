@@ -58,6 +58,6 @@ module RoutingLib.Relation.Binary.Construct.NonStrictToStrict.PartialOrder
     ; <-≤-trans            = <-≤-trans
     ; ≤-<-trans            = ≤-<-trans
     }
-  
+
   ≤-<-orderingPair : OrderingPair a ℓ₁ ℓ₂ (ℓ₁ ⊔ ℓ₂)
   ≤-<-orderingPair = record { isOrderingPair = ≤-<-isOrderingPair }

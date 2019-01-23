@@ -15,6 +15,11 @@ module RoutingLib.Function.Metric where
 ------------------------------------------------------------------------
 -- PreMetric
 
+open import RoutingLib.Function.Metric.Core public
+
+------------------------------------------------------------------------
+-- PreMetric
+
 record PreMetric a i ℓ₁ ℓ₂ ℓ₃ : Set (suc (a ⊔ i ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃)) where
   field
     Carrier     : Set a

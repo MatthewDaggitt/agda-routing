@@ -22,7 +22,7 @@ record IsOrderingPair
     ≤∧≉⇒<     : ∀ {x y} → x ≤ y → ¬ (x ≈ y) → x < y
     <-≤-trans : Trans _<_ _≤_ _<_
     ≤-<-trans : Trans _≤_ _<_ _<_
-    
+
   module Eq = IsEquivalence isEquivalence
   module PO = IsPartialOrder isPartialOrder
   module SPO = IsStrictPartialOrder isStrictPartialOrder
@@ -32,8 +32,8 @@ record IsOrderingPair
 
   <-respˡ-≈ : _<_ Respectsˡ _≈_
   <-respˡ-≈ = proj₂ SPO.<-resp-≈
-  
-  
+
+
 record OrderingPair a ℓ₁ ℓ₂ ℓ₃ : Set (suc (a ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃)) where
 
   field

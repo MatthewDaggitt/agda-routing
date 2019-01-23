@@ -11,7 +11,7 @@ record IsMagma (∙ : Op₂ A) : Set (a ⊔ ℓ) where
   field
     isEquivalence : IsEquivalence _≈_
     ∙-cong        : Congruent₂ ∙
-    
+
   open IsEquivalence isEquivalence public
 
   setoid : Setoid a ℓ

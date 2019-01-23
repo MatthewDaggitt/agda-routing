@@ -83,7 +83,7 @@ module _ {ℓ₂} {_≈_ : Rel A ℓ₂} where
   max[x,y]≈y⇒x≤y : _≈_ ⇒ _≤_ → Symmetric _≈_ →
                     ∀ {x y} → max x y ≈ y → x ≤ y
   max[x,y]≈y⇒x≤y refl sym = Min.min[x,y]≈y⇒y≤x total (Converse.reflexive _≤_ sym refl) sym
-    
+
   max[x,y]≈x⇒y≤x : _≈_ ⇒ _≤_ → Symmetric _≈_ →
                    ∀ {x y} → max x y ≈ x → y ≤ x
   max[x,y]≈x⇒y≤x refl sym = Min.min[x,y]≈x⇒x≤y total (Converse.reflexive _≤_ sym refl) sym

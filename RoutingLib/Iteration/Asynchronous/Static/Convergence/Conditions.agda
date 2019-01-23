@@ -15,7 +15,7 @@ open import Relation.Binary as B using (DecSetoid; _Respects_; Total; _Preserves
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 import Relation.Binary.Construct.NonStrictToStrict as NonStrictToStrict
 open import Relation.Binary.Indexed.Homogeneous using (Decidable; IsIndexedDecEquivalence; IndexedDecSetoid)
-open import Relation.Unary using () renaming (_∈_ to _∈ᵤ_)
+open import Relation.Unary using (_∈_)
 open import Relation.Nullary.Decidable using (⌊_⌋)
 
 open import RoutingLib.Data.Table using (Table; max)
@@ -23,7 +23,7 @@ open import RoutingLib.Data.Table.Relation.Pointwise using (Pointwise)
 open import RoutingLib.Function.Metric
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (Setoid_at_)
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as SubsetEq
-open import RoutingLib.Relation.Unary.Indexed hiding (_∉_)
+open import RoutingLib.Relation.Unary.Indexed
 
 open import RoutingLib.Iteration.Asynchronous.Static
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule
@@ -44,13 +44,16 @@ record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
   field
     -- Boxes
     B          : ℕ → IPred Sᵢ p
-    Bᵢ-cong    : ∀ {k i} → (_∈ᵤ B k i) Respects _≈ᵢ_
-    B-finish   : ∃₂ λ k* x* → ∀ {k} → k* ≤ k → (x* ∈ B k × (∀ {x} → x ∈ B k → x ≈ x*))
-    
+    Bᵢ-cong    : ∀ {k i} → (_∈ B k i) Respects _≈ᵢ_
+    B-finish   : ∃₂ λ k* x* → ∀ {k} → k* ≤ k → (x* ∈ᵢ B k × (∀ {x} → x ∈ᵢ B k → x ≈ x*))
+
     -- F
-    F-resp-B₀  : ∀ {x} → x ∈ B 0 → F x ∈ B 0
-    F-mono-B   : ∀ {k x} → x ∈ B k → F x ∈ B (suc k)
-  
+    F-resp-B₀  : ∀ {x} → x ∈ᵢ B 0 → F x ∈ᵢ B 0
+    F-mono-B   : ∀ {k x} → x ∈ᵢ B k → F x ∈ᵢ B (suc k)
+
+  B-cong : ∀ {k} → (_∈ᵢ B k) Respects _≈_
+  B-cong x≈y x∈Bₖ i = Bᵢ-cong (x≈y i) (x∈Bₖ i)
+
 --------------------------------------------------------------------------------
 -- Ultrametric spaces --
 --------------------------------------------------------------------------------

@@ -22,7 +22,7 @@ data _≲_ (x y : A) : Set (ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃) where
   strict    : x < y → x ≲ y
   nonstrict : x ≤ y → x ≲ y
   eq        : x ≈ y → x ≲ y
-  
+
 levelOf : ∀ {x y} → x ≲ y → Level
 levelOf (eq x≈y)        = ℓ₁
 levelOf (nonstrict x≤y) = ℓ₂

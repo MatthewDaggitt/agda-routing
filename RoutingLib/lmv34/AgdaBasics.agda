@@ -45,7 +45,7 @@ module RoutingLib.lmv34.AgdaBasics where
   data Vec (A : Set) : Nat -> Set where
     []   : Vec A zero
     _::_ : {n : Nat} -> A -> Vec A n -> Vec A (suc n)
-    
+
   data   False : Set where
   record True  : Set where
 

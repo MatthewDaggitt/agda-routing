@@ -44,7 +44,7 @@ module _ (p : Subset n) where
     ; sym   = sym   Eq.symᵢ
     ; trans = trans Eq.transᵢ
     } where module Eq = IsIndexedEquivalence isEq
-  
+
   isDecEquivalence : IsIndexedDecEquivalence Aᵢ _∼ᵢ_ → B.IsDecEquivalence _∼[ p ]_
   isDecEquivalence isEq = record
     { isEquivalence = isEquivalence Eq.isEquivalenceᵢ

@@ -49,7 +49,7 @@ module _ {n} (A : AdjacencyMatrix algebra n) where
 
   open CoreVectorBasedRouting algebra A
   open CoreVectorBasedRoutingProperties isRoutingAlgebra A
-  
+
   h[FXᵢⱼ]⊔h[FYᵢⱼ]<v : ∀ X Y {i j v} → F X i j <₊ F Y i j →
                     (∀ k → X k j ≉ Y k j → r (X k j) (Y k j) ≤ v) →
                     h (F X i j) ⊔ h (F Y i j) < v
@@ -106,7 +106,7 @@ module _ {n} (network : Network algebra n) where
 
   open DistanceVectorRouting algebra network hiding (F)
   open DistanceVectorRoutingProperties isRoutingAlgebra network
-  
+
   module _ (e : Epoch) (p : Subset n) where
 
     private

@@ -18,7 +18,7 @@ module RoutingLib.Relation.Binary.Construct.NonStrictToStrict
 
   ≤∧≉⇒< : ∀ {x y} → x ≤ y → ¬ (x ≈ y) → x < y
   ≤∧≉⇒< = _,_
-  
+
   <⇒≱ : Antisymmetric _≈_ _≤_ → ∀ {x y} → x < y → ¬ (y ≤ x)
   <⇒≱ antisym (x≤y , x≉y) y≤x = x≉y (antisym x≤y y≤x)
 

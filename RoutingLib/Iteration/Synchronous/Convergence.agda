@@ -11,7 +11,7 @@ open Setoid S renaming (Carrier to A)
 open EqReasoning S
 
 _ConvergesIn_ : (A → A) → ℕ → Set _
-f ConvergesIn n = ∀ x t → (f ^ˡ n) x ≈ (f ^ˡ (n + t)) x 
+f ConvergesIn n = ∀ x t → (f ^ˡ n) x ≈ (f ^ˡ (n + t)) x
 
 {-
 ConvergesIn-mono : ∀ f {n m} → n ≤ m → f ConvergesIn n → f ConvergesIn m

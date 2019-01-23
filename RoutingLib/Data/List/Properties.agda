@@ -91,7 +91,7 @@ module _ {a ℓ} (M : Magma a ℓ) where
 
   open Magma M
   open import Relation.Binary.EqReasoning setoid
-  
+
   foldr-zeroʳ  : ∀ {e} → RightZero _≈_ e _∙_ → ∀ xs → foldr _∙_ e xs ≈ e
   foldr-zeroʳ {e} zeroʳ []       = Magma.refl M
   foldr-zeroʳ {e} zeroʳ (x ∷ xs) = begin
@@ -105,7 +105,7 @@ module _ {a ℓ} (M : Magma a ℓ) where
     x ∙ foldr _∙_ e xs ≈⟨ ∙-cong x≈e (foldr-constant idem xs≈e) ⟩
     e ∙ e              ≈⟨ idem ⟩
     e                  ∎
-  
+
 ------------------------------------------------------------------------
 -- Properties of foldl
 
@@ -146,7 +146,7 @@ module _ {a} {A : Set a} where
 -- stdlib
 length-upTo : ∀ n → length (upTo n) ≡ n
 length-upTo = length-applyUpTo id
-  
+
 ------------------------------------------------------------------------
 -- Properties of applyDownFrom
 
@@ -162,7 +162,7 @@ module _ {a} {A : Set a} (f : ℕ → A) where
   applyDownFrom-lookup zero  ()
   applyDownFrom-lookup (suc n) zero    = refl
   applyDownFrom-lookup (suc n) (suc i) = applyDownFrom-lookup n i
-  
+
 ------------------------------------------------------------------------
 -- Properties of downFrom
 
@@ -241,7 +241,7 @@ module _ {a ℓ} (S : Setoid a ℓ)  where
 
   open Setoid S renaming (Carrier to A; refl to ≈-refl; sym to ≈-sym; trans to ≈-trans)
   open EqReasoning S
-  
+
   foldr-map-commute-gen₁ : ∀ {b} {B : Set b} {_•ᵃ_ _•ᵇ_} {f : B → A} → Congruent₂ _≈_ _•ᵃ_ →
                            ∀ {p} {P : Pred B p} → _•ᵇ_ Preservesᵇ P →
                            (∀ {x y} → P x → P y → f x •ᵃ f y ≈ f (x •ᵇ y)) →

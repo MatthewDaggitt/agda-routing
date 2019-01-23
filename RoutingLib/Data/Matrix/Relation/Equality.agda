@@ -29,14 +29,15 @@ module _ {m n : ℕ} where
     ; isEquivalence to ≈ₘ-isEquivalence
     )
 
-
+{-
 module _ {m n} (p : Subset m) (q : Subset n) where
 
   grow-strip : (T : Matrix A m n) (M : Matrix A m n) →
                (∀ {i j} → i ∉ p → j ∉ q → T i j ≈ M i j) →
                grow p q T (strip p q M) ≈ₘ M
   grow-strip = PW.grow-strip {_~_ = _≈_} refl p q
-  
+
   strip-grow : (T : Matrix A m n) (M : Matrix A ∣ p ∣ ∣ q ∣) →
                strip p q (grow p q T M) ≈ₘ M
   strip-grow = PW.strip-grow {_~_ = _≈_} refl p q
+-}

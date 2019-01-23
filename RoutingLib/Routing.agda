@@ -127,7 +127,7 @@ module _ (network : Network) where
     -- Needs to be abstract otherwise unfolding causes all sorts of problems
 
     Aₜ : Epoch → Subset n → AdjacencyMatrix
-    Aₜ e p i j with i ∈? p | j ∈? p 
+    Aₜ e p i j with i ∈? p | j ∈? p
     ... | yes _ | yes _ = network e i j
     ... | _     | _     = f∞ i j
 
@@ -167,4 +167,3 @@ WellFormed p X = ∀ {i} → i ∉ p → X i ≈ₜ I i
 WellFormed-cong : ∀ {X Y p} → WellFormed p X → WellFormed p Y →
                   ∀ {i} → i ∉ p → X i ≈ₜ Y i
 WellFormed-cong wfX wfY i∉p = ≈ₜ-trans (wfX i∉p) (≈ₜ-sym (wfY i∉p))
-

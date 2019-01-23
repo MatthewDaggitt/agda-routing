@@ -20,7 +20,7 @@ open import RoutingLib.Data.Table.Properties using (max[t]<x; x≤max[t])
 open import RoutingLib.Data.Nat.Properties
 import RoutingLib.Function.Metric.Construct.Condition as Condition
 import RoutingLib.Function.Metric.Construct.MaxLift as MaxLift
-open import RoutingLib.Function.Metric
+open import RoutingLib.Function.Metric.Nat
 import RoutingLib.Relation.Binary.Reasoning.PartialOrder as PO-Reasoning
 open import RoutingLib.Data.List.Membership.Setoid.Properties using (index-cong)
 open import RoutingLib.Function.Reasoning
@@ -63,7 +63,7 @@ h-resp-≤ : h Preserves _≤₊_ ⟶ _≥_
 h-resp-≤ {u} {v} u≤v with u ≟ v
 ... | yes u≈v = ≤-reflexive (h-cong (≈-sym u≈v))
 ... | no  u≉v = <⇒≤ (h-resp-< (u≤v , u≉v))
-  
+
 1≤h : ∀ x → 1 ≤ h x
 1≤h _ = s≤s z≤n
 
@@ -95,7 +95,7 @@ r≤H x y with x ≟ y
 ... | yes _ = z≤n
 ... | no  _ = n≤m×o≤m⇒n⊔o≤m (h≤H x) (h≤H y)
 
-r-bounded : Bounded S r
+r-bounded : Bounded r
 r-bounded = H , r≤H
 
 r-sym : ∀ x y → r x y ≡ r y x
@@ -105,7 +105,7 @@ r-sym x y with x ≟ y | y ≟ x
 ... | yes x≈y | no  y≉x = contradiction (≈-sym x≈y) y≉x
 ... | no  _   | no  _   = ⊔-comm (h x) (h y)
 
-r-maxTriIneq : MaxTriangleIneq S r
+r-maxTriIneq : MaxTriangleInequality r
 r-maxTriIneq x y z with x ≟ y | y ≟ z | x ≟ z
 ... | _       | _       | yes _  = z≤n
 ... | yes x≈y | yes y≈z | no x≉z = contradiction (≈-trans x≈y y≈z) x≉z
@@ -118,19 +118,37 @@ r[x,y]≡hx⊔hy {x} {y} x≉y with x ≟ y
 ... | yes x≈y = contradiction x≈y x≉y
 ... | no  _   = refl
 
-r-isUltrametric : IsUltrametric S r
-r-isUltrametric = record
-  { eq⇒0        = x≈y⇒r≡0
-  ; 0⇒eq        = r≡0⇒x≈y
-  ; sym         = r-sym
-  ; maxTriangle = r-maxTriIneq
-  ; cong        = r-cong
+r-isPreMetric : IsPreMetric _≈_ r
+r-isPreMetric = record
+  { isTotalOrder    = ≤-isTotalOrder
+  ; 0#-minimum      = z≤n
+  ; ≈-isEquivalence = ≈-isEquivalence
+  ; cong            = r-cong
+  ; eq⇒0            = x≈y⇒r≡0
   }
 
-r-ultrametric : Ultrametric S
-r-ultrametric = record
+r-isQuasiSemiMetric : IsQuasiSemiMetric _≈_ r
+r-isQuasiSemiMetric = record
+  { isPreMetric = r-isPreMetric
+  ; 0⇒eq        = r≡0⇒x≈y
+  }
+
+r-isSemiMetric : IsSemiMetric _≈_ r
+r-isSemiMetric = record
+  { isQuasiSemiMetric = r-isQuasiSemiMetric
+  ; sym               = r-sym
+  }
+
+r-isUltraMetric : IsUltraMetric _≈_ r
+r-isUltraMetric = record
+  { isSemiMetric = r-isSemiMetric
+  ; triangle     = r-maxTriIneq
+  }
+
+r-ultraMetric : UltraMetric b ℓ
+r-ultraMetric = record
   { d             = r
-  ; isUltrametric = r-isUltrametric
+  ; isUltraMetric = r-isUltraMetric
   }
 
 ------------------------------------------------------------------------
@@ -141,10 +159,10 @@ module _ {n : ℕ} where
   open Routing algebra n
   private module MaxLiftₜ = MaxLift ℝ𝕋ₛⁱ (λ _ → r)
 
-  d-isUltrametric : IsUltrametric _ d
-  d-isUltrametric = MaxLiftₜ.isUltrametric r-isUltrametric
+  d-isUltraMetric : IsUltraMetric _≈ₜ_ d
+  d-isUltraMetric = MaxLiftₜ.isUltraMetric r-isUltraMetric
 
-  open IsUltrametric d-isUltrametric public
+  open IsUltraMetric d-isUltraMetric public
     using ()
     renaming
     ( cong to d-cong
@@ -156,7 +174,7 @@ module _ {n : ℕ} where
   r≤d : ∀ x y i → r (x i) (y i) ≤ d x y
   r≤d = MaxLiftₜ.dᵢ≤d
 
-  d-bounded : Bounded ℝ𝕋ₛ d
+  d-bounded : Bounded d
   d-bounded = MaxLiftₜ.bounded r-bounded
 
 ------------------------------------------------------------------------
@@ -166,7 +184,7 @@ module _ {n : ℕ} (p : Subset n) where
 
   open Routing algebra n
   private module Conditionₜ = Condition (d {n}) (_∈? p)
-  
+
   dᶜ-cong : ∀ i → (dᶜ p i) Preserves₂ _≈ₜ_ ⟶ _≈ₜ_ ⟶ _≡_
   dᶜ-cong = Conditionₜ.cong′ d-cong
 
@@ -203,5 +221,5 @@ module _ {n : ℕ} (p : Subset n) where
   ... | yes i∈p = r≤D X Y i j (inj₁ i∈p)
   ... | no  i∉p = r≤D X Y i j (inj₂ (WellFormed-cong wfX wfY i∉p))
 
-  Y≉ₚX⇒0<DXY : ∀ {X Y} → Y ≉ₘ[ p ] X → 0 < Dₚ X Y
+  Y≉ₚX⇒0<DXY : ∀ {X Y} → Y ≉ₘ X → 0 < Dₚ X Y
   Y≉ₚX⇒0<DXY Y≉X = n≢0⇒0<n (Y≉X ∘ ≈ₛ-sym ∘ D≡0⇒X≈ₛY)

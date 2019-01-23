@@ -31,10 +31,10 @@ module RoutingLib.Data.Path.Certified.Enumeration (n : ℕ) where
   -- Enumerating paths
 
   private
-  
+
     Eₛ : Setoid _ _
     Eₛ = 𝔼ₛ n
-    
+
     Pₛ : Setoid _ _
     Pₛ = ℙₛ n
 

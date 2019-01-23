@@ -40,11 +40,11 @@ module _ (e : Epoch) (q : Subset n) where
   σ : ℕ → S → S
   σ zero    x = x
   σ (suc i) x = F′ (σ i x)
-  
+
 
   -- Fixed points
-  
-  
+
+
 
 
 
@@ -52,7 +52,7 @@ module _ (e : Epoch) (q : Subset n) where
 
   C : ℕ → IPred Sᵢ p
   C zero    = B′ 0
-  C (suc k) = B′ k ∩ B′ (suc k)  
+  C (suc k) = B′ k ∩ B′ (suc k)
 
   Cₖ⊆Bₖ : ∀ k → C k ⊆[ Sᵢ ] B′ k
   Cₖ⊆Bₖ zero    x∈C₀   = x∈C₀
@@ -61,11 +61,11 @@ module _ (e : Epoch) (q : Subset n) where
   k*≤k⇒x*∈Cᵏ : ∀ {k} → k* ≤ k → x* ∈ C k
   k*≤k⇒x*∈Cᵏ {zero}  k*≤0   i = x*∈Bₖ {!!} 0 i
   k*≤k⇒x*∈Cᵏ {suc k} k*≤1+k i = x*∈Bₖ {!!} k i , x*∈Bₖ {!!} (suc k) i
-  
+
   k*≤k∧x∈Cᵏ⇒x≈x* : ∀ {k} → k* ≤ k → ∀ {x} → x ∈ C k → x ≈ x*
   k*≤k∧x∈Cᵏ⇒x≈x* {zero}  k*≤0   x∈C₀   i = k*≤k∧x∈Bₖ⇒x≈x* k*≤0 x∈C₀ i
   k*≤k∧x∈Cᵏ⇒x≈x* {suc k} k*≤1+k x∈C₁₊ₖ i = k*≤k∧x∈Bₖ⇒x≈x* k*≤1+k (proj₂ ∘ x∈C₁₊ₖ) i
-  
+
   C-finish : ∃₂ λ k* x* → ∀ {k} → k* ≤ k → (x* ∈ C k × (∀ {x} → x ∈ C k → x ≈ x*))
   C-finish = k* , x* , (λ k*≤k → k*≤k⇒x*∈Cᵏ k*≤k , k*≤k∧x∈Cᵏ⇒x≈x* k*≤k)
 
@@ -79,7 +79,7 @@ module _ (e : Epoch) (q : Subset n) where
   F-mono-C : ∀ {k x} → WellFormed q x → x ∈ C k → F′ x ∈ C (suc k)
   F-mono-C {zero}  x-wf x∈C₀   i = F-resp-B₀ x∈C₀ i , F-mono-B {!!} x∈C₀ i
   F-mono-C {suc k} x-wf x∈C₁₊ₖ i = F-mono-B {!!} (proj₁ ∘ x∈C₁₊ₖ) i , F-mono-B {!!} (proj₂ ∘ x∈C₁₊ₖ) i
-  
+
   C₁₊ₖ⊆Cₖ : ∀ k → C (suc k) ⊆[ Sᵢ ] C k
   C₁₊ₖ⊆Cₖ zero    x∈C₁   i = proj₁ (x∈C₁ i)
   C₁₊ₖ⊆Cₖ (suc k) x∈C₂₊ₖ i = {!!} , proj₁ (x∈C₂₊ₖ i)

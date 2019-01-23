@@ -9,10 +9,10 @@ library at some point, and is layed out correspondingly.
 
 ## Iterative algorithms
 
-* `RoutingLib.Iteration.Asynchronous.(Static/Dynamic)` contains a record type encoding 
+* `RoutingLib.Iteration.Asynchronous.(Static/Dynamic)` contains a record type encoding
   parallelisations of dynamic and static iterative algorithms.
 
-* `RoutingLib.Iteration.Asynchronous.(Static/Dynamic).Schedule` contains a formalisation of 
+* `RoutingLib.Iteration.Asynchronous.(Static/Dynamic).Schedule` contains a formalisation of
   schedules for static and dynamic asynchronous iterations.
 
 * `RoutingLib.Iteration.Asynchronous.(Static/Dynamic).Convergence` contains theorems
@@ -22,7 +22,7 @@ library at some point, and is layed out correspondingly.
   version of Uresin \& Dubois's proof [1] that the (dynamic) ACO conditions implies the iteration
   is convergent.
 
-* `RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.UltrametricToACO` contains a 
+* `RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.UltrametricToACO` contains a
   generalised version of Gurney's proof [2] that the (dynamic) ACO conditions implies the iteration
   is convergent.
 
@@ -43,7 +43,7 @@ on the Distributed Bellman Ford (DBF) algorithm.
 * `RoutingLib.Routing.VectorBased.Asynchronous.Results` contains various convergence theorems
   about distance-vector and path-vector protocols.
 
-* `RoutingLib.Routing.Protocols.BGPLite` shwos how the work may be used to create a 
+* `RoutingLib.Routing.Protocols.BGPLite` shwos how the work may be used to create a
   safe-by-design protocol that contains many of the features of BGP including path inflation,
   communities, conditional policy and local preferences.
 

@@ -27,7 +27,7 @@ module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.Pr
   open IncreasingPathAlgebraProperties algebra isPathAlgebra public
 
   open CertifiedPaths public hiding (Edge; Vertex)
-  
+
   open BellmanFord algebra A public
   open BellmanFordProperties algebra isRoutingAlgebra A public
   open BellmanFordPathProperties algebra isPathAlgebra A public

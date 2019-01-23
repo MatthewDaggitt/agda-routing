@@ -384,7 +384,7 @@ module _ (p : Subset n) where
   private module MaxLiftₘ = MaxLift ℝ𝕄ₛⁱ (dᶜ p)
   private module Conditionₜ = Condition d (_∈? p)
   Dₚ = D p
-  
+
   D-sym : ∀ X Y → Dₚ X Y ≡ Dₚ Y X
   D-sym = MaxLiftₘ.sym (dᶜ-sym p _)
 

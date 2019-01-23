@@ -31,7 +31,7 @@ module RoutingLib.lmv34.Exercises2 where
   (f :: fs) $ (x :: xs) = f x :: fs $ xs
 
   transpose : forall {A m n} -> Matrix A m n -> Matrix A n m
-  transpose {A} {zero} {n} xss = [] 
+  transpose {A} {zero} {n} xss = []
   transpose {A} {suc m} {n} xss = ((vec {n} head) $ xss) :: (transpose ((vec {n} tail) $ xss))
 
   M : Matrix Nat (suc (suc zero)) (suc (suc zero))

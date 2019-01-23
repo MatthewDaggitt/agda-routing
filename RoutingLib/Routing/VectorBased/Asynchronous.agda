@@ -35,13 +35,13 @@ Aₜ = Routing.Aₜ algebra n network
 F′ : Epoch → Subset n → RoutingMatrix → RoutingMatrix
 F′ e p X = F (Aₜ e p) X
 
-F′-cong : ∀ e p {X Y} → X ≈ₘ[ p ] Y → F′ e p X ≈ₘ[ p ] F′ e p Y
-F′-cong e p X≈Y _ j = foldr⁺ _≈_ ⊕-cong ≈-refl (tabulate⁺ (Aₜ-cong _ e p X≈Y))
+F′-cong : ∀ e p {X Y} → X ≈ₘ Y → F′ e p X ≈ₘ[ p ] F′ e p Y
+F′-cong e p X≈Y _ j = foldr⁺ _≈_ ⊕-cong ≈-refl (tabulate⁺ (Aₜ-cong _ e p (λ _ → X≈Y _)))
 
 F′-isAsyncIterable : IsAsyncIterable _≈ₜ_ F′ I
 F′-isAsyncIterable = record
   { isDecEquivalenceᵢ = IndexedDecSetoid.isDecEquivalenceᵢ Decℝ𝕄ₛⁱ
-  ; F-cong           = F′-cong
+  ; F-cong            = F′-cong
   }
 
 F∥ : AsyncIterable b ℓ n

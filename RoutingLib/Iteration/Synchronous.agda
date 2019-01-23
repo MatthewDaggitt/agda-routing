@@ -25,4 +25,3 @@ module _ {ℓ} (_≈_ : Rel A ℓ) (f : A → A) where
   Converges : Set (a ⊔ ℓ)
   Converges = ConvergesOver U
 
-  

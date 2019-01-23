@@ -15,9 +15,9 @@ import RoutingLib.Data.List.Extrema.Nat as List
 
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule
 
-module RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod {n} (𝓢 : Schedule n) where
+module RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod {n} (ψ : Schedule n) where
 
-open Schedule 𝓢
+open Schedule ψ
 
 --------------------------------------------------------------------------------
 -- Activation periods --
@@ -61,8 +61,8 @@ record IsExpiryPeriod (period : TimePeriod) : Set where
   constructor mkₑ
   open TimePeriod period
   field
-    start≤end  : start ≤ end
-    expiryᵢ    : ∀ i {t} → end ≤ t → ∀ j → start ≤ β t i j
+    start≤end : start ≤ end
+    expiryᵢ    : ∀ {t} i j → end < t → start ≤ β t i j
 
 --------------------------------------------------------------------------------
 -- Pseudoperiod
@@ -83,7 +83,7 @@ record IsPseudoperiodic (period : TimePeriod) : Set₁ where
     renaming (start≤end to start≤mid)
   open IsActivationPeriod α[m,e] public
     renaming (start≤end to mid≤end)
-  
+
   start≤end : start ≤ end
   start≤end = ≤-trans start≤mid mid≤end
 
@@ -95,7 +95,10 @@ record IsPseudoperiodic (period : TimePeriod) : Set₁ where
 
 data IsMultiPseudoperiodic : ℕ → TimePeriod → Set₁ where
   none : ∀ {s}         → IsMultiPseudoperiodic 0 [ s , s ]
-  next : ∀ {s} m {e k} → IsPseudoperiodic [ s , m ] → IsMultiPseudoperiodic k [ m , e ] → IsMultiPseudoperiodic (suc k) [ s , e ]
+  next : ∀ {s} m {e k} →
+         IsPseudoperiodic [ s , m ] →
+         IsMultiPseudoperiodic k [ m , e ] →
+         IsMultiPseudoperiodic (suc k) [ s , e ]
 
 s≤e-mpp : ∀ {s e k} → IsMultiPseudoperiodic k [ s , e ] → s ≤ e
 s≤e-mpp none            = ≤-refl

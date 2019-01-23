@@ -218,7 +218,7 @@ p≮ₗₑₓ[] {e ∷ p} (() , _)
 -- length
 
 |p|≢|q|⇒p≉q : ∀ {p q} → length p ≢ length q → p ≉ₚ q
-|p|≢|q|⇒p≉q {[]}    {[]}    0≢0     = contradiction refl 0≢0 
+|p|≢|q|⇒p≉q {[]}    {[]}    0≢0     = contradiction refl 0≢0
 |p|≢|q|⇒p≉q {[]}    {y ∷ q} |p|≢|q| = λ()
 |p|≢|q|⇒p≉q {x ∷ p} {[]}    |p|≢|q| = λ()
 |p|≢|q|⇒p≉q {x ∷ p} {y ∷ q} |p|≢|q| = λ { refl → |p|≢|q| refl }
@@ -265,12 +265,12 @@ deflate-inflate-[] ((i , j) ∷ p) zero    eq = eq
 deflate-inflate-[] ((i , j) ∷ p) (suc n) eq with i ≟ i
 ... | no  i≢i = contradiction refl i≢i
 ... | yes _   with source (deflate (inflate ((i , j) ∷ p) n)) | inspect source (deflate (inflate ((i , j) ∷ p) n))
-...   | nothing | [ i₀≡nothing ] = deflate-inflate-[] ((i , j) ∷ p) n (p₀≡n⇒p≡[] i₀≡nothing) 
+...   | nothing | [ i₀≡nothing ] = deflate-inflate-[] ((i , j) ∷ p) n (p₀≡n⇒p≡[] i₀≡nothing)
 ...   | just k  | [ i₀≡k ] with i ≟ k
 ...     | yes _ = deflate-inflate-[] _ n eq
 ...     | no  _ = contradiction eq λ()
 
-deflate-inflate : ∀ p n → deflate (inflate p n) ≡ deflate p 
+deflate-inflate : ∀ p n → deflate (inflate p n) ≡ deflate p
 deflate-inflate p             zero    = refl
 deflate-inflate []            (suc n) = refl
 deflate-inflate ((i , j) ∷ p) (suc n) with i ≟ i
@@ -305,8 +305,8 @@ deflate-idem ((i , j) ∷ p) with i ≟ j
 ...   | nothing | _        | ()
 ...   | just l  | [ p₀≡l ] | i∈d[kj∷p]₃ with k ≟ l | i∈d[kj∷p]₃
 ...     | yes refl | i∈d[p]      = there (∈-deflate⁻ i∈d[p])
-...     | no  k≢l  | here  left  = here left 
-...     | no  k≢l  | here  right = there (∈-deflate⁻ (∈-source p₀≡l)) 
+...     | no  k≢l  | here  left  = here left
+...     | no  k≢l  | here  right = there (∈-deflate⁻ (∈-source p₀≡l))
 ...     | no  _    | there i∈p   = there (∈-deflate⁻ i∈p)
 
 ⇿-deflate⁺ : ∀ {e p} → e ⇿ p → e ⇿ deflate p

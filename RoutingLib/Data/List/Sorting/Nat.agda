@@ -27,7 +27,7 @@ module RoutingLib.Data.List.Sorting.Nat where
   upTo-↗ : ∀ e → ↑-Sorted (upTo e)
   upTo-↗ e = applyUpTo⁺₁ e (λ i<j _ → <⇒≤ i<j)
 
-  postulate downFrom-↘ : ∀ e → ↓-Sorted (downFrom e) 
+  postulate downFrom-↘ : ∀ e → ↓-Sorted (downFrom e)
   {-
   between-↗ : ∀ e s → Sorted (between e s)
   between-↗ e s = AllPairs-applyBetween⁺₁ id e s (λ _ i<j _ → <⇒≤ i<j)

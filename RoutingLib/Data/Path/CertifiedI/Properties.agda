@@ -84,7 +84,7 @@ module _ {n : ℕ} where
 
   ≈ₚ-sym : Symmetric (_≈ₚ_ {n})
   ≈ₚ-sym = Eq-sym ≈ₚᵛ-sym
-  
+
   ≈ₚ-trans : Transitive (_≈ₚ_ {n})
   ≈ₚ-trans = Eq-trans ≈ₚᵛ-trans
 {-

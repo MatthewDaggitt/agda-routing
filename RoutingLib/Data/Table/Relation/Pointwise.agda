@@ -86,7 +86,7 @@ module _ {a b c d e f} {ℓ₁ ℓ₂ ℓ₃}
          {_~₁_ : REL A B ℓ₁} {_~₂_ : REL C D ℓ₂} {_~₃_ : REL E F ℓ₃}
          {f : A → B → E} {g : C → D → F}
          where
-         
+
   zipWith-cong : (∀ {w x y z} → w ~₁ x → y ~₂ z → f w x ~₃ g y z) →
                  ∀ {n} {r : Table A n} {s : Table B n} {t : Table C n} {u : Table D n} →
                  Pointwise _~₁_ r s → Pointwise _~₂_ t u →
@@ -102,14 +102,14 @@ module _ {a b c d} {ℓ₁ ℓ₂}
          {_~₁_ : REL A B ℓ₁} {_~₂_ : REL C D ℓ₂}
          {f : A → C → C} {g : B → D → D}
          where
-         
+
   foldr-cong : (∀ {w x y z} → w ~₁ x → y ~₂ z → f w y ~₂ g x z) →
                ∀ {d : C} {e : D} → d ~₂ e →
                ∀ {n} {s : Table A n} {t : Table B n} → Pointwise _~₁_ s t →
                foldr f d s ~₂ foldr g e t
   foldr-cong fg-cong d~e {zero}  s~t = d~e
   foldr-cong fg-cong d~e {suc n} s~t = fg-cong (s~t zero) (foldr-cong (λ {w x y z} → fg-cong {w} {x} {y} {z}) d~e (s~t ∘ suc))
-  
+
 module _ where
 
   foldr⁺-cong : ∀ {a b ℓ} {A : Set a} {B : Set b} {_~_ : REL A B ℓ}
@@ -124,7 +124,7 @@ module _ where
 -- strip
 
 module _ {a ℓ} {A : Set a} {_~_ : Rel A ℓ} (~-refl : B.Reflexive _~_) where
-  
+
   grow-strip : ∀ {n} (p : Subset n) (t : Table A n) (f : Table A n) →
                (∀ {i} → i ∉ p → t i ~ f i) → Pointwise _~_ (grow p t (strip p f)) f
   grow-strip []            t f ∉⇒~ ()

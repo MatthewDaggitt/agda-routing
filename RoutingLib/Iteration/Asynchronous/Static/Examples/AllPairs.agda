@@ -1,18 +1,21 @@
 open import Data.Fin using (Fin)
 open import Data.Fin.Dec using (all?;  ¬∀⟶∃¬)
 open import Data.Nat using (ℕ)
-open import Level using () renaming (zero to lzero; suc to lsuc)
-open import Relation.Binary using (Setoid; Rel; Reflexive; Symmetric; Transitive; Decidable; _⇒_; IsEquivalence; IsDecEquivalence)
+open import Level using (0ℓ)
+open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; _≢_)
+open import Relation.Binary.Indexed.Homogeneous using (IndexedSetoid)
 open import Relation.Nullary using (¬_; yes; no)
 
-open import RoutingLib.Asynchronous using (Parallelisation)
 open import RoutingLib.Data.NatInf
 open import RoutingLib.Data.Table using (Table; min∞)
 open import RoutingLib.Data.Table.All using (All)
-open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (triviallyIndexSetoid) renaming (Setoid to ISetoid)
+open import RoutingLib.Relation.Binary.Indexed.Homogeneous
+  using (triviallyIndexSetoid)
 
-module RoutingLib.Asynchronous.Examples.AllPairs (n : ℕ) where
+open import RoutingLib.Iteration.Asynchronous.Static
+
+module RoutingLib.Iteration.Asynchronous.Static.Examples.AllPairs (n : ℕ) where
 
   -- Row type - Table of ℕ∞
   Row : Set
@@ -23,10 +26,10 @@ module RoutingLib.Asynchronous.Examples.AllPairs (n : ℕ) where
   Matrix = Table Row n
 
   -- Equality over Row
-  _≡ᵣ_ : Rel Row lzero
+  _≡ᵣ_ : Rel Row 0ℓ
   x ≡ᵣ y = ∀ i → x i ≡ y i
 
-  _≢ᵣ_ : Rel Row lzero
+  _≢ᵣ_ : Rel Row 0ℓ
   x ≢ᵣ y = ¬ (x ≡ᵣ y)
 
   -- Properties of Equality over Row
@@ -47,14 +50,14 @@ module RoutingLib.Asynchronous.Examples.AllPairs (n : ℕ) where
   x ≟ᵣ y = all? (λ i → (x i) ≟ (y i))
 
   -- Row Ordering Relation
-  _≼_ : Rel Row lzero
+  _≼_ : Rel Row 0ℓ
   x ≼ y = ∀ i → x i ≤ y i
 
   -- Matrix Equality
-  _≡ₘ_ : Rel Matrix lzero
+  _≡ₘ_ : Rel Matrix 0ℓ
   g ≡ₘ h = ∀ i → g i ≡ᵣ h i
 
-  _≢ₘ_ : Rel Matrix lzero
+  _≢ₘ_ : Rel Matrix 0ℓ
   g ≢ₘ h = ¬ (g ≡ₘ h)
 
   -- Decidability of Matrix Equality
@@ -62,7 +65,7 @@ module RoutingLib.Asynchronous.Examples.AllPairs (n : ℕ) where
   g ≟ₘ h = all? (λ i → (g i) ≟ᵣ (h i))
 
   -- Matrix Ordering Relation
-  _≼ₘ_ : Rel Matrix lzero
+  _≼ₘ_ : Rel Matrix 0ℓ
   g ≼ₘ h = ∀ i → g i ≼ h i
 
   -- Equality over Row is an equivalence class
@@ -81,11 +84,9 @@ module RoutingLib.Asynchronous.Examples.AllPairs (n : ℕ) where
     }
 
   -- Row Setoid
-  row : Setoid lzero lzero
+  row : Setoid 0ℓ 0ℓ
   row = record
-    { Carrier       = Row
-    ; _≈_           = _≡ᵣ_
-    ; isEquivalence = isEquivalenceᵣ
+    { isEquivalence = isEquivalenceᵣ
     }
 
   -- Cost of going from node i to j through k
@@ -96,8 +97,19 @@ module RoutingLib.Asynchronous.Examples.AllPairs (n : ℕ) where
   F : Matrix → Fin n → Row
   F X i j = min∞ (X i j) (path-cost X i j)
 
-  matrix : ISetoid (Fin n) lzero lzero
+  F-cong : F Preserves _≡ₘ_ ⟶ _≡ₘ_
+  F-cong = {!!}
+  
+  matrix : IndexedSetoid (Fin n) 0ℓ 0ℓ
   matrix = triviallyIndexSetoid (Fin n) row
 
-  all-pairs-parallelisation : Parallelisation matrix
-  all-pairs-parallelisation = record {F = F}
+  allPairs-isAsyncIterable : IsAsyncIterable _≡ᵣ_ F
+  allPairs-isAsyncIterable = record
+    { isDecEquivalenceᵢ = {!!}
+    ; F-cong           = F-cong
+    }
+
+  allPairs∥ : AsyncIterable 0ℓ 0ℓ n
+  allPairs∥ = record
+    { isAsyncIterable = allPairs-isAsyncIterable
+    }

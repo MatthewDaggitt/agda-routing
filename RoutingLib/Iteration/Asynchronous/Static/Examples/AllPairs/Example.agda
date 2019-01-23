@@ -8,56 +8,48 @@ open import Relation.Binary.PropositionalEquality
 
 open import RoutingLib.Data.NatInf using (ℕ∞; N; ∞)
 
-module RoutingLib.Asynchronous.Examples.AllPairs.Example where
+module RoutingLib.Iteration.Asynchronous.Static.Examples.AllPairs.Example where
 
-  row₁ : Fin 5 → ℕ∞
-  row₁ fzero                             = N 0
-  row₁ (fsuc fzero)                      = N 3
-  row₁ (fsuc (fsuc fzero))               = N 8
-  row₁ (fsuc (fsuc (fsuc fzero)))        = ∞
-  row₁ (fsuc (fsuc (fsuc (fsuc fzero)))) = N 4
-  row₁ (fsuc (fsuc (fsuc (fsuc (fsuc ())))))
-  row₂ : Fin 5 → ℕ∞
-  row₂ fzero                             = ∞
-  row₂ (fsuc fzero)                      = N 0
-  row₂ (fsuc (fsuc fzero))               = ∞
-  row₂ (fsuc (fsuc (fsuc fzero)))        = N 1
-  row₂ (fsuc (fsuc (fsuc (fsuc fzero)))) = N 7
-  row₂ (fsuc (fsuc (fsuc (fsuc (fsuc ())))))
-  row₃ : Fin 5 → ℕ∞
-  row₃ fzero                             = ∞
-  row₃ (fsuc fzero)                      = N 4
-  row₃ (fsuc (fsuc fzero))               = N 0
-  row₃ (fsuc (fsuc (fsuc fzero)))        = ∞
-  row₃ (fsuc (fsuc (fsuc (fsuc fzero)))) = ∞
-  row₃ (fsuc (fsuc (fsuc (fsuc (fsuc ())))))
-  row₄ : Fin 5 → ℕ∞
-  row₄ fzero                             = N 2
-  row₄ (fsuc fzero)                      = ∞
-  row₄ (fsuc (fsuc fzero))               = N 5
-  row₄ (fsuc (fsuc (fsuc fzero)))        = N 0
-  row₄ (fsuc (fsuc (fsuc (fsuc fzero)))) = ∞
-  row₄ (fsuc (fsuc (fsuc (fsuc (fsuc ())))))
-  row₅ : Fin 5 → ℕ∞
-  row₅ fzero                             = ∞
-  row₅ (fsuc fzero)                      = ∞
-  row₅ (fsuc (fsuc fzero))               = ∞
-  row₅ (fsuc (fsuc (fsuc fzero)))        = N 6
-  row₅ (fsuc (fsuc (fsuc (fsuc fzero)))) = N 0
-  row₅ (fsuc (fsuc (fsuc (fsuc (fsuc ())))))
-
+  pattern 0# = fzero
+  pattern 1# = fsuc fzero
+  pattern 2# = fsuc (fsuc fzero)
+  pattern 3# = (fsuc (fsuc (fsuc fzero)))
+  pattern 4# = (fsuc (fsuc (fsuc (fsuc fzero))))
+  pattern ## = (fsuc (fsuc (fsuc (fsuc (fsuc ())))))
+  
   grid : Fin 5 → Fin 5 → ℕ∞
-  grid fzero = row₁
-  grid (fsuc fzero) = row₂
-  grid (fsuc (fsuc fzero)) = row₃
-  grid (fsuc (fsuc (fsuc fzero))) = row₄
-  grid (fsuc (fsuc (fsuc (fsuc fzero)))) = row₅
-  grid (fsuc (fsuc (fsuc (fsuc (fsuc ())))))
+  grid ## _
+  grid _ ##
+  grid 0# 0# = N 0
+  grid 0# 1# = N 3
+  grid 0# 2# = N 8
+  grid 0# 3# = ∞
+  grid 0# 4# = N 4
+  grid 1# 0# = ∞
+  grid 1# 1# = N 0
+  grid 1# 2# = ∞
+  grid 1# 3# = N 1
+  grid 1# 4# = N 7
+  grid 2# 0# = ∞
+  grid 2# 1# = N 4
+  grid 2# 2# = N 0
+  grid 2# 3# = ∞
+  grid 2# 4# = ∞
+  grid 3# 0# = N 2
+  grid 3# 1# = ∞
+  grid 3# 2# = N 5
+  grid 3# 3# = N 0
+  grid 3# 4# = ∞
+  grid 4# 0# = ∞
+  grid 4# 1# = ∞
+  grid 4# 2# = ∞
+  grid 4# 3# = N 6
+  grid 4# 4# = N 0
 
   Cᵢ,ᵢ : ∀ i → grid i i ≡ N 0
-  Cᵢ,ᵢ fzero = refl
-  Cᵢ,ᵢ (fsuc fzero) = refl
-  Cᵢ,ᵢ (fsuc (fsuc fzero)) = refl
-  Cᵢ,ᵢ (fsuc (fsuc (fsuc fzero))) = refl
-  Cᵢ,ᵢ (fsuc (fsuc (fsuc (fsuc fzero)))) = refl
-  Cᵢ,ᵢ (fsuc (fsuc (fsuc (fsuc (fsuc ())))))
+  Cᵢ,ᵢ 0# = refl
+  Cᵢ,ᵢ 1# = refl
+  Cᵢ,ᵢ 2# = refl
+  Cᵢ,ᵢ 3# = refl
+  Cᵢ,ᵢ 4# = refl
+  Cᵢ,ᵢ ##

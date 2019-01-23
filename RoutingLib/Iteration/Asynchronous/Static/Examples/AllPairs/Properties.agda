@@ -11,9 +11,9 @@ open import RoutingLib.Data.NatInf
 open import RoutingLib.Data.NatInf.Properties
 open import RoutingLib.Data.Table.Properties using (min∞[s]≤min∞[t])
 
-module RoutingLib.Asynchronous.Examples.AllPairs.Properties (n : ℕ) where
+module RoutingLib.Iteration.Asynchronous.Static.Examples.AllPairs.Properties (n : ℕ) where
 
-  open import RoutingLib.Asynchronous.Examples.AllPairs n
+  open import RoutingLib.Iteration.Asynchronous.Static.Examples.AllPairs n
 
   -- path-cost properties
   path-cost-monotone : ∀ {g h} → g ≼ₘ h → ∀ i j k → path-cost g i j k ≤ path-cost h i j k

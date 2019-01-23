@@ -24,8 +24,8 @@ open import Relation.Unary.Properties using (U-Universal)
 
 open Relation.Binary.PropositionalEquality.≡-Reasoning
 
-open import RoutingLib.Asynchronous using (Parallelisation)
-import RoutingLib.Asynchronous.Examples.AllPairs as AllPairs
+open import RoutingLib.Iteration.Asynchronous.Static
+import RoutingLib.Iteration.Asynchronous.Static.Examples.AllPairs as AllPairs
 open import RoutingLib.Asynchronous.Schedule using (Schedule; 𝕋)
 open import RoutingLib.Data.List using (allFinPairs)
 open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-combine⁺; ∈-allFinPairs⁺)
@@ -36,7 +36,7 @@ open import RoutingLib.Data.Table.Any using (Any)
 open import RoutingLib.Data.Table.Properties using (min∞[s]≤min∞[t]; min∞[t]≤x; t≤max[t]; sum[s]≤sum[t]; sum[s]<sum[t])
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (min∞[t]∈t)
 
-module RoutingLib.Asynchronous.Examples.AllPairs.Convergence {n}(𝕤 : Schedule n)(x₀ : AllPairs.Matrix n)(Cᵢ,ᵢ : ∀ i → x₀ i i ≡ N 0) where
+module RoutingLib.Iteration.Asynchronous.Static.Examples.AllPairs.Convergence {n}(𝕤 : Schedule n)(x₀ : AllPairs.Matrix n)(Cᵢ,ᵢ : ∀ i → x₀ i i ≡ N 0) where
 
 
   open AllPairs n hiding (F)

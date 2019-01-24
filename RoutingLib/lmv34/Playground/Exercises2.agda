@@ -1,6 +1,6 @@
-module RoutingLib.lmv34.Exercises2 where
-  import RoutingLib.lmv34.AgdaBasics
-  open RoutingLib.lmv34.AgdaBasics
+module RoutingLib.lmv34.Playground.Exercises2 where
+  import RoutingLib.lmv34.Playground.AgdaBasics
+  open RoutingLib.lmv34.Playground.AgdaBasics
 
   -- Exercise 2.1
   data Fin : Nat -> Set where

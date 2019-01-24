@@ -1,4 +1,4 @@
-module RoutingLib.lmv34.EqualityProofs where
+module RoutingLib.lmv34.Playground.EqualityProofs where
 
 -- This file implements the exercises from the tutorial https://people.inf.elte.hu/divip/AgdaTutorial/Functions.Equality_Proofs.html#automatic-reduction-of-types
 

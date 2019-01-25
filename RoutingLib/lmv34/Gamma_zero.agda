@@ -7,9 +7,10 @@ module RoutingLib.lmv34.Gamma_zero {a b ℓ} (algebra : RawRoutingAlgebra a b �
 
 open RawRoutingAlgebra algebra
 
-RoutingMatrix : (B : Set b) → ℕ → ℕ → Set b
-RoutingMatrix B x y = (i : Fin x) → (j : Fin y) → B
+RoutingMatrix : Set b
+RoutingMatrix = Fin n → Fin n → Route
 
 record Γ₀-State : Set (lsuc b) where
   field
-    X : {B : Set b} → RoutingMatrix B n n
+    X : RoutingMatrix
+

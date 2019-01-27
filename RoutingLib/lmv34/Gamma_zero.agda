@@ -17,12 +17,15 @@ open RoutingLib.lmv34.Gamma_zero.Algebra algebra n
 ------------------------------------
 -- State model
 
-record Γ₀-State : Set (lsuc b) where
+record Γ₀-State : Set b where
   field
-    X : RoutingMatrix
+    Y : RoutingMatrix
 
 ------------------------------------
 -- Computation model
 
-Γ₀ : Γ₀-State → Γ₀-State
-Γ₀ State = record { X = A 〚 Γ₀-State.X State 〛 M⊕ I }
+Γ₀ : RoutingMatrix → RoutingMatrix
+Γ₀ Y = A 〚 Y 〛 M⊕ I
+
+Γ₀-Model : Γ₀-State → Γ₀-State
+Γ₀-Model State = record { Y = Γ₀ (Γ₀-State.Y State) }

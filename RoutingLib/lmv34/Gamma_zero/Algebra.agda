@@ -14,7 +14,7 @@ open RawRoutingAlgebra algebra
 -- Matrix addition
 infixl 9 _M⊕_
 _M⊕_ : Op₂ RoutingMatrix
-A M⊕ B  = λ i j → (A i j) ⊕ (B i j)
+(A M⊕ B) i j = (A i j) ⊕ (B i j)
 
 -- Big choice operator
 infix 5 Σ⊕

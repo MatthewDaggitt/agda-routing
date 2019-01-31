@@ -1,8 +1,8 @@
-module RoutingLib.lmv34.Exercises3 where
-  import RoutingLib.lmv34.Exercises2
-  open RoutingLib.lmv34.Exercises2
-  import RoutingLib.lmv34.AgdaBasics
-  open RoutingLib.lmv34.AgdaBasics
+module RoutingLib.lmv34.Playground.Exercises3 where
+  import RoutingLib.lmv34.Playground.Exercises2
+  open RoutingLib.lmv34.Playground.Exercises2
+  import RoutingLib.lmv34.Playground.AgdaBasics
+  open RoutingLib.lmv34.Playground.AgdaBasics
 
   isFalse : Bool → Set
   isFalse true = False

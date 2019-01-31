@@ -8,7 +8,7 @@ open import Function using (_$_; const)
 open import RoutingLib.Data.NatInf using (ℕ∞; ∞; N; _⊓_; _≟_)
 open import Data.Nat using (zero; suc)
 
-module RoutingLib.lmv34.ShortestPathsAlgebra where
+module RoutingLib.lmv34.Playground.ShortestPathsAlgebra where
 
 ▷-cong : (f : (ℕ∞ → ℕ∞)) → ∀ {x y} → x ≡ y → (f x) ≡ (f y)
 ▷-cong f refl = refl
@@ -26,6 +26,7 @@ ShortestPathAlgebra = record
   ; 0# = (N zero)
   ; ∞ = ∞
   ; f∞ = λ i j n → ∞
+  
   ; ≈-isDecEquivalence = record
     { isEquivalence = isEquivalence
     ; _≟_ = _≟_ }

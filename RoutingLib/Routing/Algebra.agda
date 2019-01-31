@@ -1,3 +1,12 @@
+--------------------------------------------------------------------------------
+-- This module contains the core definitions for routing algebras and some
+-- simple associated properties. A routing algebra is an abstract representation
+-- of some problem that we want our routing protocol to solve (e.g. the
+-- shortest paths problem, the widest paths problem).
+--------------------------------------------------------------------------------
+
+module RoutingLib.Routing.Algebra  where
+
 open import Algebra.FunctionProperties
 open import Data.Fin using (Fin; toℕ)
 open import Data.List using (List)
@@ -20,12 +29,17 @@ import RoutingLib.Data.Matrix.Relation.DecidableEquality as MatrixDecEquality
 import RoutingLib.Data.Table.Relation.DecidableEquality as TableDecEquality
 import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
 
-module RoutingLib.Routing.Algebra  where
-
 --------------------------------------------------------------------------------
--- Routing algebras --
+-- Raw routing algebras --
 --------------------------------------------------------------------------------
--- Raw routing algebra without any properties
+-- This definition defines the structure of a routing algebra. In this record
+-- the algebra is not assumed to have any of the natural properties we would
+-- expect, only that the operations respect the associated notion of equality
+-- over routes.
+--
+-- These raw structures are useful when one algebra that may
+-- not technically be a routing algebra but still simulates a true routing
+-- algebra. 
 
 record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
   no-eta-equality -- Needed due to bug #2732 in Agda
@@ -35,23 +49,34 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
   infix 6 _▷_
 
   field
+    -- The type of the routes
     Route            : Set b
+    -- The type of edge labels for each arc (i , j)
     Step             : ∀ {n} → Fin n → Fin n → Set a
 
+    -- Equality between routes
     _≈_              : Rel Route ℓ
+    -- Operation for choosing between routes
     _⊕_              : Op₂ Route
+    -- Operation for extending a route along an edge
     _▷_              : ∀ {n} {i j : Fin n} → Step i j → Route → Route
+    -- The trivial route
     0#               : Route
+    -- The invalid route
     ∞                : Route
+    -- The invalid edge weight
     f∞               : ∀ {n} (i j : Fin n) → Step i j
 
+    -- The _≈_ relation really is an equality relation
     ≈-isDecEquivalence : IsDecEquivalence _≈_
     ⊕-cong             : Congruent₂ _≈_ _⊕_
     ▷-cong             : ∀ {n} {i j : Fin n} (f : Step i j) → Congruent₁ _≈_ (f ▷_)
+
+    -- The invalid edge weight really does reject routes
     f∞-reject          : ∀ {n} (i j : Fin n) x → f∞ i j ▷ x ≈ ∞
 
-  -- Publicly re-export some useful terminology
 
+  -- Publicly re-export some useful terminology
   open RightNaturalOrder _≈_ _⊕_ public using () renaming ( _≤_ to _≤₊_ )
   open NonStrictToStrict _≈_ _≤₊_ public using () renaming ( _<_ to _<₊_)
 
@@ -64,7 +89,6 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
   x ≰₊ y = ¬ (x ≤₊ y)
 
   -- Publicly export equality proofs
-
   open IsDecEquivalence ≈-isDecEquivalence public
     renaming
     ( refl          to ≈-refl
@@ -81,27 +105,10 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
   DS = record { isDecEquivalence = ≈-isDecEquivalence }
 
 --------------------------------------------------------------------------------
--- Other additional properties that a raw routing algebra may possess
-
-module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
-
-  open RawRoutingAlgebra algebra
-  open ListMembership S renaming (_∈_ to _∈ₗ_)
-
-  IsDistributive : Set _
-  IsDistributive = ∀ {n} {i j : Fin n} (f : Step i j) x y → f ▷ (x ⊕ y) ≈ (f ▷ x) ⊕ (f ▷ y)
-
-  IsIncreasing : Set _
-  IsIncreasing = ∀ {n} {i j : Fin n} (f : Step i j) x → x ≤₊ (f ▷ x)
-
-  IsStrictlyIncreasing : Set _
-  IsStrictlyIncreasing = ∀ {n} {i j : Fin n} (f : Step i j) {x} → x ≉ ∞ → x <₊ (f ▷ x)
-
-  IsFinite : Set _
-  IsFinite = Σ (List Route) (λ rs → ∀ r → r ∈ₗ rs)
-
+-- Routing algebras
 --------------------------------------------------------------------------------
--- Algebras that represent distance-vector protocols
+-- This record ensures that the corresponding raw routing algebra obeys all the
+-- properties we would expect of a routing algebra. See below for descriptions.
 
 module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 
@@ -111,15 +118,25 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
     no-eta-equality -- Needed due to bug #2732 in Agda
 
     field
+      -- The choice operator always returns one of its two arguments
       ⊕-sel        : Selective _≈_ _⊕_
+      -- Choosing between x and y is the same as choosing between y and x
       ⊕-comm       : Commutative _≈_ _⊕_
+      -- Choosing between x and y then z is the same as y and z then x
       ⊕-assoc      : Associative _≈_ _⊕_
+      -- The trivial route 0# is always chosen over any other route
       ⊕-zeroʳ      : RightZero _≈_ 0# _⊕_
+      -- Any route is always chosen over the invalid route ∞
       ⊕-identityʳ  : RightIdentity _≈_ ∞ _⊕_
+      -- When you extend the invalid route, the result is always invalid
       ▷-fixedPoint : ∀ {n} {i j : Fin n} (f : Step i j) → f ▷ ∞ ≈ ∞
 
 --------------------------------------------------------------------------------
--- Algebras that represent path-vector protocols
+-- Path algebras
+--------------------------------------------------------------------------------
+-- This encapsulates the notion that the algebra is also a path algebra. Note
+-- that it does not require the algebra to divulge how paths are implemented
+-- only that there exists a `path` function that obeys the natural properties.
 
 module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 
@@ -130,19 +147,38 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
     no-eta-equality -- Needed due to bug #2732 in Agda
 
     field
+      -- Every route has an associated path
       path           : Route → Path
+      -- The paths of two equal routes are equal
       path-cong      : path Preserves _≈_ ⟶ _≡_
+      -- The path of the trivial route is the empty path
       r≈0⇒path[r]≈[] : ∀ {r} → r ≈ 0# → path r ≡ valid []
+      -- The path of the invalid route is the invalid path
       r≈∞⇒path[r]≈∅  : ∀ {r} → r ≈ ∞  → path r ≡ invalid
+      -- The invalid path is only associated with the invalid route
       path[r]≈∅⇒r≈∞  : ∀ {r} → path r ≡ invalid → r ≈ ∞
+      -- The extension of a route along an edge that either doesn't match up
+      -- with the start of its path (⇿) or would form a loop (i ∈ p) is always
+      -- the invalid route.
       path-reject    : ∀ {n} {i j : Fin n} {r p} (f : Step i j) → path r ≡ valid p →
                        (¬ (toℕ i , toℕ j) ⇿ᵥ p) ⊎ toℕ i ∈ᵥₚ p → f ▷ r ≈ ∞
+      -- The extension of a route along a valid edge always actually adds that
+      -- edge to the path.
       path-accept    : ∀ {n} {i j : Fin n} {r p} (f : Step i j) → path r ≡ valid p →
                        f ▷ r ≉ ∞ → path (f ▷ r) ≡ valid ((toℕ i , toℕ j) ∷ p)
 
 --------------------------------------------------------------------------------
--- Algebras that represent path-vector protocols with nodes in network
--- and proofs of simple paths
+-- Certified path algebras
+--------------------------------------------------------------------------------
+-- This is an alternative more convenient internal representation of a path
+-- algebra used by the various proofs in the library. The difference is that
+-- in a certified path algebra the paths themselves contain proofs that they
+-- are indeed simple paths and that all nodes in the path are truely node in the
+-- network.
+--
+-- As shown in `RoutingLib.Routing.Algebra.Certification` the two definitions
+-- may be moved between interchangably. This handled internally by the library
+-- and therefore users should not need to IsCertifiedPathAlgebra themselves.
 
 module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 
@@ -172,3 +208,29 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
     weight A invalid                       = ∞
     weight A (valid [])                    = 0#
     weight A (valid ((i , j) ∷ p ∣ _ ∣ _)) = A i j ▷ weight A (valid p)
+
+--------------------------------------------------------------------------------
+-- Other properties
+--------------------------------------------------------------------------------
+-- Other important properties an algebra may possess
+
+module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
+
+  open RawRoutingAlgebra algebra
+  open ListMembership S renaming (_∈_ to _∈ₗ_)
+
+  -- Distributivity = you and your neighbour's choices always agree
+  IsDistributive : Set _
+  IsDistributive = ∀ {n} {i j : Fin n} (f : Step i j) x y → f ▷ (x ⊕ y) ≈ (f ▷ x) ⊕ (f ▷ y)
+
+  -- Increasing = extending a route never makes it better
+  IsIncreasing : Set _
+  IsIncreasing = ∀ {n} {i j : Fin n} (f : Step i j) x → x ≤₊ (f ▷ x)
+
+  -- Strictly increasing = extending a route always makes it worse
+  IsStrictlyIncreasing : Set _
+  IsStrictlyIncreasing = ∀ {n} {i j : Fin n} (f : Step i j) {x} → x ≉ ∞ → x <₊ (f ▷ x)
+
+  -- Finite = there only exist a finite number of weights
+  IsFinite : Set _
+  IsFinite = Σ (List Route) (λ rs → ∀ r → r ∈ₗ rs)

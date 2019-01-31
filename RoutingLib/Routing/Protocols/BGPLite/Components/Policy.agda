@@ -1,26 +1,26 @@
 open import Data.Bool as 𝔹 using (Bool; true; false; _∧_; _∨_; if_then_else_)
 open import Data.Fin using (fromℕ≤)
 open import Data.Nat using (ℕ; _≟_; _+_; _≤_; zero; suc; s≤s)
-open import Data.Nat.Properties using (_<?_; n≤m+n; ≤-refl; ≤-trans; n≮n; ≤⇒≯; n≤1+n; <⇒≯; <⇒≢)
+open import Data.Nat.Properties
 open import Data.Product using (∃; ∃₂; _×_; _,_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Function using (_∘_)
 open import Relation.Binary.PropositionalEquality
-  using (_≡_; refl; sym; trans; cong; cong₂; inspect; [_]; module ≡-Reasoning)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Decidable using (⌊_⌋)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Data.Path.Uncertified as Path using (Path; []; _∷_; length; deflate)
+open import RoutingLib.Data.Path.Uncertified as Path
+  using (Path; []; _∷_; length; deflate)
 open import RoutingLib.Data.Path.Uncertified.Properties
 open import RoutingLib.Data.Nat.Properties using (n≢1+n)
 
-open import RoutingLib.Routing.Protocols.BGPLite.Route
-open import RoutingLib.Routing.Protocols.BGPLite.Communities
+open import RoutingLib.Routing.Protocols.BGPLite.Components.Route
+open import RoutingLib.Routing.Protocols.BGPLite.Components.Communities
 
-module RoutingLib.Routing.Protocols.BGPLite.Policy where
+module RoutingLib.Routing.Protocols.BGPLite.Components.Policy where
 
-------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- A language for writing conditional expressions
 
 data Condition : Set where
@@ -42,7 +42,7 @@ evaluate (inComm  c) invalid        = false
 evaluate (isLevel k) invalid        = false
 evaluate (inPath  i) invalid        = false
 
-------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- A language for writing policies
 
 data Policy : Set₁ where
@@ -85,22 +85,16 @@ apply-result (compose pol₁ pol₂) l cs p with apply-result pol₁ l cs p
   valid m es (Path.inflate p (i + j))            ∎))
   where open ≡-Reasoning
 
-{-
-apply-increasing : ∀ pol {l cs p k ds q} → apply pol (valid l cs p) ≡ valid k ds q →
-                   l ≤ k × length p ≤ length q × deflate p ≡ deflate q
-apply-increasing pol {l} {cs} {p} ≡valid with apply-result pol l cs p
-... | inj₁ ≡invalid = {!!}
-... | inj₂ (
 
+{-
 apply-nonDecreasing : ∀ pol {l cs e p} →
                       apply pol (valid l cs (e ∷ p)) ≰ᵣ valid l cs p
-apply-nonDecreasing pol {l} {cs} {e} {p} leq
-  with apply pol (valid l cs (e ∷ p)) | inspect (apply pol) (valid l cs (e ∷ p))
-... | invalid      | _      = contradiction leq λ()
-... | valid k ds q | [ eq ] with apply-increasing pol eq
-...   | l≤k , |p|<|q| , _ with leq
+apply-nonDecreasing pol {l} {cs} {e} {p} with apply-result pol l cs p
+...   | inj₁ v                        = {!!} --contradiction (subst (_≤ᵣ valid l cs (e ∷ p)) {!!} {!!}) λ()
+...   | inj₂ (k , ds , i , l≤k , eq)  = {!!}
+with leq
 ...     | (level< k<l)          = contradiction k<l (≤⇒≯ l≤k)
-...     | (length< _ 2+|p|<|p|) = contradiction 2+|p|<|p| (<⇒≯ |p|<|q|)
-...     | (plex< _ 1+|p|≡|p| _) = contradiction 1+|p|≡|p| (<⇒≢ |p|<|q| ∘ sym)
-...     | (comm≤ _ e∷p≈p _)     = contradiction e∷p≈p (|p|≢|q|⇒p≉q (<⇒≢ |p|<|q| ∘ sym))
+...     | (length< _ 2+|p|<|p|) = ? --contradiction 2+|p|<|p| (<⇒≯ |p|<|q|)
+...     | (plex< _ 1+|p|≡|p| _) = ? --contradiction 1+|p|≡|p| (<⇒≢ |p|<|q| ∘ sym)
+...     | (comm≤ _ e∷p≈p _)     = ? --contradiction e∷p≈p (|p|≢|q|⇒p≉q (<⇒≢ |p|<|q| ∘ sym))
 -}

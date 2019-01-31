@@ -1,9 +1,10 @@
-------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- Dynamic asynchronous iterations
 --
 -- This module contains teh definition of what it means to be a dynamic
 -- asynchronous iteration as well as the definition of the state function
 -- and what it means for such processes to be "correct".
+--------------------------------------------------------------------------------
 
 module RoutingLib.Iteration.Asynchronous.Dynamic where
 
@@ -16,6 +17,7 @@ open import Data.Nat using (ℕ; _≤_; _+_; s≤s; _<_; zero; suc)
 open import Data.Nat.Properties using (≤-refl)
 open import Data.Product using (∃; _×_; _,_)
 open import Data.Unit using (tt)
+open import Function using (_∘_)
 open import Induction.WellFounded using (Acc; acc)
 open import Induction.Nat using (<-wellFounded)
 open import Relation.Binary as B using (Setoid; Rel; _Preserves_⟶_; Reflexive)
@@ -25,21 +27,23 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Unary using (Universal; Pred; _∈_; U)
 open import Relation.Unary.Properties using (U-Universal)
 
-import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset as FiniteSubset
-import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as FiniteSubsetEquality
+import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset
+  as FiniteSubset
+import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality
+  as FiniteSubsetEquality
 open import RoutingLib.Relation.Unary.Indexed using (IPred; _∈ᵢ_; Uᵢ; Universalᵢ)
 open import RoutingLib.Relation.Unary.Indexed.Properties using (Uᵢ-universal)
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule as Schedules
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudoperiod
 
-------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- Publicly re-export the notions of epochs and times so that they may
 -- be imported from directly from this module.
 
 open Schedules public using (Epoch; 𝕋)
 
-------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- The definition of what it means for a function F to be able to be
 -- iterated in an asynchronous environment.
 
@@ -73,7 +77,7 @@ record IsAsyncIterable
     isDecEquivalenceᵢ : IsIndexedDecEquivalence Sᵢ _≈ᵢ_
     F-cong            : ∀ e p → (F e p) Preserves _≈_ ⟶ _≈[ p ]_
 
-  -- IsConsistentState / Legal / Sane
+  -- The notion of a state being in agreement with a set of participants
   Accordant : Subset n → S → Set _
   Accordant p x = ∀ {i} → i ∉ₛ p → x i ≈ᵢ ⊥ i
 
@@ -113,9 +117,9 @@ record AsyncIterable a ℓ n : Set (lsuc (a ⊔ ℓ)) where
 
   open IsAsyncIterable isAsyncIterable public
 
--------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- State function
---
+--------------------------------------------------------------------------------
 -- Given an iterable and a schedule and an initial state, returns the
 -- state at time t.
 
@@ -138,12 +142,15 @@ module _ {a ℓ n} (I : AsyncIterable a ℓ n) (𝓢 : Schedule n) where
   ... | no _  | _     | _     = ⊥  i
   ... | yes _ | no  _ | _     = x₀ i
   ... | yes _ | yes _ | no  _ = asyncIter' x₀ (rec t ≤-refl) i
-  ... | yes _ | yes _ | yes _ = F (η (suc t)) (ρ (suc t)) (λ j → asyncIter' x₀ (rec (β (suc t) i j) (s≤s (β-causality t i j))) j) i
+  ... | yes _ | yes _ | yes _ = F (η (suc t)) (ρ (suc t))
+    (λ j → asyncIter' x₀ (rec (β (suc t) i j) (s≤s (β-causality t i j))) j) i
 
   asyncIter : S → 𝕋 → S
   asyncIter x₀ t = asyncIter' x₀ (<-wellFounded t)
 
--------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Convergent
+--------------------------------------------------------------------------------
 -- The notion of what it means for a dynamic asynchronous iteration to be
 -- "correct".
 
@@ -191,6 +198,8 @@ module _ {a ℓ n} (I : AsyncIterable a ℓ n) where
                    IsSubEpoch S [ tₘ , tₑ ] →
                    asyncIter I S x₀ tₑ ≈ x* (η S tₛ) (ρ∈Q tₛ)
 
+-- The relationship between convergent and partially convergent
+
 module _ {a ℓ n} {I : AsyncIterable a ℓ n} where
 
   open AsyncIterable I
@@ -214,10 +223,15 @@ module _ {a ℓ n} {I : AsyncIterable a ℓ n} where
     } where open PartiallyConvergent pConvergent
 
   partiallyConvergent⇒convergent′ : PartiallyConvergent I Uᵢ U → Convergent I
-  partiallyConvergent⇒convergent′ = partiallyConvergent⇒convergent (Uᵢ-universal Sᵢ) U-Universal
+  partiallyConvergent⇒convergent′ = partiallyConvergent⇒convergent
+    (Uᵢ-universal Sᵢ) U-Universal
 
--------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 -- Simulation
+--------------------------------------------------------------------------------
+-- The notion of one asynchronous iteration simulating another. The behaviour
+-- of one can therefore be reasoned about by looking at the behaviour of the
+-- other.
 
 module _ {a₁ a₂ ℓ₁ ℓ₂ n}
          (I∥ : AsyncIterable a₁ ℓ₁ n)
@@ -236,7 +250,7 @@ module _ {a₁ a₂ ℓ₁ ℓ₂ n}
       toᵢ-⊥     : ∀ {i} → toᵢ (P.⊥ i) Q.≈ᵢ Q.⊥ i
       toᵢ-cong  : ∀ {i} {x y : P.Sᵢ i} → x P.≈ᵢ y → toᵢ x Q.≈ᵢ toᵢ y
       toᵢ-fromᵢ : ∀ {i} (x : Q.Sᵢ i) → toᵢ (fromᵢ x) Q.≈ᵢ x
-      toᵢ-F     : ∀ {i e p} (x : P.S) → toᵢ (P.F e p x i) Q.≈ᵢ Q.F e p (λ j → toᵢ (x j)) i
+      toᵢ-F     : ∀ {i e p} x → toᵢ (P.F e p x i) Q.≈ᵢ Q.F e p (toᵢ ∘ x) i
 
     to : P.S → Q.S
     to x i = toᵢ (x i)

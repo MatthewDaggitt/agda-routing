@@ -1,12 +1,12 @@
 open import Data.List.Any using (any; there; here)
-open import Data.Maybe using (just; nothing)
+open import Data.Maybe using (just; nothing; just-injective)
 open import Data.Nat
 open import Data.Nat.Properties
 open import Data.Fin.Properties using (pigeonhole)
-open import Data.Sum using (inj₁; inj₂)
+open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_,_; _×_; proj₁; proj₂)
 open import Level using (0ℓ)
-open import Function using (_∘_)
+open import Function using (_∘_; flip)
 open import Relation.Binary.Product.Pointwise using (≡?×≡?⇒≡?)
 open import Relation.Binary hiding (NonEmpty)
 open import Relation.Binary.PropositionalEquality
@@ -15,9 +15,12 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.Nat.Properties using (<⇒≤suc)
-import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.DecTotalOrder as ToStrict
+import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.DecTotalOrder
+  as ToStrict
 
 open import RoutingLib.Data.Path.Uncertified
+
+open ≡-Reasoning
 
 module RoutingLib.Data.Path.Uncertified.Properties where
 
@@ -48,13 +51,25 @@ _⇿?_ : Decidable _⇿_
 ⇿-resp-≈ₚ : ∀ {e} → (e ⇿_) Respects _≈ₚ_
 ⇿-resp-≈ₚ refl e⇿p = e⇿p
 
+⇿-resp-p₀ : ∀ {e p q} → source p ≡ source q → e ⇿ p → e ⇿ q
+⇿-resp-p₀ {e} {[]}    {[]}    eq   e⇿p            = e⇿p
+⇿-resp-p₀ {e} {[]}    {y ∷ q} ()   e⇿p
+⇿-resp-p₀ {e} {x ∷ p} {[]}    ()   e⇿p
+⇿-resp-p₀ {e} {_ ∷ p} {_ ∷ q} refl (continue i≢j) = continue i≢j
+
 ij⇿p⇒i≢j : ∀ {i j p} → (i , j) ⇿ p → i ≢ j
 ij⇿p⇒i≢j (start    i≢j) = i≢j
 ij⇿p⇒i≢j (continue i≢j) = i≢j
 
-⇿-source : ∀ {i j p} → i ≢ j → source p ≡ just j → (i , j) ⇿ p
-⇿-source {p = []}    i≢j ()
-⇿-source {p = x ∷ p} i≢j refl = continue i≢j
+⇿-source⁺ : ∀ {i j p} → i ≢ j → source p ≡ just j → (i , j) ⇿ p
+⇿-source⁺ {p = []}    i≢j ()
+⇿-source⁺ {p = x ∷ p} i≢j refl = continue i≢j
+
+{-
+⇿-source⁻ : ∀ {i j p} → (i , j) ⇿ p → source p ≡ just j
+⇿-source⁻ (start    i≢j) = {!!}
+⇿-source⁻ (continue i≢j) = refl
+-}
 
 p₀≡n⇒p≡[] : ∀ {p} → source p ≡ nothing → p ≡ []
 p₀≡n⇒p≡[] {[]}    refl = refl
@@ -207,6 +222,8 @@ open ToStrict ≤ₗₑₓ-decTotalOrder public
   ; <-respˡ-≈ to <ₗₑₓ-respˡ-≈ₚ
   ; <-respʳ-≈ to <ₗₑₓ-respʳ-≈ₚ
   ; <-cmp     to <ₗₑₓ-cmp
+  ; <⇒≱       to <ₗₑₓ⇒≱ₗₑₓ
+  ; <⇒≤       to <ₗₑₓ⇒≤ₗₑₓ
   )
 
 p≮ₗₑₓ[] : ∀ {p} → ¬ (p <ₗₑₓ [])
@@ -259,62 +276,83 @@ inflate-inflate ((i , j) ∷ p) (suc m) n       = begin
 p≡[]⇒deflate[p]≡[] : ∀ {p} → p ≡ [] → deflate p ≡ []
 p≡[]⇒deflate[p]≡[] refl = refl
 
-deflate-inflate-[] : ∀ p n → deflate (inflate p n) ≡ [] → deflate p ≡ []
-deflate-inflate-[] []            n       eq = refl
-deflate-inflate-[] ((i , j) ∷ p) zero    eq = eq
-deflate-inflate-[] ((i , j) ∷ p) (suc n) eq with i ≟ i
-... | no  i≢i = contradiction refl i≢i
-... | yes _   with source (deflate (inflate ((i , j) ∷ p) n)) | inspect source (deflate (inflate ((i , j) ∷ p) n))
-...   | nothing | [ i₀≡nothing ] = deflate-inflate-[] ((i , j) ∷ p) n (p₀≡n⇒p≡[] i₀≡nothing)
-...   | just k  | [ i₀≡k ] with i ≟ k
-...     | yes _ = deflate-inflate-[] _ n eq
-...     | no  _ = contradiction eq λ()
-{-
+deflate-source : ∀ p → source (deflate p) ≡ source p
+deflate-source []                      = refl
+deflate-source ((i , j) ∷ [])          = refl
+deflate-source ((i , j) ∷ (k , l) ∷ p) with i ≟ j | j ≟ k
+... | no  _    | _        = refl
+... | yes _    | no  _    = refl
+... | yes refl | yes refl = deflate-source ((i , l) ∷ p)
+
+deflate-remove : ∀ p {i j} → i ≡ j → just j ≡ source p → deflate ((i , j) ∷ p) ≡ deflate p
+deflate-remove []            refl ()
+deflate-remove ((i , j) ∷ p) refl refl with i ≟ i
+... | no i≢i   = contradiction refl i≢i
+... | yes refl = refl
+
+deflate-skip : ∀ p {i j} → i ≢ j ⊎ just j ≢ source p →
+               deflate ((i , j) ∷ p) ≡ (i , j) ∷ deflate p
+deflate-skip []            {i} {j} eq = refl
+deflate-skip ((k , l) ∷ p) {i} {j} eq with i ≟ j | j ≟ k
+... | no  _    | _        = refl
+... | yes _    | no  _    = refl
+... | yes refl | yes refl = contradiction eq λ
+  { (inj₁ k≢k)   → k≢k refl
+  ; (inj₂ jk≢jk) → jk≢jk (cong just refl)
+  }
+
 deflate-inflate : ∀ p n → deflate (inflate p n) ≡ deflate p
-deflate-inflate p             zero    = refl
-deflate-inflate []            (suc n) = refl
-deflate-inflate ((i , j) ∷ p) (suc n) with i ≟ i
-... | no  i≢i = contradiction refl i≢i
-... | yes _   with source (deflate (inflate ((i , j) ∷ p) n)) | inspect source (deflate (inflate ((i , j) ∷ p) n))
-...   | nothing | [ i₀≡nothing ] = sym (deflate-inflate-[] _ n (p₀≡n⇒p≡[] i₀≡nothing))
-...   | just k  | [ i₀≡k ]       with i ≟ k
-...     | yes refl = deflate-inflate ((i , j) ∷ p) n
-...     | no  i≢k  = {!!} --contradiction {!!} i≢k
--}
-deflate-skip : ∀ p {i j} → i ≢ j → deflate ((i , j) ∷ p) ≡ (i , j) ∷ deflate p
-deflate-skip p {i} {j} i≢j with i ≟ j
-... | yes i≡j = contradiction i≡j i≢j
-... | no  _   = refl
+deflate-inflate p                       0       = refl
+deflate-inflate []                      (suc n) = refl
+deflate-inflate p@((i , j) ∷ [])        (suc n) = begin
+   deflate ((i , i) ∷ inflate ((i , j) ∷ []) n) ≡⟨ deflate-remove (inflate p n) refl (sym (inflate-source p n refl)) ⟩
+   deflate (inflate ((i , j) ∷ []) n)           ≡⟨ deflate-inflate p n ⟩
+   deflate ((i , j) ∷ [])                       ∎
+deflate-inflate ((i , j) ∷ q@((k , l) ∷ p)) (suc n) with i ≟ j | j ≟ k
+... | no  i≢j  | _        = begin
+  deflate ((i , i) ∷ inflate ((i , j) ∷ q) n) ≡⟨ deflate-remove (inflate ((i , j) ∷ q) n) refl (sym (inflate-source ((i , j) ∷ q) n refl)) ⟩
+  deflate (inflate ((i , j) ∷ q) n)           ≡⟨ deflate-inflate ((i , j) ∷ q) n ⟩
+  deflate ((i , j) ∷ q)                       ≡⟨ deflate-skip q (inj₁ i≢j) ⟩
+  (i , j) ∷ deflate q                         ∎
+... | yes _    | no  j≢k  = begin
+  deflate ((i , i) ∷ inflate ((i , j) ∷ q) n) ≡⟨ deflate-remove (inflate ((i , j) ∷ q) n) refl (sym (inflate-source ((i , j) ∷ q) n refl)) ⟩
+  deflate (inflate ((i , j) ∷ q) n)           ≡⟨ deflate-inflate ((i , j) ∷ q) n ⟩
+  deflate ((i , j) ∷ q)                       ≡⟨ deflate-skip q (inj₂ (j≢k ∘ just-injective)) ⟩
+  (i , j) ∷ deflate q                         ∎
+... | yes refl | yes refl = begin
+  deflate ((i , i) ∷ inflate ((i , i) ∷ q) n) ≡⟨ deflate-remove (inflate ((i , i) ∷ q) n) refl (sym (inflate-source ((i , i) ∷ q) n refl)) ⟩
+  deflate (inflate ((i , i) ∷ q) n)           ≡⟨ deflate-inflate ((i , i) ∷ q) n ⟩
+  deflate ((i , i) ∷ q)                       ≡⟨ deflate-remove q refl refl ⟩
+  deflate q                                   ∎
 
 deflate-idem : ∀ p → deflate (deflate p) ≡ deflate p
 deflate-idem []            = refl
-deflate-idem ((i , j) ∷ p) with i ≟ j
-... | no  i≢j = trans (deflate-skip (deflate p) i≢j) (cong (_ ∷_) (deflate-idem p))
-... | yes _   with source (deflate p)
-...   | nothing = refl
-...   | just k  with i ≟ k
-...     | yes _ = deflate-idem p
-...     | no  i≢k = trans (deflate-skip (deflate p) i≢k) (cong (_ ∷_) (deflate-idem p))
+deflate-idem ((i , j) ∷ []) = refl
+deflate-idem ((i , j) ∷ q@((k , l) ∷ p)) with i ≟ j | j ≟ k
+... | no  i≢j | _       = begin
+  deflate ((i , j) ∷ deflate q) ≡⟨ deflate-skip (deflate q) (inj₁ i≢j) ⟩
+  (i , j) ∷ deflate (deflate q) ≡⟨ cong (_ ∷_) (deflate-idem q) ⟩
+  (i , j) ∷ deflate q           ∎
+... | yes _   | no  j≢k = begin
+  deflate ((i , j) ∷ deflate q) ≡⟨ deflate-skip (deflate q) (inj₂ (j≢k ∘ just-injective ∘ flip trans (deflate-source q))) ⟩
+  (i , j) ∷ deflate (deflate q) ≡⟨ cong (_ ∷_) (deflate-idem q) ⟩
+  (i , j) ∷ deflate q           ∎
+... | yes _   | yes _   = deflate-idem ((k , l) ∷ p)
 
-∈-deflate⁻ : ∀ {i p} → i ∈ₚ deflate p → i ∈ₚ p
-∈-deflate⁻ {i} {[]}          ()
-∈-deflate⁻ {i} {(k , j) ∷ p} i∈d[kj∷p] with k ≟ j | i∈d[kj∷p]
-... | no  _    | here  eq  = here eq
-... | no  _    | there i∈p = there (∈-deflate⁻ i∈p)
-... | yes refl | i∈d[kj∷p]₂ with source (deflate p) | inspect source (deflate p) | i∈d[kj∷p]₂
-...   | nothing | _        | ()
-...   | just l  | [ p₀≡l ] | i∈d[kj∷p]₃ with k ≟ l | i∈d[kj∷p]₃
-...     | yes refl | i∈d[p]      = there (∈-deflate⁻ i∈d[p])
-...     | no  k≢l  | here  left  = here left
-...     | no  k≢l  | here  right = there (∈-deflate⁻ (∈-source p₀≡l))
-...     | no  _    | there i∈p   = there (∈-deflate⁻ i∈p)
+∈-deflate⁻ : ∀ {v p} → v ∈ₚ deflate p → v ∈ₚ p
+∈-deflate⁻ {v} {[]}                    ()
+∈-deflate⁻ {v} {(i , j) ∷ []}          v∈ij = v∈ij
+∈-deflate⁻ {v} {(i , j) ∷ (k , l) ∷ p} v∈p with i ≟ j | j ≟ k | v∈p
+... | no  _ | _     | here  v∈ij   = here v∈ij
+... | no  _ | _     | there v∈kl∷p = there (∈-deflate⁻ v∈kl∷p)
+... | yes _ | no  _ | here  v∈ij   = here v∈ij
+... | yes _ | no  _ | there v∈kl∷p = there (∈-deflate⁻ v∈kl∷p)
+... | yes _ | yes _ | v∈p'         = there (∈-deflate⁻ v∈p')
 
 ⇿-deflate⁺ : ∀ {e p} → e ⇿ p → e ⇿ deflate p
-⇿-deflate⁺ (start i≢j)                    = start i≢j
-⇿-deflate⁺ (continue {_} {j} {k} {p} i≢j) with j ≟ k
-... | no  _    = continue i≢j
-... | yes refl with source (deflate p) | inspect source (deflate p)
-...   | nothing | _        = start i≢j
-...   | just l  | [ p₀≡l ] with j ≟ l
-...     | yes refl = ⇿-source i≢j p₀≡l
-...     | no  _    = continue i≢j
+⇿-deflate⁺ {e} {[]}                    e⇿p = e⇿p
+⇿-deflate⁺ {e} {(i , j) ∷ []}          e⇿p = e⇿p
+⇿-deflate⁺ {e} {(i , j) ∷ (k , l) ∷ p} e⇿p with i ≟ j | j ≟ k
+... | no  _    | _        = ⇿-resp-p₀ refl e⇿p
+... | yes _    | no  _    = ⇿-resp-p₀ refl e⇿p
+... | yes refl | yes refl = ⇿-deflate⁺ {e} {(k , l) ∷ p} (⇿-resp-p₀ refl e⇿p)

@@ -1,3 +1,15 @@
+--------------------------------------------------------------------------------
+-- Properties of certified path algebras
+--------------------------------------------------------------------------------
+
+open import RoutingLib.Routing.Algebra
+
+module RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra
+  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
+  where
+
 open import Data.Nat using (suc; _≤_; _<_; s≤s)
 open import Data.Product using (_,_; proj₁)
 open import Data.Sum using (inj₁; inj₂)
@@ -13,23 +25,9 @@ open import Relation.Nullary.Negation using (contradiction)
 open import RoutingLib.Data.Path.CertifiedI
 open import RoutingLib.Data.Path.CertifiedI.Properties
 
-open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
-
-module RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra
-  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
-  where
-
 open RawRoutingAlgebra algebra
 open IsCertifiedPathAlgebra isPathAlgebra
 open IsRoutingAlgebra isRoutingAlgebra
-
---------------------------------------------------------------------------------
--- Import routing algebra properties
-
-open RoutingAlgebraProperties isRoutingAlgebra public
 
 --------------------------------------------------------------------------------
 -- Path properties
@@ -58,3 +56,11 @@ size≤n+1 r = |p|≤1+n (path r)
 
 size-cong : ∀ {r s} → r ≈ s → size r ≡ size s
 size-cong {r} {s} r≈s = length-cong (path-cong r≈s)
+
+--------------------------------------------------------------------------------
+-- Weight properties
+
+weight-cong : ∀ {A} {p q : Path n} → p ≈ₚ q → weight A p ≈ weight A q
+weight-cong invalid              = ≈-refl
+weight-cong (valid [])           = ≈-refl
+weight-cong (valid (refl ∷ p≈q)) = ▷-cong _ (weight-cong (valid p≈q))

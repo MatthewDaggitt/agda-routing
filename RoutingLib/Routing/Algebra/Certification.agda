@@ -1,7 +1,22 @@
+--------------------------------------------------------------------------------
+-- Proof that any algebra that is a path algebra is also a certified path
+-- algebra. Certified path algebras are much easier to reason about as all nodes
+-- are guaranteed to be members of the network and the path type itself contains
+-- proofs that it is simple.
+--------------------------------------------------------------------------------
+
+open import Data.Nat using (ℕ)
+open import RoutingLib.Routing.Algebra
+
+module RoutingLib.Routing.Algebra.Certification
+  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
+  (isPathAlgebra : IsPathAlgebra algebra)
+  (n : ℕ)
+  where
+
 open import Data.Fin using (Fin; toℕ)
 open import Data.List using (_∷_)
 open import Data.Maybe
-open import Data.Nat using (ℕ)
 open import Data.Product using (_,_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Function using (_∘_)
@@ -12,26 +27,27 @@ import Relation.Binary.EqReasoning as EqReasoning
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Data.Maybe
-
-open import RoutingLib.Routing.Algebra
 open import RoutingLib.Data.Path.Uncertified using ([]; _∷_)
 open import RoutingLib.Data.Path.Uncertified.Properties using (_⇿?_; _∈ₚ?_)
 open import RoutingLib.Data.Path.Uncertified.Certify
 open import RoutingLib.Data.Path.CertifiedI
 open import RoutingLib.Data.Path.CertifiedI.Properties hiding (_⇿?_)
 
-module RoutingLib.Routing.Algebra.Certification
-  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
-  (isPathAlgebra : IsPathAlgebra algebra)
-  (n : ℕ)
-  where
-
 open RawRoutingAlgebra algebra
 open IsPathAlgebra isPathAlgebra
 
+--------------------------------------------------------------------------------
+-- Definition of a new path function that applies the `certify` function to any
+-- valid path. The certify function effectively discards any part of the path
+-- that is malformed or contains nodes not in the current network.
+
 pathᶜ : Route → Maybe (Pathᵛ n)
 pathᶜ r = map certify (path r)
+
+--------------------------------------------------------------------------------
+-- The key insight is that the required axioms that pathᶜ must only be obeyed
+-- when extending the path in the `correct` matter hence the application of
+-- certify does not affect the required axioms.
 
 pathᶜ-cong : pathᶜ Preserves _≈_ ⟶ _≈ₚ_
 pathᶜ-cong r≈s = ≈ₚ-reflexive (cong (map certify) (path-cong r≈s))

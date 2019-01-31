@@ -1,3 +1,14 @@
+--------------------------------------------------------------------------------
+-- Properties of routing algebras
+--------------------------------------------------------------------------------
+
+open import RoutingLib.Routing.Algebra
+
+module RoutingLib.Routing.Algebra.Properties.RoutingAlgebra
+  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  where
+
 open import Algebra
 open import Algebra.Structures
 import Algebra.FunctionProperties as FunctionProperties
@@ -15,19 +26,12 @@ open import RoutingLib.Algebra.Structures
 import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
 import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.DecTotalOrder as NonStrictToStrict
 
-open import RoutingLib.Routing.Algebra
-
-module RoutingLib.Routing.Algebra.Properties.RoutingAlgebra
-  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  where
-
 open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
 open FunctionProperties _≈_
 
 ------------------------------------------------------------------------------
--- Additional properties of ⊕ and ▷
+-- _⊕_
 
 ⊕-idem : Idempotent _⊕_
 ⊕-idem = Consequences.sel⇒idem S ⊕-sel
@@ -71,7 +75,8 @@ open FunctionProperties _≈_
   }
 
 ------------------------------------------------------------------------------
--- The induced right natural ordering over routes
+-- An ordering over routes is induced from ⊕ using the right natural order.
+-- i.e. x ≤₊ y iff when choosing between x and y you choose x.
 
 ≤₊-decTotalOrder : DecTotalOrder b ℓ ℓ
 ≤₊-decTotalOrder = RightNaturalOrder.decTotalOrder _ _ ⊕-isSemilattice ⊕-sel _≟_
@@ -112,9 +117,8 @@ open NonStrictToStrict ≤₊-decTotalOrder public
   ; <-strictTotalOrder   to <₊-strictTotalOrder
   )
 
-
 --------------------------------------------------------------------------------
--- Strictly increasing routing algebras
+-- If the algebra is strictly increasing it's also increasing
 
 strIncr⇒incr : IsStrictlyIncreasing algebra → IsIncreasing algebra
 strIncr⇒incr strIncr f x with x ≟ ∞

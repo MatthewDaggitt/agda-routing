@@ -1,6 +1,7 @@
 --------------------------------------------------------------------------------
--- The notion of an algebra A simulating another algebra B, in which case the
--- behaviour of A can be transferred to B.
+-- This module defines the notion of an algebra A simulating another algebra B.
+-- In such a case the behaviour of B can be reasoned about using the behaviour
+-- of A.
 --------------------------------------------------------------------------------
 
 open import RoutingLib.Routing.Algebra
@@ -46,5 +47,5 @@ record Simulates : Set (lsuc (a₁ ⊔ a₂ ⊔ b₁ ⊔ b₂ ⊔ ℓ₁ ⊔ ℓ
     
     -- Note that A need only simulate B's choice for routes that are comparable.
     -- This allows only "morally" commutative routing algebras to be proved correct.
-    to-⊕      : ∀ {x y} → x ≎ y → to x ⊕ᵇ to y ≈ᵇ to (x ⊕ᵃ y)
+    to-⊕     : ∀ {x y} → x ≎ y → to x ⊕ᵇ to y ≈ᵇ to (x ⊕ᵃ y)
     ⊕-pres-≎ : ∀ {x y z} → x ≎ y → x ≎ z → x ≎ (y ⊕ᵃ z)

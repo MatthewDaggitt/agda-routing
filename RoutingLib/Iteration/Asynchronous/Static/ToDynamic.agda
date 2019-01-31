@@ -8,7 +8,7 @@
 import RoutingLib.Iteration.Asynchronous.Static as Static
 
 module RoutingLib.Iteration.Asynchronous.Static.ToDynamic
-  {a ℓ n} (I : Static.AsyncIterable a ℓ n) where
+  {a ℓ n} (I∥ : Static.AsyncIterable a ℓ n) where
 
 open import Data.Empty using (⊥)
 open import Data.Fin using (Fin)
@@ -25,6 +25,7 @@ open import Induction.WellFounded using (Acc; acc)
 open import Induction.Nat using (<-wellFounded)
 open import Level using (lift; _⊔_)
 open import Relation.Binary using (Rel; _Respects_)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 open import Relation.Binary.Indexed.Homogeneous hiding (Rel; Lift)
 open import Relation.Nullary using (Dec; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
@@ -53,7 +54,7 @@ open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
   using (Epoch; 𝕋) renaming ([_,_] to [_,_]ₜ)
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.FromStatic
 
-open Static.AsyncIterable I
+open Static.AsyncIterable I∥
 
 ------------------------------------------------------------------------
 -- Formulating the dynamic iteration
@@ -91,8 +92,8 @@ F∙-isAsyncIterable = record
   ; F-cong            = F∙-cong
   }
 
-I∙ : Dynamic.AsyncIterable a (a ⊔ ℓ) n
-I∙ = record
+I∙∥ : Dynamic.AsyncIterable a (a ⊔ ℓ) n
+I∙∥ = record
   { isAsyncIterable = F∙-isAsyncIterable
   }
 
@@ -109,8 +110,8 @@ module _ (ψ : Static.Schedule n) where
   ... | no  ¬[x]ᵥ = contradiction (λ _ → [ tt ]ᵢ) ¬[x]ᵥ
 
   asyncIter-sim : ∀ x₀ {t} (accₜ : Acc _<_ t) →
-                  [ Static.asyncIter' I ψ x₀ accₜ ] ≈∙
-                  Dynamic.asyncIter' I∙ (convert ψ) [ x₀ ] accₜ
+                  [ Static.asyncIter' I∥ ψ x₀ accₜ ] ≈∙
+                  Dynamic.asyncIter' I∙∥ (convert ψ) [ x₀ ] accₜ
   asyncIter-sim x₀ {zero} rec i with i ∈? ⊤ₛ
   ... | yes _   = ≈∙ᵢ-refl
   ... | no  i∉⊤ = contradiction ∈⊤ i∉⊤
@@ -118,9 +119,9 @@ module _ (ψ : Static.Schedule n) where
   ... | no  i∉⊤ | _     = contradiction ∈⊤ i∉⊤
   ... | yes _   | no  _ = asyncIter-sim x₀ (rec t _) i
   ... | yes _   | yes _ = begin
-    [ F (λ j → Static.asyncIter' I ψ x₀ (rec (β (suc t) i j) _) j) i ]ᵢ      ≈⟨ F-sim _ i ⟩
-    F∙ 0 ⊤ₛ (λ j → [ Static.asyncIter' I ψ x₀ (rec (β (suc t) i j) _) ] j) i ≈⟨ F∙-cong 0 ⊤ₛ (λ j → asyncIter-sim x₀ (rec (β (suc t) i j) _) j) ∈⊤ ⟩
-    F∙ 0 ⊤ₛ (λ j → Dynamic.asyncIter' I∙ (convert ψ) [ x₀ ] (rec (β (suc t) i j) _) j) i ∎
+    [ F (λ j → Static.asyncIter' I∥ ψ x₀ (rec (β (suc t) i j) _) j) i ]ᵢ      ≈⟨ F-sim _ i ⟩
+    F∙ 0 ⊤ₛ (λ j → [ Static.asyncIter' I∥ ψ x₀ (rec (β (suc t) i j) _) ] j) i ≈⟨ F∙-cong 0 ⊤ₛ (λ j → asyncIter-sim x₀ (rec (β (suc t) i j) _) j) ∈⊤ ⟩
+    F∙ 0 ⊤ₛ (λ j → Dynamic.asyncIter' I∙∥ (convert ψ) [ x₀ ] (rec (β (suc t) i j) _) j) i ∎
     where open EqReasoning (≈∙-setoidᵢ atₛ i)
 
 ------------------------------------------------------------------------
@@ -128,7 +129,7 @@ module _ (ψ : Static.Schedule n) where
 -- converges
 
 module DynamicToStaticConvergence
-  (C : Dynamic.PartiallyConvergent I∙ (λ i → IsValueᵢ) Full)
+  (C : Dynamic.PartiallyConvergent I∙∥ (λ i → IsValueᵢ) Full)
   (x : S)  -- The set of states must be non-empty to prove this result
   where
 
@@ -144,10 +145,10 @@ module DynamicToStaticConvergence
   x*∙-isValue = IsValue-resp-≈∙ δ≈x* IsValue[ _ ]
     where
     open EqReasoning ≈∙-setoid
-    δ≈x* : [ Static.asyncIter I ψˢʸⁿᶜ x k*∙ ] ≈∙ x*∙
+    δ≈x* : [ Static.asyncIter I∥ ψˢʸⁿᶜ x k*∙ ] ≈∙ x*∙
     δ≈x* = begin
-      [ Static.asyncIter I ψˢʸⁿᶜ x k*∙ ]             ≈⟨ asyncIter-sim ψˢʸⁿᶜ x (<-wellFounded k*∙) ⟩
-      Dynamic.asyncIter I∙ dψˢʸⁿᶜ [ x ] k*∙          ≈⟨ x*-reached IsValue[ x ] (λ _ → ⊤-full) {tₛ = 0} dψˢʸⁿᶜ-mpp dψˢʸⁿᶜ-η[k*∙,k*∙] ⟩
+      [ Static.asyncIter I∥ ψˢʸⁿᶜ x k*∙ ]             ≈⟨ asyncIter-sim ψˢʸⁿᶜ x (<-wellFounded k*∙) ⟩
+      Dynamic.asyncIter I∙∥ dψˢʸⁿᶜ [ x ] k*∙          ≈⟨ x*-reached IsValue[ x ] (λ _ → ⊤-full) {tₛ = 0} dψˢʸⁿᶜ-mpp dψˢʸⁿᶜ-η[k*∙,k*∙] ⟩
       x*∙                                           ∎
       where
       dψˢʸⁿᶜ            = convert ψˢʸⁿᶜ
@@ -176,10 +177,10 @@ module DynamicToStaticConvergence
                 ∀ (ψ : Static.Schedule n) {s m e : 𝕋} →
                 Static.IsMultiPseudoperiodic ψ k*ₛ [ s , m ]ₜ →
                 m ≤ e →
-                Static.asyncIter I ψ x₀ e ≈ x*ₛ
+                Static.asyncIter I∥ ψ x₀ e ≈ x*ₛ
   x*ₛ-reached {x₀} _ ψ {e = e} mpp m≤e = [≈]-injective (begin
-    [ Static.asyncIter I ψ x₀ e   ]  ≈⟨ asyncIter-sim ψ x₀ (<-wellFounded e) ⟩
-    Dynamic.asyncIter I∙ ψᵈ [ x₀ ] e ≈⟨ x*-reached IsValue[ x₀ ] ψᵈ-full ψᵈ-mpp ψᵈ-η[m,e] ⟩
+    [ Static.asyncIter I∥ ψ x₀ e   ]  ≈⟨ asyncIter-sim ψ x₀ (<-wellFounded e) ⟩
+    Dynamic.asyncIter I∙∥ ψᵈ [ x₀ ] e ≈⟨ x*-reached IsValue[ x₀ ] ψᵈ-full ψᵈ-mpp ψᵈ-η[m,e] ⟩
     x*∙                              ≈⟨ extract-IsValue x*∙-isValue ⟩
     [ x*ₛ ]                          ∎)
     where
@@ -189,7 +190,7 @@ module DynamicToStaticConvergence
     ψᵈ-mpp    = convert-multiPseudoperiod ψ mpp
     ψᵈ-η[m,e] = convert-subEpoch ψ m≤e
 
-  dynamicToStaticConvergence : Static.Converges I
+  dynamicToStaticConvergence : Static.Converges I∥
   dynamicToStaticConvergence = record
     { x*         = x*ₛ
     ; k*         = k*ₛ
@@ -202,17 +203,17 @@ open DynamicToStaticConvergence public using (dynamicToStaticConvergence)
 ------------------------------------------------------------------------
 -- Translation from static ACO to a dynamic ACO
 
-module StaticToDynamicACO {ℓ} (aco : Static.ACO I ℓ) where
+module StaticToDynamicACO {ℓ} (aco : Static.ACO I∥ ℓ) where
 
   open Static.ACO aco
   open Dynamic.AsyncIterable using (Accordant)
 
   -- Initial box
   B∙₀ : IPred S∙ᵢ ℓ
-  B∙₀ = Lift (B 0)
+  B∙₀ = Lift∙ (B 0)
 
   B∙₀-cong : ∀ {x y} → x ≈∙ y → x ∈ᵢ B∙₀ → y ∈ᵢ B∙₀
-  B∙₀-cong = Lift-cong Bᵢ-cong
+  B∙₀-cong = Lift∙-cong Bᵢ-cong
 
   F∙-resp-B∙₀ : ∀ {e p} (p∈F : p ∈ Full) → ∀ {x} → x ∈ᵢ B∙₀ → F∙ e p x ∈ᵢ B∙₀
   F∙-resp-B∙₀ {e} {p} p∈F {x} x∈B∙₀ i with all? (IsJust? ∘ x)
@@ -222,7 +223,7 @@ module StaticToDynamicACO {ℓ} (aco : Static.ACO I ℓ) where
 
   -- Main boxes
   B∙ : Epoch → {p : Subset n} → p ∈ Full → ℕ → IPred S∙ᵢ ℓ
-  B∙ e p k = Lift (B k)
+  B∙ e p k = Lift∙ (B k)
 
   B∙₀⊆B∙₀ₑ : ∀ e {p} (p∈F : p ∈ Full) → B∙₀ ⊆ᵢ B∙ e p∈F 0
   B∙₀⊆B∙₀ₑ e p∈F {i} {∙ᵢ}     ()
@@ -235,9 +236,11 @@ module StaticToDynamicACO {ℓ} (aco : Static.ACO I ℓ) where
   B∙₀-eqᵢ : ∀ {e p} (p∈F : p ∈ Full) → B∙₀ ≋ᵢ B∙ e p∈F 0
   B∙₀-eqᵢ {e} p∈F = (λ {i xᵢ} → B∙₀⊆B∙₀ₑ e p∈F {i} {xᵢ}) , (λ {i xᵢ} → B∙₀ₑ⊆B∙₀ e p∈F {i} {xᵢ})
 
-  B∙ᵢ-cong  : ∀ {e p} (p∈F : p ∈ Full) → ∀ {k i} {x y : S∙ᵢ i} →
-              x ≈∙ᵢ y → x ∈ B∙ e p∈F k i → y ∈ B∙ e p∈F k i
-  B∙ᵢ-cong p∈F = Lift-congᵢ Bᵢ-cong
+  B∙ᵢ-cong  : ∀ {e f : ℕ} {p q : Subset n} → e ≡ f → p ≡ q →
+              (p∈Q : p ∈ Full) (q∈Q : q ∈ Full) {k : ℕ} {i : Fin n}
+              {x y : Pointedᵢ Sᵢ i} →
+              x ≈∙ᵢ y → x ∈ Lift∙ (B k) i → y ∈ Lift∙ (B k) i
+  B∙ᵢ-cong refl refl p∈F q∈F = Lift∙-congᵢ Bᵢ-cong
 
   B∙-finish : ∀ e {p} (p∈F : p ∈ Full) → ∃₂ (λ k* x* →
                 ∀ {k} → k* ≤ k →
@@ -263,25 +266,25 @@ module StaticToDynamicACO {ℓ} (aco : Static.ACO I ℓ) where
   B∙-null : ∀ {e p} (p∈F : p ∈ Full) → ∀ {k i} → i ∉ p → ∙ᵢ ∈ B∙ e p∈F k i
   B∙-null _∈p {i = i} i∉p = contradiction (i ∈p) i∉p
 
-  F∙-mono-B∙ : ∀ {e p} (p∈F : p ∈ Full) {k x} → x ∈ Accordant I∙ p →
+  F∙-mono-B∙ : ∀ {e p} (p∈F : p ∈ Full) {k x} → x ∈ Accordant I∙∥ p →
                x ∈ᵢ B∙ e p∈F k → F∙ e p x ∈ᵢ B∙ e p∈F (suc k)
   F∙-mono-B∙ {e} {p} p∈F {x = x} x-wf x∈B∙ₖ i with all? (IsJust? ∘ x)
   ... | no ¬xᵥ = contradiction (∈-isValue x∈B∙ₖ) ¬xᵥ
   ... | yes xᵥ = F-mono-B (∈-extractValue xᵥ x∈B∙ₖ) i
 
-  staticToDynamicACO : Dynamic.PartialACO I∙ B∙₀ Full ℓ
+  staticToDynamicACO : Dynamic.PartialACO I∙∥ B∙₀ Full ℓ
   staticToDynamicACO = record
     { B₀-cong   = B∙₀-cong
     ; F-resp-B₀ = λ {e} → F∙-resp-B∙₀ {e}
     ; B         = B∙
     ; B₀-eqᵢ    = λ {e} → B∙₀-eqᵢ {e}
-    ; Bᵢ-cong   = {!!} --λ {e} → B∙ᵢ-cong {e}
+    ; Bᵢ-cong   = λ {e} → B∙ᵢ-cong {e}
     ; B-finish  = B∙-finish
     ; B-null    = λ {e} → B∙-null {e}
     ; F-mono-B  = λ {e} → F∙-mono-B∙ {e}
     }
 
-open StaticToDynamicACO public using (staticToDynamicACO)
+open StaticToDynamicACO public using (staticToDynamicACO; B∙₀)
 
 ------------------------------------------------------------------------
 -- Translation from static AMCO to a dynamic AMCO

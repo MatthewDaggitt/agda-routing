@@ -4,8 +4,10 @@ open import Relation.Binary.Indexed.Homogeneous using (IndexedDecSetoid)
 
 open import RoutingLib.Data.List.Relation.Pointwise using (foldr⁺)
 
-open import RoutingLib.Iteration.Asynchronous.Dynamic using (IsAsyncIterable; AsyncIterable; asyncIter)
-open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule using (Schedule; 𝕋)
+open import RoutingLib.Iteration.Asynchronous.Dynamic
+  using (IsAsyncIterable; AsyncIterable; asyncIter)
+open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
+  using (Schedule; 𝕋)
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing as Routing using (Network)
 import RoutingLib.Routing.VectorBased.Core as Core

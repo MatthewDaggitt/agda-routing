@@ -17,8 +17,6 @@ open import RoutingLib.Data.List using (insert)
 open import RoutingLib.Data.List.All.Properties as Allₚ
 open import RoutingLib.Data.List.AllPairs using ([]; _∷_)
 open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
-open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (perm!)
-open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-perm)
 
 module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTotalOrder a ℓ₁ ℓ₂) where
 

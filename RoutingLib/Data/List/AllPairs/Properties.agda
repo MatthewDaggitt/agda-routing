@@ -4,12 +4,14 @@ import Data.List.All.Properties as All
 open import Data.Fin using (Fin)
 open import Data.Fin.Properties using (suc-injective)
 open import Data.Nat using (zero; suc; _<_; z≤n; s≤s)
+open import Data.Nat.Properties using (≤-refl; ≤-step)
 open import Function using (_∘_)
 open import Relation.Binary using (Rel; Total; Symmetric; DecSetoid)
 open import Relation.Binary.PropositionalEquality using (_≢_)
 open import Relation.Unary using (Pred; Decidable)
 open import Relation.Nullary using (yes; no)
 
+open import RoutingLib.Function
 open import RoutingLib.Data.List using (insert)
 open import RoutingLib.Data.List.AllPairs
 import RoutingLib.Data.List.All.Properties as All
@@ -20,23 +22,23 @@ module RoutingLib.Data.List.AllPairs.Properties where
 -- All pairs
 
   {-
-All⇒AllPairs : ∀ {a p ℓ} {A : Set a} {P : Pred A p} {_~_ : Rel A ℓ} {xs} →
+  All⇒AllPairs : ∀ {a p ℓ} {A : Set a} {P : Pred A p} {_~_ : Rel A ℓ} {xs} →
                  All P xs → (∀ {x y} → P x → P y → x ~ y) → AllPairs _~_ xs
-All⇒AllPairs []         pres = []
-All⇒AllPairs (px ∷ pxs) pres = All.map (pres px) pxs ∷ (All⇒AllPairs pxs pres)
+  All⇒AllPairs []         pres = []
+  All⇒AllPairs (px ∷ pxs) pres = All.map (pres px) pxs ∷ (All⇒AllPairs pxs pres)
 
-  AllPairs-map⁺₂ : ∀ {a b ℓ₁ ℓ₂} {A : Set a} {B : Set b}  {_~₁_ : Rel A ℓ₁} {_~₂_ : Rel B ℓ₂}
-              {f : A → B} → f Preserves _~₁_ ⟶ _~₂_ → AllPairs _~₁_ ⋐ AllPairs _~₂_ ∘ map f
-  AllPairs-map⁺₂ f-pres []           = []
-  AllPairs-map⁺₂ f-pres (x∉xs ∷ xs!) = All-map (mapₐ f-pres x∉xs) ∷ AllPairs-map⁺₂ f-pres xs!
+  map⁺₂ : ∀ {a b ℓ₁ ℓ₂} {A : Set a} {B : Set b}  {_~₁_ : Rel A ℓ₁} {_~₂_ : Rel B ℓ₂}
+          {f : A → B} → f Preserves _~₁_ ⟶ _~₂_ → AllPairs _~₁_ ⋐ AllPairs _~₂_ ∘ map f
+  map⁺₂ f-pres []           = []
+  map⁺₂ f-pres (x∉xs ∷ xs!) = All-map (mapₐ f-pres x∉xs) ∷ AllPairs-map⁺₂ f-pres xs!
   -}
 
   {-
-  AllPairs-mapMaybe⁺ : ∀ {a b ℓ₁ ℓ₂} {A : Set a} {B : Set b} {_~₁_ : Rel A ℓ₁} {_~₂_ : Rel B ℓ₂}
-                  (f : A → Maybe B) → (∀ {x y} → x ~₁ y → (f x ≡ nothing) ⊎ (f y ≡ nothing) ⊎ (Eq _~₂_ (f x) (f y)))
-                  → AllPairs _~₁_ ⋐ AllPairs _~₂_ ∘ mapMaybe f
-  AllPairs-mapMaybe⁺ _ _ [] = []
-  AllPairs-mapMaybe⁺ {_~₁_ = _~₁_} {_~₂_} f f-inj {x ∷ xs} (px ∷ pxs) with f x | inspect f x
+  mapMaybe⁺ : ∀ {a b ℓ₁ ℓ₂} {A : Set a} {B : Set b} {_~₁_ : Rel A ℓ₁} {_~₂_ : Rel B ℓ₂}
+              (f : A → Maybe B) → (∀ {x y} → x ~₁ y → (f x ≡ nothing) ⊎ (f y ≡ nothing) ⊎ (Eq _~₂_ (f x) (f y))) → 
+              AllPairs _~₁_ ⋐ AllPairs _~₂_ ∘ mapMaybe f
+  mapMaybe⁺ _ _ [] = []
+  mapMaybe⁺ {_~₁_ = _~₁_} {_~₂_} f f-inj {x ∷ xs} (px ∷ pxs) with f x | inspect f x
   ... | nothing | _            = AllPairs-mapMaybe⁺ f f-inj pxs
   ... | just v  | [ fx≡justv ] = mapMaybe⁺ (v ~₂_) {!!} ∷ AllPairs-mapMaybe⁺ f f-inj pxs
     where
@@ -46,6 +48,7 @@ All⇒AllPairs (px ∷ pxs) pres = All.map (pres px) pxs ∷ (All⇒AllPairs pxs
     ... | inj₂ (inj₁ fa≡nothing) = contradiction (≡-trans (≡-sym fa≡nothing) fa≡justb) λ()
     ... | inj₂ (inj₂ fx~fa)      = drop-just (subst₂ (Eq _~₂_) fx≡justv fa≡justb fx~fa)
   -}
+
 
 ------------------------------------------------------------------------
 -- filter
@@ -114,6 +117,20 @@ module _ {a ℓ} {A : Set a} {_~_ : Rel A ℓ} where
 
   applyUpTo⁺₂ : ∀ f n → (∀ i j → f i ~ f j) → AllPairs _~_ (applyUpTo f n)
   applyUpTo⁺₂ f n f~ = applyUpTo⁺₁ n (λ _ _ → f~ _ _)
+
+------------------------------------------------------------------------
+-- applyDownFrom
+
+module _ {a ℓ} {A : Set a} {_~_ : Rel A ℓ} where
+
+  applyDownFrom⁺₁ : ∀ {f} n → (∀ {i j} → j < i → i < n → f i ~ f j) → AllPairs _~_ (applyDownFrom f n)
+  applyDownFrom⁺₁ zero    f~ = []
+  applyDownFrom⁺₁ (suc n) f~ =
+    All.applyDownFrom⁺₁ _ n (f~ ◌ ≤-refl)  ∷
+    applyDownFrom⁺₁ n (λ j<i i<n → f~ j<i (≤-step i<n))
+
+  applyDownFrom⁺₂ : ∀ f n → (∀ i j → f i ~ f j) → AllPairs _~_ (applyDownFrom f n)
+  applyDownFrom⁺₂ f n f~ = applyDownFrom⁺₁ n (λ _ _ → f~ _ _)
 
 ------------------------------------------------------------------------
 -- tabulate

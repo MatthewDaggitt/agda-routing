@@ -67,9 +67,6 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     ... | yes Px | here  v≈x     = ¬Pv (resp (sym v≈x) Px)
     ... | yes _  | there v∈f[xs] = ∉-filter₂ P? resp ¬Pv xs v∈f[xs]
 
-    postulate ∈-perm : ∀ {x xs ys} → x ∈ xs → xs ↭ ys → x ∈ ys
-    --∈-perm = Any-↭
-
     index-cong : ∀ {x y xs} → (x∈xs : x ∈ xs) (y∈xs : y ∈ xs) → Unique S xs → x ≈ y → index x∈xs ≡ index y∈xs
     index-cong (here x≈z)   (here y≈z)   _            x≈y = refl
     index-cong (here x≈z)   (there y∈xs) (z≉xs ∷ xs!) x≈y = contradiction (∈-resp-≈ S (trans (sym x≈y) x≈z) y∈xs) (All¬⇒¬Any z≉xs)

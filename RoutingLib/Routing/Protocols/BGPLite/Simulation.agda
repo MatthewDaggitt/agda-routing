@@ -10,10 +10,13 @@ module RoutingLib.Routing.Protocols.BGPLite.Simulation where
 open import Data.Maybe using (just; nothing; Is-just; just-injective)
 open import Data.Nat using (_≤_)
 open import Data.Nat.Properties using (≤-refl; <-cmp; <-transˡ)
+open import Data.List.Properties using (∷-injectiveˡ)
 open import Data.Fin using (Fin; toℕ)
+open import Data.Fin.Properties using (toℕ-injective)
 open import Data.Product using (∃; ∃₂; _×_; _,_)
+open import Data.Product.Properties using (,-injectiveʳ)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
-open import Function using (id; _∘_)
+open import Function using (id; _∘_; _$_)
 open import Relation.Binary using (tri<; tri≈; tri>)
 open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary using (¬_; yes; no)
@@ -31,6 +34,8 @@ open import RoutingLib.Routing.Protocols.BGPLite.Components.Policy
   using (apply; apply-result)
 open import RoutingLib.Routing.Protocols.BGPLite.Components.Route
 open import RoutingLib.Routing.Protocols.BGPLite.Components.Communities
+
+open ≡-Reasoning
 
 --------------------------------------------------------------------------------
 -- The simulating algebra
@@ -147,7 +152,6 @@ path-accept {_} {i} {j} {valid l cs p} {q} (step pol) eq f▷r≉0 with (toℕ i
   valid (deflate ((toℕ i , toℕ j) ∷ p))               ≡⟨ cong valid (deflate-skip p (inj₁ (ij⇿p⇒i≢j e⇿p))) ⟩
   valid ((toℕ i , toℕ j) ∷ deflate p)                 ≡⟨ cong (λ p → valid (_ ∷ p)) (valid-injective eq) ⟩
   valid ((toℕ i , toℕ j) ∷ q)                         ∎
-  where open ≡-Reasoning
 
 isPathAlgebra : IsPathAlgebra Aₐₗₜ
 isPathAlgebra = record
@@ -166,7 +170,7 @@ isPathAlgebra = record
 open import RoutingLib.Routing.Algebra.Simulation
 open import RoutingLib.Routing.Algebra.Comparable Aₐₗₜ
 
-
+{-
 p[fᵢⱼ▷v]₀≡i : ∀ {n} {i j : Fin n} {f : Step i j} {v} →
               IsValid (f ▷ v) → source (path (f ▷ v)) ≡ just (toℕ i)
 p[fᵢⱼ▷v]₀≡i {n} {i} {j} {f@(step pol)} {invalid}      ()
@@ -178,47 +182,44 @@ p[fᵢⱼ▷v]₀≡i {n} {i} {j} {f@(step pol)} {valid l cs p} f▷ᵥ with ▷
   sourceᵥ (deflate (inflate ((toℕ i , toℕ j) ∷ p) m))          ≡⟨ deflate-source _ ⟩
   sourceᵥ (inflate ((toℕ i , toℕ j) ∷ p) m)                    ≡⟨ inflate-source _ m refl ⟩
   just (toℕ i) ∎
-  where open ≡-Reasoning
+-}
 
-f▷vᵥ⇒p[v]₀≡i : ∀ {n} {i j : Fin n} {f : Step i j} {v} →
-              IsValid (f ▷ v) → source (path v) ≡ just (toℕ j)
-f▷vᵥ⇒p[v]₀≡i {n} {i} {j} {f@(step pol)} {invalid}      ()
-f▷vᵥ⇒p[v]₀≡i {n} {i} {j} {f@(step pol)} {valid l cs p} f▷ᵥ with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p
-... | no ¬ij⇿p | _       = contradiction f▷ᵥ λ()
-... | yes _    | yes i∈p = contradiction f▷ᵥ λ()
-... | yes ij⇿p | no  _   = begin
-  sourceᵥ (deflate p) ≡⟨ deflate-source p ⟩
-  sourceᵥ p           ≡⟨ {!!} ⟩
-  just (toℕ j )       ∎
-  where open ≡-Reasoning
-
-p[f▷v]≡inf[ij∷p] : ∀ {k cs p} {n} {i j : Fin n} (f : Step i j) v → f ▷ v ≡ valid k cs p →
-                   ∃ λ m → path (f ▷ v) ≡ valid (deflate (inflate ((toℕ i , toℕ j) ∷ p) m))
-p[f▷v]≡inf[ij∷p] f invalid ()
-p[f▷v]≡inf[ij∷p] f (valid l cs p) fv≡ᵥ with ▷-result f l cs p
-... | inj₁ fv≡ᵢ = contradiction (trans (sym fv≡ᵥ) fv≡ᵢ) λ()
-... | inj₂ (_ , _ , m , _ , eq) = m , {!cong path fv≡ᵥ!}
+private
+  ≢invalid : ∀ {k cs p} {n} {i j : Fin n} (f : Step i j) v → valid k cs p ≡ f ▷ v → f ▷ v ≢ invalid
+  ≢invalid f v ᵥ≡fv fv≡ᵢ = contradiction (trans ᵥ≡fv fv≡ᵢ) λ()
+  
+x≡fv⇒p≢[] : ∀ {k cs p} {n} {i j : Fin n} (f : Step i j) v → valid k cs p ≡ f ▷ v → p ≢ []
+x≡fv⇒p≢[] f invalid ()
+x≡fv⇒p≢[] {k} {cs} {p} {n} {i} {j} f v@(valid l ds q) ≡f▷v p≡[] = contradiction (begin
+  valid []                            ≡⟨ sym (cong (valid ∘ deflate) p≡[]) ⟩
+  valid (deflate p)                   ≡⟨⟩
+  path (valid k cs p)                 ≡⟨ cong path ≡f▷v ⟩
+  path (f ▷ valid l ds q)             ≡⟨ path-accept f refl (≢invalid f v ≡f▷v) ⟩
+  valid ((toℕ i , toℕ j) ∷ deflate q) ∎) λ()
 
 x≡fv∧y≈gw⇒p≢q : ∀ {k l cs ds p q} {n} {i j m : Fin n} (f : Step i j) (g : Step i m) v w →
                 valid k cs p ≡ f ▷ v → valid l ds q ≡ g ▷ w →
                 j ≢ m → p ≢ q
-x≡fv∧y≈gw⇒p≢q {k} {l} {cs} {ds} {p} {q} {n} {i} {j} {m} f g v w ≡f▷v ≡g▷w j≢m p≡q
-  with ▷-result f {!!}
-     | p[fᵢⱼ▷v]₀≡i {f = g} {v = w} (subst IsValid ≡g▷w (isValid l ds q))
-... | eq | e = {!!}
+x≡fv∧y≈gw⇒p≢q f g invalid w () _
+x≡fv∧y≈gw⇒p≢q f g v invalid _ ()
+x≡fv∧y≈gw⇒p≢q {p = p} {q} {i = i} {j} {m} f g v@(valid k₂ cs₂ p₂) w@(valid l₂ ds₂ q₂) ≡f▷v ≡g▷w j≢m p≡q =
+  j≢m $ toℕ-injective $ ,-injectiveʳ $ ∷-injectiveˡ $ valid-injective (begin
+    valid ((toℕ i , toℕ j) ∷ deflate p₂) ≡⟨ sym (path-accept f refl (≢invalid f v ≡f▷v)) ⟩
+    path (f ▷ valid k₂ cs₂ p₂)           ≡⟨ sym (cong path ≡f▷v) ⟩
+    valid (deflate p)                    ≡⟨ cong (valid ∘ deflate) p≡q ⟩
+    valid (deflate q)                    ≡⟨ cong path ≡g▷w ⟩
+    path (g ▷ valid l₂ ds₂ q₂)           ≡⟨ path-accept g refl (≢invalid g w ≡g▷w) ⟩
+    valid ((toℕ i , toℕ m) ∷ deflate q₂) ∎)
 
 ≎⇒path≢ : ∀ {k l cs ds p q} → k ≡ l → valid k cs p ≎ valid l ds q → p ≢ q
 ≎⇒path≢ refl (0∞# refl ())
 ≎⇒path≢ refl (∞0# () refl)
 ≎⇒path≢ refl (∞∞# () ())
-≎⇒path≢ refl (0e# g w refl ≈gw) = {!!} -- x≡fv⇒p[x]≢[] g w ≈gw ∘ sym
-≎⇒path≢ refl (e0# f v ≈fv refl) = {!!} -- x≡fv⇒p[x]≢[] f v ≈fv
+≎⇒path≢ refl (0e# g w refl ≈gw) = x≡fv⇒p≢[] g w ≈gw ∘ sym
+≎⇒path≢ refl (e0# f v ≈fv refl) = x≡fv⇒p≢[] f v ≈fv
 ≎⇒path≢ refl (∞e# g w () x)
 ≎⇒path≢ refl (e∞# f v x ())
-≎⇒path≢ refl (ee# {j = j} {k = k} f g v w j≢k x≈fv y≈gw) p≡q = j≢k (just-injective (begin
-  just j ≡⟨ {!p[fᵢⱼ▷v]₀≡i {f = f} {k}!} ⟩
-  just k ∎)) --x≡fv∧y≈gw⇒p≢q f g v w x≈fv y≈gw j≢k
-  where open ≡-Reasoning
+≎⇒path≢ refl (ee# f g v w j≢k x≈fv y≈gw) = x≡fv∧y≈gw⇒p≢q f g v w x≈fv y≈gw j≢k
   
 ⊕ₐₗₜ-pres-≎ : ∀ {x y z} → x ≎ y → x ≎ z → x ≎ (y ⊕ₐₗₜ z)
 ⊕ₐₗₜ-pres-≎ {x} {y} {z} x≎y x≎z with ⊕ₐₗₜ-sel y z

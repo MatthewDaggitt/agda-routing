@@ -103,29 +103,3 @@ module _ (e : Epoch) {p} (p∈Q : p ∈ Q) where
   Fᵏx∈B₀ : ∀ k {x} → x ∈ᵢ B₀ → (F e p ^ k) x ∈ᵢ B₀
   Fᵏx∈B₀ zero    x∈B₀ = x∈B₀
   Fᵏx∈B₀ (suc k) x∈B₀ = F-resp-B₀ p∈Q (Fᵏx∈B₀ k x∈B₀)
-
-  {-
-  postulate Fᵏx∈Bₖ : ∀ k {x} → x ∈ Accordant p → x ∈ᵢ B₀ → (F e p ^ k) x ∈ᵢ B e p∈Q k
-  {-
-  Fᵏx∈Bₖ zero    x-wf x∈B₀ = x∈B₀
-  Fᵏx∈Bₖ (suc k) x-wf x∈B₀ = F-mono-B {!!} (Fᵏx∈Bₖ k x-wf x∈B₀)
-  -}
-
-  postulate k*≤k⇒Fᵏx≈x* : ∀ {k} → k* ≤ k → ∀ {x} → x ∈ᵢ B₀ → (F e p ^ k) x ≈ x*
-  -- k*≤k⇒Fᵏx≈x* {k} k*≤k x∈B₀ = k*≤k∧x∈Bₖ⇒x≈x* k*≤k (Fᵏx∈Bₖ k {!!} x∈B₀)
-
-  x*∈B₀ : (∃ λ x → x ∈ᵢ B₀) → x* ∈ᵢ B₀
-  x*∈B₀ (x , x∈B₀) = begin⟨ x∈B₀ ⟩
-    ⇒ x              ∈ᵢ B₀ ∴⟨ Fᵏx∈B₀ k* ⟩
-    ⇒ (F e p ^ k*) x ∈ᵢ B₀ ∴⟨ B₀-cong (k*≤k⇒Fᵏx≈x* ≤-refl x∈B₀) ⟩
-    ⇒ x*             ∈ᵢ B₀ ∎
-  -}
-  
-  {-
-  x*∈Bₖ : (∃ λ x → x ∈ᵢ B₀) → ∀ k → x* ∈ᵢ B e p k
-  x*∈Bₖ ∃x∈B₀ zero    = {!!} --x*∈B₀ ∃x∈B₀
-  x*∈Bₖ ∃x∈B₀ (suc k) = begin⟨ x*∈Bₖ ∃x∈B₀ k ⟩
-    ⇒ x*       ∈ᵢ B e p k       ∴⟨ F-mono-B p∈Q x*-wf ⟩
-    ⇒ F e p x* ∈ᵢ B e p (suc k) ∴⟨ B-cong x*-fixed ⟩
-    ⇒ x*       ∈ᵢ B e p (suc k) ∎
-  -}

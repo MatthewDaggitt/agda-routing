@@ -1,7 +1,8 @@
 open import Relation.Binary
 open import Data.List using (List; []; _∷_)
 open import Data.List.All using ([]; _∷_; map)
-open import Data.List.Relation.Permutation.Inductive using (_↭_)
+open import Data.List.Relation.Permutation.Inductive using (_↭_; ↭-sym)
+  renaming (refl to ↭-refl; trans to ↭-trans)
 open import Data.Sum using (inj₁; inj₂)
 import Data.List.Membership.Setoid as Membership
 
@@ -13,7 +14,7 @@ open import RoutingLib.Data.List.Membership.Setoid.Properties using (∈-perm)
 import RoutingLib.Data.List.Sorting as Sorting
 import RoutingLib.Data.List.Sorting.Properties as Sortingₚ
 import RoutingLib.Data.List.Uniqueness.Setoid as Uniqueness
-
+import RoutingLib.Data.List.Relation.Permutation.Inductive as Perm
 
 module RoutingLib.Data.List.Sorting.InsertionSort
   {a ℓ₁ ℓ₂} (decTotalOrder : DecTotalOrder a ℓ₁ ℓ₂) where
@@ -32,13 +33,13 @@ module RoutingLib.Data.List.Sorting.InsertionSort
   sort↗ []       = []
   sort↗ (x ∷ xs) = insert↗⁺ x (sort↗ xs)
 
-  postulate sort↭ : ∀ xs → sort xs ↭ xs
-  -- sort↭ []       = []
-  -- sort↭ (x ∷ xs) = ⇿-insert⁺ total x (sort⇿ xs)
+  sort↭ : ∀ xs → sort xs ↭ xs
+  sort↭ []       = ↭-refl --[]
+  sort↭ (x ∷ xs) = Perm.insert⁺ total x (sort↭ xs)
 
-  postulate sort!⁺ : ∀ {xs} → Unique xs → Unique (sort xs)
-  --sort!⁺ {xs} xs! = perm! Eq.setoid xs! (⇿-sym (sort⇿ xs))
+  sort!⁺ : ∀ {xs} → Unique xs → Unique (sort xs)
+  sort!⁺ {xs} xs! = perm! Eq.setoid xs! (↭-sym (sort↭ xs))
 
-  postulate ∈-sort⁺ : ∀ {v xs} → v ∈ xs → v ∈ sort xs
-  -- ∈-sort⁺ {_} {xs} v∈xs = ∈-perm Eq.setoid v∈xs (⇿-sym (sort⇿ xs))
+  ∈-sort⁺ : ∀ {v xs} → v ∈ xs → v ∈ sort xs
+  ∈-sort⁺ {_} {xs} v∈xs = ∈-perm Eq.setoid v∈xs (↭-sym (sort↭ xs))
 

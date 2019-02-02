@@ -43,7 +43,7 @@ open AsyncIterable 𝓘
 record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
   field
     B          : ℕ → IPred Sᵢ p
-    Bᵢ-cong     : ∀ {k i} → (_∈ B k i) Respects _≈ᵢ_
+    Bᵢ-cong    : ∀ {k i} → (_∈ B k i) Respects _≈ᵢ_
     B-finish   : ∃₂ λ k* x* → ∀ {k} → k* ≤ k → (x* ∈ᵢ B k × (∀ {x} → x ∈ᵢ B k → x ≈ x*))
     F-resp-B₀  : ∀ {x} → x ∈ᵢ B 0 → F x ∈ᵢ B 0
     F-mono-B   : ∀ {k x} → x ∈ᵢ B k → F x ∈ᵢ B (suc k)

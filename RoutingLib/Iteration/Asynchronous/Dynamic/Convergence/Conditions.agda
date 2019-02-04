@@ -1,9 +1,9 @@
 --------------------------------------------------------------------------------
 -- This core module contains the definitions for the pre-conditions for a
--- dynamic asynchronous iteration to be convergent. If interested in using these
--- proofs these conditions should not be imported from here directly but
--- from `RoutingLib.Iteration.Asynchronous.Dynamic.Convergence` which also
--- exports the proofs of convergence.
+-- dynamic asynchronous iteration being convergent. Users interested in using
+-- these conditions should not import them from here directly but from
+-- `RoutingLib.Iteration.Asynchronous.Dynamic.Convergence` which also exports
+-- the associated proofs of convergence.
 --------------------------------------------------------------------------------
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic
@@ -59,24 +59,24 @@ record PartialACO {ℓ₁ ℓ₂}
                   (Q  : Pred (Subset n) ℓ₂)   -- Set of allowable sets of participants
                   ℓ₃ : Set (a ⊔ ℓ₁ ⊔ ℓ₂ ⊔ lsuc ℓ₃ ⊔ ℓ) where
   field
-    B         : Epoch → {p : Subset n} → p ∈ Q → ℕ → IPred Sᵢ ℓ₃
-    B₀-cong    : (_∈ᵢ B₀) Respects _≈_
+    B         : Epoch → {p : Subset n} → .(p ∈ Q) → ℕ → IPred Sᵢ ℓ₃
+    B₀-cong   : (_∈ᵢ B₀) Respects _≈_
     B₀-eqᵢ     : ∀ {e p} (p∈Q : p ∈ Q) → B₀ ≋ᵢ B e p∈Q 0
-    Bᵢ-cong    : ∀ {e f p q} → e ≡ f → p ≡ q → (p∈Q : p ∈ Q) (q∈Q : q ∈ Q) →
-                   ∀ {k i x y} → x ≈ᵢ y → x ∈ B e p∈Q k i → y ∈ B f q∈Q k i
+    Bᵢ-cong    : ∀ {e p} (p∈Q : p ∈ Q) → ∀ {k i} → (_∈ B e p∈Q k i) Respects _≈ᵢ_
     B-finish   : ∀ e {p} (p∈Q : p ∈ Q) → ∃₂ λ k* x* → ∀ {k} → k* ≤ k →
                    (x* ∈ᵢ B e p∈Q k × (∀ {x} → x ∈ᵢ B e p∈Q k → x ≈ x*))
     B-null     : ∀ {e p} (p∈Q : p ∈ Q) → ∀ {k i} → i ∉ p → ⊥ i ∈ B e p∈Q k i
-    F-mono-B   : ∀ {e p} (p∈Q : p ∈ Q) → ∀ {k x} → x ∈ Accordant p → x ∈ᵢ B e p∈Q k → F e p x ∈ᵢ B e p∈Q (suc k)
+    F-mono-B   : ∀ {e p} (p∈Q : p ∈ Q) → ∀ {k x} → x ∈ Accordant p →
+                 x ∈ᵢ B e p∈Q k → F e p x ∈ᵢ B e p∈Q (suc k)
     F-resp-B₀  : ∀ {e p} → p ∈ Q → ∀ {x} → x ∈ᵢ B₀ → F e p x ∈ᵢ B₀
-
+  
 ACO⇒partialACO : ∀ {ℓ₃} → ACO ℓ₃ → PartialACO Uᵢ U ℓ₃
 ACO⇒partialACO aco = record
   { B₀-cong   = λ _ _ _ → tt
   ; F-resp-B₀ = λ _ _ _ → tt
   ; B         = λ e {p} _ → B e p
   ; B₀-eqᵢ     = λ _ → (λ _ → B₀-universal _ _ _ _) , (λ _ → tt)
-  ; Bᵢ-cong    = λ { refl refl _ _ → Bᵢ-cong }
+  ; Bᵢ-cong    = λ _ → Bᵢ-cong --λ { refl refl _ _ → Bᵢ-cong }
   ; B-finish  = λ e {p} _ → B-finish e p
   ; B-null    = λ _ → B-null
   ; F-mono-B  = λ _ → F-mono-B
@@ -87,7 +87,7 @@ partialACO⇒ACO : ∀ {ℓ₁ ℓ₂ ℓ₃} {B₀ : IPred Sᵢ ℓ₁} {Q : Pr
                  PartialACO B₀ Q ℓ₃ → ACO ℓ₃
 partialACO⇒ACO _∈B₀ _∈Q pACO = record
   { B            = λ e p → B e (p ∈Q)
-  ; Bᵢ-cong       = Bᵢ-cong refl refl (_ ∈Q) (_ ∈Q)
+  ; Bᵢ-cong       = Bᵢ-cong (_ ∈Q)
   ; B₀-universal = λ e p i xᵢ → proj₁ (B₀-eqᵢ (_ ∈Q)) (xᵢ ∈B₀)
   ; B-finish     = λ e p → B-finish e (p ∈Q)
   ; B-null       = B-null (_ ∈Q)
@@ -131,22 +131,22 @@ record AMCO : Set (a ⊔ ℓ) where
 
 record PartialAMCO {q} (Q : Pred (Subset n) q) : Set (a ⊔ ℓ ⊔ q) where
   field
-    dᵢ                   : Epoch → {p : Subset n} → p ∈ Q → ∀ {i} → Sᵢ i → Sᵢ i → ℕ
-    dᵢ-isQuasiSemiMetric : ∀ e {p} (p∈Q : p ∈ Q) i → IsQuasiSemiMetric _≈ᵢ_ (dᵢ e p∈Q {i})
-    dᵢ-bounded           : ∀ e {p} (p∈Q : p ∈ Q) → ∃ λ dₘₐₓ → ∀ {i} x y → dᵢ e p∈Q {i} x y ≤ dₘₐₓ
+    dᵢ                   : Epoch → {p : Subset n} → .(p ∈ Q) → ∀ {i} → Sᵢ i → Sᵢ i → ℕ
+    dᵢ-isQuasiSemiMetric : ∀ e {p} .(p∈Q : p ∈ Q) i → IsQuasiSemiMetric _≈ᵢ_ (dᵢ e p∈Q {i})
+    dᵢ-bounded           : ∀ e {p} .(p∈Q : p ∈ Q) → ∃ λ dₘₐₓ → ∀ {i} x y → dᵢ e p∈Q {i} x y ≤ dₘₐₓ
 
-  dₛᵢ : Epoch → {p : Subset n} → p ∈ Q → ∀ {i} → Sᵢ i → Sᵢ i → ℕ
+  dₛᵢ : Epoch → {p : Subset n} → .(p ∈ Q) → ∀ {i} → Sᵢ i → Sᵢ i → ℕ
   dₛᵢ e {p} p∈Q {i} x y = if ⌊ i ∈? p ⌋ then dᵢ e p∈Q x y else 0
 
-  d : Epoch → {p : Subset n} → p ∈ Q → S → S → ℕ
+  d : Epoch → {p : Subset n} → .(p ∈ Q) → S → S → ℕ
   d e p∈Q x y = max 0 (λ i → dₛᵢ e p∈Q (x i) (y i))
 
   field
-    F-strContrOnOrbits  : ∀ {e p} (p∈Q : p ∈ Q) → ∀ {x} → x ∈ Accordant p → F e p x ≉[ p ] x → d e p∈Q (F e p x) (F e p (F e p x)) < d e p∈Q x (F e p x)
-    F-strContrOnFP      : ∀ {e p} (p∈Q : p ∈ Q) → ∀ {x} → x ∈ Accordant p → ∀ {x*} → F e p x* ≈ x* → x ≉[ p ] x* → d e p∈Q x* (F e p x) < d e p∈Q x* x
-    F-inactive          : ∀ e {p} → p ∈ Q       → ∀ x   → F e p x ∈ Accordant p
+    F-strContrOnOrbits  : ∀ {e p} .(p∈Q : p ∈ Q) → ∀ {x} → x ∈ Accordant p → F e p x ≉[ p ] x → d e p∈Q (F e p x) (F e p (F e p x)) < d e p∈Q x (F e p x)
+    F-strContrOnFP      : ∀ {e p} .(p∈Q : p ∈ Q) → ∀ {x} → x ∈ Accordant p → ∀ {x*} → F e p x* ≈ x* → x ≉[ p ] x* → d e p∈Q x* (F e p x) < d e p∈Q x* x
+    F-inactive          : ∀ e {p} .(p∈Q : p ∈ Q)       → ∀ x   → F e p x ∈ Accordant p
 
-  module _ e {p} (p∈Q : p ∈ Q) {i} where
+  module _ e {p} .(p∈Q : p ∈ Q) {i} where
     open IsQuasiSemiMetric (dᵢ-isQuasiSemiMetric e p∈Q i) public
       using ()
       renaming
@@ -178,6 +178,7 @@ partialAMCO⇒AMCO _∈Q partialAMCO = record
 
 partialAMCO⇒AMCO′ : PartialAMCO U → AMCO
 partialAMCO⇒AMCO′ = partialAMCO⇒AMCO U-Universal
+
 
 {-
 ---------------------------------

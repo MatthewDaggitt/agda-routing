@@ -13,7 +13,6 @@ _^_ : (A → A) → ℕ → (A → A)
 f ^ zero    = id
 f ^ (suc n) = f ∘ (f ^ n)
 
-
 module _ {ℓ} (_≈_ : Rel A ℓ) (f : A → A) where
 
   IsFixedPoint : A → Set ℓ
@@ -24,4 +23,3 @@ module _ {ℓ} (_≈_ : Rel A ℓ) (f : A → A) where
 
   Converges : Set (a ⊔ ℓ)
   Converges = ConvergesOver U
-

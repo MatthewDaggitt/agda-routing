@@ -3,6 +3,7 @@ open import Data.List.All as All using (All; []; _∷_; head; tail; universal)
 open import Data.List.All.Properties
 open import Data.List.Any using (here; there)
 open import Data.Nat using (ℕ; suc; zero; z≤n; s≤s; _≤_; _<_)
+open import Data.Nat.Properties using (≤-refl; ≤-step)
 open import Data.Fin using (Fin)
 open import Data.Product as Prod using (_×_; _,_)
 open import Data.Sum using (inj₁; inj₂)
@@ -29,8 +30,8 @@ module _ {a b ℓ} {A : Set a} {B : Set b} where
   All-swap : ∀ {_~_ : REL (List A) B ℓ} {xss ys} →
              All (λ xs → All (xs ~_) ys) xss →
              All (λ y → All (_~ y) xss) ys
-  All-swap {ys = []}      _  = []
-  All-swap {ys = _ ∷ _}  []  = universal (λ _ → []) _
+  All-swap {ys = []}     _   = []
+  All-swap {ys = y ∷ ys} []  = universal (λ _ → []) (y ∷ ys)
   All-swap {ys = y ∷ ys} ((x~y ∷ x~ys) ∷ pxss) =
     (x~y ∷ (All.map head pxss)) ∷ All-swap (x~ys ∷ (All.map tail pxss))
 
@@ -60,6 +61,28 @@ module _ {a ℓ} {A : Set a} {_≤_ : Rel A ℓ} (total : Total _≤_)
   insert⁻ v (x ∷ xs) pvxxs      with total v x | pvxxs
   ... | inj₁ _ | pv ∷ (px ∷ pxs) = pv , px ∷ pxs
   ... | inj₂ _ | px ∷ pvxs       = Prod.map id (px ∷_) (insert⁻ v xs pvxs)
+
+
+------------------------------------------------------------------------
+-- applyDownFrom
+
+module _ {a p} {A : Set a} {P : A → Set p} where
+
+  applyDownFrom⁺₁ : ∀ f n → (∀ {i} → i < n → P (f i)) → All P (applyDownFrom f n)
+  applyDownFrom⁺₁ f zero    Pf = []
+  applyDownFrom⁺₁ f (suc n) Pf = Pf ≤-refl ∷ applyDownFrom⁺₁ f n (Pf ∘ ≤-step)
+
+  applyDownFrom⁺₂ : ∀ f n → (∀ i → P (f i)) → All P (applyDownFrom f n)
+  applyDownFrom⁺₂ f n Pf = applyDownFrom⁺₁ f n (λ _ → Pf _)
+
+{-
+  applyDownFrom⁻ : ∀ f n → All P (applyDownFrom f n) → ∀ {i} → i < n → P (f i)
+  applyDownFrom⁻ f zero    pxs        ()
+  applyDownFrom⁻ f (suc n) (px ∷ _)   (s≤s z≤n)       = {!!} --px
+  applyDownFrom⁻ f (suc n) (_  ∷ pxs) (s≤s (s≤s i<n)) = {!!}
+-}
+--    applyDownFrom⁻ (f ∘ suc) n pxs (s≤s i<n)
+
 {-
 ------------------------------------------------------------------------
 -- applyBetween

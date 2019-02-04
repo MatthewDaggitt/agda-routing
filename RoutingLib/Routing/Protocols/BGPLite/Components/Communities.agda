@@ -11,10 +11,11 @@ open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary.Decidable using (⌊_⌋)
 open import Level using () renaming (zero to ℓ₀)
 
-open import RoutingLib.Data.Vec.Relation.Lex using (Lex; ≤-isDecTotalOrder; ≤-minimum)
+open import RoutingLib.Data.Vec.Relation.Lex
+  using (Lex; ≤-isDecTotalOrder; ≤-minimum)
 open import RoutingLib.Data.Bool
 
-module RoutingLib.Routing.Protocols.BGPLite.Communities where
+module RoutingLib.Routing.Protocols.BGPLite.Components.Communities where
 
 abstract
 

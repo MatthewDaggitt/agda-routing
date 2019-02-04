@@ -14,12 +14,13 @@ open import Relation.Nullary using (Dec; yes; no)
 open import RoutingLib.Data.Fin.Subset.Properties using (x∉p⇒x∈∁p)
 open import RoutingLib.Relation.Unary using (Finite)
 
+import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset as FinSubset
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.Equality as Eq
 
 module RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality
   {n a ℓ} (S : IndexedDecSetoid (Fin n) a ℓ) where
 
-open IndexedDecSetoid S using (indexedSetoid; _≟ᵢ_) renaming ( Carrierᵢ to Aᵢ )
+open IndexedDecSetoid S using (indexedSetoid; _≟ᵢ_; _≈ᵢ_) renaming ( Carrierᵢ to Aᵢ )
 
 --------------------------------------------------------------------------------
 -- Re-export contents of equality
@@ -29,7 +30,8 @@ open Eq indexedSetoid public
 --------------------------------------------------------------------------------
 -- Extra decidability properties
 
-postulate _≟[_]_ : ∀ x p y → Dec (x ≈[ p ] y)
+_≟[_]_ : ∀ x p y → Dec (x ≈[ p ] y)
+x ≟[ p ] y = FinSubset.dec Aᵢ _≈ᵢ_ _≟ᵢ_ x y
 
 module _ (p : Subset n) where
 

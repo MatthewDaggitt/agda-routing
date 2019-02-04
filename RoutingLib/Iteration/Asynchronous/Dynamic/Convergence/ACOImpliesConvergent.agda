@@ -10,7 +10,8 @@ open import Induction.WellFounded using (Acc; acc)
 open import Induction.Nat using (<-wellFounded)
 open import Level using (_⊔_)
 open import Relation.Binary using (tri<; tri≈; tri>)
-open import Relation.Binary.PropositionalEquality using (_≡_; subst; subst₂; cong; cong₂; refl; sym; trans)
+open import Relation.Binary.PropositionalEquality
+  using (_≡_; subst; subst₂; cong; cong₂; refl; sym; trans)
 open import Relation.Nullary using (yes; no; ¬_)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Pred; _⊆_; _∈_)
@@ -22,11 +23,13 @@ open import RoutingLib.Function
 open import RoutingLib.Function.Reasoning
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic
-open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions using (PartialACO)
+open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Properties
-import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Properties.ACO as ACOProperties
+import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Properties.ACO
+  as ACOProperties
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
-import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudoperiod as Pseudoperiod
+import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudoperiod
+  as Pseudoperiod
 
 
 module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.ACOImpliesConvergent
@@ -71,11 +74,12 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ᵢ B₀)
 
   ∈Bₜᵢ-resp-rec : ∀ {t b} (rec₁ rec₂ : Acc _<_ t) →
                   ∀ {i} → async rec₁ i ∈ Bₜ t b i → async rec₂ i ∈ Bₜ t b i
-  ∈Bₜᵢ-resp-rec {t} rec₁ rec₂ = Bᵢ-cong refl refl (ρ∈Q t) (ρ∈Q t) (asyncIter-cong 𝓘 𝓢 x₀ rec₁ rec₂ refl _)
-
+  ∈Bₜᵢ-resp-rec {t} rec₁ rec₂ = Bᵢ-cong (ρ∈Q t) (asyncIter-cong 𝓘 𝓢 x₀ rec₁ rec₂ refl _)
+  
   async∈-resp-Bₜᵢ : ∀ t {s e k} {rec : Acc _<_ t} → η s ≡ η e →
                     ∀ {i} → async rec i ∈ Bₜ s k i → async rec i ∈ Bₜ e k i
-  async∈-resp-Bₜᵢ t {s} {e} {k} {rec} ηₛ≡ηₑ = Bᵢ-cong ηₛ≡ηₑ (cong π ηₛ≡ηₑ) (ρ∈Q s) (ρ∈Q e) ≈ᵢ-refl
+  async∈-resp-Bₜᵢ t {s} {e} {k} {rec} ηₛ≡ηₑ {i} =
+    subst (λ v → async rec i ∈ v k i) (B-subst ηₛ≡ηₑ (cong π ηₛ≡ηₑ) (ρ∈Q s) (ρ∈Q e))
 
   async∈-resp-Bₜ : ∀ t {b s e} {rec : Acc _<_ t} → η s ≡ η e →
                    async rec ∈ᵢ Bₜ s b → async rec ∈ᵢ Bₜ e b
@@ -128,7 +132,7 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ᵢ B₀)
 
   i∉ρ⇒sᵢ∈Bₖᵢ : ∀ {i t k} → i ∉ₛ ρ t → StateOfNode i In (Bₜ t k) AtTime t
   i∉ρ⇒sᵢ∈Bₖᵢ {i} {t} {k} i∉ρₜ recₑ = begin⟨ B-null (ρ∈Q t) i∉ρₜ ⟩
-    ⇒ ⊥ i        ∈ Bₜ t k i ∴⟨ Bᵢ-cong refl refl (ρ∈Q t) (ρ∈Q t) (≈ᵢ-sym (≈ᵢ-reflexive (asyncIter-inactive 𝓘 𝓢 x₀ recₑ i∉ρₜ))) ⟩
+    ⇒ ⊥ i        ∈ Bₜ t k i ∴⟨ Bᵢ-cong (ρ∈Q t) (≈ᵢ-sym (≈ᵢ-reflexive (asyncIter-inactive 𝓘 𝓢 x₀ recₑ i∉ρₜ))) ⟩
     ⇒ asyncₜ t i ∈ Bₜ t k i ∎
 
 --------------------------------------------------------------------------

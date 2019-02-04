@@ -18,6 +18,7 @@ open import Function using (_∘_; id)
 open import RoutingLib.Data.List using (combine; allFinPairs)
 open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 import RoutingLib.Data.List.Membership.Setoid as SetoidMembership
+open import RoutingLib.Data.List.Relation.Permutation.Inductive using (↭-pres-∈)
 
 module RoutingLib.Data.List.Membership.Propositional.Properties where
 
@@ -67,5 +68,5 @@ module RoutingLib.Data.List.Membership.Propositional.Properties where
 
 
 
-  ∈-perm : ∀ {a} {A : Set a} {x : A} {xs ys} → x ∈ xs → xs ↭ ys → x ∈ ys
-  ∈-perm = GM.∈-perm (setoid _)
+  ∈-perm : ∀ {a} {A : Set a} {x : A} {xs ys} → xs ↭ ys → x ∈ xs → x ∈ ys
+  ∈-perm = ↭-pres-∈ (setoid _) --GM.∈-perm (setoid _)

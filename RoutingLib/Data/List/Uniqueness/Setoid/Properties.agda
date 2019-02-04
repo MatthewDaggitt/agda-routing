@@ -8,7 +8,6 @@ open import Data.List.Any using (here; there; any)
 open import Data.List.All using (All; []; _∷_; lookup) renaming (map to mapₐ; tabulate to tabulateₐ)
 open import Data.List.All.Properties using (gmap; ¬Any⇒All¬; tabulate⁺)
 open import Data.List.Membership.Setoid.Properties
-open import Data.List.Relation.Permutation.Inductive using (_↭_)
 open import Data.Fin using (Fin) renaming (suc to fsuc)
 open import Data.Fin.Properties using (suc-injective)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
@@ -66,9 +65,6 @@ module RoutingLib.Data.List.Uniqueness.Setoid.Properties where
 
 
     -- Other
-
-    postulate perm! : ∀ {xs ys} → Unique S xs → xs ↭ ys → Unique S ys
-    -- perm! xs! xs⇿ys = ⇿-pres-AllPairs (λ i≉j → i≉j ∘ sym) xs! xs⇿ys
 
 
   open SingleSetoid public

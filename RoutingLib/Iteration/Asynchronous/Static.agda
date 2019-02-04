@@ -22,6 +22,7 @@ open import RoutingLib.Data.Table using (Table)
 import RoutingLib.Data.Table.Relation.Equality as TableEquality
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset as FiniteSubset
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as FiniteSubsetEquality
+open import RoutingLib.Relation.Unary.Indexed using (IPred; _∈ᵢ_; Uᵢ)
 
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule as Schedules
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod
@@ -128,12 +129,12 @@ module _ {a ℓ n} (I : AsyncIterable a ℓ n) where
   open AsyncIterable I
   open Schedule
 
-  record ConvergesOver {p} (X₀ : Pred S p) : Set (lsuc lzero ⊔ a ⊔ ℓ ⊔ p) where
+  record ConvergesOver {p} (X₀ : IPred Sᵢ p) : Set (lsuc lzero ⊔ a ⊔ ℓ ⊔ p) where
     field
       x*         : S
       k*         : ℕ
       x*-fixed   : F x* ≈ x*
-      x*-reached : ∀ {x₀} → x₀ ∈ X₀ →
+      x*-reached : ∀ {x₀} → x₀ ∈ᵢ X₀ →
                    (S : Schedule n) →
                    ∀ {s m e : 𝕋} →
                    IsMultiPseudoperiodic S k* [ s , m ] →
@@ -141,4 +142,4 @@ module _ {a ℓ n} (I : AsyncIterable a ℓ n) where
                    asyncIter I S x₀ e ≈ x*
 
   Converges : Set (lsuc lzero ⊔ a ⊔ ℓ)
-  Converges = ConvergesOver U
+  Converges = ConvergesOver Uᵢ

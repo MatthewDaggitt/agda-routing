@@ -29,17 +29,17 @@ open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudoperiod
 
 
-module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.ConvergentImpliesACO
+module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.IncompleteProofs.ConvergentImpliesACO
   {a ℓ n} (I : AsyncIterable a ℓ n) (convergent : Convergent I) where
 
 open AsyncIterable I
 
 module _ (x₀ : S) where
 
-  postulate P : (sc : Schedule n) → Epoch → Subset n → ℕ → IPred Sᵢ ℓ
+{-
+  P : (sc : Schedule n) → Epoch → Subset n → ℕ → IPred Sᵢ ℓ
 
-  postulate Pᵢ-cong : ∀ {s e p k i} → (_∈ᵤ P s e p k i) Respects _≈ᵢ_
-
+  Pᵢ-cong : ∀ {s e p k i} → (_∈ᵤ P s e p k i) Respects _≈ᵢ_
 
 
 
@@ -96,3 +96,4 @@ module _ (x₀ : S) where
     ; F-resp-B₀ = F-resp-B₀
     ; F-mono-B  = F-mono-B
     }
+-}

@@ -10,10 +10,8 @@ open import Data.Fin.Subset using (Subset)
 open import Data.Unit using (tt)
 open import Level using () renaming (zero to 0ℓ)
 open import Relation.Unary using (Pred; U)
-open import Relation.Unary.Properties using (U-Universal)
 
 open import RoutingLib.Relation.Unary.Indexed using (IPred; Uᵢ; _∈ᵢ_)
-open import RoutingLib.Relation.Unary.Indexed.Properties using (Uᵢ-universal)
 open import RoutingLib.Function.Reasoning
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic

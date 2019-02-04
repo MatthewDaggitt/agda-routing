@@ -74,7 +74,6 @@ length : ∀ {n} → Path n → ℕ
 length []              = 0
 length (_ ∷ p ∣ _ ∣ _) = suc (length p)
 
-
 data NonEmpty {n} : Path n → Set where
   nonEmpty : ∀ e p e⇿p e∉p → NonEmpty (e ∷ p ∣ e⇿p ∣ e∉p)
 

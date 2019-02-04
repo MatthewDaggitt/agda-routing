@@ -46,7 +46,7 @@ module _ (dᵢ : ∀ {i} → Sᵢ i → Sᵢ i → ℕ) (p : Subset n) where
   x≈y⇒dˢ≡0 : (∀ {i} {xᵢ yᵢ : Sᵢ i} → xᵢ ≈ᵢ yᵢ → dᵢ xᵢ yᵢ ≡ 0) → ∀ {x y} → x ≈ y → dˢ x y ≡ 0
   x≈y⇒dˢ≡0 eq x≈y = max-constant refl (λ i → x≈y⇒cond≡0 eq (x≈y i))
 
-  postulate dˢ≡0⇒x≈ₛy : (∀ {i} {x y : Sᵢ i} → dᵢ x y ≡ 0 → x ≈ᵢ y) → ∀ {x y} → dˢ x y ≡ 0 → x ≈[ p ] y
+  dˢ≡0⇒x≈ₛy : (∀ {i} {x y : Sᵢ i} → dᵢ x y ≡ 0 → x ≈ᵢ y) → ∀ {x y} → dˢ x y ≡ 0 → x ≈[ p ] y
   {-dˢ≡0⇒x≈ₛy {x} {y} dˢ≡0 {i} i∈p with i ∈? p
   ... | yes _   = {!!}
   ... | no  i∉p = {!contradiction !}

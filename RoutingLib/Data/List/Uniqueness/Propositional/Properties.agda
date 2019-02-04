@@ -2,13 +2,13 @@ open import Data.List
 open import Data.Fin using (Fin)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Nat.Properties using (<⇒≢)
-open import Relation.Binary.PropositionalEquality using (setoid; _≡_; _≢_; refl; decSetoid)
-open import Function using (id)
+open import Relation.Binary.PropositionalEquality using (setoid; _≡_; _≢_; refl; sym; decSetoid)
+open import Function using (_∘_; id)
 
 open import RoutingLib.Data.List using (combine)
 open import RoutingLib.Data.List.Relation.Disjoint using (_#_)
 open import RoutingLib.Data.List.Membership.DecPropositional using (deduplicate)
-open import RoutingLib.Data.List.AllPairs.Properties using (applyUpTo⁺₁)
+open import RoutingLib.Data.List.AllPairs.Properties using (applyUpTo⁺₁; applyDownFrom⁺₁)
 open import RoutingLib.Data.List.Uniqueness.Propositional
 import RoutingLib.Data.List.Uniqueness.Setoid.Properties as SP
 
@@ -38,8 +38,5 @@ module RoutingLib.Data.List.Uniqueness.Propositional.Properties where
   upTo!⁺ : ∀ n → Unique (upTo n)
   upTo!⁺ n = applyUpTo⁺₁ n (λ i<j _ → <⇒≢ i<j)
 
-  postulate downFrom!⁺ : ∀ n → Unique (downFrom n)
-  {-
-  between!⁺ : ∀ s e → Unique (between s e)
-  between!⁺ s e = AllPairs-applyBetween⁺₁ id s e (λ _ i<j _ → <⇒≢ i<j)
-  -}
+  downFrom!⁺ : ∀ n → Unique (downFrom n)
+  downFrom!⁺ n = applyDownFrom⁺₁ n (λ j<i _ → <⇒≢ j<i ∘ sym)

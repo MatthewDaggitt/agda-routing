@@ -20,7 +20,7 @@ open import Relation.Nullary.Decidable using (⌊_⌋)
 
 open import RoutingLib.Data.Table using (Table; max)
 open import RoutingLib.Data.Table.Relation.Pointwise using (Pointwise)
-open import RoutingLib.Function.Metric
+open import RoutingLib.Function.Metric.Nat
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (Setoid_at_)
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as SubsetEq
 open import RoutingLib.Relation.Unary.Indexed
@@ -35,19 +35,16 @@ module RoutingLib.Iteration.Asynchronous.Static.Convergence.Conditions
 open AsyncIterable 𝓘
 
 --------------------------------------------------------------------------------
--- Asynchronously contracting operator --
+-- Asynchronously contracting operator (ACO) --
 --------------------------------------------------------------------------------
--- Sufficient (and necessary conditions) for convergence
--- as inspired by Üresin and Dubois
+-- Sufficient (and necessary conditions) for convergence as inspired by Üresin
+-- and Dubois
 
 record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
   field
-    -- Boxes
     B          : ℕ → IPred Sᵢ p
     Bᵢ-cong    : ∀ {k i} → (_∈ B k i) Respects _≈ᵢ_
     B-finish   : ∃₂ λ k* x* → ∀ {k} → k* ≤ k → (x* ∈ᵢ B k × (∀ {x} → x ∈ᵢ B k → x ≈ x*))
-
-    -- F
     F-resp-B₀  : ∀ {x} → x ∈ᵢ B 0 → F x ∈ᵢ B 0
     F-mono-B   : ∀ {k x} → x ∈ᵢ B k → F x ∈ᵢ B (suc k)
 
@@ -55,19 +52,17 @@ record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
   B-cong x≈y x∈Bₖ i = Bᵢ-cong (x≈y i) (x∈Bₖ i)
 
 --------------------------------------------------------------------------------
--- Ultrametric spaces --
+-- Asynchronously metricly contracting operator (AMCO) --
 --------------------------------------------------------------------------------
--- Ultrametic space conditions that are also sufficient (and necessary)
--- conditions as defined by Gurney
+-- Metric conditions that are also sufficient (and necessary) conditions based
+-- on those defined by Gurney
 
-record UltrametricConditions : Set (a ⊔ ℓ) where
+record AMCO : Set (a ⊔ ℓ) where
   field
-    dᵢ                 : ∀ {i} → Sᵢ i → Sᵢ i → ℕ
-    dᵢ-cong            : ∀ {i} → (dᵢ {i}) Preserves₂ _≈ᵢ_ ⟶ _≈ᵢ_ ⟶ _≡_
-    x≈y⇒dᵢ≡0           : ∀ {i} {x y : Sᵢ i} → x ≈ᵢ y → dᵢ x y ≡ 0
-    dᵢ≡0⇒x≈y           : ∀ {i} {x y : Sᵢ i} → dᵢ x y ≡ 0 → x ≈ᵢ y
-    dᵢ-bounded         : ∃ λ dₘₐₓ → ∀ {i} x y → dᵢ {i} x y ≤ dₘₐₓ -- TO-DO
-    element            : S
+    dᵢ                   : ∀ {i} → Sᵢ i → Sᵢ i → ℕ
+    dᵢ-isQuasiSemiMetric : ∀ i → IsQuasiSemiMetric {A = Sᵢ i} _≈ᵢ_ dᵢ
+    dᵢ-bounded           : ∀ i → Bounded {A = Sᵢ i} dᵢ
+    element             : S
 
   d : S → S → ℕ
   d x y = max 0 (λ i → dᵢ (x i) (y i))

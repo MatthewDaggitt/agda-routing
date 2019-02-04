@@ -1,4 +1,22 @@
-import Algebra.FunctionProperties as AlgebraicProperties
+--------------------------------------------------------------------------------
+-- This module defines the notion of a value of a route being consistent with
+-- the current network. This means that if you traversed the path along which
+-- it claims it was generated along you would arrive at the same value. For
+-- example a route may be inconsistent with the current network topology if a
+-- link on it's path has since failed or its weight has changed.
+--------------------------------------------------------------------------------
+
+open import RoutingLib.Routing using (AdjacencyMatrix)
+open import RoutingLib.Routing.Algebra
+
+module RoutingLib.Routing.Algebra.Consistency
+  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
+  (A : AdjacencyMatrix algebra n)
+  where
+
+open import Algebra.FunctionProperties as AlgebraicProperties using (Op₂)
 open import Data.Fin as Fin using (Fin)
 open import Data.List using (List; map)
 import Data.List.Membership.Setoid as Membership
@@ -22,37 +40,31 @@ open import RoutingLib.Relation.Nullary.Decidable using (toSum)
 open import RoutingLib.Data.Path.CertifiedI
 open import RoutingLib.Data.Path.CertifiedI.Enumeration
 open import RoutingLib.Data.Path.CertifiedI.Properties
-
-open import RoutingLib.Routing using (AdjacencyMatrix)
-open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra
   as PathAlgebraProperties
-
-module RoutingLib.Routing.Algebra.Consistency
-  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
-  (A : AdjacencyMatrix algebra n)
-  where
+import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra
+  as RoutingAlgebraProperties
 
 open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
 open IsCertifiedPathAlgebra isPathAlgebra
 open PathAlgebraProperties isRoutingAlgebra isPathAlgebra
+open RoutingAlgebraProperties isRoutingAlgebra
 
 --------------------------------------------------------------------------------
--- Consistency
-
-weight-cong : ∀ {p q : Path n} → p ≈ₚ q → weight A p ≈ weight A q
-weight-cong invalid              = ≈-refl
-weight-cong (valid [])           = ≈-refl
-weight-cong (valid (refl ∷ p≈q)) = ▷-cong _ (weight-cong (valid p≈q))
+-- Definition
+--------------------------------------------------------------------------------
+-- A route is consistent if it is equal to the weight of the path along which
+-- it was generated.
 
 𝑪 : Route → Set ℓ
 𝑪 r = weight A (path r) ≈ r
 
 𝑰 : Route → Set ℓ
 𝑰 r = ¬ 𝑪 r
+
+--------------------------------------------------------------------------------
+-- Some simple properties
 
 𝑪? : U.Decidable 𝑪
 𝑪? r = weight A (path r) ≟ r
@@ -86,7 +98,7 @@ weight-cong (valid (refl ∷ p≈q)) = ▷-cong _ (weight-cong (valid p≈q))
 ...     | pᵣ≈q | no ¬ij⇿q | _       = 𝑪-cong (≈-sym (path-reject (A i j) pᵣ≈q (inj₁ ¬ij⇿q))) ∞ᶜ -- pᵣ≈q
 ...     | pᵣ≈q | _        | no  i∈q = 𝑪-cong (≈-sym (path-reject (A i j) pᵣ≈q (inj₂ i∈q))) ∞ᶜ -- pᵣ≈q
 ...     | pᵣ≈q | yes ij⇿q | yes i∉q = begin
-  weight A (path (A i j ▷ r))                   ≈⟨ weight-cong {path (A i j ▷ r)} (path-accept (A i j) pᵣ≈q Aᵢⱼ▷r≉∞ ij⇿q i∉q) ⟩
+  weight A (path (A i j ▷ r))                   ≈⟨ weight-cong {_} {path (A i j ▷ r)} (path-accept (A i j) pᵣ≈q Aᵢⱼ▷r≉∞ ij⇿q i∉q) ⟩
   weight A (valid ((i , j) ∷ q ∣ ij⇿q ∣ i∉q))   ≡⟨⟩
   A i j ▷ weight A (valid q)                    ≈⟨ ▷-cong (A i j) rᶜ ⟩
   A i j ▷ r                                     ∎
@@ -126,27 +138,49 @@ sizeⁱ-incr {i} {j} {r} {f} f▷rⁱ with f ▷ r ≟ ∞
 sizeⁱ-incr′ : ∀ {i j : Fin n} {r s} {f : Step i j} → 𝑰 s → s ≈ f ▷ r → suc (size r) ≡ size s
 sizeⁱ-incr′ sⁱ s≈f▷r = trans (sizeⁱ-incr (𝑰-cong s≈f▷r sⁱ)) (size-cong (≈-sym s≈f▷r))
 
-------------------------------------------------------------------------------
--- Types
+--------------------------------------------------------------------------------
+-- The consistent routing algebra
+--------------------------------------------------------------------------------
+-- The subset of routes consistent with the current network topology form a
+-- finite routing algebra
+
+-- A consistent route is simply a route paired with a proof that it is
+-- consistent.
 
 CRoute : Set _
 CRoute = Σ Route 𝑪
 
--- Note: U i j is never used but is included so that i and j are inferrable
+toCRoute : ∀ {r} → 𝑪 r → CRoute
+toCRoute {r} rᶜ = r , rᶜ
+
+fromCRoute : CRoute → Route
+fromCRoute (r , _ ) = r
+
+-- The sets of edge functions for the consistent routing algebra are a little
+-- harder to define. The edges are labelled with the arcs, that are then
+-- used to index into the current network topology. The problem is that they
+-- technically they need to work for all sizes of networks. Therefore the
+-- arc indexes (i.e. i and j from CStep i j) are discarded, and only the
+-- contents of the arc (Fin n × Fin n) are used. The type has to be extended
+-- to Maybe (Fin n × Fin n) to ensure that the algebra has an invalid edge f∞.
+-- Finally to ensure that i and j are still inferable by Agda, it is is
+-- necessary to append the no-op type (i ≡ j ⊎ i ≢ j). Basically it's all
+-- an ugly hack but it seems to work.
+
 CStep : ∀ {m} → Fin m → Fin m → Set
 CStep i j = Maybe (Fin n × Fin n) × (i ≡ j ⊎ i ≢ j)
 
-------------------------------------------------------------------------------
--- Special routes
+-- The trivial route is simply taken from the original algebra
 
 C0# : CRoute
 C0# = 0# , 0ᶜ
 
+-- The invalid route is simply taken from the original algebra
+
 C∞ : CRoute
 C∞ = ∞ , ∞ᶜ
 
-------------------------------------------------------------------------------
--- Equality
+-- Equality over consistent routes is equality on the route
 
 infix 4 _≈ᶜ_ _≉ᶜ_ _≟ᶜ_
 
@@ -155,6 +189,31 @@ _≈ᶜ_ = _≈_ on proj₁
 
 _≉ᶜ_ : Rel CRoute _
 r ≉ᶜ s = ¬ (r ≈ᶜ s)
+
+-- Again the choice operator is simply lifted to consistent routes
+
+infix 7 _⊕ᶜ_
+
+_⊕ᶜ_ : Op₂ CRoute
+(r , rᶜ) ⊕ᶜ (s , sᶜ) = r ⊕ s , ⊕-pres-𝑪 rᶜ sᶜ
+
+-- Extension works a little differently. The arc containing `nothing` is the
+-- invalid arc. For the arc (k , l), extending the route is performed by
+-- applying the original edge weight A k l in the network topology.
+
+infix 6 _▷ᶜ_
+
+_▷ᶜ_ : ∀{n} {i j : Fin n} → CStep i j → CRoute → CRoute
+(nothing       , _) ▷ᶜ (r , rᶜ) = C∞
+(valid (k , l) , _) ▷ᶜ (r , rᶜ) = A k l ▷ r , ▷-pres-𝑪 k l rᶜ
+-- As mentioned the invalid arc weight is simply `nothing`
+
+f∞ᶜ : ∀ {n} (i j : Fin n) → CStep i j
+f∞ᶜ i j = nothing , toSum (i Fin.≟ j)
+
+-- As expected, equality obeys all the required properties
+
+open AlgebraicProperties _≈ᶜ_
 
 _≟ᶜ_ : B.Decidable _≈ᶜ_
 _ ≟ᶜ _ = _ ≟ _
@@ -168,40 +227,17 @@ Sᶜ = On.setoid {B = CRoute} S proj₁
 DSᶜ : DecSetoid _ _
 DSᶜ = On.decSetoid {B = CRoute} DS proj₁
 
-------------------------------------------------------------------------------
--- Choice operator
-
-open AlgebraicProperties _≈ᶜ_
-
-infix 7 _⊕ᶜ_
-
-_⊕ᶜ_ : Op₂ CRoute
-(r , rᶜ) ⊕ᶜ (s , sᶜ) = r ⊕ s , ⊕-pres-𝑪 rᶜ sᶜ
-
 ⊕ᶜ-cong : Congruent₂ _⊕ᶜ_
 ⊕ᶜ-cong = ⊕-cong
-
-------------------------------------------------------------------------------
--- Extension functions
-
-infix 6 _▷ᶜ_
-
-_▷ᶜ_ : ∀{n} {i j : Fin n} → CStep i j → CRoute → CRoute
-(nothing       , _) ▷ᶜ (r , rᶜ) = C∞
-(valid (k , l) , _) ▷ᶜ (r , rᶜ) = A k l ▷ r , ▷-pres-𝑪 k l rᶜ
 
 ▷ᶜ-cong : ∀ {n} {i j : Fin n} (f : CStep i j) {r s} → r ≈ᶜ s → f ▷ᶜ r ≈ᶜ f ▷ᶜ s
 ▷ᶜ-cong (nothing       , _) = λ _ → ≈-refl
 ▷ᶜ-cong (valid (k , l) , _) = ▷-cong (A k l)
 
-f∞ᶜ : ∀ {n} (i j : Fin n) → CStep i j
-f∞ᶜ i j = nothing , toSum (i Fin.≟ j)
-
 f∞ᶜ-reject : ∀ {n} (i j : Fin n) → ∀ x → (f∞ᶜ i j) ▷ᶜ x ≈ᶜ C∞
 f∞ᶜ-reject _ _ _ = ≈-refl
 
-------------------------------------------------------------------------------
--- Raw routing algebra
+-- Finally the raw routing algebra may be formed
 
 algebraᶜ : RawRoutingAlgebra 0ℓ (b ⊔ ℓ) ℓ
 algebraᶜ = record
@@ -220,7 +256,7 @@ algebraᶜ = record
   }
 
 ------------------------------------------------------------------------------
--- Routing algebra properties
+-- The consistent algebra obeys all the properties of a routing algebra
 
 ⊕ᶜ-assoc : Associative _⊕ᶜ_
 ⊕ᶜ-assoc _ _ _ = ⊕-assoc _ _ _
@@ -252,7 +288,9 @@ isRoutingAlgebraᶜ = record
   }
 
 ------------------------------------------------------------------------------
--- Optional properties
+-- The consistent algebra preserves strict increasingness and is always
+-- guaranteed to be finite (as the set of simple paths in the network is
+-- finite).
 
 isIncreasingᶜ : IsIncreasing algebra → IsIncreasing algebraᶜ
 isIncreasingᶜ incr (valid (k , l) , _) (r , _) = incr (A k l) r
@@ -280,16 +318,8 @@ isFiniteᶜ = allCRoutes , ∈-allCRoutes
       rᶜ (∈-map⁺ (ℙₛ n) Sᶜ weight-cong (∈-allPaths (path r)))
 
 ------------------------------------------------------------------------------
--- Conversion
-
-toCRoute : ∀ {r} → 𝑪 r → CRoute
-toCRoute {r} rᶜ = r , rᶜ
-
-fromCRoute : CRoute → Route
-fromCRoute (r , _ ) = r
-
-------------------------------------------------------------------------------
--- Adjacency matrix
+-- Finally the corresponding adjacency matrix for the consitent algebra may be
+-- built
 
 Aᶜ : AdjacencyMatrix algebraᶜ n
 Aᶜ i j = just (i , j) , toSum (i Fin.≟ j)

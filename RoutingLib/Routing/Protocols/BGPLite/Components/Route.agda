@@ -1,4 +1,4 @@
-open import Data.Nat using (ℕ; _<_; _≟_)
+open import Data.Nat using (ℕ; _<_; _≤_; _≟_)
 open import Data.Nat.Properties hiding (≡-isDecEquivalence)
 open import Data.Fin using (Fin)
 open import Data.Product using (_,_)
@@ -13,9 +13,9 @@ open import Relation.Unary using (Pred)
 open import RoutingLib.Data.Path.Uncertified
 open import RoutingLib.Data.Path.Uncertified.Properties
 
-open import RoutingLib.Routing.Protocols.BGPLite.Communities
+open import RoutingLib.Routing.Protocols.BGPLite.Components.Communities
 
-module RoutingLib.Routing.Protocols.BGPLite.Route where
+module RoutingLib.Routing.Protocols.BGPLite.Components.Route where
 
 ------------------------------------------------------------------------
 -- Types
@@ -26,6 +26,9 @@ Level = ℕ
 data Route : Set where
   invalid : Route
   valid   : (l : Level) → (cs : CommunitySet) → (p : Path) → Route
+
+data IsValid : Route → Set where
+  isValid : ∀ l cs p → IsValid (valid l cs p)
 
 ------------------------------------------------------------------------
 -- Equality over routes
@@ -178,4 +181,10 @@ r ≰ᵣ s = ¬ (r ≤ᵣ s)
     ; total = ≤ᵣ-total
     }
   }
+
+≤ᵣ-reject : ∀ {k l p q cs ds} → l ≤ k → length p < length q → valid k ds q ≰ᵣ valid l cs p
+≤ᵣ-reject l≤k |p|<|q| (level< k<l)        = <⇒≱ k<l l≤k
+≤ᵣ-reject l≤k |p|<|q| (length< _ |q|<|p|) = <-asym |p|<|q| |q|<|p|
+≤ᵣ-reject l≤k |p|<|q| (plex< _ |q|≡|p| _) = <-irrefl (sym |q|≡|p|) |p|<|q|
+≤ᵣ-reject l≤k |p|<|q| (comm≤ _ refl _)    = <-irrefl refl |p|<|q|
 

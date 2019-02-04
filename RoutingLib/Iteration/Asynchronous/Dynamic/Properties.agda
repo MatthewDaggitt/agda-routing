@@ -1,3 +1,9 @@
+--------------------------------------------------------------------------------
+-- Some basic properties of asynchronous iterations
+--------------------------------------------------------------------------------
+
+module RoutingLib.Iteration.Asynchronous.Dynamic.Properties where
+
 open import Level using (_⊔_) renaming (zero to lzero; suc to lsuc)
 open import Data.Fin using (Fin)
 open import Data.Fin.Dec using (_∈?_)
@@ -25,8 +31,6 @@ open import RoutingLib.Relation.Unary.Indexed using (IPred; Uᵢ; _∈ᵢ_; _⊆
 open import RoutingLib.Iteration.Asynchronous.Dynamic
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
 
-module RoutingLib.Iteration.Asynchronous.Dynamic.Properties where
-
 -------------------------------------------------------------------------
 -- Basic properties of the asynchronous state function
 
@@ -35,6 +39,8 @@ module _ {a ℓ n} (I : AsyncIterable a ℓ n) (𝓢 : Schedule n) where
   open AsyncIterable I
   open Schedule 𝓢
 
+  -- asyncIter respects equality of times (not immediately obvious due to
+  -- the Acc arguments)
   asyncIter-cong : ∀ x₀ {t₁ t₂} (acc₁ : Acc _<_ t₁) (acc₂ : Acc _<_ t₂) →
                    t₁ ≡ t₂ → asyncIter' I 𝓢 x₀ acc₁ ≈ asyncIter' I 𝓢 x₀ acc₂
   asyncIter-cong  x₀ {zero} rec₁ rec₂ refl i with i ∈? ρ 0
@@ -44,7 +50,8 @@ module _ {a ℓ n} (I : AsyncIterable a ℓ n) (𝓢 : Schedule n) where
   ... | no _       | _     | _     = ≈ᵢ-refl
   ... | yes _      | no  _ | _     = ≈ᵢ-refl
   ... | yes _      | yes _ | no  _ = asyncIter-cong x₀ (rec₁ t _) _ refl i
-  ... | yes i∈ρ₁₊ₜ | yes _ | yes _ = F-cong (η (suc t)) (ρ (suc t)) (λ j → asyncIter-cong x₀ (rec₁ (β (suc t) i j) _) _ refl j) i∈ρ₁₊ₜ
+  ... | yes i∈ρ₁₊ₜ | yes _ | yes _ = F-cong (η (suc t)) (ρ (suc t))
+    (λ j → asyncIter-cong x₀ (rec₁ (β (suc t) i j) _) _ refl j) i∈ρ₁₊ₜ
 
   -- If a node is inactive at time t then it has the blank state
   asyncIter-inactive : ∀ x₀ {t} (rec : Acc _<_ t) {i} →
@@ -57,7 +64,7 @@ module _ {a ℓ n} (I : AsyncIterable a ℓ n) (𝓢 : Schedule n) where
   ... | yes i∈ρ₁₊ₜ = contradiction i∈ρ₁₊ₜ i∉ρ₁₊ₜ
 
 -------------------------------------------------------------------------
--- Basic properties of safety
+-- Convergent
 
 module _ {a ℓ n} {I : AsyncIterable a ℓ n} where
 
@@ -77,14 +84,14 @@ module _ {a ℓ n} {I : AsyncIterable a ℓ n} where
     where open PartiallyConvergent Y₀-safe
 
 -------------------------------------------------------------------------
--- WellFormed properties
+-- Accordant
 
 module _ {a ℓ n} (I : AsyncIterable a ℓ n) where
 
   open AsyncIterable I
 
-  wf∧x≈ₚy⇒x≈y : ∀ {p x y} → x ∈ Accordant p → y ∈ Accordant p →
-                x ≈[ p ] y → x ≈ y
-  wf∧x≈ₚy⇒x≈y {p} x∈Aₚ y∈Aₚ x≈ₚy i with i ∈? p
+  xy∈Aₚ∧x≈ₚy⇒x≈y : ∀ {p x y} → x ∈ Accordant p → y ∈ Accordant p →
+                   x ≈[ p ] y → x ≈ y
+  xy∈Aₚ∧x≈ₚy⇒x≈y {p} x∈Aₚ y∈Aₚ x≈ₚy i with i ∈? p
   ... | yes i∈p = x≈ₚy i∈p
   ... | no  i∉p = ≈ᵢ-trans (x∈Aₚ i∉p) (≈ᵢ-sym (y∈Aₚ i∉p))

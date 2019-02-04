@@ -16,3 +16,13 @@ begin⟨ x ⟩ f = f x
 
 ⇒_∎ : ∀ {a} (A : Set a) → (A → A)
 ⇒ A ∎ = id
+
+---
+--- this is a simple example illustrating the use of this notation. 
+---
+private 
+   example1 : ∀ {a} (A : Set a) → (B : Set a) →  (C : Set a) → (A → B) → (B → C) → A → C 
+   example1 A B C f g x = begin⟨ x ⟩
+                   ⇒ A      ∴⟨ f ⟩
+                   ⇒ B      ∴⟨ g ⟩                   
+                   ⇒ C ∎

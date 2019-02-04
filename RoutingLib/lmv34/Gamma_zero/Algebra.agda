@@ -12,16 +12,16 @@ open Routing algebra n
 open RawRoutingAlgebra algebra
 
 -- Matrix addition
-infixl 9 _M⊕_
-_M⊕_ : Op₂ RoutingMatrix
-(A M⊕ B) i j = (A i j) ⊕ (B i j)
+infixl 10 _⊕ₘ_
+_⊕ₘ_ : Op₂ RoutingMatrix
+(A ⊕ₘ B) i j = (A i j) ⊕ (B i j)
 
 -- Big choice operator
-infix 5 Σ⊕
-Σ⊕ : ∀ {n} (f : Fin n → Route) → Route
-Σ⊕ f = foldr _⊕_ ∞ (tabulate f)
+infix 5 ⨁
+⨁ : ∀ {k} → (Fin k → Route) → Route
+⨁ iter = foldr _⊕_ ∞ (tabulate iter)
 
 -- Matrix application
-infix 10 _〚_〛
-_〚_〛 : AdjacencyMatrix → RoutingMatrix → RoutingMatrix
-(A 〚 X 〛) i j = Σ⊕ (λ k → (A i k) ▷ (X k j))
+infix 11 _〔_〕
+_〔_〕 : AdjacencyMatrix → RoutingMatrix → RoutingMatrix
+(A 〔 X 〕) i j = ⨁ (λ k → (A i k) ▷ (X k j))

@@ -50,7 +50,6 @@ module RoutingLib.Iteration.Asynchronous.Static.Convergence.ACOImpliesConvergesO
 
 open AsyncIterable I∥
 open ACO  aco
--- open ACOProperties I∥ aco
 
 
 k* : ℕ
@@ -59,16 +58,16 @@ k* = proj₁ (B-finish)
 x* : S
 x* = proj₁ (proj₂ B-finish)
 
-B* : x*   ∈ᵢ B k* 
-B* = proj₁ (proj₂ (proj₂ B-finish) ≤-refl)
+x*∈B[k*] : x* ∈ᵢ B k* 
+x*∈B[k*] = proj₁ (proj₂ (proj₂ B-finish) ≤-refl)
 
-F* : (F x* ∈ᵢ B (suc k*)) → F x* ≈ x* 
-F* = proj₂ (proj₂ (proj₂ B-finish) (n≤1+n k*))
+x∈B[k*]⇒x≈x* : ∀ {x} → x ∈ᵢ B k* → x ≈ x* 
+x∈B[k*]⇒x≈x* = proj₂ (proj₂ (proj₂ B-finish) ≤-refl)
 
 x*-fixed : F x* ≈ x*
-x*-fixed = begin⟨ B* ⟩
+x*-fixed = begin⟨ x*∈B[k*] ⟩
   ⇒ x*   ∈ᵢ B k*       ∴⟨ F-mono-B ⟩
-  ⇒ F x* ∈ᵢ B (suc k*) ∴⟨ F* ⟩
+  ⇒ F x* ∈ᵢ B (suc k*) ∴⟨ proj₂ (proj₂ (proj₂ B-finish) (n≤1+n k*)) ⟩
   ⇒ F x* ≈ x*          ∎
 
 ------------------------------------------------------------------------
@@ -187,9 +186,9 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ᵢ B 0) (𝓢 : Schedule n) where
   messages-pp pp c∈Bₖ = m∈Bₖᵉ , s∈B₁₊ₖ
     where
     open Pseudoperiod pp
-    m∈Bₖᵐ = advance-messages β[s,m] c∈Bₖ
-    m∈Bₖᵉ  = message-steps mid≤end m∈Bₖᵐ
-    s∈B₁₊ₖ = advance-state α[m,e] m∈Bₖᵐ
+    m∈Bₖᵐ  = advance-messages β[s,m] c∈Bₖ
+    m∈Bₖᵉ   = message-steps mid≤end m∈Bₖᵐ
+    s∈B₁₊ₖ  = advance-state α[m,e] m∈Bₖᵐ
   
   messages-mpp : ∀ {s e k n} →
                  MultiPseudoperiod n [ s , e ] →
@@ -218,16 +217,13 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ᵢ B 0) (𝓢 : Schedule n) where
   x*-reached : ∀ {s m e : 𝕋} →
                MultiPseudoperiod k* [ s , m ] →
                m ≤ e → 
-               δ' x₀ (<-wellFounded e) ≈ x*
+               δ x₀ e ≈ x*
   x*-reached {s} {m} {e} mpp m≤e = begin⟨ mpp ⟩
     ⇒ MultiPseudoperiod k* [ s , m ]  ∴⟨ computation∈Bₖ ⟩
     ⇒ ComputationInBox k* AtTime m    ∴⟨ state-steps m≤e ⟩
     ⇒ StateInBox k* AtTime e          ∴⟨ (λ prf i → prf i (<-wellFounded e)) ⟩
-    ⇒ δ x₀ e ∈ᵢ B k*                  ∴⟨ proj₂ (proj₂ (proj₂ B-finish) ≤-refl) ⟩
+    ⇒ δ x₀ e ∈ᵢ B k*                  ∴⟨ x∈B[k*]⇒x≈x* ⟩
     ⇒ δ x₀ e ≈ x*                     ∎
-    where
-    last-step : δ x₀ e ∈ᵢ B k* → δ x₀ e ≈ x*
-    last-step = proj₂ (proj₂ (proj₂ B-finish) ≤-refl)
 
 convergent : ConvergesOver I∥ (B 0) 
 convergent = record

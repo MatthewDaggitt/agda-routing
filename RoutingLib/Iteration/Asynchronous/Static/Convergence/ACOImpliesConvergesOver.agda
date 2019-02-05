@@ -59,10 +59,16 @@ k* = proj₁ (B-finish)
 x* : S
 x* = proj₁ (proj₂ B-finish)
 
+B* : x*   ∈ᵢ B k* 
+B* = proj₁ (proj₂ (proj₂ B-finish) ≤-refl)
+
+F* : (F x* ∈ᵢ B (suc k*)) → F x* ≈ x* 
+F* = proj₂ (proj₂ (proj₂ B-finish) (n≤1+n k*))
+
 x*-fixed : F x* ≈ x*
-x*-fixed = begin⟨ proj₁ (proj₂ (proj₂ B-finish) ≤-refl)  ⟩
+x*-fixed = begin⟨ B* ⟩
   ⇒ x*   ∈ᵢ B k*       ∴⟨ F-mono-B ⟩
-  ⇒ F x* ∈ᵢ B (suc k*) ∴⟨ proj₂ (proj₂ (proj₂ B-finish) (n≤1+n k*)) ⟩
+  ⇒ F x* ∈ᵢ B (suc k*) ∴⟨ F* ⟩
   ⇒ F x* ≈ x*          ∎
 
 ------------------------------------------------------------------------
@@ -118,9 +124,8 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ᵢ B 0) (𝓢 : Schedule n) where
   computation∈B₀ t = messages∈B₀ t , state∈B₀ t
   
 --------------------------------------------------------------------------
--- Preservation: if the asynchronous iteration is in a box and
--- information recieved is in that box then assuming the epoch is the
--- same, it will still be in that box in the future.
+-- Preservation: if the asynchronous iteration is in a box, 
+-- then it will still be in that box in the future.
 
   state-steps : ∀ {k s e} → s ≤ e →
                 ComputationInBox k AtTime s →
@@ -220,8 +225,11 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ᵢ B 0) (𝓢 : Schedule n) where
     ⇒ StateInBox k* AtTime e          ∴⟨ (λ prf i → prf i (<-wellFounded e)) ⟩
     ⇒ δ x₀ e ∈ᵢ B k*                  ∴⟨ proj₂ (proj₂ (proj₂ B-finish) ≤-refl) ⟩
     ⇒ δ x₀ e ≈ x*                     ∎
+    where
+    last-step : δ x₀ e ∈ᵢ B k* → δ x₀ e ≈ x*
+    last-step = proj₂ (proj₂ (proj₂ B-finish) ≤-refl)
 
-convergent : ConvergesOver I∥ (B 0)
+convergent : ConvergesOver I∥ (B 0) 
 convergent = record
   { x*         = x*
   ; k*         = k*

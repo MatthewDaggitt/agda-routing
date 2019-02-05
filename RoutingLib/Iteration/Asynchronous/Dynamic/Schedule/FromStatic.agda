@@ -36,45 +36,44 @@ convert {n} static = record
 --------------------------------------------------------------------------------
 -- Properties
 
-module _ {n} (S : StaticSchedule n) where
+module _ {n} (ψˢ : StaticSchedule n) where
 
   private
-    D : Schedule n
-    D = convert S
+    ψᵈ : Schedule n
+    ψᵈ = convert ψˢ
 
-  convert-subEpoch : ∀ {s e} → s ≤ e → IsSubEpoch D [ s , e ]
+  convert-subEpoch : ∀ {s e} → s ≤ e → SubEpoch ψᵈ [ s , e ]
   convert-subEpoch s≤e = mkₛₑ s≤e refl
 
   convert-isActiveIn : ∀ {s e i} →
-                       Static._IsActiveIn_ S i [ s , e ] →
-                       _IsActiveIn_ D i [ s , e ]
+                       Static._IsActiveIn_ ψˢ i [ s , e ] →
+                       _IsActiveIn_ ψᵈ i [ s , e ]
   convert-isActiveIn (Static.mkₐᵢ α+ s<α+ α+≤e i∈α+[i]) =
     mkₐᵢ refl α+ s<α+ α+≤e i∈α+[i]
 
-  convert-activationPeriod : ∀ {s e} → Static.IsActivationPeriod S [ s , e ] →
-                             IsActivationPeriod D [ s , e ]
+  convert-activationPeriod : ∀ {s e} → Static.ActivationPeriod ψˢ [ s , e ] →
+                             ActivationPeriod ψᵈ [ s , e ]
   convert-activationPeriod (Static.mkₐ start≤end isActivation) =
     mkₐ (convert-subEpoch start≤end) (λ _ → convert-isActiveIn (isActivation _))
 
-  convert-expiryPeriod : ∀ {s e} → Static.IsExpiryPeriod S [ s , e ] →
-                             IsExpiryPeriod D [ s , e ]
+  convert-expiryPeriod : ∀ {s e} → Static.ExpiryPeriod ψˢ [ s , e ] →
+                             ExpiryPeriod ψᵈ [ s , e ]
   convert-expiryPeriod (Static.mkₑ start≤end expiryᵢ) =
     mkₑ (convert-subEpoch start≤end) (λ _ e<t j → expiryᵢ _ j e<t)
 
-  convert-pseudoperiod : ∀ {s e} → Static.IsPseudoperiodic S [ s , e ] →
-                         IsPseudoperiodic D [ s , e ]
+  convert-pseudoperiod : ∀ {s e} → Static.Pseudoperiod ψˢ [ s , e ] →
+                         Pseudoperiod ψᵈ [ s , e ]
   convert-pseudoperiod pp = record
     { m      = m
     ; β[s,m] = convert-expiryPeriod β[s,m]
     ; α[m,e] = convert-activationPeriod α[m,e]
-    }
-    where open Static.IsPseudoperiodic pp
+    } where open Static.Pseudoperiod pp
 
-  convert-multiPseudoperiod : ∀ {s e k} → Static.IsMultiPseudoperiodic S k [ s , e ] →
-                              IsMultiPseudoperiodic D k [ s , e ]
+  convert-multiPseudoperiod : ∀ {s e k} → Static.MultiPseudoperiod ψˢ k [ s , e ] →
+                              MultiPseudoperiod ψᵈ k [ s , e ]
   convert-multiPseudoperiod Static.none            = none
   convert-multiPseudoperiod (Static.next m pp mpp) =
     next m (convert-pseudoperiod pp) (convert-multiPseudoperiod mpp)
 
-  convert∈Full : D satisfies Full
+  convert∈Full : ψᵈ satisfies Full
   convert∈Full t = ⊤-full

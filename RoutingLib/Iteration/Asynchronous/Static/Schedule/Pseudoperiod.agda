@@ -1,49 +1,58 @@
+--------------------------------------------------------------------------------
+-- This module defines what it means for a period of time to be a pseudoperiod
+-- with respect to some schedule. As is shown by the proofs in the module
+-- `RoutingLib.Iteration.Asynchronous.Static.Convergence.ACOImpliesConvergent`
+-- during a pseudoperiod the asynchronous iteration will make at least as much
+-- progress towards the fixed point as a single synchronous iteration.
+--------------------------------------------------------------------------------
+
+open import RoutingLib.Iteration.Asynchronous.Static.Schedule
+
+module RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod
+  {n} (ψ : Schedule n) where
+
 open import Level using () renaming (zero to lzero)
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (_∈_; _∉_)
 open import Data.Nat using (ℕ; zero; suc; s≤s; _<_; _≤_; _∸_; _≟_; _⊔_; _+_)
-open import Data.Nat.Properties using (1+n≰n; ≤-refl; ≤+≢⇒<; <⇒≤; +-suc; ≤-trans; <-transʳ)
+open import Data.Nat.Properties
 open import Data.List using (foldr; tabulate; applyUpTo)
 open import Data.Product using (∃; _×_; _,_; proj₁)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; subst)
+open import Relation.Binary.PropositionalEquality
+  using (_≡_; refl; trans; subst)
 open import Relation.Nullary using (¬_; yes; no)
 open import Induction.WellFounded using (Acc; acc)
 open import Induction.Nat using (<-wellFounded)
 
 open import RoutingLib.Data.Table using (max)
-import RoutingLib.Data.List.Extrema.Nat as List
-
-open import RoutingLib.Iteration.Asynchronous.Static.Schedule
-
-module RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod {n} (ψ : Schedule n) where
 
 open Schedule ψ
 
 --------------------------------------------------------------------------------
 -- Activation periods --
 --------------------------------------------------------------------------------
---
 -- In activation period every participating node is activated at least once.
--- These are typically named α[s,e]
+--
+-- Activation periods are typically named α[s,e]
 
 record _IsActiveIn_ (i : Fin n) (period : TimePeriod) : Set where
   constructor mkₐᵢ
   open TimePeriod period
   field
-    α+            : 𝕋
-    s<α+          : start < α+
-    α+≤e          : α+ ≤ end
-    i∈α+[i]       : i ∈ α α+
+    tₐ       : 𝕋
+    s<tₐ     : start < tₐ
+    tₐ≤e     : tₐ ≤ end
+    i∈α[tₐ]  : i ∈ α tₐ
 
   start≤end : start ≤ end
-  start≤end = ≤-trans (<⇒≤ s<α+) α+≤e
+  start≤end = ≤-trans (<⇒≤ s<tₐ) tₐ≤e
 
-record IsActivationPeriod (period : TimePeriod) : Set where
+record ActivationPeriod (period : TimePeriod) : Set where
   constructor mkₐ
   open TimePeriod period
   field
-    start≤end    : start ≤ end
-    isActivation : ∀ i → i IsActiveIn period
+    start≤end     : start ≤ end
+    isActivation  : ∀ i → i IsActiveIn period
 
   module _ i where
     open _IsActiveIn_ (isActivation i) public hiding (start≤end)
@@ -51,13 +60,12 @@ record IsActivationPeriod (period : TimePeriod) : Set where
 --------------------------------------------------------------------------------
 -- Expiry periods --
 --------------------------------------------------------------------------------
---
 -- After the end of an expiry period, there are no messages left in flight that
 -- originate from before the start of the expiry period.
 --
--- These are typically named β[s,e]
+-- Activation periods are typically named β[s,e]
 
-record IsExpiryPeriod (period : TimePeriod) : Set where
+record ExpiryPeriod (period : TimePeriod) : Set where
   constructor mkₑ
   open TimePeriod period
   field
@@ -67,21 +75,20 @@ record IsExpiryPeriod (period : TimePeriod) : Set where
 --------------------------------------------------------------------------------
 -- Pseudoperiod
 --------------------------------------------------------------------------------
---
 -- A time period that "emulates" one synchronous iteration. During a
 -- pseudoperiod every node activates and then we wait until all data before
 -- those activation points are flushed from the system.
 
-record IsPseudoperiodic (period : TimePeriod) : Set₁ where
+record Pseudoperiod (period : TimePeriod) : Set₁ where
   open TimePeriod period
   field
     m      : 𝕋
-    β[s,m] : IsExpiryPeriod     [ start , m   ]
-    α[m,e] : IsActivationPeriod [ m     , end ]
+    β[s,m] : ExpiryPeriod     [ start , m   ]
+    α[m,e] : ActivationPeriod [ m     , end ]
 
-  open IsExpiryPeriod β[s,m] public
+  open ExpiryPeriod β[s,m] public
     renaming (start≤end to start≤mid)
-  open IsActivationPeriod α[m,e] public
+  open ActivationPeriod α[m,e] public
     renaming (start≤end to mid≤end)
 
   start≤end : start ≤ end
@@ -90,21 +97,18 @@ record IsPseudoperiodic (period : TimePeriod) : Set₁ where
 --------------------------------------------------------------------------------
 -- Multi-pseudoperiods
 --------------------------------------------------------------------------------
---
 -- A time period that contains k pseudoperiods
 
-data IsMultiPseudoperiodic : ℕ → TimePeriod → Set₁ where
-  none : ∀ {s}         → IsMultiPseudoperiodic 0 [ s , s ]
+data MultiPseudoperiod : ℕ → TimePeriod → Set₁ where
+  none : ∀ {t} → MultiPseudoperiod 0 [ t , t ]
   next : ∀ {s} m {e k} →
-         IsPseudoperiodic [ s , m ] →
-         IsMultiPseudoperiodic k [ m , e ] →
-         IsMultiPseudoperiodic (suc k) [ s , e ]
+         Pseudoperiod [ s , m ] →
+         MultiPseudoperiod k [ m , e ] →
+         MultiPseudoperiod (suc k) [ s , e ]
 
-s≤e-mpp : ∀ {s e k} → IsMultiPseudoperiodic k [ s , e ] → s ≤ e
+s≤e-mpp : ∀ {s e k} → MultiPseudoperiod k [ s , e ] → s ≤ e
 s≤e-mpp none            = ≤-refl
-s≤e-mpp (next m pp mpp) = ≤-trans (IsPseudoperiodic.start≤end pp) (s≤e-mpp mpp)
-
-
+s≤e-mpp (next m pp mpp) = ≤-trans (Pseudoperiod.start≤end pp) (s≤e-mpp mpp)
 
 {-
 -----------------

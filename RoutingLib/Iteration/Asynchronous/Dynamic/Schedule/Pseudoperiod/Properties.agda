@@ -31,7 +31,8 @@ import RoutingLib.Data.List.Relation.Sublist.Propositional.Properties as Sublist
 open import RoutingLib.Asynchronous.Schedule
 import RoutingLib.Asynchronous.Schedule.Pseudoperiod as Pseudoperiod
 
-module RoutingLib.Asynchronous.Schedule.Pseudoperiod.Properties {n} (𝓢 : Schedule n) where
+module RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudoperiod.Properties
+  {n} (𝓢 : Schedule n) where
 
   open Schedule 𝓢
   open Pseudoperiod 𝓢

@@ -178,8 +178,8 @@ module _ {a ℓ n} (I : AsyncIterable a ℓ n) where
       -- the iteration will be at the fixed point x*.
       x*-reached : ∀ (x₀ : S) (S : Schedule n) →
                    ∀ {tₛ tₘ tₑ : 𝕋} →
-                   IsMultiPseudoperiodic S (k* (η S tₛ) (ρ S tₛ)) [ tₛ , tₘ ] →
-                   IsSubEpoch S [ tₘ , tₑ ] →
+                   MultiPseudoperiod S (k* (η S tₛ) (ρ S tₛ)) [ tₛ , tₘ ] →
+                   SubEpoch S [ tₘ , tₑ ] →
                    asyncIter I S x₀ tₑ ≈ x* (η S tₛ) (ρ S tₛ)
 
   -- This is a specialised definition that only guarantees the iteration

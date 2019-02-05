@@ -1,12 +1,26 @@
+--------------------------------------------------------------------------------
+-- This module defines what it means for a period of time to be a pseudoperiod
+-- with respect to some schedule. As is shown by the proofs in the module
+-- `RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.ACOImpliesConvergent`
+-- during a pseudoperiod the asynchronous iteration will make at least as much
+-- progress towards the fixed point as a single synchronous iteration.
+--------------------------------------------------------------------------------
+
+open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
+
+module RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudoperiod
+  {n} (ψ : Schedule n) where
+
 open import Level using () renaming (zero to lzero)
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (_∈_; _∉_)
 open import Data.Nat using (ℕ; zero; suc; s≤s; _<_; _≤_; _∸_; _≟_; _⊔_; _+_)
-open import Data.Nat.Properties using (1+n≰n; ≤-refl; ≤+≢⇒<; <⇒≤; +-suc; ≤-trans; <-transʳ)
+open import Data.Nat.Properties
 open import Data.List using (foldr; tabulate; applyUpTo)
 open import Data.Product using (∃; _×_; _,_; proj₁)
 open import Function using (_∘_)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; subst)
+open import Relation.Binary.PropositionalEquality
+  using (_≡_; refl; trans; subst)
 open import Relation.Nullary using (¬_; yes; no)
 open import Induction.WellFounded using (Acc; acc)
 open import Induction.Nat using (<-wellFounded)
@@ -14,11 +28,7 @@ open import Induction.Nat using (<-wellFounded)
 open import RoutingLib.Data.Table using (max)
 import RoutingLib.Data.List.Extrema.Nat as List
 
-open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
-
-module RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudoperiod {n} (𝓢 : Schedule n) where
-
-open Schedule 𝓢
+open Schedule ψ
 
 --------------------------------------------------------------------------------
 -- Sub epochs --
@@ -27,18 +37,18 @@ open Schedule 𝓢
 --
 -- These are typically named η[s,e].
 
-record IsSubEpoch (period : TimePeriod) : Set where
+record SubEpoch (period : TimePeriod) : Set where
   constructor mkₛₑ
   open TimePeriod period
   field
     start≤end : start ≤ end
     ηₛ≡ηₑ     : η start ≡ η end
 
-_++ₛₑ_ : ∀ {s m e} → IsSubEpoch [ s , m ] → IsSubEpoch [ m , e ] → IsSubEpoch [ s , e ]
+_++ₛₑ_ : ∀ {s m e} → SubEpoch [ s , m ] → SubEpoch [ m , e ] → SubEpoch [ s , e ]
 (mkₛₑ s≤m ηₛ≡ηₘ) ++ₛₑ (mkₛₑ m≤e ηₘ≡ηₑ) = record
   { start≤end = ≤-trans s≤m m≤e
   ; ηₛ≡ηₑ     = trans ηₛ≡ηₘ ηₘ≡ηₑ
-  } where open IsSubEpoch
+  } where open SubEpoch
 
 --------------------------------------------------------------------------------
 -- Activation periods --
@@ -57,17 +67,17 @@ record _IsActiveIn_ (i : Fin n) (period : TimePeriod) : Set where
     α+≤e          : α+ ≤ end
     i∈α+[i]       : i ∈ α α+
 
-  η[s,e] : IsSubEpoch [ start , end ]
+  η[s,e] : SubEpoch [ start , end ]
   η[s,e] = mkₛₑ (≤-trans (<⇒≤ s<α+) α+≤e) ηₛ≡ηₑ
 
-record IsActivationPeriod (period : TimePeriod) : Set where
+record ActivationPeriod (period : TimePeriod) : Set where
   constructor mkₐ
   open TimePeriod period
   field
-    η[s,e]        : IsSubEpoch period
+    η[s,e]        : SubEpoch period
     isActivation  : ∀ {i} → i ∈ ρ start → i IsActiveIn period
 
-  open IsSubEpoch η[s,e] public
+  open SubEpoch η[s,e] public
 
   module _ {i} (i∈ρ : i ∈ ρ start) where
     open _IsActiveIn_ (isActivation i∈ρ) public hiding (ηₛ≡ηₑ; η[s,e])
@@ -80,14 +90,14 @@ record IsActivationPeriod (period : TimePeriod) : Set where
 --
 -- These are typically named β[s,e]
 
-record IsExpiryPeriod (period : TimePeriod) : Set where
+record ExpiryPeriod (period : TimePeriod) : Set where
   constructor mkₑ
   open TimePeriod period
   field
-    η[s,e]  : IsSubEpoch period
+    η[s,e]  : SubEpoch period
     expiryᵢ  : ∀ {i} → i ∈ ρ start → ∀ {t} → end < t → ∀ j → start ≤ β t i j
 
-  open IsSubEpoch η[s,e] public
+  open SubEpoch η[s,e] public
 
 --------------------------------------------------------------------------------
 -- Pseudoperiod
@@ -97,16 +107,16 @@ record IsExpiryPeriod (period : TimePeriod) : Set where
 -- pseudoperiod every node activates and then we wait until all data before
 -- those activation points are flushed from the system.
 
-record IsPseudoperiodic (period : TimePeriod) : Set₁ where
+record Pseudoperiod (period : TimePeriod) : Set₁ where
   open TimePeriod period
   field
     m      : 𝕋
-    β[s,m] : IsExpiryPeriod     [ start , m   ]
-    α[m,e] : IsActivationPeriod [ m     , end ]
+    β[s,m] : ExpiryPeriod     [ start , m   ]
+    α[m,e] : ActivationPeriod [ m     , end ]
 
-  open IsExpiryPeriod β[s,m] public
+  open ExpiryPeriod β[s,m] public
     renaming (start≤end to start≤mid; ηₛ≡ηₑ to ηₛ≡ηₘ; η[s,e] to η[s,m])
-  open IsActivationPeriod α[m,e] public
+  open ActivationPeriod α[m,e] public
     renaming (start≤end to mid≤end;   ηₛ≡ηₑ to ηₘ≡ηₑ; η[s,e] to η[m,e])
 
   start≤end : start ≤ end
@@ -115,7 +125,7 @@ record IsPseudoperiodic (period : TimePeriod) : Set₁ where
   ηₛ≡ηₑ : η start ≡ η end
   ηₛ≡ηₑ = trans ηₛ≡ηₘ ηₘ≡ηₑ
 
-  η[s,e] : IsSubEpoch [ start , end ]
+  η[s,e] : SubEpoch [ start , end ]
   η[s,e] = mkₛₑ start≤end ηₛ≡ηₑ
 
 --------------------------------------------------------------------------------
@@ -124,20 +134,20 @@ record IsPseudoperiodic (period : TimePeriod) : Set₁ where
 --
 -- A time period that contains k pseudoperiods.
 
-data IsMultiPseudoperiodic : ℕ → TimePeriod → Set₁ where
-  none : ∀ {s}         → IsMultiPseudoperiodic 0 [ s , s ]
+data MultiPseudoperiod : ℕ → TimePeriod → Set₁ where
+  none : ∀ {t} → MultiPseudoperiod 0 [ t , t ]
   next : ∀ {s} m {e k} →
-         IsPseudoperiodic [ s , m ] →
-         IsMultiPseudoperiodic k [ m , e ] →
-         IsMultiPseudoperiodic (suc k) [ s , e ]
+         Pseudoperiod [ s , m ] →
+         MultiPseudoperiod k [ m , e ] →
+         MultiPseudoperiod (suc k) [ s , e ]
 
-ηₛ≡ηₑ-mpp : ∀ {s e k} → IsMultiPseudoperiodic k [ s , e ] → η s ≡ η e
+ηₛ≡ηₑ-mpp : ∀ {s e k} → MultiPseudoperiod k [ s , e ] → η s ≡ η e
 ηₛ≡ηₑ-mpp none            = refl
-ηₛ≡ηₑ-mpp (next m pp mpp) = trans (IsPseudoperiodic.ηₛ≡ηₑ pp) (ηₛ≡ηₑ-mpp mpp)
+ηₛ≡ηₑ-mpp (next m pp mpp) = trans (Pseudoperiod.ηₛ≡ηₑ pp) (ηₛ≡ηₑ-mpp mpp)
 
-s≤e-mpp : ∀ {s e k} → IsMultiPseudoperiodic k [ s , e ] → s ≤ e
+s≤e-mpp : ∀ {s e k} → MultiPseudoperiod k [ s , e ] → s ≤ e
 s≤e-mpp none            = ≤-refl
-s≤e-mpp (next m pp mpp) = ≤-trans (IsPseudoperiodic.start≤end pp) (s≤e-mpp mpp)
+s≤e-mpp (next m pp mpp) = ≤-trans (Pseudoperiod.start≤end pp) (s≤e-mpp mpp)
 
 {-
 -----------------

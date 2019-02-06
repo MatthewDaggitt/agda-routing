@@ -73,7 +73,7 @@ x*-fixed = begin⟨ x*∈B[k*] ⟩
 ------------------------------------------------------------------------
 -- Notation
 
-module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ᵢ B 0) (𝓢 : Schedule n) where
+module _ {x : S} (x∈B₀ : x ∈ᵢ B 0) (𝓢 : Schedule n) where
 
   open Schedule 𝓢
   open Pseudoperiods 𝓢
@@ -85,19 +85,19 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ᵢ B 0) (𝓢 : Schedule n) where
   δ' = asyncIter' I∥ 𝓢
 
   δ : S → 𝕋 → S
-  δ x₀ t = δ' x₀ (<-wellFounded t)
+  δ x t = δ' x (<-wellFounded t)
 
 
   -- The concept of being locally safe
 
   StateOfNode_InBox_AtTime_ : Fin n → ℕ → 𝕋 → Set ℓ₃
-  StateOfNode i InBox k AtTime t = (acc : Acc _<_ t) → δ' x₀ acc i ∈ B k i
+  StateOfNode i InBox k AtTime t = (acc : Acc _<_ t) → δ' x acc i ∈ B k i
 
   StateInBox_AtTime_ : ℕ → 𝕋 → Set ℓ₃
   StateInBox k AtTime t = ∀ i → StateOfNode i InBox k AtTime t
 
   MessagesOfNode_InBox_AtTime_ : Fin n → ℕ → 𝕋 → Set ℓ₃
-  MessagesOfNode i InBox k AtTime t = ∀ {j s} → t < s → (acc : Acc _<_ (β s i j)) → δ' x₀ acc j ∈ B k j
+  MessagesOfNode i InBox k AtTime t = ∀ {j s} → t < s → (acc : Acc _<_ (β s i j)) → δ' x acc j ∈ B k j
 
   MessagesInBox_AtTime_ : ℕ → 𝕋 → Set ℓ₃
   MessagesInBox k AtTime t = ∀ i → MessagesOfNode i InBox k AtTime t
@@ -111,7 +111,7 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ᵢ B 0) (𝓢 : Schedule n) where
 -- Base case: the asynchronous iteration is always in the initial box
 
   state∈B₀ : ∀ t → StateInBox 0 AtTime t
-  state∈B₀ zero    i (acc rec) = x₀∈B₀ i
+  state∈B₀ zero    i (acc rec) = x∈B₀ i
   state∈B₀ (suc t) i (acc rec) with i ∈? α (suc t)
   ... | no  _ = state∈B₀ t i (rec t _)
   ... | yes _ = F-resp-B₀ (λ j → state∈B₀ (β (suc t) i j) j _) i 
@@ -126,23 +126,22 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ᵢ B 0) (𝓢 : Schedule n) where
 -- Preservation: if the asynchronous iteration is in a box, 
 -- then it will still be in that box in the future.
 
-  state-steps : ∀ {k s e} → s ≤ e →
+  state-stability : ∀ {k s e} → s ≤ e →
                 ComputationInBox k AtTime s →
                 StateInBox k AtTime e
-  state-steps {k}     {s} {zero}  z≤n   c∈Bₖ = proj₂ c∈Bₖ
-  state-steps {zero}  {s} {suc e} s≤1+e c∈Bₖ i rec = state∈B₀ (suc e) i rec
-  state-steps {suc k} {s} {suc e} s≤1+e c∈Bₖ i (acc rec) with <-cmp s (suc e)
+  state-stability {k}     {s} {zero}  z≤n   c∈Bₖ = proj₂ c∈Bₖ
+  state-stability {zero}  {s} {suc e} s≤1+e c∈Bₖ = state∈B₀ (suc e)
+  state-stability {suc k} {s} {suc e} s≤1+e c∈Bₖ i (acc rec) with <-cmp s (suc e)
   ... | tri≈ _ refl _      = proj₂ c∈Bₖ i (acc rec)
   ... | tri> _ _ s>1+e     = contradiction s≤1+e (<⇒≱ s>1+e)
   ... | tri< (s≤s s≤e) _ _ with i ∈? α (suc e)
-  ...   | no  _ = state-steps s≤e c∈Bₖ i (rec e ≤-refl)
+  ...   | no  _ = state-stability s≤e c∈Bₖ i (rec e ≤-refl)
   ...   | yes _ = F-mono-B (λ j → proj₁ c∈Bₖ i (s≤s s≤e) _) i
 
-  message-steps : ∀ {k s e} →
-                  s ≤ e →
-                  MessagesInBox k AtTime s →
-                  MessagesInBox k AtTime e
-  message-steps s≤e m∈b i e<t recβ = m∈b i (<-transʳ s≤e e<t) recβ
+  message-stability : ∀ {k s e} → s ≤ e →
+                      MessagesInBox k AtTime s →
+                      MessagesInBox k AtTime e
+  message-stability s≤e m∈b i e<t = m∈b i (<-transʳ s≤e e<t)
 
 --------------------------------------------------------------------------
 -- Step: after one pseudoperiod the node is guaranteed to have
@@ -165,65 +164,51 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ᵢ B 0) (𝓢 : Schedule n) where
                   ActivationPeriod [ s , e ] →
                   MessagesInBox k AtTime s →
                   StateInBox (suc k) AtTime e
-  advance-state {s} {e} {k} (mkₐ v activeᵢ) m∈Bₖ i
+  advance-state (mkₐ v activeᵢ) m∈Bₖ i
     = advance-stateᵢ (activeᵢ i) (m∈Bₖ i)
 
   advance-messages : ∀ {s e k} →
                      ExpiryPeriod [ s , e ] →
                      ComputationInBox k AtTime s →
                      MessagesInBox k AtTime e
-  advance-messages {s} (mkₑ _ expiryᵢ) c∈Bₖ i {j} e<t recβ
-    = state-steps (expiryᵢ i j e<t) c∈Bₖ j recβ
+  advance-messages (mkₑ _ expiryᵢ) c∈Bₖ i {j} e<t
+    = state-stability (expiryᵢ i j e<t) c∈Bₖ j
 
---------------------------------------------------------------------------
--- Steps : after k pseudoperiods all nodes are guaranteed to have
--- advanced at least k boxes
-
-  messages-pp : ∀ {s e k} →
-                Pseudoperiod [ s , e ] →
-                ComputationInBox k       AtTime s →
-                ComputationInBox (suc k) AtTime e
-  messages-pp pp c∈Bₖ = m∈Bₖᵉ , s∈B₁₊ₖ
+  advance-computation₁ : ∀ {s e k} →
+                         Pseudoperiod [ s , e ] →
+                         ComputationInBox k       AtTime s →
+                         ComputationInBox (suc k) AtTime e
+  advance-computation₁ pp c∈Bₖ = m∈Bₖᵉ , s∈B₁₊ₖ
     where
     open Pseudoperiod pp
     m∈Bₖᵐ  = advance-messages β[s,m] c∈Bₖ
-    m∈Bₖᵉ   = message-steps mid≤end m∈Bₖᵐ
+    m∈Bₖᵉ   = message-stability mid≤end m∈Bₖᵐ
     s∈B₁₊ₖ  = advance-state α[m,e] m∈Bₖᵐ
   
-  messages-mpp : ∀ {s e k n} →
-                 MultiPseudoperiod n [ s , e ] →
-                 ComputationInBox k       AtTime s →
-                 ComputationInBox (n + k) AtTime e
-  messages-mpp {_} {_} {_} {zero}  none            c∈Bₖ = c∈Bₖ
-  messages-mpp {s} {e} {k} {suc n} (next m pp mpp) c∈Bₖ = begin⟨ c∈Bₖ ⟩
-    ⇒ ComputationInBox k           AtTime s ∴⟨ messages-pp pp ⟩
-    ⇒ ComputationInBox (suc k)     AtTime m ∴⟨ messages-mpp mpp ⟩
-    ⇒ ComputationInBox (n + suc k) AtTime e ∴⟨ subst (ComputationInBox_AtTime e) (+-suc n k) ⟩
-    ⇒ ComputationInBox (suc n + k) AtTime e ∎
+  advance-computationₙ : ∀ {s e k n} →
+                         MultiPseudoperiod n [ s , e ] →
+                         ComputationInBox k       AtTime s →
+                         ComputationInBox (k + n) AtTime e
+  advance-computationₙ {_} {_} {k} {zero}  none            c∈Bₖ rewrite +-identityʳ k = c∈Bₖ
+  advance-computationₙ {s} {e} {k} {suc n} (next m pp mpp) c∈Bₖ = begin⟨ c∈Bₖ ⟩
+    ⇒ ComputationInBox k           AtTime s ∴⟨ advance-computation₁ pp ⟩
+    ⇒ ComputationInBox (suc k)     AtTime m ∴⟨ advance-computationₙ mpp ⟩
+    ⇒ ComputationInBox (suc k + n) AtTime e ∴⟨ subst (ComputationInBox_AtTime e) (sym (+-suc k n)) ⟩
+    ⇒ ComputationInBox (k + suc n) AtTime e ∎
 
 --------------------------------------------------------------------------
 -- Convergence
 
-  computation∈Bₖ : ∀ {s e k} →
-                   MultiPseudoperiod k [ s , e ] →
-                   ComputationInBox k AtTime e
-  computation∈Bₖ {s} {e} {zero}  none = computation∈B₀ s
-  computation∈Bₖ {s} {e} {suc k} (next m pp mpp) = begin⟨ computation∈B₀ s ⟩
-    ⇒ ComputationInBox 0       AtTime s ∴⟨ messages-pp pp ⟩
-    ⇒ ComputationInBox 1       AtTime m ∴⟨ messages-mpp mpp ⟩
-    ⇒ ComputationInBox (k + 1) AtTime e ∴⟨ subst (ComputationInBox_AtTime e) (+-comm k 1) ⟩
-    ⇒ ComputationInBox (1 + k) AtTime e ∎
-
-  x*-reached : ∀ {s m e : 𝕋} →
-               MultiPseudoperiod k* [ s , m ] →
-               m ≤ e → 
-               δ x₀ e ≈ x*
-  x*-reached {s} {m} {e} mpp m≤e = begin⟨ mpp ⟩
-    ⇒ MultiPseudoperiod k* [ s , m ]  ∴⟨ computation∈Bₖ ⟩
-    ⇒ ComputationInBox k* AtTime m    ∴⟨ state-steps m≤e ⟩
-    ⇒ StateInBox k* AtTime e          ∴⟨ (λ prf i → prf i (<-wellFounded e)) ⟩
-    ⇒ δ x₀ e ∈ᵢ B k*                  ∴⟨ x∈B[k*]⇒x≈x* ⟩
-    ⇒ δ x₀ e ≈ x*                     ∎
+  x*-reached : ∀ {s e t : 𝕋} →
+               MultiPseudoperiod k* [ s , e ] →
+               e ≤ t → 
+               δ x t ≈ x*
+  x*-reached {s} {m} {e} mpp m≤e = begin⟨ computation∈B₀ s ⟩
+    ⇒ ComputationInBox 0  AtTime s ∴⟨ advance-computationₙ mpp ⟩
+    ⇒ ComputationInBox k* AtTime m ∴⟨ state-stability m≤e ⟩
+    ⇒ StateInBox k* AtTime e       ∴⟨ (λ prf i → prf i (<-wellFounded e)) ⟩
+    ⇒ δ x e ∈ᵢ B k*                ∴⟨ x∈B[k*]⇒x≈x* ⟩
+    ⇒ δ x e ≈ x*                   ∎
 
 convergent : ConvergesOver I∥ (B 0) 
 convergent = record

@@ -134,12 +134,11 @@ module _ {a ℓ n} (I : AsyncIterable a ℓ n) where
       x*         : S
       k*         : ℕ
       x*-fixed   : F x* ≈ x*
-      x*-reached : ∀ {x₀} → x₀ ∈ᵢ X₀ →
+      x*-reached : ∀ {x} → x ∈ᵢ X₀ →
                    (ψ : Schedule n) →
-                   ∀ {s m e : 𝕋} →
-                   MultiPseudoperiod ψ k* [ s , m ] →
-                   m ≤ e →
-                   asyncIter I ψ x₀ e ≈ x*
+                   ∀ {s e : 𝕋} → MultiPseudocycle ψ k* [ s , e ] →
+                   ∀ {t} → e ≤ t →
+                   asyncIter I ψ x t ≈ x*
 
   Converges : Set (lsuc lzero ⊔ a ⊔ ℓ)
   Converges = ConvergesOver Uᵢ

@@ -32,7 +32,8 @@ import RoutingLib.Routing.Algebra.Comparable as Comparable
 
 open import RoutingLib.Routing.Protocols.BGPLite
 open import RoutingLib.Routing.Protocols.BGPLite.Components.Route
-open import RoutingLib.Routing.Protocols.BGPLite.Components.Policy using (Policy; apply; reject; apply-result)
+open import RoutingLib.Routing.Protocols.BGPLite.Components.Policy
+  using (Policy; apply; reject; apply-result)
 open import RoutingLib.Routing.Protocols.BGPLite.Components.Communities
 
 module RoutingLib.Routing.Protocols.BGPLite.Properties where

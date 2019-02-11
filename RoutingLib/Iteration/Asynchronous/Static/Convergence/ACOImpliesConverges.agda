@@ -12,12 +12,13 @@
 --------------------------------------------------------------------------
 
 open import Data.Fin using (Fin)
-open import Data.Fin.Subset using (Subset; ⊤) renaming (_∈_ to _∈ₛ_; _∉_ to _∉ₛ_)
+open import Data.Fin.Subset using (Subset; ⊤)
+  renaming (_∈_ to _∈ₛ_; _∉_ to _∉ₛ_)
 open import Data.Fin.Dec using (_∈?_)
 open import Data.Maybe using (just; nothing)
 open import Data.Nat renaming (_≟_ to _≟ℕ_) hiding (_⊔_)
 open import Data.Nat.Properties hiding (_≟_)
-open import Data.Product as Prod using (∃; proj₂; proj₁; _,_; _×_; map)
+open import Data.Product using (∃; proj₂; proj₁; _,_; _×_; map)
 open import Function using (id; _∘_; _$_)
 open import Induction.WellFounded using (Acc; acc)
 open import Induction.Nat using (<-wellFounded)
@@ -40,35 +41,18 @@ open import RoutingLib.Iteration.Asynchronous.Static.Convergence.Conditions
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule
 import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod
   as Pseudoperiods
+import RoutingLib.Iteration.Asynchronous.Static.Convergence.Properties.ACO
+  as ACOProperties
 
-
-module RoutingLib.Iteration.Asynchronous.Static.Convergence.ACOImpliesConvergesOver
-  {a ℓ ℓ₃ n}
-  (I∥ : AsyncIterable a ℓ n)
-  (aco : ACO I∥ ℓ₃)
-   where
+module RoutingLib.Iteration.Asynchronous.Static.Convergence.ACOImpliesConverges
+  {a ℓ₁ ℓ₂ n}
+  (I∥ : AsyncIterable a ℓ₁ n)
+  (aco : ACO I∥ ℓ₂)
+  where
 
 open AsyncIterable I∥
 open ACO  aco
-
-
-k* : ℕ
-k* = proj₁ (B-finish)
-
-x* : S
-x* = proj₁ (proj₂ B-finish)
-
-x*∈B[k*] : x* ∈ᵢ B k* 
-x*∈B[k*] = proj₁ (proj₂ (proj₂ B-finish) ≤-refl)
-
-x∈B[k*]⇒x≈x* : ∀ {x} → x ∈ᵢ B k* → x ≈ x* 
-x∈B[k*]⇒x≈x* = proj₂ (proj₂ (proj₂ B-finish) ≤-refl)
-
-x*-fixed : F x* ≈ x*
-x*-fixed = begin⟨ x*∈B[k*] ⟩
-  ⇒ x*   ∈ᵢ B k*       ∴⟨ F-mono-B ⟩
-  ⇒ F x* ∈ᵢ B (suc k*) ∴⟨ proj₂ (proj₂ (proj₂ B-finish) (n≤1+n k*)) ⟩
-  ⇒ F x* ≈ x*          ∎
+open ACOProperties I∥ aco
 
 ------------------------------------------------------------------------
 -- Notation
@@ -90,19 +74,19 @@ module _ {x : S} (x∈B₀ : x ∈ᵢ B 0) (𝓢 : Schedule n) where
 
   -- The concept of being locally safe
 
-  StateOfNode_InBox_AtTime_ : Fin n → ℕ → 𝕋 → Set ℓ₃
+  StateOfNode_InBox_AtTime_ : Fin n → ℕ → 𝕋 → Set ℓ₂
   StateOfNode i InBox k AtTime t = (acc : Acc _<_ t) → δ' x acc i ∈ B k i
 
-  StateInBox_AtTime_ : ℕ → 𝕋 → Set ℓ₃
+  StateInBox_AtTime_ : ℕ → 𝕋 → Set ℓ₂
   StateInBox k AtTime t = ∀ i → StateOfNode i InBox k AtTime t
 
-  MessagesOfNode_InBox_AtTime_ : Fin n → ℕ → 𝕋 → Set ℓ₃
+  MessagesOfNode_InBox_AtTime_ : Fin n → ℕ → 𝕋 → Set ℓ₂
   MessagesOfNode i InBox k AtTime t = ∀ {j s} → t < s → (acc : Acc _<_ (β s i j)) → δ' x acc j ∈ B k j
 
-  MessagesInBox_AtTime_ : ℕ → 𝕋 → Set ℓ₃
+  MessagesInBox_AtTime_ : ℕ → 𝕋 → Set ℓ₂
   MessagesInBox k AtTime t = ∀ i → MessagesOfNode i InBox k AtTime t
 
-  ComputationInBox_AtTime_ : ℕ → 𝕋 → Set ℓ₃
+  ComputationInBox_AtTime_ : ℕ → 𝕋 → Set ℓ₂
   ComputationInBox k AtTime t = MessagesInBox (k ∸ 1) AtTime t × StateInBox k AtTime t
 
 --------------------------------------------------------------------------
@@ -175,18 +159,18 @@ module _ {x : S} (x∈B₀ : x ∈ᵢ B 0) (𝓢 : Schedule n) where
     = state-stability (expiryᵢ i j e<t) c∈Bₖ j
 
   advance-computation₁ : ∀ {s e k} →
-                         Pseudoperiod [ s , e ] →
+                         Pseudocycle [ s , e ] →
                          ComputationInBox k       AtTime s →
                          ComputationInBox (suc k) AtTime e
   advance-computation₁ pp c∈Bₖ = m∈Bₖᵉ , s∈B₁₊ₖ
     where
-    open Pseudoperiod pp
+    open Pseudocycle pp
     m∈Bₖᵐ  = advance-messages β[s,m] c∈Bₖ
     m∈Bₖᵉ   = message-stability mid≤end m∈Bₖᵐ
     s∈B₁₊ₖ  = advance-state α[m,e] m∈Bₖᵐ
   
   advance-computationₙ : ∀ {s e k n} →
-                         MultiPseudoperiod n [ s , e ] →
+                         MultiPseudocycle n [ s , e ] →
                          ComputationInBox k       AtTime s →
                          ComputationInBox (k + n) AtTime e
   advance-computationₙ {_} {_} {k} {zero}  none            c∈Bₖ rewrite +-identityʳ k = c∈Bₖ
@@ -199,16 +183,16 @@ module _ {x : S} (x∈B₀ : x ∈ᵢ B 0) (𝓢 : Schedule n) where
 --------------------------------------------------------------------------
 -- Convergence
 
-  x*-reached : ∀ {s e t : 𝕋} →
-               MultiPseudoperiod k* [ s , e ] →
-               e ≤ t → 
+  x*-reached : ∀ {s e : 𝕋} →
+               MultiPseudocycle k* [ s , e ] →
+               ∀ {t : 𝕋} → e ≤ t → 
                δ x t ≈ x*
-  x*-reached {s} {m} {e} mpp m≤e = begin⟨ computation∈B₀ s ⟩
+  x*-reached {s} {e} mpp {t} e≤t = begin⟨ computation∈B₀ s ⟩
     ⇒ ComputationInBox 0  AtTime s ∴⟨ advance-computationₙ mpp ⟩
-    ⇒ ComputationInBox k* AtTime m ∴⟨ state-stability m≤e ⟩
-    ⇒ StateInBox k* AtTime e       ∴⟨ (λ prf i → prf i (<-wellFounded e)) ⟩
-    ⇒ δ x e ∈ᵢ B k*                ∴⟨ x∈B[k*]⇒x≈x* ⟩
-    ⇒ δ x e ≈ x*                   ∎
+    ⇒ ComputationInBox k* AtTime e ∴⟨ state-stability e≤t ⟩
+    ⇒ StateInBox k* AtTime t       ∴⟨ (λ prf i → prf i (<-wellFounded t)) ⟩
+    ⇒ δ x t ∈ᵢ B k*                ∴⟨ x∈B[k*]⇒x≈x* ⟩
+    ⇒ δ x t ≈ x*                   ∎
 
 convergent : ConvergesOver I∥ (B 0) 
 convergent = record

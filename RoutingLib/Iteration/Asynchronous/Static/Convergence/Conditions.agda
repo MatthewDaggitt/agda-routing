@@ -11,10 +11,12 @@ open import Data.Bool using (if_then_else_)
 import Data.List.Membership.Setoid as Membership
 open import Function using (id)
 open import Level using (_⊔_) renaming (suc to lsuc)
-open import Relation.Binary as B using (DecSetoid; _Respects_; Total; _Preserves_⟶_; _Preserves₂_⟶_⟶_)
+open import Relation.Binary as B
+  using (DecSetoid; _Respects_; Total; _Preserves_⟶_; _Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 import Relation.Binary.Construct.NonStrictToStrict as NonStrictToStrict
-open import Relation.Binary.Indexed.Homogeneous using (Decidable; IsIndexedDecEquivalence; IndexedDecSetoid)
+open import Relation.Binary.Indexed.Homogeneous
+  using (IRel; Lift; Decidable; IsIndexedPartialOrder)
 open import Relation.Unary using (_∈_)
 open import Relation.Nullary.Decidable using (⌊_⌋)
 
@@ -22,7 +24,6 @@ open import RoutingLib.Data.Table using (Table; max)
 open import RoutingLib.Data.Table.Relation.Pointwise using (Pointwise)
 open import RoutingLib.Function.Metric.Nat
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (Setoid_at_)
-import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as SubsetEq
 open import RoutingLib.Relation.Unary.Indexed
 
 open import RoutingLib.Iteration.Asynchronous.Static
@@ -35,7 +36,7 @@ module RoutingLib.Iteration.Asynchronous.Static.Convergence.Conditions
 open AsyncIterable 𝓘
 
 --------------------------------------------------------------------------------
--- Asynchronously contracting operator (ACO) --
+-- Asynchronously contracting operator (ACO)
 --------------------------------------------------------------------------------
 -- Sufficient (and necessary conditions) for convergence as inspired by Üresin
 -- and Dubois
@@ -52,7 +53,7 @@ record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
   B-cong x≈y x∈Bₖ i = Bᵢ-cong (x≈y i) (x∈Bₖ i)
 
 --------------------------------------------------------------------------------
--- Asynchronously metricly contracting operator (AMCO) --
+-- Asynchronously metricly contracting operator (AMCO)
 --------------------------------------------------------------------------------
 -- Metric conditions that are also sufficient (and necessary) conditions based
 -- on those defined by Gurney
@@ -73,7 +74,6 @@ record AMCO : Set (a ⊔ ℓ) where
 
 
 
-{-
 ---------------------------------
 -- Other sufficient conditions --
 ---------------------------------
@@ -82,9 +82,9 @@ record AMCO : Set (a ⊔ ℓ) where
 record SynchronousConditions p o : Set (lsuc (a ⊔ ℓ ⊔ p ⊔ o)) where
 
   field
-    D₀               : Pred Sᵢ p
-    D₀-cong          : ∀ {x y} → x ∈ D₀ → x ≈ y → y ∈ D₀
-    D₀-closed        : ∀ {x} → x ∈ D₀ → F x ∈ D₀
+    B               : IPred Sᵢ p
+    B-cong          : ∀ {x y} → x ∈ᵢ B → x ≈ y → y ∈ᵢ B
+    B-closed        : ∀ {x} → x ∈ᵢ B → F x ∈ᵢ B
 
     _≤ᵢ_              : IRel Sᵢ o
     ≤ᵢ-isPartialOrder : IsIndexedPartialOrder Sᵢ _≈ᵢ_ _≤ᵢ_
@@ -101,18 +101,20 @@ record SynchronousConditions p o : Set (lsuc (a ⊔ ℓ ⊔ p ⊔ o)) where
     ; antisymᵢ   to ≤ᵢ-antisym
     )
 
-  _≤_ = Lift Sᵢ _≤ᵢ_
-
+  -- _≤_ = Lift Sᵢ _≤ᵢ_
+{-
   field
-    F-monotone       : ∀ {x y} → x ∈ D₀ → y ∈ D₀ → x ≤ y → F x ≤ F y
+    F-monotone       : ∀ {x y} → x ∈ B → y ∈ B → x ≤ y → F x ≤ F y
     F-cong           : ∀ {x y} → x ≈ y → F x ≈ F y
-    iter-decreasing  : ∀ {x} → x ∈ D₀ → ∀ K → syncIter x (suc K) ≤ syncIter x K
+    iter-decreasing  : ∀ {x} → x ∈ B → ∀ K → syncIter x (suc K) ≤ syncIter x K
 
     ξ                : S
     ξ-fixed          : F ξ ≈ ξ
-    iter-converge    : ∀ {x} → x ∈ D₀ → ∃ λ T → syncIter x T ≈ ξ
+    iter-converge    : ∀ {x} → x ∈ B → ∃ λ k* → syncIter k* x ≈ x*
+-}
 
 
+{-
 
 
 

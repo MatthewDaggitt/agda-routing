@@ -61,19 +61,19 @@ module _ {n} (ψˢ : StaticSchedule n) where
   convert-expiryPeriod (Static.mkₑ start≤end expiryᵢ) =
     mkₑ (convert-subEpoch start≤end) (λ _ e<t j → expiryᵢ _ j e<t)
 
-  convert-pseudoperiod : ∀ {s e} → Static.Pseudoperiod ψˢ [ s , e ] →
-                         Pseudoperiod ψᵈ [ s , e ]
+  convert-pseudoperiod : ∀ {s e} → Static.Pseudocycle ψˢ [ s , e ] →
+                         Pseudocycle ψᵈ [ s , e ]
   convert-pseudoperiod pp = record
     { m      = m
     ; β[s,m] = convert-expiryPeriod β[s,m]
     ; α[m,e] = convert-activationPeriod α[m,e]
-    } where open Static.Pseudoperiod pp
+    } where open Static.Pseudocycle pp
 
-  convert-multiPseudoperiod : ∀ {s e k} → Static.MultiPseudoperiod ψˢ k [ s , e ] →
-                              MultiPseudoperiod ψᵈ k [ s , e ]
-  convert-multiPseudoperiod Static.none            = none
-  convert-multiPseudoperiod (Static.next m pp mpp) =
-    next m (convert-pseudoperiod pp) (convert-multiPseudoperiod mpp)
+  convert-multiPseudocycle : ∀ {s e k} → Static.MultiPseudocycle ψˢ k [ s , e ] →
+                              MultiPseudocycle ψᵈ k [ s , e ]
+  convert-multiPseudocycle Static.none            = none
+  convert-multiPseudocycle (Static.next m pp mpp) =
+    next m (convert-pseudoperiod pp) (convert-multiPseudocycle mpp)
 
   convert∈Full : ψᵈ satisfies Full
   convert∈Full t = ⊤-full

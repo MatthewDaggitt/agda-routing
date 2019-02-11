@@ -85,6 +85,10 @@ module _ {a} {Aᵢ : I → Set a} where
 
 module _ {a} {Aᵢ : I → Set a} where
 
+  infixr 7 _∩_
+  _∩_ : ∀ {ℓ₁ ℓ₂} → IPred Aᵢ ℓ₁ → IPred Aᵢ ℓ₂ → IPred Aᵢ _
+  (P ∩ Q) i = λ xᵢ → xᵢ ∈ P i × xᵢ ∈ Q i
+  
 {-
   ∁ : ∀ {ℓ} → IPred Aᵢ ℓ → IPred Aᵢ ℓ
   ∁ P i = λ x → x ∉ᵢ P i
@@ -93,9 +97,7 @@ module _ {a} {Aᵢ : I → Set a} where
   _∪_ : ∀ {ℓ₁ ℓ₂} → IPred Aᵢ ℓ₁ → IPred Aᵢ ℓ₂ → IPred Aᵢ _
   (P ∪ Q) i = λ x → x ∈ᵢ P ⊎ x ∈ᵢ Q
 
-  infixr 7 _∩_
-  _∩_ : ∀ {ℓ₁ ℓ₂} → IPred Aᵢ ℓ₁ → IPred Aᵢ ℓ₂ → IPred Aᵢ _
-  (P ∩ Q) i = λ x → x ∈ᵢ P × x ∈ᵢ Q
+
 
   ⋃ : ∀ {ℓ j} (J : Set j) → (J → IPred Aᵢ ℓ) → IPred Aᵢ _
   ⋃ J P i = λ x → Σ[ j ∈ J ] P j i x

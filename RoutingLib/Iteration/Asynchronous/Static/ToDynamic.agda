@@ -35,7 +35,7 @@ import Relation.Binary.EqReasoning as EqReasoning
 open import RoutingLib.Data.Fin.Subset using (Full)
 open import RoutingLib.Data.Fin.Subset.Properties using (⊤-full)
 open import RoutingLib.Data.Maybe.Properties
-open import RoutingLib.Relation.Unary.Indexed using (IPred; _∈ᵢ_; _⊆ᵢ_; _≋ᵢ_)
+open import RoutingLib.Relation.Unary.Indexed using (IPred; _∈ᵢ_; _⊆ᵢ_; _≋ᵢ_; Uᵢ)
 open import RoutingLib.Relation.Unary.Indexed.Construct.Add.Point.Exclude
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset as FiniteSubset
 open import RoutingLib.Relation.Nullary.Indexed.Construct.Add.Point
@@ -153,7 +153,7 @@ module DynamicToStaticConvergence
       where
       dψˢʸⁿᶜ            = convert ψˢʸⁿᶜ
       dψˢʸⁿᶜ-η[k*∙,k*∙] = convert-subEpoch ψˢʸⁿᶜ {k*∙} {k*∙} ≤-refl
-      dψˢʸⁿᶜ-mpp        = convert-multiPseudoperiod ψˢʸⁿᶜ (ψˢʸⁿᶜ-multiPseudoperiodic 0 k*∙)
+      dψˢʸⁿᶜ-mpp        = convert-multiPseudocycle ψˢʸⁿᶜ (ψˢʸⁿᶜ-multiPseudocycle 0 k*∙)
 
   x*ₛ : S
   x*ₛ = extractValue (x*∙-isValue)
@@ -173,12 +173,13 @@ module DynamicToStaticConvergence
   k*ₛ : ℕ
   k*ₛ = k* 0 ⊤-full
 
-  x*ₛ-reached : ∀ {x₀ : S} → x₀ ∈ U →
-                ∀ (ψ : Static.Schedule n) {s m e : 𝕋} →
-                Static.IsMultiPseudoperiodic ψ k*ₛ [ s , m ]ₜ →
-                m ≤ e →
+  x*ₛ-reached : ∀ {x₀ : S} → x₀ ∈ᵢ Uᵢ →
+                ∀ (ψ : Static.Schedule n) →
+                ∀ {s m : 𝕋} →
+                Static.MultiPseudocycle ψ k*ₛ [ s , m ]ₜ →
+                ∀ {e} → m ≤ e →
                 Static.asyncIter I∥ ψ x₀ e ≈ x*ₛ
-  x*ₛ-reached {x₀} _ ψ {e = e} mpp m≤e = [≈]-injective (begin
+  x*ₛ-reached {x₀} _ ψ mpp {e} m≤e = [≈]-injective (begin
     [ Static.asyncIter I∥ ψ x₀ e   ]  ≈⟨ asyncIter-sim ψ x₀ (<-wellFounded e) ⟩
     Dynamic.asyncIter I∙∥ ψᵈ [ x₀ ] e ≈⟨ x*-reached IsValue[ x₀ ] ψᵈ-full ψᵈ-mpp ψᵈ-η[m,e] ⟩
     x*∙                              ≈⟨ extract-IsValue x*∙-isValue ⟩
@@ -187,7 +188,7 @@ module DynamicToStaticConvergence
     open EqReasoning ≈∙-setoid
     ψᵈ        = convert ψ
     ψᵈ-full   = convert∈Full ψ
-    ψᵈ-mpp    = convert-multiPseudoperiod ψ mpp
+    ψᵈ-mpp    = convert-multiPseudocycle ψ mpp
     ψᵈ-η[m,e] = convert-subEpoch ψ m≤e
 
   dynamicToStaticConvergence : Static.Converges I∥
@@ -222,27 +223,26 @@ module StaticToDynamicACO {ℓ} (aco : Static.ACO I∥ ℓ) where
 
 
   -- Main boxes
-  B∙ : Epoch → {p : Subset n} → p ∈ Full → ℕ → IPred S∙ᵢ ℓ
+  B∙ : Epoch → {p : Subset n} → .(p ∈ Full) → ℕ → IPred S∙ᵢ ℓ
   B∙ e p k = Lift∙ (B k)
 
-  B∙₀⊆B∙₀ₑ : ∀ e {p} (p∈F : p ∈ Full) → B∙₀ ⊆ᵢ B∙ e p∈F 0
+  B∙₀⊆B∙₀ₑ : ∀ e {p} .(p∈F : p ∈ Full) → B∙₀ ⊆ᵢ B∙ e p∈F 0
   B∙₀⊆B∙₀ₑ e p∈F {i} {∙ᵢ}     ()
   B∙₀⊆B∙₀ₑ e p∈F {i} {[ xᵢ ]ᵢ} x∈B₀ = x∈B₀
 
-  B∙₀ₑ⊆B∙₀ : ∀ e {p} (p∈F : p ∈ Full) → B∙ e p∈F 0 ⊆ᵢ B∙₀
+  B∙₀ₑ⊆B∙₀ : ∀ e {p} .(p∈F : p ∈ Full) → B∙ e p∈F 0 ⊆ᵢ B∙₀
   B∙₀ₑ⊆B∙₀ e p∈F {i} {∙ᵢ}     ()
   B∙₀ₑ⊆B∙₀ e p∈F {i} {[ xᵢ ]ᵢ} x∈B₀ = x∈B₀
 
-  B∙₀-eqᵢ : ∀ {e p} (p∈F : p ∈ Full) → B∙₀ ≋ᵢ B∙ e p∈F 0
+  B∙₀-eqᵢ : ∀ {e p} .(p∈F : p ∈ Full) → B∙₀ ≋ᵢ B∙ e p∈F 0
   B∙₀-eqᵢ {e} p∈F = (λ {i xᵢ} → B∙₀⊆B∙₀ₑ e p∈F {i} {xᵢ}) , (λ {i xᵢ} → B∙₀ₑ⊆B∙₀ e p∈F {i} {xᵢ})
 
-  B∙ᵢ-cong  : ∀ {e f : ℕ} {p q : Subset n} → e ≡ f → p ≡ q →
-              (p∈Q : p ∈ Full) (q∈Q : q ∈ Full) {k : ℕ} {i : Fin n}
-              {x y : Pointedᵢ Sᵢ i} →
+  B∙ᵢ-cong  : ∀ {e : Epoch} {p : Subset n} → (p∈Q : p ∈ Full) →
+              ∀ {k i} {x y : Pointedᵢ Sᵢ i} →
               x ≈∙ᵢ y → x ∈ Lift∙ (B k) i → y ∈ Lift∙ (B k) i
-  B∙ᵢ-cong refl refl p∈F q∈F = Lift∙-congᵢ Bᵢ-cong
+  B∙ᵢ-cong p∈F = Lift∙-congᵢ Bᵢ-cong
 
-  B∙-finish : ∀ e {p} (p∈F : p ∈ Full) → ∃₂ (λ k* x* →
+  B∙-finish : ∀ e {p} .(p∈F : p ∈ Full) → ∃₂ (λ k* x* →
                 ∀ {k} → k* ≤ k →
                   (x* ∈ᵢ B∙ e p∈F k) ×
                   (∀ {x} → x ∈ᵢ B∙ e p∈F k → x ≈∙ x*))
@@ -266,7 +266,7 @@ module StaticToDynamicACO {ℓ} (aco : Static.ACO I∥ ℓ) where
   B∙-null : ∀ {e p} (p∈F : p ∈ Full) → ∀ {k i} → i ∉ p → ∙ᵢ ∈ B∙ e p∈F k i
   B∙-null _∈p {i = i} i∉p = contradiction (i ∈p) i∉p
 
-  F∙-mono-B∙ : ∀ {e p} (p∈F : p ∈ Full) {k x} → x ∈ Accordant I∙∥ p →
+  F∙-mono-B∙ : ∀ {e p} .(p∈F : p ∈ Full) {k x} → x ∈ Accordant I∙∥ p →
                x ∈ᵢ B∙ e p∈F k → F∙ e p x ∈ᵢ B∙ e p∈F (suc k)
   F∙-mono-B∙ {e} {p} p∈F {x = x} x-wf x∈B∙ₖ i with all? (IsJust? ∘ x)
   ... | no ¬xᵥ = contradiction (∈-isValue x∈B∙ₖ) ¬xᵥ

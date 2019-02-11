@@ -100,14 +100,13 @@ record ExpiryPeriod (period : TimePeriod) : Set where
   open SubEpoch η[s,e] public
 
 --------------------------------------------------------------------------------
--- Pseudoperiod
+-- Pseudocycle
 --------------------------------------------------------------------------------
---
 -- A time period that "emulates" one synchronous iteration. During a
--- pseudoperiod every node activates and then we wait until all data before
+-- pseudocycle every node activates and then we wait until all data before
 -- those activation points are flushed from the system.
 
-record Pseudoperiod (period : TimePeriod) : Set₁ where
+record Pseudocycle (period : TimePeriod) : Set₁ where
   open TimePeriod period
   field
     m      : 𝕋
@@ -129,25 +128,24 @@ record Pseudoperiod (period : TimePeriod) : Set₁ where
   η[s,e] = mkₛₑ start≤end ηₛ≡ηₑ
 
 --------------------------------------------------------------------------------
--- Multi-pseudoperiods
+-- Multi-pseudocycles
 --------------------------------------------------------------------------------
---
--- A time period that contains k pseudoperiods.
+-- A time period that contains k pseudocycle.
 
-data MultiPseudoperiod : ℕ → TimePeriod → Set₁ where
-  none : ∀ {t} → MultiPseudoperiod 0 [ t , t ]
+data MultiPseudocycle : ℕ → TimePeriod → Set₁ where
+  none : ∀ {t} → MultiPseudocycle 0 [ t , t ]
   next : ∀ {s} m {e k} →
-         Pseudoperiod [ s , m ] →
-         MultiPseudoperiod k [ m , e ] →
-         MultiPseudoperiod (suc k) [ s , e ]
+         Pseudocycle [ s , m ] →
+         MultiPseudocycle k [ m , e ] →
+         MultiPseudocycle (suc k) [ s , e ]
 
-ηₛ≡ηₑ-mpp : ∀ {s e k} → MultiPseudoperiod k [ s , e ] → η s ≡ η e
+ηₛ≡ηₑ-mpp : ∀ {s e k} → MultiPseudocycle k [ s , e ] → η s ≡ η e
 ηₛ≡ηₑ-mpp none            = refl
-ηₛ≡ηₑ-mpp (next m pp mpp) = trans (Pseudoperiod.ηₛ≡ηₑ pp) (ηₛ≡ηₑ-mpp mpp)
+ηₛ≡ηₑ-mpp (next m pp mpp) = trans (Pseudocycle.ηₛ≡ηₑ pp) (ηₛ≡ηₑ-mpp mpp)
 
-s≤e-mpp : ∀ {s e k} → MultiPseudoperiod k [ s , e ] → s ≤ e
+s≤e-mpp : ∀ {s e k} → MultiPseudocycle k [ s , e ] → s ≤ e
 s≤e-mpp none            = ≤-refl
-s≤e-mpp (next m pp mpp) = ≤-trans (Pseudoperiod.start≤end pp) (s≤e-mpp mpp)
+s≤e-mpp (next m pp mpp) = ≤-trans (Pseudocycle.start≤end pp) (s≤e-mpp mpp)
 
 {-
 -----------------

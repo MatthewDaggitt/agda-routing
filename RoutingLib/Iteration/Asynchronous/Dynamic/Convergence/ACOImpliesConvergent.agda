@@ -94,7 +94,7 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ᵢ B₀)
   StateIn b AtTime t = ∀ i → StateOfNode i In b AtTime t
 
   MessagesOfNode_In_AtTime_ : Fin n → IPred Sᵢ ℓ₃ → 𝕋 → Set ℓ₃
-  MessagesOfNode i In b AtTime t = ∀ {j s} → t < s → IsSubEpoch [ t , s ] → i ∈ₛ ρ s →
+  MessagesOfNode i In b AtTime t = ∀ {j s} → t < s → SubEpoch [ t , s ] → i ∈ₛ ρ s →
                                    (acc : Acc _<_ (β s i j)) → async acc j ∈ b j
 
   MessagesIn_AtTime_ : IPred Sᵢ ℓ₃ → 𝕋 → Set ℓ₃
@@ -103,7 +103,7 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ᵢ B₀)
 
   -- Concept of all messages being the current epoch
   MessagesWellFormedAt : 𝕋 → Set ℓ
-  MessagesWellFormedAt t = ∀ {i s} → t < s → IsSubEpoch [ t , s ] →
+  MessagesWellFormedAt t = ∀ {i s} → t < s → SubEpoch [ t , s ] →
                            ∀ {j} {accβ : Acc _<_ (β s i j)} →
                            i ∈ₛ ρ s → j ∉ₛ ρ s → async accβ j ≈ᵢ ⊥ j
 
@@ -151,8 +151,7 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ᵢ B₀)
     ⇒ (∀ j → _ ∈ Bₜ (suc t)         0 j) ∴⟨ (λ prf → F-resp-B₀ₑ (ρ∈Q (suc t)) prf i) ⟩
     ⇒ Fₜ (suc t) _ i ∈ Bₜ (suc t)   0 i  ∎
 
-  expiry⇒wellFormed : ∀ {s e} →
-                      IsExpiryPeriod [ s , e ] →
+  expiry⇒wellFormed : ∀ {s e} → ExpiryPeriod [ s , e ] →
                       MessagesWellFormedAt e
   expiry⇒wellFormed {s}  (mkₑ (mkₛₑ s≤e ηₛ≡ηₑ) expᵢ) {i} {t} e<t (mkₛₑ _ ηₑ≡ηₜ) {j} {accβ} i∈ρₜ j∉ρₜ
     with trans ηₛ≡ηₑ ηₑ≡ηₜ
@@ -168,14 +167,12 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ᵢ B₀)
 -- information recieved is in that box then assuming the epoch is the
 -- same, it will still be in that box in the future.
 
-  wellFormed-steps : ∀ {s e} →
-                     IsSubEpoch [ s , e ] →
+  wellFormed-steps : ∀ {s e} → SubEpoch [ s , e ] →
                      MessagesWellFormedAt s →
                      MessagesWellFormedAt e
   wellFormed-steps η[s,e]@(mkₛₑ s≤e _) wf e<t η[e,t] = wf (<-transʳ s≤e e<t) (η[s,e] ++ₛₑ η[e,t])
 
-  state-steps : ∀ {k s e} →
-                IsSubEpoch [ s , e ] →
+  state-steps : ∀ {k s e} → SubEpoch [ s , e ] →
                 ComputationInBox k AtTime s →
                 StateIn (Bₜ e k) AtTime e
   state-steps {k}     {s} {zero}  η[s,1+e]@(mkₛₑ z≤n   _) c∈Bₖ = c∈Bₖ⇒s∈Bₖ c∈Bₖ
@@ -195,13 +192,22 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ᵢ B₀)
     ⇒ (∀ j → asyncₜ (β (suc e) i j) j ∈ Bₜ (suc e) k      j)  ∴⟨ (λ prf → F-mono-B (ρ∈Q (suc e)) (wf (s≤s s≤e) η[s,1+e] i∈ρ₁₊ₑ) prf i) ⟩
     ⇒ Fₜ (suc e) _ i                  ∈ Bₜ (suc e) (suc k) i  ∎
 
-  message-steps : ∀ {k s e} →
-                  IsSubEpoch [ s , e ] →
+  message-steps : ∀ {k s e} → SubEpoch [ s , e ] →
                   MessagesIn (Bₜ s k) AtTime s →
                   MessagesIn (Bₜ e k) AtTime e
   message-steps η[s,e]@(mkₛₑ s≤e ηₛ≡ηₑ) m∈b i e<t η[e,t] i∈ρ₁₊ₜ recβ =
     async∈-resp-Bₜᵢ (β _ _ _) ηₛ≡ηₑ (m∈b i (<-transʳ s≤e e<t) (η[s,e] ++ₛₑ η[e,t]) i∈ρ₁₊ₜ recβ)
 
+
+  start-pp : ∀ {s e} → Pseudocycle [ s , e ] →
+             ComputationInBox 0 AtTime e
+  start-pp {s} {e} pp = zeroᵇ m∈wfᵉ s∈B₀
+    where
+    open Pseudocycle pp
+    m∈wfᵐ = expiry⇒wellFormed β[s,m]
+    m∈wfᵉ = wellFormed-steps η[m,e] m∈wfᵐ
+    s∈B₀  = state∈B₀ e
+    
 --------------------------------------------------------------------------
 -- Step: after one pseudoperiod the node is guaranteed to have
 -- advanced at least one box
@@ -225,17 +231,15 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ᵢ B₀)
   ...     | no  m≢1+e = async∈-resp-Bₜᵢ e ηₑ≡η₁₊ₑ (advance-stateᵢ wf (mkₐᵢ ηₛ≡ηₑ m s<m m≤e i∈αₘ) m∈Bₖ _)
     where m≤e = ≤-pred (≤∧≢⇒< m≤1+e m≢1+e)
 
-  advance-state : ∀ {s e k} →
+  advance-state : ∀ {s e k} → ActivationPeriod [ s , e ] →
                   MessagesWellFormedAt s →
-                  IsActivationPeriod [ s , e ] →
                   MessagesIn (Bₜ s k) AtTime s →
                   StateIn (Bₜ e (suc k)) AtTime e
-  advance-state {s} {e} {k} wf (mkₐ (mkₛₑ _ ηₛ≡ηₑ) activeᵢ) m∈Bₖ i with i ∈? ρ s
+  advance-state {s} {e} {k} (mkₐ (mkₛₑ _ ηₛ≡ηₑ) activeᵢ) wf m∈Bₖ i with i ∈? ρ s
   ... | no  i∉ρₛ = i∉ρ⇒sᵢ∈Bₖᵢ (i∉ρₛ ∘ ∈ρ-subst (sym ηₛ≡ηₑ))
   ... | yes i∈ρₛ = advance-stateᵢ wf (activeᵢ i∈ρₛ) (m∈Bₖ i)
 
-  advance-messages : ∀ {s e k} →
-                     IsExpiryPeriod [ s , e ] →
+  advance-messages : ∀ {s e k} → ExpiryPeriod [ s , e ] →
                      ComputationInBox k AtTime s →
                      MessagesIn (Bₜ e k) AtTime e
   advance-messages (mkₑ (mkₛₑ _ ηₛ≡ηₑ) expiryᵢ) c∈Bₖ i {j} e<t (mkₛₑ e≤t ηₑ≡ηₜ) i∈ρₜ recβ
@@ -244,57 +248,33 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ᵢ B₀)
   ...   | s≤β with η-inRange ηₛ≡ηₜ (s≤β , (β-decreasing i j (<-transʳ z≤n e<t)))
   ...     | (ηₛ≡ηβ , ηβ≡ηₜ) = async∈-resp-Bₜᵢ (β _ _ _) (trans ηβ≡ηₜ (sym ηₑ≡ηₜ)) (state-steps (mkₛₑ s≤β ηₛ≡ηβ) c∈Bₖ j recβ)
 
---------------------------------------------------------------------------
--- Steps : after k pseudoperiods all nodes are guaranteed to have
--- advanced at least k boxes
-
-  start-pp : ∀ {s e} →
-             IsPseudoperiodic [ s , e ] →
-             ComputationInBox 0 AtTime e
-  start-pp {s} {e} pp = zeroᵇ m∈wfᵉ s∈B₀
+  advance-computation₁ : ∀ {s e k} → Pseudocycle [ s , e ] →
+                         ComputationInBox k       AtTime s →
+                         ComputationInBox (suc k) AtTime e
+  advance-computation₁ pp c∈Bₖ = sucᵇ m∈wfᵉ m∈Bₖᵉ s∈B₁₊ₖ
     where
-    open IsPseudoperiodic pp
-    m∈wfᵐ = expiry⇒wellFormed β[s,m]
-    m∈wfᵉ = wellFormed-steps η[m,e] m∈wfᵐ
-    s∈B₀  = state∈B₀ e
-
-  messages-pp : ∀ {s e k} →
-                IsPseudoperiodic [ s , e ] →
-                ComputationInBox k       AtTime s →
-                ComputationInBox (suc k) AtTime e
-  messages-pp pp c∈Bₖ = sucᵇ m∈wfᵉ m∈Bₖᵉ s∈B₁₊ₖ
-    where
-    open IsPseudoperiodic pp
+    open Pseudocycle pp
     m∈wfᵐ = wellFormed-steps η[s,m] (c∈Bₖ⇒m∈wf c∈Bₖ)
     m∈wfᵉ  = wellFormed-steps η[m,e] m∈wfᵐ
     m∈Bₖᵐ  = advance-messages β[s,m] c∈Bₖ
     m∈Bₖᵉ  = message-steps η[m,e] m∈Bₖᵐ
-    s∈B₁₊ₖ = advance-state m∈wfᵐ α[m,e] m∈Bₖᵐ
+    s∈B₁₊ₖ = advance-state α[m,e] m∈wfᵐ m∈Bₖᵐ
 
-  messages-mpp : ∀ {s e k n} →
-                 IsMultiPseudoperiodic n [ s , e ] →
-                 ComputationInBox k       AtTime s →
-                 ComputationInBox (n + k) AtTime e
-  messages-mpp {_} {_} {_} {_}     none            c∈Bₖ = c∈Bₖ
-  messages-mpp {s} {e} {k} {suc n} (next m pp mpp) c∈Bₖ = begin⟨ c∈Bₖ ⟩
-    ⇒ ComputationInBox k           AtTime s ∴⟨ messages-pp pp ⟩
-    ⇒ ComputationInBox (suc k)     AtTime m ∴⟨ messages-mpp mpp ⟩
-    ⇒ ComputationInBox (n + suc k) AtTime e ∴⟨ subst (ComputationInBox_AtTime e) (+-suc n k) ⟩
-    ⇒ ComputationInBox (suc n + k) AtTime e ∎
+  advance-computationₙ : ∀ {s e k n} →
+                         MultiPseudocycle n [ s , e ] →
+                         ComputationInBox k       AtTime s →
+                         ComputationInBox (k + n) AtTime e
+  advance-computationₙ {_} {_} {k} {_}     none            c∈Bₖ rewrite +-identityʳ k = c∈Bₖ
+  advance-computationₙ {s} {e} {k} {suc n} (next m pp mpp) c∈Bₖ = begin⟨ c∈Bₖ ⟩
+    ⇒ ComputationInBox k           AtTime s ∴⟨ advance-computation₁ pp ⟩
+    ⇒ ComputationInBox (suc k)     AtTime m ∴⟨ advance-computationₙ mpp ⟩
+    ⇒ ComputationInBox (suc k + n) AtTime e ∴⟨ subst (ComputationInBox_AtTime e) (sym (+-suc k n)) ⟩
+    ⇒ ComputationInBox (k + suc n) AtTime e ∎
 
 --------------------------------------------------------------------------
 -- Convergence
 
-  computation∈Bₖ : ∀ {s e k} →
-                   IsMultiPseudoperiodic (suc k) [ s , e ] →
-                   ComputationInBox k AtTime e
-  computation∈Bₖ {s} {e} {k} (next m pp mpp) = begin⟨ pp ⟩
-    ⇒ IsPseudoperiodic [ s , m ]        ∴⟨ start-pp ⟩
-    ⇒ ComputationInBox 0       AtTime m ∴⟨ messages-mpp mpp ⟩
-    ⇒ ComputationInBox (k + 0) AtTime e ∴⟨ subst (ComputationInBox_AtTime e) (+-identityʳ k) ⟩
-    ⇒ ComputationInBox k       AtTime e ∎
-
-  module _ {s m e : 𝕋} where
+  module _ {s e : 𝕋} where
 
     k*' : ℕ
     k*' = k* (η s) (ρ∈Q s)
@@ -302,16 +282,17 @@ module _ {x₀ : S} (x₀∈B₀ : x₀ ∈ᵢ B₀)
     x*' : S
     x*' = x* (η s) (ρ∈Q s)
 
-    x*-reached : IsMultiPseudoperiodic (suc k*') [ s , m ] →
-                 IsSubEpoch [ m , e ] →
-                 async (<-wellFounded e) ≈ x*'
-    x*-reached mpp η[m,e]@(mkₛₑ m≤e ηₘ≡ηₑ) = begin⟨ mpp ⟩
-      ⇒ IsMultiPseudoperiodic _ [ s , m ] ∴⟨ computation∈Bₖ ⟩
-      ⇒ ComputationInBox k*' AtTime m     ∴⟨ state-steps η[m,e] ⟩
-      ⇒ StateIn (Bₜ e k*') AtTime e       ∴⟨ (λ prf i → prf i (<-wellFounded e)) ⟩
-      ⇒ asyncₜ e ∈ᵢ Bₜ e k*'               ∴⟨ async∈-resp-Bₜ e (sym (trans (ηₛ≡ηₑ-mpp mpp) ηₘ≡ηₑ)) ⟩
-      ⇒ asyncₜ e ∈ᵢ Bₜ s k*'               ∴⟨ k*≤k∧x∈Bₖ⇒x≈x* (η s) (ρ∈Q s) ≤-refl ⟩
-      ⇒ asyncₜ e ≈ x*'                    ∎
+    x*-reached : MultiPseudocycle (suc k*') [ s , e ] →
+                 ∀ {t} → SubEpoch [ e , t ] →
+                 async (<-wellFounded t) ≈ x*'
+    x*-reached (next m pp mpp) {t} η[m,e]@(mkₛₑ m≤e ηₘ≡ηₑ) = begin⟨ start-pp pp ⟩
+      ⇒ ComputationInBox 0   AtTime m        ∴⟨ advance-computationₙ mpp ⟩
+      ⇒ ComputationInBox k*' AtTime e        ∴⟨ state-steps η[m,e] ⟩
+      ⇒ StateIn (Bₜ t k*') AtTime t          ∴⟨ (λ prf i → prf i (<-wellFounded t)) ⟩
+      ⇒ asyncₜ t ∈ᵢ Bₜ t k*'                 ∴⟨ async∈-resp-Bₜ t ηₛ≡ηₜ ⟩
+      ⇒ asyncₜ t ∈ᵢ Bₜ s k*'                 ∴⟨ k*≤k∧x∈Bₖ⇒x≈x* (η s) (ρ∈Q s) ≤-refl ⟩
+      ⇒ asyncₜ t ≈ x*'                       ∎
+      where ηₛ≡ηₜ = sym (trans (Pseudocycle.ηₛ≡ηₑ pp) (trans (ηₛ≡ηₑ-mpp mpp) ηₘ≡ηₑ))
 
 convergent : PartiallyConvergent 𝓘 B₀ Q
 convergent = record

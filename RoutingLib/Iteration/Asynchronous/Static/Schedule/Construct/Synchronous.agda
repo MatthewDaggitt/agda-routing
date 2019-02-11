@@ -46,20 +46,20 @@ open Pseudoperiod ψˢʸⁿᶜ
 ψˢʸⁿᶜ-activeIn : ∀ t i → i IsActiveIn [ t , suc t ]
 ψˢʸⁿᶜ-activeIn t i = mkₐᵢ (suc t) ≤-refl ≤-refl ∈⊤
 
-ψˢʸⁿᶜ-activationPeriod : ∀ t → IsActivationPeriod [ t , suc t ]
+ψˢʸⁿᶜ-activationPeriod : ∀ t → ActivationPeriod [ t , suc t ]
 ψˢʸⁿᶜ-activationPeriod t = mkₐ (n≤1+n t) (ψˢʸⁿᶜ-activeIn t)
 
-ψˢʸⁿᶜ-expiryPeriod : ∀ t → IsExpiryPeriod [ t , t ]
+ψˢʸⁿᶜ-expiryPeriod : ∀ t → ExpiryPeriod [ t , t ]
 ψˢʸⁿᶜ-expiryPeriod t = mkₑ ≤-refl βˢʸⁿᶜ-expiry
 
-ψˢʸⁿᶜ-pseudoperiodic : ∀ t → IsPseudoperiodic [ t , suc t ]
-ψˢʸⁿᶜ-pseudoperiodic t = record
+ψˢʸⁿᶜ-pseudocycle : ∀ t → Pseudocycle [ t , suc t ]
+ψˢʸⁿᶜ-pseudocycle t = record
   { m      = t
   ; β[s,m] = ψˢʸⁿᶜ-expiryPeriod t
   ; α[m,e] = ψˢʸⁿᶜ-activationPeriod t
   }
 
-ψˢʸⁿᶜ-multiPseudoperiodic : ∀ t k → IsMultiPseudoperiodic k [ t , t + k ]
-ψˢʸⁿᶜ-multiPseudoperiodic t zero    rewrite +-identityʳ t = none
-ψˢʸⁿᶜ-multiPseudoperiodic t (suc k) rewrite +-suc t k     =
-  next (suc t) (ψˢʸⁿᶜ-pseudoperiodic t) (ψˢʸⁿᶜ-multiPseudoperiodic (suc t) k)
+ψˢʸⁿᶜ-multiPseudocycle : ∀ t k → MultiPseudocycle k [ t , t + k ]
+ψˢʸⁿᶜ-multiPseudocycle t zero    rewrite +-identityʳ t = none
+ψˢʸⁿᶜ-multiPseudocycle t (suc k) rewrite +-suc t k     =
+  next (suc t) (ψˢʸⁿᶜ-pseudocycle t) (ψˢʸⁿᶜ-multiPseudocycle (suc t) k)

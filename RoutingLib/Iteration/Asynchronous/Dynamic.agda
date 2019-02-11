@@ -177,9 +177,9 @@ module _ {a ℓ n} (I : AsyncIterable a ℓ n) where
       -- then for every time t₃ after t₂ that is within the same epoch
       -- the iteration will be at the fixed point x*.
       x*-reached : ∀ (x₀ : S) (S : Schedule n) →
-                   ∀ {tₛ tₘ tₑ : 𝕋} →
-                   MultiPseudoperiod S (k* (η S tₛ) (ρ S tₛ)) [ tₛ , tₘ ] →
-                   SubEpoch S [ tₘ , tₑ ] →
+                   ∀ {tₛ tₘ : 𝕋} →
+                   MultiPseudocycle S (k* (η S tₛ) (ρ S tₛ)) [ tₛ , tₘ ] →
+                   ∀ {tₑ : 𝕋} → SubEpoch S [ tₘ , tₑ ] →
                    asyncIter I S x₀ tₑ ≈ x* (η S tₛ) (ρ S tₛ)
 
   -- This is a specialised definition that only guarantees the iteration
@@ -193,9 +193,9 @@ module _ {a ℓ n} (I : AsyncIterable a ℓ n) where
       x*-fixed   : ∀ e {p} (p∈Q : p ∈ Q) → F e p (x* e p∈Q) ≈ x* e p∈Q
       x*-reached : ∀ {x₀} → x₀ ∈ᵢ X₀ →
                    ∀ {S : Schedule n} (ρ∈Q : S satisfies Q) →
-                   ∀ {tₛ tₘ tₑ : 𝕋} →
-                   IsMultiPseudoperiodic S (k* (η S tₛ) (ρ∈Q tₛ)) [ tₛ , tₘ ] →
-                   IsSubEpoch S [ tₘ , tₑ ] →
+                   ∀ {tₛ tₘ : 𝕋} →
+                   MultiPseudocycle S (k* (η S tₛ) (ρ∈Q tₛ)) [ tₛ , tₘ ] →
+                   ∀ {tₑ} → SubEpoch S [ tₘ , tₑ ] →
                    asyncIter I S x₀ tₑ ≈ x* (η S tₛ) (ρ∈Q tₛ)
 
 -- The relationship between convergent and partially convergent

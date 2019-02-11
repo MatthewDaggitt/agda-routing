@@ -74,11 +74,11 @@ module _ {ℓ₃ ℓ₄ ℓ₅} {B₀ : IPred I.Sᵢ ℓ₃} {C₀ : IPred J.S�
     x* e p∈Q                ∎
     where open EqReasoning J.≈-setoid
 
-  x*-reached : ∀ {x₀} → x₀ ∈ᵢ C₀ → {𝓢 : Schedule n} (ρ∈Q : 𝓢 satisfies Q) → {s m e : 𝕋} →
-               IsMultiPseudoperiodic 𝓢 (k* (η 𝓢 s) (ρ∈Q s)) [ s , m ] →
-               IsSubEpoch 𝓢 [ m , e ] →
+  x*-reached : ∀ {x₀} → x₀ ∈ᵢ C₀ → {𝓢 : Schedule n} (ρ∈Q : 𝓢 satisfies Q) →
+               ∀ {s m : 𝕋} → MultiPseudocycle 𝓢 (k* (η 𝓢 s) (ρ∈Q s)) [ s , m ] →
+               ∀ {e : 𝕋} → SubEpoch 𝓢 [ m , e ] →
                asyncIter J∥ 𝓢 x₀ e J.≈ x* (η 𝓢 s) (ρ∈Q s)
-  x*-reached {x₀} x₀∈C₀ {S} ρ∈Q {s} {m} {e} ppₖ η[m,e] i = J.≈ᵢ-trans
+  x*-reached {x₀} x₀∈C₀ {S} ρ∈Q {s} {m} ppₖ {e} η[m,e] i = J.≈ᵢ-trans
     (J.≈-sym (asyncIter-eq S x₀ (<-wellFounded e)) i)
     (toᵢ-cong (y*-reached (C₀⊆B₀ x₀∈C₀) ρ∈Q ppₖ η[m,e] i))
 

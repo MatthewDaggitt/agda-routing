@@ -1,39 +1,37 @@
+--------------------------------------------------------------------------------
+-- This core module contains the definitions for the pre-conditions for a
+-- static asynchronous iteration being convergent. Users interested in using
+-- these conditions should not import them from here directly but from
+-- `RoutingLib.Iteration.Asynchronous.Static.Convergence` which also exports
+-- the associated proofs of convergence.
+--------------------------------------------------------------------------------
+
+open import RoutingLib.Iteration.Asynchronous.Static
+
+module RoutingLib.Iteration.Asynchronous.Static.Convergence.Conditions
+  {a ℓ n} (I∥ : AsyncIterable a ℓ n) where
+
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (Subset; _∉_; ⊤)
 open import Data.Fin.Dec using (_∈?_)
-open import Data.Maybe using (Eq; nothing)
 open import Data.Nat using (ℕ; suc; _<_; _≤_)
-open import Data.Nat.Properties using (+-comm; ≤⇒≤″)
-open import Data.Product using (∃; ∃₂; _×_)
-open import Data.List using (List)
-open import Data.Maybe using (Maybe)
+open import Data.Product using (∃; ∃₂; _×_; proj₁; proj₂)
 open import Data.Bool using (if_then_else_)
-import Data.List.Membership.Setoid as Membership
-open import Function using (id)
 open import Level using (_⊔_) renaming (suc to lsuc)
 open import Relation.Binary as B
   using (DecSetoid; _Respects_; Total; _Preserves_⟶_; _Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
-import Relation.Binary.Construct.NonStrictToStrict as NonStrictToStrict
 open import Relation.Binary.Indexed.Homogeneous
   using (IRel; Lift; Decidable; IsIndexedPartialOrder)
 open import Relation.Unary using (_∈_)
-open import Relation.Nullary.Decidable using (⌊_⌋)
 
-open import RoutingLib.Data.Table using (Table; max)
-open import RoutingLib.Data.Table.Relation.Pointwise using (Pointwise)
+open import RoutingLib.Data.Table using (max)
 open import RoutingLib.Function.Metric.Nat
-open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (Setoid_at_)
 open import RoutingLib.Relation.Unary.Indexed
 
-open import RoutingLib.Iteration.Asynchronous.Static
-open import RoutingLib.Iteration.Asynchronous.Static.Schedule
-open import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod
+open import RoutingLib.Iteration.Synchronous using (_^_)
 
-module RoutingLib.Iteration.Asynchronous.Static.Convergence.Conditions
-  {a ℓ n} (𝓘 : AsyncIterable a ℓ n) where
-
-open AsyncIterable 𝓘
+open AsyncIterable I∥
 
 --------------------------------------------------------------------------------
 -- Asynchronously contracting operator (ACO)
@@ -45,9 +43,11 @@ record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
   field
     B          : ℕ → IPred Sᵢ p
     Bᵢ-cong    : ∀ {k i} → (_∈ B k i) Respects _≈ᵢ_
-    B-finish   : ∃₂ λ k* x* → ∀ {k} → k* ≤ k → (x* ∈ᵢ B k × (∀ {x} → x ∈ᵢ B k → x ≈ x*))
     F-resp-B₀  : ∀ {x} → x ∈ᵢ B 0 → F x ∈ᵢ B 0
     F-mono-B   : ∀ {k x} → x ∈ᵢ B k → F x ∈ᵢ B (suc k)
+    x*         : S
+    k*         : ℕ
+    B-finish   : ∀ {k} → k* ≤ k → Singletonᵢ _≈_ (B k) x*
 
   B-cong : ∀ {k} → (_∈ᵢ B k) Respects _≈_
   B-cong x≈y x∈Bₖ i = Bᵢ-cong (x≈y i) (x∈Bₖ i)
@@ -61,34 +61,59 @@ record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
 record AMCO : Set (a ⊔ ℓ) where
   field
     dᵢ                   : ∀ {i} → Sᵢ i → Sᵢ i → ℕ
-    dᵢ-isQuasiSemiMetric : ∀ i → IsQuasiSemiMetric {A = Sᵢ i} _≈ᵢ_ dᵢ
-    dᵢ-bounded           : ∀ i → Bounded {A = Sᵢ i} dᵢ
-    element             : S
 
   d : S → S → ℕ
   d x y = max 0 (λ i → dᵢ (x i) (y i))
 
   field
+    element             : S
+    dᵢ-isQuasiSemiMetric : ∀ i → IsQuasiSemiMetric {A = Sᵢ i} _≈ᵢ_ dᵢ
+    dᵢ-bounded           : ∀ i → Bounded {A = Sᵢ i} dᵢ
     F-strContrOnOrbits  : ∀ {x} → F x ≉ x → d (F x) (F (F x)) < d x (F x)
     F-strContrOnFP      : ∀ {x x*} → F x* ≈ x* → x ≉ x* → d x* (F x) < d x* x
 
-
-
----------------------------------
--- Other sufficient conditions --
----------------------------------
+--------------------------------------------------------------------------------
+-- Synchronous conditions --
+--------------------------------------------------------------------------------
 -- Sufficient but not necessary conditions by Üresin and Dubois
+-- It should be noted that these conditions are modified from those proposed by
+-- Uresin and Dubois in Proposition 3 in that they require the synchronous fixed
+-- point to be unique. The file:
+--
+--   RoutingLib.Iteration.Asynchronous.Static.Convergence.UresinDubois3Counterexample
+--
+-- contains a counter-example to Uresin & Dubois' original formulation.
+
+private
+
+  σ : ℕ → S → S
+  σ k = (F ^ k)
 
 record SynchronousConditions p o : Set (lsuc (a ⊔ ℓ ⊔ p ⊔ o)) where
 
   field
-    B               : IPred Sᵢ p
-    B-cong          : ∀ {x y} → x ∈ᵢ B → x ≈ y → y ∈ᵢ B
-    B-closed        : ∀ {x} → x ∈ᵢ B → F x ∈ᵢ B
-
+    B                 : IPred Sᵢ p
+    Bᵢ-cong           : ∀ {i} → (_∈ B i) Respects _≈ᵢ_
     _≤ᵢ_              : IRel Sᵢ o
     ≤ᵢ-isPartialOrder : IsIndexedPartialOrder Sᵢ _≈ᵢ_ _≤ᵢ_
 
+  _≤ₛ_ = Lift Sᵢ _≤ᵢ_
+
+  field
+    B-closed          : ∀ {x} → x ∈ᵢ B → F x ∈ᵢ B
+    F-monotone        : ∀ {x y} → x ∈ᵢ B → y ∈ᵢ B → x ≤ₛ y → F x ≤ₛ F y
+    F-decreasing      : ∀ {x} → x ∈ᵢ B → F x ≤ₛ x
+    
+    -- σ converges to a unique fixed point
+    x*                : S
+    x*-fixed          : F x* ≈ x*
+    k*                : ℕ
+    σ-convergesTo-x*  : ∀ {x} → x ∈ᵢ B → σ k* x ≈ x*
+
+    -- B is non-empty
+    xₚ                 : S
+    xₚ∈B               : xₚ ∈ᵢ B
+    
   open IsIndexedPartialOrder ≤ᵢ-isPartialOrder public
     renaming
     ( reflexive  to ≤-reflexive
@@ -101,19 +126,8 @@ record SynchronousConditions p o : Set (lsuc (a ⊔ ℓ ⊔ p ⊔ o)) where
     ; antisymᵢ   to ≤ᵢ-antisym
     )
 
-  -- _≤_ = Lift Sᵢ _≤ᵢ_
-{-
-  field
-    F-monotone       : ∀ {x y} → x ∈ B → y ∈ B → x ≤ y → F x ≤ F y
-    F-cong           : ∀ {x y} → x ≈ y → F x ≈ F y
-    iter-decreasing  : ∀ {x} → x ∈ B → ∀ K → syncIter x (suc K) ≤ syncIter x K
-
-    ξ                : S
-    ξ-fixed          : F ξ ≈ ξ
-    iter-converge    : ∀ {x} → x ∈ B → ∃ λ k* → syncIter k* x ≈ x*
--}
-
-
+  B-cong : (_∈ᵢ B) Respects _≈_
+  B-cong x≈y x∈Bₖ i = Bᵢ-cong (x≈y i) (x∈Bₖ i)
 {-
 
 

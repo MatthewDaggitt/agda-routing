@@ -12,7 +12,7 @@ open import RoutingLib.Asynchronous
 open import RoutingLib.Relation.Unary.Indexed
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous
 
-module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois3_counterexample where
+module RoutingLib.Asynchronous.Convergence.Proofs.UresinDubois3-Counterexample where
 
 ---------------------------------------------------------
 -- The synchronous conditions as described by U&D.

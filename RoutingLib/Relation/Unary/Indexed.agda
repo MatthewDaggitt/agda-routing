@@ -71,8 +71,8 @@ module _ {a} {Aᵢ : I → Set a} where
   Universalᵢ : ∀ {ℓ} → Pred (IPred Aᵢ ℓ) (i ⊔ a ⊔ ℓ)
   Universalᵢ P = ∀ {i} x → x ∈ P i
 
-  IsSingleton : ∀ {p ℓ} → Rel (∀ i → Aᵢ i) ℓ → IPred Aᵢ p → (∀ i → Aᵢ i) → Set _
-  IsSingleton _≈_ P x = (x ∈ᵢ P) × (∀ {y} → y ∈ᵢ P → y ≈ x)
+  Singletonᵢ : ∀ {p ℓ} → Rel (∀ i → Aᵢ i) ℓ → IPred Aᵢ p → (∀ i → Aᵢ i) → Set _
+  Singletonᵢ _≈_ P x = (x ∈ᵢ P) × (∀ {y} → y ∈ᵢ P → y ≈ x)
 
   Decidableᵢ : ∀ {p} → IPred Aᵢ p → Set _
   Decidableᵢ P = ∀ x → Dec (x ∈ᵢ P)

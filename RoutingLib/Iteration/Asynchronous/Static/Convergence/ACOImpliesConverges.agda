@@ -11,6 +11,15 @@
 -- complicate the proofs.
 --------------------------------------------------------------------------
 
+open import RoutingLib.Iteration.Asynchronous.Static
+open import RoutingLib.Iteration.Asynchronous.Static.Convergence.Conditions
+
+module RoutingLib.Iteration.Asynchronous.Static.Convergence.ACOImpliesConverges
+  {a ℓ₁ ℓ₂ n}
+  (I∥ : AsyncIterable a ℓ₁ n)
+  (aco : ACO I∥ ℓ₂)
+  where
+
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (Subset; ⊤)
   renaming (_∈_ to _∈ₛ_; _∉_ to _∉ₛ_)
@@ -36,19 +45,11 @@ open import RoutingLib.Relation.Unary.Properties
 open import RoutingLib.Function
 open import RoutingLib.Function.Reasoning
 
-open import RoutingLib.Iteration.Asynchronous.Static
-open import RoutingLib.Iteration.Asynchronous.Static.Convergence.Conditions
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule
 import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod
   as Pseudoperiods
 import RoutingLib.Iteration.Asynchronous.Static.Convergence.Properties.ACO
   as ACOProperties
-
-module RoutingLib.Iteration.Asynchronous.Static.Convergence.ACOImpliesConverges
-  {a ℓ₁ ℓ₂ n}
-  (I∥ : AsyncIterable a ℓ₁ n)
-  (aco : ACO I∥ ℓ₂)
-  where
 
 open AsyncIterable I∥
 open ACO  aco
@@ -57,17 +58,17 @@ open ACOProperties I∥ aco
 ------------------------------------------------------------------------
 -- Notation
 
-module _ {x : S} (x∈B₀ : x ∈ᵢ B 0) (𝓢 : Schedule n) where
+module _ {x : S} (x∈B₀ : x ∈ᵢ B 0) (ψ : Schedule n) where
 
-  open Schedule 𝓢
-  open Pseudoperiods 𝓢
+  open Schedule ψ
+  open Pseudoperiods ψ
 
   -- Some shorthand notation where the epoch and participant indices are
   -- replaced with a time index.
 
   δ' : S → ∀ {t} → Acc _<_ t → S
-  δ' = asyncIter' I∥ 𝓢
-
+  δ' = asyncIter' I∥ ψ
+  
   δ : S → 𝕋 → S
   δ x t = δ' x (<-wellFounded t)
 
@@ -75,16 +76,16 @@ module _ {x : S} (x∈B₀ : x ∈ᵢ B 0) (𝓢 : Schedule n) where
   -- The concept of being locally safe
 
   StateOfNode_InBox_AtTime_ : Fin n → ℕ → 𝕋 → Set ℓ₂
-  StateOfNode i InBox k AtTime t = (acc : Acc _<_ t) → δ' x acc i ∈ B k i
+  StateOfNode i InBox k AtTime t = (tₐ : Acc _<_ t) → δ' x tₐ i ∈ B k i
 
   StateInBox_AtTime_ : ℕ → 𝕋 → Set ℓ₂
   StateInBox k AtTime t = ∀ i → StateOfNode i InBox k AtTime t
 
-  MessagesOfNode_InBox_AtTime_ : Fin n → ℕ → 𝕋 → Set ℓ₂
-  MessagesOfNode i InBox k AtTime t = ∀ {j s} → t < s → (acc : Acc _<_ (β s i j)) → δ' x acc j ∈ B k j
+  MessagesToNode_InBox_AtTime_ : Fin n → ℕ → 𝕋 → Set ℓ₂
+  MessagesToNode i InBox k AtTime t = ∀ {s} → t < s → ∀ {j} → (βₐ : Acc _<_ (β s i j)) → δ' x βₐ j ∈ B k j
 
   MessagesInBox_AtTime_ : ℕ → 𝕋 → Set ℓ₂
-  MessagesInBox k AtTime t = ∀ i → MessagesOfNode i InBox k AtTime t
+  MessagesInBox k AtTime t = ∀ i → MessagesToNode i InBox k AtTime t
 
   ComputationInBox_AtTime_ : ℕ → 𝕋 → Set ℓ₂
   ComputationInBox k AtTime t = MessagesInBox (k ∸ 1) AtTime t × StateInBox k AtTime t
@@ -101,7 +102,7 @@ module _ {x : S} (x∈B₀ : x ∈ᵢ B 0) (𝓢 : Schedule n) where
   ... | yes _ = F-resp-B₀ (λ j → state∈B₀ (β (suc t) i j) j _) i 
 
   messages∈B₀ : ∀ t → MessagesInBox 0 AtTime t
-  messages∈B₀ t i {j} {s} t<s rec = state∈B₀ (β s i j) j rec
+  messages∈B₀ t i {s} t<s {j} = state∈B₀ (β s i j) j
 
   computation∈B₀ : ∀ t → ComputationInBox 0 AtTime t
   computation∈B₀ t = messages∈B₀ t , state∈B₀ t
@@ -133,7 +134,7 @@ module _ {x : S} (x∈B₀ : x ∈ᵢ B 0) (𝓢 : Schedule n) where
 
   advance-stateᵢ : ∀ {s e i k} →
                    i IsActiveIn [ s , e ] →
-                   MessagesOfNode i InBox k AtTime s →
+                   MessagesToNode i InBox k AtTime s →
                    StateOfNode i InBox (suc k) AtTime e
   advance-stateᵢ {s} {zero}  {i} (mkₐᵢ m ()  z≤n   i∈αₘ)
   advance-stateᵢ {s} {suc e} {i} (mkₐᵢ m s<m m≤1+e i∈αₘ) m∈Bₖ (acc recₑ)
@@ -155,7 +156,7 @@ module _ {x : S} (x∈B₀ : x ∈ᵢ B 0) (𝓢 : Schedule n) where
                      ExpiryPeriod [ s , e ] →
                      ComputationInBox k AtTime s →
                      MessagesInBox k AtTime e
-  advance-messages (mkₑ _ expiryᵢ) c∈Bₖ i {j} e<t
+  advance-messages (mkₑ _ expiryᵢ) c∈Bₖ i e<t {j}
     = state-stability (expiryᵢ i j e<t) c∈Bₖ j
 
   advance-computation₁ : ∀ {s e k} →

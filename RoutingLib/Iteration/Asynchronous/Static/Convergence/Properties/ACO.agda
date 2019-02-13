@@ -28,12 +28,6 @@ open ACO aco
 --------------------------------------------------------------------------
 -- Deconstructing the assumption B-finish
 
-k* : ℕ
-k* = proj₁ (B-finish)
-
-x* : S
-x* = proj₁ (proj₂ B-finish)
-
 k*≤k⇒x*∈B[k] : ∀ {k} → k* ≤ k → x* ∈ᵢ B k
 k*≤k⇒x*∈B[k] k*≤k = proj₁ (proj₂ (proj₂ B-finish) k*≤k)
 

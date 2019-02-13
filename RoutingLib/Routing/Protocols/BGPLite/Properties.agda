@@ -22,8 +22,6 @@ import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOr
 import RoutingLib.Algebra.Construct.NaturalChoice.Min.TotalOrder as NaturalChoice
 
 open import RoutingLib.Data.Path.Uncertified using (inflate; deflate; length)
-open import RoutingLib.Data.Path.Uncertified.Properties
-  using (∈-deflate⁻; ⇿-deflate⁺; deflate-inflate; deflate-skip; ij⇿p⇒i≢j; _≤ₗₑₓ?_; ≤ₗₑₓ-total; ≤ₗₑₓ-antisym)
 open import RoutingLib.Data.Path.UncertifiedI hiding (length)
 open import RoutingLib.Data.Path.UncertifiedI.Properties
 

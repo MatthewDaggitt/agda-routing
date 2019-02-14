@@ -63,8 +63,15 @@ record ActivationPeriod (period : TimePeriod) : Set where
 -- After the end of an expiry period, there are no messages left in flight that
 -- originate from before the start of the expiry period.
 --
--- Activation periods are typically named β[s,e]
+-- Expiry periods are typically named β[s,e]
 
+record Node_MessagesExpireIn_ (i : Fin n) (period : TimePeriod) : Set where
+  constructor mkₑᵢ
+  open TimePeriod period
+  field
+    start≤end : start ≤ end
+    expiryᵢ   : ∀ {t} j → end < t → start ≤ β t i j
+  
 record ExpiryPeriod (period : TimePeriod) : Set where
   constructor mkₑ
   open TimePeriod period

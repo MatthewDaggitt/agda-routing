@@ -151,7 +151,13 @@ module _ {x : S} (x∈B₀ : x ∈ᵢ B 0) (ψ : Schedule n) where
                   StateInBox (suc k) AtTime e
   advance-state (mkₐ v activeᵢ) m∈Bₖ i
     = advance-stateᵢ (activeᵢ i) (m∈Bₖ i)
-
+{-
+  advance-messagesᵢ : ∀ {s e k i} →
+                     Node i MessagesExpireIn [ s , e ] →
+                     ComputationInBox k AtTime s →
+                     MessagesToNode i InBox k AtTime e
+  advance-messagesᵢ (mkₑᵢ _ expiryᵢ) c∈Bₖ j e<t = {!state-stability ? ? ?!}
+-}
   advance-messages : ∀ {s e k} →
                      ExpiryPeriod [ s , e ] →
                      ComputationInBox k AtTime s →

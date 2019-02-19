@@ -3,13 +3,16 @@
 -- definition of an ACO
 --------------------------------------------------------------------------
 
+open import RoutingLib.Relation.Unary.Indexed
+
 open import RoutingLib.Iteration.Asynchronous.Static
 open import RoutingLib.Iteration.Asynchronous.Static.Convergence.Conditions
 
 module RoutingLib.Iteration.Asynchronous.Static.Convergence.Properties.ACO
-  {a ℓ ℓ₃ n}
+  {a ℓ ℓ₂ ℓ₃ n}
   (I∥ : AsyncIterable a ℓ n)
-  (aco : ACO I∥ ℓ₃)
+  {X₀ : IPred _ ℓ₃}
+  (aco : PartialACO I∥ X₀ ℓ₂)
   where
 
 open import Data.Nat hiding (_^_)
@@ -23,7 +26,7 @@ open import RoutingLib.Relation.Unary.Indexed
 open import RoutingLib.Iteration.Synchronous
 
 open AsyncIterable I∥
-open ACO aco
+open PartialACO aco
 
 --------------------------------------------------------------------------
 -- Deconstructing the assumption B-finish
@@ -42,9 +45,9 @@ x∈B[k*]⇒x≈x* = k*≤k⇒x∈B[k]⇒x≈x* ≤-refl
 
 x*-fixed : F x* ≈ x*
 x*-fixed = begin⟨ x*∈B[k*] ⟩
-  ⇒ x*   ∈ᵢ B k*       ∴⟨ F-mono-B ⟩
-  ⇒ F x* ∈ᵢ B (suc k*) ∴⟨ k*≤k⇒x∈B[k]⇒x≈x* (n≤1+n k*) ⟩
-  ⇒ F x* ≈ x*          ∎
+  ∴ x*   ∈ᵢ B k*       $⟨ F-mono-B ⟩
+  ∴ F x* ∈ᵢ B (suc k*) $⟨ k*≤k⇒x∈B[k]⇒x≈x* (n≤1+n k*) ⟩
+  ∴ F x* ≈ x*          ∎
 
 --------------------------------------------------------------------------
 -- Synchronous iterations
@@ -63,14 +66,14 @@ Fᵏx∈Bₖ (suc k) x∈B₀ = F-mono-B (Fᵏx∈Bₖ k x∈B₀)
 
 x*∈B₀ : ∀ {x} → x ∈ᵢ B 0 → x* ∈ᵢ B 0
 x*∈B₀ {x} x∈B₀ = begin⟨ x∈B₀ ⟩
-  ⇒ x ∈ᵢ B 0            ∴⟨ Fᵏx∈Bₖ k* ⟩
-  ⇒ (F ^ k*) x ∈ᵢ B k*  ∴⟨ x∈B[k*]⇒x≈x* ⟩
-  ⇒ (F ^ k*) x ≈ x*     ∴⟨ B-cong ◌ (Fᵏx∈B₀ k* x∈B₀) ⟩
-  ⇒ x* ∈ᵢ B 0           ∎
+  ∴ x ∈ᵢ B 0            $⟨ Fᵏx∈Bₖ k* ⟩
+  ∴ (F ^ k*) x ∈ᵢ B k*  $⟨ x∈B[k*]⇒x≈x* ⟩
+  ∴ (F ^ k*) x ≈ x*     $⟨ B-cong ◌ (Fᵏx∈B₀ k* x∈B₀) ⟩
+  ∴ x* ∈ᵢ B 0           ∎
 
 x*∈Bₖ : ∀ {x} → x ∈ᵢ B 0 → ∀ k → x* ∈ᵢ B k
 x*∈Bₖ x∈B₀ zero    = x*∈B₀ x∈B₀
 x*∈Bₖ x∈B₀ (suc k) = begin⟨ x*∈Bₖ x∈B₀ k ⟩
-  ⇒ x*   ∈ᵢ B k        ∴⟨ F-mono-B ⟩
-  ⇒ F x* ∈ᵢ B (suc k)  ∴⟨ B-cong x*-fixed ⟩
-  ⇒ x*   ∈ᵢ B (suc k)  ∎
+  ∴ x*   ∈ᵢ B k        $⟨ F-mono-B ⟩
+  ∴ F x* ∈ᵢ B (suc k)  $⟨ B-cong x*-fixed ⟩
+  ∴ x*   ∈ᵢ B (suc k)  ∎

@@ -46,8 +46,8 @@ open AsyncIterable 𝓘
 record ACO ℓ₃ : Set (a ⊔ ℓ ⊔ lsuc ℓ₃) where
   field
     B            : Epoch → Subset n → ℕ → IPred Sᵢ ℓ₃
-    Bᵢ-cong       : ∀ {e p k i} → (_∈ B e p k i) Respects _≈ᵢ_
-    B₀-universal : ∀ e p i xᵢ → xᵢ ∈ B e p 0 i
+    Bᵢ-cong      : ∀ {e p k i} → (_∈ B e p k i) Respects _≈ᵢ_
+    B₀-universal : ∀ e p i x → x ∈ B e p 0 i
     B-finish     : ∀ e p → ∃₂ λ k* x* → ∀ {k} → k* ≤ k →
                      (x* ∈ᵢ B e p k × (∀ {x} → x ∈ᵢ B e p k → x ≈ x*))
     B-null       : ∀ {e p k i} → i ∉ p → ⊥ i ∈ B e p k i
@@ -75,8 +75,8 @@ ACO⇒partialACO aco = record
   { B₀-cong   = λ _ _ _ → tt
   ; F-resp-B₀ = λ _ _ _ → tt
   ; B         = λ e {p} _ → B e p
-  ; B₀-eqᵢ     = λ _ → (λ _ → B₀-universal _ _ _ _) , (λ _ → tt)
-  ; Bᵢ-cong    = λ _ → Bᵢ-cong --λ { refl refl _ _ → Bᵢ-cong }
+  ; B₀-eqᵢ    = λ _ → (λ _ → B₀-universal _ _ _ _) , (λ _ → tt)
+  ; Bᵢ-cong   = λ _ → Bᵢ-cong --λ { refl refl _ _ → Bᵢ-cong }
   ; B-finish  = λ e {p} _ → B-finish e p
   ; B-null    = λ _ → B-null
   ; F-mono-B  = λ _ → F-mono-B
@@ -88,7 +88,7 @@ partialACO⇒ACO : ∀ {ℓ₁ ℓ₂ ℓ₃} {B₀ : IPred Sᵢ ℓ₁} {Q : Pr
 partialACO⇒ACO _∈B₀ _∈Q pACO = record
   { B            = λ e p → B e (p ∈Q)
   ; Bᵢ-cong       = Bᵢ-cong (_ ∈Q)
-  ; B₀-universal = λ e p i xᵢ → proj₁ (B₀-eqᵢ (_ ∈Q)) (xᵢ ∈B₀)
+  ; B₀-universal = λ e p x i → proj₁ (B₀-eqᵢ (_ ∈Q)) (_ ∈B₀)
   ; B-finish     = λ e p → B-finish e (p ∈Q)
   ; B-null       = B-null (_ ∈Q)
   ; F-mono-B     = F-mono-B (_ ∈Q)

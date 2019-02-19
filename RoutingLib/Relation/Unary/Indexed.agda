@@ -61,7 +61,7 @@ P ⊆ᵢ Q = ∀ {i} → P i ⊆ Q i
 ⊆-trans Aᵢ x⊆y y⊆z i = y⊆z (x⊆y i)
 
 _≋ᵢ_ : ∀ {a p q} {Aᵢ : I → Set a} → REL (IPred Aᵢ p) (IPred Aᵢ q) _
-p ≋ᵢ q = (p ⊆ᵢ q) × (q ⊆ᵢ p)
+p ≋ᵢ q = p ⊆ᵢ q × q ⊆ᵢ p
 
 --------------------------------------------------------------------------------
 -- Properties

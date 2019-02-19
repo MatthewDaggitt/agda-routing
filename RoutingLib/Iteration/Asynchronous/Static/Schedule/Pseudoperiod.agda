@@ -36,7 +36,7 @@ open Schedule ψ
 -- Activation periods are typically named α[s,e]
 
 record _IsActiveIn_ (i : Fin n) (period : TimePeriod) : Set where
-  constructor mkₐᵢ
+  constructor mkₐ
   open TimePeriod period
   field
     tₐ       : 𝕋
@@ -47,16 +47,6 @@ record _IsActiveIn_ (i : Fin n) (period : TimePeriod) : Set where
   start≤end : start ≤ end
   start≤end = ≤-trans (<⇒≤ s<tₐ) tₐ≤e
 
-record ActivationPeriod (period : TimePeriod) : Set where
-  constructor mkₐ
-  open TimePeriod period
-  field
-    start≤end     : start ≤ end
-    isActivation  : ∀ i → i IsActiveIn period
-
-  module _ i where
-    open _IsActiveIn_ (isActivation i) public hiding (start≤end)
-
 --------------------------------------------------------------------------------
 -- Expiry periods --
 --------------------------------------------------------------------------------
@@ -65,22 +55,15 @@ record ActivationPeriod (period : TimePeriod) : Set where
 --
 -- Expiry periods are typically named β[s,e]
 
-record Node_MessagesExpireIn_ (i : Fin n) (period : TimePeriod) : Set where
-  constructor mkₑᵢ
-  open TimePeriod period
-  field
-    start≤end : start ≤ end
-    expiryᵢ   : ∀ {t} j → end < t → start ≤ β t i j
-  
-record ExpiryPeriod (period : TimePeriod) : Set where
+record MessagesTo_ExpireIn_ (i : Fin n) (period : TimePeriod) : Set where
   constructor mkₑ
   open TimePeriod period
   field
     start≤end : start ≤ end
-    expiryᵢ    : ∀ {t} i j → end < t → start ≤ β t i j
+    expiryᵢ   : ∀ {t} j → end < t → start ≤ β t i j
 
-β[0,0] : ExpiryPeriod [ 0 , 0 ]
-β[0,0] = mkₑ z≤n (λ i j 0<t → z≤n)
+β[0,0] : ∀ i → MessagesTo i ExpireIn [ 0 , 0 ]
+β[0,0] i = mkₑ z≤n (λ j 0<t → z≤n)
 
 --------------------------------------------------------------------------------
 -- Pseudocycle
@@ -92,17 +75,13 @@ record ExpiryPeriod (period : TimePeriod) : Set where
 record Pseudocycle (period : TimePeriod) : Set₁ where
   open TimePeriod period
   field
-    m      : 𝕋
-    β[s,m] : ExpiryPeriod     [ start , m   ]
-    α[m,e] : ActivationPeriod [ m     , end ]
-
-  open ExpiryPeriod β[s,m] public
-    renaming (start≤end to start≤mid)
-  open ActivationPeriod α[m,e] public
-    renaming (start≤end to mid≤end)
-
-  start≤end : start ≤ end
-  start≤end = ≤-trans start≤mid mid≤end
+    m          : Fin n → 𝕋
+    start≤end  : start ≤ end
+    start≤midᵢ : ∀ i → start ≤ m i
+    midᵢ≤end   : ∀ i → m i ≤ end
+    
+    β[s,m]    : ∀ i → MessagesTo i ExpireIn [ start , m i  ]
+    α[m,e]    : ∀ i → i IsActiveIn [ m i , end ]
 
 --------------------------------------------------------------------------------
 -- Multi-pseudocycles
@@ -116,11 +95,6 @@ data MultiPseudocycle : ℕ → TimePeriod → Set₁ where
          MultiPseudocycle k [ m , e ] →
          MultiPseudocycle (suc k) [ s , e ]
 
-{-
-s≤e-mpp : ∀ {s e k} → MultiPseudocycle k [ s , e ] → s ≤ e
-s≤e-mpp none            = ≤-refl
-s≤e-mpp (next m pp mpp) = ≤-trans (Pseudocycle.start≤end pp) (s≤e-mpp mpp)
--}
 
 {-
 -----------------

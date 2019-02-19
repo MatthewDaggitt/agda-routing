@@ -6,11 +6,13 @@ open import Data.Fin using (Fin)
 open import Data.Fin.Dec using (all?;  ¬∀⟶∃¬)
 open import Level using (0ℓ)
 open import Relation.Binary
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; _≢_)
+open import Relation.Binary.PropositionalEquality
+  using (_≡_; refl; sym; trans; cong; cong₂; _≢_)
 open import Relation.Binary.Indexed.Homogeneous using (IndexedSetoid)
 open import Relation.Nullary using (¬_; yes; no)
 
 open import RoutingLib.Data.NatInf
+open import RoutingLib.Data.NatInf.Properties
 open import RoutingLib.Data.Table using (Table; min∞)
 open import RoutingLib.Data.Table.All using (All)
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous
@@ -19,20 +21,20 @@ open import RoutingLib.Relation.Binary.Indexed.Homogeneous
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Iteration.Asynchronous.Static
 
-routingAlgebra : RawRoutingAlgebra {!!} {!!} {!!}
+routingAlgebra : RawRoutingAlgebra 0ℓ 0ℓ 0ℓ
 routingAlgebra = record
   { Route              = ℕ∞
   ; Step               = λ i j → ℕ∞
   ; _≈_                = _≡_
-  ; _⊕_                = {!!}
-  ; _▷_                = {!!}
-  ; 0#                 = {!!}
-  ; ∞                  = {!!}
-  ; f∞                 = {!!}
-  ; ≈-isDecEquivalence = {!!}
-  ; ⊕-cong             = {!!}
-  ; ▷-cong             = {!!}
-  ; f∞-reject          = {!!}
+  ; _⊕_                = _⊓_
+  ; _▷_                = _+_
+  ; 0#                 = N 0
+  ; ∞                  = ∞
+  ; f∞                 = λ _ _ → ∞
+  ; ≈-isDecEquivalence = {!isDecEquivalence ?!}
+  ; ⊕-cong             = cong₂ _⊓_
+  ; ▷-cong             = λ f → cong (f +_)
+  ; f∞-reject          = λ _ _ _ → refl
   }
 
 -- Row type - Table of ℕ∞

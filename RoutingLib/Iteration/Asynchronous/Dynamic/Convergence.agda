@@ -57,10 +57,10 @@ module _ {a b ℓ₁ ℓ₂ n}
 
   simulate : Simulates I∥ J∥ → Convergent I∥ → Convergent J∥
   simulate I∥⇉J∥ = begin⟨_⟩
-    ⇒ Convergent I∥              ∴⟨ convergent⇒partiallyConvergent ⟩
-    ⇒ PartiallyConvergent I∥ Uᵢ U ∴⟨ simulate-partial I∥⇉J∥ (λ _ _ → tt) ⟩
-    ⇒ PartiallyConvergent J∥ Uᵢ U ∴⟨ partiallyConvergent⇒convergent′ ⟩
-    ⇒ Convergent J∥              ∎
+    ∴ Convergent I∥               $⟨ convergent⇒partiallyConvergent ⟩
+    ∴ PartiallyConvergent I∥ Uᵢ U $⟨ simulate-partial I∥⇉J∥ (λ _ _ → tt) ⟩
+    ∴ PartiallyConvergent J∥ Uᵢ U $⟨ partiallyConvergent⇒convergent′ ⟩
+    ∴ Convergent J∥               ∎
 
 ------------------------------------------------------------------------
 -- ACOs
@@ -80,10 +80,10 @@ module _ {a ℓ n} {I∥ : AsyncIterable a ℓ n} where
 
   ACO⇒convergent : ∀ {ℓ} → ACO I∥ ℓ → Convergent I∥
   ACO⇒convergent {ℓ} = begin⟨_⟩
-    ⇒ ACO                 I∥ ℓ       ∴⟨ ACO⇒partialACO I∥ ⟩
-    ⇒ PartialACO          I∥ Uᵢ U ℓ  ∴⟨ ACO⇒convergent-partial ⟩
-    ⇒ PartiallyConvergent I∥ Uᵢ U    ∴⟨ partiallyConvergent⇒convergent′ ⟩
-    ⇒ Convergent          I∥        ∎
+    ∴ ACO                 I∥ ℓ       $⟨ ACO⇒partialACO I∥ ⟩
+    ∴ PartialACO          I∥ Uᵢ U ℓ  $⟨ ACO⇒convergent-partial ⟩
+    ∴ PartiallyConvergent I∥ Uᵢ U    $⟨ partiallyConvergent⇒convergent′ ⟩
+    ∴ Convergent          I∥        ∎
 
 ------------------------------------------------------------------------
 -- AMCO
@@ -101,20 +101,20 @@ module _ {a ℓ n} {I∥ : AsyncIterable a ℓ n} where
 
   AMCO⇒ACO : AMCO I∥ → ACO I∥ ℓ
   AMCO⇒ACO = begin⟨_⟩
-    ⇒ AMCO        I∥        ∴⟨ AMCO⇒partialAMCO I∥ ⟩
-    ⇒ PartialAMCO I∥ U      ∴⟨ AMCO⇒ACO-partial ⟩
-    ⇒ PartialACO  I∥ Uᵢ U ℓ  ∴⟨ partialACO⇒ACO′ I∥ ⟩
-    ⇒ ACO         I∥ ℓ      ∎
+    ∴ AMCO        I∥        $⟨ AMCO⇒partialAMCO I∥ ⟩
+    ∴ PartialAMCO I∥ U      $⟨ AMCO⇒ACO-partial ⟩
+    ∴ PartialACO  I∥ Uᵢ U ℓ  $⟨ partialACO⇒ACO′ I∥ ⟩
+    ∴ ACO         I∥ ℓ      ∎
 
   AMCO⇒convergent-partial : ∀ {ℓ₂} {Q : Pred (Subset n) ℓ₂} →
                             PartialAMCO I∥ Q → PartiallyConvergent I∥ Uᵢ Q
   AMCO⇒convergent-partial {Q = Q} = begin⟨_⟩
-    ⇒ PartialAMCO         I∥ Q      ∴⟨ AMCO⇒ACO-partial ⟩
-    ⇒ PartialACO          I∥ Uᵢ Q ℓ  ∴⟨ ACO⇒convergent-partial ⟩
-    ⇒ PartiallyConvergent I∥ Uᵢ Q    ∎
+    ∴ PartialAMCO         I∥ Q      $⟨ AMCO⇒ACO-partial ⟩
+    ∴ PartialACO          I∥ Uᵢ Q ℓ  $⟨ ACO⇒convergent-partial ⟩
+    ∴ PartiallyConvergent I∥ Uᵢ Q    ∎
 
   AMCO⇒convergent : AMCO I∥ → Convergent I∥
   AMCO⇒convergent amco = begin⟨ amco ⟩
-    ⇒ AMCO       I∥   ∴⟨ AMCO⇒ACO ⟩
-    ⇒ ACO        I∥ ℓ ∴⟨ ACO⇒convergent ⟩
-    ⇒ Convergent I∥   ∎
+    ∴ AMCO       I∥   $⟨ AMCO⇒ACO ⟩
+    ∴ ACO        I∥ ℓ $⟨ ACO⇒convergent ⟩
+    ∴ Convergent I∥   ∎

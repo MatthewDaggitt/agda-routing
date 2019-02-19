@@ -19,6 +19,9 @@ module _ {a} {A : Set a} where
   Bounded : (A → A → ℕ) → Set a
   Bounded = BaseCore.Bounded _≤_
 
+  TriangleInequality : (A → A → ℕ) → Set a
+  TriangleInequality = BaseCore.TriangleIneq _≤_ _+_
+  
   MaxTriangleInequality : (A → A → ℕ) → Set a
   MaxTriangleInequality = BaseCore.TriangleIneq _≤_ _⊔_
 
@@ -70,10 +73,12 @@ record Metric a ℓ : Set (suc (a ⊔ₗ ℓ)) where
     d        : Carrier → Carrier → ℕ
     isMetric : IsMetric _≈_ d
 
-  open IsGeneralMetric isMetric public
+  open IsMetric isMetric public
 
   generalMetric : GeneralMetric a 0ℓ ℓ 0ℓ 0ℓ
-  generalMetric = record { isGeneralMetric = isMetric }
+  generalMetric = record
+    { isGeneralMetric = isMetric
+    }
 
 
 record UltraMetric a ℓ : Set (suc (a ⊔ₗ ℓ)) where
@@ -83,7 +88,7 @@ record UltraMetric a ℓ : Set (suc (a ⊔ₗ ℓ)) where
     d             : Carrier → Carrier → ℕ
     isUltraMetric : IsUltraMetric _≈_ d
 
-  open IsGeneralMetric isUltraMetric
+  open IsUltraMetric isUltraMetric public
 
   isMetric : IsMetric _≈_ d
   isMetric = record
@@ -92,4 +97,6 @@ record UltraMetric a ℓ : Set (suc (a ⊔ₗ ℓ)) where
     }
 
   metric : Metric a ℓ
-  metric = record { isMetric = isMetric }
+  metric = record
+    { isMetric = isMetric
+    }

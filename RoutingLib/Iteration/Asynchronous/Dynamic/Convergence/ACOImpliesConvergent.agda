@@ -135,8 +135,8 @@ module _ {x : S} (x∈B₀ : x ∈ᵢ B₀)
 
   i∉ρ⇒sᵢ∈Bₖᵢ : ∀ {i t k} → i ∉ₛ ρ t → StateOfNode i In (Bₜ t k) AtTime t
   i∉ρ⇒sᵢ∈Bₖᵢ {i} {t} {k} i∉ρₜ recₑ = begin⟨ B-null (ρ∈Q t) i∉ρₜ ⟩
-    ⇒ ⊥ i          ∈ Bₜ t k i ∴⟨ Bᵢ-cong (ρ∈Q t) (≈ᵢ-sym (≈ᵢ-reflexive (asyncIter-inactive 𝓘 𝓢 x recₑ i∉ρₜ))) ⟩
-    ⇒ δ' x {t} _ i ∈ Bₜ t k i ∎
+    ∴ ⊥ i          ∈ Bₜ t k i $⟨ Bᵢ-cong (ρ∈Q t) (≈ᵢ-sym (≈ᵢ-reflexive (asyncIter-inactive 𝓘 𝓢 x recₑ i∉ρₜ))) ⟩
+    ∴ δ' x {t} _ i ∈ Bₜ t k i ∎
 
 --------------------------------------------------------------------------
 -- Base case: the asynchronous iteration is always in the initial box
@@ -146,24 +146,25 @@ module _ {x : S} (x∈B₀ : x ∈ᵢ B₀)
   ... | no  i∉ρ₀ = B-null (ρ∈Q 0) i∉ρ₀
   ... | yes _    = proj₁ (B₀-eqᵢ (ρ∈Q 0)) (x∈B₀ i)
   state∈B₀ (suc t) i (acc rec) with i ∈? ρ (suc t) | i ∈? ρ t | i ∈? α (suc t)
-  ... | no  i∉ρ₁₊ₜ | _     | _     = B-null (ρ∈Q (suc t)) i∉ρ₁₊ₜ
+  ... | no  i∉ρ₁₊ₜ  | _     | _     = B-null (ρ∈Q (suc t)) i∉ρ₁₊ₜ
   ... | yes _       | no  _ | _     = proj₁ (B₀-eqᵢ (ρ∈Q (suc t))) (x∈B₀ i)
   ... | yes _       | yes _ | no  _ = B₀ₑ-eqᵢ (ρ∈Q t) (ρ∈Q (suc t)) (state∈B₀ t i (rec t _))
   ... | yes _       | yes _ | yes _ = begin⟨ (λ j → state∈B₀ (β (suc t) i j) j _) ⟩
-    ⇒ (∀ j → _ ∈ Bₜ (β (suc t) i j) 0 j) ∴⟨ B₀ₑ-eqᵢ (ρ∈Q _) (ρ∈Q (suc t)) ∘_ ⟩
-    ⇒ (∀ j → _ ∈ Bₜ (suc t)         0 j) ∴⟨ (λ prf → F-resp-B₀ₑ (ρ∈Q (suc t)) prf i) ⟩
-    ⇒ Fₜ (suc t) _ i ∈ Bₜ (suc t)   0 i  ∎
+    ∴ (∀ j → _ ∈ Bₜ (β (suc t) i j) 0 j) $⟨ B₀ₑ-eqᵢ (ρ∈Q _) (ρ∈Q (suc t)) ∘_ ⟩
+    ∴ (∀ j → _ ∈ Bₜ (suc t)         0 j) $⟨ (λ prf → F-resp-B₀ₑ (ρ∈Q (suc t)) prf i) ⟩
+    ∴ Fₜ (suc t) _ i ∈ Bₜ (suc t)   0 i  ∎
+-- (λ prf j → B₀ₑ-eq (ρ∈Q _) (ρ∈Q (suc t)) (λ k → state∈B₀ (β (suc t) i j) k {!rec ?!}) j)
 
   expiry⇒wellFormed : ∀ {s e} → ExpiryPeriod [ s , e ] →
                       MessagesWellFormedAt e
   expiry⇒wellFormed {s}  (mkₑ (mkₛₑ s≤e ηₛ≡ηₑ) expᵢ) {i} {t} e<t (mkₛₑ _ ηₑ≡ηₜ) {j} {accβ} i∈ρₜ j∉ρₜ
     with trans ηₛ≡ηₑ ηₑ≡ηₜ
   ... | ηₛ≡ηₜ = begin⟨ expᵢ (∈ρ-subst (sym ηₛ≡ηₜ) i∈ρₜ) e<t j , β-decreasing i j (<-transʳ z≤n e<t) ⟩
-    ⇒ β t i j ∈ₜ [ s , t ] ∴⟨ η-inRangeₑ ηₛ≡ηₜ ⟩
-    ⇒ η (β t i j) ≡ η t    ∴⟨ (λ prf → j∉ρₜ ∘ ∈ρ-subst prf) ⟩
-    ⇒ j ∉ₛ ρ (β t i j)     ∴⟨ asyncIter-inactive 𝓘 𝓢 x accβ ⟩
-    ⇒ δ' x accβ j ≡ ⊥ j   ∴⟨ ≈ᵢ-reflexive ⟩
-    ⇒ δ' x accβ j ≈ᵢ ⊥ j   ∎
+    ∴ β t i j ∈ₜ [ s , t ] $⟨ η-inRangeₑ ηₛ≡ηₜ ⟩
+    ∴ η (β t i j) ≡ η t    $⟨ (λ prf → j∉ρₜ ∘ ∈ρ-subst prf) ⟩
+    ∴ j ∉ₛ ρ (β t i j)     $⟨ asyncIter-inactive 𝓘 𝓢 x accβ ⟩
+    ∴ δ' x accβ j ≡ ⊥ j    $⟨ ≈ᵢ-reflexive ⟩
+    ∴ δ' x accβ j ≈ᵢ ⊥ j   ∎
 
 --------------------------------------------------------------------------
 -- Preservation: if the asynchronous iteration is in a box and
@@ -188,12 +189,12 @@ module _ {x : S} (x∈B₀ : x ∈ᵢ B₀)
   ...     | no  i∉ρ₁₊ₑ | _       | _     = B-null (ρ∈Q (suc e)) i∉ρ₁₊ₑ
   ...     | yes i∈ρ₁₊ₑ | no i∉ρₑ | _     = contradiction (∈ρ-subst (sym ηₑ≡η₁₊ₑ) i∈ρ₁₊ₑ) i∉ρₑ
   ...     | yes _       | yes _   | no  _ = begin⟨ state-steps (mkₛₑ s≤e ηₛ≡ηₑ) c∈Bₖ i (rec e ≤-refl) ⟩
-    ⇒ δ' x {e} _ i ∈ Bₜ e       (suc k) i ∴⟨ δ'∈-resp-Bₜᵢ e ηₑ≡η₁₊ₑ ⟩
-    ⇒ δ' x {e} _ i ∈ Bₜ (suc e) (suc k) i ∎
+    ∴ δ' x {e} _ i ∈ Bₜ e       (suc k) i $⟨ δ'∈-resp-Bₜᵢ e ηₑ≡η₁₊ₑ ⟩
+    ∴ δ' x {e} _ i ∈ Bₜ (suc e) (suc k) i ∎
   ...     | yes i∈ρ₁₊ₑ | yes _   | yes _ = begin⟨ (λ j → m∈Bₖ i (s≤s s≤e) η[s,1+e] i∈ρ₁₊ₑ _) ⟩
-    ⇒ (∀ j → δ' x {β (suc e) i j} _ j ∈ Bₜ s       k      j)  ∴⟨ (λ prf j → δ'∈-resp-Bₜᵢ (β (suc e) i j) ηₛ≡η₁₊ₑ (prf j)) ⟩
-    ⇒ (∀ j → δ' x {β (suc e) i j} _ j ∈ Bₜ (suc e) k      j)  ∴⟨ (λ prf → F-mono-B (ρ∈Q (suc e)) (wf (s≤s s≤e) η[s,1+e] i∈ρ₁₊ₑ) prf i) ⟩
-    ⇒ Fₜ (suc e) _ i                  ∈ Bₜ (suc e) (suc k) i  ∎
+    ∴ (∀ j → δ' x {β (suc e) i j} _ j ∈ Bₜ s       k      j)  $⟨ (λ prf j → δ'∈-resp-Bₜᵢ (β (suc e) i j) ηₛ≡η₁₊ₑ (prf j)) ⟩
+    ∴ (∀ j → δ' x {β (suc e) i j} _ j ∈ Bₜ (suc e) k      j)  $⟨ (λ prf → F-mono-B (ρ∈Q (suc e)) (wf (s≤s s≤e) η[s,1+e] i∈ρ₁₊ₑ) prf i) ⟩
+    ∴ Fₜ (suc e) _ i                  ∈ Bₜ (suc e) (suc k) i  ∎
 
   message-steps : ∀ {k s e} → SubEpoch [ s , e ] →
                   MessagesIn (Bₜ s k) AtTime s →
@@ -269,10 +270,10 @@ module _ {x : S} (x∈B₀ : x ∈ᵢ B₀)
                          ComputationInBox (k + n) AtTime e
   advance-computationₙ {_} {_} {k} {_}     none            c∈Bₖ rewrite +-identityʳ k = c∈Bₖ
   advance-computationₙ {s} {e} {k} {suc n} (next m pp mpp) c∈Bₖ = begin⟨ c∈Bₖ ⟩
-    ⇒ ComputationInBox k           AtTime s ∴⟨ advance-computation₁ pp ⟩
-    ⇒ ComputationInBox (suc k)     AtTime m ∴⟨ advance-computationₙ mpp ⟩
-    ⇒ ComputationInBox (suc k + n) AtTime e ∴⟨ subst (ComputationInBox_AtTime e) (sym (+-suc k n)) ⟩
-    ⇒ ComputationInBox (k + suc n) AtTime e ∎
+    ∴ ComputationInBox k           AtTime s $⟨ advance-computation₁ pp ⟩
+    ∴ ComputationInBox (suc k)     AtTime m $⟨ advance-computationₙ mpp ⟩
+    ∴ ComputationInBox (suc k + n) AtTime e $⟨ subst (ComputationInBox_AtTime e) (sym (+-suc k n)) ⟩
+    ∴ ComputationInBox (k + suc n) AtTime e ∎
 
 --------------------------------------------------------------------------
 -- Convergence
@@ -289,12 +290,12 @@ module _ {x : S} (x∈B₀ : x ∈ᵢ B₀)
                  ∀ {t} → SubEpoch [ e , t ] →
                  δ x t ≈ x*'
     x*-reached (next m pp mpp) {t} η[m,e]@(mkₛₑ m≤e ηₘ≡ηₑ) = begin⟨ start-pp pp ⟩
-      ⇒ ComputationInBox 0   AtTime m   ∴⟨ advance-computationₙ mpp ⟩
-      ⇒ ComputationInBox k*' AtTime e   ∴⟨ state-steps η[m,e] ⟩
-      ⇒ StateIn (Bₜ t k*') AtTime t     ∴⟨ (λ prf i → prf i (<-wellFounded t)) ⟩
-      ⇒ δ x t ∈ᵢ Bₜ t k*'               ∴⟨ δ'∈-resp-Bₜ t ηₛ≡ηₜ ⟩
-      ⇒ δ x t ∈ᵢ Bₜ s k*'               ∴⟨ k*≤k∧x∈Bₖ⇒x≈x* (η s) (ρ∈Q s) ≤-refl ⟩
-      ⇒ δ x t ≈ x*'                     ∎
+      ∴ ComputationInBox 0   AtTime m   $⟨ advance-computationₙ mpp ⟩
+      ∴ ComputationInBox k*' AtTime e   $⟨ state-steps η[m,e] ⟩
+      ∴ StateIn (Bₜ t k*') AtTime t     $⟨ (λ prf i → prf i (<-wellFounded t)) ⟩
+      ∴ δ x t ∈ᵢ Bₜ t k*'               $⟨ δ'∈-resp-Bₜ t ηₛ≡ηₜ ⟩
+      ∴ δ x t ∈ᵢ Bₜ s k*'               $⟨ k*≤k∧x∈Bₖ⇒x≈x* (η s) (ρ∈Q s) ≤-refl ⟩
+      ∴ δ x t ≈ x*'                     ∎
       where ηₛ≡ηₜ = sym (trans (Pseudocycle.ηₛ≡ηₑ pp) (trans (ηₛ≡ηₑ-mpp mpp) ηₘ≡ηₑ))
 
 convergent : PartiallyConvergent 𝓘 B₀ Q

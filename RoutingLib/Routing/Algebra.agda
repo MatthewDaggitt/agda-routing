@@ -11,7 +11,7 @@ open import Algebra.FunctionProperties
 open import Data.Fin using (Fin; toℕ)
 open import Data.List using (List)
 import Data.List.Membership.Setoid as ListMembership
-open import Data.Nat using (ℕ)
+open import Data.Nat using (ℕ; zero; suc)
 open import Data.Product using (Σ; _,_)
 open import Data.Sum using (_⊎_)
 open import Level using (_⊔_) renaming (suc to lsuc)
@@ -222,7 +222,7 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
   -- Distributivity = you and your neighbour's choices always agree
   IsDistributive : Set _
   IsDistributive = ∀ {n} {i j : Fin n} (f : Step i j) x y → f ▷ (x ⊕ y) ≈ (f ▷ x) ⊕ (f ▷ y)
-
+  
   -- Increasing = extending a route never makes it better
   IsIncreasing : Set _
   IsIncreasing = ∀ {n} {i j : Fin n} (f : Step i j) x → x ≤₊ (f ▷ x)
@@ -234,3 +234,15 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
   -- Finite = there only exist a finite number of weights
   IsFinite : Set _
   IsFinite = Σ (List Route) (λ rs → ∀ r → r ∈ₗ rs)
+
+  -- kᵗʰ level distributivity
+  Level_DistributiveIn[_,_] : ℕ → Route → Route → Set _
+  Level 0       DistributiveIn[ ⊥ , ⊤ ] = ∀ {n} {i j : Fin n} (f : Step i j) →
+                                          ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
+                                          f ▷ (x ⊕ y) ≈ (f ▷ x) ⊕ (f ▷ y) 
+  Level (suc k) DistributiveIn[ ⊥ , ⊤ ] = ∀ {n} {i j : Fin n} (f : Step i j) →
+                                          ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
+                                          Level k DistributiveIn[ f ▷ (x ⊕ y) , (f ▷ x) ⊕ (f ▷ y) ]
+  
+  IsLevel_Distributive : ℕ → Set _
+  IsLevel k Distributive = Level k DistributiveIn[ 0# , ∞ ]

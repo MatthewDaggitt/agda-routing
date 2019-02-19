@@ -7,6 +7,7 @@ open import Data.Fin.Properties using () renaming (setoid to 𝔽ₛ)
 open import Data.Nat using (ℕ; _≤_; _+_; s≤s; _<_; zero; suc)
 open import Data.Nat.Properties using (≤-refl)
 open import Data.Product using (∃; _×_; _,_)
+open import Data.Unit using (tt)
 open import Relation.Binary as B using (Setoid; Rel; _Preserves_⟶_; Reflexive)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 open import Relation.Binary.Indexed.Homogeneous hiding (Rel)
@@ -22,7 +23,7 @@ open import RoutingLib.Data.Table using (Table)
 import RoutingLib.Data.Table.Relation.Equality as TableEquality
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset as FiniteSubset
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as FiniteSubsetEquality
-open import RoutingLib.Relation.Unary.Indexed using (IPred; _∈ᵢ_; Uᵢ)
+open import RoutingLib.Relation.Unary.Indexed using (IPred; _∈ᵢ_; Uᵢ; Universalᵢ)
 
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule as Schedules
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod
@@ -129,7 +130,17 @@ module _ {a ℓ n} (I : AsyncIterable a ℓ n) where
   open AsyncIterable I
   open Schedule
 
-  record ConvergesOver {p} (X₀ : IPred Sᵢ p) : Set (lsuc lzero ⊔ a ⊔ ℓ ⊔ p) where
+  record Converges : Set (lsuc lzero ⊔ a ⊔ ℓ) where
+    field
+      x*         : S
+      k*         : ℕ
+      x*-fixed   : F x* ≈ x*
+      x*-reached : ∀ x → (ψ : Schedule n) →
+                   ∀ {s e : 𝕋} → MultiPseudocycle ψ k* [ s , e ] →
+                   ∀ {t} → e ≤ t →
+                   asyncIter I ψ x t ≈ x*
+
+  record PartiallyConverges {p} (X₀ : IPred Sᵢ p) : Set (lsuc lzero ⊔ a ⊔ ℓ ⊔ p) where
     field
       x*         : S
       k*         : ℕ
@@ -140,5 +151,23 @@ module _ {a ℓ n} (I : AsyncIterable a ℓ n) where
                    ∀ {t} → e ≤ t →
                    asyncIter I ψ x t ≈ x*
 
-  Converges : Set (lsuc lzero ⊔ a ⊔ ℓ)
-  Converges = ConvergesOver Uᵢ
+  converges⇒partiallyConverges : Converges → PartiallyConverges Uᵢ
+  converges⇒partiallyConverges conv = record
+    { x*         = x*
+    ; k*         = k*
+    ; x*-fixed   = x*-fixed
+    ; x*-reached = λ {x} _ → x*-reached x
+    } where open Converges conv
+
+  partiallyConverges⇒converges : ∀ {p} {X₀ : IPred Sᵢ p} → Universalᵢ X₀ →
+                                 PartiallyConverges X₀ → Converges
+  partiallyConverges⇒converges _∈X₀ partialConv = record
+    { x*         = x*
+    ; k*         = k*
+    ; x*-fixed   = x*-fixed
+    ; x*-reached = λ x → x*-reached (λ i → x i ∈X₀)
+    } where open PartiallyConverges partialConv
+
+  
+  partiallyConverges⇒converges′ : PartiallyConverges Uᵢ → Converges
+  partiallyConverges⇒converges′ = partiallyConverges⇒converges (λ _ → tt)

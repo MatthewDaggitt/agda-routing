@@ -42,22 +42,22 @@ open PartialACO aco
 
 B-subst : ∀ {e f p q} → e ≡ f → p ≡ q → (p∈Q : p ∈ Q) (q∈Q : q ∈ Q) → B e p∈Q ≡ B f q∈Q
 B-subst refl refl p∈Q q∈Q = refl
-  
+
 B₀ₑ-eqᵢ : ∀ {e p f q} (p∈Q : p ∈ Q) (q∈Q : q ∈ Q) → ∀ {i xᵢ} → xᵢ ∈ B e p∈Q 0 i → xᵢ ∈ B f q∈Q 0 i
 B₀ₑ-eqᵢ {e} {p} {f} {q} p∈Q q∈Q {i} {xᵢ} xᵢ∈Bₑₚₖᵢ = begin⟨ xᵢ∈Bₑₚₖᵢ ⟩
-  ⇒ xᵢ ∈ B e p∈Q 0 i ∴⟨ proj₂ (B₀-eqᵢ p∈Q) ⟩
-  ⇒ xᵢ ∈ B₀ i        ∴⟨ proj₁ (B₀-eqᵢ q∈Q) ⟩
-  ⇒ xᵢ ∈ B f q∈Q 0 i ∎
+  ∴ xᵢ ∈ B e p∈Q 0 i $⟨ proj₂ (B₀-eqᵢ p∈Q) ⟩
+  ∴ xᵢ ∈ B₀ i        $⟨ proj₁ (B₀-eqᵢ q∈Q) ⟩
+  ∴ xᵢ ∈ B f q∈Q 0 i ∎
 
 B₀ₑ-eq : ∀ {e p f q} (p∈Q : p ∈ Q) (q∈Q : q ∈ Q) → ∀ {x} → x ∈ᵢ B e p∈Q 0 → x ∈ᵢ B f q∈Q 0
 B₀ₑ-eq p∈Q q∈Q x∈Bₑₚ₀ i = B₀ₑ-eqᵢ p∈Q q∈Q (x∈Bₑₚ₀ i)
 
 F-resp-B₀ₑ : ∀ {e p x} (p∈Q : p ∈ Q) → x ∈ᵢ B e p∈Q 0 → F e p x ∈ᵢ B e p∈Q 0
 F-resp-B₀ₑ {e} {p} {x} p∈Q x∈Bₑₚ₀ = begin⟨ x∈Bₑₚ₀ ⟩
-  ⇒ x       ∈ᵢ B e p∈Q 0 ∴⟨ (λ prf i → proj₂ (B₀-eqᵢ p∈Q) (prf i)) ⟩
-  ⇒ x       ∈ᵢ B₀        ∴⟨ F-resp-B₀ p∈Q ⟩
-  ⇒ F e p x ∈ᵢ B₀        ∴⟨ (λ prf i → proj₁ (B₀-eqᵢ p∈Q) (prf i)) ⟩
-  ⇒ F e p x ∈ᵢ B e p∈Q 0 ∎
+  ∴ x       ∈ᵢ B e p∈Q 0 $⟨ (λ prf i → proj₂ (B₀-eqᵢ p∈Q) (prf i)) ⟩
+  ∴ x       ∈ᵢ B₀        $⟨ F-resp-B₀ p∈Q ⟩
+  ∴ F e p x ∈ᵢ B₀        $⟨ (λ prf i → proj₁ (B₀-eqᵢ p∈Q) (prf i)) ⟩
+  ∴ F e p x ∈ᵢ B e p∈Q 0 ∎
 
 --------------------------------------------------------------------------------
 -- Fixed points
@@ -85,20 +85,20 @@ module _ (e : Epoch) {p} (p∈Q : p ∈ Q) where
   
   k*≤k∧x∈Bₖᵢ⇒x≈x*ᵢ : ∀ {k} → k* ≤ k → ∀ {i} {xᵢ : Sᵢ i} → xᵢ ∈ B e p∈Q k i → xᵢ ≈ᵢ x* i
   k*≤k∧x∈Bₖᵢ⇒x≈x*ᵢ {k} k*≤k {i} {xᵢ} xᵢ∈Bₖᵢ = begin⟨ k*≤k⇒x*∈Bₖ k*≤k ⟩
-    ⇒ x*             ∈ᵢ B e p∈Q k  ∴⟨ ∈-replace (B e p∈Q k) ◌ xᵢ∈Bₖᵢ ⟩
-    ⇒ replace x* xᵢ   ∈ᵢ B e p∈Q k ∴⟨ k*≤k∧x∈Bₖ⇒x≈x* k*≤k ⟩
-    ⇒ replace x* xᵢ   ≈ x*         ∴⟨ _$ i ⟩
-    ⇒ replace x* xᵢ i ≈ᵢ x* i      ∴⟨ ≈ᵢ-trans (≈ᵢ-sym (≈ᵢ-reflexive (≡-replace x* xᵢ))) ⟩
-    ⇒ xᵢ              ≈ᵢ x* i      ∎
+    ∴ x*             ∈ᵢ B e p∈Q k  $⟨ ∈-replace (B e p∈Q k) ◌ xᵢ∈Bₖᵢ ⟩
+    ∴ replace x* xᵢ   ∈ᵢ B e p∈Q k $⟨ k*≤k∧x∈Bₖ⇒x≈x* k*≤k ⟩
+    ∴ replace x* xᵢ   ≈ x*         $⟨ _$ i ⟩
+    ∴ replace x* xᵢ i ≈ᵢ x* i      $⟨ ≈ᵢ-trans (≈ᵢ-sym (≈ᵢ-reflexive (≡-replace x* xᵢ))) ⟩
+    ∴ xᵢ              ≈ᵢ x* i      ∎
 
   x*∈Aₚ : x* ∈ Accordant p
   x*∈Aₚ i∉p = ≈ᵢ-sym (k*≤k∧x∈Bₖᵢ⇒x≈x*ᵢ ≤-refl (B-null p∈Q i∉p))
 
   x*-fixed : (F e p) x* ≈ x*
   x*-fixed = begin⟨ k*≤k⇒x*∈Bₖ ≤-refl ⟩
-    ⇒ x*         ∈ᵢ B e p∈Q k*       ∴⟨ F-mono-B p∈Q x*∈Aₚ ⟩
-    ⇒ F e p (x*) ∈ᵢ B e p∈Q (suc k*) ∴⟨ k*≤k∧x∈Bₖ⇒x≈x* (n≤1+n k*) ⟩
-    ⇒ F e p (x*) ≈ x*                ∎
+    ∴ x*         ∈ᵢ B e p∈Q k*       $⟨ F-mono-B p∈Q x*∈Aₚ ⟩
+    ∴ F e p (x*) ∈ᵢ B e p∈Q (suc k*) $⟨ k*≤k∧x∈Bₖ⇒x≈x* (n≤1+n k*) ⟩
+    ∴ F e p (x*) ≈ x*                ∎
 
   Fᵏx∈B₀ : ∀ k {x} → x ∈ᵢ B₀ → (F e p ^ k) x ∈ᵢ B₀
   Fᵏx∈B₀ zero    x∈B₀ = x∈B₀

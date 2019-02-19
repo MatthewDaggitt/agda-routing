@@ -6,7 +6,7 @@ This is the frozen version of the library accompanying the paper _A Relaxation o
 
 ## Proofs
 
-All the definitions and proofs of the paper are found in the `RoutingLib.Iteration.Asynchronous.Static` directory:
+All the definitions and proofs of the paper are found in the DIR=`RoutingLib.Iteration.Asynchronous.Static` directory:
 
 * Definition of a schedule is found in:
   [RoutingLib.Iteration.Asynchronous.Static.Schedule](https://github.com/MatthewDaggitt/agda-routing/blob/jar2019/RoutingLib/Iteration/Asynchronous/Static/Schedule.agda)

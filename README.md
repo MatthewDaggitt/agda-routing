@@ -1,54 +1,42 @@
-# Agda-routing
+# Agda-routing for JAR 2019
 
-This library reasons about iterative asynchronous processes and network routing
-problems. It is organised in the same manner as the Agda standard library and
-contains extensions of several of the Agda standard library modules. The core
-contributions of this library can be found in the `RoutingLib.Iteration` and
-`RoutingLib.Routing` directories. The rest of the library contains various stuff
-that should probably be pushed to the standard library at some point, and is
-layed out correspondingly.
+This library reasons about iterative asynchronous processes and network routing problems. It is organised in the same manner as the Agda standard library and contains extensions of several of the Agda standard library modules. The core contributions of this library can be found in the `RoutingLib.Iteration` and `RoutingLib.Routing` directories.
 
-## Iterative algorithms
+This is the frozen version of the library accompanying the paper _A Relaxation of Uresin & Dubois' Asynchronous Fixed-Point Theory in Agda_ by Matthew L. Daggitt, Ran Zmigrod and Timothy G Griffin submitted to JAR in 2019. The latest version of the library can be found on the [master](https://github.com/MatthewDaggitt/agda-routing) branch in this repository.
 
-* `RoutingLib.Iteration.Asynchronous.(Static/Dynamic)` contains a record type
-  encoding parallelisations of dynamic and static iterative algorithms.
+## Proofs
 
-* `RoutingLib.Iteration.Asynchronous.(Static/Dynamic).Schedule` contains a 
-  formalisation of schedules for static and dynamic asynchronous iterations.
+All the definitions and proofs of the paper are found in the `RoutingLib.Iteration.Asynchronous.Static` directory:
 
-* `RoutingLib.Iteration.Asynchronous.(Static/Dynamic).Convergence` 
-  contains theorems about the properties required for convergence.
+* Definition of a schedule is found in:
+  [RoutingLib.Iteration.Asynchronous.Static.Schedule](https://github.com/MatthewDaggitt/agda-routing/blob/sigcomm2018/RoutingLib/Iteration/Asynchronous/Static/Schedule.agda)
 
-* `RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.ACOToSafe` contains a
-  generalised version of Uresin \& Dubois's proof [1] that the (dynamic) ACO 
-  conditions implies the iteration is convergent.
+* Definition of a pseudoperiod is found in:
+  [RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod](https://github.com/MatthewDaggitt/agda-routing/blob/sigcomm2018/RoutingLib/Iteration/Asynchronous/Static/Schedule/Pseudoperiod.agda)
 
-* `RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.UltrametricToACO` 
-  contains a generalised version of Gurney's proof [2] that the (dynamic) ACO 
-  conditions implies the iteration is convergent.
+* Definition of the asynchronous iteration and correctness is in:
+  [RoutingLib.Iteration.Asynchronous.Static](https://github.com/MatthewDaggitt/agda-routing/blob/sigcomm2018/RoutingLib/Iteration/Asynchronous/Static.agda)
 
-## Routing proofs
+* Definitions of the various conditions sufficient for convergence are found in:
+  [RoutingLib.Iteration.Asynchronous.Static.Convergence.Conditions](https://github.com/MatthewDaggitt/agda-routing/blob/sigcomm2018/RoutingLib/Iteration/Asynchronous/Static/Convergence/Conditions.agda)
 
-The author's main use for this library has been to apply this work to internet
-routing protocols based on the Distributed Bellman Ford (DBF) algorithm.
+* Proof that our relaxed ACO conditions are equivalent to that of Uresin & Dubois:
+  [RoutingLib.Iteration.Asynchronous.Static.Convergence.RelaxACO](https://github.com/MatthewDaggitt/agda-routing/blob/sigcomm2018/RoutingLib/Iteration/Asynchronous/Static/Convergence/RelaxACO.agda)
 
-* `RoutingLib.Routing` contains various concepts used in next-hop routing.
+* Proof of Theorem~1 that ACO implies convergence is found in:
+  [RoutingLib.Iteration.Asynchronous.Static.Convergence.ACOImpliesConverges](https://github.com/MatthewDaggitt/agda-routing/blob/sigcomm2018/RoutingLib/Iteration/Asynchronous/Static/Convergence/ACOImpliesConverges.agda)
 
-* `RoutingLib.Routing.Algebra` contains the definition of `RoutingAlgebra`s and
-  `PathAlgebra`s. These are used to represent a generic routing problem.
+* Counter-example to Proposition 3 and 4 of Uresin & Dubois is found in:
+  [RoutingLib.Iteration.Asynchronous.Static.Convergence.CounterExample-UresinDubois3](https://github.com/MatthewDaggitt/agda-routing/blob/sigcomm2018/RoutingLib/Iteration/Asynchronous/Static/Convergence/CounterExample-UresinDubois3.agda)
 
-* `RoutingLib.Routing.VectorBased.Asynchronous` contains a general model for an
-  asynchronously implemented vector-based protocol. The model is agnostic to 
-  whether it the protocol is a distance-vector protocol or a path-vector 
-  protocol.
+* Proof of Theorem~2 that our updated synchronous conditions implies ACO:
+  [RoutingLib.Iteration.Asynchronous.Static.Convergence.SynchronousImpliesACO](https://github.com/MatthewDaggitt/agda-routing/blob/sigcomm2018/RoutingLib/Iteration/Asynchronous/Static/SynchronousImpliesACO.agda)
 
-* `RoutingLib.Routing.VectorBased.Asynchronous.Results` contains various 
-  convergence theorems about distance-vector and path-vector protocols.
+* Proof of Theorem~3 that AMCO implies ACO is found in:
+  [RoutingLib.Iteration.Asynchronous.Static.Convergence.AMCOImpliesACO](https://github.com/MatthewDaggitt/agda-routing/blob/sigcomm2018/RoutingLib/Iteration/Asynchronous/Static/AMCOImpliesACO.agda)
 
-* `RoutingLib.Routing.Protocols.BGPLite` shwos how the work may be used to
-  create a safe-by-design protocol that contains many of the features of BGP 
-  including path inflation, communities, conditional policy and local
-  preferences.
+* A public facing interface that users of the library should use to prove new convergence results is found at:
+  [RoutingLib.Iteration.Asynchronous.Static.Convergence](https://github.com/MatthewDaggitt/agda-routing/blob/sigcomm2018/RoutingLib/Iteration/Asynchronous/Static/Convergence.agda)
 
 ## Requirements
 

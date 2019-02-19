@@ -9,34 +9,34 @@ This is the frozen version of the library accompanying the paper _A Relaxation o
 All the definitions and proofs of the paper are found in the `RoutingLib.Iteration.Asynchronous.Static` directory:
 
 * Definition of a schedule is found in:
-  [RoutingLib.Iteration.Asynchronous.Static.Schedule](https://github.com/MatthewDaggitt/agda-routing/blob/sigcomm2018/RoutingLib/Iteration/Asynchronous/Static/Schedule.agda)
+  [RoutingLib.Iteration.Asynchronous.Static.Schedule](https://github.com/MatthewDaggitt/agda-routing/blob/jar2019/RoutingLib/Iteration/Asynchronous/Static/Schedule.agda)
 
 * Definition of a pseudoperiod is found in:
-  [RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod](https://github.com/MatthewDaggitt/agda-routing/blob/sigcomm2018/RoutingLib/Iteration/Asynchronous/Static/Schedule/Pseudoperiod.agda)
+  [RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod](https://github.com/MatthewDaggitt/agda-routing/blob/jar2019/RoutingLib/Iteration/Asynchronous/Static/Schedule/Pseudoperiod.agda)
 
 * Definition of the asynchronous iteration and correctness is in:
-  [RoutingLib.Iteration.Asynchronous.Static](https://github.com/MatthewDaggitt/agda-routing/blob/sigcomm2018/RoutingLib/Iteration/Asynchronous/Static.agda)
+  [RoutingLib.Iteration.Asynchronous.Static](https://github.com/MatthewDaggitt/agda-routing/blob/jar2019/RoutingLib/Iteration/Asynchronous/Static.agda)
 
 * Definitions of the various conditions sufficient for convergence are found in:
-  [RoutingLib.Iteration.Asynchronous.Static.Convergence.Conditions](https://github.com/MatthewDaggitt/agda-routing/blob/sigcomm2018/RoutingLib/Iteration/Asynchronous/Static/Convergence/Conditions.agda)
+  [RoutingLib.Iteration.Asynchronous.Static.Convergence.Conditions](https://github.com/MatthewDaggitt/agda-routing/blob/jar2019/RoutingLib/Iteration/Asynchronous/Static/Convergence/Conditions.agda)
 
 * Proof that our relaxed ACO conditions are equivalent to that of Uresin & Dubois:
-  [RoutingLib.Iteration.Asynchronous.Static.Convergence.RelaxACO](https://github.com/MatthewDaggitt/agda-routing/blob/sigcomm2018/RoutingLib/Iteration/Asynchronous/Static/Convergence/RelaxACO.agda)
+  [RoutingLib.Iteration.Asynchronous.Static.Convergence.RelaxACO](https://github.com/MatthewDaggitt/agda-routing/blob/jar2019/RoutingLib/Iteration/Asynchronous/Static/Convergence/RelaxACO.agda)
 
 * Proof of Theorem~1 that ACO implies convergence is found in:
-  [RoutingLib.Iteration.Asynchronous.Static.Convergence.ACOImpliesConverges](https://github.com/MatthewDaggitt/agda-routing/blob/sigcomm2018/RoutingLib/Iteration/Asynchronous/Static/Convergence/ACOImpliesConverges.agda)
+  [RoutingLib.Iteration.Asynchronous.Static.Convergence.ACOImpliesConverges](https://github.com/MatthewDaggitt/agda-routing/blob/jar2019/RoutingLib/Iteration/Asynchronous/Static/Convergence/ACOImpliesConverges.agda)
 
 * Counter-example to Proposition 3 and 4 of Uresin & Dubois is found in:
-  [RoutingLib.Iteration.Asynchronous.Static.Convergence.CounterExample-UresinDubois3](https://github.com/MatthewDaggitt/agda-routing/blob/sigcomm2018/RoutingLib/Iteration/Asynchronous/Static/Convergence/CounterExample-UresinDubois3.agda)
+  [RoutingLib.Iteration.Asynchronous.Static.Convergence.CounterExample-UresinDubois3](https://github.com/MatthewDaggitt/agda-routing/blob/jar2019/RoutingLib/Iteration/Asynchronous/Static/Convergence/CounterExample-UresinDubois3.agda)
 
 * Proof of Theorem~2 that our updated synchronous conditions implies ACO:
-  [RoutingLib.Iteration.Asynchronous.Static.Convergence.SynchronousImpliesACO](https://github.com/MatthewDaggitt/agda-routing/blob/sigcomm2018/RoutingLib/Iteration/Asynchronous/Static/SynchronousImpliesACO.agda)
+  [RoutingLib.Iteration.Asynchronous.Static.Convergence.SynchronousImpliesACO](https://github.com/MatthewDaggitt/agda-routing/blob/jar2019/RoutingLib/Iteration/Asynchronous/Static/SynchronousImpliesACO.agda)
 
 * Proof of Theorem~3 that AMCO implies ACO is found in:
-  [RoutingLib.Iteration.Asynchronous.Static.Convergence.AMCOImpliesACO](https://github.com/MatthewDaggitt/agda-routing/blob/sigcomm2018/RoutingLib/Iteration/Asynchronous/Static/AMCOImpliesACO.agda)
+  [RoutingLib.Iteration.Asynchronous.Static.Convergence.AMCOImpliesACO](https://github.com/MatthewDaggitt/agda-routing/blob/jar2019/RoutingLib/Iteration/Asynchronous/Static/AMCOImpliesACO.agda)
 
 * A public facing interface that users of the library should use to prove new convergence results is found at:
-  [RoutingLib.Iteration.Asynchronous.Static.Convergence](https://github.com/MatthewDaggitt/agda-routing/blob/sigcomm2018/RoutingLib/Iteration/Asynchronous/Static/Convergence.agda)
+  [RoutingLib.Iteration.Asynchronous.Static.Convergence](https://github.com/MatthewDaggitt/agda-routing/blob/jar2019/RoutingLib/Iteration/Asynchronous/Static/Convergence.agda)
 
 ## Requirements
 

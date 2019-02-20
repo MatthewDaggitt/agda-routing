@@ -23,16 +23,16 @@ All the definitions and proofs of the paper are found in the DIR=`RoutingLib.Ite
 * Proof that our relaxed ACO conditions are equivalent to that of Uresin & Dubois:
   [RoutingLib.Iteration.Asynchronous.Static.Convergence.RelaxACO](https://github.com/MatthewDaggitt/agda-routing/blob/jar2019/RoutingLib/Iteration/Asynchronous/Static/Convergence/RelaxACO.agda)
 
-* Proof of Theorem~1 that ACO implies convergence is found in:
+* Proof of Theorem 1 that ACO implies convergence is found in:
   [RoutingLib.Iteration.Asynchronous.Static.Convergence.ACOImpliesConverges](https://github.com/MatthewDaggitt/agda-routing/blob/jar2019/RoutingLib/Iteration/Asynchronous/Static/Convergence/ACOImpliesConverges.agda)
 
 * Counter-example to Proposition 3 and 4 of Uresin & Dubois is found in:
   [RoutingLib.Iteration.Asynchronous.Static.Convergence.CounterExample-UresinDubois3](https://github.com/MatthewDaggitt/agda-routing/blob/jar2019/RoutingLib/Iteration/Asynchronous/Static/Convergence/CounterExample-UresinDubois3.agda)
 
-* Proof of Theorem~2 that our updated synchronous conditions implies ACO:
+* Proof of Theorem 2 that our updated synchronous conditions implies ACO:
   [RoutingLib.Iteration.Asynchronous.Static.Convergence.SynchronousImpliesACO](https://github.com/MatthewDaggitt/agda-routing/blob/jar2019/RoutingLib/Iteration/Asynchronous/Static/SynchronousImpliesACO.agda)
 
-* Proof of Theorem~3 that AMCO implies ACO is found in:
+* Proof of Theorem 3 that AMCO implies ACO is found in:
   [RoutingLib.Iteration.Asynchronous.Static.Convergence.AMCOImpliesACO](https://github.com/MatthewDaggitt/agda-routing/blob/jar2019/RoutingLib/Iteration/Asynchronous/Static/AMCOImpliesACO.agda)
 
 * A public facing interface that users of the library should use to prove new convergence results is found at:

@@ -78,7 +78,7 @@ open FunctionProperties _≈_
 -- An ordering over routes is induced from ⊕ using the right natural order.
 -- i.e. x ≤₊ y iff when choosing between x and y you choose x.
 
-≤₊-decTotalOrder : DecTotalOrder b ℓ ℓ
+≤₊-decTotalOrder : DecTotalOrder a ℓ ℓ
 ≤₊-decTotalOrder = RightNaturalOrder.decTotalOrder _ _ ⊕-isSemilattice ⊕-sel _≟_
 
 ≥₊-decTotalOrder : DecTotalOrder _ _ _

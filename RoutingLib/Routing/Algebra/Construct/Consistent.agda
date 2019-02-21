@@ -9,7 +9,7 @@
 open import RoutingLib.Routing using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra
 
-module RoutingLib.Routing.Algebra.Consistency
+module RoutingLib.Routing.Algebra.Construct.Consistent
   {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
@@ -239,7 +239,7 @@ f∞ᶜ-reject _ _ _ = ≈-refl
 
 -- Finally the raw routing algebra may be formed
 
-algebraᶜ : RawRoutingAlgebra 0ℓ (b ⊔ ℓ) ℓ
+algebraᶜ : RawRoutingAlgebra (a ⊔ ℓ) 0ℓ ℓ
 algebraᶜ = record
   { Step               = CStep
   ; Route              = CRoute

@@ -34,28 +34,28 @@ open Schedule public using (Epoch)
 --------------------------------------------------------------------------------
 -- Adjacency matrices represent the topology of the network at a point in time
 
-AdjacencyMatrix : Set a
+AdjacencyMatrix : Set b
 AdjacencyMatrix = ∀ (i j : Fin n) → Step i j
 
 --------------------------------------------------------------------------------
 -- A network is a epoch indexed family of adjacency matrices
 
-Network : Set a
+Network : Set b
 Network = Epoch → AdjacencyMatrix
 
 --------------------------------------------------------------------------------
 -- Routing tables store a node's routing decisions
 
-RoutingTable : Set b
+RoutingTable : Set a
 RoutingTable = Table Route n
 
 -- Properties
 open TableDecEquality DS public
 
-ℝ𝕋ₛ : Setoid b ℓ
+ℝ𝕋ₛ : Setoid a ℓ
 ℝ𝕋ₛ = 𝕋ₛ n
 
-Decℝ𝕋ₛ : DecSetoid b ℓ
+Decℝ𝕋ₛ : DecSetoid a ℓ
 Decℝ𝕋ₛ = Dec𝕋ₛ n
 
 ℝ𝕋ₛⁱ : IndexedSetoid (Fin n) _ _
@@ -64,22 +64,22 @@ Decℝ𝕋ₛ = Dec𝕋ₛ n
 --------------------------------------------------------------------------------
 -- Routing matrices store the routing decisions of the entire network
 
-RoutingMatrix : Set b
+RoutingMatrix : Set a
 RoutingMatrix = SquareMatrix Route n
 
 -- Standard equality
 open MatrixDecEquality DS public
 
-ℝ𝕄ₛ : Setoid b ℓ
+ℝ𝕄ₛ : Setoid a ℓ
 ℝ𝕄ₛ = 𝕄ₛ n n
 
 ℝ𝕄ₛⁱ : IndexedSetoid (Fin n) _ _
 ℝ𝕄ₛⁱ = triviallyIndexSetoid (Fin n) ℝ𝕋ₛ
 
-Decℝ𝕄ₛ : DecSetoid b ℓ
+Decℝ𝕄ₛ : DecSetoid a ℓ
 Decℝ𝕄ₛ = Dec𝕄ₛ n n
 
-Decℝ𝕄ₛⁱ : IndexedDecSetoid (Fin n) b ℓ
+Decℝ𝕄ₛⁱ : IndexedDecSetoid (Fin n) a ℓ
 Decℝ𝕄ₛⁱ = triviallyIndexDecSetoid (Fin n) Decℝ𝕋ₛ
 
 -- Equality over only a subset of routing tables

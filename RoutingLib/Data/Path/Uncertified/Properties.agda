@@ -171,6 +171,9 @@ _≟ₚ_ : Decidable _≈ₚ_
 ≤ₗₑₓ-antisym (step  refl refl _)   (here₂ _ j<i)         = contradiction j<i 1+n≰n
 ≤ₗₑₓ-antisym (step  refl refl p≤q) (step refl refl q≤p)  = cong (_ ∷_) (≤ₗₑₓ-antisym p≤q q≤p)
 
+≤ₗₑₓ-minimum : Minimum _≤ₗₑₓ_ []
+≤ₗₑₓ-minimum x = stop
+
 _≤ₗₑₓ?_ : Decidable _≤ₗₑₓ_
 [] ≤ₗₑₓ? _ = yes stop
 (i ∷ p) ≤ₗₑₓ? []          = no λ()
@@ -194,23 +197,34 @@ _≤ₗₑₓ?_ : Decidable _≤ₗₑₓ_
   }
 ... | tri≈ _   i≡k _ | tri≈ _ j≡l _   | yes p≤q = yes (step i≡k j≡l p≤q)
 
+≤ₗₑₓ-isTotalOrder : IsTotalOrder _≡_ _≤ₗₑₓ_
+≤ₗₑₓ-isTotalOrder = record
+  { isPartialOrder = record
+    { isPreorder = record
+      { isEquivalence = isEquivalence
+      ; reflexive     = ≤ₗₑₓ-reflexive
+      ; trans         = ≤ₗₑₓ-trans
+      }
+    ; antisym    = ≤ₗₑₓ-antisym
+    }
+  ; total        = ≤ₗₑₓ-total
+  }
+
+≤ₗₑₓ-isDecTotalOrder : IsDecTotalOrder _≡_ _≤ₗₑₓ_
+≤ₗₑₓ-isDecTotalOrder = record
+  { isTotalOrder = ≤ₗₑₓ-isTotalOrder
+  ; _≟_          = _≟ₚ_
+  ; _≤?_         = _≤ₗₑₓ?_
+  }
+
+≤ₗₑₓ-totalOrder : TotalOrder _ _ _
+≤ₗₑₓ-totalOrder = record
+  { isTotalOrder = ≤ₗₑₓ-isTotalOrder
+  }
+  
 ≤ₗₑₓ-decTotalOrder : DecTotalOrder _ _ _
 ≤ₗₑₓ-decTotalOrder = record
-  { isDecTotalOrder = record
-    { isTotalOrder = record
-      { isPartialOrder = record
-        { isPreorder = record
-          { isEquivalence = isEquivalence
-          ; reflexive     = ≤ₗₑₓ-reflexive
-          ; trans         = ≤ₗₑₓ-trans
-          }
-        ; antisym    = ≤ₗₑₓ-antisym
-        }
-      ; total        = ≤ₗₑₓ-total
-      }
-    ; _≟_          = _≟ₚ_
-    ; _≤?_         = _≤ₗₑₓ?_
-    }
+  { isDecTotalOrder = ≤ₗₑₓ-isDecTotalOrder
   }
 
 open ToStrict ≤ₗₑₓ-decTotalOrder public

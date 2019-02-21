@@ -17,7 +17,7 @@ open import Data.Sum using (_⊎_)
 open import Level using (_⊔_) renaming (suc to lsuc)
 open import Relation.Nullary using (¬_)
 open import Relation.Binary
-open import Relation.Binary.PropositionalEquality using (_≡_; refl)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 import Relation.Binary.Construct.NonStrictToStrict as NonStrictToStrict
 import Relation.Binary.EqReasoning as EqReasoning
 
@@ -50,9 +50,9 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
 
   field
     -- The type of the routes
-    Route            : Set b
+    Route            : Set a
     -- The type of edge labels for each arc (i , j)
-    Step             : ∀ {n} → Fin n → Fin n → Set a
+    Step             : ∀ {n} → Fin n → Fin n → Set b
 
     -- Equality between routes
     _≈_              : Rel Route ℓ
@@ -105,14 +105,50 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
   DS = record { isDecEquivalence = ≈-isDecEquivalence }
 
 --------------------------------------------------------------------------------
--- Routing algebras
+-- Basic properties
 --------------------------------------------------------------------------------
--- This record ensures that the corresponding raw routing algebra obeys all the
--- properties we would expect of a routing algebra. See below for descriptions.
+-- Basic important properties an algebra may possess
 
 module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 
   open RawRoutingAlgebra algebra
+  open ListMembership S renaming (_∈_ to _∈ₗ_)
+
+  -- Distributivity = you and your neighbour's choices always agree
+  IsDistributive : Set _
+  IsDistributive = ∀ {n} {i j : Fin n} (f : Step i j) x y → f ▷ (x ⊕ y) ≈ (f ▷ x) ⊕ (f ▷ y)
+  
+  -- Increasing = extending a route never makes it better
+  IsIncreasing : Set _
+  IsIncreasing = ∀ {n} {i j : Fin n} (f : Step i j) x → x ≤₊ (f ▷ x)
+
+  -- Strictly increasing = extending a route always makes it worse
+  IsStrictlyIncreasing : Set _
+  IsStrictlyIncreasing = ∀ {n} {i j : Fin n} (f : Step i j) {x} → x ≉ ∞ → x <₊ (f ▷ x)
+
+  -- Finite = there only exist a finite number of weights
+  IsFinite : Set _
+  IsFinite = Σ (List Route) (λ rs → ∀ r → r ∈ₗ rs)
+
+  Level_DistributiveIn[_,_] : ℕ → Route → Route → Set _
+  Level 0       DistributiveIn[ ⊥ , ⊤ ] =
+    ∀ {n} {i j : Fin n} (f : Step i j) →
+    ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
+    f ▷ (x ⊕ y) ≈ (f ▷ x) ⊕ (f ▷ y) 
+  Level (suc k) DistributiveIn[ ⊥ , ⊤ ] =
+    ∀ {n} {i j : Fin n} (f : Step i j) →
+    ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
+    Level k DistributiveIn[ f ▷ (x ⊕ y) , (f ▷ x) ⊕ (f ▷ y) ]
+
+
+  IsLevel_Distributive : ℕ → Set _
+  IsLevel k Distributive = Level k DistributiveIn[ 0# , ∞ ]
+
+--------------------------------------------------------------------------------
+-- Routing algebras
+--------------------------------------------------------------------------------
+-- This record ensures that the corresponding raw routing algebra obeys all the
+-- properties we would expect of a routing algebra. See below for descriptions.
 
   record IsRoutingAlgebra : Set (a ⊔ b ⊔ ℓ) where
     no-eta-equality -- Needed due to bug #2732 in Agda
@@ -209,40 +245,35 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
     weight A (valid [])                    = 0#
     weight A (valid ((i , j) ∷ p ∣ _ ∣ _)) = A i j ▷ weight A (valid p)
 
---------------------------------------------------------------------------------
--- Other properties
---------------------------------------------------------------------------------
--- Other important properties an algebra may possess
 
-module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
+
+module PathDistributivity
+       {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
+       (isPathAlgebra : IsPathAlgebra algebra)
+       where
 
   open RawRoutingAlgebra algebra
-  open ListMembership S renaming (_∈_ to _∈ₗ_)
+  open IsPathAlgebra isPathAlgebra
+  open UncertifiedPaths
 
-  -- Distributivity = you and your neighbour's choices always agree
-  IsDistributive : Set _
-  IsDistributive = ∀ {n} {i j : Fin n} (f : Step i j) x y → f ▷ (x ⊕ y) ≈ (f ▷ x) ⊕ (f ▷ y)
+  PathDistributive : Set _
+  PathDistributive = ∀ {n} {i j : Fin n} (f : Step i j) →
+                     ∀ {x y} → toℕ i ∉ₚ path x → toℕ i ∉ₚ path y → f ▷ (x ⊕ y) ≈ (f ▷ x) ⊕ (f ▷ y)
+
   
-  -- Increasing = extending a route never makes it better
-  IsIncreasing : Set _
-  IsIncreasing = ∀ {n} {i j : Fin n} (f : Step i j) x → x ≤₊ (f ▷ x)
-
-  -- Strictly increasing = extending a route always makes it worse
-  IsStrictlyIncreasing : Set _
-  IsStrictlyIncreasing = ∀ {n} {i j : Fin n} (f : Step i j) {x} → x ≉ ∞ → x <₊ (f ▷ x)
-
-  -- Finite = there only exist a finite number of weights
-  IsFinite : Set _
-  IsFinite = Σ (List Route) (λ rs → ∀ r → r ∈ₗ rs)
-
   -- kᵗʰ level distributivity
-  Level_DistributiveIn[_,_] : ℕ → Route → Route → Set _
-  Level 0       DistributiveIn[ ⊥ , ⊤ ] = ∀ {n} {i j : Fin n} (f : Step i j) →
-                                          ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
-                                          f ▷ (x ⊕ y) ≈ (f ▷ x) ⊕ (f ▷ y) 
-  Level (suc k) DistributiveIn[ ⊥ , ⊤ ] = ∀ {n} {i j : Fin n} (f : Step i j) →
-                                          ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
-                                          Level k DistributiveIn[ f ▷ (x ⊕ y) , (f ▷ x) ⊕ (f ▷ y) ]
+  IsLevel_PathDistributiveIn[_,_] : ℕ → Route → Route → Set _
+  IsLevel 0       PathDistributiveIn[ ⊥ , ⊤ ] =
+    ∀ {n} {i j : Fin n} (f : Step i j) →
+    ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
+    toℕ i ∉ₚ path x → toℕ i ∉ₚ path y →
+    (toℕ i , toℕ j) ⇿ path x → (toℕ i , toℕ j) ⇿ path y →
+    f ▷ (x ⊕ y) ≈ (f ▷ x) ⊕ (f ▷ y) 
+  IsLevel (suc k) PathDistributiveIn[ ⊥ , ⊤ ] =
+    ∀ {n} {i j : Fin n} (f : Step i j) →
+    ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
+    toℕ i ∉ₚ path x → toℕ i ∉ₚ path y →
+    IsLevel k PathDistributiveIn[ f ▷ (x ⊕ y) , (f ▷ x) ⊕ (f ▷ y) ]
   
-  IsLevel_Distributive : ℕ → Set _
-  IsLevel k Distributive = Level k DistributiveIn[ 0# , ∞ ]
+  IsLevel_PathDistributive : ℕ → Set _
+  IsLevel k PathDistributive = IsLevel k PathDistributiveIn[ 0# , ∞ ]

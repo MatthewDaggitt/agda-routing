@@ -36,8 +36,8 @@ open FunctionProperties _≈_
 ⊕-idem : Idempotent _⊕_
 ⊕-idem = Consequences.sel⇒idem S ⊕-sel
 
-⊕-identityˡ : LeftIdentity ∞ _⊕_
-⊕-identityˡ x = ≈-trans (⊕-comm ∞ x) (⊕-identityʳ x)
+⊕-identityˡ : LeftIdentity ∞# _⊕_
+⊕-identityˡ x = ≈-trans (⊕-comm ∞# x) (⊕-identityʳ x)
 
 ⊕-isMagma : IsMagma _≈_ _⊕_
 ⊕-isMagma = record
@@ -121,21 +121,21 @@ open NonStrictToStrict ≤₊-decTotalOrder public
 -- If the algebra is strictly increasing it's also increasing
 
 strIncr⇒incr : IsStrictlyIncreasing algebra → IsIncreasing algebra
-strIncr⇒incr strIncr f x with x ≟ ∞
+strIncr⇒incr strIncr f x with x ≟ ∞#
 ... | no  x≉∞ = proj₁ (strIncr f x≉∞)
 ... | yes x≈∞ = begin
-  (f ▷ x) ⊕ x ≈⟨ ⊕-cong (▷-cong f x≈∞) x≈∞ ⟩
-  (f ▷ ∞) ⊕ ∞ ≈⟨ ⊕-cong (▷-fixedPoint f) ≈-refl ⟩
-  ∞       ⊕ ∞ ≈⟨ sel⇒idem S ⊕-sel ∞ ⟩
-  ∞           ≈⟨ ≈-sym x≈∞ ⟩
-  x           ∎
+  (f ▷ x)  ⊕ x  ≈⟨ ⊕-cong (▷-cong f x≈∞) x≈∞ ⟩
+  (f ▷ ∞#) ⊕ ∞# ≈⟨ ⊕-cong (▷-fixedPoint f) ≈-refl ⟩
+  ∞#       ⊕ ∞# ≈⟨ sel⇒idem S ⊕-sel ∞# ⟩
+  ∞#            ≈⟨ ≈-sym x≈∞ ⟩
+  x             ∎
   where open EqReasoning S
 
 ------------------------------------------------------------------------------
 -- Other
 
-r≈∞⇒f▷r≈∞ : ∀ {n} {i j : Fin n} {f : Step i j} {r} → r ≈ ∞ → f ▷ r ≈ ∞
+r≈∞⇒f▷r≈∞ : ∀ {n} {i j : Fin n} {f : Step i j} {r} → r ≈ ∞# → f ▷ r ≈ ∞#
 r≈∞⇒f▷r≈∞ {f = f} {r} r≈∞ = ≈-trans (▷-cong _ r≈∞) (▷-fixedPoint f)
 
-f▷r≉∞⇒r≉∞ : ∀ {n} {i j : Fin n} {f : Step i j} {r} → f ▷ r ≉ ∞ → r ≉ ∞
+f▷r≉∞⇒r≉∞ : ∀ {n} {i j : Fin n} {f : Step i j} {r} → f ▷ r ≉ ∞# → r ≉ ∞#
 f▷r≉∞⇒r≉∞ f▷r≉∞ r≈∞ = f▷r≉∞ (r≈∞⇒f▷r≈∞ r≈∞)

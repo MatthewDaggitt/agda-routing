@@ -64,7 +64,7 @@ _⊕⁺_ = AddIdentity (Lex _≟_ _⊕_ _⊓ₗₑₓ_)
 _▷⁺_ : ∀ {n} {i j : Fin n} → Step⁺ i j → Route⁺ → Route⁺
 _▷⁺_ {_} {i} {j} f invalid         = invalid
 _▷⁺_ {_} {i} {j} f (valid (x , p))
-  with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p | f ▷ x ≟ ∞
+  with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p | f ▷ x ≟ ∞#
 ... | no  _ | _     | _     = invalid
 ... | yes _ | yes _ | _     = invalid
 ... | yes _ | no  _ | yes _ = invalid
@@ -73,8 +73,8 @@ _▷⁺_ {_} {i} {j} f (valid (x , p))
 0#⁺ : Route⁺
 0#⁺ = valid (0# , [])
 
-∞⁺ : Route⁺
-∞⁺ = invalid
+∞#⁺ : Route⁺
+∞#⁺ = invalid
 
 f∞⁺ : ∀ {n} (i j : Fin n) → Step i j
 f∞⁺ = f∞
@@ -94,7 +94,7 @@ private
 ▷⁺-cong : ∀ {n} {i j : Fin n} (f : Step i j) → Congruent₁ _≈⁺_ (f ▷⁺_)
 ▷⁺-cong {_} {i} {j} f {_}             {_}             ∙≈∙     = ∙≈∙
 ▷⁺-cong {_} {i} {j} f {valid (x , p)} {valid (y , p)} [ x≈y , refl ]
-  with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p | f ▷ x ≟ ∞ | f ▷ y ≟ ∞
+  with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p | f ▷ x ≟ ∞# | f ▷ y ≟ ∞#
 ... | no  _ | _     | _         | _          = ∙≈∙
 ... | yes _ | yes _ | _         | _          = ∙≈∙
 ... | yes _ | no  _ | yes _     | yes _      = ∙≈∙
@@ -102,9 +102,9 @@ private
 ... | yes _ | no  _ | no  f▷x≉∞ | yes f▷y≈∞ = contradiction (≈-trans (▷-cong f x≈y) f▷y≈∞) f▷x≉∞
 ... | yes _ | no  _ | no  _     | no  _     = [ ▷-cong f x≈y , refl ]
 
-f∞⁺-reject : ∀ {n} (i j : Fin n) (x : Route⁺) → f∞⁺ i j ▷⁺ x ≈⁺ ∞⁺
+f∞⁺-reject : ∀ {n} (i j : Fin n) (x : Route⁺) → f∞⁺ i j ▷⁺ x ≈⁺ ∞#⁺
 f∞⁺-reject i j invalid         = ∙≈∙
-f∞⁺-reject i j (valid (x , p)) with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p | f∞ i j ▷ x ≟ ∞
+f∞⁺-reject i j (valid (x , p)) with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p | f∞ i j ▷ x ≟ ∞#
 ... | no  _ | _     | _          = ∙≈∙
 ... | yes _ | yes _ | _          = ∙≈∙
 ... | yes _ | no  _ | yes _      = ∙≈∙
@@ -118,7 +118,7 @@ AddPaths = record
   ; _⊕_                = _⊕⁺_
   ; _▷_                = _▷⁺_
   ; 0#                 = 0#⁺
-  ; ∞                  = ∞⁺
+  ; ∞#                 = ∞#⁺
   ; f∞                 = f∞⁺
   ; ≈-isDecEquivalence = ≈⁺-isDecEquivalence
   ; ⊕-cong             = ⊕⁺-cong
@@ -146,10 +146,10 @@ AddPaths = record
 ⊕⁺-zeroʳ ⊕-zeroʳ = AddIdentity.⊕∙-zeroʳ _ ≈ₓ-refl
   (Lex.zeroʳ {_≈₂_ = _≡_} _≟_ _⊕_ _⊓ₗₑₓ_ ≈-refl refl ⊕-zeroʳ ⊓ₗₑₓ-zeroʳ)
 
-⊕⁺-identityʳ : RightIdentity _≈⁺_ ∞⁺ _⊕⁺_
+⊕⁺-identityʳ : RightIdentity _≈⁺_ ∞#⁺ _⊕⁺_
 ⊕⁺-identityʳ = AddIdentity.⊕∙-identityʳ _ ≈ₓ-refl
 
-▷⁺-fixedPoint : ∀ {n} {i j : Fin n} (f : Step i j) → f ▷⁺ ∞⁺ ≈⁺ ∞⁺
+▷⁺-fixedPoint : ∀ {n} {i j : Fin n} (f : Step i j) → f ▷⁺ ∞#⁺ ≈⁺ ∞#⁺
 ▷⁺-fixedPoint f = ∙≈∙
 
 isRoutingAlgebra : IsRoutingAlgebra A → IsRoutingAlgebra AddPaths
@@ -167,17 +167,17 @@ isRoutingAlgebra A-isRoutingAlgebra = record
 -- Other properties
 
 ▷⁺-reject : ∀ {n} {i j : Fin n} (f : Step i j) x p →
-            f ▷ x ≈ ∞ → f ▷⁺ (valid (x , p)) ≈⁺ ∞⁺
-▷⁺-reject {_} {i} {j} f x p f▷x≈∞ with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p | f ▷ x ≟ ∞
+            f ▷ x ≈ ∞# → f ▷⁺ (valid (x , p)) ≈⁺ ∞#⁺
+▷⁺-reject {_} {i} {j} f x p f▷x≈∞ with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p | f ▷ x ≟ ∞#
 ... | no  _ | _     | _         = ∙≈∙
 ... | yes _ | yes _ | _         = ∙≈∙
 ... | yes _ | no  _ | yes _     = ∙≈∙
 ... | yes _ | no  _ | no  f▷x≉∞ = contradiction f▷x≈∞ f▷x≉∞
 
 ▷⁺-accept : ∀ {n} {i j : Fin n} (f : Step i j) x p →
-            (toℕ i , toℕ j) ⇿ p → toℕ i ∉ₚ p → f ▷ x ≉ ∞ →
+            (toℕ i , toℕ j) ⇿ p → toℕ i ∉ₚ p → f ▷ x ≉ ∞# →
             f ▷⁺ (valid (x , p)) ≈⁺ valid (f ▷ x , (toℕ i , toℕ j) ∷ p)
-▷⁺-accept {_} {i} {j} f x p ij⇿p i∉p f▷x≉∞ with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p | f ▷ x ≟ ∞
+▷⁺-accept {_} {i} {j} f x p ij⇿p i∉p f▷x≉∞ with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p | f ▷ x ≟ ∞#
 ... | no ¬ij⇿p | _       | _         = contradiction ij⇿p ¬ij⇿p
 ... | yes _    | yes i∈p | _         = contradiction i∈p i∉p
 ... | yes _    | no  _   | yes f▷x≈∞ = contradiction f▷x≈∞ f▷x≉∞
@@ -196,31 +196,30 @@ path-cong [ _ , refl ] = refl
 
 r≈0⇒path[r]≈[] : ∀ {r} → r ≈⁺ 0#⁺ → path r ≡ valid []
 r≈0⇒path[r]≈[] [ _ , refl ] = refl
-
-r≈∞⇒path[r]≈∅ : ∀ {r} → r ≈⁺ ∞⁺ → path r ≡ invalid
+r≈∞⇒path[r]≈∅ : ∀ {r} → r ≈⁺ ∞#⁺ → path r ≡ invalid
 r≈∞⇒path[r]≈∅ ∙≈∙ = refl
 
-path[r]≈∅⇒r≈∞ : ∀ {r} → path r ≡ invalid → r ≈⁺ ∞⁺
+path[r]≈∅⇒r≈∞ : ∀ {r} → path r ≡ invalid → r ≈⁺ ∞#⁺
 path[r]≈∅⇒r≈∞ {invalid} refl = ∙≈∙
 path[r]≈∅⇒r≈∞ {valid x} ()
 
 path-reject : ∀ {n} {i j : Fin n} {r p} (f : Step⁺ i j) →
               path r ≡ valid p → ¬ (toℕ i , toℕ j) ⇿ p ⊎ toℕ i ∈ₚ p →
-              f ▷⁺ r ≈⁺ ∞⁺
+              f ▷⁺ r ≈⁺ ∞#⁺
 path-reject {i = i} {j} {invalid}       f _    v = ∙≈∙
 path-reject {i = i} {j} {valid (x , p)} f refl v
-  with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p | f ▷ x ≟ ∞
+  with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p | f ▷ x ≟ ∞#
 ... | no  _    | _       | _           = ∙≈∙
 ... | yes _    | yes _   | _           = ∙≈∙
 ... | yes _    | no  _   | yes _       = ∙≈∙
 ... | yes ij⇿p | no  i∉p | no  f∞▷x≉∞ = Sum.[ contradiction ij⇿p , contradiction ◌ i∉p ] v
 
 path-accept : ∀ {n} {i j : Fin n} {r p} (f : Step⁺ i j) →
-              path r ≡ valid p → f ▷⁺ r ≉⁺ ∞⁺ →
+              path r ≡ valid p → f ▷⁺ r ≉⁺ ∞#⁺ →
               path (f ▷⁺ r) ≡ valid ((toℕ i , toℕ j) ∷ p)
 path-accept {i = i} {j} {invalid}       f _    f▷r≉∞ = contradiction ∙≈∙ f▷r≉∞
 path-accept {i = i} {j} {valid (x , p)} f refl f▷r≉∞
-  with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p | f ▷ x ≟ ∞
+  with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p | f ▷ x ≟ ∞#
 ... | no  _    | _       | _           = contradiction ∙≈∙ f▷r≉∞
 ... | yes _    | yes _   | _           = contradiction ∙≈∙ f▷r≉∞
 ... | yes _    | no  _   | yes _       = contradiction ∙≈∙ f▷r≉∞
@@ -243,7 +242,7 @@ isPathAlgebra = record
 
 open PathDistributivity isPathAlgebra
 
-module _ (⊕-sel : Selective _≈_ _⊕_) (⊕-identityˡ : LeftIdentity _≈_ ∞ _⊕_) where
+module _ (⊕-sel : Selective _≈_ _⊕_) (⊕-identityˡ : LeftIdentity _≈_ ∞# _⊕_) where
   
   open IsDecEquivalence ≈⁺-isDecEquivalence
     using () renaming (trans to ≈⁺-trans)
@@ -254,26 +253,26 @@ module _ (⊕-sel : Selective _≈_ _⊕_) (⊕-identityˡ : LeftIdentity _≈_ 
   lemma1 : ∀ {⊤ ⊥} → Level_DistributiveIn[_,_] A 0 ⊥ ⊤ → 
            ∀ {n} {i j : Fin n} {f : Step i j} {x y p q} →
            ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
-           f ▷ x ≈ ∞ → valid (x , p) ⊕⁺ valid (y , q) ≈⁺ valid (x , p) → f ▷ y ≈ ∞
+           f ▷ x ≈ ∞# → valid (x , p) ⊕⁺ valid (y , q) ≈⁺ valid (x , p) → f ▷ y ≈ ∞#
   lemma1 distrib {f = f} {x} {y} {p} {q} ⊥≤x x≤⊤ ⊥≤y y≤⊤ f▷x≈∞ xp⊕yq≈xp = begin
     f ▷ y             ≈⟨ ≈-sym (⊕-identityˡ (f ▷ y)) ⟩
-    ∞ ⊕ (f ▷ y)       ≈⟨ ⊕-cong (≈-sym f▷x≈∞) ≈-refl ⟩
+    ∞# ⊕ (f ▷ y)       ≈⟨ ⊕-cong (≈-sym f▷x≈∞) ≈-refl ⟩
     (f ▷ x) ⊕ (f ▷ y) ≈⟨ ≈-sym (distrib f ⊥≤x x≤⊤ ⊥≤y y≤⊤) ⟩
     f ▷ (x ⊕ y)       ≈⟨ ▷-cong f {!!} ⟩
     f ▷ x             ≈⟨ f▷x≈∞ ⟩
-    ∞                 ∎
+    ∞#                 ∎
   
   pres-distrib : ∀ {k ⊤ ⊥} → Level_DistributiveIn[_,_] A k ⊥ ⊤ →
                  ∀ p q → IsLevel_PathDistributiveIn[_,_] k (valid (⊥ , p)) (valid (⊤ , q))
   pres-distrib {zero} {⊤} {⊥} dist p q {_} {i} {j} f {invalid}       {invalid}       ⊥≤x x≤⊤ ⊥≤y y≤⊤ _ _ _ _    = ∙≈∙
   pres-distrib {zero} {⊤} {⊥} dist p q {_} {i} {j} f {valid (x , r)} {invalid}       ⊥≤x x≤⊤ ⊥≤y y≤⊤ _ _ _ _
-    with (toℕ i , toℕ j) ⇿? r  | toℕ i ∈ₚ? r | f ▷ x ≟ ∞
+    with (toℕ i , toℕ j) ⇿? r  | toℕ i ∈ₚ? r | f ▷ x ≟ ∞#
   ... | no  _    | _       | _           = ∙≈∙
   ... | yes _    | yes _   | _           = ∙≈∙
   ... | yes _    | no  _   | yes _       = ∙≈∙
   ... | yes ij⇿p | no  i∉p | no  f∞▷x≉∞  = [ ≈-refl , refl ]
   pres-distrib {zero} {⊤} {⊥} dist p q {_} {i} {j} f {invalid}       {valid (y , s)} ⊥≤x x≤⊤ ⊥≤y y≤⊤ _ _ _ _
-    with (toℕ i , toℕ j) ⇿? s  | toℕ i ∈ₚ? s | f ▷ y ≟ ∞
+    with (toℕ i , toℕ j) ⇿? s  | toℕ i ∈ₚ? s | f ▷ y ≟ ∞#
   ... | no  _    | _       | _           = ∙≈∙
   ... | yes _    | yes _   | _           = ∙≈∙
   ... | yes _    | no  _   | yes _       = ∙≈∙
@@ -284,10 +283,10 @@ module _ (⊕-sel : Selective _≈_ _⊕_) (⊕-identityˡ : LeftIdentity _≈_ 
   ... | _       | yes i∈s | _        | _        = contradiction (valid i∈s) i∉s
   ... | _       | _       | no ¬ij⇿r | _        = contradiction ij⇿r ¬ij⇿r
   ... | _       | _       | _        | no ¬ij⇿s = contradiction ij⇿s ¬ij⇿s
-  ... | no _    | no _    | yes _    | yes _ with f ▷ x ≟ ∞ | f ▷ y ≟ ∞
+  ... | no _    | no _    | yes _    | yes _ with f ▷ x ≟ ∞# | f ▷ y ≟ ∞#
   ...   | yes f▷x≈∞  | yes f▷y≈∞  = test2
      where
-     test2 : f ▷⁺ (valid (x , r) ⊕⁺ valid (y , s)) ≈⁺ ∞⁺
+     test2 : f ▷⁺ (valid (x , r) ⊕⁺ valid (y , s)) ≈⁺ ∞#⁺
      test2 with ⊕⁺-sel ⊕-sel (valid (x , r)) (valid (y , s))
      ... | inj₁ eq = ≈⁺-trans (▷⁺-cong f eq) (▷⁺-reject f x r f▷x≈∞)
      ... | inj₂ eq = ≈⁺-trans (▷⁺-cong f eq) (▷⁺-reject f y s f▷y≈∞)

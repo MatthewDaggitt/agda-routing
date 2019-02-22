@@ -47,7 +47,7 @@ _▷_ : ∀ {n} {i j : Fin n} → Step i j → Route → Route
 0# = A.0# , B.0#
 
 ∞# : Route
-∞# = A.∞ , B.∞
+∞# = A.∞# , B.∞#
 
 f∞ : ∀ {n} (i j : Fin n) → Step i j
 f∞ i j = A.f∞ i j , B.f∞ i j
@@ -66,7 +66,7 @@ Lex = record
   ; _⊕_                = _⊕_
   ; _▷_                = _▷_
   ; 0#                 = 0#
-  ; ∞                  = ∞#
+  ; ∞#                 = ∞#
   ; f∞                 = f∞
   ; ≈-isDecEquivalence = Pointwise.×-isDecEquivalence A.≈-isDecEquivalence B.≈-isDecEquivalence
   ; ⊕-cong             = OpLex.cong A._≟_ A._⊕_ B._⊕_ A.≈-sym A.≈-trans A.⊕-cong B.⊕-cong

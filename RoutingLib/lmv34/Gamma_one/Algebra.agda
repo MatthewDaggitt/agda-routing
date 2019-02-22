@@ -33,7 +33,7 @@ open RoutingAlgebra isRoutingAlgebra using (≤₊-decTotalOrder)
 
 --------------------------------
 -- Data
-RoutingVector : Set b
+RoutingVector : Set a
 RoutingVector = Table (List (Fin n × Route)) n
 
 -- RoutingVector setoid
@@ -57,13 +57,13 @@ open EqReasoning 𝕍ₛ public
 invalidSet : List (Fin n × Route)
 invalidSet = []
 
-isValidRoute : (x : Route) → Dec (¬(x ≈ ∞))
-isValidRoute x = ¬? (x ≟ ∞)
+isValidRoute : (x : Route) → Dec (¬(x ≈ ∞#))
+isValidRoute x = ¬? (x ≟ ∞#)
 
 validRoutes : List (Fin n × Route) → List (Fin n × Route)
 validRoutes xs = filter (λ {(d , v) → isValidRoute v}) xs
 
-decTotalOrder : DecTotalOrder b ℓ ℓ
+decTotalOrder : DecTotalOrder a ℓ ℓ
 decTotalOrder = ×-decTotalOrder (fin-decTotalOrder n) ≤₊-decTotalOrder
 
 open InsertionSort decTotalOrder using (sort)

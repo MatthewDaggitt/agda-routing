@@ -32,17 +32,17 @@ open IsRoutingAlgebra isRoutingAlgebra
 --------------------------------------------------------------------------------
 -- Path properties
 
-p[∞]≈∅ : path ∞ ≈ₚ invalid
+p[∞]≈∅ : path ∞# ≈ₚ invalid
 p[∞]≈∅ = r≈∞⇒path[r]≈∅ ≈-refl
 
 p[0]≈[] : path 0# ≈ₚ valid []
 p[0]≈[] = r≈0⇒path[r]≈[] ≈-refl
 
-p[r]≡∅⇒f▷r≈∞ : ∀ {i j : Fin n} (f : Step i j) {r} → path r ≡ invalid → f ▷ r ≈ ∞
+p[r]≡∅⇒f▷r≈∞ : ∀ {i j : Fin n} (f : Step i j) {r} → path r ≡ invalid → f ▷ r ≈ ∞#
 p[r]≡∅⇒f▷r≈∞ f {r} pᵣ≡∅ = begin
-  f ▷ r ≈⟨ ▷-cong f (path[r]≈∅⇒r≈∞ (≈ₚ-reflexive pᵣ≡∅)) ⟩
-  f ▷ ∞ ≈⟨ ▷-fixedPoint f ⟩
-  ∞     ∎
+  f ▷ r  ≈⟨ ▷-cong f (path[r]≈∅⇒r≈∞ (≈ₚ-reflexive pᵣ≡∅)) ⟩
+  f ▷ ∞# ≈⟨ ▷-fixedPoint f ⟩
+  ∞#     ∎
   where open EqReasoning S
 
 --------------------------------------------------------------------------------

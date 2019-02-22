@@ -13,9 +13,9 @@ open import Relation.Unary using (Pred)
 open import RoutingLib.Data.Path.Uncertified
 open import RoutingLib.Data.Path.Uncertified.Properties
 
-open import RoutingLib.Routing.Protocols.BGPLite.Components.Communities
+open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Communities
 
-module RoutingLib.Routing.Protocols.BGPLite.Components.Route where
+module RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Route where
 
 ------------------------------------------------------------------------
 -- Types

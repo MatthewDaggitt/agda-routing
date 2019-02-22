@@ -45,13 +45,13 @@ open FunctionProperties _≈_
 infix 4 _≎_
 
 data _≎_ : Rel Route (a ⊔ b ⊔ ℓ) where
-  0∞# : ∀ {x y} → x ≈ 0# → y ≈ ∞  → x ≎ y
-  ∞0# : ∀ {x y} → x ≈ ∞  → y ≈ 0# → x ≎ y
-  ∞∞# : ∀ {x y} → x ≈ ∞  → y ≈ ∞  → x ≎ y
+  0∞# : ∀ {x y} → x ≈ 0# → y ≈ ∞#  → x ≎ y
+  ∞0# : ∀ {x y} → x ≈ ∞#  → y ≈ 0# → x ≎ y
+  ∞∞# : ∀ {x y} → x ≈ ∞#  → y ≈ ∞#  → x ≎ y
   0e# : ∀ {x y} → ∀ {n} {i j : Fin n} (g : Step i j) (w : Route) → x ≈ 0# → y ≈ g ▷ w → x ≎ y
   e0# : ∀ {x y} → ∀ {n} {i j : Fin n} (f : Step i j) (v : Route) → x ≈ f ▷ v → y ≈ 0# → x ≎ y
-  ∞e# : ∀ {x y} → ∀ {n} {i j : Fin n} (g : Step i j) (w : Route) → x ≈ ∞ → y ≈ g ▷ w → x ≎ y
-  e∞# : ∀ {x y} → ∀ {n} {i j : Fin n} (f : Step i j) (v : Route) → x ≈ f ▷ v → y ≈ ∞ → x ≎ y
+  ∞e# : ∀ {x y} → ∀ {n} {i j : Fin n} (g : Step i j) (w : Route) → x ≈ ∞# → y ≈ g ▷ w → x ≎ y
+  e∞# : ∀ {x y} → ∀ {n} {i j : Fin n} (f : Step i j) (v : Route) → x ≈ f ▷ v → y ≈ ∞# → x ≎ y
   ee# : ∀ {x y} → ∀ {n} {i j k : Fin n} (f : Step i j) (g : Step i k) (v w : Route) → j ≢ k → x ≈ f ▷ v → y ≈ g ▷ w → x ≎ y
 
 --------------------------------------------------------------------------------

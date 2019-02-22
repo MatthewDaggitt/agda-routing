@@ -33,7 +33,7 @@ open RoutingAlgebraProperties isRoutingAlgebra
 -- Any path algebra that is increasing is also strictly increasing
 
 incr⇒strIncr : IsIncreasing algebra → IsStrictlyIncreasing algebra
-incr⇒strIncr incr {i = i} {k} f {x} x≉∞ with f ▷ x ≟ ∞
+incr⇒strIncr incr {i = i} {k} f {x} x≉∞ with f ▷ x ≟ ∞#
 ... | yes fx≈∞ = ≈-trans (⊕-cong fx≈∞ ≈-refl) (⊕-identityˡ x) , x≉∞ ∘ (λ x≈fx → ≈-trans x≈fx fx≈∞)
 ... | no  fx≉∞ with path x | inspect path x
 ...   | invalid | [ p[x]≡∅ ] = contradiction (path[r]≈∅⇒r≈∞ p[x]≡∅) x≉∞

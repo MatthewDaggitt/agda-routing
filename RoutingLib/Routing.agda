@@ -96,10 +96,10 @@ open SubsetEquality ℝ𝕄ₛⁱ public
 I : RoutingMatrix
 I i j with j ≟𝔽 i
 ... | yes _ = 0#
-... | no  _ = ∞
+... | no  _ = ∞#
 
 -- Properties
-Iᵢⱼ≈0⊎∞ : ∀ i j → (I i j ≈ 0#) ⊎ (I i j ≈ ∞)
+Iᵢⱼ≈0⊎∞ : ∀ i j → (I i j ≈ 0#) ⊎ (I i j ≈ ∞#)
 Iᵢⱼ≈0⊎∞ i j with j ≟𝔽 i
 ... | yes _ = inj₁ ≈-refl
 ... | no  _ = inj₂ ≈-refl
@@ -109,7 +109,7 @@ Iᵢᵢ≡0# i with i ≟𝔽 i
 ... | yes _   = refl
 ... | no  i≢i = contradiction refl i≢i
 
-Iᵢⱼ≡∞ : ∀ {i j} → j ≢ i → I i j ≡ ∞
+Iᵢⱼ≡∞ : ∀ {i j} → j ≢ i → I i j ≡ ∞#
 Iᵢⱼ≡∞ {i} {j} i≢j with j ≟𝔽 i
 ... | yes i≡j = contradiction i≡j i≢j
 ... | no  _   = refl
@@ -131,7 +131,7 @@ module _ (network : Network) where
     ... | yes _ | yes _ = network e i j
     ... | _     | _     = f∞ i j
 
-    Aₜ-reject : ∀ e {p} i j → i ∉ p ⊎ j ∉ p → ∀ x → Aₜ e p i j ▷ x ≈ ∞
+    Aₜ-reject : ∀ e {p} i j → i ∉ p ⊎ j ∉ p → ∀ x → Aₜ e p i j ▷ x ≈ ∞#
     Aₜ-reject e {p} i j op x with i ∈? p | j ∈? p
     ... | yes _   | no  _   = f∞-reject i j x
     ... | no  _   | yes _   = f∞-reject i j x
@@ -143,7 +143,7 @@ module _ (network : Network) where
     Aₜ-reject-eq : ∀ e {p} i j → i ∉ p → ∀ x y → Aₜ e p i j ▷ x ≈ Aₜ e p i j ▷ y
     Aₜ-reject-eq e {p} i j i∉p x y = begin
       Aₜ e p i j ▷ x ≈⟨ Aₜ-reject e i j (inj₁ i∉p) x ⟩
-      ∞              ≈⟨ ≈-sym (Aₜ-reject e i j (inj₁ i∉p) y) ⟩
+      ∞#             ≈⟨ ≈-sym (Aₜ-reject e i j (inj₁ i∉p) y) ⟩
       Aₜ e p i j ▷ y ∎
       where open EqReasoning S
 

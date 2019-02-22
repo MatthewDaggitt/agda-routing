@@ -63,7 +63,7 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
     -- The trivial route
     0#               : Route
     -- The invalid route
-    ∞                : Route
+    ∞#               : Route
     -- The invalid edge weight
     f∞               : ∀ {n} (i j : Fin n) → Step i j
 
@@ -73,7 +73,7 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
     ▷-cong             : ∀ {n} {i j : Fin n} (f : Step i j) → Congruent₁ _≈_ (f ▷_)
 
     -- The invalid edge weight really does reject routes
-    f∞-reject          : ∀ {n} (i j : Fin n) x → f∞ i j ▷ x ≈ ∞
+    f∞-reject          : ∀ {n} (i j : Fin n) x → f∞ i j ▷ x ≈ ∞#
 
 
   -- Publicly re-export some useful terminology
@@ -124,7 +124,7 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 
   -- Strictly increasing = extending a route always makes it worse
   IsStrictlyIncreasing : Set _
-  IsStrictlyIncreasing = ∀ {n} {i j : Fin n} (f : Step i j) {x} → x ≉ ∞ → x <₊ (f ▷ x)
+  IsStrictlyIncreasing = ∀ {n} {i j : Fin n} (f : Step i j) {x} → x ≉ ∞# → x <₊ (f ▷ x)
 
   -- Finite = there only exist a finite number of weights
   IsFinite : Set _
@@ -142,7 +142,7 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 
 
   IsLevel_Distributive : ℕ → Set _
-  IsLevel k Distributive = Level k DistributiveIn[ 0# , ∞ ]
+  IsLevel k Distributive = Level k DistributiveIn[ 0# , ∞# ]
 
 --------------------------------------------------------------------------------
 -- Routing algebras
@@ -162,10 +162,10 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
       ⊕-assoc      : Associative _≈_ _⊕_
       -- The trivial route 0# is always chosen over any other route
       ⊕-zeroʳ      : RightZero _≈_ 0# _⊕_
-      -- Any route is always chosen over the invalid route ∞
-      ⊕-identityʳ  : RightIdentity _≈_ ∞ _⊕_
+      -- Any route is always chosen over the invalid route ∞#
+      ⊕-identityʳ  : RightIdentity _≈_ ∞# _⊕_
       -- When you extend the invalid route, the result is always invalid
-      ▷-fixedPoint : ∀ {n} {i j : Fin n} (f : Step i j) → f ▷ ∞ ≈ ∞
+      ▷-fixedPoint : ∀ {n} {i j : Fin n} (f : Step i j) → f ▷ ∞# ≈ ∞#
 
 --------------------------------------------------------------------------------
 -- Path algebras
@@ -190,18 +190,18 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
       -- The path of the trivial route is the empty path
       r≈0⇒path[r]≈[] : ∀ {r} → r ≈ 0# → path r ≡ valid []
       -- The path of the invalid route is the invalid path
-      r≈∞⇒path[r]≈∅  : ∀ {r} → r ≈ ∞  → path r ≡ invalid
+      r≈∞⇒path[r]≈∅  : ∀ {r} → r ≈ ∞#  → path r ≡ invalid
       -- The invalid path is only associated with the invalid route
-      path[r]≈∅⇒r≈∞  : ∀ {r} → path r ≡ invalid → r ≈ ∞
+      path[r]≈∅⇒r≈∞  : ∀ {r} → path r ≡ invalid → r ≈ ∞#
       -- The extension of a route along an edge that either doesn't match up
       -- with the start of its path (⇿) or would form a loop (i ∈ p) is always
       -- the invalid route.
       path-reject    : ∀ {n} {i j : Fin n} {r p} (f : Step i j) → path r ≡ valid p →
-                       (¬ (toℕ i , toℕ j) ⇿ᵥ p) ⊎ toℕ i ∈ᵥₚ p → f ▷ r ≈ ∞
+                       (¬ (toℕ i , toℕ j) ⇿ᵥ p) ⊎ toℕ i ∈ᵥₚ p → f ▷ r ≈ ∞#
       -- The extension of a route along a valid edge always actually adds that
       -- edge to the path.
       path-accept    : ∀ {n} {i j : Fin n} {r p} (f : Step i j) → path r ≡ valid p →
-                       f ▷ r ≉ ∞ → path (f ▷ r) ≡ valid ((toℕ i , toℕ j) ∷ p)
+                       f ▷ r ≉ ∞# → path (f ▷ r) ≡ valid ((toℕ i , toℕ j) ∷ p)
 
 --------------------------------------------------------------------------------
 -- Certified path algebras
@@ -228,11 +228,11 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
       path           : Route → Path n
       path-cong      : path Preserves _≈_ ⟶ _≈ₚ_
       r≈0⇒path[r]≈[] : ∀ {r} → r ≈ 0# → path r ≈ₚ valid []
-      r≈∞⇒path[r]≈∅  : ∀ {r} → r ≈ ∞  → path r ≈ₚ invalid
-      path[r]≈∅⇒r≈∞  : ∀ {r} → path r ≈ₚ invalid → r ≈ ∞
+      r≈∞⇒path[r]≈∅  : ∀ {r} → r ≈ ∞#  → path r ≈ₚ invalid
+      path[r]≈∅⇒r≈∞  : ∀ {r} → path r ≈ₚ invalid → r ≈ ∞#
       path-reject    : ∀ {i j : Fin n} {r p} (f : Step i j) → path r ≈ₚ valid p →
-                       (¬ (i , j) ⇿ᵛ p) ⊎ i ∈ᵥₚ p → f ▷ r ≈ ∞
-      path-accept    : ∀ {i j : Fin n} {r p} (f : Step i j) → path r ≈ₚ valid p → f ▷ r ≉ ∞ →
+                       (¬ (i , j) ⇿ᵛ p) ⊎ i ∈ᵥₚ p → f ▷ r ≈ ∞#
+      path-accept    : ∀ {i j : Fin n} {r p} (f : Step i j) → path r ≈ₚ valid p → f ▷ r ≉ ∞# →
                        ∀ ij⇿p i∉p → path (f ▷ r) ≈ₚ valid ((i , j) ∷ p ∣ ij⇿p ∣ i∉p)
 
     -- Functions
@@ -241,7 +241,7 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
     size r = length (path r)
 
     weight : (∀ i j → Step i j) → Path n → Route
-    weight A invalid                       = ∞
+    weight A invalid                       = ∞#
     weight A (valid [])                    = 0#
     weight A (valid ((i , j) ∷ p ∣ _ ∣ _)) = A i j ▷ weight A (valid p)
 
@@ -276,4 +276,4 @@ module PathDistributivity
     IsLevel k PathDistributiveIn[ f ▷ (x ⊕ y) , (f ▷ x) ⊕ (f ▷ y) ]
   
   IsLevel_PathDistributive : ℕ → Set _
-  IsLevel k PathDistributive = IsLevel k PathDistributiveIn[ 0# , ∞ ]
+  IsLevel k PathDistributive = IsLevel k PathDistributiveIn[ 0# , ∞# ]

@@ -5,7 +5,7 @@
 -- convergent.
 --------------------------------------------------------------------------------
 
-module RoutingLib.Routing.Protocols.BGPLite.Simulation where
+module RoutingLib.Routing.Protocols.PathVector.BGPLite.Simulation where
 
 open import Data.Maybe using (just; nothing; Is-just; just-injective)
 open import Data.Nat using (_≤_)
@@ -29,11 +29,11 @@ open import RoutingLib.Data.Path.Uncertified.Properties
 import RoutingLib.Algebra.Construct.NaturalChoice.Min.TotalOrder as Min
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Protocols.BGPLite
-open import RoutingLib.Routing.Protocols.BGPLite.Components.Policy
+open import RoutingLib.Routing.Protocols.PathVector.BGPLite
+open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Policy
   using (apply; apply-result)
-open import RoutingLib.Routing.Protocols.BGPLite.Components.Route
-open import RoutingLib.Routing.Protocols.BGPLite.Components.Communities
+open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Route
+open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Communities
 
 open ≡-Reasoning
 
@@ -58,7 +58,7 @@ Aₐₗₜ = record
   ; _⊕_                = _⊕ₐₗₜ_
   ; _▷_                = _▷_
   ; 0#                 = 0#
-  ; ∞                  = ∞
+  ; ∞#                 = ∞#
   ; f∞                 = f∞
   ; ≈-isDecEquivalence = ≡ᵣ-isDecEquivalence
   ; ⊕-cong             = ⊕ₐₗₜ-cong

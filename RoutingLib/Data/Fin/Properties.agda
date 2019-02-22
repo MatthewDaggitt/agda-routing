@@ -25,11 +25,11 @@ module RoutingLib.Data.Fin.Properties where
 -------------------------
 
 -- stdlib
-≤-respₗ-≡ : ∀ {n x} → ((_≤_ {n}) x) Respects _≡_
+≤-respₗ-≡ : ∀ {n} → (_≤_ {n}) Respectsʳ _≡_
 ≤-respₗ-≡ refl x≤y = x≤y
 
 -- stdlib
-≤-respᵣ-≡ : ∀ {n x} → (flip (_≤_ {n}) x) Respects _≡_
+≤-respᵣ-≡ : ∀ {n} → (_≤_ {n}) Respectsˡ _≡_
 ≤-respᵣ-≡ refl x≤y = x≤y
 
 -- stdlib

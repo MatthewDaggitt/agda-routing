@@ -8,7 +8,7 @@ module RoutingLib.Relation.Binary.Reasoning.StrictPartialOrder
   {a ℓ₁ ℓ₂} (poset : Poset a ℓ₁ ℓ₂) where
 
   import RoutingLib.Relation.Binary.Reasoning.StrictCore as Core
-  import RoutingLib.Relation.Binary.NonStrictToStrict.PartialOrder as Strict
+  import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.PartialOrder as Strict
 
   open Poset poset
   open Strict poset

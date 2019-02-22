@@ -20,15 +20,15 @@ open import RoutingLib.Data.Fin.Subset using (Nonfull)
 open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
-open import RoutingLib.Routing.Model using (RoutingMatrix; AdjacencyMatrix)
-import RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.Prelude as Prelude
-import RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.Step1_NodeSets as Step1_NodeSets
-import RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.Step2_ConvergedSubtree as Step2_ConvergedSubtree
-import RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.Step3_DangerousNodes as Step3_DangerousNodes
+open import RoutingLib.Routing using (RoutingMatrix; AdjacencyMatrix)
+import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Prelude as Prelude
+import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step1_NodeSets as Step1_NodeSets
+import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step2_ConvergedSubtree as Step2_ConvergedSubtree
+import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step3_DangerousNodes as Step3_DangerousNodes
 
-module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.Step4_InductiveStep
+module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step4_InductiveStep
   {a b ℓ n-1} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (isPathAlgebra : IsCertifiedPathAlgebra algebra (suc n-1))
   (isIncreasing : IsIncreasing algebra)
   (A : AdjacencyMatrix algebra (suc n-1))
@@ -38,14 +38,14 @@ module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.St
   {C : Subset (suc n-1)}
   (j∈C : j ∈ C)
   (C-nonFull : Nonfull C)
-  (C⊆𝓒ₜ : ∀ {i} → i ∈ C → i ∈ᵤ Step1_NodeSets.𝓒 isPathAlgebra A X j (suc t-1))
+  (C⊆𝓒ₜ : ∀ {i} → i ∈ C → i ∈ᵤ Step1_NodeSets.𝓒 isRoutingAlgebra isPathAlgebra A X j (suc t-1))
   where
 
-  open Prelude isPathAlgebra A
+  open Prelude isRoutingAlgebra isPathAlgebra A
   open Notation X j
-  open Step1_NodeSets isPathAlgebra A X j
-  open Step2_ConvergedSubtree isPathAlgebra isIncreasing A X j t-1 j∈C C-nonFull C⊆𝓒ₜ
-  open Step3_DangerousNodes   isPathAlgebra isIncreasing A X j t-1 j∈C C-nonFull C⊆𝓒ₜ
+  open Step1_NodeSets isRoutingAlgebra isPathAlgebra A X j
+  open Step2_ConvergedSubtree isRoutingAlgebra isPathAlgebra isIncreasing A X j t-1 j∈C C-nonFull C⊆𝓒ₜ
+  open Step3_DangerousNodes   isRoutingAlgebra isPathAlgebra isIncreasing A X j t-1 j∈C C-nonFull C⊆𝓒ₜ
 
   --------------------------------------------------------------------------
   -- Some lemmas
@@ -70,10 +70,10 @@ module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.St
 
 
   iₘᵢₙ-pred≤ : ∀ s → A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + n-1 + s) X kₘᵢₙ j ≤₊ σ^ (suc (t + n-1 + s)) X iₘᵢₙ j
-  iₘᵢₙ-pred≤ s with σXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ (σ^ (t + n-1 + s) X) iₘᵢₙ j
+  iₘᵢₙ-pred≤ s with FXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ (σ^ (t + n-1 + s) X) iₘᵢₙ j
   ... | inj₂ σXᵢⱼ≈Iᵢⱼ    = begin
     A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + n-1 + s) X kₘᵢₙ j ≤⟨ ⊕-identityˡ _ ⟩
-    ∞                                       ≈⟨ ≈-reflexive (sym (Iᵢⱼ≡∞ j≢iₘᵢₙ)) ⟩
+    ∞#                                      ≈⟨ ≈-reflexive (sym (Iᵢⱼ≡∞ j≢iₘᵢₙ)) ⟩
     I iₘᵢₙ j                                ≈⟨ ≈-sym σXᵢⱼ≈Iᵢⱼ ⟩
     σ^ (suc (t + n-1 + s)) X iₘᵢₙ j         ∎
     where open POR ≤₊-poset
@@ -88,7 +88,7 @@ module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.St
   iₘᵢₙ-pred : ∀ s → σ^ (t + n + s) X iₘᵢₙ j ≈ A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + (n-1 + s)) X kₘᵢₙ j
   iₘᵢₙ-pred s = begin
     σ^ (t + n + s) X iₘᵢₙ j                   ≡⟨ cong (λ v → σ^ (v + s) X iₘᵢₙ j) (+-suc t n-1) ⟩
-    σ^ (suc t + n-1 + s) X iₘᵢₙ j             ≈⟨ ≤₊-antisym (σXᵢⱼ≤Aᵢₖ▷Xₖⱼ
+    σ^ (suc t + n-1 + s) X iₘᵢₙ j             ≈⟨ ≤₊-antisym (FXᵢⱼ≤Aᵢₖ▷Xₖⱼ
                                                 (σ^ (t + n-1 + s) X) iₘᵢₙ j kₘᵢₙ) (iₘᵢₙ-pred≤ s) ⟩
     A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + n-1 + s) X kₘᵢₙ j   ≡⟨ cong (λ v → A iₘᵢₙ kₘᵢₙ ▷ σ^ v X kₘᵢₙ j) (+-assoc t n-1 s) ⟩
     A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + (n-1 + s)) X kₘᵢₙ j ∎

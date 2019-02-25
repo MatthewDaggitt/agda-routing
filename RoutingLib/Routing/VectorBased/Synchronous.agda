@@ -23,5 +23,5 @@ open Core algebra A public
 --------------------------------------------------------------------------------
 -- Synchronous state function
 
-σ : ℕ → RoutingMatrix → RoutingMatrix
-σ = F ^_
+σ^ : ℕ → RoutingMatrix → RoutingMatrix
+σ^ = F ^_

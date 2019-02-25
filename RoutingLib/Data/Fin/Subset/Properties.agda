@@ -1,6 +1,7 @@
 open import Data.Nat using (ℕ; zero; suc; _<_; _≤_; z≤n; s≤s; _⊔_; _⊓_; _∸_)
 open import Data.Nat.Properties hiding (_≟_)
 open import Data.Fin using (Fin; zero; suc)
+open import Data.Fin.Properties using (¬∀⟶∃¬)
 open import Data.Fin.Subset
 open import Data.Fin.Subset.Properties
 open import Data.Bool using (_≟_)
@@ -132,6 +133,9 @@ module RoutingLib.Data.Fin.Subset.Properties where
   ∣p∣<n⇒Nonfull {p = outside ∷ p} |p|<n       full = contradiction (full zero) λ()
   ∣p∣<n⇒Nonfull {p = inside  ∷ p} (s≤s |p|<n) full = ∣p∣<n⇒Nonfull |p|<n (drop-there ∘ full ∘ suc)
 
+  Nonfull-witness : ∀ {n} {p : Subset n} → Nonfull p → ∃ λ i → i ∉ p
+  Nonfull-witness {n} {p} ¬pᶠ = ¬∀⟶∃¬ n (_∈ p) (_∈? p) ¬pᶠ
+  
   ∣p∣≡n⇒p≡⊤ : ∀ {n} {p : Subset n} → ∣ p ∣ ≡ n → p ≡ ⊤
   ∣p∣≡n⇒p≡⊤ {p = []}          _     = refl
   ∣p∣≡n⇒p≡⊤ {p = outside ∷ p} |p|≡n = contradiction |p|≡n (<⇒≢ (s≤s (∣p∣≤n p)))

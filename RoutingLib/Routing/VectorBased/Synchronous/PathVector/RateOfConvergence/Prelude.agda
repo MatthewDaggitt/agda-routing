@@ -9,28 +9,31 @@ import RoutingLib.Data.Path.CertifiedI as CertifiedPaths
 open import RoutingLib.Data.Path.CertifiedI.Properties using (length-cong)
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
-open import RoutingLib.Routing.Model using (AdjacencyMatrix)
-import RoutingLib.Routing.Algebra.CertifiedPathAlgebra.Properties as IncreasingPathAlgebraProperties
-import RoutingLib.Routing.BellmanFord.Synchronous as BellmanFord
-import RoutingLib.Routing.BellmanFord.Synchronous.Properties as BellmanFordProperties
-import RoutingLib.Routing.BellmanFord.Synchronous.PathProperties as BellmanFordPathProperties
+open import RoutingLib.Routing using (AdjacencyMatrix)
+import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
+import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra as CertifiedPathAlgebraProperties
+import RoutingLib.Routing.VectorBased.Synchronous as BellmanFord
+import RoutingLib.Routing.VectorBased.Core.Properties as BellmanFordProperties
+import RoutingLib.Routing.VectorBased.Core.PathProperties as BellmanFordPathProperties
 
-module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.Prelude
+module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Prelude
   {a b ℓ n-1} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (isPathAlgebra : IsCertifiedPathAlgebra algebra (suc n-1))
   (A : AdjacencyMatrix algebra (suc n-1))
   where
 
   open RawRoutingAlgebra algebra public
+  open IsRoutingAlgebra isRoutingAlgebra public
   open IsCertifiedPathAlgebra isPathAlgebra public
-  open IncreasingPathAlgebraProperties algebra isPathAlgebra public
-
+  open RoutingAlgebraProperties isRoutingAlgebra public
+  open CertifiedPathAlgebraProperties isRoutingAlgebra isPathAlgebra public
+  
   open CertifiedPaths public hiding (Edge; Vertex)
 
   open BellmanFord algebra A public
-  open BellmanFordProperties algebra isRoutingAlgebra A public
-  open BellmanFordPathProperties algebra isPathAlgebra A public
+  open BellmanFordProperties isRoutingAlgebra A public
+  open BellmanFordPathProperties isRoutingAlgebra isPathAlgebra A public
 
   n : ℕ
   n = suc n-1

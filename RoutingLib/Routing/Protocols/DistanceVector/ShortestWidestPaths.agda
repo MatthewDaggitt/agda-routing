@@ -17,10 +17,23 @@ open import Relation.Nullary using (yes; no)
 open import RoutingLib.Data.NatInf
 open import RoutingLib.Data.NatInf.Properties
 open import RoutingLib.Data.Path.Uncertified
-open import RoutingLib.Algebra.Construct.Lexicographic using (Lex)
 
 open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Algebra.Construct.Lex
+  as Lex using (Lex)
 
+open import RoutingLib.Routing.Protocols.DistanceVector.ShortestPaths
+  as Shortest using (Aˢʰᵒʳᵗᵉˢᵗ)
+open import RoutingLib.Routing.Protocols.DistanceVector.WidestPaths
+  as Widest using (Aʷⁱᵈᵉˢᵗ)
+
+Aˢʷ : RawRoutingAlgebra 0ℓ 0ℓ 0ℓ
+Aˢʷ = Lex Aʷⁱᵈᵉˢᵗ Aˢʰᵒʳᵗᵉˢᵗ
+
+isRoutingAlgebra : IsRoutingAlgebra Aˢʷ
+isRoutingAlgebra = ?
+
+{-
 ------------------------------------------------------------------------
 -- Algebra
 
@@ -77,3 +90,4 @@ Aˢʷ = record
   ; ▷-cong = λ {n} {i} {j} f → cong (_▷_ {n} {i} {j} f)
   ; f∞-reject = f∞-reject
   }
+-}

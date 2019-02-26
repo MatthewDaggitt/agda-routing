@@ -252,13 +252,26 @@ postulate ⊓-assoc : Associative _⊓_
 
 postulate ⊓-comm : Commutative _⊓_
 
+postulate ⊓-identityˡ : LeftIdentity ∞ _⊓_
+
 postulate ⊓-identityʳ : RightIdentity ∞ _⊓_
 
 postulate ⊓-zeroʳ : RightZero (N 0) _⊓_
 
 postulate ⊓-zeroˡ : LeftZero (N 0) _⊓_
 
-postulate +-distribˡ-⊓ : _+_ DistributesOverˡ _⊓_
+
+postulate ⊔-sel : Selective _⊔_
+
+postulate ⊔-assoc : Associative _⊔_
+
+postulate ⊔-comm : Commutative _⊔_
+
+postulate ⊔-identityʳ : RightIdentity (N 0) _⊔_
+
+postulate ⊔-zeroʳ : RightZero ∞ _⊔_
+
+postulate ⊔-zeroˡ : LeftZero ∞ _⊔_
 
 m⊓n≤n : ∀ m n → m ⊓ n ≤ n
 m⊓n≤n ∞     ∞     = ≤-refl
@@ -290,3 +303,7 @@ n≤m⊎o≤m⇒n⊓o≤m n o (inj₂ o≤m) = o≤m⇒n⊓o≤m n o≤m
 m≤n×m≤o⇒m≤n⊓o : ∀ {m} → _⊓_ Preservesᵇ (m ≤_)
 m≤n×m≤o⇒m≤n⊓o m≤n m≤o = subst (_≤ _) (⊓-idem _) (⊓-mono-≤ m≤n m≤o)
 
+
+postulate +-distribˡ-⊓ : _+_ DistributesOverˡ _⊓_
+
+postulate ⊓-distribˡ-⊔ : _⊓_ DistributesOverˡ _⊔_

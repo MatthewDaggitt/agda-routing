@@ -32,6 +32,7 @@ open import Relation.Nullary.Negation using (contradiction)
 open import RoutingLib.Algebra.Construct.Add.Identity as AddIdentity
   renaming (_⊕∙_ to AddIdentity) using ()
 open import RoutingLib.Algebra.Construct.Lexicographic as Lex using (Lex)
+open import RoutingLib.Algebra.Construct.Lexicographic.Magma as OpLexProperties′
 open import RoutingLib.Function
 open import RoutingLib.Relation.Nullary.Construct.Add.Point
   renaming (∙ to invalid; [_] to valid)
@@ -42,6 +43,18 @@ open import RoutingLib.Data.Path.Uncertified.Choice
 open import RoutingLib.Data.Path.Uncertified.Properties 
 open import RoutingLib.Algebra.Construct.NaturalChoice.Min.TotalOrder
 open import RoutingLib.Data.Path.UncertifiedI 
+
+------------------------------------------------------------------------
+-- Prelude
+
+private
+  ≈ₓ-refl : Reflexive (Pointwise {A₂ = EPath} _≈_ _≡_)
+  ≈ₓ-refl = Pointwise.×-refl {_∼₁_ = _≈_} {_≡_} ≈-refl refl
+  
+  module LexProperties = OpLexProperties′ ⊕-decMagma ⊓ₗₑₓ-magma
+
+------------------------------------------------------------------------
+-- Definition
 
 infix 4 _≈⁺_ _≉⁺_
 infix 7 _⊕⁺_
@@ -80,17 +93,13 @@ _▷⁺_ {_} {i} {j} f (valid (x , p))
 f∞⁺ : ∀ {n} (i j : Fin n) → Step i j
 f∞⁺ = f∞
 
-private
-  ≈ₓ-refl : Reflexive (Pointwise {A₂ = EPath} _≈_ _≡_)
-  ≈ₓ-refl = Pointwise.×-refl {_∼₁_ = _≈_} {_≡_} ≈-refl refl
 
 ≈⁺-isDecEquivalence : IsDecEquivalence _≈⁺_
 ≈⁺-isDecEquivalence = PointedEq.≈∙-isDecEquivalence (Pointwise _≈_ _≡_)
   (Pointwise.×-isDecEquivalence ≈-isDecEquivalence ≡ₚ-isDecEquivalence)
 
 ⊕⁺-cong : Congruent₂ _≈⁺_ _⊕⁺_
-⊕⁺-cong = AddIdentity.⊕∙-cong _ ≈ₓ-refl
-  (Lex.cong _≟_ _⊕_ _⊓ₗₑₓ_ ≈-sym ≈-trans ⊕-cong (cong₂ _⊓ₗₑₓ_))
+⊕⁺-cong = AddIdentity.⊕∙-cong _ ≈ₓ-refl LexProperties.cong
 
 ▷⁺-cong : ∀ {n} {i j : Fin n} (f : Step i j) → Congruent₁ _≈⁺_ (f ▷⁺_)
 ▷⁺-cong {_} {i} {j} f {_}             {_}             ∙≈∙     = ∙≈∙
@@ -132,20 +141,16 @@ AddPaths = record
 -- Adding paths preserves the required properties of a routing algebra
 
 ⊕⁺-sel : Selective _≈_ _⊕_ → Selective _≈⁺_ _⊕⁺_
-⊕⁺-sel ⊕-sel = AddIdentity.⊕∙-sel _ ≈ₓ-refl
-  (Lex.sel {_≈₂_ = _≡_} _≟_ _⊕_ _⊓ₗₑₓ_ ≈-refl (refl {A = EPath}) ⊕-sel ⊓ₗₑₓ-sel)
+⊕⁺-sel ⊕-sel = AddIdentity.⊕∙-sel _ ≈ₓ-refl (LexProperties.sel ⊕-sel ⊓ₗₑₓ-sel)
 
 ⊕⁺-comm : Commutative _≈_ _⊕_ → Commutative _≈⁺_ _⊕⁺_
-⊕⁺-comm ⊕-comm = AddIdentity.⊕∙-comm _ ≈ₓ-refl
-  (Lex.comm {_≈₂_ = _≡_} _≟_ _⊕_ _⊓ₗₑₓ_ ≈-refl refl ≈-trans ⊕-comm ⊓ₗₑₓ-comm)
+⊕⁺-comm ⊕-comm = AddIdentity.⊕∙-comm _ ≈ₓ-refl (LexProperties.comm ⊕-comm ⊓ₗₑₓ-comm)
 
 ⊕⁺-assoc : Associative _≈_ _⊕_ → Associative _≈⁺_ _⊕⁺_
-⊕⁺-assoc ⊕-assoc = AddIdentity.⊕∙-assoc _ ≈ₓ-refl
-  (Lex.assoc {_≈₂_ = _≡_} _≟_ _⊕_ _⊓ₗₑₓ_ ≈-refl refl ≈-trans ⊕-assoc ⊓ₗₑₓ-assoc)
+⊕⁺-assoc ⊕-assoc = AddIdentity.⊕∙-assoc _ ≈ₓ-refl (LexProperties.assoc ⊕-assoc ⊓ₗₑₓ-assoc)
 
 ⊕⁺-zeroʳ : RightZero _≈_ 0# _⊕_ → RightZero _≈⁺_ 0#⁺ _⊕⁺_
-⊕⁺-zeroʳ ⊕-zeroʳ = AddIdentity.⊕∙-zeroʳ _ ≈ₓ-refl
-  (Lex.zeroʳ {_≈₂_ = _≡_} _≟_ _⊕_ _⊓ₗₑₓ_ ≈-refl refl ⊕-zeroʳ ⊓ₗₑₓ-zeroʳ)
+⊕⁺-zeroʳ ⊕-zeroʳ = AddIdentity.⊕∙-zeroʳ _ ≈ₓ-refl (LexProperties.zeroʳ ⊕-zeroʳ ⊓ₗₑₓ-zeroʳ)
 
 ⊕⁺-identityʳ : RightIdentity _≈⁺_ ∞#⁺ _⊕⁺_
 ⊕⁺-identityʳ = AddIdentity.⊕∙-identityʳ _ ≈ₓ-refl

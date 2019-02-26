@@ -10,15 +10,15 @@ open import RoutingLib.Data.NatInf.Properties
 
 open import RoutingLib.Routing.Algebra
 
-algebra : RawRoutingAlgebra 0ℓ 0ℓ 0ℓ
-algebra = record
+Aˢʰᵒʳᵗᵉˢᵗ : RawRoutingAlgebra 0ℓ 0ℓ 0ℓ
+Aˢʰᵒʳᵗᵉˢᵗ = record
   { Route              = ℕ∞
   ; Step               = λ _ _ → ℕ∞
   ; _≈_                = _≡_
   ; _⊕_                = _⊓_
   ; _▷_                = _+_
   ; 0#                 = N 0
-  ; ∞                  = ∞
+  ; ∞#                 = ∞
   ; f∞                 = λ _ _ → ∞
   ; ≈-isDecEquivalence = ≡-isDecEquivalence
   ; ⊕-cong             = cong₂ _⊓_
@@ -26,7 +26,7 @@ algebra = record
   ; f∞-reject          = λ _ _ _ → refl
   }
 
-isRoutingAlgebra : IsRoutingAlgebra algebra
+isRoutingAlgebra : IsRoutingAlgebra Aˢʰᵒʳᵗᵉˢᵗ
 isRoutingAlgebra = record
   { ⊕-sel        = ⊓-sel
   ; ⊕-comm       = ⊓-comm
@@ -36,5 +36,5 @@ isRoutingAlgebra = record
   ; ▷-fixedPoint = +-zeroʳ
   }
 
-isDistributive : IsDistributive algebra
+isDistributive : IsDistributive Aˢʰᵒʳᵗᵉˢᵗ
 isDistributive = +-distribˡ-⊓

@@ -19,8 +19,10 @@ open import Relation.Nullary using (¬_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 import Relation.Binary.Construct.NonStrictToStrict as NonStrictToStrict
-import Relation.Binary.EqReasoning as EqReasoning
+import Relation.Binary.EqReasoning as EqReasonin
 
+open import RoutingLib.Algebra
+open import RoutingLib.Algebra.Structures
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.Table using (Table)
 import RoutingLib.Data.Path.UncertifiedI as UncertifiedPaths
@@ -104,6 +106,28 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
   DS : DecSetoid _ ℓ
   DS = record { isDecEquivalence = ≈-isDecEquivalence }
 
+  ⊕-isMagma : IsMagma _≈_ _⊕_
+  ⊕-isMagma = record
+    { isEquivalence = ≈-isEquivalence
+    ; ∙-cong        = ⊕-cong
+    }
+
+  ⊕-magma : Magma _ _
+  ⊕-magma = record
+    { isMagma = ⊕-isMagma
+    }
+
+  ⊕-isDecMagma : IsDecMagma _≈_ _⊕_
+  ⊕-isDecMagma = record
+    { isMagma = ⊕-isMagma
+    ; _≟_     = _≟_
+    }
+
+  ⊕-decMagma : DecMagma _ _
+  ⊕-decMagma = record
+    { isDecMagma = ⊕-isDecMagma
+    }
+  
 --------------------------------------------------------------------------------
 -- Basic properties
 --------------------------------------------------------------------------------

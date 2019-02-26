@@ -23,10 +23,8 @@ module RoutingLib.Routing.Algebra.Construct.Lex
 module A = RawRoutingAlgebra algebraA
 module B = RawRoutingAlgebra algebraB
 
-{-
-syntax x A.▷ y = x ▷ᴬ y 
-_▷ᴮ_ = B._▷_
--}
+------------------------------------------------------------------------
+-- Algebra
 
 Route : Set _
 Route = A.Route × B.Route
@@ -69,15 +67,30 @@ Lex = record
   ; ∞#                 = ∞#
   ; f∞                 = f∞
   ; ≈-isDecEquivalence = Pointwise.×-isDecEquivalence A.≈-isDecEquivalence B.≈-isDecEquivalence
-  ; ⊕-cong             = OpLex.cong A._≟_ A._⊕_ B._⊕_ A.≈-sym A.≈-trans A.⊕-cong B.⊕-cong
+  ; ⊕-cong             = OpLex.cong A._≟_ B._≈_ A._⊕_ B._⊕_ A.≈-sym A.≈-trans A.⊕-cong B.⊕-cong
   ; ▷-cong             = ▷-cong
   ; f∞-reject          = f∞-reject
   }
 
 open RawRoutingAlgebra Lex using (_≤₊_)
 
+------------------------------------------------------------------------
+-- IsRoutinAlgebra
 
+isRoutingAlgebra : IsRoutingAlgebra algebraA →
+                   IsRoutingAlgebra algebraB →
+                   IsRoutingAlgebra Lex
+isRoutingAlgebra A-isRA B-isRA = record
+  { ⊕-sel         = OpLex.sel A._≟_ B._≈_ A._⊕_ B._⊕_ A.≈-refl B.≈-refl {!A.⊕-sel!} {!!}
+  ; ⊕-comm        = {!!}
+  ; ⊕-assoc       = {!!}
+  ; ⊕-zeroʳ       = {!!}
+  ; ⊕-identityʳ   = {!!}
+  ; ▷-fixedPoint = {!!}
+  }
 
+------------------------------------------------------------------------
+-- Other properties
 
 distrib-1st-comp : Selective A._≈_ A._⊕_ → 
                    IsDistributive algebraA →

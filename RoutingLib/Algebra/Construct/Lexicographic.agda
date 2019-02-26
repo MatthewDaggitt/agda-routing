@@ -24,8 +24,8 @@ module _ {a b ℓ} {A : Set a} {B : Set b} {_≈_ : Rel A ℓ}
   ... | _     | _     = (a • b , x ◦ y)
 
 
-module _ {a b ℓ₁ ℓ₂} {A : Set a} {B : Set b} {_≈₁_ : Rel A ℓ₁} {_≈₂_ : Rel B ℓ₂}
-         (_≟_ : Decidable _≈₁_) (_•_ : Op₂ A) (_◦_ : Op₂ B) where
+module _ {a b ℓ₁ ℓ₂} {A : Set a} {B : Set b} {_≈₁_ : Rel A ℓ₁} (_≟_ : Decidable _≈₁_)
+         (_≈₂_ : Rel B ℓ₂) (_•_ : Op₂ A) (_◦_ : Op₂ B) where
 
   
   private

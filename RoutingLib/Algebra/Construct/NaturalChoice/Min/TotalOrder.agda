@@ -1,64 +1,84 @@
 open import Relation.Binary using (TotalOrder)
-open import Algebra.FunctionProperties
-open import Algebra.Structures
-open import Relation.Binary.Lattice using (Minimum; Maximum)
-
-import RoutingLib.Algebra.Construct.NaturalChoice.Min as Min
 
 module RoutingLib.Algebra.Construct.NaturalChoice.Min.TotalOrder
   {a ℓ₁ ℓ₂} (TO : TotalOrder a ℓ₁ ℓ₂) where
 
-  open TotalOrder TO renaming (Carrier to A)
+open import Algebra.FunctionProperties
+open import Algebra.Structures
+open import Relation.Binary.Lattice using (Minimum; Maximum)
 
-  infix 7 _⊓_
+open import RoutingLib.Algebra
+open import RoutingLib.Algebra.Structures
+import RoutingLib.Algebra.Construct.NaturalChoice.Min as Min
 
-  _⊓_ : Op₂ A
-  _⊓_ = Min.min total
+open TotalOrder TO renaming (Carrier to A)
 
-  ------------------------------------------------------------------------------
-  -- Algebraic properties
+------------------------------------------------------------------------------
+-- Definition
 
-  ⊓-sel : Selective _≈_ _⊓_
-  ⊓-sel = Min.sel total _≈_ Eq.refl
+infix 7 _⊓_
 
-  ⊓-cong : Congruent₂ _≈_ _⊓_
-  ⊓-cong = Min.cong total Eq.sym antisym ≤-resp-≈
+_⊓_ : Op₂ A
+_⊓_ = Min.min total
 
-  ⊓-comm : Commutative _≈_ _⊓_
-  ⊓-comm = Min.comm total Eq.refl antisym
+------------------------------------------------------------------------------
+-- Algebraic properties
 
-  ⊓-assoc : Associative _≈_ _⊓_
-  ⊓-assoc = Min.assoc total Eq.refl trans antisym
+⊓-sel : Selective _≈_ _⊓_
+⊓-sel = Min.sel total _≈_ Eq.refl
 
-  ⊓-identityˡ : ∀ {⊥} → Maximum _≤_ ⊥ → LeftIdentity _≈_ ⊥ _⊓_
-  ⊓-identityˡ = Min.identityˡ total Eq.refl antisym
+⊓-cong : Congruent₂ _≈_ _⊓_
+⊓-cong = Min.cong total Eq.sym antisym ≤-resp-≈
 
-  ⊓-identityʳ : ∀ {⊥} → Maximum _≤_ ⊥ → RightIdentity _≈_ ⊥ _⊓_
-  ⊓-identityʳ = Min.identityʳ total Eq.refl antisym
+⊓-comm : Commutative _≈_ _⊓_
+⊓-comm = Min.comm total Eq.refl antisym
 
-  ⊓-identity : ∀ {⊥} → Maximum _≤_ ⊥ → Identity _≈_ ⊥ _⊓_
-  ⊓-identity = Min.identity total Eq.refl antisym
+⊓-assoc : Associative _≈_ _⊓_
+⊓-assoc = Min.assoc total Eq.refl trans antisym
 
-  ⊓-zeroˡ : ∀ {⊥} → Minimum _≤_ ⊥ → LeftZero _≈_ ⊥ _⊓_
-  ⊓-zeroˡ = Min.zeroˡ total Eq.refl antisym
+⊓-identityˡ : ∀ {⊥} → Maximum _≤_ ⊥ → LeftIdentity _≈_ ⊥ _⊓_
+⊓-identityˡ = Min.identityˡ total Eq.refl antisym
 
-  ⊓-zeroʳ : ∀ {⊥} → Minimum _≤_ ⊥ → RightZero _≈_ ⊥ _⊓_
-  ⊓-zeroʳ = Min.zeroʳ total Eq.refl antisym
+⊓-identityʳ : ∀ {⊥} → Maximum _≤_ ⊥ → RightIdentity _≈_ ⊥ _⊓_
+⊓-identityʳ = Min.identityʳ total Eq.refl antisym
 
-  ⊓-zero : ∀ {⊥} → Minimum _≤_ ⊥ → Zero _≈_ ⊥ _⊓_
-  ⊓-zero = Min.zero total Eq.refl antisym
+⊓-identity : ∀ {⊥} → Maximum _≤_ ⊥ → Identity _≈_ ⊥ _⊓_
+⊓-identity = Min.identity total Eq.refl antisym
 
-  ⊓-isSemigroup : IsSemigroup _≈_ _⊓_
-  ⊓-isSemigroup = Min.isSemigroup total isPartialOrder
+⊓-zeroˡ : ∀ {⊥} → Minimum _≤_ ⊥ → LeftZero _≈_ ⊥ _⊓_
+⊓-zeroˡ = Min.zeroˡ total Eq.refl antisym
 
-  ⊓-isMonoid : ∀ {⊥} → Maximum _≤_ ⊥ → IsMonoid _≈_ _⊓_ ⊥
-  ⊓-isMonoid = Min.isMonoid total isPartialOrder
+⊓-zeroʳ : ∀ {⊥} → Minimum _≤_ ⊥ → RightZero _≈_ ⊥ _⊓_
+⊓-zeroʳ = Min.zeroʳ total Eq.refl antisym
 
-  ----------------------------------------------------------------------------
-  -- Other properties
+⊓-zero : ∀ {⊥} → Minimum _≤_ ⊥ → Zero _≈_ ⊥ _⊓_
+⊓-zero = Min.zero total Eq.refl antisym
 
-  x⊓y≈y⇒y≤x : ∀ {x y} → (x ⊓ y) ≈ y → y ≤ x
-  x⊓y≈y⇒y≤x = Min.min[x,y]≈y⇒y≤x total reflexive Eq.sym
+----------------------------------------------------------------------------
+-- Structures
 
-  x⊓y≈x⇒x≤y : ∀ {x y} → (x ⊓ y) ≈ x → x ≤ y
-  x⊓y≈x⇒x≤y = Min.min[x,y]≈x⇒x≤y total reflexive Eq.sym
+⊓-isMagma : IsMagma _≈_ _⊓_
+⊓-isMagma = Min.isMagma total isPartialOrder
+
+⊓-isSemigroup : IsSemigroup _≈_ _⊓_
+⊓-isSemigroup = Min.isSemigroup total isPartialOrder
+
+⊓-isMonoid : ∀ {⊥} → Maximum _≤_ ⊥ → IsMonoid _≈_ _⊓_ ⊥
+⊓-isMonoid = Min.isMonoid total isPartialOrder
+
+----------------------------------------------------------------------------
+-- Packages
+
+⊓-magma : Magma _ _
+⊓-magma = record
+  { isMagma = ⊓-isMagma
+  }
+
+----------------------------------------------------------------------------
+-- Other properties
+
+x⊓y≈y⇒y≤x : ∀ {x y} → (x ⊓ y) ≈ y → y ≤ x
+x⊓y≈y⇒y≤x = Min.min[x,y]≈y⇒y≤x total reflexive Eq.sym
+
+x⊓y≈x⇒x≤y : ∀ {x y} → (x ⊓ y) ≈ x → x ≤ y
+x⊓y≈x⇒x≤y = Min.min[x,y]≈x⇒x≤y total reflexive Eq.sym

@@ -111,7 +111,7 @@ import RoutingLib.Routing.VectorBased.Synchronous  A as SyncRouting
 
 -- Synchronous version (can start from any initial state)
 σ : ∀ {n} → AdjacencyMatrix n → RoutingMatrix n → 𝕋 → RoutingMatrix n
-σ {n} A X₀ t = SyncRouting.σ A t X₀
+σ {n} A X₀ t = SyncRouting.σ^ A t X₀
 
 -- Dynamic asynchronous version (starts identity matrix but has arbitrary
 -- network growth and failures depending on the exact schedule and network)

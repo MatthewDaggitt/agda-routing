@@ -14,7 +14,7 @@ open import Algebra.Structures
 import Algebra.FunctionProperties as FunctionProperties
 import Algebra.FunctionProperties.Consequences as Consequences
 open import Algebra.FunctionProperties.Consequences using (sel⇒idem)
-open import Data.Product using (proj₁)
+open import Data.Product using (proj₁; _,_)
 open import Data.Fin using (Fin)
 open import Relation.Nullary using (yes; no)
 open import Relation.Binary using (DecTotalOrder; StrictTotalOrder)
@@ -39,16 +39,8 @@ open FunctionProperties _≈_
 ⊕-identityˡ : LeftIdentity ∞# _⊕_
 ⊕-identityˡ x = ≈-trans (⊕-comm ∞# x) (⊕-identityʳ x)
 
-⊕-isMagma : IsMagma _≈_ _⊕_
-⊕-isMagma = record
-  { isEquivalence = ≈-isEquivalence
-  ; ∙-cong        = ⊕-cong
-  }
-
-⊕-magma : Magma _ _
-⊕-magma = record
-  { isMagma = ⊕-isMagma
-  }
+⊕-identity : Identity ∞# _⊕_
+⊕-identity = ⊕-identityˡ , ⊕-identityʳ
 
 ⊕-isSemigroup : IsSemigroup _≈_ _⊕_
 ⊕-isSemigroup = record
@@ -72,6 +64,18 @@ open FunctionProperties _≈_
 ⊕-semilattice : Semilattice _ _
 ⊕-semilattice = record
   { isSemilattice = ⊕-isSemilattice
+  }
+
+⊕-isMonoid : IsMonoid _≈_ _⊕_ ∞#
+⊕-isMonoid = record
+  { isSemigroup = ⊕-isSemigroup
+  ; identity    = ⊕-identity
+  }
+
+⊕-isDecMonoid : IsDecMonoid _≈_ _⊕_ ∞#
+⊕-isDecMonoid = record
+  { isMonoid = ⊕-isMonoid
+  ; _≟_      = _≟_
   }
 
 ------------------------------------------------------------------------------

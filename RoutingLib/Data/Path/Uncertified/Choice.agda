@@ -17,6 +17,7 @@ abstract
     ; ⊓-sel   to ⊓ₗₑₓ-sel
     ; ⊓-comm  to ⊓ₗₑₓ-comm
     ; ⊓-assoc to ⊓ₗₑₓ-assoc
+    ; ⊓-magma to ⊓ₗₑₓ-magma
     )
 
   ⊓ₗₑₓ-zeroʳ : RightZero _≡_ [] _⊓ₗₑₓ_

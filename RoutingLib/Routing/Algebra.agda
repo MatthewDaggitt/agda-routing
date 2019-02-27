@@ -14,7 +14,7 @@ import Data.List.Membership.Setoid as ListMembership
 open import Data.Nat using (ℕ; zero; suc)
 open import Data.Product using (Σ; _,_)
 open import Data.Sum using (_⊎_)
-open import Level using (_⊔_) renaming (suc to lsuc)
+open import Level using (Lift; _⊔_) renaming (suc to lsuc)
 open import Relation.Nullary using (¬_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
@@ -164,10 +164,21 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
     ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
     Level k DistributiveIn[ f ▷ (x ⊕ y) , (f ▷ x) ⊕ (f ▷ y) ]
 
-
   IsLevel_Distributive : ℕ → Set _
   IsLevel k Distributive = Level k DistributiveIn[ 0# , ∞# ]
 
+
+
+  Level_DistributiveIn[_,_]Alt : ℕ → Route → Route → Set _
+  Level 0       DistributiveIn[ ⊥ , ⊤ ]Alt = Lift (a ⊔ b ⊔ ℓ) (⊥ ≈ ⊤)
+  Level (suc k) DistributiveIn[ ⊥ , ⊤ ]Alt =
+    ∀ {n} {i j : Fin n} (f : Step i j) →
+    ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
+    Level k DistributiveIn[ f ▷ (x ⊕ y) , (f ▷ x) ⊕ (f ▷ y) ]
+
+  IsLevel_DistributiveAlt : ℕ → Set _
+  IsLevel k DistributiveAlt = Level k DistributiveIn[ 0# , ∞# ]Alt
+  
 --------------------------------------------------------------------------------
 -- Routing algebras
 --------------------------------------------------------------------------------

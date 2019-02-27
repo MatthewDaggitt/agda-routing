@@ -6,6 +6,7 @@ open import Data.Product
 open import Data.Product.Relation.Pointwise.NonDependent
   as Pointwise using (Pointwise)
 open import Data.Sum as Sum using ()
+open import Level using (lift)
 open import Relation.Binary
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation
@@ -167,18 +168,14 @@ bumpDistributivity A-comm A-sel A-distrib B-distrib
 bumpDistributivity2 : Commutative A._≈_ A._⊕_ →
                      Selective A._≈_ A._⊕_ →
                      ∀ {k} →
-                     IsLevel_Distributive algebraA k →
-                     IsLevel_Distributive algebraA k →
-                     IsLevel_Distributive Lex (suc k)
-bumpDistributivity2 A-comm A-sel A-distrib B-distrib
-  f {p@(a , w)} {q@(b , x)} _ _ _ _ = ?
-  -- (k , l) {r@(c , y)} {s@(d , z)} f[p⊕q]≤r r≤fp⊕fq f[p⊕q]≤s s≤fp⊕fq = ?
-{-
-with sel⇒idem A.S A-sel
-... | A-idem with middle-1st-comp A-idem A-comm f[p⊕q]≤r r≤fp⊕fq (distrib-1st-comp A-sel A-distrib f)
-                | middle-1st-comp A-idem A-comm f[p⊕q]≤s s≤fp⊕fq (distrib-1st-comp A-sel A-distrib f)
-...   | f[p⊕q]₁≈c | f[p⊕q]₁≈d with A.≈-trans (A.≈-sym f[p⊕q]₁≈c) f[p⊕q]₁≈d
-...     | c≈d with c A.⊕ d A.≟ c | c A.⊕ d A.≟ d | (k A.▷ c) A.⊕ (k A.▷ d) A.≟ k A.▷ c | (k A.▷ c) A.⊕ (k A.▷ d) A.≟ k A.▷ d
+                     IsLevel_DistributiveAlt algebraA k →
+                     IsLevel_DistributiveAlt algebraA k →
+                     IsLevel_DistributiveAlt Lex (suc k)
+bumpDistributivity2 A-comm A-sel {zero} (lift 0≈ᵃ∞) (lift 0≈ᵇ∞) f {a , w} {b , x} _ _ _ _
+  (m , l) {r@(c , y)} {s@(d , z)} f[p⊕q]≤r r≤fp⊕fq f[p⊕q]≤s s≤fp⊕fq = {!!} , {!!}
+bumpDistributivity2 A-comm A-sel {suc k} A-distrib B-distrib f {a , w} {b , x} _ _ _ _
+  (m , l) {r@(c , y)} {s@(d , z)} f[p⊕q]≤r r≤fp⊕fq f[p⊕q]≤s s≤fp⊕fq with sel⇒idem A.S A-sel
+... | A-idem with c A.⊕ d A.≟ c | c A.⊕ d A.≟ d | (k A.▷ c) A.⊕ (k A.▷ d) A.≟ k A.▷ c | (k A.▷ c) A.⊕ (k A.▷ d) A.≟ k A.▷ d
 ...       | yes p     | yes p₁    | yes p₂ | yes p₃ =
   A-distrib k c d , B-distrib l y z
 ...       | yes c⊕d≈c | yes c⊕d≈d | yes kc⊕kd≈kc | no kc⊕kd≉kd =
@@ -187,8 +184,15 @@ with sel⇒idem A.S A-sel
   contradiction (A.≈-trans kc⊕kd≈kd (A.▷-cong k (A.≈-trans (A.≈-sym c⊕d≈d) c⊕d≈c))) kc⊕kd≉kc
 ...       | yes p     | yes p₁    | no ¬p | no ¬p₁ =
   A-distrib k c d , B-distrib l y z
-...       | _         | no c⊕d≉d | _ | _ =
-  contradiction (A.≈-trans (A.⊕-cong c≈d A.≈-refl) (A-idem d)) c⊕d≉d
-...       | no c⊕d≉c  | _ | _ | _ =
-  contradiction (A.≈-trans (A.⊕-cong A.≈-refl (A.≈-sym c≈d)) (A-idem c)) c⊕d≉c
+...       | _         | no c⊕d≉d | _ | _ = ?
+  -- contradiction (A.≈-trans (A.⊕-cong c≈d A.≈-refl) (A-idem d)) c⊕d≉d
+...       | no c⊕d≉c  | _ | _ | _ = ?
+  -- contradiction (A.≈-trans (A.⊕-cong A.≈-refl (A.≈-sym c≈d)) (A-idem c)) c⊕d≉c
+
+{-
+with middle-1st-comp A-idem A-comm f[p⊕q]≤r r≤fp⊕fq (distrib-1st-comp A-sel A-distrib f)
+                | middle-1st-comp A-idem A-comm f[p⊕q]≤s s≤fp⊕fq (distrib-1st-comp A-sel A-distrib f)
+...   | f[p⊕q]₁≈c | f[p⊕q]₁≈d = ?
+with A.≈-trans (A.≈-sym f[p⊕q]₁≈c) f[p⊕q]₁≈d
+...     | c≈d 
 -}

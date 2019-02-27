@@ -54,8 +54,15 @@ zeroʳ : ∀ {0₁ 0₂} → RightZero _≈ᵃ_ 0₁ _∙ᵃ_ → RightZero _≈
         RightZero _≈ₗₑₓ_ (0₁ , 0₂) _⊕ₗₑₓ_
 zeroʳ = Lex.zeroʳ Mᵃ._≟_ _≈ᵇ_ _∙ᵃ_ _∙ᵇ_ Mᵃ.refl Mᵇ.refl
 
+identityʳ : ∀ {e f} → RightIdentity _≈ᵃ_ e _∙ᵃ_ → RightIdentity _≈ᵇ_ f _∙ᵇ_ →
+           RightIdentity _≈ₗₑₓ_ (e , f) _⊕ₗₑₓ_
+identityʳ = Lex.identityʳ Mᵃ._≟_ _≈ᵇ_ _∙ᵃ_ _∙ᵇ_ Mᵃ.refl Mᵇ.refl
+
 cong : Congruent₂ _≈ₗₑₓ_ _⊕ₗₑₓ_
 cong = Lex.cong Mᵃ._≟_ _≈ᵇ_ _∙ᵃ_ _∙ᵇ_ Mᵃ.sym Mᵃ.trans Mᵃ.∙-cong Mᵇ.∙-cong
+
+------------------------------------------------------------------------
+-- Other properties
 
 opLex-proj₁ : ∀ x y → proj₁ (x ⊕ₗₑₓ y) ≈ᵃ ((proj₁ x) ∙ᵃ (proj₁ y))
 opLex-proj₁ = Lex.opLex-proj₁ Mᵃ._≟_ _≈ᵇ_ _∙ᵃ_ _∙ᵇ_ Mᵃ.refl Mᵃ.sym

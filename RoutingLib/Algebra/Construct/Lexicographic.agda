@@ -102,6 +102,14 @@ module _ {a b ℓ₁ ℓ₂} {A : Set a} {B : Set b} {_≈₁_ : Rel A ℓ₁} (
   ... | no  _ | yes _    = refl₁ , refl₂
   ... | yes _ | yes _    = (zeroʳ₁ x) , (zeroʳ₂ a)
 
+  identityʳ : Reflexive _≈₁_ → Reflexive _≈₂_ → 
+          ∀ {0₁ 0₂} → RightIdentity _≈₁_ 0₁ _•_ → RightIdentity _≈₂_ 0₂ _◦_ →
+          RightIdentity _≈ₓ_ (0₁ , 0₂) _⊕_
+  identityʳ refl₁ refl₂ {e} identityʳ₁ identityʳ₂ (x , a) with (x • e) ≟ x | (x • e) ≟ e
+  ... | no  x∙e≉x | _     = contradiction (identityʳ₁ x) x∙e≉x
+  ... | yes  _    | no  _ = refl₁ , refl₂
+  ... | yes _     | yes _ = identityʳ₁ x , identityʳ₂ a
+  
   cong : Symmetric _≈₁_ → Transitive _≈₁_ →
          Congruent₂ _≈₁_ _•_ → Congruent₂ _≈₂_ _◦_ → Congruent₂ _≈ₓ_ _⊕_
   cong sym₁ trans₁ •-cong ◦-cong {a , w} {b , x} {c , y} {d , z} (a≈b , w≈x) (c≈d , y≈z)

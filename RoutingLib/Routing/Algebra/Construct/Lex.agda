@@ -1,5 +1,6 @@
 open import Algebra.FunctionProperties
 open import Algebra.FunctionProperties.Consequences
+open import Data.Nat
 open import Data.Fin
 open import Data.Product
 open import Data.Product.Relation.Pointwise.NonDependent
@@ -10,6 +11,8 @@ open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation
 open import RoutingLib.Algebra.Construct.Lexicographic
   as OpLex renaming (Lex to OpLex)
+open import RoutingLib.Algebra.Construct.Lexicographic.Magma
+  as OpLexProperties′
 
 open import RoutingLib.Function
 open import RoutingLib.Routing.Algebra
@@ -20,11 +23,22 @@ module RoutingLib.Routing.Algebra.Construct.Lex
   (algebraB : RawRoutingAlgebra a₂ b₂ ℓ₂)
   where
 
-module A = RawRoutingAlgebra algebraA
-module B = RawRoutingAlgebra algebraB
+------------------------------------------------------------------------
+-- Prelude
 
+private
+
+  module A = RawRoutingAlgebra algebraA
+  module B = RawRoutingAlgebra algebraB
+
+  module LexProperties = OpLexProperties′ A.⊕-decMagma B.⊕-magma
+  
 ------------------------------------------------------------------------
 -- Algebra
+
+infix 7 _⊕_
+infix 6 _▷_
+infix 4 _≈_
 
 Route : Set _
 Route = A.Route × B.Route
@@ -67,7 +81,7 @@ Lex = record
   ; ∞#                 = ∞#
   ; f∞                 = f∞
   ; ≈-isDecEquivalence = Pointwise.×-isDecEquivalence A.≈-isDecEquivalence B.≈-isDecEquivalence
-  ; ⊕-cong             = OpLex.cong A._≟_ B._≈_ A._⊕_ B._⊕_ A.≈-sym A.≈-trans A.⊕-cong B.⊕-cong
+  ; ⊕-cong             = LexProperties.cong
   ; ▷-cong             = ▷-cong
   ; f∞-reject          = f∞-reject
   }
@@ -75,19 +89,21 @@ Lex = record
 open RawRoutingAlgebra Lex using (_≤₊_)
 
 ------------------------------------------------------------------------
--- IsRoutinAlgebra
+-- IsRoutinAlgebra is preserved
 
 isRoutingAlgebra : IsRoutingAlgebra algebraA →
                    IsRoutingAlgebra algebraB →
                    IsRoutingAlgebra Lex
 isRoutingAlgebra A-isRA B-isRA = record
-  { ⊕-sel         = OpLex.sel A._≟_ B._≈_ A._⊕_ B._⊕_ A.≈-refl B.≈-refl {!A.⊕-sel!} {!!}
-  ; ⊕-comm        = {!!}
-  ; ⊕-assoc       = {!!}
-  ; ⊕-zeroʳ       = {!!}
-  ; ⊕-identityʳ   = {!!}
-  ; ▷-fixedPoint = {!!}
-  }
+  { ⊕-sel         = LexProperties.sel      Aᵣ.⊕-sel      Bᵣ.⊕-sel
+  ; ⊕-comm        = LexProperties.comm     Aᵣ.⊕-comm     Bᵣ.⊕-comm
+  ; ⊕-assoc       = LexProperties.assoc    Aᵣ.⊕-assoc    Bᵣ.⊕-assoc
+  ; ⊕-zeroʳ       = LexProperties.zeroʳ     Aᵣ.⊕-zeroʳ     Bᵣ.⊕-zeroʳ
+  ; ⊕-identityʳ   = LexProperties.identityʳ Aᵣ.⊕-identityʳ Bᵣ.⊕-identityʳ
+  ; ▷-fixedPoint = λ {(f , g) → Aᵣ.▷-fixedPoint f , Bᵣ.▷-fixedPoint g}
+  } where
+  module Aᵣ = IsRoutingAlgebra A-isRA
+  module Bᵣ = IsRoutingAlgebra B-isRA
 
 ------------------------------------------------------------------------
 -- Other properties
@@ -146,3 +162,33 @@ bumpDistributivity A-comm A-sel A-distrib B-distrib
   contradiction (A.≈-trans (A.⊕-cong c≈d A.≈-refl) (A-idem d)) c⊕d≉d
 ...       | no c⊕d≉c  | _ | _ | _ =
   contradiction (A.≈-trans (A.⊕-cong A.≈-refl (A.≈-sym c≈d)) (A-idem c)) c⊕d≉c
+
+
+bumpDistributivity2 : Commutative A._≈_ A._⊕_ →
+                     Selective A._≈_ A._⊕_ →
+                     ∀ {k} →
+                     IsLevel_Distributive algebraA k →
+                     IsLevel_Distributive algebraA k →
+                     IsLevel_Distributive Lex (suc k)
+bumpDistributivity2 A-comm A-sel A-distrib B-distrib
+  f {p@(a , w)} {q@(b , x)} _ _ _ _ = ?
+  -- (k , l) {r@(c , y)} {s@(d , z)} f[p⊕q]≤r r≤fp⊕fq f[p⊕q]≤s s≤fp⊕fq = ?
+{-
+with sel⇒idem A.S A-sel
+... | A-idem with middle-1st-comp A-idem A-comm f[p⊕q]≤r r≤fp⊕fq (distrib-1st-comp A-sel A-distrib f)
+                | middle-1st-comp A-idem A-comm f[p⊕q]≤s s≤fp⊕fq (distrib-1st-comp A-sel A-distrib f)
+...   | f[p⊕q]₁≈c | f[p⊕q]₁≈d with A.≈-trans (A.≈-sym f[p⊕q]₁≈c) f[p⊕q]₁≈d
+...     | c≈d with c A.⊕ d A.≟ c | c A.⊕ d A.≟ d | (k A.▷ c) A.⊕ (k A.▷ d) A.≟ k A.▷ c | (k A.▷ c) A.⊕ (k A.▷ d) A.≟ k A.▷ d
+...       | yes p     | yes p₁    | yes p₂ | yes p₃ =
+  A-distrib k c d , B-distrib l y z
+...       | yes c⊕d≈c | yes c⊕d≈d | yes kc⊕kd≈kc | no kc⊕kd≉kd =
+  contradiction (A.≈-trans kc⊕kd≈kc (A.▷-cong k (A.≈-trans (A.≈-sym c⊕d≈c) c⊕d≈d))) kc⊕kd≉kd
+...       | yes c⊕d≈c | yes c⊕d≈d | no kc⊕kd≉kc | yes kc⊕kd≈kd =
+  contradiction (A.≈-trans kc⊕kd≈kd (A.▷-cong k (A.≈-trans (A.≈-sym c⊕d≈d) c⊕d≈c))) kc⊕kd≉kc
+...       | yes p     | yes p₁    | no ¬p | no ¬p₁ =
+  A-distrib k c d , B-distrib l y z
+...       | _         | no c⊕d≉d | _ | _ =
+  contradiction (A.≈-trans (A.⊕-cong c≈d A.≈-refl) (A-idem d)) c⊕d≉d
+...       | no c⊕d≉c  | _ | _ | _ =
+  contradiction (A.≈-trans (A.⊕-cong A.≈-refl (A.≈-sym c≈d)) (A-idem c)) c⊕d≉c
+-}

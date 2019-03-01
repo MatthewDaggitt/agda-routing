@@ -9,7 +9,7 @@ open import Relation.Binary
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Data.Sum using (inj₁; inj₂; map)
-open import Data.Maybe using (Maybe; Eq; decSetoid)
+open import Data.Maybe using (Maybe; Eq; decSetoid; drop-just)
 open import Data.Product using (_,_)
 
 open import RoutingLib.Algebra.FunctionProperties
@@ -74,3 +74,4 @@ module _ {ℓ} {_≈_ : Rel A ℓ} (refl : Reflexive _≈_) where
   ⊕∙-cong cong ∙≈∙     [ y≈z ] = [ y≈z ]
   ⊕∙-cong cong [ w≈x ] ∙≈∙     = [ w≈x ]
   ⊕∙-cong cong [ w≈x ] [ y≈z ] = [ cong w≈x y≈z ]
+

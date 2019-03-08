@@ -1,3 +1,14 @@
+
+open import RoutingLib.Relation.Unary.Indexed
+
+open import RoutingLib.Iteration.Asynchronous.Static using (AsyncIterable)
+open import RoutingLib.Iteration.Asynchronous.Static.Convergence.Conditions
+
+module RoutingLib.Iteration.Asynchronous.Static.Convergence.AMCOImpliesACO
+  {a ℓ n} {I∥ : AsyncIterable a ℓ n}
+  {p} {X₀ : IPred _ p}
+  (amco : PartialAMCO I∥ X₀) where
+
 open import Data.Fin.Dec using (_∈?_)
 open import Data.Fin.Subset using (Subset) renaming (_∈_ to _∈ₛ_; _∉_ to _∉ₛ_; ⊤ to ⊤ₛ)
 open import Data.Nat using (ℕ; _≤_; _<_; z≤n; s≤s; zero; suc; _+_; _∸_; ≤-pred)
@@ -20,22 +31,13 @@ open import RoutingLib.Data.Table.Properties using (max[t]≤x; x≤max[t]; max-
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
 open import RoutingLib.Data.Nat.Properties using (m+[n∸o]≤[m+n]∸o; module ≤-Reasoning)
 import RoutingLib.Function.Metric.Construct.Condition as Condition
-open import RoutingLib.Relation.Unary.Indexed
 open import RoutingLib.Relation.Binary.PropositionalEquality using (inspect′)
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as SubsetEquality
 import RoutingLib.Function.Reasoning as FunctionReasoning
 
-open import RoutingLib.Iteration.Asynchronous.Static using (AsyncIterable)
-open import RoutingLib.Iteration.Asynchronous.Static.Convergence.Conditions using (ACO; AMCO)
-
-open ≤-Reasoning
-
-module RoutingLib.Iteration.Asynchronous.Static.Convergence.AMCOImpliesACO
-  {a ℓ n} {I∥ : AsyncIterable a ℓ n}
-  (amco : AMCO I∥) where
-
 open AsyncIterable I∥
-open AMCO amco
+open PartialAMCO amco
+open ≤-Reasoning
 
 ----------------------------------------------
 -- Export and define some useful properties --
@@ -105,80 +107,93 @@ abstract
     f : S → S
     f = F
 
-    fixedPoint : S → ∃ (λ x → f x ≈ x)
-    fixedPoint v = inner v (<-wellFounded (d v (f v)))
+    fixedPoint : ∀ {v} → v ∈ᵢ X₀ → ∃ (λ x → f x ≈ x × x ∈ᵢ X₀)
+    fixedPoint {v} v∈X₀ = inner v∈X₀ (<-wellFounded (d v (f v)))
       where
-      inner : ∀ x → Acc _<_ (d x (f x)) → ∃ (λ x* → f x* ≈ x*)
-      inner x (acc x-acc) with F x ≟ x
-      ... | yes fx≈x = x , fx≈x
-      ... | no  fx≉x = inner (F x) (x-acc _ (F-strContrOnOrbits fx≉x))
+      inner : ∀ {x} → x ∈ᵢ X₀ → Acc _<_ (d x (f x)) → ∃ (λ x* → f x* ≈ x* × x* ∈ᵢ X₀)
+      inner {x} x∈X₀ (acc x-acc) with F x ≟ x
+      ... | yes fx≈x = x , fx≈x , x∈X₀
+      ... | no  fx≉x = inner {F x} (X₀-closed x∈X₀) (x-acc _ (F-strContrOnOrbits x∈X₀ fx≉x))
 
   x* : S
-  x* = proj₁ (fixedPoint element)
+  x* = proj₁ (fixedPoint element∈X₀)
 
   Fx*≈x* : F x* ≈ x*
-  Fx*≈x* = proj₂ (fixedPoint element)
+  Fx*≈x* = proj₁ (proj₂ (fixedPoint element∈X₀))
 
+  x*∈X₀ : x* ∈ᵢ X₀
+  x*∈X₀ = proj₂ (proj₂ (fixedPoint element∈X₀))
+  
 -----------
 -- Boxes --
 -----------
--- Definition and properties of the subboxes B
+-- Definition and properties of the subboxes D
 
-B : ℕ → IPred Sᵢ 0ℓ
-B k i xᵢ = dᵢ (x* i) xᵢ ≤ r[ k ]
+D : ℕ → IPred Sᵢ p
+D k i xᵢ = (xᵢ ∈ X₀ i) × (dᵢ (x* i) xᵢ ≤ r[ k ])
 
-B₀-universal : ∀ i x → x ∈ B 0 i
-B₀-universal i x = dᵢ≤r[0] (x* i) x
-
-Bᵢ-cong : ∀ {k i} → (_∈ B k i) Respects _≈ᵢ_
-Bᵢ-cong {k} {i} {x} {y} x≈y x∈B = begin
+Dᵢ-cong : ∀ {k i} → (_∈ D k i) Respects _≈ᵢ_
+Dᵢ-cong {k} {i} {x} {y} x≈y (x∈X₀ , x≤r[k]) = X₀-cong x≈y x∈X₀ , (begin
   dᵢ (x* i) y ≡⟨ dᵢ-cong ≈ᵢ-refl (≈ᵢ-sym x≈y) ⟩
-  dᵢ (x* i) x ≤⟨ x∈B ⟩
-  r[ k ]      ∎
+  dᵢ (x* i) x ≤⟨ x≤r[k] ⟩
+  r[ k ]      ∎)
 
-B-finish : ∀ {k} → k* ≤ k → (x* ∈ᵢ B k × (∀ {x} → x ∈ᵢ B k → x ≈ x*))
-B-finish k*≤k = x*∈B[k] k*≤k , x∈B[k]⇒x*≈x k*≤k
+D-finish : ∀ {k} → k* ≤ k → (x* ∈ᵢ D k × (∀ {x} → x ∈ᵢ D k → x ≈ x*))
+D-finish k*≤k = x*∈D[k] k*≤k , x∈D[k]⇒x*≈x k*≤k
   where
-  x∈B[k]⇒x*≈x : ∀ {k} → k* ≤ k → ∀ {x} → x ∈ᵢ B k → x ≈ x*
-  x∈B[k]⇒x*≈x {zero}  k*≤0   {x} x∈B[k] i = dᵢ≡0⇒x≈y (n≤0⇒n≡0 (≤-trans (dᵢ≤k* (x i) _) k*≤0))
-  x∈B[k]⇒x*≈x {suc k} k*≤1+k {x} x∈B[k] i with x∈B[k] i
-  ... | xᵢ∈B = ≈ᵢ-sym (dᵢ≡0⇒x≈y (n≤0⇒n≡0 (begin
-    dᵢ (x* i) (x i)  ≤⟨ xᵢ∈B ⟩
+  x∈D[k]⇒x*≈x : ∀ {k} → k* ≤ k → ∀ {x} → x ∈ᵢ D k → x ≈ x*
+  x∈D[k]⇒x*≈x {zero}  k*≤0   {x} x∈D[k] i = dᵢ≡0⇒x≈y (n≤0⇒n≡0 (≤-trans (dᵢ≤k* (x i) _) k*≤0))
+  x∈D[k]⇒x*≈x {suc k} k*≤1+k {x} x∈D[k] i with x∈D[k] i
+  ... | _ , xᵢ∈D = ≈ᵢ-sym (dᵢ≡0⇒x≈y (n≤0⇒n≡0 (begin
+    dᵢ (x* i) (x i)  ≤⟨ xᵢ∈D ⟩
     r[ suc k ]       ≡⟨ k*≤k⇒r[k]≡0 k*≤1+k ⟩
     0                ∎)))
 
-  x*∈B[k] : ∀ {k} → k* ≤ k → x* ∈ᵢ B k
-  x*∈B[k] {k} k*≤k i = subst (_≤ r[ k ]) (sym (x≈y⇒dᵢ≡0 ≈ᵢ-refl)) z≤n
+  x*∈D[k] : ∀ {k} → k* ≤ k → x* ∈ᵢ D k
+  x*∈D[k] {k} k*≤k i = x*∈X₀ i , subst (_≤ r[ k ]) (sym (x≈y⇒dᵢ≡0 ≈ᵢ-refl)) z≤n
 
-∈B⇒d≤r : ∀ {k x} → x ∈ᵢ B k → d x* x ≤ r[ k ]
-∈B⇒d≤r {zero}  {x} x∈B = d≤r[0] x* x
-∈B⇒d≤r {suc k} {x} x∈B = max[t]≤x z≤n x∈B
+∈D⇒d≤r : ∀ {k x} → x ∈ᵢ D k → d x* x ≤ r[ k ]
+∈D⇒d≤r {zero}  {x} _ = d≤r[0] x* x
+∈D⇒d≤r {suc k} {x} x∈D = max[t]≤x z≤n (proj₂ ∘ x∈D)
 
-F-mono-B  : ∀ {k x} → x ∈ᵢ B k → F x ∈ᵢ B (suc k)
-F-mono-B {k} {x} x∈B i with x ≟ x*
-...   | yes x≈x* = begin
+F-resp-D₀ : ∀ {x} → x ∈ᵢ D 0 → F x ∈ᵢ D 0
+F-resp-D₀ x∈D₀ i = X₀-closed (proj₁ ∘ x∈D₀) i , dᵢ≤r[0] _ _
+
+F-mono-D  : ∀ {k x} → x ∈ᵢ D k → F x ∈ᵢ D (suc k)
+F-mono-D {k} {x} x∈D i with x ≟ x*
+...   | yes x≈x* = X₀-closed (proj₁ ∘ x∈D) i , (begin
   dᵢ (x* i) (F x  i)  ≡⟨ dᵢ-cong ≈ᵢ-refl (F-cong x≈x* i) ⟩
   dᵢ (x* i) (F x* i)  ≡⟨ dᵢ-cong ≈ᵢ-refl (Fx*≈x* i) ⟩
   dᵢ (x* i) (x*   i)  ≡⟨ x≈y⇒dᵢ≡0 ≈ᵢ-refl ⟩
   0                   ≤⟨ z≤n ⟩
-  r[ suc k ]          ∎
-...   | no  x≉x* = v<r[k]⇒v≤r[1+k] (begin
+  r[ suc k ]          ∎)
+...   | no  x≉x* = X₀-closed (proj₁ ∘ x∈D) i , (v<r[k]⇒v≤r[1+k] (begin
   dᵢ (x* i) (F x i) ≤⟨ dᵢ≤d x* (F x) ⟩
-  d x*   (F x)      <⟨ F-strContrOnFP Fx*≈x* x≉x* ⟩
-  d x*    x         ≤⟨ ∈B⇒d≤r x∈B ⟩
-  r[ k ]            ∎)
+  d x*   (F x)      <⟨ F-strContrOnFP Fx*≈x* (proj₁ ∘ x∈D) x≉x* ⟩
+  d x*    x         ≤⟨ ∈D⇒d≤r x∈D ⟩
+  r[ k ]            ∎))
+
+X₀⊆D₀ : X₀ ⊆ᵢ D 0
+X₀⊆D₀ x∈X₀ = x∈X₀ , dᵢ≤r[0] _ _
+
+D₀⊆X₀ : D 0 ⊆ᵢ X₀
+D₀⊆X₀ (x∈X₀ , _) = x∈X₀
+
+X₀≋D₀ : X₀ ≋ᵢ D 0
+X₀≋D₀ = X₀⊆D₀ , D₀⊆X₀
 
 ----------------------
 -- ACO construction --
 ----------------------
 
-aco : ACO I∥ 0ℓ
+aco : PartialACO I∥ X₀ p
 aco = record
-  { B            = B
-  ; Bᵢ-cong       = Bᵢ-cong
-  ; B₀-universal = B₀-universal
-  ; F-mono-B     = F-mono-B
+  { D            = D
+  ; Dᵢ-cong      = Dᵢ-cong
+  ; F-resp-D₀    = F-resp-D₀
+  ; F-mono-D     = F-mono-D
   ; x*           = x*
   ; k*           = k*
-  ; B-finish     = B-finish
+  ; D-finish     = D-finish
+  ; X₀≋D₀        = X₀≋D₀
   }

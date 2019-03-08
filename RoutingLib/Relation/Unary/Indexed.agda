@@ -50,18 +50,25 @@ subset A P Q = ∀ {x} → x ∈ᵢ P → x ∈ᵢ Q
 
 syntax subset A P Q = P ⊆ᵢ[ A ] Q
 
-
-_⊆ᵢ_ : ∀ {a p q} {Aᵢ : I → Set a} → REL (IPred Aᵢ p) (IPred Aᵢ q) _
-P ⊆ᵢ Q = ∀ {i} → P i ⊆ Q i
-
 ⊆-refl : ∀ {a p} (Aᵢ : I → Set a) → Reflexive (subset Aᵢ {p = p})
 ⊆-refl Aᵢ x i = x i
 
 ⊆-trans : ∀ {a p} (Aᵢ : I → Set a) → Transitive (subset Aᵢ {p = p})
 ⊆-trans Aᵢ x⊆y y⊆z i = y⊆z (x⊆y i)
 
+
+_⊆ᵢ_ : ∀ {a p q} {Aᵢ : I → Set a} → REL (IPred Aᵢ p) (IPred Aᵢ q) _
+P ⊆ᵢ Q = ∀ {i} → P i ⊆ Q i
+
+⊆ᵢ-refl : ∀ {a p} (Aᵢ : I → Set a) → Reflexive (_⊆ᵢ_ {p = p} {Aᵢ = Aᵢ})
+⊆ᵢ-refl Aᵢ xᵢ∈Pᵢ = xᵢ∈Pᵢ
+
+
 _≋ᵢ_ : ∀ {a p q} {Aᵢ : I → Set a} → REL (IPred Aᵢ p) (IPred Aᵢ q) _
 p ≋ᵢ q = p ⊆ᵢ q × q ⊆ᵢ p
+
+≋ᵢ-refl : ∀ {a p} {Aᵢ : I → Set a} → Reflexive (_≋ᵢ_ {p = p} {Aᵢ = Aᵢ})
+≋ᵢ-refl {Aᵢ = Aᵢ} {x = P} = ⊆ᵢ-refl Aᵢ {x = P} , ⊆ᵢ-refl Aᵢ {x = P}
 
 --------------------------------------------------------------------------------
 -- Properties
@@ -89,15 +96,15 @@ module _ {a} {Aᵢ : I → Set a} where
   _∩_ : ∀ {ℓ₁ ℓ₂} → IPred Aᵢ ℓ₁ → IPred Aᵢ ℓ₂ → IPred Aᵢ _
   (P ∩ Q) i = λ xᵢ → xᵢ ∈ P i × xᵢ ∈ Q i
   
-{-
-  ∁ : ∀ {ℓ} → IPred Aᵢ ℓ → IPred Aᵢ ℓ
-  ∁ P i = λ x → x ∉ᵢ P i
-
   infixr 6 _∪_
   _∪_ : ∀ {ℓ₁ ℓ₂} → IPred Aᵢ ℓ₁ → IPred Aᵢ ℓ₂ → IPred Aᵢ _
-  (P ∪ Q) i = λ x → x ∈ᵢ P ⊎ x ∈ᵢ Q
+  (P ∪ Q) i = λ xᵢ → xᵢ ∈ P i ⊎ xᵢ ∈ Q i
 
 
+{-
+
+  ∁ : ∀ {ℓ} → IPred Aᵢ ℓ → IPred Aᵢ ℓ
+  ∁ P i = λ x → x ∉ᵢ P i
 
   ⋃ : ∀ {ℓ j} (J : Set j) → (J → IPred Aᵢ ℓ) → IPred Aᵢ _
   ⋃ J P i = λ x → Σ[ j ∈ J ] P j i x

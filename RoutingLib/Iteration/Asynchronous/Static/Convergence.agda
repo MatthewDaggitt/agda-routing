@@ -7,9 +7,9 @@
 module RoutingLib.Iteration.Asynchronous.Static.Convergence where
 
 open import Data.Fin.Subset using (Subset)
+open import Data.Product using (_,_)
 open import Data.Unit using (tt)
-open import Level using () renaming (zero to 0ℓ)
-open import Relation.Unary using (Pred; U)
+open import Level using (0ℓ)
 
 open import RoutingLib.Relation.Unary.Indexed using (IPred; Uᵢ; _∈ᵢ_)
 open import RoutingLib.Function.Reasoning
@@ -21,6 +21,8 @@ import RoutingLib.Iteration.Asynchronous.Static.Convergence.ACOImpliesConverges
   as ACOImpliesConverges
 import RoutingLib.Iteration.Asynchronous.Static.Convergence.AMCOImpliesACO
   as AMCOImpliesACO
+import RoutingLib.Iteration.Asynchronous.Static.Convergence.SyncImpliesACO
+  as SyncImpliesACO
 
 ------------------------------------------------------------------------
 -- Export convergence conditions publically
@@ -63,13 +65,44 @@ module _ {a ℓ n} {I∥ : AsyncIterable a ℓ n} where
 
 module _ {a ℓ n} {I∥ : AsyncIterable a ℓ n} where
 
-  open AsyncIterable I∥
+  AMCO⇒ACO-partial : ∀ {p} {X₀ : IPred _ p} → PartialAMCO I∥ X₀ → PartialACO I∥ X₀ p
+  AMCO⇒ACO-partial = AMCOImpliesACO.aco
+
+  AMCO⇒converges-partial : ∀ {p} {X₀ : IPred _ p} → PartialAMCO I∥ X₀ → PartiallyConverges I∥ X₀
+  AMCO⇒converges-partial amco = ACO⇒converges-partial (AMCO⇒ACO-partial amco)
   
   AMCO⇒ACO : AMCO I∥ → ACO I∥ 0ℓ
-  AMCO⇒ACO = AMCOImpliesACO.aco
-
+  AMCO⇒ACO = begin⟨_⟩
+    ∴ AMCO        I∥       $⟨ AMCO⇒partialAMCO I∥ ⟩
+    ∴ PartialAMCO I∥ Uᵢ    $⟨ AMCO⇒ACO-partial ⟩
+    ∴ PartialACO  I∥ Uᵢ 0ℓ $⟨ partialACO⇒ACO′ I∥ ⟩
+    ∴ ACO         I∥ 0ℓ    ∎
+  
   AMCO⇒converges : AMCO I∥ → Converges I∥
-  AMCO⇒converges amco = begin⟨ amco ⟩
-    ∴ AMCO       I∥    $⟨ AMCO⇒ACO ⟩
-    ∴ ACO        I∥ 0ℓ $⟨ ACO⇒converges ⟩
-    ∴ Converges  I∥    ∎
+  AMCO⇒converges amco = ACO⇒converges (AMCO⇒ACO amco)
+
+------------------------------------------------------------------------
+-- Synchronous conditions
+
+module _ {a ℓ n} {I∥ : AsyncIterable a ℓ n} where
+
+  open AsyncIterable I∥
+  
+  sync⇒converges-partial : ∀ {b c} {X₀ : IPred Sᵢ b} →
+                           PartialSynchronousConditions I∥ X₀ c →
+                           PartiallyConverges I∥ X₀
+  sync⇒converges-partial sync = record
+    { x*         = Sync.x*
+    ; k*         = Sync.k*
+    ; x*-fixed   = Sync.x*-fixed
+    ; x*-reached = λ x∈X₀ → PartiallyConverges.x*-reached (ACO⇒converges-partial (SyncProofs.aco x∈X₀)) (SyncProofs.y∈B₀ x∈X₀)
+    } where
+    module Sync       = PartialSynchronousConditions sync
+    module SyncProofs = SyncImpliesACO I∥ sync
+  
+  sync⇒converges : ∀ {ℓ} → SynchronousConditions I∥ ℓ → Converges I∥
+  sync⇒converges {ℓ} = begin⟨_⟩
+    ∴ SynchronousConditions         I∥ ℓ    $⟨ sync⇒partialSync I∥ ⟩
+    ∴ PartialSynchronousConditions  I∥ Uᵢ ℓ $⟨ sync⇒converges-partial ⟩
+    ∴ PartiallyConverges            I∥ Uᵢ   $⟨ partiallyConverges⇒converges′ I∥ ⟩
+    ∴ Converges                     I∥      ∎

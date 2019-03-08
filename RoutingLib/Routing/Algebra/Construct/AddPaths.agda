@@ -25,7 +25,7 @@ open import Function using (_∘_)
 open import Relation.Binary
 open import Data.Product
 open import Relation.Binary.PropositionalEquality
---open import Relation.Binary.EqReasoning S
+import Relation.Binary.EqReasoning as EqReasoning
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
@@ -37,7 +37,7 @@ open import RoutingLib.Function
 open import RoutingLib.Relation.Nullary.Construct.Add.Point
   renaming (∙ to invalid; [_] to valid)
 open import RoutingLib.Relation.Binary.Construct.Add.Point.Equality as PointedEq
-  renaming (_≈∙_ to PointedEq) using (∙≈∙; [_];[≈]-injective)
+  renaming (_≈∙_ to PointedEq) using (∙≈∙; [_];[≈]-injective;≈∙-refl; ≈∙-sym)
 open import RoutingLib.Data.Path.Uncertified renaming (_∈ₚ_ to _∈ᴱ_; _∉ₚ_ to _∉̂ᴱ_; Path to EPath; _⇿_ to _⇿ᴱ_)
 open import RoutingLib.Data.Path.Uncertified.Choice
 open import RoutingLib.Data.Path.Uncertified.Properties 
@@ -56,14 +56,6 @@ private
 ------------------------------------------------------------------------
 -- Definition
 
--- some of this could be more general and moved to Lex file.
-G : Route  → Route  → EPath  → EPath → EPath
-G x y p q = {!!} 
---  with (x ⊕ y) ≟ x | (x ⊕ y) ≟ y
---  ... | yes _ | no  _ = p
---  ... | no  _ | yes _ = q
---  ... | _     | _     = p ⊓ₗₑₓ q
-
 
 
 infix 4 _≈⁺_ _≉⁺_
@@ -78,6 +70,13 @@ Step⁺ i j = Step i j
 
 _≈⁺_ : Rel Route⁺ ℓ
 _≈⁺_ = PointedEq (Pointwise _≈_ _≡_)
+
+≈⁺-refl : Reflexive _≈⁺_
+≈⁺-refl = ≈∙-refl (Pointwise _≈_ _≡_) ( Pointwise.×-refl {_∼₁_ = _≈_} {_∼₂_ = _≡_} ≈-refl  refl ) 
+
+
+≈⁺-sym : Symmetric _≈⁺_
+≈⁺-sym = ≈∙-sym (Pointwise _≈_ _≡_) ( Pointwise.×-symmetric {_∼₁_ = _≈_} {_∼₂_ = _≡_} ≈-sym sym ) 
 
 _≉⁺_ : Rel Route⁺ ℓ
 x ≉⁺ y = ¬ (x ≈⁺ y)
@@ -102,6 +101,10 @@ _▷⁺_ {_} {i} {j} f (valid (x , p))
 
 f∞⁺ : ∀ {n} (i j : Fin n) → Step i j
 f∞⁺ = f∞
+
+≈⁺-isEquivalence : IsEquivalence _≈⁺_
+≈⁺-isEquivalence = PointedEq.≈∙-isEquivalence (Pointwise _≈_ _≡_)
+  (Pointwise.×-isEquivalence ≈-isEquivalence isEquivalence)
 
 
 ≈⁺-isDecEquivalence : IsDecEquivalence _≈⁺_
@@ -146,6 +149,8 @@ AddPaths = record
   ; f∞-reject          = f∞⁺-reject
   }
 
+open RawRoutingAlgebra AddPaths using ()
+  renaming ( ≤₊-respˡ-≈ to  ≤₊⁺-respˡ-≈⁺; ≤₊-respʳ-≈ to  ≤₊⁺-respʳ-≈⁺)
 
 --------------------------------------------------------------------------------
 -- Adding paths preserves the required properties of a routing algebra
@@ -182,14 +187,68 @@ isRoutingAlgebra A-isRoutingAlgebra = record
 --------------------------------------------------------------------------------
 -- Other properties
 
+
+-- some of this could be more general and moved to Lex file.
+G : Route  → Route  → EPath  → EPath → EPath
+G x y p q with (x ⊕ y) ≟ x | (x ⊕ y) ≟ y
+... | yes _ | no  _ = p
+... | no  _ | yes _ = q
+... | _     | _     = p ⊓ₗₑₓ q
+
+private
+  _≈ₓ_ : Rel (Route × EPath) _
+  _≈ₓ_ = (Pointwise _≈_ _≡_)
+  _⊕ₗ_   = (Lex _≟_ _⊕_ _⊓ₗₑₓ_)
+
+-- G (bad name) allows us to reason equationally rather than using case analysis .. 
+Lex-G : ∀ {x y p q} → ((x , p) ⊕ₗ (y , q)) ≈ₓ (x ⊕ y , G x y p q)
+Lex-G {x} {y} {p} {q} with  x ⊕ y ≟ x | x ⊕ y ≟ y
+Lex-G {x} {y} {p} {q} | yes p₁ | yes p₂ = ≈-refl , refl
+Lex-G {x} {y} {p} {q} | yes p₁ | no ¬p = (≈-sym p₁) ,  refl
+Lex-G {x} {y} {p} {q} | no ¬p | yes p₁ = (≈-sym p₁) ,  refl
+Lex-G {x} {y} {p} {q} | no ¬p | no ¬p₁ = ≈-refl , refl
+
+Lex-G⁺ : ∀ x y p q → (valid (x , p)) ⊕⁺ (valid (y , q)) ≈⁺ valid (x ⊕ y , G x y p q)
+Lex-G⁺ x y p q =  [  Lex-G  ]
+
+Lex-G-∉̂ᴱ : ∀ {n} {i : Fin n} x y p q (i∉p : toℕ i ∉̂ᴱ p) (i∉q : toℕ i ∉̂ᴱ q) → toℕ i ∉̂ᴱ (G x y p q)
+Lex-G-∉̂ᴱ {n} {i} x y p q i∉p i∉q with x ⊕ y ≟ x  | x ⊕ y ≟ y | ⊓ₗₑₓ-sel p q
+... | yes _ | yes _ | inj₁ x₁ = ∉ₚ-resp-≈ₚ (sym x₁) i∉p
+... | yes _ | yes _ | inj₂ y₁ = ∉ₚ-resp-≈ₚ (sym y₁) i∉q
+... | yes _ | no _  | _ = i∉p
+... | no _  | yes _ | _ = i∉q
+... | no _  | no _  | inj₁ x₁ = ∉ₚ-resp-≈ₚ (sym x₁) i∉p
+... | no _  | no _  | inj₂ y₁ = ∉ₚ-resp-≈ₚ (sym y₁) i∉q
+
+
+Lex-G-dist : ∀ {n} {i j : Fin n} x y p q →  (toℕ i , toℕ j) ∷ (G x y p q) ≡ (G x y ((toℕ i , toℕ j) ∷ p) ((toℕ i , toℕ j) ∷ q)) 
+Lex-G-dist {n} {i} {j} x y p q with x ⊕ y ≟ x  | x ⊕ y ≟ y 
+... | yes _ | yes _ = ∷-distrib-⊓ₗₑₓ (toℕ i , toℕ j) p q 
+... | yes _ | no _  = refl 
+... | no _  | yes _ = refl 
+... | no _  | no _  = ∷-distrib-⊓ₗₑₓ (toℕ i , toℕ j) p q 
+
+
+
 eql : ∀ {x} {y} {r} {s} → ((valid (x , r)) ⊕⁺ (valid (y , s))) ≈⁺ (valid (x , r)) → (x ⊕ y) ≈ x
-eql = {!!} 
+eql {x} {y} {r} {s} h with  x ⊕ y ≟ x | x ⊕ y ≟ y
+eql {x} {y} {r} {s} h | yes p | _ = p
+eql {x} {y} {r} {s} h | no _  | yes p = ≈-trans p (proj₁ ([≈]-injective _ h))
+eql {x} {y} {r} {s} h | no ¬p | no ¬p₁ = contradiction (proj₁ ([≈]-injective _ h)) ¬p 
 
 eqr : ∀ {x} {y} {r} {s} → ((valid (x , r)) ⊕⁺ (valid (y , s))) ≈⁺ (valid (y , s)) → (x ⊕ y) ≈ y 
-eqr = {!!}
+eqr {x} {y} {r} {s} h with  x ⊕ y ≟ x | x ⊕ y ≟ y
+eqr {x} {y} {r} {s} h | _ | yes p  = p
+eqr {x} {y} {r} {s} h | yes p | no _ = ≈-trans p (proj₁ ([≈]-injective _ h))
+eqr {x} {y} {r} {s} h | no ¬p | no ¬p₁ = contradiction (proj₁ ([≈]-injective _ h)) ¬p₁
 
-▷⁺-valid : ∀ {n} {i j : Fin n} (f : Step i j) x p (i∉p : toℕ i ∉̂ᴱ p) → (f ▷⁺ (valid (x , p))) ≈⁺ valid (f ▷ x , (toℕ i , toℕ j) ∷ p)
-▷⁺-valid = {!!}
+▷⁺-valid : ∀ {n} {i j : Fin n} (f : Step i j) x p (i∉p : toℕ i ∉̂ᴱ p) → ((toℕ i , toℕ j) ⇿ᵥ p) → (f ▷ x ≉ ∞#) → (f ▷⁺ (valid (x , p))) ≈⁺ valid (f ▷ x , (toℕ i , toℕ j) ∷ p) 
+▷⁺-valid {n} {i} {j} f x p i∉p ij⇿p fx≉∞ with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p | f ▷ x ≟ ∞#
+... | no  ¬ij⇿p | _     | _         = contradiction ij⇿p ¬ij⇿p 
+... | yes _ | yes i∈p | _       = contradiction i∈p i∉p
+... | yes _ | no  _ | yes f▷x≈∞ = contradiction f▷x≈∞ fx≉∞
+... | yes _ | no  _ | no  f▷x≉∞ = ≈⁺-refl 
+
 
 
 ▷⁺-reject : ∀ {n} {i j : Fin n} (f : Step i j) x p → f ▷ x ≈ ∞# → f ▷⁺ (valid (x , p)) ≈⁺ ∞#⁺
@@ -205,8 +264,9 @@ eqr = {!!}
 ▷⁺-accept {_} {i} {j} f x p ij⇿p i∉p f▷x≉∞ with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p | f ▷ x ≟ ∞#
 ... | no ¬ij⇿p | _       | _         = contradiction ij⇿p ¬ij⇿p
 ... | yes _    | yes i∈p | _         = contradiction i∈p i∉p
-... | yes _    | no  xxx   | yes f▷x≈∞ = contradiction f▷x≈∞ f▷x≉∞
+... | yes _    | no  _   | yes f▷x≈∞ = contradiction f▷x≈∞ f▷x≉∞
 ... | yes _    | no  _   | no  _     = [ ≈-refl , refl ]
+
 
 --------------------------------------------------------------------------------
 -- The resulting algebra is a path algebra
@@ -268,6 +328,74 @@ isPathAlgebra = record
 
 open PathDistributivity isPathAlgebra
 
+{-
+
+  IsLevel_PathDistributiveIn[_,_] : ℕ → Route → Route → Set _
+  IsLevel 0       PathDistributiveIn[ ⊥ , ⊤ ] =
+    ∀ {n} {i j : Fin n} (f : Step i j) →
+    ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
+    toℕ i ∉ₚ path x → toℕ i ∉ₚ path y →
+    (toℕ i , toℕ j) ⇿ path x → (toℕ i , toℕ j) ⇿ path y →
+    f ▷ (x ⊕ y) ≈ (f ▷ x) ⊕ (f ▷ y) 
+
+  IsLevel (suc k) PathDistributiveIn[ ⊥ , ⊤ ] =
+    ∀ {n} {i j : Fin n} (f : Step i j) 
+    ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
+    toℕ i ∉ₚ path x → toℕ i ∉ₚ path y →
+    IsLevel k PathDistributiveIn[ f ▷ (x ⊕ y) , (f ▷ x) ⊕ (f ▷ y) ]
+
+-}
+
+
+cong-path-distrib : ∀ a b c d → a ≈⁺ c → b ≈⁺ d → ∀ k → IsLevel k PathDistributiveIn[ a , b ] → IsLevel k PathDistributiveIn[ c , d ]
+
+cong-path-distrib a b c d a≈⁺c b≈⁺d zero dis[a,b] {n} {i} {j} f {x} {y} c≤₊x x≤₊d c≤₊y y≤₊d i∉ₚpathx i∉ₚpathy  ij⇿pathx ij⇿pathy =  cnc
+  where
+  cnc : f ▷⁺ (x ⊕⁺ y) ≈⁺  (f ▷⁺ x) ⊕⁺ (f ▷⁺ y)
+  cnc =  dis[a,b] {n} {i} {j} f {x} {y}
+    (≤₊⁺-respˡ-≈⁺ {x} (≈⁺-sym a≈⁺c) c≤₊x)
+    (≤₊⁺-respʳ-≈⁺ (≈⁺-sym b≈⁺d) x≤₊d)
+    (≤₊⁺-respˡ-≈⁺ {y}  (≈⁺-sym a≈⁺c) c≤₊y)
+    (≤₊⁺-respʳ-≈⁺ (≈⁺-sym b≈⁺d) y≤₊d)
+    i∉ₚpathx  i∉ₚpathy  ij⇿pathx ij⇿pathy 
+  
+cong-path-distrib a b c d a≈⁺c b≈⁺d (suc k) dis[a,b] {n} {i} {j} f {x} {y} c≤₊x x≤₊d c≤₊y y≤₊d i∉ₚpathx i∉ₚpathy  =  cnc
+  where
+  cnc : IsLevel k PathDistributiveIn[ f ▷⁺ (x ⊕⁺ y) ,  (f ▷⁺ x) ⊕⁺ (f ▷⁺ y)  ]
+  cnc =  dis[a,b] {n} {i} {j} f {x} {y}
+    (≤₊⁺-respˡ-≈⁺ {x} (≈⁺-sym a≈⁺c) c≤₊x)
+    (≤₊⁺-respʳ-≈⁺ (≈⁺-sym b≈⁺d) x≤₊d)
+    (≤₊⁺-respˡ-≈⁺ {y}  (≈⁺-sym a≈⁺c) c≤₊y)
+    (≤₊⁺-respʳ-≈⁺ (≈⁺-sym b≈⁺d) y≤₊d)
+    i∉ₚpathx  i∉ₚpathy
+
+  
+{-  
+cong-path-constant : ∀ k a b → a ≈⁺ b  → IsLevel k PathDistributiveIn[ a , b ]
+
+cong-path-constant zero a b a≈⁺b {n} {i} {j} f {x} {y} a≤₊x x≤₊a b≤₊y y≤₊b i∉ₚpathx i∉ₚpathy  ij⇿pathx ij⇿pathy =  cnc
+  where 
+  cnc : f ▷⁺ (x ⊕⁺ y) ≈⁺  (f ▷⁺ x) ⊕⁺ (f ▷⁺ y)
+  cnc = {!!}
+  
+cong-path-constant (suc k) a b a≈⁺b {n} {i} {j} f {x} {y} a≤₊x x≤₊a b≤₊y y≤₊b i∉ₚpathx i∉ₚpathy  =  cnc
+  where
+  x≈⁺a : x ≈⁺ a
+  x≈⁺a = {!!} 
+
+  y≈⁺b : y ≈⁺ b
+  y≈⁺b = {!!} 
+
+  x≈⁺y : x ≈⁺ y
+  x≈⁺y = {!!}
+
+  tst : f ▷⁺ (x ⊕⁺ y) ≈⁺ ((f ▷⁺ x) ⊕⁺ (f ▷⁺ y))  
+  tst = {!!}  --- need idempotence, eq-reasoning over ≈⁺
+  
+  cnc : IsLevel k PathDistributiveIn[ f ▷⁺ (x ⊕⁺ y) ,  (f ▷⁺ x) ⊕⁺ (f ▷⁺ y)  ]
+  cnc =   cong-path-constant k (f ▷⁺ (x ⊕⁺ y)) ((f ▷⁺ x) ⊕⁺ (f ▷⁺ y))  tst   
+  
+
 
 
 module _ (⊕-sel : Selective _≈_ _⊕_) (⊕-identityˡ : LeftIdentity _≈_ ∞# _⊕_) where
@@ -316,33 +444,14 @@ module _ (⊕-sel : Selective _≈_ _⊕_) (⊕-identityˡ : LeftIdentity _≈_ 
   -- needed? 
   path⁺-valid : ∀ {p x}  → path⁺ (valid (x , p)) ≡ valid p
   path⁺-valid = refl
-
-  private
-    _≈ₓ_ : Rel (Route × EPath) _
-    _≈ₓ_ = (Pointwise _≈_ _≡_)
-    _⊕ₗ_   = (Lex _≟_ _⊕_ _⊓ₗₑₓ_)
-
-  -- G (bad name) allows us to reason equationally rather than using case analysis .. 
-  Lex-G : ∀ {x y p q} → ((x , p) ⊕ₗ (y , q)) ≈ₓ (x ⊕ y , G x y p q)
-  Lex-G = {! !}
-
-  Lex-G⁺ : ∀ x y p q → (valid (x , p)) ⊕⁺ (valid (y , q)) ≈⁺ valid (x ⊕ y , G x y p q)
-  Lex-G⁺ = {!!}
-
-  Lex-G-∉̂ᴱ : ∀ {n} {i : Fin n} x y p q (i∉p : toℕ i ∉̂ᴱ p) (i∉q : toℕ i ∉̂ᴱ q) → toℕ i ∉̂ᴱ (G x y p q)
-  Lex-G-∉̂ᴱ = {!!}
-
-  Lex-G-dist : ∀ {n} {i j : Fin n} x y p q →  (toℕ i , toℕ j) ∷ (G x y p p) ≡ (G x y ((toℕ i , toℕ j) ∷ p) ((toℕ i , toℕ j) ∷ q)) 
-  Lex-G-dist = {!!} 
-
   
   ∉ₚto∉̂ᴱ : ∀ {n x p} {i : Fin n}  → (toℕ i) ∉ₚ (path⁺ (valid (x , p))) → toℕ i ∉̂ᴱ p
   ∉ₚto∉̂ᴱ i∉ₚ = λ z → i∉ₚ (valid z) 
 
   pres-distrib : ∀ {k ⊤ ⊥} → Level_DistributiveIn[_,_] A k ⊥ ⊤ →
                  ∀ p q → IsLevel_PathDistributiveIn[_,_] k (valid (⊥ , p)) (valid (⊤ , q))
-  pres-distrib {zero} {⊤} {⊥} dist p q {_} {i} {j} f {invalid}       {invalid}       ⊥≤x x≤⊤ ⊥≤y y≤⊤ _ _ _ _    = ∙≈∙
-  pres-distrib {zero} {⊤} {⊥} dist p q {_} {i} {j} f {valid (x , r)} {invalid}       ⊥≤x x≤⊤ ⊥≤y y≤⊤ _ _ _ _
+  pres-distrib {zero} {⊤} {⊥} dist p q {n} {i} {j} f {invalid}       {invalid}       ⊥≤x x≤⊤ ⊥≤y y≤⊤ _ _ _ _    = ∙≈∙
+  pres-distrib {zero} {⊤} {⊥} dist p q {n} {i} {j} f {valid (x , r)} {invalid}       ⊥≤x x≤⊤ ⊥≤y y≤⊤ _ _ _ _
     with (toℕ i , toℕ j) ⇿? r  | toℕ i ∈ₚ? r | f ▷ x ≟ ∞#
   ... | no  _    | _       | _           = ∙≈∙
   ... | yes _    | yes _   | _           = ∙≈∙
@@ -354,7 +463,7 @@ module _ (⊕-sel : Selective _≈_ _⊕_) (⊕-identityˡ : LeftIdentity _≈_ 
   ... | yes _    | yes _   | _           = ∙≈∙
   ... | yes _    | no  _   | yes _       = ∙≈∙
   ... | yes ij⇿p | no  i∉p | no  f∞▷x≉∞  = [ ≈-refl , refl ]
-  pres-distrib {zero} {⊤} {⊥} dist p q {_} {i} {j} f {valid (x , r)} {valid (y , s)} ⊥≤x x≤⊤ ⊥≤y y≤⊤ i∉r i∉s (just ij⇿r) (just ij⇿s) =  cnc
+  pres-distrib {zero} {⊤} {⊥} dist p q {n} {i} {j} f {valid (x , r)} {valid (y , s)} ⊥≤x x≤⊤ ⊥≤y y≤⊤ i∉r i∉s (just ij⇿r) (just ij⇿s) =  cnc
      where
      
      dst : f ▷ (x ⊕ y) ≈ (f ▷ x) ⊕ (f ▷ y)
@@ -369,48 +478,52 @@ module _ (⊕-sel : Selective _≈_ _⊕_) (⊕-identityˡ : LeftIdentity _≈_ 
      lm_b =  ▷⁺-valid f y s (∉ₚto∉̂ᴱ {_} {x} {s} {i} i∉s)
 
      cnc : f ▷⁺ ((valid (x , r)) ⊕⁺ (valid (y , s))) ≈⁺ ((f ▷⁺ (valid (x , r))) ⊕⁺ (f ▷⁺ (valid (y , s))))
-     cnc =  {!!}
+     cnc = begin 
+           f ▷⁺ ((valid (x , r)) ⊕⁺ (valid (y , s)))                                              ≈⟨  ▷⁺-cong f ((Lex-G⁺ x y r s)) ⟩
+           f ▷⁺ (valid (x ⊕ y , G x y r s))                                                       ≈⟨  ▷⁺-valid f _ _ (Lex-G-∉̂ᴱ  x  y  r s ( (∉ₚto∉̂ᴱ {n} {x} {r} {i} i∉r) ) ( (∉ₚto∉̂ᴱ {n} {y}  {s} {i} i∉s)))  ⟩ 
+           valid (f ▷ (x ⊕ y) , (toℕ i , toℕ j)  ∷  (G x y r s))                               ≈⟨ {!!} ⟩ -- cong and dst
+           valid ((f ▷ x) ⊕ (f ▷ y) , (toℕ i , toℕ j) ∷ (G x y r s))                           ≈⟨ {!!} ⟩ -- cong and Lex-G-dist
+           valid ((f ▷ x) ⊕ (f ▷ y) ,  (G x y ((toℕ i , toℕ j) ∷ r) ((toℕ i , toℕ j) ∷ s))) ≈⟨ {!!} ⟩ -- cong, sym, and Lex-G⁺
+           valid (f ▷ x , (toℕ i , toℕ j) ∷ r) ⊕⁺ valid (f ▷ y , (toℕ i , toℕ j) ∷ s)       ≈⟨ ⊕⁺-cong (≈⁺-sym (▷⁺-valid f x r  (∉ₚto∉̂ᴱ {n} {x} {r} {i} i∉r)))  ≈⁺-refl  ⟩
+           (f ▷⁺ (valid (x , r))) ⊕⁺ valid (f ▷ y , (toℕ i , toℕ j) ∷ s)                        ≈⟨ ⊕⁺-cong  ≈⁺-refl (≈⁺-sym (▷⁺-valid f y s  ( (∉ₚto∉̂ᴱ {n} {y} {s} {i} i∉s)))) ⟩
+           (f ▷⁺ (valid (x , r))) ⊕⁺ (f ▷⁺ (valid (y , s)))                                     ∎
+           where open EqReasoning (record { isEquivalence = ≈⁺-isEquivalence })  -- HERE 
 
-{- Here is what I want to do, but need to do this reasoning with ≈⁺ ... 
-
-                begin 
-                f ▷⁺ ((valid (x , r)) ⊕⁺ (valid (y , s)))                                             ≈⟨ ? ⟩ -- cong and Lex-G⁺
-                f ▷⁺ (valid (x ⊕ y , G(x, y, r, s))                                                   ≈⟨ ? ⟩ -- Lex-G-∉̂ᴱ and ▷⁺-valid 
-                (valid (f ▷ (x ⊕ y) , (toℕ i , toℕ j) :: G(x, y, r, s))                             ≈⟨ ? ⟩ -- cong and dst
-                (valid ((f ▷ x) ⊕ (f ▷ y) , (toℕ i , toℕ j) :: G(x, y, r, s))                       ≈⟨ ? ⟩ -- cong and Lex-G-dist
-                (valid ((f ▷ x) ⊕ (f ▷ y) ,  G(x, y, (toℕ i , toℕ j) :: r, (toℕ i , toℕ j) :: s)) ≈⟨ ? ⟩ -- sym and Lex-G⁺ 
-                valid (f ▷ x , (toℕ i , toℕ j) ::r) ⊕⁺ valid (f ▷ y , (toℕ i , toℕ j) :: s)       ≈⟨ ? ⟩ -- ▷⁺-valid twice, with cong
-                ((f ▷⁺ (valid (x , r))) ⊕⁺ (f ▷⁺ (valid (y , s))))                                    ∎
-              
--}
   pres-distrib {suc k} {⊤} {⊥} dist p q {_} {i} {j} f {invalid}       {invalid}       ⊥≤x x≤⊤ ⊥≤y y≤⊤ _ _     = cnc
     where
 --  cnc : IsLevel k PathDistributiveIn[ f ▷⁺ (invalid ⊕⁺ invalid) , (f ▷⁺ invalid) ⊕⁺ (f ▷⁺ invalid) ]
     cnc : IsLevel k PathDistributiveIn[ invalid , invalid ]
-    cnc = {!!}
+    cnc = cong-path-constant k invalid invalid  ≈⁺-refl 
     
   pres-distrib {suc k} {⊤} {⊥} dist p q {_} {i} {j} f {valid (x , r)} {invalid}       ⊥≤x x≤⊤ ⊥≤y y≤⊤ i∉r _ = cnc 
     where
 
-    tst : IsLevel k PathDistributiveIn[ f ▷⁺ (valid (x , r)) , f ▷⁺ (valid (x , r))]        
-    tst  = {!!} 
+    tst : f ▷⁺ ((valid (x , r)) ⊕⁺ invalid) ≈⁺ (f ▷⁺ (valid (x , r))) ⊕⁺ (f ▷⁺ invalid)
+    tst  = begin
+           f ▷⁺ ((valid (x , r)) ⊕⁺ invalid)      ≈⟨   ▷⁺-cong f ( ⊕⁺-cong  ≈⁺-refl  {!!})  ⟩
+           (f ▷⁺ (valid (x , r))) ⊕⁺ (f ▷⁺ invalid) ∎
+           where open EqReasoning (record { isEquivalence = ≈⁺-isEquivalence })
+           
 
     cnc : IsLevel k PathDistributiveIn[ f ▷⁺ ((valid (x , r)) ⊕⁺ invalid) , (f ▷⁺ (valid (x , r))) ⊕⁺ (f ▷⁺ invalid) ]
-    cnc = {!!} 
+    cnc = cong-path-constant k _ _ tst
 
   pres-distrib {suc k} {⊤} {⊥} dist p q {_} {i} {j} f {invalid} {valid (y , s)}        ⊥≤x x≤⊤ ⊥≤y y≤⊤ _ i∉s = cnc 
     where
 
-    tst : IsLevel k PathDistributiveIn[ f ▷⁺ (valid (y , s)) , f ▷⁺ (valid (y , s)) ]
-    tst = {!!}
+    tst : f ▷⁺ (invalid ⊕⁺ (valid (y , s)) ) ≈⁺ (f ▷⁺ invalid) ⊕⁺ (f ▷⁺ (valid (y , s)))
+    tst = begin
+           f ▷⁺ (invalid ⊕⁺ (valid (y , s)) )      ≈⟨   {!!}  ⟩
+           f ▷⁺ (valid (y , s))                    ≈⟨   {!!}  ⟩
+           invalid ⊕⁺ (f ▷⁺ (valid (y , s)))       ≈⟨   {!!}  ⟩                     
+           (f ▷⁺ invalid) ⊕⁺ (f ▷⁺ (valid (y , s))) ∎
+           where open EqReasoning (record { isEquivalence = ≈⁺-isEquivalence })
     
     cnc : IsLevel k PathDistributiveIn[ f ▷⁺ (invalid ⊕⁺ (valid (y , s)) ) , (f ▷⁺ invalid) ⊕⁺ (f ▷⁺ (valid (y , s))) ]    
-    cnc = {!!}
+    cnc = cong-path-constant k _ _ tst
     
   pres-distrib {suc k} {⊤} {⊥} dist p q {_} {i} {j} f {valid (x , r)} {valid (y , s)}       ⊥≤x x≤⊤ ⊥≤y y≤⊤ i∉r i∉s = cnc 
     where
-
-
     dst : Level_DistributiveIn[_,_] A k (f ▷ (x ⊕ y)) ((f ▷ x) ⊕ (f ▷ y)) 
     dst = dist f (eqr ⊥≤x) (eqr x≤⊤)  (eqr ⊥≤y) (eqr y≤⊤)
 
@@ -420,7 +533,16 @@ module _ (⊕-sel : Selective _≈_ _⊕_) (⊕-identityˡ : LeftIdentity _≈_ 
     tst = pres-distrib {k} {((f ▷ x) ⊕ (f ▷ y)) }
                        {(f ▷ (x ⊕ y))} dst
                        ((toℕ i , toℕ j) ∷ (G x y r s))
-                       (G x y ((toℕ i , toℕ j) ∷ r) ((toℕ i , toℕ j) ∷ s)) 
+                       (G x y ((toℕ i , toℕ j) ∷ r) ((toℕ i , toℕ j) ∷ s))
+
+    eq1 : valid ( f ▷ (x ⊕ y) , (toℕ i , toℕ j) ∷ (G x y r s))  ≈⁺ f ▷⁺ ((valid (x , r)) ⊕⁺ (valid (y , s)) ) 
+    eq1 = {!!}
+
+    eq2 : valid ( ((f ▷ x) ⊕ (f ▷ y)) , G x y ((toℕ i , toℕ j) ∷ r) ((toℕ i , toℕ j) ∷ s) )
+          ≈⁺
+          (f ▷⁺ (valid (x , r))) ⊕⁺ (f ▷⁺ (valid (y , s)))
+    eq2 = {!!} 
 
     cnc : IsLevel k PathDistributiveIn[ f ▷⁺ ((valid (x , r)) ⊕⁺ (valid (y , s)) ) , (f ▷⁺ (valid (x , r))) ⊕⁺ (f ▷⁺ (valid (y , s))) ]    
-    cnc = {!  !} 
+    cnc =  cong-path-distrib _ _ _ _ eq1 eq2 k tst  
+-}

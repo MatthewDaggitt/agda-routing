@@ -78,18 +78,6 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
     f∞-reject          : ∀ {n} (i j : Fin n) x → f∞ i j ▷ x ≈ ∞#
 
 
-  -- Publicly re-export some useful terminology
-  open RightNaturalOrder _≈_ _⊕_ public using () renaming ( _≤_ to _≤₊_ )
-  open NonStrictToStrict _≈_ _≤₊_ public using () renaming ( _<_ to _<₊_)
-
-  infix 4 _≉_
-  _≉_ : Rel Route ℓ
-  x ≉ y = ¬ (x ≈ y)
-
-  infix 4 _≰₊_
-  _≰₊_ : Rel Route ℓ
-  x ≰₊ y = ¬ (x ≤₊ y)
-
   -- Publicly export equality proofs
   open IsDecEquivalence ≈-isDecEquivalence public
     renaming
@@ -105,6 +93,25 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
 
   DS : DecSetoid _ ℓ
   DS = record { isDecEquivalence = ≈-isDecEquivalence }
+
+  -- Publicly re-export some useful terminology
+  open RightNaturalOrder _≈_ _⊕_ public using () renaming ( _≤_ to _≤₊_ )
+  open NonStrictToStrict _≈_ _≤₊_ public using () renaming ( _<_ to _<₊_)
+
+
+  infix 4 _≉_
+  _≉_ : Rel Route ℓ
+  x ≉ y = ¬ (x ≈ y)
+
+  infix 4 _≰₊_
+  _≰₊_ : Rel Route ℓ
+  x ≰₊ y = ¬ (x ≤₊ y)
+
+  ≤₊-respʳ-≈ : _≤₊_ Respectsʳ _≈_
+  ≤₊-respʳ-≈ = RightNaturalOrder.respʳ _≈_  _⊕_ ≈-isEquivalence ⊕-cong  
+
+  ≤₊-respˡ-≈ : _≤₊_ Respectsˡ _≈_
+  ≤₊-respˡ-≈ = RightNaturalOrder.respˡ _≈_  _⊕_ ≈-isEquivalence ⊕-cong  
 
   ⊕-isMagma : IsMagma _≈_ _⊕_
   ⊕-isMagma = record

@@ -43,67 +43,67 @@ open AsyncIterable I∥
 
 record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
   field
-    B             : ℕ → IPred Sᵢ p
-    Bᵢ-cong       : ∀ {k i} → (_∈ B k i) Respects _≈ᵢ_
-    B₀-universal  : ∀ i x → x ∈ B 0 i
-    F-mono-B      : ∀ {k x} → x ∈ᵢ B k → F x ∈ᵢ B (suc k)
+    D             : ℕ → IPred Sᵢ p
+    Dᵢ-cong       : ∀ {k i} → (_∈ D k i) Respects _≈ᵢ_
+    D₀-universal  : ∀ i x → x ∈ D 0 i
+    F-mono-D      : ∀ {k x} → x ∈ᵢ D k → F x ∈ᵢ D (suc k)
 
     -- There exists a point k* after which the boxes only contain x*
     x*         : S
     k*         : ℕ
-    B-finish   : ∀ {k} → k* ≤ k → Singletonᵢ _≈_ (B k) x*
+    D-finish   : ∀ {k} → k* ≤ k → Singletonᵢ _≈_ (D k) x*
 
-  B-cong : ∀ {k} → (_∈ᵢ B k) Respects _≈_
-  B-cong x≈y x∈Bₖ i = Bᵢ-cong (x≈y i) (x∈Bₖ i)
+  D-cong : ∀ {k} → (_∈ᵢ D k) Respects _≈_
+  D-cong x≈y x∈Dₖ i = Dᵢ-cong (x≈y i) (x∈Dₖ i)
 
 record PartialACO {ℓ₁} (X₀ : IPred Sᵢ ℓ₁) ℓ₂ : Set (a ⊔ lsuc ℓ₂ ⊔ ℓ ⊔ ℓ₁) where
   field
-    B          : ℕ → IPred Sᵢ ℓ₂
+    D          : ℕ → IPred Sᵢ ℓ₂
 
-    X₀≋B₀      : X₀ ≋ᵢ B 0
+    X₀≋D₀      : X₀ ≋ᵢ D 0
     
-    Bᵢ-cong    : ∀ {k i} → (_∈ B k i) Respects _≈ᵢ_
-    F-resp-B₀  : ∀ {x} → x ∈ᵢ B 0 → F x ∈ᵢ B 0
-    F-mono-B   : ∀ {k x} → x ∈ᵢ B k → F x ∈ᵢ B (suc k)
+    Dᵢ-cong    : ∀ {k i} → (_∈ D k i) Respects _≈ᵢ_
+    F-resp-D₀  : ∀ {x} → x ∈ᵢ D 0 → F x ∈ᵢ D 0
+    F-mono-D   : ∀ {k x} → x ∈ᵢ D k → F x ∈ᵢ D (suc k)
 
     -- There exists a point k* after which the boxes only contain x*
     x*         : S
     k*         : ℕ
-    B-finish   : ∀ {k} → k* ≤ k → Singletonᵢ _≈_ (B k) x*
+    D-finish   : ∀ {k} → k* ≤ k → Singletonᵢ _≈_ (D k) x*
 
-  B-cong : ∀ {k} → (_∈ᵢ B k) Respects _≈_
-  B-cong x≈y x∈Bₖ i = Bᵢ-cong (x≈y i) (x∈Bₖ i)
+  D-cong : ∀ {k} → (_∈ᵢ D k) Respects _≈_
+  D-cong x≈y x∈Dₖ i = Dᵢ-cong (x≈y i) (x∈Dₖ i)
 
 ACO⇒partialACO : ∀ {ℓ₃} → ACO ℓ₃ → PartialACO Uᵢ ℓ₃
 ACO⇒partialACO aco = record
-  { B         = B
-  ; F-resp-B₀ = λ {x} x∈B₀ → λ i → B₀-universal i (F x i) 
-  ; X₀≋B₀     = (λ _ → B₀-universal _ _) , λ _ → tt
-  ; Bᵢ-cong   = Bᵢ-cong
-  ; F-mono-B  = F-mono-B
+  { D         = D
+  ; F-resp-D₀ = λ {x} x∈D₀ → λ i → D₀-universal i (F x i) 
+  ; X₀≋D₀     = (λ _ → D₀-universal _ _) , λ _ → tt
+  ; Dᵢ-cong   = Dᵢ-cong
+  ; F-mono-D  = F-mono-D
   ; x*        = x*
   ; k*        = k*
-  ; B-finish  = B-finish
+  ; D-finish  = D-finish
   } where open ACO aco
 
 partialACO⇒ACO : ∀ {ℓ₁ ℓ₃} {X₀ : IPred Sᵢ ℓ₁} →
                  Universalᵢ X₀ →
                  PartialACO X₀ ℓ₃ → ACO ℓ₃
 partialACO⇒ACO _∈X₀ pACO = record
-  { B            = B
-  ; Bᵢ-cong      = Bᵢ-cong
-  ; B₀-universal = λ i x → proj₁ X₀≋B₀ (x ∈X₀)
-  ; F-mono-B     = F-mono-B
+  { D            = D
+  ; Dᵢ-cong      = Dᵢ-cong
+  ; D₀-universal = λ i x → proj₁ X₀≋D₀ (x ∈X₀)
+  ; F-mono-D     = F-mono-D
   ; x*           = x*
   ; k*           = k*
-  ; B-finish     = B-finish
+  ; D-finish     = D-finish
   } where open PartialACO pACO
 
 partialACO⇒ACO′ : ∀ {ℓ₁} → PartialACO Uᵢ ℓ₁ → ACO ℓ₁
 partialACO⇒ACO′ = partialACO⇒ACO (Uᵢ-universal Sᵢ)
 
 --------------------------------------------------------------------------------
--- Asynchronously metricly contracting operator (AMCO)
+-- Asynchronously metrically contracting operator (AMCO)
 --------------------------------------------------------------------------------
 -- Metric conditions that are also sufficient (and necessary) conditions based
 -- on those defined by Gurney
@@ -130,7 +130,60 @@ record AMCO : Set (a ⊔ ℓ) where
       ; eq⇒0 to x≈y⇒dᵢ≡0
       ; 0⇒eq to dᵢ≡0⇒x≈y
       )
-      
+
+record PartialAMCO {p} (X₀ : IPred Sᵢ p) : Set (a ⊔ ℓ ⊔ p) where
+  field
+    dᵢ                   : ∀ {i} → Sᵢ i → Sᵢ i → ℕ
+
+  d : S → S → ℕ
+  d x y = max 0 (λ i → dᵢ (x i) (y i))
+
+  field
+    element              : S
+    element∈X₀           : element ∈ᵢ X₀
+    X₀-closed            : ∀ {x} → x ∈ᵢ X₀ → F x ∈ᵢ X₀
+    X₀-cong              : ∀ {i} → (_∈ X₀ i) Respects _≈ᵢ_
+    dᵢ-isQuasiSemiMetric : ∀ i → IsQuasiSemiMetric {A = Sᵢ i} _≈ᵢ_ dᵢ
+    dᵢ-bounded           : ∀ i → Bounded {A = Sᵢ i} dᵢ
+    F-strContrOnOrbits   : ∀ {x} → x ∈ᵢ X₀ → F x ≉ x → d (F x) (F (F x)) < d x (F x)
+    F-strContrOnFP       : ∀ {x*} → F x* ≈ x* → ∀ {x} → x ∈ᵢ X₀ → x ≉ x* → d x* (F x) < d x* x
+
+  module _ {i} where
+    open IsQuasiSemiMetric (dᵢ-isQuasiSemiMetric i) public
+      using ()
+      renaming
+      ( cong to dᵢ-cong
+      ; eq⇒0 to x≈y⇒dᵢ≡0
+      ; 0⇒eq to dᵢ≡0⇒x≈y
+      )
+
+AMCO⇒partialAMCO : AMCO → PartialAMCO Uᵢ
+AMCO⇒partialAMCO amco = record
+  { dᵢ                   = dᵢ
+  ; element              = element
+  ; dᵢ-isQuasiSemiMetric = dᵢ-isQuasiSemiMetric
+  ; dᵢ-bounded           = dᵢ-bounded
+  ; F-strContrOnOrbits   = λ _ → F-strContrOnOrbits
+  ; F-strContrOnFP       = λ Fx*≈x* _ → F-strContrOnFP Fx*≈x*
+  }
+  where open AMCO amco
+
+partialAMCO⇒AMCO : ∀ {ℓ₁} {X₀ : IPred Sᵢ ℓ₁} →
+                   Universalᵢ X₀ →
+                   PartialAMCO X₀ → AMCO
+partialAMCO⇒AMCO _∈X₀ pAMCO = record
+  { dᵢ                   = dᵢ
+  ; element              = element
+  ; dᵢ-isQuasiSemiMetric = dᵢ-isQuasiSemiMetric
+  ; dᵢ-bounded           = dᵢ-bounded
+  ; F-strContrOnOrbits   = λ {x} → F-strContrOnOrbits (λ i → x i ∈X₀)
+  ; F-strContrOnFP       = λ {x} Fx*≈x* → F-strContrOnFP Fx*≈x* (λ i → x i ∈X₀)
+  }
+  where open PartialAMCO pAMCO
+
+partialAMCO⇒AMCO′ : PartialAMCO Uᵢ → AMCO
+partialAMCO⇒AMCO′ = partialAMCO⇒AMCO (Uᵢ-universal Sᵢ)
+
 --------------------------------------------------------------------------------
 -- Synchronous conditions --
 --------------------------------------------------------------------------------
@@ -148,11 +201,9 @@ private
   σ : ℕ → S → S
   σ k = (F ^ k)
 
-record SynchronousConditions p o : Set (lsuc (a ⊔ ℓ ⊔ p ⊔ o)) where
+record SynchronousConditions o : Set (lsuc (a ⊔ ℓ ⊔ o)) where
 
   field
-    B                 : IPred Sᵢ p
-    Bᵢ-cong           : ∀ {i} → (_∈ B i) Respects _≈ᵢ_
     _≤ᵢ_              : IRel Sᵢ o
     ≤ᵢ-isPartialOrder : IsIndexedPartialOrder Sᵢ _≈ᵢ_ _≤ᵢ_
 
@@ -160,19 +211,14 @@ record SynchronousConditions p o : Set (lsuc (a ⊔ ℓ ⊔ p ⊔ o)) where
   x ≤ₛ y = ∀ i → x i ≤ᵢ y i
 
   field
-    B-closed          : ∀ {x} → x ∈ᵢ B → F x ∈ᵢ B
-    F-monotone        : ∀ {x y} → x ∈ᵢ B → y ∈ᵢ B → x ≤ₛ y → F x ≤ₛ F y
-    F-decreasing      : ∀ {x} → x ∈ᵢ B → F x ≤ₛ x
+    F-monotone        : ∀ {x y} → x ≤ₛ y → F x ≤ₛ F y
+    F-decreasing      : ∀ x → F x ≤ₛ x
     
     -- σ converges to a unique fixed point
     x*                : S
     x*-fixed          : F x* ≈ x*
     k*                : ℕ
-    σ-convergesTo-x*  : ∀ {x} → x ∈ᵢ B → σ k* x ≈ x*
-
-    -- B is non-empty
-    xₚ                 : S
-    xₚ∈B               : xₚ ∈ᵢ B
+    σ-convergesTo-x*  : ∀ x → σ k* x ≈ x*
     
   open IsIndexedPartialOrder ≤ᵢ-isPartialOrder public
     renaming
@@ -186,13 +232,81 @@ record SynchronousConditions p o : Set (lsuc (a ⊔ ℓ ⊔ p ⊔ o)) where
     ; antisymᵢ   to ≤ᵢ-antisym
     )
 
-  B-cong : (_∈ᵢ B) Respects _≈_
-  B-cong x≈y x∈Bₖ i = Bᵢ-cong (x≈y i) (x∈Bₖ i)
+
+record PartialSynchronousConditions {p} (D : IPred Sᵢ p) o : Set (lsuc (a ⊔ ℓ ⊔ p ⊔ o)) where
+
+  field
+    Dᵢ-cong           : ∀ {i} → (_∈ D i) Respects _≈ᵢ_
+    _≤ᵢ_              : IRel Sᵢ o
+    ≤ᵢ-isPartialOrder : IsIndexedPartialOrder Sᵢ _≈ᵢ_ _≤ᵢ_
+
+  _≤ₛ_ : Rel S _
+  x ≤ₛ y = ∀ i → x i ≤ᵢ y i
+
+  field
+    D-closed          : ∀ {x} → x ∈ᵢ D → F x ∈ᵢ D
+    F-monotone        : ∀ {x y} → x ∈ᵢ D → y ∈ᵢ D → x ≤ₛ y → F x ≤ₛ F y
+    F-decreasing      : ∀ {x} → x ∈ᵢ D → F x ≤ₛ x
+    
+    -- σ converges to a unique fixed point
+    x*                : S
+    x*-fixed          : F x* ≈ x*
+    k*                : ℕ
+    σ-convergesTo-x*  : ∀ {x} → x ∈ᵢ D → σ k* x ≈ x*
+    
+  open IsIndexedPartialOrder ≤ᵢ-isPartialOrder public
+    renaming
+    ( reflexive  to ≤-reflexive
+    ; refl       to ≤-refl
+    ; trans      to ≤-trans
+    ; antisym    to ≤-antisym
+    ; reflexiveᵢ to ≤ᵢ-reflexive
+    ; reflᵢ      to ≤ᵢ-refl
+    ; transᵢ     to ≤ᵢ-trans
+    ; antisymᵢ   to ≤ᵢ-antisym
+    )
+
+  D-cong : (_∈ᵢ D) Respects _≈_
+  D-cong x≈y x∈Dₖ i = Dᵢ-cong (x≈y i) (x∈Dₖ i)
+
+
+
+
+
+sync⇒partialSync : ∀ {ℓ₃} → SynchronousConditions ℓ₃ → PartialSynchronousConditions Uᵢ ℓ₃
+sync⇒partialSync sync = record
+  { Dᵢ-cong           = λ _ _ → tt
+  ; _≤ᵢ_              = _≤ᵢ_
+  ; ≤ᵢ-isPartialOrder = ≤ᵢ-isPartialOrder
+  ; D-closed          = λ _ _ → tt
+  ; F-monotone        = λ _ _ → F-monotone
+  ; F-decreasing      = λ _ → F-decreasing _
+  ; x*                = x*
+  ; x*-fixed          = x*-fixed
+  ; k*                = k*
+  ; σ-convergesTo-x*  = λ _ → σ-convergesTo-x* _
+  } where open SynchronousConditions sync
+
+partialSync⇒Sync : ∀ {ℓ₁ ℓ₃} {X₀ : IPred Sᵢ ℓ₁} →
+                 Universalᵢ X₀ →
+                 PartialSynchronousConditions X₀ ℓ₃ →
+                 SynchronousConditions ℓ₃
+partialSync⇒Sync _∈X₀ pSync = record
+  { _≤ᵢ_              = _≤ᵢ_
+  ; ≤ᵢ-isPartialOrder = ≤ᵢ-isPartialOrder
+  ; F-monotone        = λ {x} {y} → F-monotone (λ i → x i ∈X₀) (λ i → y i ∈X₀)
+  ; F-decreasing      = λ x → F-decreasing (λ i → x i ∈X₀)
+  ; x*                = x*
+  ; x*-fixed          = x*-fixed
+  ; k*                = k*
+  ; σ-convergesTo-x*  = λ x → σ-convergesTo-x* (λ i → x i ∈X₀)
+  }
+  where open PartialSynchronousConditions pSync
+
+partialSync⇒Sync′ : ∀ {ℓ₁} → PartialSynchronousConditions Uᵢ ℓ₁ → SynchronousConditions ℓ₁
+partialSync⇒Sync′ = partialSync⇒Sync (Uᵢ-universal Sᵢ)
+
 {-
-
-
-
-
 record FiniteConditions p o : Set (lsuc (a ⊔ ℓ ⊔ p ⊔ o)) where
   open Membership (setoid) using () renaming (_∈_ to _∈L_)
 

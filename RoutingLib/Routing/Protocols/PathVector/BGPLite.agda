@@ -8,7 +8,7 @@
 -- that violates associativity.
 --------------------------------------------------------------------------------
 
-module RoutingLib.Routing.Protocols.BGPLite where
+module RoutingLib.Routing.Protocols.PathVector.BGPLite where
 
 open import Algebra.FunctionProperties
 open import Data.Nat using (ℕ; _≟_)
@@ -33,9 +33,9 @@ open import RoutingLib.Routing.Algebra
 --------------------------------------------------------------------------------
 -- Definition of the underlying routing problem (i.e. routing algebra)
 
-open import RoutingLib.Routing.Protocols.BGPLite.Components.Policy
-open import RoutingLib.Routing.Protocols.BGPLite.Components.Communities
-open import RoutingLib.Routing.Protocols.BGPLite.Components.Route
+open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Policy
+open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Communities
+open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Route
 
 data Step {n} (i j : Fin n) : Set₁ where
   step : Policy → Step i j
@@ -43,8 +43,8 @@ data Step {n} (i j : Fin n) : Set₁ where
 0# : Route
 0# = valid 0 ∅ []
 
-∞ : Route
-∞ = invalid
+∞# : Route
+∞# = invalid
 
 infix 5 _⊕_
 _⊕_ : Op₂ Route
@@ -92,7 +92,7 @@ A = record
   ; _⊕_                = _⊕_
   ; _▷_                = _▷_
   ; 0#                 = 0#
-  ; ∞                  = ∞
+  ; ∞#                 = ∞#
   ; f∞                 = f∞
   ; f∞-reject          = f∞-reject
   ; ≈-isDecEquivalence = ≡ᵣ-isDecEquivalence
@@ -111,7 +111,7 @@ import RoutingLib.Routing.VectorBased.Synchronous  A as SyncRouting
 
 -- Synchronous version (can start from any initial state)
 σ : ∀ {n} → AdjacencyMatrix n → RoutingMatrix n → 𝕋 → RoutingMatrix n
-σ {n} A X₀ t = SyncRouting.σ A t X₀
+σ {n} A X₀ t = SyncRouting.σ^ A t X₀
 
 -- Dynamic asynchronous version (starts identity matrix but has arbitrary
 -- network growth and failures depending on the exact schedule and network)

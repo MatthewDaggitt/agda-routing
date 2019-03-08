@@ -48,16 +48,16 @@ open Sorting ≥₊-decTotalOrder using (index-mono-<)
 
 h-cong : h Preserves _≈_ ⟶ _≡_
 h-cong {u} {v} u≈v = begin⟨ u≈v ⟩
- ⇒ u      ≈ v       ∴⟨ index-cong S (∈-routes u) (∈-routes v) routes! ⟩
- ⇒ i[ u ] ≡ i[ v ]  ∴⟨ cong (suc ∘ toℕ) ⟩
- ⇒ h u    ≡ h v     ∎
+ ∴ u      ≈ v       $⟨ index-cong S (∈-routes u) (∈-routes v) routes! ⟩
+ ∴ i[ u ] ≡ i[ v ]  $⟨ cong (suc ∘ toℕ) ⟩
+ ∴ h u    ≡ h v     ∎
 
 h-resp-< : ∀ {u v} → u <₊ v → h v < h u
 h-resp-< {u} {v} u<v = begin⟨ u<v ⟩
- ⇒ (u ≤₊ v) × (u ≉ v)   ∴⟨ map id (λ u≉v → u≉v ∘ ≈-sym) ⟩
- ⇒ (u ≤₊ v) × (v ≉ u)   ∴⟨ index-mono-< routes↗ (∈-routes _) (∈-routes _) ⟩
- ⇒ i[ v ] <𝔽 i[ u ]     ∴⟨ s≤s ∘ toℕ-mono-< ⟩
- ⇒ h v < h u            ∎
+ ∴ (u ≤₊ v) × (u ≉ v)   $⟨ map id (λ u≉v → u≉v ∘ ≈-sym) ⟩
+ ∴ (u ≤₊ v) × (v ≉ u)   $⟨ index-mono-< routes↗ (∈-routes _) (∈-routes _) ⟩
+ ∴ i[ v ] <𝔽 i[ u ]     $⟨ s≤s ∘ toℕ-mono-< ⟩
+ ∴ h v < h u            ∎
 
 h-resp-≤ : h Preserves _≤₊_ ⟶ _≥_
 h-resp-≤ {u} {v} u≤v with u ≟ v
@@ -145,7 +145,7 @@ r-isUltraMetric = record
   ; triangle     = r-maxTriIneq
   }
 
-r-ultraMetric : UltraMetric b ℓ
+r-ultraMetric : UltraMetric a ℓ
 r-ultraMetric = record
   { d             = r
   ; isUltraMetric = r-isUltraMetric

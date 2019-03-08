@@ -45,9 +45,9 @@ import RoutingLib.Routing.VectorBased.Asynchronous as BellmanFord
 
 open RawRoutingAlgebra hiding (_≟_)
 open RawRoutingAlgebra A using ()
-  renaming (_≈_ to _≈ᵃ_; _⊕_ to _⊕ᵃ_; _▷_ to _▷ᵃ_; 0# to 0#ᵃ; ∞ to ∞ᵃ)
+  renaming (_≈_ to _≈ᵃ_; _⊕_ to _⊕ᵃ_; _▷_ to _▷ᵃ_; 0# to 0#ᵃ; ∞# to ∞ᵃ)
 open RawRoutingAlgebra B using ()
-  renaming (_≈_ to _≈ᵇ_; _⊕_ to _⊕ᵇ_; _▷_ to _▷ᵇ_; 0# to 0#ᵇ; ∞ to ∞ᵇ)
+  renaming (_≈_ to _≈ᵇ_; _⊕_ to _⊕ᵇ_; _▷_ to _▷ᵇ_; 0# to 0#ᵇ; ∞# to ∞ᵇ)
 open Simulates A⇉B
 
 --------------------------------------------------------------------------------

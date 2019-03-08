@@ -29,51 +29,51 @@ open AsyncIterable I∥
 open PartialACO aco
 
 --------------------------------------------------------------------------
--- Deconstructing the assumption B-finish
+-- Deconstructing the assumption D-finish
 
-k*≤k⇒x*∈B[k] : ∀ {k} → k* ≤ k → x* ∈ᵢ B k
-k*≤k⇒x*∈B[k] k*≤k = proj₁ (B-finish k*≤k)
+k*≤k⇒x*∈D[k] : ∀ {k} → k* ≤ k → x* ∈ᵢ D k
+k*≤k⇒x*∈D[k] k*≤k = proj₁ (D-finish k*≤k)
 
-x*∈B[k*] : x* ∈ᵢ B k* 
-x*∈B[k*] = k*≤k⇒x*∈B[k] ≤-refl
+x*∈D[k*] : x* ∈ᵢ D k* 
+x*∈D[k*] = k*≤k⇒x*∈D[k] ≤-refl
 
-k*≤k⇒x∈B[k]⇒x≈x* : ∀ {k} → k* ≤ k → ∀ {x} → x ∈ᵢ B k → x ≈ x* 
-k*≤k⇒x∈B[k]⇒x≈x* k*≤k = proj₂ (B-finish k*≤k)
+k*≤k⇒x∈D[k]⇒x≈x* : ∀ {k} → k* ≤ k → ∀ {x} → x ∈ᵢ D k → x ≈ x* 
+k*≤k⇒x∈D[k]⇒x≈x* k*≤k = proj₂ (D-finish k*≤k)
 
-x∈B[k*]⇒x≈x* : ∀ {x} → x ∈ᵢ B k* → x ≈ x* 
-x∈B[k*]⇒x≈x* = k*≤k⇒x∈B[k]⇒x≈x* ≤-refl
+x∈D[k*]⇒x≈x* : ∀ {x} → x ∈ᵢ D k* → x ≈ x* 
+x∈D[k*]⇒x≈x* = k*≤k⇒x∈D[k]⇒x≈x* ≤-refl
 
 x*-fixed : F x* ≈ x*
-x*-fixed = begin⟨ x*∈B[k*] ⟩
-  ∴ x*   ∈ᵢ B k*       $⟨ F-mono-B ⟩
-  ∴ F x* ∈ᵢ B (suc k*) $⟨ k*≤k⇒x∈B[k]⇒x≈x* (n≤1+n k*) ⟩
+x*-fixed = begin⟨ x*∈D[k*] ⟩
+  ∴ x*   ∈ᵢ D k*       $⟨ F-mono-D ⟩
+  ∴ F x* ∈ᵢ D (suc k*) $⟨ k*≤k⇒x∈D[k]⇒x≈x* (n≤1+n k*) ⟩
   ∴ F x* ≈ x*          ∎
 
 --------------------------------------------------------------------------
 -- Synchronous iterations
 
-Fᵏx∈B₀ : ∀ k {x} → x ∈ᵢ B 0 → (F ^ k) x ∈ᵢ B 0
-Fᵏx∈B₀ zero    x∈B₀ = x∈B₀
-Fᵏx∈B₀ (suc k) x∈B₀ = F-resp-B₀ (Fᵏx∈B₀ k x∈B₀)
+Fᵏx∈D₀ : ∀ k {x} → x ∈ᵢ D 0 → (F ^ k) x ∈ᵢ D 0
+Fᵏx∈D₀ zero    x∈D₀ = x∈D₀
+Fᵏx∈D₀ (suc k) x∈D₀ = F-resp-D₀ (Fᵏx∈D₀ k x∈D₀)
 
-Fᵏx∈Bₖ : ∀ k {x} → x ∈ᵢ B 0 → (F ^ k) x ∈ᵢ B k
-Fᵏx∈Bₖ zero    x∈B₀ = x∈B₀
-Fᵏx∈Bₖ (suc k) x∈B₀ = F-mono-B (Fᵏx∈Bₖ k x∈B₀)
+Fᵏx∈Dₖ : ∀ k {x} → x ∈ᵢ D 0 → (F ^ k) x ∈ᵢ D k
+Fᵏx∈Dₖ zero    x∈D₀ = x∈D₀
+Fᵏx∈Dₖ (suc k) x∈D₀ = F-mono-D (Fᵏx∈Dₖ k x∈D₀)
 
 --------------------------------------------------------------------------
--- If `B 0` is non-empty then it can be shown that the fixed point is in
--- every box `B k`
+-- If `D 0` is non-empty then it can be shown that the fixed point is in
+-- every box `D k`
 
-x*∈B₀ : ∀ {x} → x ∈ᵢ B 0 → x* ∈ᵢ B 0
-x*∈B₀ {x} x∈B₀ = begin⟨ x∈B₀ ⟩
-  ∴ x ∈ᵢ B 0            $⟨ Fᵏx∈Bₖ k* ⟩
-  ∴ (F ^ k*) x ∈ᵢ B k*  $⟨ x∈B[k*]⇒x≈x* ⟩
-  ∴ (F ^ k*) x ≈ x*     $⟨ B-cong ◌ (Fᵏx∈B₀ k* x∈B₀) ⟩
-  ∴ x* ∈ᵢ B 0           ∎
+x*∈D₀ : ∀ {x} → x ∈ᵢ D 0 → x* ∈ᵢ D 0
+x*∈D₀ {x} x∈D₀ = begin⟨ x∈D₀ ⟩
+  ∴ x ∈ᵢ D 0            $⟨ Fᵏx∈Dₖ k* ⟩
+  ∴ (F ^ k*) x ∈ᵢ D k*  $⟨ x∈D[k*]⇒x≈x* ⟩
+  ∴ (F ^ k*) x ≈ x*     $⟨ D-cong ◌ (Fᵏx∈D₀ k* x∈D₀) ⟩
+  ∴ x* ∈ᵢ D 0           ∎
 
-x*∈Bₖ : ∀ {x} → x ∈ᵢ B 0 → ∀ k → x* ∈ᵢ B k
-x*∈Bₖ x∈B₀ zero    = x*∈B₀ x∈B₀
-x*∈Bₖ x∈B₀ (suc k) = begin⟨ x*∈Bₖ x∈B₀ k ⟩
-  ∴ x*   ∈ᵢ B k        $⟨ F-mono-B ⟩
-  ∴ F x* ∈ᵢ B (suc k)  $⟨ B-cong x*-fixed ⟩
-  ∴ x*   ∈ᵢ B (suc k)  ∎
+x*∈Dₖ : ∀ {x} → x ∈ᵢ D 0 → ∀ k → x* ∈ᵢ D k
+x*∈Dₖ x∈D₀ zero    = x*∈D₀ x∈D₀
+x*∈Dₖ x∈D₀ (suc k) = begin⟨ x*∈Dₖ x∈D₀ k ⟩
+  ∴ x*   ∈ᵢ D k        $⟨ F-mono-D ⟩
+  ∴ F x* ∈ᵢ D (suc k)  $⟨ D-cong x*-fixed ⟩
+  ∴ x*   ∈ᵢ D (suc k)  ∎

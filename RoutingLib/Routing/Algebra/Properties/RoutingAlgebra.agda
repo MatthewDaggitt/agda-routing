@@ -14,7 +14,7 @@ open import Algebra.Structures
 import Algebra.FunctionProperties as FunctionProperties
 import Algebra.FunctionProperties.Consequences as Consequences
 open import Algebra.FunctionProperties.Consequences using (sel⇒idem)
-open import Data.Product using (proj₁)
+open import Data.Product using (proj₁; _,_)
 open import Data.Fin using (Fin)
 open import Relation.Nullary using (yes; no)
 open import Relation.Binary using (DecTotalOrder; StrictTotalOrder)
@@ -36,19 +36,11 @@ open FunctionProperties _≈_
 ⊕-idem : Idempotent _⊕_
 ⊕-idem = Consequences.sel⇒idem S ⊕-sel
 
-⊕-identityˡ : LeftIdentity ∞ _⊕_
-⊕-identityˡ x = ≈-trans (⊕-comm ∞ x) (⊕-identityʳ x)
+⊕-identityˡ : LeftIdentity ∞# _⊕_
+⊕-identityˡ x = ≈-trans (⊕-comm ∞# x) (⊕-identityʳ x)
 
-⊕-isMagma : IsMagma _≈_ _⊕_
-⊕-isMagma = record
-  { isEquivalence = ≈-isEquivalence
-  ; ∙-cong        = ⊕-cong
-  }
-
-⊕-magma : Magma _ _
-⊕-magma = record
-  { isMagma = ⊕-isMagma
-  }
+⊕-identity : Identity ∞# _⊕_
+⊕-identity = ⊕-identityˡ , ⊕-identityʳ
 
 ⊕-isSemigroup : IsSemigroup _≈_ _⊕_
 ⊕-isSemigroup = record
@@ -74,11 +66,23 @@ open FunctionProperties _≈_
   { isSemilattice = ⊕-isSemilattice
   }
 
+⊕-isMonoid : IsMonoid _≈_ _⊕_ ∞#
+⊕-isMonoid = record
+  { isSemigroup = ⊕-isSemigroup
+  ; identity    = ⊕-identity
+  }
+
+⊕-isDecMonoid : IsDecMonoid _≈_ _⊕_ ∞#
+⊕-isDecMonoid = record
+  { isMonoid = ⊕-isMonoid
+  ; _≟_      = _≟_
+  }
+
 ------------------------------------------------------------------------------
 -- An ordering over routes is induced from ⊕ using the right natural order.
 -- i.e. x ≤₊ y iff when choosing between x and y you choose x.
 
-≤₊-decTotalOrder : DecTotalOrder b ℓ ℓ
+≤₊-decTotalOrder : DecTotalOrder a ℓ ℓ
 ≤₊-decTotalOrder = RightNaturalOrder.decTotalOrder _ _ ⊕-isSemilattice ⊕-sel _≟_
 
 ≥₊-decTotalOrder : DecTotalOrder _ _ _
@@ -121,21 +125,21 @@ open NonStrictToStrict ≤₊-decTotalOrder public
 -- If the algebra is strictly increasing it's also increasing
 
 strIncr⇒incr : IsStrictlyIncreasing algebra → IsIncreasing algebra
-strIncr⇒incr strIncr f x with x ≟ ∞
+strIncr⇒incr strIncr f x with x ≟ ∞#
 ... | no  x≉∞ = proj₁ (strIncr f x≉∞)
 ... | yes x≈∞ = begin
-  (f ▷ x) ⊕ x ≈⟨ ⊕-cong (▷-cong f x≈∞) x≈∞ ⟩
-  (f ▷ ∞) ⊕ ∞ ≈⟨ ⊕-cong (▷-fixedPoint f) ≈-refl ⟩
-  ∞       ⊕ ∞ ≈⟨ sel⇒idem S ⊕-sel ∞ ⟩
-  ∞           ≈⟨ ≈-sym x≈∞ ⟩
-  x           ∎
+  (f ▷ x)  ⊕ x  ≈⟨ ⊕-cong (▷-cong f x≈∞) x≈∞ ⟩
+  (f ▷ ∞#) ⊕ ∞# ≈⟨ ⊕-cong (▷-fixedPoint f) ≈-refl ⟩
+  ∞#       ⊕ ∞# ≈⟨ sel⇒idem S ⊕-sel ∞# ⟩
+  ∞#            ≈⟨ ≈-sym x≈∞ ⟩
+  x             ∎
   where open EqReasoning S
 
 ------------------------------------------------------------------------------
 -- Other
 
-r≈∞⇒f▷r≈∞ : ∀ {n} {i j : Fin n} {f : Step i j} {r} → r ≈ ∞ → f ▷ r ≈ ∞
+r≈∞⇒f▷r≈∞ : ∀ {n} {i j : Fin n} {f : Step i j} {r} → r ≈ ∞# → f ▷ r ≈ ∞#
 r≈∞⇒f▷r≈∞ {f = f} {r} r≈∞ = ≈-trans (▷-cong _ r≈∞) (▷-fixedPoint f)
 
-f▷r≉∞⇒r≉∞ : ∀ {n} {i j : Fin n} {f : Step i j} {r} → f ▷ r ≉ ∞ → r ≉ ∞
+f▷r≉∞⇒r≉∞ : ∀ {n} {i j : Fin n} {f : Step i j} {r} → f ▷ r ≉ ∞# → r ≉ ∞#
 f▷r≉∞⇒r≉∞ f▷r≉∞ r≈∞ = f▷r≉∞ (r≈∞⇒f▷r≈∞ r≈∞)

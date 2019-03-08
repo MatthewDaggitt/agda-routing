@@ -27,7 +27,7 @@ import RoutingLib.Routing.Algebra.Properties.FiniteRoutingAlgebra as FiniteRouti
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Metrics as DistanceVectorMetrics
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Properties as DistanceVectorMetricProperties
-import RoutingLib.Routing.Algebra.Consistency as Consistency
+import RoutingLib.Routing.Algebra.Construct.Consistent as Consistent
 
 module RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.Metrics
   {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
@@ -39,7 +39,7 @@ module RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.Metric
 open Routing algebra n
 open RawRoutingAlgebra algebra
 open IsCertifiedPathAlgebra isPathAlgebra
-open Consistency isRoutingAlgebra isPathAlgebra A
+open Consistent isRoutingAlgebra isPathAlgebra A
 open FiniteRoutingAlgebraProperties isRoutingAlgebraᶜ isFiniteᶜ using (H)
 
 module DV = DistanceVectorMetrics isRoutingAlgebraᶜ isFiniteᶜ

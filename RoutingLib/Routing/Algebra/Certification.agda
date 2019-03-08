@@ -55,23 +55,23 @@ pathᶜ-cong r≈s = ≈ₚ-reflexive (cong (map certify) (path-cong r≈s))
 r≈0⇒pathᶜ[r]≈[] : ∀ {r} → r ≈ 0# → pathᶜ r ≈ₚ valid []
 r≈0⇒pathᶜ[r]≈[] r≈0# rewrite r≈0⇒path[r]≈[] r≈0# = valid []
 
-r≈∞⇒pathᶜ[r]≈∅ : {r : Route} → r ≈ ∞ → pathᶜ r ≈ₚ nothing
+r≈∞⇒pathᶜ[r]≈∅ : {r : Route} → r ≈ ∞# → pathᶜ r ≈ₚ nothing
 r≈∞⇒pathᶜ[r]≈∅ r≈∞ rewrite r≈∞⇒path[r]≈∅ r≈∞ = ≈ₚ-refl
 
-pathᶜ[r]≈∅⇒r≈∞ : {r : Route} → pathᶜ r ≈ₚ nothing → r ≈ ∞
+pathᶜ[r]≈∅⇒r≈∞ : {r : Route} → pathᶜ r ≈ₚ nothing → r ≈ ∞#
 pathᶜ[r]≈∅⇒r≈∞ {r} p[r]≡∅ with path r | inspect path r
 ... | invalid | [ eq ] = path[r]≈∅⇒r≈∞ eq
 ... | valid p | _      = contradiction p[r]≡∅ λ()
 
 pathᶜ-reject : ∀ {i j} {r p} (f : Step i j) → pathᶜ r ≈ₚ valid p →
-               ¬ (i , j) ⇿ᵛ p ⊎ i ∈ᵥₚ p → f ▷ r ≈ ∞
+               ¬ (i , j) ⇿ᵛ p ⊎ i ∈ᵥₚ p → f ▷ r ≈ ∞#
 pathᶜ-reject {r = r} {p} f p[r]≈p reason with path r | inspect path r | p[r]≈p
 ... | invalid | _      | ()
 ... | valid q | [ eq ] | valid qᶜ≈p with reason
 ...   | inj₁ ¬ij⇿p = path-reject f eq (inj₁ (¬ij⇿p ∘ ⇿ᵥ-resp-≈ᵥₚ qᶜ≈p ∘ ⇿-certify⁺ refl refl))
 ...   | inj₂ i∈p   = path-reject f eq (inj₂ (∈ₚ-certify⁻ refl (i∈p ∘ ∉ᵥₚ-resp-≈ᵥₚ qᶜ≈p)))
 
-pathᶜ-accept : ∀ {i j r p} (f : Step i j) → pathᶜ r ≈ₚ valid p → f ▷ r ≉ ∞ →
+pathᶜ-accept : ∀ {i j r p} (f : Step i j) → pathᶜ r ≈ₚ valid p → f ▷ r ≉ ∞# →
                (ij⇿p : (i , j) ⇿ᵛ p) (i∉p : i ∉ᵥₚ p) →
                pathᶜ (f ▷ r) ≈ₚ valid ((i , j) ∷ p ∣ ij⇿p ∣ i∉p)
 pathᶜ-accept {i} {j} {r} {p} f p[r]≈p fr≉∞ ij⇿p i∉p with path r | inspect path r | p[r]≈p

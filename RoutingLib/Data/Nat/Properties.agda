@@ -218,8 +218,8 @@ m<n⇒1+m+o≡n {_} {suc n} (s≤s z≤n) = n , refl
 m<n⇒1+m+o≡n (s≤s (s≤s m<n)) with m<n⇒1+m+o≡n (s≤s m<n)
 ... | o , m+o+1≡n = o , (cong suc m+o+1≡n)
 
-a≤b*a : ∀ {a b} → 0 < b → a ≤ b * a
-a≤b*a (s≤s _)  = m≤m+n _ _
+a≤b*a : ∀ a b → a ≤ suc b * a
+a≤b*a a b = m≤m+n _ _
 
 ------------------------------------------------------------------------
 -- Min and max

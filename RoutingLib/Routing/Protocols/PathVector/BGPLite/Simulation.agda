@@ -5,7 +5,7 @@
 -- convergent.
 --------------------------------------------------------------------------------
 
-module RoutingLib.Routing.Protocols.BGPLite.Simulation where
+module RoutingLib.Routing.Protocols.PathVector.BGPLite.Simulation where
 
 open import Data.Maybe using (just; nothing; Is-just; just-injective)
 open import Data.Nat using (_≤_)
@@ -29,11 +29,11 @@ open import RoutingLib.Data.Path.Uncertified.Properties
 import RoutingLib.Algebra.Construct.NaturalChoice.Min.TotalOrder as Min
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Protocols.BGPLite
-open import RoutingLib.Routing.Protocols.BGPLite.Components.Policy
+open import RoutingLib.Routing.Protocols.PathVector.BGPLite
+open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Policy
   using (apply; apply-result)
-open import RoutingLib.Routing.Protocols.BGPLite.Components.Route
-open import RoutingLib.Routing.Protocols.BGPLite.Components.Communities
+open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Route
+open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Communities
 
 open ≡-Reasoning
 
@@ -58,7 +58,7 @@ Aₐₗₜ = record
   ; _⊕_                = _⊕ₐₗₜ_
   ; _▷_                = _▷_
   ; 0#                 = 0#
-  ; ∞                  = ∞
+  ; ∞#                 = ∞#
   ; f∞                 = f∞
   ; ≈-isDecEquivalence = ≡ᵣ-isDecEquivalence
   ; ⊕-cong             = ⊕ₐₗₜ-cong
@@ -169,20 +169,6 @@ isPathAlgebra = record
 
 open import RoutingLib.Routing.Algebra.Simulation
 open import RoutingLib.Routing.Algebra.Comparable Aₐₗₜ
-
-{-
-p[fᵢⱼ▷v]₀≡i : ∀ {n} {i j : Fin n} {f : Step i j} {v} →
-              IsValid (f ▷ v) → source (path (f ▷ v)) ≡ just (toℕ i)
-p[fᵢⱼ▷v]₀≡i {n} {i} {j} {f@(step pol)} {invalid}      ()
-p[fᵢⱼ▷v]₀≡i {n} {i} {j} {f@(step pol)} {valid l cs p} f▷ᵥ with ▷-result f l cs p
-... | inj₁ f▷ᵢ = contradiction (subst IsValid f▷ᵢ f▷ᵥ) λ()
-... | inj₂ (k , ds , m , _ , ≡v[i[p]]) = begin
-  source (path (f ▷ valid l cs p))                             ≡⟨ cong (source ∘ path) ≡v[i[p]] ⟩
-  source (path (valid k ds (inflate ((toℕ i , toℕ j) ∷ p) m))) ≡⟨⟩
-  sourceᵥ (deflate (inflate ((toℕ i , toℕ j) ∷ p) m))          ≡⟨ deflate-source _ ⟩
-  sourceᵥ (inflate ((toℕ i , toℕ j) ∷ p) m)                    ≡⟨ inflate-source _ m refl ⟩
-  just (toℕ i) ∎
--}
 
 private
   ≢invalid : ∀ {k cs p} {n} {i j : Fin n} (f : Step i j) v → valid k cs p ≡ f ▷ v → f ▷ v ≢ invalid

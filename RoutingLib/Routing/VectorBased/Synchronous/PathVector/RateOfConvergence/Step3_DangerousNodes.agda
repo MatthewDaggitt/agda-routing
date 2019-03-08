@@ -2,8 +2,9 @@ open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _+_; _<_; _≤_)
 open import Data.Nat.Properties using (+-suc)
 open import Data.Empty using (⊥)
 open import Data.Fin using (Fin)
+open import Data.Fin.Properties using (any?)
 open import Data.Fin.Subset using (Subset; _∈_; _∉_; _∪_)
-open import Data.Fin.Dec using (_∈?_)
+open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Product using (_,_; _×_; ∃; ∃₂)
 open import Data.List.Membership.Propositional.Properties using (∈-filter⁺)
 open import Function using (_∘_)
@@ -23,20 +24,19 @@ open import RoutingLib.Data.Path.CertifiedI.All
 open import RoutingLib.Data.Path.CertifiedI.Properties
 open import RoutingLib.Data.Fin.Subset using (Nonfull) renaming ()
 open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
-open import RoutingLib.Data.Fin.Dec using (any?)
 open import RoutingLib.Data.List using (allFinPairs)
 open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-allFinPairs⁺)
 import RoutingLib.Relation.Binary.Reasoning.StrictPartialOrder as SPOR
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
-open import RoutingLib.Routing.Model using (RoutingMatrix; AdjacencyMatrix)
-import RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.Prelude as Prelude
-import RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.Step1_NodeSets as Step1_NodeSets
-import RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.Step2_ConvergedSubtree as Step2_ConvergedSubtree
+open import RoutingLib.Routing using (RoutingMatrix; AdjacencyMatrix)
+import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Prelude as Prelude
+import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step1_NodeSets as Step1_NodeSets
+import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step2_ConvergedSubtree as Step2_ConvergedSubtree
 
-module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.Step3_DangerousNodes
+module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step3_DangerousNodes
   {a b ℓ n-1} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (isPathAlgebra : IsCertifiedPathAlgebra algebra (suc n-1))
   (isIncreasing  : IsIncreasing algebra)
   (A : AdjacencyMatrix algebra (suc n-1))
@@ -46,12 +46,12 @@ module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.St
   {C : Subset (suc n-1)}
   (j∈C : j ∈ C)
   (C-nonFull : Nonfull C)
-  (C⊆𝓒ₜ : ∀ {i} → i ∈ C → i ∈ᵤ Step1_NodeSets.𝓒 isPathAlgebra A X j (suc t-1))
+  (C⊆𝓒ₜ : ∀ {i} → i ∈ C → i ∈ᵤ Step1_NodeSets.𝓒 isRoutingAlgebra isPathAlgebra A X j (suc t-1))
   where
 
-  open Prelude isPathAlgebra A
+  open Prelude isRoutingAlgebra isPathAlgebra A
   open Notation X j
-  open Step1_NodeSets isPathAlgebra A X j
+  open Step1_NodeSets isRoutingAlgebra isPathAlgebra A X j
 
   ----------------------------------------------------------------------------
   -- Inductive proof
@@ -73,7 +73,7 @@ module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.St
   --------------------------------------------------------------------------
   -- Compute the minimum cut edge (iₘᵢₙ , kₘᵢₙ) of C
 
-  open Step2_ConvergedSubtree isPathAlgebra isIncreasing A X j t-1 j∈C C-nonFull C⊆𝓒ₜ
+  open Step2_ConvergedSubtree isRoutingAlgebra isPathAlgebra isIncreasing A X j t-1 j∈C C-nonFull C⊆𝓒ₜ
 
   -------------------------------------------------------------------------
   -- The only time that the source node of the minimal edge out of the fixed

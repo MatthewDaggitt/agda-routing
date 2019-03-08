@@ -13,6 +13,7 @@ open import Data.Fin.Subset using (Subset; ⊤)
 open import Data.Fin.Subset.Properties using (∈⊤)
 open import Data.Nat using (z≤n; s≤s; _≤_; _<_; _+_)
 open import Data.Nat.Properties
+open import Function using (const)
 
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule
 import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod
@@ -22,11 +23,10 @@ import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod
 -- Definition
 
 αˢʸⁿᶜ : 𝕋 → Subset n
-αˢʸⁿᶜ _ = ⊤
+αˢʸⁿᶜ = const ⊤
 
 βˢʸⁿᶜ : 𝕋 → Fin n → Fin n → 𝕋
-βˢʸⁿᶜ zero    _ _ = zero
-βˢʸⁿᶜ (suc t) _ _ = t
+βˢʸⁿᶜ t _ _ = t ∸ 1
 
 ψˢʸⁿᶜ : Schedule n
 ψˢʸⁿᶜ = record
@@ -44,19 +44,19 @@ open Pseudoperiod ψˢʸⁿᶜ
 βˢʸⁿᶜ-expiry i j (s≤s t₁≤t₂) = t₁≤t₂
 
 ψˢʸⁿᶜ-activeIn : ∀ t i → i IsActiveIn [ t , suc t ]
-ψˢʸⁿᶜ-activeIn t i = mkₐᵢ (suc t) ≤-refl ≤-refl ∈⊤
+ψˢʸⁿᶜ-activeIn t i = mkₐ (suc t) ≤-refl ≤-refl ∈⊤
 
-ψˢʸⁿᶜ-activationPeriod : ∀ t → ActivationPeriod [ t , suc t ]
-ψˢʸⁿᶜ-activationPeriod t = mkₐ (n≤1+n t) (ψˢʸⁿᶜ-activeIn t)
-
-ψˢʸⁿᶜ-expiryPeriod : ∀ t → ExpiryPeriod [ t , t ]
-ψˢʸⁿᶜ-expiryPeriod t = mkₑ ≤-refl βˢʸⁿᶜ-expiry
+ψˢʸⁿᶜ-expiresIn : ∀ t i → MessagesTo i ExpireIn [ t , t ]
+ψˢʸⁿᶜ-expiresIn t i = mkₑ ≤-refl (βˢʸⁿᶜ-expiry i)
 
 ψˢʸⁿᶜ-pseudocycle : ∀ t → Pseudocycle [ t , suc t ]
 ψˢʸⁿᶜ-pseudocycle t = record
-  { m      = t
-  ; β[s,m] = ψˢʸⁿᶜ-expiryPeriod t
-  ; α[m,e] = ψˢʸⁿᶜ-activationPeriod t
+  { m          = const t
+  ; start≤end  = n≤1+n t
+  ; start≤midᵢ = const ≤-refl
+  ; midᵢ≤end   = const (n≤1+n t)
+  ; β[s,m]     = ψˢʸⁿᶜ-expiresIn t
+  ; α[m,e]     = ψˢʸⁿᶜ-activeIn t
   }
 
 ψˢʸⁿᶜ-multiPseudocycle : ∀ t k → MultiPseudocycle k [ t , t + k ]

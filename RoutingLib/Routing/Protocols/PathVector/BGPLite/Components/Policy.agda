@@ -15,10 +15,10 @@ open import RoutingLib.Data.Path.Uncertified as Path
 open import RoutingLib.Data.Path.Uncertified.Properties
 open import RoutingLib.Data.Nat.Properties using (n≢1+n)
 
-open import RoutingLib.Routing.Protocols.BGPLite.Components.Route
-open import RoutingLib.Routing.Protocols.BGPLite.Components.Communities
+open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Route
+open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Communities
 
-module RoutingLib.Routing.Protocols.BGPLite.Components.Policy where
+module RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Policy where
 
 --------------------------------------------------------------------------------
 -- A language for writing conditional expressions

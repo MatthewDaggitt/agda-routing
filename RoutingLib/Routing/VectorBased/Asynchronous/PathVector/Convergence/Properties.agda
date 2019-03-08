@@ -20,7 +20,7 @@ import RoutingLib.Function.Metric.Construct.MaxLift as MaxLift
 import RoutingLib.Relation.Binary.Reasoning.PartialOrder as PO-Reasoning
 
 open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing.Algebra.Consistency as Consistency
+import RoutingLib.Routing.Algebra.Construct.Consistent as Consistent
 import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra as PathAlgebraProperties
 import RoutingLib.Routing.Algebra.Properties.FiniteRoutingAlgebra as FiniteRoutingAlgebraProperties
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
@@ -42,7 +42,7 @@ module RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.Proper
 open RawRoutingAlgebra algebra
 open IsCertifiedPathAlgebra isPathAlgebra
 open PathAlgebraProperties isRoutingAlgebra isPathAlgebra
-open Consistency isRoutingAlgebra isPathAlgebra A
+open Consistent isRoutingAlgebra isPathAlgebra A
 
 open Routing algebra n
 open Metrics isRoutingAlgebra isPathAlgebra A
@@ -305,7 +305,7 @@ r-isUltraMetric = record
   ; triangle     = r-maxTriIneq
   }
 
-r-ultraMetric : UltraMetric b ℓ
+r-ultraMetric : UltraMetric a ℓ
 r-ultraMetric = record
   { d             = r
   ; isUltraMetric = r-isUltraMetric

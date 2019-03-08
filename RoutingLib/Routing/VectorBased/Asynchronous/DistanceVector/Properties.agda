@@ -50,7 +50,7 @@ F′-cong-∉ e p {X} {Y} i∉p j = foldr⁺ _≈_ ⊕-cong ≈-refl (tabulate�
 F′-inactive : ∀ e p X → WellFormed p (F′ e p X)
 F′-inactive e p X {i} i∉p j with j ≟𝔽 i
 ... | yes j≡i = foldr-zeroʳ ⊕-magma ⊕-zeroʳ (tabulate λ k → Aₜ e p i k ▷ X k j)
-... | no  j≢i = foldr-constant ⊕-magma (⊕-idem ∞) (All.tabulate⁺ (λ k → Aₜ-reject network e i k (inj₁ i∉p) (X k j)))
+... | no  j≢i = foldr-constant ⊕-magma (⊕-idem ∞#) (All.tabulate⁺ (λ k → Aₜ-reject network e i k (inj₁ i∉p) (X k j)))
 
 ------------------------------------------------------------------------
 -- States in which the inactive nodes are actually inactive

@@ -22,7 +22,7 @@ open import RoutingLib.Routing using (Network)
 open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
 import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra as PathAlgebraProperties
-import RoutingLib.Routing.Algebra.Consistency as Consistency
+import RoutingLib.Routing.Algebra.Construct.Consistent as Consistent
 import RoutingLib.Routing.VectorBased.Core as VectorBasedRoutingCore
 import RoutingLib.Routing.VectorBased.Asynchronous as PathVector
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Properties as DistanceVectorProperties
@@ -62,7 +62,7 @@ module _ {e : Epoch} {p : Subset n} where
   open Metrics isRoutingAlgebra isPathAlgebra A public
   open MetricProperties isRoutingAlgebra isPathAlgebra A 1≤n p public
 
-  open Consistency isRoutingAlgebra isPathAlgebra A
+  open Consistent isRoutingAlgebra isPathAlgebra A
   open VectorBasedRoutingCore algebraᶜ Aᶜ using () renaming (F to Fᶜ)
   open PathVectorProperties isRoutingAlgebra isPathAlgebra A
 

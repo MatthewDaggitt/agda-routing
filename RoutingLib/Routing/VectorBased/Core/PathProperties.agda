@@ -25,7 +25,7 @@ open import RoutingLib.Data.Path.CertifiedI.Properties using (∉ₚ-resp-≈ₚ
 open import RoutingLib.Routing using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra as PathAlgebraProperties
-import RoutingLib.Routing.Algebra.Consistency as Consistency
+import RoutingLib.Routing.Algebra.Construct.Consistent as Consistent
 import RoutingLib.Routing.VectorBased.Synchronous as VectorBased
 import RoutingLib.Routing.VectorBased.Core.Properties as CoreProperties
 
@@ -39,7 +39,7 @@ module RoutingLib.Routing.VectorBased.Core.PathProperties
 open RawRoutingAlgebra algebra
 open IsCertifiedPathAlgebra isPathAlgebra
 open PathAlgebraProperties isRoutingAlgebra isPathAlgebra
-open Consistency isRoutingAlgebra isPathAlgebra A
+open Consistent isRoutingAlgebra isPathAlgebra A
 
 open VectorBased algebra A
 open CoreProperties isRoutingAlgebra A
@@ -71,7 +71,7 @@ abstract
   p[FXᵢⱼ]≈[]⇒i≡j : ∀ X i j → path (F X i j) ≈ₚ valid [] → i ≡ j
   p[FXᵢⱼ]≈[]⇒i≡j X i j p[FXᵢⱼ]≈[] with FXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
   ... | inj₂ FXᵢⱼ≈Iᵢⱼ          = p[Iᵢⱼ]≈[]⇒i≡j (≈ₚ-trans (path-cong (≈-sym FXᵢⱼ≈Iᵢⱼ)) p[FXᵢⱼ]≈[])
-  ... | inj₁ (k , FXᵢⱼ≈AᵢₖXₖⱼ) with A i k ▷ X k j ≟ ∞
+  ... | inj₁ (k , FXᵢⱼ≈AᵢₖXₖⱼ) with A i k ▷ X k j ≟ ∞#
   ...   | yes AᵢₖXₖⱼ≈∞ = contradiction
     (≈ₚ-trans (≈ₚ-trans (≈ₚ-sym (r≈∞⇒path[r]≈∅ AᵢₖXₖⱼ≈∞)) (path-cong (≈-sym FXᵢⱼ≈AᵢₖXₖⱼ))) p[FXᵢⱼ]≈[]) λ()
   ...   | no  AᵢₖXₖⱼ≉∞ with path (X k j) | inspect path (X k j)
@@ -89,7 +89,7 @@ abstract
   alignPathExtension : ∀ (X : RoutingMatrix) i j k {u v p e⇿p i∉p} →
             path (A i k ▷ X k j) ≈ₚ valid ((u , v) ∷ p ∣ e⇿p ∣ i∉p) →
             i ≡ u × k ≡ v × path (X k j) ≈ₚ valid p
-  alignPathExtension X i j k p[AᵢₖXₖⱼ]≈uv∷p with A i k ▷ X k j ≟ ∞
+  alignPathExtension X i j k p[AᵢₖXₖⱼ]≈uv∷p with A i k ▷ X k j ≟ ∞#
   ...     | yes AᵢₖXₖⱼ≈∞ = contradiction (
     ≈ₚ-trans (≈ₚ-sym p[AᵢₖXₖⱼ]≈uv∷p) (
       ≈ₚ-trans (path-cong AᵢₖXₖⱼ≈∞) p[∞]≈∅)) λ()

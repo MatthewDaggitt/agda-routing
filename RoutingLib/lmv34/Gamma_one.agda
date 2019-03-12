@@ -12,7 +12,7 @@ module RoutingLib.lmv34.Gamma_one
   {n} (A : AdjacencyMatrix algebra n)
   where
 
-open Routing algebra n
+open Routing algebra n renaming (I to M)
 open RawRoutingAlgebra algebra
 open Gamma_one_Algebra isRoutingAlgebra n
 
@@ -27,7 +27,7 @@ record Γ₁-State : Set b where
 -- Computation model
 
 Γ₁ : RoutingVector → RoutingVector
-Γ₁ V = A 〚 V 〛 ⊕ᵥ ~ I
+Γ₁ V = A 〚 V 〛 ⊕ᵥ ~ M
 
 Γ₁-Model : Γ₁-State → Γ₁-State
 Γ₁-Model State = record { V = Γ₁ (Γ₁-State.V State) }

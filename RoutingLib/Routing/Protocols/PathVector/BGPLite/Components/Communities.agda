@@ -15,7 +15,7 @@ open import RoutingLib.Data.Vec.Relation.Lex
   using (Lex; ≤-isDecTotalOrder; ≤-minimum)
 open import RoutingLib.Data.Bool
 
-module RoutingLib.Routing.Protocols.BGPLite.Components.Communities where
+module RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Communities where
 
 abstract
 

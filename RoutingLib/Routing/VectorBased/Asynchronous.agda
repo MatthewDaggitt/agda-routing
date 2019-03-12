@@ -46,7 +46,7 @@ F′-isAsyncIterable = record
   ; F-cong            = F′-cong
   }
 
-F∥ : AsyncIterable b ℓ n
+F∥ : AsyncIterable a ℓ n
 F∥ = record
   { isAsyncIterable = F′-isAsyncIterable
   }

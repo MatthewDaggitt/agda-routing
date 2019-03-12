@@ -15,19 +15,20 @@ open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.Fin.Subset using (Nonfull)
+open import RoutingLib.Data.Fin.Subset.Properties using (Nonfull-witness)
 open import RoutingLib.Data.Fin.Subset.Cutset
 open import RoutingLib.Data.List using (allFinPairs)
 import RoutingLib.Data.List.Extrema as Extrema
 open import RoutingLib.Data.Path.CertifiedI.All
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
-open import RoutingLib.Routing.Model using (RoutingMatrix; AdjacencyMatrix)
-import RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.Prelude as Prelude
-import RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.Step1_NodeSets as Step1_NodeSets
+open import RoutingLib.Routing using (RoutingMatrix; AdjacencyMatrix)
+import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Prelude as Prelude
+import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step1_NodeSets as Step1_NodeSets
 
-module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.Step2_ConvergedSubtree
+module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step2_ConvergedSubtree
   {a b ℓ n-1} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (isPathAlgebra : IsCertifiedPathAlgebra algebra (suc n-1))
   (isIncreasing : IsIncreasing algebra)
   (A : AdjacencyMatrix algebra (suc n-1))
@@ -37,14 +38,14 @@ module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.St
   {C : Subset (suc n-1)}
   (j∈C : j ∈ C)
   (C-nonFull : Nonfull C)
-  (C⊆𝓒ₜ : ∀ {i} → i ∈ C → i ∈ᵤ Step1_NodeSets.𝓒 isPathAlgebra A X j (suc t-1))
+  (C⊆𝓒ₜ : ∀ {i} → i ∈ C → i ∈ᵤ Step1_NodeSets.𝓒 isRoutingAlgebra isPathAlgebra A X j (suc t-1))
   where
 
-  open Prelude isPathAlgebra A
+  open Prelude isRoutingAlgebra isPathAlgebra A
 
 
   open Notation X j
-  open Step1_NodeSets isPathAlgebra A X j
+  open Step1_NodeSets isRoutingAlgebra isPathAlgebra A X j
 
   open Extrema ≤₊-totalOrder
 
@@ -62,10 +63,10 @@ module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.St
   -- At least one edge entering the fixed set exists
 
     eₐ : Edge
-    eₐ = (proj₁ C-nonFull , j)
+    eₐ = (proj₁ (Nonfull-witness C-nonFull) , j)
 
     eₐ↷C : eₐ ↷ C
-    eₐ↷C = (proj₂ C-nonFull , j∈C)
+    eₐ↷C = (proj₂ (Nonfull-witness C-nonFull) , j∈C)
 
   -- We can therefore find the minimum weight edge out of the fixed set
 
@@ -136,8 +137,8 @@ module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.St
                   eₘᵢₙ ≤[ t + s ] (i , k)
   ∈𝓡-invalid s {i} {k} p[σᵗ⁺ˢXₖⱼ]≈∅ = begin
     A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + s) X kₘᵢₙ j ≤⟨ ⊕-identityˡ _ ⟩
-    ∞                                ≈⟨ ≈-sym (▷-fixedPoint (A i k)) ⟩
-    A i    k    ▷ ∞                  ≈⟨ ▷-cong (A i k) (≈-sym (path[r]≈∅⇒r≈∞ p[σᵗ⁺ˢXₖⱼ]≈∅)) ⟩
+    ∞#                               ≈⟨ ≈-sym (▷-fixedPoint (A i k)) ⟩
+    A i    k    ▷ ∞#                 ≈⟨ ▷-cong (A i k) (≈-sym (path[r]≈∅⇒r≈∞ p[σᵗ⁺ˢXₖⱼ]≈∅)) ⟩
     A i    k    ▷ σ^ (t + s) X k j   ∎
     where open POR ≤₊-poset
 
@@ -145,7 +146,7 @@ module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.St
                   path (σ^ (t + s) X k j) ≈ₚ valid [] →
                   eₘᵢₙ ≤[ t + s ] (i , k)
   ∈𝓡-trivial s {i} {k} k∉C p[σᵗ⁺ˢXₖⱼ]≈[]
-    with p[σXᵢⱼ]≈[]⇒i≡j (σ^ (t-1 + s) X) k j p[σᵗ⁺ˢXₖⱼ]≈[]
+    with p[FXᵢⱼ]≈[]⇒i≡j (σ^ (t-1 + s) X) k j p[σᵗ⁺ˢXₖⱼ]≈[]
   ... | refl = contradiction j∈C k∉C
 
   ∈𝓡 : ∀ s i {k} → k ∈ᵤ 𝓡 (t + s) → k ∉ C →

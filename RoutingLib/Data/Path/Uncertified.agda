@@ -1,3 +1,8 @@
+
+
+module RoutingLib.Data.Path.Uncertified where
+
+open import Algebra.FunctionProperties
 open import Data.Fin using (Fin; _≤_) renaming (zero to fzero; suc to fsuc)
 open import Data.Maybe using (Maybe; just; nothing)
 open import Data.Nat using (ℕ; _<_; zero; suc; _≟_)
@@ -10,7 +15,6 @@ open import Relation.Binary using (Rel)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
 import Relation.Binary.Construct.NonStrictToStrict as ToStrict
 
-module RoutingLib.Data.Path.Uncertified where
 
 ------------------------------------------------------------------------------
 -- Vertices and edges

@@ -5,6 +5,7 @@ open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (_,_)
 open import Relation.Binary.Lattice using (Minimum; Maximum)
 
+open import RoutingLib.Algebra.Structures
 open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Relation.Binary
 
@@ -116,6 +117,13 @@ module _ {ℓ₂} {_≈_ : Rel A ℓ₂} where
          ∀ {⊥} → Minimum _≤_ ⊥ → Zero _≈_ ⊥ min
   zero refl antisym bot = (zeroˡ refl antisym bot , zeroʳ refl antisym bot)
 
+  isMagma : IsPartialOrder _≈_ _≤_ →
+            IsMagma _≈_ min
+  isMagma ord = record
+    { isEquivalence = isEquivalence
+    ; ∙-cong = cong Eq.sym antisym ≤-resp-≈
+    } where open IsPartialOrder ord
+  
   isSemigroup : IsPartialOrder _≈_ _≤_ →
                 IsSemigroup _≈_ min
   isSemigroup ord = record

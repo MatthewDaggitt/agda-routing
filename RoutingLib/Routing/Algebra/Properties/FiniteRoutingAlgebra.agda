@@ -67,4 +67,4 @@ H : ℕ
 H = length routes
 
 1≤H : 1 ≤ H
-1≤H = ∈-length S (∈-routes ∞)
+1≤H = ∈-length S (∈-routes ∞#)

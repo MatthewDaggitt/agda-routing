@@ -9,7 +9,7 @@
 open import RoutingLib.Routing using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra
 
-module RoutingLib.Routing.Algebra.Consistency
+module RoutingLib.Routing.Algebra.Construct.Consistent
   {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
@@ -81,7 +81,7 @@ open RoutingAlgebraProperties isRoutingAlgebra
 0ᶜ : 𝑪 0#
 0ᶜ = weight-cong p[0]≈[]
 
-∞ᶜ : 𝑪 ∞
+∞ᶜ : 𝑪 ∞#
 ∞ᶜ = weight-cong p[∞]≈∅
 
 ⊕-pres-𝑪 : ∀ {r s} → 𝑪 r → 𝑪 s → 𝑪 (r ⊕ s)
@@ -90,7 +90,7 @@ open RoutingAlgebraProperties isRoutingAlgebra
 ... | inj₂ r⊕s≈s = 𝑪-cong (≈-sym r⊕s≈s) sᶜ
 
 ▷-pres-𝑪 : ∀ i j {r} → 𝑪 r → 𝑪 (A i j ▷ r)
-▷-pres-𝑪 i j {r} rᶜ with A i j ▷ r ≟ ∞
+▷-pres-𝑪 i j {r} rᶜ with A i j ▷ r ≟ ∞#
 ... | yes Aᵢⱼ▷r≈∞ = 𝑪-cong (≈-sym Aᵢⱼ▷r≈∞) ∞ᶜ
 ... | no  Aᵢⱼ▷r≉∞ with path r | inspect path r
 ...   | invalid | [ pᵣ≡∅ ] = contradiction (p[r]≡∅⇒f▷r≈∞ (A i j) pᵣ≡∅) Aᵢⱼ▷r≉∞
@@ -110,7 +110,7 @@ open RoutingAlgebraProperties isRoutingAlgebra
 weightᶜ : ∀ p → 𝑪 (weight A p)
 weightᶜ invalid                            = ∞ᶜ
 weightᶜ (valid [])                         = 0ᶜ
-weightᶜ (valid ((i , j) ∷ p ∣ e⇿p ∣ e∉p)) with A i j ▷ weight A (valid p) ≟ ∞
+weightᶜ (valid ((i , j) ∷ p ∣ e⇿p ∣ e∉p)) with A i j ▷ weight A (valid p) ≟ ∞#
 ... | yes Aᵢⱼ▷wₚ≈∞ = 𝑪-cong (≈-sym Aᵢⱼ▷wₚ≈∞) ∞ᶜ
 ... | no  Aᵢⱼ▷wₚ≉∞ with path (weight A (valid p)) | inspect path (weight A (valid p))
 ...   | invalid | [ p[wₚ]≡∅ ] = 𝑪-cong (≈-sym (p[r]≡∅⇒f▷r≈∞ (A i j) p[wₚ]≡∅)) ∞ᶜ
@@ -126,7 +126,7 @@ weightᶜ (valid ((i , j) ∷ p ∣ e⇿p ∣ e∉p)) with A i j ▷ weight A (v
   where open EqReasoning S
 
 sizeⁱ-incr : ∀ {i j : Fin n} {r} {f : Step i j} → 𝑰 (f ▷ r) → suc (size r) ≡ size (f ▷ r)
-sizeⁱ-incr {i} {j} {r} {f} f▷rⁱ with f ▷ r ≟ ∞
+sizeⁱ-incr {i} {j} {r} {f} f▷rⁱ with f ▷ r ≟ ∞#
 ... | yes f▷r≈∞ = contradiction (𝑪-cong (≈-sym f▷r≈∞) ∞ᶜ) f▷rⁱ
 ... | no  f▷r≉∞ with path r | inspect path r
 ...   | invalid | [ pᵣ≡∅ ] = contradiction (p[r]≡∅⇒f▷r≈∞ f pᵣ≡∅) f▷r≉∞
@@ -177,8 +177,8 @@ C0# = 0# , 0ᶜ
 
 -- The invalid route is simply taken from the original algebra
 
-C∞ : CRoute
-C∞ = ∞ , ∞ᶜ
+C∞# : CRoute
+C∞# = ∞# , ∞ᶜ
 
 -- Equality over consistent routes is equality on the route
 
@@ -204,7 +204,7 @@ _⊕ᶜ_ : Op₂ CRoute
 infix 6 _▷ᶜ_
 
 _▷ᶜ_ : ∀{n} {i j : Fin n} → CStep i j → CRoute → CRoute
-(nothing       , _) ▷ᶜ (r , rᶜ) = C∞
+(nothing       , _) ▷ᶜ (r , rᶜ) = C∞#
 (valid (k , l) , _) ▷ᶜ (r , rᶜ) = A k l ▷ r , ▷-pres-𝑪 k l rᶜ
 -- As mentioned the invalid arc weight is simply `nothing`
 
@@ -234,12 +234,12 @@ DSᶜ = On.decSetoid {B = CRoute} DS proj₁
 ▷ᶜ-cong (nothing       , _) = λ _ → ≈-refl
 ▷ᶜ-cong (valid (k , l) , _) = ▷-cong (A k l)
 
-f∞ᶜ-reject : ∀ {n} (i j : Fin n) → ∀ x → (f∞ᶜ i j) ▷ᶜ x ≈ᶜ C∞
+f∞ᶜ-reject : ∀ {n} (i j : Fin n) → ∀ x → (f∞ᶜ i j) ▷ᶜ x ≈ᶜ C∞#
 f∞ᶜ-reject _ _ _ = ≈-refl
 
 -- Finally the raw routing algebra may be formed
 
-algebraᶜ : RawRoutingAlgebra 0ℓ (b ⊔ ℓ) ℓ
+algebraᶜ : RawRoutingAlgebra (a ⊔ ℓ) 0ℓ ℓ
 algebraᶜ = record
   { Step               = CStep
   ; Route              = CRoute
@@ -247,7 +247,7 @@ algebraᶜ = record
   ; _⊕_                = _⊕ᶜ_
   ; _▷_                = _▷ᶜ_
   ; 0#                 = C0#
-  ; ∞                  = C∞
+  ; ∞#                 = C∞#
   ; f∞                 = f∞ᶜ
   ; ≈-isDecEquivalence = ≈ᶜ-isDecEquivalence
   ; ⊕-cong             = ⊕-cong
@@ -270,10 +270,10 @@ algebraᶜ = record
 ⊕ᶜ-zeroʳ : RightZero C0# _⊕ᶜ_
 ⊕ᶜ-zeroʳ _ = ⊕-zeroʳ _
 
-⊕ᶜ-identityʳ : RightIdentity C∞ _⊕ᶜ_
+⊕ᶜ-identityʳ : RightIdentity C∞# _⊕ᶜ_
 ⊕ᶜ-identityʳ _ = ⊕-identityʳ _
 
-▷ᶜ-fixedPoint : ∀ {n} {i j : Fin n} (f : CStep i j) → f ▷ᶜ C∞ ≈ᶜ C∞
+▷ᶜ-fixedPoint : ∀ {n} {i j : Fin n} (f : CStep i j) → f ▷ᶜ C∞# ≈ᶜ C∞#
 ▷ᶜ-fixedPoint (nothing       , _) = ≈-refl
 ▷ᶜ-fixedPoint (valid (k , l) , _) = ▷-fixedPoint (A k l)
 

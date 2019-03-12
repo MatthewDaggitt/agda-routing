@@ -2,7 +2,7 @@ open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (Subset; ⁅_⁆; ∣_∣; _∪_; _∈_; _∉_)
 open import Data.Fin.Subset.Properties using (x∈⁅x⁆; x∈p∪q⁺; x∈p∪q⁻; x∈⁅y⁆⇒x≡y; ∈⊤; ∣⁅x⁆∣≡1)
 open import Data.Nat as ℕ using (ℕ; zero; suc; z≤n; s≤s; _+_; _^_; _*_; _<_; _≤_)
-open import Data.Nat.Properties using (≤⇒pred≤; +-comm; +-suc; *-identityʳ; ≤-refl; <⇒≢; ≤+≢⇒<; ≤-irrelevance)
+open import Data.Nat.Properties
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (proj₁)
 open import Function using (_∘_)
@@ -17,27 +17,27 @@ open import RoutingLib.Data.Fin.Subset.Properties
   using (∣p∣<n⇒Nonfull; ∣p∪⁅i⁆∣≡1+∣p∣; i∉⁅j⁆; Nonfull⁅i⁆′; x∉p∪q⁺; ∣p∣≡n⇒p≡⊤)
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
-open import RoutingLib.Routing.Model using (AdjacencyMatrix)
-import RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.Prelude as Prelude
-import RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.Step1_NodeSets as Step1_NodeSets
-import RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.Step2_ConvergedSubtree as Step2_ConvergedSubtree
-import RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.Step4_InductiveStep as Step4_InductiveStep
+open import RoutingLib.Routing using (AdjacencyMatrix)
+import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Prelude as Prelude
+import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step1_NodeSets as Step1_NodeSets
+import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step2_ConvergedSubtree as Step2_ConvergedSubtree
+import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step4_InductiveStep as Step4_InductiveStep
 
-module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.Step5_Proof
+module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step5_Proof
   {a b ℓ n-1} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (isPathAlgebra : IsCertifiedPathAlgebra algebra (suc n-1))
   (isIncreasing : IsIncreasing algebra)
   (A : AdjacencyMatrix algebra (suc n-1))
   where
 
-  open Prelude isPathAlgebra A
+  open Prelude isRoutingAlgebra isPathAlgebra A
 
   module _ (X : RoutingMatrix) (j : Fin n) where
 
-    open Step1_NodeSets isPathAlgebra A X j
-    open Step2_ConvergedSubtree isPathAlgebra isIncreasing A X j
-    open Step4_InductiveStep isPathAlgebra isIncreasing A X j
+    open Step1_NodeSets isRoutingAlgebra isPathAlgebra A X j
+    open Step2_ConvergedSubtree isRoutingAlgebra isPathAlgebra isIncreasing A X j
+    open Step4_InductiveStep isRoutingAlgebra isPathAlgebra isIncreasing A X j
 
     mutual
 
@@ -99,7 +99,7 @@ module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.St
       iᵗʰ∈Cₖ i      i<n (suc k)  k<n z≤n = j∈C (suc k) k<n
       iᵗʰ∈Cₖ (suc i) i<n zero    k<n ()
       iᵗʰ∈Cₖ (suc i) i<n (suc k) k<n (s≤s i≤k) with i ℕ.≟ k
-      ... | no  i≢k = x∈p∪q⁺ (inj₁ (iᵗʰ∈Cₖ (suc i) i<n k (≤⇒pred≤ k<n) (≤+≢⇒< i≤k i≢k)))
+      ... | no  i≢k = x∈p∪q⁺ (inj₁ (iᵗʰ∈Cₖ (suc i) i<n k (≤⇒pred≤ k<n) (≤∧≢⇒< i≤k i≢k)))
       ... | yes refl with ≤-irrelevance k<n i<n
       ...   | refl = x∈p∪q⁺ (inj₂ (x∈⁅x⁆ (iᵗʰ (suc i) i<n)))
 
@@ -134,6 +134,9 @@ module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.St
       v : n-1 + suc (n-1 * n) ≡ n ^ 2
       v rewrite *-identityʳ n-1 = +-suc n-1 _
 
-  n²-convergence : ∀ X t → σ^ (n ^ 2 + t) X ≈ₘ σ^ (n ^ 2) X
-  n²-convergence X t i j = proj₁ (Cₙ₋₁-converged X j (Cₙ₋₁-complete X j i)) t
+  Tᶜᵒⁿᵛ : ℕ → ℕ
+  Tᶜᵒⁿᵛ n = n ^ 2
+  
+  Tᶜᵒⁿᵛ-converged : ∀ X t → σ^ (Tᶜᵒⁿᵛ n + t) X ≈ₘ σ^ (Tᶜᵒⁿᵛ n) X
+  Tᶜᵒⁿᵛ-converged X t i j = proj₁ (Cₙ₋₁-converged X j (Cₙ₋₁-complete X j i)) t
 

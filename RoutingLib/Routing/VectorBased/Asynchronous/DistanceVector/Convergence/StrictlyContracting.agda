@@ -81,11 +81,11 @@ module _ {n} (A : AdjacencyMatrix algebra n) where
       F X i j       ∎))
       where open POR ≤₊-poset
 
-    Xₖⱼ≉∞ : X k j ≉ ∞
+    Xₖⱼ≉∞ : X k j ≉ ∞#
     Xₖⱼ≉∞ Xₖⱼ≈∞ = FYᵢⱼ≰AᵢₖXₖⱼ (begin
       F Y i j       ≤⟨ ⊕-identityˡ _ ⟩
-      ∞             ≈⟨ ≈-sym (▷-fixedPoint (A i k)) ⟩
-      A i k ▷ ∞     ≈⟨ ▷-cong (A i k) (≈-sym Xₖⱼ≈∞) ⟩
+      ∞#            ≈⟨ ≈-sym (▷-fixedPoint (A i k)) ⟩
+      A i k ▷ ∞#    ≈⟨ ▷-cong (A i k) (≈-sym Xₖⱼ≈∞) ⟩
       A i k ▷ X k j ∎)
       where open POR ≤₊-poset
 

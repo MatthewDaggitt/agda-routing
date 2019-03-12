@@ -17,7 +17,7 @@ open Gamma_zero_Algebra algebra n
 ------------------------------------
 -- State model
 
-record Γ₀-State : Set b where
+record Γ₀-State : Set a where
   field
     Y : RoutingMatrix
 

@@ -19,19 +19,19 @@ open import RoutingLib.Data.Path.CertifiedI.All
 open import RoutingLib.Data.Path.CertifiedI.Properties
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Algebra.CertifiedPathAlgebra
-open import RoutingLib.Routing.Model using (AdjacencyMatrix; RoutingMatrix)
-import RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.Prelude as Prelude
+open import RoutingLib.Routing using (AdjacencyMatrix; RoutingMatrix)
+import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Prelude as Prelude
 
-module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.Step1_NodeSets
+module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step1_NodeSets
   {a b ℓ n-1} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (isPathAlgebra : IsCertifiedPathAlgebra algebra (suc n-1))
   (A : AdjacencyMatrix algebra (suc n-1))
   (X : RoutingMatrix   algebra (suc n-1))
   (j : Fin (suc n-1))
   where
 
-  open Prelude isPathAlgebra A
+  open Prelude isRoutingAlgebra isPathAlgebra A
 
   ------------------------------------------------------------------------------
   -- Fixed vertices (vertices that don't change their value after time t)
@@ -40,7 +40,7 @@ module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.St
   𝓕 t i = ∀ s → σ^ (t + s) X i j ≈ σ^ t X i j
 
   j∈𝓕₁ : j ∈ᵤ 𝓕 1
-  j∈𝓕₁ s = σXᵢᵢ≈σYᵢᵢ (σ^ s X) X j
+  j∈𝓕₁ s = FXᵢᵢ≈FYᵢᵢ (σ^ s X) X refl
 
   𝓕ₜ⊆𝓕ₜ₊ₛ : ∀ t s {i} → i ∈ᵤ 𝓕 t → i ∈ᵤ 𝓕 (t + s)
   𝓕ₜ⊆𝓕ₜ₊ₛ t s {i} i∈Fₜ r = begin
@@ -56,7 +56,7 @@ module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.St
                       path (σ^ t X k j) ≈ₚ valid p
   𝓕-alignment t {i} i∈Sₜ p[σXᵢⱼ]≈uv∷p
     with ≈-reflexive (cong (λ t → σ^ t X i j) (+-comm 1 t))
-  ... | σ¹⁺ᵗ≈σᵗ⁺¹ with p[σXᵢⱼ]⇒σXᵢⱼ≈AᵢₖXₖⱼ (σ^ t X) i j (≈ₚ-trans (path-cong (≈-trans σ¹⁺ᵗ≈σᵗ⁺¹ (i∈Sₜ 1))) p[σXᵢⱼ]≈uv∷p)
+  ... | σ¹⁺ᵗ≈σᵗ⁺¹ with p[FXᵢⱼ]⇒FXᵢⱼ≈AᵢₖXₖⱼ (σ^ t X) i j (≈ₚ-trans (path-cong (≈-trans σ¹⁺ᵗ≈σᵗ⁺¹ (i∈Sₜ 1))) p[σXᵢⱼ]≈uv∷p)
   ...   | i≡l , σ¹⁺ᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ , p[σᵗXₖⱼ]≈p = i≡l , ≈-trans (≈-sym (i∈Sₜ 1)) (≈-trans (≈-sym σ¹⁺ᵗ≈σᵗ⁺¹) σ¹⁺ᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ) , p[σᵗXₖⱼ]≈p
 
   ------------------------------------------------------------------------------
@@ -71,7 +71,7 @@ module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.St
 
   j∈𝓒₁ : j ∈ᵤ 𝓒 1
   j∈𝓒₁ = j∈𝓕₁ , Allᵥ-resp-≈ₚ (valid []) (≈ₚ-sym (begin
-    path (σ X j j) ≈⟨ path-cong (σXᵢᵢ≈Iᵢᵢ X j) ⟩
+    path (F X j j) ≈⟨ path-cong (FXᵢᵢ≈Iᵢᵢ X j) ⟩
     path (I j j)   ≡⟨ cong path (Iᵢᵢ≡0# j) ⟩
     path 0#        ≈⟨ p[0]≈[] ⟩
     valid []       ∎))
@@ -133,7 +133,7 @@ module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.St
   𝓡-alignment t {i} i∈R₁₊ₜ {k} p[σ¹⁺ᵗXᵢⱼ]≈uv∷p
     with Allₑ-resp-≈ₚ i∈R₁₊ₜ p[σ¹⁺ᵗXᵢⱼ]≈uv∷p
   ... | valid (σ¹⁺ᵗXᵢⱼ≈Aᵢₖσ¹⁺ᵗXₖⱼ ∷ _)
-      with p[σXᵢⱼ]⇒σXᵢⱼ≈AᵢₖXₖⱼ (σ^ t X) i j p[σ¹⁺ᵗXᵢⱼ]≈uv∷p
+      with p[FXᵢⱼ]⇒FXᵢⱼ≈AᵢₖXₖⱼ (σ^ t X) i j p[σ¹⁺ᵗXᵢⱼ]≈uv∷p
   ...   | refl , _ , _
         with alignPathExtension (σ^ (suc t) X) i j k
           (≈ₚ-trans (path-cong (≈-sym σ¹⁺ᵗXᵢⱼ≈Aᵢₖσ¹⁺ᵗXₖⱼ)) p[σ¹⁺ᵗXᵢⱼ]≈uv∷p)
@@ -171,7 +171,7 @@ module RoutingLib.Routing.BellmanFord.Synchronous.Convergence.Rate.PathVector.St
   ... | invalid  | _ = contradiction invalid i∉R₁₊ₜ
   ... | valid [] | _ = contradiction (valid []) i∉R₁₊ₜ
   ... | valid ((_ , k) ∷ p ∣ k∉p ∣ e↔p) | [ p[σ¹⁺ᵗ]≡ik∷p ]
-    with p[σXᵢⱼ]⇒σXᵢⱼ≈AᵢₖXₖⱼ (σ^ t X) i j (≈ₚ-reflexive p[σ¹⁺ᵗ]≡ik∷p)
+    with p[FXᵢⱼ]⇒FXᵢⱼ≈AᵢₖXₖⱼ (σ^ t X) i j (≈ₚ-reflexive p[σ¹⁺ᵗ]≡ik∷p)
   ...   | refl , σ¹⁺ᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ , p[σᵗXₖⱼ]≈p =
     k , p , k∉p , e↔p , ≈ₚ-refl , σ¹⁺ᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ , p[σᵗXₖⱼ]≈p
 

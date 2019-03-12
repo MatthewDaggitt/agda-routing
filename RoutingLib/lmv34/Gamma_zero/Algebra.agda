@@ -19,7 +19,7 @@ _⊕ₘ_ : Op₂ RoutingMatrix
 -- Big choice operator
 infix 5 ⨁
 ⨁ : ∀ {k} → (Fin k → Route) → Route
-⨁ iter = foldr _⊕_ ∞ (tabulate iter)
+⨁ iter = foldr _⊕_ ∞# (tabulate iter)
 
 -- Matrix application
 infix 11 _〔_〕

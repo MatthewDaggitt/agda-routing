@@ -36,7 +36,7 @@ private _⊛_ : {n : ℕ} → Vec n → Vec n → Vec n
 _⊛_ u v = λ i → u i * v i
 
 -- Standard dot product on vectors
-private _∙_ : {n : ℕ} → Vec n → Vec n → C
+_∙_ : {n : ℕ} → Vec n → Vec n → C
 _∙_ u v = ∑ (λ i → u i *  v i)
 
 -- Matrix addition and multiplication:

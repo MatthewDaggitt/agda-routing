@@ -31,7 +31,7 @@ Aˢʷ : RawRoutingAlgebra 0ℓ 0ℓ 0ℓ
 Aˢʷ = Lex Aʷⁱᵈᵉˢᵗ Aˢʰᵒʳᵗᵉˢᵗ
 
 isRoutingAlgebra : IsRoutingAlgebra Aˢʷ
-isRoutingAlgebra = ?
+isRoutingAlgebra =  Lex.isRoutingAlgebra Aʷⁱᵈᵉˢᵗ Aˢʰᵒʳᵗᵉˢᵗ Widest.isRoutingAlgebra Shortest.isRoutingAlgebra
 
 {-
 ------------------------------------------------------------------------
@@ -90,4 +90,4 @@ Aˢʷ = record
   ; ▷-cong = λ {n} {i} {j} f → cong (_▷_ {n} {i} {j} f)
   ; f∞-reject = f∞-reject
   }
--}
+-} 

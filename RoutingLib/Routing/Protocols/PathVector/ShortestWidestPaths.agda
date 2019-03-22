@@ -28,11 +28,13 @@ open import RoutingLib.Routing.Algebra.Construct.AddPaths
 
 open import RoutingLib.Routing.Protocols.DistanceVector.ShortestWidestPaths
 
+open IsRoutingAlgebra isRoutingAlgebra 
+
 Aˢʷᵖ : RawRoutingAlgebra 0ℓ 0ℓ 0ℓ
-Aˢʷᵖ = AddPaths Aˢʷ
+Aˢʷᵖ = AddPaths Aˢʷ ⊕-assoc ⊕-sel ⊕-comm 
 
 Aˢʷᵖ-isPathAlgebra : IsPathAlgebra Aˢʷᵖ
-Aˢʷᵖ-isPathAlgebra = AddPaths.isPathAlgebra Aˢʷ
+Aˢʷᵖ-isPathAlgebra = AddPaths.isPathAlgebra Aˢʷ ⊕-assoc ⊕-sel ⊕-comm 
 
 
 open PathDistributivity Aˢʷᵖ-isPathAlgebra

@@ -4,7 +4,7 @@
 -- F∥ is an asynchronously metrically contracting operator (AMCO).
 --------------------------------------------------------------------------------
 
-open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Algebra 
 
 module RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.StrictlyContracting
   {a b ℓ}
@@ -31,10 +31,11 @@ open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning; n≢0⇒
 import RoutingLib.Function.Metric.Construct.Condition as Condition
 import RoutingLib.Relation.Binary.Reasoning.PartialOrder as POR
 open import RoutingLib.Relation.Nullary.Decidable using ([_,_])
+open import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right using () 
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix; Network)
-import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
+open import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra using (≤₊-antisym) -- tgg22 : explicity use this ≤₊-antisym
 import RoutingLib.Routing.VectorBased.Core as CoreVectorBasedRouting
 import RoutingLib.Routing.VectorBased.Core.Properties as CoreVectorBasedRoutingProperties
 import RoutingLib.Routing.VectorBased.Asynchronous as DistanceVectorRouting
@@ -44,9 +45,9 @@ import RoutingLib.Routing.VectorBased.Asynchronous as AsyncVectorBased
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Metrics as Metrics
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Properties as MetricsProperties
 
-open RawRoutingAlgebra algebra
+open RawRoutingAlgebra algebra hiding (≤₊-antisym) -- tgg22 : why is hiding needed? 
 open IsRoutingAlgebra isRoutingAlgebra
-open FiniteRoutingAlgebraProperties isRoutingAlgebra isFinite
+open FiniteRoutingAlgebraProperties isRoutingAlgebra isFinite hiding (≤₊-antisym) -- tgg22 : why is hiding needed? 
 
 open Metrics isRoutingAlgebra isFinite
 open MetricsProperties isRoutingAlgebra isFinite
@@ -72,10 +73,11 @@ module _ {n} (A : AdjacencyMatrix algebra n) where
     h (X k j) ⊔ h (Y k j)     ≡⟨ sym (r[x,y]≡hx⊔hy Xₖⱼ≉Yₖⱼ) ⟩
     r (X k j) (Y k j)         ≤⟨ d≤v k Xₖⱼ≉Yₖⱼ ⟩
     v                         ∎
-    where
+    where    
 
     FYᵢⱼ≰AᵢₖXₖⱼ : F Y i j ≰₊ A i k ▷ X k j
-    FYᵢⱼ≰AᵢₖXₖⱼ FYᵢⱼ≤AᵢₖXₖⱼ = FXᵢⱼ≉FYᵢⱼ (≤₊-antisym FXᵢⱼ≤FYᵢⱼ (begin
+    FYᵢⱼ≰AᵢₖXₖⱼ FYᵢⱼ≤AᵢₖXₖⱼ = FXᵢⱼ≉FYᵢⱼ (≤₊-antisym isRoutingAlgebra FXᵢⱼ≤FYᵢⱼ -- tgg22 : added isRoutingAlgebra argument 
+      (begin 
       F Y i j       ≤⟨ FYᵢⱼ≤AᵢₖXₖⱼ ⟩
       A i k ▷ X k j ≈⟨ ≈-sym FXᵢⱼ≈AᵢₖXₖⱼ ⟩
       F X i j       ∎))

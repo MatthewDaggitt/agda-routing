@@ -24,6 +24,7 @@ module RoutingLib.Routing.Algebra.Construct.Lex
   (algebraB : RawRoutingAlgebra a₂ b₂ ℓ₂)
   where
 
+
 ------------------------------------------------------------------------
 -- Prelude
 
@@ -33,7 +34,8 @@ private
   module B = RawRoutingAlgebra algebraB
 
   module LexProperties = OpLexProperties′ A.⊕-decMagma B.⊕-magma
-  
+
+
 ------------------------------------------------------------------------
 -- Algebra
 
@@ -87,10 +89,13 @@ Lex = record
   ; f∞-reject          = f∞-reject
   }
 
+
 open RawRoutingAlgebra Lex using (_≤₊_)
 
 ------------------------------------------------------------------------
 -- IsRoutinAlgebra is preserved
+
+
 
 isRoutingAlgebra : IsRoutingAlgebra algebraA →
                    IsRoutingAlgebra algebraB →
@@ -98,7 +103,7 @@ isRoutingAlgebra : IsRoutingAlgebra algebraA →
 isRoutingAlgebra A-isRA B-isRA = record
   { ⊕-sel         = LexProperties.sel      Aᵣ.⊕-sel      Bᵣ.⊕-sel
   ; ⊕-comm        = LexProperties.comm     Aᵣ.⊕-comm     Bᵣ.⊕-comm
-  ; ⊕-assoc       = LexProperties.assoc    Aᵣ.⊕-assoc    Bᵣ.⊕-assoc
+  ; ⊕-assoc       = LexProperties.assoc    Aᵣ.⊕-assoc    Bᵣ.⊕-assoc Aᵣ.⊕-sel Aᵣ.⊕-comm
   ; ⊕-zeroʳ       = LexProperties.zeroʳ     Aᵣ.⊕-zeroʳ     Bᵣ.⊕-zeroʳ
   ; ⊕-identityʳ   = LexProperties.identityʳ Aᵣ.⊕-identityʳ Bᵣ.⊕-identityʳ
   ; ▷-fixedPoint = λ {(f , g) → Aᵣ.▷-fixedPoint f , Bᵣ.▷-fixedPoint g}
@@ -106,6 +111,7 @@ isRoutingAlgebra A-isRA B-isRA = record
   module Aᵣ = IsRoutingAlgebra A-isRA
   module Bᵣ = IsRoutingAlgebra B-isRA
 
+{-
 ------------------------------------------------------------------------
 -- Other properties
 
@@ -188,6 +194,8 @@ bumpDistributivity2 A-comm A-sel {suc k} A-distrib B-distrib f {a , w} {b , x} _
   -- contradiction (A.≈-trans (A.⊕-cong c≈d A.≈-refl) (A-idem d)) c⊕d≉d
 ...       | no c⊕d≉c  | _ | _ | _ = ?
   -- contradiction (A.≈-trans (A.⊕-cong A.≈-refl (A.≈-sym c≈d)) (A-idem c)) c⊕d≉c
+
+-}
 
 {-
 with middle-1st-comp A-idem A-comm f[p⊕q]≤r r≤fp⊕fq (distrib-1st-comp A-sel A-distrib f)

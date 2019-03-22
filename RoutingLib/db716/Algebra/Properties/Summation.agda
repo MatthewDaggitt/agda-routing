@@ -21,7 +21,8 @@ open import Relation.Binary.EqReasoning setoid
 private Vec : ∀ (n : ℕ) →  Set c
 Vec n = Table C n
 
-∑ = foldr _+_ 0#
+∑ : ∀ {n} → Vec n → C
+∑ {n} v = foldr _+_ 0# v
 
 ∑0≈0 : ∀ {n : ℕ} (v : Vec n) → (∀ i → v i ≈ 0#) → ∑ v ≈ 0#
 ∑0≈0 {zero} v eq = refl
@@ -114,7 +115,7 @@ append v x (suc n) = v n
   ∑⋯∑ (λ v → c * (f v)) ∎
 
 ∑⋯∑-distʳ : ∀ {n k : ℕ} (f : Vec (Fin n) (suc k) → C) (c : C) → (∑⋯∑ f) * c ≈ ∑⋯∑ (λ v → (f v) * c)
-∑⋯∑-distʳ {n} {zero} f c = ∑-distʳ (curryⁿ f) c 
+∑⋯∑-distʳ {n} {zero} f c = ∑-distʳ (curryⁿ f) c
 ∑⋯∑-distʳ {n} {suc k} f c = begin
   (∑⋯∑ f) * c ≈⟨  ∑-distʳ (λ i → ∑⋯∑ (λ v → f (i ∷ v))) c ⟩
   ∑ (λ i → ∑⋯∑ (λ v → f (i ∷ v)) * c) ≈⟨ ∑-cong (λ i → ∑⋯∑-distʳ {n} {k} (λ v → f (i ∷ v)) c) ⟩
@@ -129,7 +130,7 @@ unadd' {ℕ.zero} {ℕ.zero} f (Fin.zero ∷ []) = 0# , +-comm _ _
 unadd' {ℕ.zero} {ℕ.zero} f ((suc ()) ∷ [])
 unadd' {suc n} {ℕ.zero} f (Fin.zero ∷ []) = ∑ (λ x → f ((suc x) ∷ [])) , +-comm _ _
 unadd' {suc n} {ℕ.zero} f (suc i ∷ []) = x' , proof
-  where x = unadd' (λ {(j ∷ []) → f ((suc j) ∷ [])}) (i ∷ []) 
+  where x = unadd' (λ {(j ∷ []) → f ((suc j) ∷ [])}) (i ∷ [])
         x' = f (Fin.zero ∷ []) + (proj₁ x)
         proof = begin
           f (Fin.zero ∷ []) + ∑ (λ x → f ((suc x) ∷ [])) ≈⟨  +-cong refl (proj₂ x) ⟩

@@ -48,7 +48,7 @@ module _ {n} (ψˢ : StaticSchedule n) where
   convert-isActiveIn : ∀ {s e i} →
                        Static._IsActiveIn_ ψˢ i [ s , e ] →
                        _IsActiveIn_ ψᵈ i [ s , e ]
-  convert-isActiveIn (Static.mkₐᵢ α+ s<α+ α+≤e i∈α+[i]) =
+  convert-isActiveIn (Static.mkₐ α+ s<α+ α+≤e i∈α+[i]) =
     mkₐᵢ refl α+ s<α+ α+≤e i∈α+[i]
 
   convert-activationPeriod : ∀ {s e} → Static.ActivationPeriod ψˢ [ s , e ] →

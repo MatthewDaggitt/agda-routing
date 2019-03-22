@@ -38,7 +38,7 @@ RoutingVector = Table (List (Fin n × Route)) n
 
 -- RoutingVector setoid
 ×-setoid = Fin-setoid n ×ₛ S
-open PermutationEq ×-setoid using (↭-setoid)
+open PermutationEq ×-setoid public
 open TableEquality ↭-setoid public using (𝕋ₛ) renaming
       ( _≈ₜ_             to _≈ᵥ_
       ; ≈ₜ-reflexive     to ≈ᵥ-reflexive
@@ -48,9 +48,6 @@ open TableEquality ↭-setoid public using (𝕋ₛ) renaming
       ; ≈ₜ-isEquivalence to ≈ᵥ-isEquivalence
       )
 𝕍ₛ = 𝕋ₛ n
-open EqReasoning 𝕍ₛ public
-    using (begin_ ; _∎ ; _≡⟨⟩_; _≡⟨_⟩_)
-    renaming (_≈⟨_⟩_ to _≈ᵥ⟨_⟩_)
 
 --------------------------------
 

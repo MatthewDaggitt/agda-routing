@@ -1,13 +1,12 @@
 open import Data.Nat hiding (_≤?_; _≟_; compare)
 open import Data.Vec
+open import Data.Vec.Properties using (≡-dec)
 open import Data.Sum
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; cong; isEquivalence)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
-
-open import RoutingLib.Data.Vec.Properties using (≡-dec)
 
 module RoutingLib.Data.Vec.Relation.Binary.Lex {a ℓ} {A : Set a} (_<_ : Rel A ℓ) where
 

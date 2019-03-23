@@ -4,64 +4,67 @@ open import Algebra.FunctionProperties hiding (Op₂)
 open import Relation.Binary
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
+open import Relation.Nullary.Construct.Add.Point using (Pointed; ∙; [_])
+import Relation.Binary.Construct.Add.Point.Equality as PointedEquality
 open import Data.Sum using (inj₁; inj₂)
-open import Data.Maybe using (Maybe; Eq; decSetoid)
+open import Data.Maybe using (Maybe)
 open import Data.Product using (_,_)
 
 open import RoutingLib.Algebra.FunctionProperties
 
-module RoutingLib.Algebra.Construct.Add.Zero {a} (A : Set a) (_⊕_ : Op₂ A) where
+module RoutingLib.Algebra.Construct.Add.Zero {a} {A : Set a} (_⊕_ : Op₂ A) where
 
-Aₑ : Set a
-Aₑ = Maybe A
+A∙ : Set a
+A∙ = Maybe A
 
-open import Data.Maybe using () renaming (nothing to e;   just to val) public
-open import Data.Maybe using () renaming (nothing to eEq; just to valEq) public
+infix 6 _⊕∙_
 
-infix 6 _⊕ₑ_
+_⊕∙_ : Op₂ A∙
+∙     ⊕∙ v       = ∙
+v     ⊕∙ ∙ = ∙
+[ v ] ⊕∙ [ w ]  = [ v ⊕ w ]
 
-_⊕ₑ_ : Op₂ Aₑ
-e      ⊕ₑ v       = e
-v      ⊕ₑ e = e
-val v  ⊕ₑ val w  = val (v ⊕ w)
+module _ {ℓ} {_≈_ : Rel A ℓ} (refl : Reflexive _≈_) where
 
-⊕ₑ-comm : ∀ {ℓ} {_≈_ : Rel A ℓ} → Commutative _≈_ _⊕_ → Commutative (Eq _≈_) _⊕ₑ_
-⊕ₑ-comm comm e       e       = Eq.nothing
-⊕ₑ-comm comm (val v) e       = Eq.nothing
-⊕ₑ-comm comm e       (val w) = e
-⊕ₑ-comm comm (val v) (val w) = val (comm v w)
+  open PointedEquality _≈_
 
-⊕ₑ-sel : ∀ {ℓ} {_≈_ : Rel A ℓ} → Selective _≈_ _⊕_ → Selective (Eq _≈_) _⊕ₑ_
-⊕ₑ-sel sel e       e       = inj₁ Eq.nothing
-⊕ₑ-sel sel (val v) e       = inj₂ Eq.nothing
-⊕ₑ-sel sel e       (val w) = inj₁ Eq.nothing
-⊕ₑ-sel sel (val v) (val w) with sel v w
-... | inj₁ v⊕w≈v = inj₁ (Eq.just v⊕w≈v)
-... | inj₂ v⊕w≈w = inj₂ (Eq.just v⊕w≈w)
+  ⊕∙-comm : Commutative _≈_ _⊕_ → Commutative _≈∙_ _⊕∙_
+  ⊕∙-comm comm ∙       ∙       = ∙≈∙
+  ⊕∙-comm comm [ v ] ∙       = ∙≈∙
+  ⊕∙-comm comm ∙     [ w ] = ∙≈∙
+  ⊕∙-comm comm [ v ] [ w ] = [ comm v w ]
 
-⊕ₑ-assoc : ∀ {ℓ} {_≈_ : Rel A ℓ} → Associative _≈_ _⊕_ → Associative (Eq _≈_) _⊕ₑ_
-⊕ₑ-assoc assoc e       e       e       = Eq.nothing
-⊕ₑ-assoc assoc e       e       (val w) = Eq.nothing
-⊕ₑ-assoc assoc e       (val v) e       = Eq.nothing
-⊕ₑ-assoc assoc e       (val v) (val w) = Eq.nothing
-⊕ₑ-assoc assoc (val u) e    e          = Eq.nothing
-⊕ₑ-assoc assoc (val u) e    (val w)    = Eq.nothing
-⊕ₑ-assoc assoc (val u) (val v) e       = Eq.nothing
-⊕ₑ-assoc assoc (val u) (val v) (val w) = Eq.just (assoc u v w)
+  ⊕∙-sel : Selective _≈_ _⊕_ → Selective _≈∙_ _⊕∙_
+  ⊕∙-sel sel ∙       ∙       = inj₁ ∙≈∙
+  ⊕∙-sel sel [ v ] ∙       = inj₂ ∙≈∙
+  ⊕∙-sel sel ∙       [ w ] = inj₁ ∙≈∙
+  ⊕∙-sel sel [ v ] [ w ] with sel v w
+  ... | inj₁ v⊕w≈v = inj₁ [ v⊕w≈v ]
+  ... | inj₂ v⊕w≈w = inj₂ [ v⊕w≈w ]
 
-e-zeₗ-⊕ₑ : ∀ {ℓ} {_≈_ : Rel A ℓ} → LeftZero (Eq _≈_) e _⊕ₑ_
-e-zeₗ-⊕ₑ e       = Eq.nothing
-e-zeₗ-⊕ₑ (val v) = Eq.nothing
+  ⊕∙-assoc : Associative _≈_ _⊕_ → Associative _≈∙_ _⊕∙_
+  ⊕∙-assoc assoc ∙     ∙     ∙     = ∙≈∙
+  ⊕∙-assoc assoc ∙     ∙     [ w ] = ∙≈∙
+  ⊕∙-assoc assoc ∙     [ v ] ∙     = ∙≈∙
+  ⊕∙-assoc assoc ∙     [ v ] [ w ] = ∙≈∙
+  ⊕∙-assoc assoc [ u ] ∙     ∙     = ∙≈∙
+  ⊕∙-assoc assoc [ u ] ∙     [ w ] = ∙≈∙
+  ⊕∙-assoc assoc [ u ] [ v ] ∙     = ∙≈∙
+  ⊕∙-assoc assoc [ u ] [ v ] [ w ] = [ assoc u v w ]
 
-e-zeᵣ-⊕ₑ : ∀ {ℓ} {_≈_ : Rel A ℓ} → RightZero (Eq _≈_) e _⊕ₑ_
-e-zeᵣ-⊕ₑ e       = Eq.nothing
-e-zeᵣ-⊕ₑ (val v) = Eq.nothing
+  ⊕∙-zeroˡ : LeftZero _≈∙_ ∙ _⊕∙_
+  ⊕∙-zeroˡ ∙     = ∙≈∙
+  ⊕∙-zeroˡ [ v ] = ∙≈∙
 
-e-ze-⊕ₑ : ∀ {ℓ} {_≈_ : Rel A ℓ} → Zero (Eq _≈_) e _⊕ₑ_
-e-ze-⊕ₑ = e-zeₗ-⊕ₑ , e-zeᵣ-⊕ₑ
+  ⊕∙-zeroʳ : RightZero _≈∙_ ∙ _⊕∙_
+  ⊕∙-zeroʳ ∙     = ∙≈∙
+  ⊕∙-zeroʳ [ v ] = ∙≈∙
 
-⊕ₑ-pres-≈ₑ : ∀ {ℓ} {_≈_ : Rel A ℓ} → Congruent₂ _≈_ _⊕_ → Congruent₂ (Eq _≈_) _⊕ₑ_
-⊕ₑ-pres-≈ₑ _    Eq.nothing    Eq.nothing    = Eq.nothing
-⊕ₑ-pres-≈ₑ _    Eq.nothing    (Eq.just w≈x) = Eq.nothing
-⊕ₑ-pres-≈ₑ _    (Eq.just u≈v) e             = Eq.nothing
-⊕ₑ-pres-≈ₑ pres (Eq.just u≈v) (Eq.just w≈x) = Eq.just (pres u≈v w≈x)
+  ⊕∙-zero : Zero _≈∙_ ∙ _⊕∙_
+  ⊕∙-zero = ⊕∙-zeroˡ , ⊕∙-zeroʳ
+
+  ⊕∙-pres-≈∙ : Congruent₂ _≈_ _⊕_ → Congruent₂ _≈∙_ _⊕∙_
+  ⊕∙-pres-≈∙ _    ∙≈∙    ∙≈∙    = ∙≈∙
+  ⊕∙-pres-≈∙ _    ∙≈∙    [ w≈x ] = ∙≈∙
+  ⊕∙-pres-≈∙ _    [ u≈v ] ∙≈∙             = ∙≈∙
+  ⊕∙-pres-≈∙ pres [ u≈v ] [ w≈x ] = [ pres u≈v w≈x ]

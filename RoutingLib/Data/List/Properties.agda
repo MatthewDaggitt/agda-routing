@@ -141,37 +141,37 @@ module _ {a ℓ} (S : Semilattice a ℓ)  where
 
   open Semilattice S renaming (Carrier to A; refl to ≈-refl; sym to ≈-sym; trans to ≈-trans)
   open import Data.List.Membership.Setoid setoid using () renaming (_∈_ to _∈ₛ_)
-  open import Relation.Binary.EqReasoning setoid
+  open import Relation.Binary.Reasoning.Setoid setoid
+  open import Relation.Binary.Construct.NaturalOrder.Right _≈_ _∧_ renaming (_≤_ to _≤ᵣ_)
+  open import Relation.Binary.Construct.NaturalOrder.Left _≈_ _∧_ renaming (_≤_ to _≤ₗ_)
 
-  foldr≤ᵣe : ∀ e xs → e ∧ foldr _∧_ e xs ≈ foldr _∧_ e xs
-  foldr≤ᵣe e [] = idem e
-  foldr≤ᵣe e (x ∷ xs) = begin
+  foldr≤ᵣe : ∀ e xs → foldr _∧_ e xs ≤ᵣ e
+  foldr≤ᵣe e [] = ≈-sym (idem e)
+  foldr≤ᵣe e (x ∷ xs) = ≈-sym (begin
     e ∧ (x  ∧ foldr _∧_ e xs)  ≈⟨ ≈-sym (assoc e x _) ⟩
     (e ∧ x) ∧ foldr _∧_ e xs   ≈⟨ ∧-congˡ (comm e x) ⟩
     (x ∧ e) ∧ foldr _∧_ e xs   ≈⟨ assoc x e _ ⟩
-    x ∧ (e  ∧ foldr _∧_ e xs)  ≈⟨ ∧-congʳ (foldr≤ᵣe e xs) ⟩
-    x       ∧ foldr _∧_ e xs   ∎
+    x ∧ (e  ∧ foldr _∧_ e xs)  ≈⟨ ∧-congʳ (≈-sym (foldr≤ᵣe e xs)) ⟩
+    x       ∧ foldr _∧_ e xs   ∎)
 
-  open import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right _≈_ _∧_ renaming (_≤_ to _≤ᵣ_)
-
-  foldr≤ₗe : ∀ e xs → foldr _∧_ e xs ∧ e ≈ foldr _∧_ e xs
-  foldr≤ₗe e xs = ≈-trans (comm _ e) (foldr≤ᵣe e xs)
+  foldr≤ₗe : ∀ e xs → foldr _∧_ e xs ≤ₗ e
+  foldr≤ₗe e xs = ≈-trans (foldr≤ᵣe e xs) (comm e _)
 
   foldr≤ᵣxs : ∀ e {x xs} → x ∈ₛ xs → foldr _∧_ e xs ≤ᵣ x
-  foldr≤ᵣxs e {x} {y ∷ xs} (here x≈y) = begin
+  foldr≤ᵣxs e {x} {y ∷ xs} (here x≈y) = ≈-sym (begin
     x ∧ (y  ∧ foldr _∧_ e xs) ≈⟨ ≈-sym (assoc x y _) ⟩
     (x ∧ y) ∧ foldr _∧_ e xs  ≈⟨ ∧-congˡ (∧-cong x≈y ≈-refl) ⟩
     (y ∧ y) ∧ foldr _∧_ e xs  ≈⟨ ∧-congˡ (idem y) ⟩
-    y       ∧ foldr _∧_ e xs  ∎
-  foldr≤ᵣxs e {x} {y ∷ xs} (there x∈xs) = begin
+    y       ∧ foldr _∧_ e xs  ∎)
+  foldr≤ᵣxs e {x} {y ∷ xs} (there x∈xs) = ≈-sym (begin
     x ∧ (y ∧ foldr _∧_ e xs) ≈⟨ ≈-sym (assoc x y _) ⟩
     (x ∧ y) ∧ foldr _∧_ e xs ≈⟨ ∧-congˡ (comm x y) ⟩
     (y ∧ x) ∧ foldr _∧_ e xs ≈⟨ assoc y x _ ⟩
-    y ∧ (x ∧ foldr _∧_ e xs) ≈⟨ ∧-congʳ (foldr≤ᵣxs e x∈xs) ⟩
-    y ∧ foldr _∧_ e xs       ∎
+    y ∧ (x ∧ foldr _∧_ e xs) ≈⟨ ∧-congʳ (≈-sym (foldr≤ᵣxs e x∈xs)) ⟩
+    y ∧ foldr _∧_ e xs       ∎)
 
-  foldr≤ₗxs : ∀ e {x xs} → x ∈ₛ xs → foldr _∧_ e xs ∧ x ≈ foldr _∧_ e xs
-  foldr≤ₗxs e x∈xs = ≈-trans (comm _ _) (foldr≤ᵣxs e x∈xs)
+  foldr≤ₗxs : ∀ e {x xs} → x ∈ₛ xs → foldr _∧_ e xs ≤ₗ x
+  foldr≤ₗxs e x∈xs = ≈-trans (foldr≤ᵣxs e x∈xs) (comm _ _)
 
 
 

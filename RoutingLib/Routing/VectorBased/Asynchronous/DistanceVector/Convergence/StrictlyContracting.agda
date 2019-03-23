@@ -45,7 +45,7 @@ import RoutingLib.Routing.VectorBased.Asynchronous as AsyncVectorBased
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Metrics as Metrics
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Properties as MetricsProperties
 
-open RawRoutingAlgebra algebra hiding (≤₊-antisym) -- tgg22 : why is hiding needed? 
+open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
 open FiniteRoutingAlgebraProperties isRoutingAlgebra isFinite hiding (≤₊-antisym) -- tgg22 : why is hiding needed? 
 

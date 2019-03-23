@@ -24,7 +24,7 @@ open import Induction.Nat using (<-wellFounded)
 open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 open import RoutingLib.Data.Fin.Properties using ()
 open import RoutingLib.Data.Table using (Table)
-import RoutingLib.Data.Table.Relation.Equality as TableEquality
+import RoutingLib.Data.Table.Relation.Binary.Equality as TableEquality
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous
 open import RoutingLib.Relation.Unary.Indexed using (IPred; Uᵢ; _∈ᵢ_; _⊆ᵢ_; Universalᵢ)
 

@@ -6,8 +6,8 @@ open import Relation.Binary using (Setoid; Rel)
 import Relation.Binary.EqReasoning as EqReasoning
 
 open import RoutingLib.lmv34.Function using (_^_)
-import RoutingLib.Data.List.Relation.Permutation.Setoid as PermutationEq
-open import RoutingLib.Data.List.Relation.Permutation.Setoid.Properties
+import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid as PermutationEq
+open import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
 import RoutingLib.lmv34.Gamma_zero as Gamma_zero

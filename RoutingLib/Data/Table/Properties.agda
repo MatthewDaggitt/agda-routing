@@ -13,9 +13,9 @@ open import Relation.Binary.PropositionalEquality using (_≡_; sym; cong₂; _�
 open import Relation.Unary using (Pred)
 
 open import RoutingLib.Data.Table
-open import RoutingLib.Data.Table.All using (All)
-open import RoutingLib.Data.Table.Any using (Any)
-open import RoutingLib.Data.Table.Relation.Pointwise using (Pointwise; foldr-cong; foldr⁺-cong)
+open import RoutingLib.Data.Table.Relation.Unary.All using (All)
+open import RoutingLib.Data.Table.Relation.Unary.Any using (Any)
+open import RoutingLib.Data.Table.Relation.Binary.Pointwise using (Pointwise; foldr-cong; foldr⁺-cong)
 open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Data.Nat.Properties
 open import RoutingLib.Data.NatInf using (ℕ∞) renaming (_≤_ to _≤∞_; _⊓_ to _⊓∞_)

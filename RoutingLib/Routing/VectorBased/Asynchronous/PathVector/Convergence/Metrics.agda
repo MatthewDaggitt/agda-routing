@@ -2,23 +2,24 @@ open import Data.Fin using (Fin) renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Subset using (Subset; _∈_)
 open import Data.Fin.Dec using (_∈?_)
 open import Data.Nat hiding (_≟_)
+open import Data.Nat.Properties using (module ≤-Reasoning)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Bool using (if_then_else_)
 open import Data.Product using (∃; _,_; proj₂)
 open import Function using (_∘_)
 open import Relation.Binary using (_Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; sym)
+import Relation.Binary.Reasoning.PartialOrder as POR
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Nullary.Decidable using (⌊_⌋)
 
 open import RoutingLib.Data.Table using (max; zipWith)
 open import RoutingLib.Data.Table.Properties using (max[t]<x; x≤max[t])
-open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning; n≢0⇒0<n)
+open import RoutingLib.Data.Nat.Properties using (n≢0⇒0<n)
 import RoutingLib.Function.Metric.Construct.Condition as Condition
 import RoutingLib.Function.Metric.Construct.MaxLift as MaxLift
 import RoutingLib.Function.Metric as Metric
-import RoutingLib.Relation.Binary.Reasoning.PartialOrder as PO-Reasoning
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
 

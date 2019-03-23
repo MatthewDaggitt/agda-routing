@@ -14,9 +14,9 @@ open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Pred)
 
 open import RoutingLib.Data.List using (insert)
-open import RoutingLib.Data.List.All.Properties as Allₚ
-open import RoutingLib.Data.List.AllPairs using ([]; _∷_)
-open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
+open import RoutingLib.Data.List.Relation.Unary.All.Properties as Allₚ
+open import RoutingLib.Data.List.Relation.Unary.AllPairs using ([]; _∷_)
+open import RoutingLib.Data.List.Relation.Unary.Uniqueness.Setoid using (Unique)
 
 module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTotalOrder a ℓ₁ ℓ₂) where
 

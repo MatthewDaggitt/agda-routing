@@ -7,12 +7,12 @@ open import Data.List.Any using (here; there)
 open import Data.List.Membership.Propositional using (_∈_)
 import Data.List.Membership.Setoid as Membership
 open import Data.List.Membership.Setoid.Properties using (∈-map⁺; ∈-concat⁺′; ∈-applyUpTo⁺)
-open import Data.List.All using (All; []; _∷_) renaming (map to mapₐ)
-open import Data.List.All.Properties using (applyUpTo⁺₁; applyUpTo⁺₂; concat⁺)
+open import Data.List.Relation.Unary.All using (All; []; _∷_) renaming (map to mapₐ)
+open import Data.List.Relation.Unary.All.Properties using (applyUpTo⁺₁; applyUpTo⁺₂; concat⁺)
+import Data.List.Relation.Binary.Equality.Setoid as ListEq
 open import Data.Product using (∃₂; ∃; _,_; _×_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Relation.Binary using (Setoid; DecSetoid; _Respects_)
-open import Relation.Binary.List.Pointwise using () renaming (setoid to listSetoid)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; cong; cong₂; refl; setoid)
 open import Relation.Nullary using (yes; no)
@@ -39,7 +39,7 @@ module RoutingLib.Data.Path.Certified.Enumeration (n : ℕ) where
     Pₛ = ℙₛ n
 
     LPₛ : Setoid _ _
-    LPₛ = listSetoid Pₛ
+    LPₛ = ListEq.≋-setoid Pₛ
 
     open Membership Pₛ using () renaming (_∈_ to _∈ₗ_)
     open Setoid LPₛ using () renaming (reflexive to ≈ₗₚ-reflexive)

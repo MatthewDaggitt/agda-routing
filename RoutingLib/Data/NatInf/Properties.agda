@@ -17,7 +17,7 @@ open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Data.NatInf
 
 open import Algebra.FunctionProperties {A = ℕ∞} _≡_
-open import Algebra.FunctionProperties.Consequences (setoid ℕ∞) using (sel⇒idem)
+open import Algebra.FunctionProperties.Consequences.Propositional using (sel⇒idem)
 
 ------------------------------------------------------------------------
 -- Properties of equality

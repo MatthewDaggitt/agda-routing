@@ -9,10 +9,10 @@ open import Relation.Binary.Indexed.Homogeneous using (IndexedDecSetoid)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
-import RoutingLib.Data.Table.Relation.DecidableEquality as TableDecEquality
-import RoutingLib.Data.Matrix.Relation.DecidableEquality as MatrixDecEquality
+import RoutingLib.Data.Table.Relation.Binary.DecidableEquality as TableDecEquality
+import RoutingLib.Data.Matrix.Relation.Binary.DecidableEquality as MatrixDecEquality
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.Equality as SubsetEquality
-open import RoutingLib.Data.List.Relation.Pointwise using (foldr⁺)
+open import RoutingLib.Data.List.Relation.Binary.Pointwise using (foldr⁺)
 open import RoutingLib.Data.List.Properties
 
 open import RoutingLib.Routing.Algebra

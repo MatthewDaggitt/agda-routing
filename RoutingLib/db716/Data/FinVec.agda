@@ -7,7 +7,7 @@ open import Function using (_∘_)
   TODO: Generalise this to not require a  monoid, 
         use fold instead of sum etc?
 -}
-module db716.Data.FinVec {c ℓ} (Mon : Monoid c ℓ) where
+module RoutingLib.db716.Data.FinVec {c ℓ} (Mon : Monoid c ℓ) where
 
   open Monoid Mon using (_∙_; ε; _≈_; ∙-cong) renaming (Carrier to M; refl to ≈-refl)
   

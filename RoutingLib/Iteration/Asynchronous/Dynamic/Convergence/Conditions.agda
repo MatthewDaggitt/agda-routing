@@ -28,7 +28,7 @@ open import Relation.Unary.Properties using (U-Universal)
 open import Relation.Nullary.Decidable using (⌊_⌋)
 
 open import RoutingLib.Data.Table using (Table; max)
-open import RoutingLib.Data.Table.Relation.Pointwise using (Pointwise)
+open import RoutingLib.Data.Table.Relation.Binary.Pointwise using (Pointwise)
 open import RoutingLib.Function.Metric.Nat
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (Setoid_at_)
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as SubsetEq

@@ -21,7 +21,6 @@ open import RoutingLib.Data.Nat.Properties
 import RoutingLib.Function.Metric.Construct.Condition as Condition
 import RoutingLib.Function.Metric.Construct.MaxLift as MaxLift
 open import RoutingLib.Function.Metric.Nat
-import RoutingLib.Relation.Binary.Reasoning.PartialOrder as PO-Reasoning
 open import RoutingLib.Data.List.Membership.Setoid.Properties using (index-cong)
 open import RoutingLib.Function.Reasoning
 

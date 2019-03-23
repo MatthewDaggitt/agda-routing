@@ -1,5 +1,5 @@
 open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _+_; _<_; _≤_)
-open import Data.Nat.Properties using (+-suc)
+open import Data.Nat.Properties using (+-suc; module ≤-Reasoning)
 open import Data.Empty using (⊥)
 open import Data.Fin using (Fin)
 open import Data.Fin.Properties using (any?)
@@ -16,17 +16,16 @@ open import Relation.Unary
 open import Relation.Unary.Properties using (∁?; _∩?_)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; cong; subst; refl; sym; trans; inspect; [_]; module ≡-Reasoning)
-import Relation.Binary.PartialOrderReasoning as POR
+import Relation.Binary.Reasoning.PartialOrder as POR
+import Relation.Binary.Reasoning.StrictPartialOrder as SPOR
 open import Function.Reasoning
 
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.Path.CertifiedI.All
 open import RoutingLib.Data.Path.CertifiedI.Properties
-open import RoutingLib.Data.Fin.Subset using (Nonfull) renaming ()
-open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
+open import RoutingLib.Data.Fin.Subset using (Nonfull)
 open import RoutingLib.Data.List using (allFinPairs)
 open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-allFinPairs⁺)
-import RoutingLib.Relation.Binary.Reasoning.StrictPartialOrder as SPOR
 
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing using (RoutingMatrix; AdjacencyMatrix)
@@ -96,14 +95,14 @@ module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.S
 
       Dangerous-retraction : ∀ {i k l s} → σ^ (t + suc s) X k j ≈ A k l ▷ (σ^ (t + s) X l j) →
                              (i , k) ∈ᵤ Dangerous (suc s) → (k , l) ∈ᵤ Dangerous s
-      Dangerous-retraction {i} {k} {l} {s} σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ ik∈D₁₊ₛ = begin
-        A k l ▷ σ^ (t + s) X l j              ≈⟨ ≈-sym σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ ⟩<
-        σ^ (t + suc s) X k j                  ≤⟨ isIncreasing (A i k) _ ⟩<
-        A i    k    ▷ σ^ (t + suc s) X k   j  <⟨ ik∈D₁₊ₛ ⟩≤
-        A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + suc s) X kₘᵢₙ j ≈⟨ ▷-cong _ (𝓒-eq t kₘᵢₙ (suc s) s kₘᵢₙ∈𝓒ₜ) ⟩≤
+      Dangerous-retraction {i} {k} {l} {s} σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ ik∈D₁₊ₛ = begin-strict
+        A k l ▷ σ^ (t + s) X l j              ≈⟨ ≈-sym σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ ⟩
+        σ^ (t + suc s) X k j                  ≤⟨ isIncreasing (A i k) _ ⟩
+        A i    k    ▷ σ^ (t + suc s) X k   j  <⟨ ik∈D₁₊ₛ ⟩
+        A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + suc s) X kₘᵢₙ j ≈⟨ ▷-cong _ (𝓒-eq t kₘᵢₙ (suc s) s kₘᵢₙ∈𝓒ₜ) ⟩
         A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + s)     X kₘᵢₙ j ∎
-        where open SPOR ≤₊-poset
-
+        where open POR ≤₊-poset
+      
       Dangerous-predNot𝓡 : ∀ {i k l s} → k ∉ C →
                               σ^ (t + suc s) X k j ≈ A k l ▷ (σ^ (t + s) X l j) →
                               (i , k) ∈ᵤ Dangerous (suc s) → l ∉ᵤ 𝓡 (t + s)
@@ -149,9 +148,9 @@ module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.S
   𝓓-length : ∀ s {i} → i ∈ᵤ 𝓓 s → s < lengthₙ (t + s) i
   𝓓-length zero    {i} (k∉Rₜ₊ₛ , _) = ¬𝓡-length (t + zero) i k∉Rₜ₊ₛ
   𝓓-length (suc s) {i} ik∈Dₛ with 𝓓-retraction ik∈Dₛ
-  ... | (l , l∈Jₛ , |i|≡1+|l|) = begin
+  ... | (l , l∈Jₛ , |i|≡1+|l|) = begin-strict
     suc s                    <⟨ s≤s (𝓓-length s l∈Jₛ) ⟩
-    suc (lengthₙ (t + s) l)  ≡⟨ sym |i|≡1+|l| ⟩
-    lengthₙ (suc t + s) i    ≡⟨ sym (cong (λ v → lengthₙ v i) (+-suc t s)) ⟩
+    suc (lengthₙ (t + s) l)  ≡˘⟨ |i|≡1+|l| ⟩
+    lengthₙ (suc t + s) i    ≡˘⟨ cong (λ v → lengthₙ v i) (+-suc t s) ⟩
     lengthₙ (t + suc s) i    ∎
     where open ≤-Reasoning

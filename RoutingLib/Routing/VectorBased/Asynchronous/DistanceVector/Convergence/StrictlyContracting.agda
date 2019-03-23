@@ -17,19 +17,19 @@ module RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.St
 open import Data.Fin.Subset using (Subset; _∈_)
 open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Nat hiding (_≟_)
-open import Data.Nat.Properties hiding (_≟_; module ≤-Reasoning)
+open import Data.Nat.Properties hiding (_≟_)
 open import Data.Product using (_,_; proj₁; proj₂)
 open import Data.Sum using (inj₁; inj₂)
 open import Function using (_∘_)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; sym; subst)
+import Relation.Binary.Reasoning.PartialOrder as POR
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.Table using (max)
 open import RoutingLib.Data.Table.Properties using (max[t]<x; x≤max[t])
-open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning; n≢0⇒0<n)
+open import RoutingLib.Data.Nat.Properties using (n≢0⇒0<n)
 import RoutingLib.Function.Metric.Construct.Condition as Condition
-import RoutingLib.Relation.Binary.Reasoning.PartialOrder as POR
 open import RoutingLib.Relation.Nullary.Decidable using ([_,_])
 open import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right using () 
 
@@ -65,7 +65,7 @@ module _ {n} (A : AdjacencyMatrix algebra n) where
                     h (F X i j) ⊔ h (F Y i j) < v
   h[FXᵢⱼ]⊔h[FYᵢⱼ]<v X Y {i} {j} {v} FXᵢⱼ<FYᵢⱼ@(FXᵢⱼ≤FYᵢⱼ , FXᵢⱼ≉FYᵢⱼ) d≤v with FXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
   ...   | inj₂ FXᵢⱼ≈Iᵢⱼ = contradiction FXᵢⱼ≈Iᵢⱼ (FXᵢⱼ<FYᵢⱼ⇒FXᵢⱼ≉Iᵢⱼ X Y FXᵢⱼ<FYᵢⱼ)
-  ...   | inj₁ (k , FXᵢⱼ≈AᵢₖXₖⱼ) = begin
+  ...   | inj₁ (k , FXᵢⱼ≈AᵢₖXₖⱼ) = begin-strict
     h (F X i j) ⊔ h (F Y i j) ≡⟨ m≤n⇒n⊔m≡n (h-resp-≤ FXᵢⱼ≤FYᵢⱼ) ⟩
     h (F X i j)               ≡⟨ h-cong FXᵢⱼ≈AᵢₖXₖⱼ ⟩
     h (A i k ▷ X k j)         <⟨ h-resp-< (isStrictlyIncreasing (A i k) Xₖⱼ≉∞) ⟩
@@ -106,7 +106,7 @@ module _ {n} (A : AdjacencyMatrix algebra n) where
   ... | yes FXᵢⱼ≈FYᵢⱼ = 0<v
   ... | no  FXᵢⱼ≉FYᵢⱼ with ≤₊-total (F X i j) (F Y i j)
   ...   | inj₁ FXᵢⱼ≤FYᵢⱼ = h[FXᵢⱼ]⊔h[FYᵢⱼ]<v X Y (FXᵢⱼ≤FYᵢⱼ , FXᵢⱼ≉FYᵢⱼ) r≤v
-  ...   | inj₂ FYᵢⱼ≤FXᵢⱼ = begin
+  ...   | inj₂ FYᵢⱼ≤FXᵢⱼ = begin-strict
     h (F X i j) ⊔ h (F Y i j) ≡⟨ ⊔-comm (h (F X i j)) (h (F Y i j)) ⟩
     h (F Y i j) ⊔ h (F X i j) <⟨ h[FXᵢⱼ]⊔h[FYᵢⱼ]<v Y X (FYᵢⱼ≤FXᵢⱼ , FXᵢⱼ≉FYᵢⱼ ∘ ≈-sym) (λ k Yₖⱼ≉Xₖⱼ → subst (_≤ v) (r-sym (X k j) (Y k j)) (r≤v k (Yₖⱼ≉Xₖⱼ ∘ ≈-sym))) ⟩
     v                         ∎
@@ -150,7 +150,7 @@ module _ {n} (network : Network algebra n) where
 
     F-strContrOnFP : ∀ {X} → WellFormed p X → ∀ {X*} → F X* ≈ₘ X* → X ≉ₘ[ p ] X* →
                      D p X* (F X) < D p X* X
-    F-strContrOnFP {X} wfX {X*} FX*≈X* X≉X* = begin
+    F-strContrOnFP {X} wfX {X*} FX*≈X* X≉X* = begin-strict
       D p X*     (F X) ≡⟨ D-cong p (≈ₘ-sym FX*≈X*) (≈ₘ-refl {x = F′ e p X}) ⟩
       D p (F X*) (F X) <⟨ F-strContr (X*-wf e p FX*≈X*) wfX X≉X* ⟩
       D p X*     X     ∎

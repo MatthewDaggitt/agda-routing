@@ -19,7 +19,7 @@ open Gamma_two_Algebra isRoutingAlgebra n
 ------------------------------------
 -- State model
 
-record Γ₂-State : Set b where
+record Γ₂-State : Set a where
   field
     V : RoutingVector
     I : RoutingVector₂

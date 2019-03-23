@@ -2,7 +2,7 @@ open import Data.Nat using (ℕ)
 open import Data.List using (foldr; tabulate)
 open import Data.List.Relation.Pointwise using (tabulate⁺)
 
-open import RoutingLib.Data.List.Relation.Pointwise using (foldr⁺)
+open import RoutingLib.Data.List.Relation.Binary.Pointwise using (foldr⁺)
 open import RoutingLib.Iteration.Synchronous
 
 open import RoutingLib.Routing.Algebra

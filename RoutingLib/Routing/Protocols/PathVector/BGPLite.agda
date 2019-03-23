@@ -10,6 +10,8 @@
 
 module RoutingLib.Routing.Protocols.PathVector.BGPLite where
 
+import Algebra.Construct.NaturalChoice.Min as NaturalChoice
+import Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
 open import Algebra.FunctionProperties
 open import Data.Nat using (ℕ; _≟_)
 open import Data.Nat.Properties using () renaming (<-cmp to compare)
@@ -20,10 +22,7 @@ open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; cong; cong₂; isEquivalence)
-open import Level using () renaming (zero to ℓ₀; suc to lsuc)
-
-import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
-import RoutingLib.Algebra.Construct.NaturalChoice.Min.TotalOrder as NaturalChoice
+open import Level using (0ℓ) renaming (suc to lsuc)
 
 open import RoutingLib.Data.Path.Uncertified using (Path; []; _∷_; inflate; deflate; length)
 open import RoutingLib.Data.Path.Uncertified.Properties

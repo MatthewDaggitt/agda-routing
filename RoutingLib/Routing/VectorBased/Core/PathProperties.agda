@@ -4,7 +4,7 @@ open import Data.List using (List; foldr)
 import Data.List.All.Properties as All
 open import Data.List.Relation.Pointwise as Pointwise using (Pointwise; []; _∷_)
 open import Data.Nat using (_<_)
-open import Data.Nat.Properties using (≤-reflexive; <-trans)
+open import Data.Nat.Properties using (≤-reflexive; <-trans; module ≤-Reasoning)
 open import Data.Product using (∃; ∃₂; _×_; _,_; proj₁)
 open import Data.Sum using (inj₁; inj₂)
 open import Function using (_∘_)
@@ -18,7 +18,6 @@ open import Induction.Nat using (<-wellFounded)
 
 open import RoutingLib.Data.List.Properties using (foldr-presᵇ)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
-open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
 open import RoutingLib.Data.Path.CertifiedI
 open import RoutingLib.Data.Path.CertifiedI.Properties using (∉ₚ-resp-≈ₚ; ≈ₚ-trans; ≈ₚ-sym; ≈ₚ-reflexive; ℙₛ; _∉ᵥₚ?_; _⇿ᵥ?_)
 

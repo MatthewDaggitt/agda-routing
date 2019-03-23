@@ -1,7 +1,7 @@
 open import Level using (_⊔_)
 open import Relation.Binary using (Setoid; Rel; Symmetric; _Respects_; _Preserves_⟶_; _Preserves₂_⟶_⟶_) renaming (Decidable to Decidable₂)
 open import Relation.Binary.PropositionalEquality using (refl; _≡_; _≢_; cong; subst; subst₂; inspect; [_]) renaming (trans to ≡-trans; sym to ≡-sym; setoid to ≡-setoid)
-open import Relation.Binary.List.Pointwise using ([]; _∷_) renaming (setoid to list-setoid)
+open import Data.List.Relation.Binary.Pointwise using ([]; _∷_) renaming (setoid to list-setoid)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Nullary using (¬_; yes; no)
 open import Function using (_∘_; id)
@@ -11,7 +11,7 @@ open import Data.List.Any using (index)
 open import Data.Nat using (_≤_; _<_; zero; suc; s≤s; z≤n)
 open import Data.Nat.Properties using (suc-injective; <⇒≤; ≤-trans; n≤1+n)
 open import Data.Fin using (Fin)
-open import Data.Maybe using (nothing; just; Maybe; Eq; Eq-refl; Eq-sym; Eq-trans; drop-just; just-injective)
+open import Data.Maybe using (nothing; just; Maybe)
 open import Data.Empty using (⊥-elim)
 open import Data.List hiding (any)
 open import Data.List.Any using (here; there; any) renaming (map to mapₐ)
@@ -22,11 +22,10 @@ open import Relation.Unary using (Decidable; _⇒_) renaming (_⊆_ to _⋐_)
 open import Algebra.FunctionProperties using (Op₂; RightIdentity; Selective)
 
 open import RoutingLib.Data.List
-open import RoutingLib.Data.Maybe using (Eq-reflexive)
 import RoutingLib.Data.List.Membership.Setoid as Membership
-open import RoutingLib.Data.List.Any.Properties
-open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique; _∷_)
-open import RoutingLib.Data.List.AllPairs using ([]; _∷_)
+open import RoutingLib.Data.List.Relation.Unary.Any.Properties
+open import RoutingLib.Data.List.Relation.Unary.Uniqueness.Setoid using (Unique; _∷_)
+open import RoutingLib.Data.List.Relation.Unary.AllPairs using ([]; _∷_)
 
 
 module RoutingLib.Data.List.Membership.Setoid.Properties where

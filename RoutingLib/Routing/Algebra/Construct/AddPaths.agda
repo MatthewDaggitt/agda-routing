@@ -41,7 +41,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_;isEquivalence)
 ------------------------------------------------------------------------
 -- Prelude
 
-module _ (⊕-assoc : Associative _≈_ _⊕_) (⊕-sel : Selective _≈_ _⊕_) (⊕-comm : Commutative _≈_ _⊕_) -- (⊕-identityˡ : LeftIdentity _≈_ ∞# _⊕_)
+module _ (⊕-assoc : Associative _≈_ _⊕_) (⊕-sel : Selective _≈_ _⊕_) (⊕-comm : Commutative _≈_ _⊕_)
   where
 
   module LexProperties = OpLexProperties′ ⊕-decMagma ⊓ₗₑₓ-magma

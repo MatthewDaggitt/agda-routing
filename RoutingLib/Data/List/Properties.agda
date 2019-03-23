@@ -1,3 +1,5 @@
+open import Algebra
+open import Algebra.FunctionProperties
 open import Data.Nat using (ℕ; zero; suc; _+_; _∸_)
 open import Data.Nat.Properties using (+-suc)
 open import Data.List
@@ -6,7 +8,8 @@ open import Data.List.Any using (Any; here; there)
 open import Data.List.Membership.Propositional using (_∈_)
 open import Data.List.Relation.Pointwise using (Pointwise; []; _∷_)
 open import Data.Fin using (Fin; toℕ; zero; suc)
-open import Data.Maybe using (Maybe; just; nothing; just-injective)
+open import Data.Maybe using (Maybe; just; nothing)
+open import Data.Maybe.Properties using (just-injective)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_,_)
 open import Relation.Binary using (Rel; Setoid)
@@ -15,17 +18,15 @@ open import Relation.Unary.Properties using (∁?)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; cong; cong₂; trans)
-open import Algebra using (Semilattice)
-open import Algebra.FunctionProperties
 open import Function using (id; _∘_)
 import Relation.Binary.EqReasoning as EqReasoning
 open import Relation.Nullary using (¬_)
 open import Relation.Unary using (∁; U)
 open import Relation.Unary.Properties using (U-Universal)
 
-open import RoutingLib.Algebra
 open import RoutingLib.Data.List
-open import RoutingLib.Data.List.AllPairs using (AllPairs; []; _∷_)
+open import RoutingLib.Data.List.Relation.Unary.AllPairs
+  using (AllPairs; []; _∷_)
 open import RoutingLib.Data.Nat.Properties
 open import RoutingLib.Algebra.FunctionProperties
 
@@ -111,13 +112,6 @@ module _ {a ℓ} (M : Magma a ℓ) where
 
 module _ {a p} {A : Set a} {P : Pred A p} {_•_ : Op₂ A} where
 
-{-
-  foldl-forces× : _•_ Forces-× P → ∀ e xs → P (foldl _•_ e xs) → All P xs
-  foldl-forces× _      _ []       _     = []
-  foldl-forces× forces e (x ∷ xs) Pfold with forces {!!} {!!} {!!}
-  ... | (px , pfxs) = {!!} --px ∷ foldl-forces× •-forces-P _ xs pfxs
--}
-
   foldl-×pres : _•_ Preservesᵇ P → ∀ {e xs} → P e → All P xs → P (foldl _•_ e xs)
   foldl-×pres _    pe []         = pe
   foldl-×pres pres pe (px ∷ pxs) = foldl-×pres pres (pres pe px) pxs
@@ -131,50 +125,6 @@ module _ {a p} {A : Set a} {P : Pred A p} {_•_ : Op₂ A} where
   foldl-⊎pres pres {x ∷ xs} e (there pxs) = foldl-⊎pres pres _ pxs
 
 ------------------------------------------------------------------------
--- Properties of applyUpTo
-
-module _ {a} {A : Set a} where
-
-  -- stdlib
-  length-applyUpTo : ∀ (f : ℕ → A) n → length (applyUpTo f n) ≡ n
-  length-applyUpTo f zero    = refl
-  length-applyUpTo f (suc n) = cong suc (length-applyUpTo (f ∘ suc) n)
-
-------------------------------------------------------------------------
--- Properties of upTo
-
--- stdlib
-length-upTo : ∀ n → length (upTo n) ≡ n
-length-upTo = length-applyUpTo id
-
-------------------------------------------------------------------------
--- Properties of applyDownFrom
-
-module _ {a} {A : Set a} (f : ℕ → A) where
-
-  -- stdlib
-  length-applyDownFrom : ∀ n → length (applyDownFrom f n) ≡ n
-  length-applyDownFrom zero    = refl
-  length-applyDownFrom (suc n) = cong suc (length-applyDownFrom n)
-
-  -- stdlib
-  applyDownFrom-lookup : ∀ n i → lookup (applyDownFrom f n) i ≡ f (n ∸ (suc (toℕ i)))
-  applyDownFrom-lookup zero  ()
-  applyDownFrom-lookup (suc n) zero    = refl
-  applyDownFrom-lookup (suc n) (suc i) = applyDownFrom-lookup n i
-
-------------------------------------------------------------------------
--- Properties of downFrom
-
--- stdlib
-length-downFrom : ∀ n → length (downFrom n) ≡ n
-length-downFrom = length-applyDownFrom id
-
--- stdlib
-downFrom-lookup : ∀ n i → lookup (downFrom n) i ≡ n ∸ (suc (toℕ i))
-downFrom-lookup = applyDownFrom-lookup id
-
-------------------------------------------------------------------------
 -- Properties of lookup
 
 module _ {a} {A : Set a} where
@@ -183,17 +133,6 @@ module _ {a} {A : Set a} where
   lookup∈xs []       ()
   lookup∈xs (x ∷ xs) zero    = here refl
   lookup∈xs (x ∷ xs) (suc i) = there (lookup∈xs xs i)
-
-------------------------------------------------------------------------
--- Properties of tabulate
-
-module _ {a b} {A : Set a} {B : Set b} where
-
-  -- stdlib
-  map-tabulate : ∀ {n} (g : Fin n → A) (f : A → B) →
-                 map f (tabulate g) ≡ tabulate (f ∘ g)
-  map-tabulate {zero}  g f = refl
-  map-tabulate {suc n} g f = cong (_ ∷_) (map-tabulate (g ∘ suc) f)
 
 ------------------------------------------------------------------------
 -- Semilattice properties
@@ -207,11 +146,11 @@ module _ {a ℓ} (S : Semilattice a ℓ)  where
   foldr≤ᵣe : ∀ e xs → e ∧ foldr _∧_ e xs ≈ foldr _∧_ e xs
   foldr≤ᵣe e [] = idem e
   foldr≤ᵣe e (x ∷ xs) = begin
-    e ∧ (x ∧ foldr _∧_ e xs) ≈⟨ ≈-sym (assoc e x _) ⟩
-    (e ∧ x) ∧ foldr _∧_ e xs ≈⟨ ∙-cong (comm e x) ≈-refl ⟩
-    (x ∧ e) ∧ foldr _∧_ e xs ≈⟨ assoc x e _ ⟩
-    x ∧ (e ∧ foldr _∧_ e xs) ≈⟨ ∙-cong ≈-refl (foldr≤ᵣe e xs) ⟩
-    x ∧ foldr _∧_ e xs       ∎
+    e ∧ (x  ∧ foldr _∧_ e xs)  ≈⟨ ≈-sym (assoc e x _) ⟩
+    (e ∧ x) ∧ foldr _∧_ e xs   ≈⟨ ∧-congˡ (comm e x) ⟩
+    (x ∧ e) ∧ foldr _∧_ e xs   ≈⟨ assoc x e _ ⟩
+    x ∧ (e  ∧ foldr _∧_ e xs)  ≈⟨ ∧-congʳ (foldr≤ᵣe e xs) ⟩
+    x       ∧ foldr _∧_ e xs   ∎
 
   open import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right _≈_ _∧_ renaming (_≤_ to _≤ᵣ_)
 
@@ -220,15 +159,15 @@ module _ {a ℓ} (S : Semilattice a ℓ)  where
 
   foldr≤ᵣxs : ∀ e {x xs} → x ∈ₛ xs → foldr _∧_ e xs ≤ᵣ x
   foldr≤ᵣxs e {x} {y ∷ xs} (here x≈y) = begin
-    x ∧ (y ∧ foldr _∧_ e xs) ≈⟨ ≈-sym (assoc x y _) ⟩
-    (x ∧ y) ∧ foldr _∧_ e xs ≈⟨ ∙-cong (∙-cong x≈y ≈-refl) ≈-refl ⟩
-    (y ∧ y) ∧ foldr _∧_ e xs ≈⟨ ∙-cong (idem y) ≈-refl ⟩
-    y ∧ foldr _∧_ e xs       ∎
+    x ∧ (y  ∧ foldr _∧_ e xs) ≈⟨ ≈-sym (assoc x y _) ⟩
+    (x ∧ y) ∧ foldr _∧_ e xs  ≈⟨ ∧-congˡ (∧-cong x≈y ≈-refl) ⟩
+    (y ∧ y) ∧ foldr _∧_ e xs  ≈⟨ ∧-congˡ (idem y) ⟩
+    y       ∧ foldr _∧_ e xs  ∎
   foldr≤ᵣxs e {x} {y ∷ xs} (there x∈xs) = begin
     x ∧ (y ∧ foldr _∧_ e xs) ≈⟨ ≈-sym (assoc x y _) ⟩
-    (x ∧ y) ∧ foldr _∧_ e xs ≈⟨ ∙-cong (comm x y) ≈-refl ⟩
+    (x ∧ y) ∧ foldr _∧_ e xs ≈⟨ ∧-congˡ (comm x y) ⟩
     (y ∧ x) ∧ foldr _∧_ e xs ≈⟨ assoc y x _ ⟩
-    y ∧ (x ∧ foldr _∧_ e xs) ≈⟨ ∙-cong ≈-refl (foldr≤ᵣxs e x∈xs) ⟩
+    y ∧ (x ∧ foldr _∧_ e xs) ≈⟨ ∧-congʳ (foldr≤ᵣxs e x∈xs) ⟩
     y ∧ foldr _∧_ e xs       ∎
 
   foldr≤ₗxs : ∀ e {x xs} → x ∈ₛ xs → foldr _∧_ e xs ∧ x ≈ foldr _∧_ e xs

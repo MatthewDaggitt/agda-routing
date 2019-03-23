@@ -11,7 +11,7 @@ open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary.Decidable using (⌊_⌋)
 open import Level using () renaming (zero to ℓ₀)
 
-open import RoutingLib.Data.Vec.Relation.Lex
+open import RoutingLib.Data.Vec.Relation.Binary.Lex
   using (Lex; ≤-isDecTotalOrder; ≤-minimum)
 open import RoutingLib.Data.Bool
 

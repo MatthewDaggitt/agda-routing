@@ -1,7 +1,7 @@
 open import Algebra using (Semilattice)
 open import Algebra.Structures using (IsSemilattice)
 import Algebra.FunctionProperties as FunctionProperties
-open import Algebra.FunctionProperties.Consequences using (sel⇒idem)
+open import Algebra.FunctionProperties.Consequences.Propositional using (sel⇒idem)
 open import Data.Nat using (suc; zero; _+_)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
@@ -19,12 +19,12 @@ open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; sym; trans)
 import Relation.Binary.EqReasoning as EqReasoning
+import Relation.Binary.Reasoning.PartialOrder as POR
 
 open import RoutingLib.Data.List.Properties using (foldr≤ₗe; foldr≤ᵣxs)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
-open import RoutingLib.Data.List.Relation.Pointwise
+open import RoutingLib.Data.List.Relation.Binary.Pointwise
   using (foldr⁺)
-import RoutingLib.Relation.Binary.Reasoning.PartialOrder as POR
 
 open import RoutingLib.Routing using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra
@@ -84,7 +84,7 @@ FXᵢᵢ≈FYᵢᵢ X Y {i} refl = ≈-trans (FXᵢᵢ≈Iᵢᵢ X i) (≈-sym (
 FXᵢⱼ<FYᵢⱼ⇒FXᵢⱼ≉Iᵢⱼ : ∀ X Y {i j} → F X i j <₊ F Y i j → F X i j ≉ I i j
 FXᵢⱼ<FYᵢⱼ⇒FXᵢⱼ≉Iᵢⱼ X Y {i} {j} FXᵢⱼ<FYᵢⱼ@(FXᵢⱼ≤FYᵢⱼ , FXᵢⱼ≉FYᵢⱼ) with i ≟𝔽 j
 ... | yes i≡j = contradiction (FXᵢᵢ≈FYᵢᵢ X Y i≡j) FXᵢⱼ≉FYᵢⱼ
-... | no  i≢j = <₊⇒≉ (begin
+... | no  i≢j = <₊⇒≉ (begin-strict
   F X i j <⟨ FXᵢⱼ<FYᵢⱼ ⟩
   F Y i j ≤⟨ ⊕-identityˡ (F Y i j) ⟩
   ∞#      ≡⟨ sym (Iᵢⱼ≡∞ (i≢j ∘ sym)) ⟩

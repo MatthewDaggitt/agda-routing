@@ -10,7 +10,7 @@ open import Level using (_⊔_) renaming (suc to lsuc)
 import RoutingLib.Routing as Routing
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
-import RoutingLib.Data.Matrix.Relation.Equality as MatrixEquality
+import RoutingLib.Data.Matrix.Relation.Binary.Equality as MatrixEquality
 import RoutingLib.lmv34.Gamma_one.Algebra as Gamma_one_Algebra
 
 module RoutingLib.lmv34.Gamma_two.Algebra
@@ -23,7 +23,7 @@ open RawRoutingAlgebra algebra
 open Gamma_one_Algebra isRoutingAlgebra n
 open MatrixEquality ↭-setoid using (_≈ₘ_)
 
-RoutingVector₂ : Set b
+RoutingVector₂ : Set a
 RoutingVector₂ = SquareMatrix (List (Fin n × Route)) n
 
 infix 10 _【_】
@@ -38,5 +38,5 @@ infix 11 _↓
 _↓ : RoutingVector₂ → RoutingVector
 (I ↓) i = ⨁ₛ (λ q → I i q) 
 
-IsComposition : (A Imp Prot Exp : AdjacencyMatrix) (V : RoutingVector) → Set (b ⊔ ℓ)
+IsComposition : (A Imp Prot Exp : AdjacencyMatrix) (V : RoutingVector) → Set (a ⊔ ℓ)
 IsComposition A Imp Prot Exp V = (A 【 V 】) ≈ₘ  (Imp 〖 Prot 〖 Exp 【 V 】 〗 〗) 

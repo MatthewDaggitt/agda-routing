@@ -1,6 +1,11 @@
+
+module RoutingLib.Data.Path.UncertifiedI where
+
 open import Data.Fin using (Fin)
 open import Data.Fin.Properties using (_≟_)
 open import Data.Maybe as Maybe hiding (module Maybe)
+open import Data.Maybe.Relation.Unary.Any
+open import Data.Maybe.Relation.Unary.All
 open import Data.Nat using (ℕ)
 open import Data.Product using (_×_)
 open import Level using () renaming (zero to 0ℓ)
@@ -9,8 +14,6 @@ open import Relation.Binary using (Rel; REL)
 open import Relation.Binary.PropositionalEquality using (_≡_)
 
 import RoutingLib.Data.Path.Uncertified as Uncertified
-
-module RoutingLib.Data.Path.UncertifiedI where
 
 ----------------------------------------------------------------------------
 -- Reimports

@@ -1,8 +1,8 @@
-open import Data.List.Relation.Pointwise using (tabulate⁺)
+open import Data.List.Relation.Binary.Pointwise using (tabulate⁺)
 open import Data.Fin.Subset using (Subset; _∉_)
 open import Relation.Binary.Indexed.Homogeneous using (IndexedDecSetoid)
 
-open import RoutingLib.Data.List.Relation.Pointwise using (foldr⁺)
+open import RoutingLib.Data.List.Relation.Binary.Pointwise using (foldr⁺)
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic
   using (IsAsyncIterable; AsyncIterable; asyncIter)

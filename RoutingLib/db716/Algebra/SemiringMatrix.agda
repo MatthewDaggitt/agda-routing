@@ -23,7 +23,7 @@ open Semiring S renaming (Carrier to C; refl to ≈-refl; sym to ≈-sym; trans 
 
 open import RoutingLib.db716.Algebra.Properties.Summation S
 open import Relation.Binary.EqReasoning ≈-setoid
-open import RoutingLib.Data.Matrix.Relation.Equality ≈-setoid
+open import RoutingLib.Data.Matrix.Relation.Binary.Equality ≈-setoid
 
 private Mat : (n : ℕ) → Set _
 Mat n = SquareMatrix C n

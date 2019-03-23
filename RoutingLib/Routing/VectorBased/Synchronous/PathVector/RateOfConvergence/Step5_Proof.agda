@@ -100,7 +100,7 @@ module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.S
       iᵗʰ∈Cₖ (suc i) i<n zero    k<n ()
       iᵗʰ∈Cₖ (suc i) i<n (suc k) k<n (s≤s i≤k) with i ℕ.≟ k
       ... | no  i≢k = x∈p∪q⁺ (inj₁ (iᵗʰ∈Cₖ (suc i) i<n k (≤⇒pred≤ k<n) (≤∧≢⇒< i≤k i≢k)))
-      ... | yes refl with ≤-irrelevance k<n i<n
+      ... | yes refl with ≤-irrelevant k<n i<n
       ...   | refl = x∈p∪q⁺ (inj₂ (x∈⁅x⁆ (iᵗʰ (suc i) i<n)))
 
       iᵗʰ∉Cₖ : ∀ i (i<n : i < n) k (k<n : k < n) → k < i → iᵗʰ i i<n ∉ C k k<n

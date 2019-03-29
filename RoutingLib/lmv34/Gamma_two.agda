@@ -1,14 +1,13 @@
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 import RoutingLib.lmv34.Gamma_one.Algebra as Gamma_one_Algebra
-import RoutingLib.lmv34.Gamma_two.Algebra as Gamma_two_Algebra
+open import RoutingLib.lmv34.Gamma_two.Algebra as Gamma_two_Algebra using (AdjacencyMatrixᵀ)
 
 module RoutingLib.lmv34.Gamma_two
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra) {n}
-  (Imp  : AdjacencyMatrix algebra n)
-  (Prot : AdjacencyMatrix algebra n)
-  (Exp  : AdjacencyMatrix algebra n)
+  (ImpProt : AdjacencyMatrix algebra n)
+  (Exp : AdjacencyMatrixᵀ isRoutingAlgebra n)
   where
 
 open Routing algebra n renaming (I to M)
@@ -19,17 +18,20 @@ open Gamma_two_Algebra isRoutingAlgebra n
 ------------------------------------
 -- State model
 
-record Γ₂-State : Set b where
+record Γ₂-State : Set a where
   field
     V : RoutingVector
     I : RoutingVector₂
     O : RoutingVector₂
 
+------------------------------------
+-- Computation Model
+
 Γ₂,ᵥ : RoutingVector₂ → RoutingVector
 Γ₂,ᵥ I = I ↓ ⊕ᵥ ~ M
 
 Γ₂,ᵢ : RoutingVector₂ → RoutingVector₂
-Γ₂,ᵢ O = Imp 〖 Prot 〖 O 〗 〗
+Γ₂,ᵢ O = ImpProt 〖 O 〗
 
 Γ₂,ₒ : RoutingVector → RoutingVector₂
 Γ₂,ₒ V = Exp 【 V 】

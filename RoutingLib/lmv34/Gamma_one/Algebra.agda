@@ -1,11 +1,10 @@
 open import Data.Nat using (ℕ)
 open import Data.Fin using (Fin)
-open import Data.Fin.Properties using (_≤?_; <-cmp) renaming (_≟_ to _≟₁_; ≤-decTotalOrder to fin-decTotalOrder; setoid to Fin-setoid)
+open import Data.Fin.Properties using (_≤?_; <-cmp) renaming (_≟_ to _≟₁_; ≤-decTotalOrder to fin-decTotalOrder; decSetoid to Fin-decSetoid)
 open import Data.List using ([]; _∷_; List; foldr; filter; map; tabulate)
 open import Data.Product.Relation.Lex.NonStrict using (×-decTotalOrder)
-open import Data.Product.Relation.Pointwise.NonDependent using (_×ₛ_)
-open import Function using (const)
-open import Relation.Binary using (Rel; DecTotalOrder; Setoid)
+open import Data.Product.Relation.Pointwise.NonDependent using (×-decSetoid)
+open import Relation.Binary using (Rel; DecTotalOrder; Setoid; DecSetoid)
 import Relation.Binary.EqReasoning as EqReasoning
 open import Relation.Binary.Core using (tri<; tri≈; tri>)
 open import Relation.Nullary using (Dec; yes; no; ¬_)
@@ -33,12 +32,16 @@ open RoutingAlgebra isRoutingAlgebra using (≤₊-decTotalOrder)
 
 --------------------------------
 -- Data
+RoutingSet : Set a
+RoutingSet = List (Fin n × Route)
+
 RoutingVector : Set a
-RoutingVector = Table (List (Fin n × Route)) n
+RoutingVector = Table RoutingSet n
 
 -- RoutingVector setoid
-×-setoid = Fin-setoid n ×ₛ S
-open PermutationEq ×-setoid public
+FinRoute-decSetoid = ×-decSetoid (Fin-decSetoid n) DS
+open DecSetoid FinRoute-decSetoid public using () renaming (setoid to FinRoute-setoid)
+open PermutationEq FinRoute-setoid public
 open TableEquality ↭-setoid public using (𝕋ₛ) renaming
       ( _≈ₜ_             to _≈ᵥ_
       ; ≈ₜ-reflexive     to ≈ᵥ-reflexive
@@ -50,22 +53,26 @@ open TableEquality ↭-setoid public using (𝕋ₛ) renaming
 𝕍ₛ = 𝕋ₛ n
 
 --------------------------------
+-- Auxilaries
 
-invalidSet : List (Fin n × Route)
-invalidSet = []
+Ø : RoutingSet
+Ø = []
+
+Øᵥ : RoutingVector
+Øᵥ i = Ø
 
 isValidRoute : (x : Route) → Dec (¬(x ≈ ∞#))
 isValidRoute x = ¬? (x ≟ ∞#)
 
-validRoutes : List (Fin n × Route) → List (Fin n × Route)
-validRoutes xs = filter (λ {(d , v) → isValidRoute v}) xs
+_† : RoutingSet → RoutingSet
+xs † = filter (λ {(d , v) → isValidRoute v}) xs
 
 decTotalOrder : DecTotalOrder a ℓ ℓ
 decTotalOrder = ×-decTotalOrder (fin-decTotalOrder n) ≤₊-decTotalOrder
 
 open InsertionSort decTotalOrder using (sort)
 
-mergeSorted : Op₂ (List (Fin n × Route))
+mergeSorted : Op₂ RoutingSet
 mergeSorted [] ys = ys
 mergeSorted (x ∷ xs) [] = x ∷ xs
 mergeSorted ((d₁ , v₁) ∷ xs) ((d₂ , v₂) ∷ ys) with <-cmp d₁ d₂
@@ -78,7 +85,7 @@ mergeSorted ((d₁ , v₁) ∷ xs) ((d₂ , v₂) ∷ ys) with <-cmp d₁ d₂
 
 -- Set addition
 infixl 10 _⊕ₛ_
-_⊕ₛ_ : Op₂ (List (Fin n × Route))
+_⊕ₛ_ : Op₂ RoutingSet
 S₁ ⊕ₛ S₂ = mergeSorted (sort S₁) (sort S₂)
 
 -- Vector addition
@@ -88,18 +95,18 @@ _⊕ᵥ_ : Op₂ RoutingVector
 
 -- Big addition
 infix 5 ⨁ₛ
-⨁ₛ : ∀ {k} → (Fin k → List (Fin n × Route)) → List (Fin n × Route)
-⨁ₛ iter = foldr _⊕ₛ_ invalidSet (tabulate iter)
+⨁ₛ : ∀ {k} → (Fin k → RoutingSet) → RoutingSet
+⨁ₛ iter = foldr _⊕ₛ_ Ø (tabulate iter)
 
 -- Matrix to vector-of-sets transformation (Gamma_0 to Gamma_1)
 infix 12 ~_
 ~_ : RoutingMatrix → RoutingVector
-(~ M) i = validRoutes (tabulate λ j → (j , M i j))
+(~ M) i = (tabulate λ j → (j , M i j)) †
 
 -- Function application to sets
 infix 13 _[_]
-_[_] : ∀ {i j : Fin n} → (Step i j) → List (Fin n × Route) → List (Fin n × Route)
-f [ X ] = validRoutes (map (λ {(d , v) → (d , f ▷ v)})  X)
+_[_] : ∀ {i j : Fin n} → (Step i j) → RoutingSet → RoutingSet
+f [ X ] = (map (λ {(d , v) → (d , f ▷ v)})  X) †
 
 -- Matrix application to vector-of-sets
 infix 10 _〚_〛

@@ -6,10 +6,15 @@ open import Data.List using (foldr; tabulate)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra)
 import RoutingLib.Routing as Routing
 
-module RoutingLib.lmv34.Gamma_zero.Algebra {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) (n : ℕ) where
+module RoutingLib.lmv34.Gamma_zero.Algebra
+  {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) (n : ℕ)
+  where
 
 open Routing algebra n
 open RawRoutingAlgebra algebra
+
+------------------------------------
+-- Operation definitions
 
 -- Matrix addition
 infixl 10 _⊕ₘ_

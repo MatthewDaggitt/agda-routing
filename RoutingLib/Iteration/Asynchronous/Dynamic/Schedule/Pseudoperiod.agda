@@ -50,6 +50,9 @@ _++ₛₑ_ : ∀ {s m e} → SubEpoch [ s , m ] → SubEpoch [ m , e ] → SubEp
   ; ηₛ≡ηₑ     = trans ηₛ≡ηₘ ηₘ≡ηₑ
   } where open SubEpoch
 
+η-trivial : ∀ t → SubEpoch [ t , t ]
+η-trivial t = mkₛₑ ≤-refl refl
+
 --------------------------------------------------------------------------------
 -- Activation periods --
 --------------------------------------------------------------------------------
@@ -70,17 +73,19 @@ record _IsActiveIn_ (i : Fin n) (period : TimePeriod) : Set where
   η[s,e] : SubEpoch [ start , end ]
   η[s,e] = mkₛₑ (≤-trans (<⇒≤ s<α+) α+≤e) ηₛ≡ηₑ
 
+{-
 record ActivationPeriod (period : TimePeriod) : Set where
   constructor mkₐ
   open TimePeriod period
   field
     η[s,e]        : SubEpoch period
-    isActivation  : ∀ {i} → i ∈ ρ start → i IsActiveIn period
+    isActivation  : i IsActiveIn period
 
   open SubEpoch η[s,e] public
 
   module _ {i} (i∈ρ : i ∈ ρ start) where
     open _IsActiveIn_ (isActivation i∈ρ) public hiding (ηₛ≡ηₑ; η[s,e])
+-}
 
 --------------------------------------------------------------------------------
 -- Expiry periods --
@@ -90,14 +95,20 @@ record ActivationPeriod (period : TimePeriod) : Set where
 --
 -- These are typically named β[s,e]
 
-record ExpiryPeriod (period : TimePeriod) : Set where
+record MessagesTo_ExpireIn (i : Fin n) (period : TimePeriod) : Set where
   constructor mkₑ
   open TimePeriod period
   field
     η[s,e]  : SubEpoch period
-    expiryᵢ  : ∀ {i} → i ∈ ρ start → ∀ {t} → end < t → ∀ j → start ≤ β t i j
+    expiryᵢ : ∀ {t} → end < t → ∀ j → start ≤ β t i j
 
   open SubEpoch η[s,e] public
+
+extendExpiry : ∀ {a s e z i} → SubEpoch [ a , s ] → SubEpoch [ e , z ] →
+               MessagesTo i ExpireIn [ s , e ] →
+               MessagesTo i ExpireIn [ a , z ]
+extendExpiry η[a,s]@(mkₛₑ a≤s _) η[e,z]@(mkₛₑ e≤z _) (mkₑ η[s,e] expiryᵢ) =
+  mkₑ ((η[a,s] ++ₛₑ η[s,e]) ++ₛₑ η[e,z]) (λ z<t → ≤-trans a≤s ∘ expiryᵢ (<-transʳ e≤z z<t))
 
 --------------------------------------------------------------------------------
 -- Pseudocycle
@@ -109,14 +120,25 @@ record ExpiryPeriod (period : TimePeriod) : Set where
 record Pseudocycle (period : TimePeriod) : Set₁ where
   open TimePeriod period
   field
-    m      : 𝕋
-    β[s,m] : ExpiryPeriod     [ start , m   ]
-    α[m,e] : ActivationPeriod [ m     , end ]
+    m          : Fin n → 𝕋
+    η[s,e]     : SubEpoch [ start , end ]
+    start≤midᵢ : ∀ i → start ≤ m i
+    midᵢ≤end   : ∀ i → m i ≤ end
+    
+    β[s,m]     : ∀ i → MessagesTo i ExpireIn [ start , m i ]
+    α[m,e]     : ∀{i} (i∈ρₛ : i ∈ ρ start) → i IsActiveIn [ m i , end ]
 
+  open SubEpoch η[s,e] public
+
+  postulate η[s,m] : ∀ i → SubEpoch [ start , m i ]
+  postulate η[m,e] : ∀ i → SubEpoch [ m i   , end ]
+  
+{-
   open ExpiryPeriod β[s,m] public
     renaming (start≤end to start≤mid; ηₛ≡ηₑ to ηₛ≡ηₘ; η[s,e] to η[s,m])
   open ActivationPeriod α[m,e] public
     renaming (start≤end to mid≤end;   ηₛ≡ηₑ to ηₘ≡ηₑ; η[s,e] to η[m,e])
+
 
   start≤end : start ≤ end
   start≤end = ≤-trans start≤mid mid≤end
@@ -126,6 +148,7 @@ record Pseudocycle (period : TimePeriod) : Set₁ where
 
   η[s,e] : SubEpoch [ start , end ]
   η[s,e] = mkₛₑ start≤end ηₛ≡ηₑ
+-}
 
 --------------------------------------------------------------------------------
 -- Multi-pseudocycles

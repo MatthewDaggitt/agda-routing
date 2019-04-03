@@ -64,13 +64,18 @@ bounded dᵢ-bounded =
     (max 0 (λ i → proj₁ (dᵢ-bounded {i}))) ,
     (λ x y → max[s]≤max[t]₂ (≤-refl {0}) (λ i → proj₂ (dᵢ-bounded {i}) (x i) (y i)))
 
-isPreMetric : (∀ {i} → IsPreMetric _≈ᵢ_ (dᵢ i)) → IsPreMetric _≈_ d
-isPreMetric pm = record
+isProtoMetric : (∀ {i} → IsProtoMetric _≈ᵢ_ (dᵢ i)) → IsProtoMetric _≈_ d
+isProtoMetric pm = record
   { isTotalOrder    = ≤-isTotalOrder
   ; 0#-minimum      = z≤n
   ; ≈-isEquivalence = ≈-isEquivalence
-  ; cong            = cong (IsPreMetric.cong pm)
-  ; eq⇒0            = x≈y⇒d≡0 (IsPreMetric.eq⇒0 pm)
+  ; cong            = cong (IsProtoMetric.cong pm)
+  }
+
+isPreMetric : (∀ {i} → IsPreMetric _≈ᵢ_ (dᵢ i)) → IsPreMetric _≈_ d
+isPreMetric pm = record
+  { isProtoMetric = isProtoMetric (IsPreMetric.isProtoMetric pm)
+  ; eq⇒0          = x≈y⇒d≡0 (IsPreMetric.eq⇒0 pm)
   }
 
 isQuasiSemiMetric : (∀ {i} → IsQuasiSemiMetric _≈ᵢ_ (dᵢ i)) → IsQuasiSemiMetric _≈_ d

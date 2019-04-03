@@ -117,13 +117,18 @@ r[x,y]≡hx⊔hy {x} {y} x≉y with x ≟ y
 ... | yes x≈y = contradiction x≈y x≉y
 ... | no  _   = refl
 
-r-isPreMetric : IsPreMetric _≈_ r
-r-isPreMetric = record
+r-isProtoMetric : IsProtoMetric _≈_ r
+r-isProtoMetric = record
   { isTotalOrder    = ≤-isTotalOrder
   ; 0#-minimum      = z≤n
   ; ≈-isEquivalence = ≈-isEquivalence
   ; cong            = r-cong
-  ; eq⇒0            = x≈y⇒r≡0
+  }
+
+r-isPreMetric : IsPreMetric _≈_ r
+r-isPreMetric = record
+  { isProtoMetric = r-isProtoMetric
+  ; eq⇒0          = x≈y⇒r≡0
   }
 
 r-isQuasiSemiMetric : IsQuasiSemiMetric _≈_ r

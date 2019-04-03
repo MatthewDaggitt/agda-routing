@@ -1,6 +1,6 @@
 open import Algebra.FunctionProperties using (Op₂)
 open import Data.List using ([]; _∷_; foldr; map; tabulate)
-import Data.List.Properties as Prop
+import Data.List.Properties as ListProperties
 open import Data.List.Relation.Pointwise as PW using (Pointwise; []; _∷_)
 open import Data.Fin using (Fin)
 open import Function using (_∘_)
@@ -29,4 +29,4 @@ module _ {a b ℓ} {A : Set a} {B : Set b} where
 
   map-tabulate : ∀ {_~_ : Rel B ℓ} → Reflexive _~_ → ∀ {n} (f : A → B) (g : Fin n → A) →
                  Pointwise _~_ (map f (tabulate g)) (tabulate (f ∘ g))
-  map-tabulate ref f g = reflexive-≡ ref (Prop.map-tabulate g f)
+  map-tabulate ref f g = reflexive-≡ ref (ListProperties.map-tabulate g f)

@@ -50,14 +50,15 @@ module _ {n} (ψˢ : StaticSchedule n) where
                        _IsActiveIn_ ψᵈ i [ s , e ]
   convert-isActiveIn (Static.mkₐ α+ s<α+ α+≤e i∈α+[i]) =
     mkₐᵢ refl α+ s<α+ α+≤e i∈α+[i]
-
+{-
   convert-activationPeriod : ∀ {s e} → Static.ActivationPeriod ψˢ [ s , e ] →
                              ActivationPeriod ψᵈ [ s , e ]
   convert-activationPeriod (Static.mkₐ start≤end isActivation) =
     mkₐ (convert-subEpoch start≤end) (λ _ → convert-isActiveIn (isActivation _))
+-}
 
-  convert-expiryPeriod : ∀ {s e} → Static.ExpiryPeriod ψˢ [ s , e ] →
-                             ExpiryPeriod ψᵈ [ s , e ]
+  convert-expiryPeriod : ∀ {s e i} → Static.MessagesTo_ExpireIn_ ψˢ i [ s , e ] →
+                         ? --MessagesTo_ExpireIn_ ψᵈ i ([ s , e ])
   convert-expiryPeriod (Static.mkₑ start≤end expiryᵢ) =
     mkₑ (convert-subEpoch start≤end) (λ _ e<t j → expiryᵢ _ j e<t)
 
@@ -66,7 +67,7 @@ module _ {n} (ψˢ : StaticSchedule n) where
   convert-pseudoperiod pp = record
     { m      = m
     ; β[s,m] = convert-expiryPeriod β[s,m]
-    ; α[m,e] = convert-activationPeriod α[m,e]
+    ; α[m,e] = convert-isActiveIn α[m,e]
     } where open Static.Pseudocycle pp
 
   convert-multiPseudocycle : ∀ {s e k} → Static.MultiPseudocycle ψˢ k [ s , e ] →

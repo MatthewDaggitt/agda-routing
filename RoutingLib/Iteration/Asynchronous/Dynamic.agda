@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- Dynamic asynchronous iterations
 --
--- This module contains teh definition of what it means to be a dynamic
+-- This module contains the definition of what it means to be a dynamic
 -- asynchronous iteration as well as the definition of the state function
 -- and what it means for such processes to be "correct".
 --------------------------------------------------------------------------------

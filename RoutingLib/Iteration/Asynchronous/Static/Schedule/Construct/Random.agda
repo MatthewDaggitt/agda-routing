@@ -13,7 +13,7 @@ open import RoutingLib.Iteration.Asynchronous.Schedule
 open import RoutingLib.Iteration.Asynchronous.Schedule.Synchronous using () renaming (α to α-sync; nonstarvation to nonstarvation-sync)
 open import RoutingLib.Iteration.Asynchronous.Schedule.RoundRobin using () renaming (α to α-rr; nonstarvation to nonstarvation-rr)
 
-module RoutingLib.Iteration.Asynchronous.Schedule.Random {n l} (random : 𝕋 → Fin n → Fin n → Fin l) where
+module RoutingLib.Iteration.Asynchronous.Static.Schedule.Construct.Random {n l} (random : 𝕋 → Fin n → Fin n → Fin l) where
 
   β :  𝕋 → Fin n → Fin n → 𝕋
   β t i j = t ∸ 1 ∸ toℕ (random t i j)

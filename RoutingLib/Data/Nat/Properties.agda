@@ -136,18 +136,18 @@ m≤∣m-n∣+n m n = subst (m ≤_) (+-comm n _) (m≤n+∣m-n∣ m n)
   where open ≤-Reasoning
 ∣-∣-triangle (suc x) (suc y) (suc z) = ∣-∣-triangle x y z
 
-∣-∣-isPreMetric : IsPreMetric _≡_ ∣_-_∣
-∣-∣-isPreMetric = record
+∣-∣-isProtoMetric : IsProtoMetric _≡_ ∣_-_∣
+∣-∣-isProtoMetric = record
   { isTotalOrder    = ≤-isTotalOrder
   ; ≈-isEquivalence = isEquivalence
   ; cong            = cong₂ ∣_-_∣
-  ; eq⇒0            = n≡m⇒∣n-m∣≡0
   ; 0#-minimum      = z≤n
   }
 
-∣-∣-preMetric : PreMetric 0ℓ 0ℓ 0ℓ 0ℓ 0ℓ
-∣-∣-preMetric = record
-  { isPreMetric = ∣-∣-isPreMetric
+∣-∣-isPreMetric : IsPreMetric _≡_ ∣_-_∣
+∣-∣-isPreMetric = record
+  { isProtoMetric = ∣-∣-isProtoMetric
+  ; eq⇒0          = n≡m⇒∣n-m∣≡0
   }
 
 ∣-∣-isQuasiSemiMetric : IsQuasiSemiMetric _≡_ ∣_-_∣
@@ -156,15 +156,21 @@ m≤∣m-n∣+n m n = subst (m ≤_) (+-comm n _) (m≤n+∣m-n∣ m n)
   ; 0⇒eq        = ∣n-m∣≡0⇒n≡m
   }
 
-∣-∣-quasiSemiMetric : QuasiSemiMetric 0ℓ 0ℓ 0ℓ 0ℓ 0ℓ
-∣-∣-quasiSemiMetric = record
-  { isQuasiSemiMetric = ∣-∣-isQuasiSemiMetric
-  }
-
 ∣-∣-isSemiMetric : IsSemiMetric _≡_ ∣_-_∣
 ∣-∣-isSemiMetric = record
   { isQuasiSemiMetric = ∣-∣-isQuasiSemiMetric
   ; sym               = ∣-∣-comm
+  }
+
+∣-∣-isMetric : IsMetric _≡_ ∣_-_∣
+∣-∣-isMetric = record
+  { isSemiMetric = ∣-∣-isSemiMetric
+  ; triangle     = ∣-∣-triangle
+  }
+
+∣-∣-quasiSemiMetric : QuasiSemiMetric 0ℓ 0ℓ 0ℓ 0ℓ 0ℓ
+∣-∣-quasiSemiMetric = record
+  { isQuasiSemiMetric = ∣-∣-isQuasiSemiMetric
   }
 
 ∣-∣-semiMetric : SemiMetric 0ℓ 0ℓ 0ℓ 0ℓ 0ℓ
@@ -172,10 +178,9 @@ m≤∣m-n∣+n m n = subst (m ≤_) (+-comm n _) (m≤n+∣m-n∣ m n)
   { isSemiMetric = ∣-∣-isSemiMetric
   }
 
-∣-∣-isMetric : IsMetric _≡_ ∣_-_∣
-∣-∣-isMetric = record
-  { isSemiMetric = ∣-∣-isSemiMetric
-  ; triangle     = ∣-∣-triangle
+∣-∣-preMetric : PreMetric 0ℓ 0ℓ 0ℓ 0ℓ 0ℓ
+∣-∣-preMetric = record
+  { isPreMetric = ∣-∣-isPreMetric
   }
 
 ∣-∣-metric : Metric 0ℓ 0ℓ

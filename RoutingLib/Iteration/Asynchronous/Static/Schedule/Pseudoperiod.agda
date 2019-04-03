@@ -80,8 +80,8 @@ record Pseudocycle (period : TimePeriod) : Set₁ where
     start≤midᵢ : ∀ i → start ≤ m i
     midᵢ≤end   : ∀ i → m i ≤ end
     
-    β[s,m]    : ∀ i → MessagesTo i ExpireIn [ start , m i  ]
-    α[m,e]    : ∀ i → i IsActiveIn [ m i , end ]
+    β[s,m]     : ∀ i → MessagesTo i ExpireIn [ start , m i  ]
+    α[m,e]     : ∀ i → i IsActiveIn [ m i , end ]
 
 --------------------------------------------------------------------------------
 -- Multi-pseudocycles

@@ -10,11 +10,11 @@ open import Data.Nat.Properties
 open import Function.Equivalence using (Equivalence)
 open ≡-Reasoning
 
-open import RoutingLib.Asynchronous.Schedule
-open import RoutingLib.Asynchronous.Schedule.Synchronous using (β; causality; finite)
+open import RoutingLib.Iteration.Asynchronous.Static.Schedule
+open import RoutingLib.Iteration.Asynchronous.Static.Schedule.ConstSynchronous using (β; causality; finite)
 open import RoutingLib.Data.Nat.DivMod
 
-module RoutingLib.Asynchronous.Schedule.RoundRobin where
+module RoutingLib.Iteration.Asynchronous.Static.Schedule.Construct.RoundRobin where
 
   -- Round Robin Schedule Functions
   α : {n : ℕ} → 𝕋 → Subset (suc n)

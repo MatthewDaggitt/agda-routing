@@ -12,6 +12,7 @@ open import Data.List.Membership.Propositional.Properties using (∈-lookup; ∈
 open import Data.List.Membership.DecPropositional
 open import Data.Product using (_×_; _,_; <_,_>; proj₁; proj₂; ∃; ∃₂)
 open import Data.Product.Relation.Pointwise.NonDependent using (≡⇒≡×≡; ≡×≡⇒≡)
+open import Data.Sum using (_⊎_)
 open import Function using (_∘_)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
@@ -94,7 +95,6 @@ _▻_ = addVertex
 _▻*_ : ∀ {n} → Fin n → List (Path n) → List (Path n)
 i ▻* l = map (i ▻_) l
 
-
 data PathFrom {n : ℕ} (i : Fin n) : Path n → Set where
 --  empty : PathFrom i []
   here : {j : Fin n} {p : Path n} → PathFrom i ((i , j) ∷ p)
@@ -103,6 +103,12 @@ data PathTo {n : ℕ} (j : Fin n) : Path n → Set where
 --  empty : PathTo j []
   here : {i : Fin n} → PathTo j ((i , j) ∷ [])
   there : {e : Edge n} {p : Path n} → PathTo j p → PathTo j (e ∷ p)
+
+PathFrom' : {n : ℕ} (i : Fin n) → Path n → Set
+PathFrom' i p = PathFrom i p ⊎ p ≡ []
+
+PathTo' : {n : ℕ} (j : Fin n) → Path n → Set
+PathTo' j p = PathTo j p ⊎ p ≡ []
 
 all-k-length-paths-from-to : ∀ n → ℕ → (Vertex n) → (Vertex n) → List (Path n)
 all-k-length-paths-to : ∀ n → ℕ → (Vertex n) → List (Path n)

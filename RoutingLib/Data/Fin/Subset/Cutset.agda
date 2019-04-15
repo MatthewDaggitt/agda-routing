@@ -11,7 +11,7 @@ open import Data.List.Membership.Propositional
   using (lose) renaming (_∈_ to _∈ₘ_)
 open import Data.List.Membership.Propositional.Properties using (∈-filter⁺)
 open import Data.List.All using (All)
-open import Data.List.All.Properties using (filter⁺₁)
+open import Data.List.All.Properties using (all-filter)
 open import Data.Product using (_×_; _,_)
 open import Relation.Binary.PropositionalEquality using (_≡_)
 open import Relation.Unary using (Decidable)
@@ -22,7 +22,7 @@ open import Relation.Nullary.Product using (_×-dec_)
 open import RoutingLib.Data.Fin.Subset using (Nonfull)
 open import RoutingLib.Data.Fin.Subset.Properties using (Nonfull-witness)
 open import RoutingLib.Data.List using (allFinPairs)
-open import RoutingLib.Data.List.All.Properties using (allFinPairs⁺)
+open import RoutingLib.Data.List.Relation.Unary.All.Properties using (allFinPairs⁺)
 open import RoutingLib.Data.List.Membership.Propositional.Properties
   using (∈-allFinPairs⁺)
 
@@ -48,7 +48,7 @@ cutset : Subset n → List (Fin n × Fin n)
 cutset p = filter (_↷? p) (allFinPairs n)
 
 ∈cutset⇒↷ : ∀ p → All (_↷ p) (cutset p)
-∈cutset⇒↷ p = filter⁺₁ (_↷? p) (allFinPairs n)
+∈cutset⇒↷ p = all-filter (_↷? p) (allFinPairs n)
 
 ↷⇒∈cutset : ∀ {p e} → e ↷ p → e ∈ₘ cutset p
 ↷⇒∈cutset e↷p = ∈-filter⁺ (_↷? _) (∈-allFinPairs⁺ _ _) e↷p

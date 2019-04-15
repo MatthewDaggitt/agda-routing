@@ -32,10 +32,10 @@ open import Relation.Binary.PropositionalEquality using (_≡_; cong)
 
 open import RoutingLib.Routing using (Network)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
-open import RoutingLib.Data.List.AllPairs using (AllPairs; []; _∷_)
-import RoutingLib.Data.List.AllPairs.Properties as AllPairs
+open import RoutingLib.Data.List.Relation.Unary.AllPairs using (AllPairs; []; _∷_)
+import RoutingLib.Data.List.Relation.Unary.AllPairs.Properties as AllPairs
 open import RoutingLib.Data.List.Properties using (foldr-map-commute-gen₂)
-open import RoutingLib.Data.List.Relation.Equality.Setoid using (foldr⁺; map-tabulate)
+open import RoutingLib.Data.List.Relation.Binary.Equality.Setoid using (foldr⁺; map-tabulate)
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic as Async using (Convergent)
 import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence as Async
@@ -98,7 +98,7 @@ module _ {n} (Nᵇ : Network B n) where
         foldr _⊕ᵇ_ (to (Iᵃ i j)) (map to (tabulate λ k → Aᵃ e p i k ▷ᵃ X k j))
       ≈⟨ foldr⁺ (S B) (⊕-cong B) (toIᵃ≈Iᵇ i j) (map-tabulate (S B) to (λ k → Aᵃ e p i k ▷ᵃ X k j)) ⟩
         foldr _⊕ᵇ_ (Iᵇ i j) (tabulate (λ k → to (Aᵃ e p i k ▷ᵃ X k j)))
-      ≈⟨ foldr⁺ (S B) (⊕-cong B) (≈-refl B) (ListEq.tabulate⁺ (λ k → to-▷ (Aᵃ e p i k) (X k j)) ) ⟩
+      ≈⟨ foldr⁺ (S B) (⊕-cong B) (≈-refl B) (ListEq.tabulate⁺ (S B) (λ k → to-▷ (Aᵃ e p i k) (X k j)) ) ⟩
         foldr _⊕ᵇ_ (Iᵇ i j) (tabulate (λ k → toₛ (Aᵃ e p i k) ▷ᵇ to (X k j)))
       ≡⟨ cong (foldr _⊕ᵇ_ (Iᵇ i j)) (tabulate-cong {n = n} λ k → cong (_▷ᵇ _) (toA k) ) ⟩
         foldr _⊕ᵇ_ (Iᵇ i j) (tabulate (λ k → Aᵇ e p i k ▷ᵇ to (X k j)))

@@ -3,10 +3,9 @@ open import Data.Nat using (zero; suc; s≤s; z≤n; _^_; _+_; _≤_)
 open import Function using (case_of_)
 
 open import RoutingLib.Routing.Algebra
-import RoutingLib.Function.Iteration.Convergence as Convergence
+import RoutingLib.Iteration.Synchronous.Convergence as Convergence
 
 import RoutingLib.Routing.VectorBased.Synchronous as VectorBased
-open import RoutingLib.Routing.VectorBased.ConvergenceConditions
 
 
 module RoutingLib.Routing.VectorBased.Synchronous.Results

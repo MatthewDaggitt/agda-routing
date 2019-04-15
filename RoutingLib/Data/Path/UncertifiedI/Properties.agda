@@ -1,4 +1,6 @@
 open import Data.Maybe
+import Data.Maybe.Relation.Unary.Any as Any
+import Data.Maybe.Relation.Unary.All as All
 open import Data.Nat using (ℕ; suc; z≤n; s≤s) renaming (_≟_ to _≟ℕ_; _≤?_ to _≤ℕ?_; _≤_ to _≤ℕ_; _<_ to _<ℕ_)
 open import Data.Nat.Properties using (<-trans; ≤-trans; m≢1+m+n; <⇒≢; <⇒≯; ≤-refl; m+n≮n; suc-injective; <-cmp)
 open import Data.Fin using (Fin; _<_; _≤?_; suc; zero)
@@ -11,7 +13,6 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Data.Maybe
 open import RoutingLib.Data.Nat.Properties using (n≢1+n)
 
 
@@ -31,7 +32,7 @@ open UncertifiedProperties public
   ; ℙₛ          to ℙᵛₛ
   )
 
-open Data.Maybe public
+open import Data.Maybe.Properties public
   using ()
   renaming
   ( just-injective to valid-injective
@@ -43,7 +44,7 @@ open Data.Maybe public
 infix 4 _⇿?_
 
 _⇿?_ : Decidable _⇿_
-e ⇿? p = anyDec (e ⇿ᵥ?_) p
+e ⇿? p = Any.dec (e ⇿ᵥ?_) p
 
 ⇿-resp-≡ : ∀ {e} → (e ⇿_) Respects _≡_
 ⇿-resp-≡ refl e⇿p = e⇿p
@@ -52,7 +53,7 @@ e ⇿? p = anyDec (e ⇿ᵥ?_) p
 -- Membership
 
 _∈ₚ?_ : Decidable _∈ₚ_
-k ∈ₚ? p = allDec (k ∈ᵥₚ?_) p
+k ∈ₚ? p = All.dec (k ∈ᵥₚ?_) p
 
 ∈ₚ-resp-≡ : ∀ {k} → (k ∈ₚ_) Respects _≡_
 ∈ₚ-resp-≡ refl k∈p = k∈p

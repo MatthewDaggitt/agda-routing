@@ -1,5 +1,5 @@
 open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _+_; _∸_; _<_; _≤_)
-open import Data.Nat.Properties using (+-identityʳ; +-suc; +-assoc; ≤-reflexive; <⇒≱; <-transˡ; m≤m+n)
+open import Data.Nat.Properties using (+-identityʳ; +-suc; +-assoc; ≤-reflexive; <⇒≱; <-transˡ; m≤m+n; module ≤-Reasoning)
 open import Data.Fin using (Fin; zero; suc)
 open import Data.Fin.Subset using (Subset; _∈_; _∉_; _∪_)
 open import Data.Fin.Dec using (_∈?_)
@@ -17,7 +17,6 @@ import Relation.Binary.EqReasoning as EqReasoning
 open import RoutingLib.Data.Path.CertifiedI.All
 open import RoutingLib.Data.Path.CertifiedI.Properties
 open import RoutingLib.Data.Fin.Subset using (Nonfull)
-open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
 
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing using (RoutingMatrix; AdjacencyMatrix)

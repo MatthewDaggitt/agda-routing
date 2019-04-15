@@ -1,7 +1,7 @@
 open import Data.Fin.Dec using (_∈?_)
 open import Data.Fin.Subset using (Subset) renaming (_∈_ to _∈ₛ_; _∉_ to _∉ₛ_; ⊤ to ⊤ₛ)
 open import Data.Nat using (ℕ; _≤_; _<_; z≤n; s≤s; zero; suc; _+_; _∸_; ≤-pred)
-open import Data.Nat.Properties hiding (module ≤-Reasoning; _≟_)
+open import Data.Nat.Properties hiding (_≟_)
 open import Data.Product using (∃; ∃₂; _×_; _,_; proj₁; proj₂)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Unit using (⊤; tt)
@@ -17,7 +17,7 @@ open import Relation.Unary using (Pred; _∈_)
 open import RoutingLib.Data.Table using (max)
 open import RoutingLib.Data.Table.Properties using (max[t]≤x; x≤max[t]; max-cong)
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
-open import RoutingLib.Data.Nat.Properties using (m+[n∸o]≤[m+n]∸o; module ≤-Reasoning)
+open import RoutingLib.Data.Nat.Properties using (m+[n∸o]≤[m+n]∸o)
 import RoutingLib.Function.Metric.Construct.Condition as Condition
 open import RoutingLib.Relation.Unary.Indexed
 open import RoutingLib.Relation.Binary.PropositionalEquality using (inspect′)
@@ -224,11 +224,11 @@ F-mono-B {e} {p} p∈Q {k} {x} x∈Aₚ x∈B i with i ∈? p
   dᵢ e p∈Q (x* e p∈Q i) (x* e p∈Q i)         ≡⟨ x≈y⇒dᵢ≡0 e p∈Q ≈ᵢ-refl ⟩
   0                                          ≤⟨ z≤n ⟩
   r[_] e p∈Q (suc k)                         ∎)
-...   | no  x≉ₚx* = lift (v<r[k]⇒v≤r[1+k] e p∈Q (begin
+...   | no  x≉ₚx* = lift (v<r[k]⇒v≤r[1+k] e p∈Q (begin-strict
   dᵢ e p∈Q (x* e p∈Q i) (F e p x i) ≤⟨ dᵢ≤d e p∈Q (x* e p∈Q) (F e p x) i∈p ⟩
-  d e p∈Q (x* e p∈Q)   (F e p x)   <⟨ F-strContrOnFP p∈Q x∈Aₚ (Fx*≈x* e p∈Q) x≉ₚx* ⟩
-  d e p∈Q (x* e p∈Q)    x          ≤⟨ ∈B⇒d≤r p∈Q x∈B ⟩
-  r[_] e p∈Q k                     ∎))
+  d e p∈Q (x* e p∈Q)   (F e p x)    <⟨ F-strContrOnFP p∈Q x∈Aₚ (Fx*≈x* e p∈Q) x≉ₚx* ⟩
+  d e p∈Q (x* e p∈Q)    x           ≤⟨ ∈B⇒d≤r p∈Q x∈B ⟩
+  r[_] e p∈Q k                      ∎))
 
 ----------------------
 -- ACO construction --

@@ -1,7 +1,7 @@
 open import Data.Fin.Subset using (Subset; _∈_)
 open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Nat hiding (_≟_)
-open import Data.Nat.Properties hiding (_≟_; module ≤-Reasoning)
+open import Data.Nat.Properties hiding (_≟_)
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
 open import Data.Sum using (_⊎_; inj₁; inj₂; swap)
 open import Function using (_∘_)
@@ -11,7 +11,7 @@ open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.Table using (max)
 open import RoutingLib.Data.Table.Properties using (max[t]<x; x≤max[t])
-open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning; n≢0⇒0<n)
+open import RoutingLib.Data.Nat.Properties using (n≢0⇒0<n)
 import RoutingLib.Function.Metric.Construct.Condition as Condition
 import RoutingLib.Function.Metric as Metric
 import RoutingLib.Relation.Nullary.Decidable as Dec
@@ -77,7 +77,7 @@ module _ {e : Epoch} {p : Subset n} where
                           ∀ {v} → (∀ k l → r (X k l) (F X k l) ≤ v) →
                           Hᶜ + hⁱ (F X i j) < v
   rⁱ-strContrOrbits-FX {X} {i} {j} FXᵢⱼⁱ {v} r≤v with FXᵢⱼⁱ⇒Xₖⱼⁱ≉FXₖⱼ X i j FXᵢⱼⁱ
-  ... | (k , Xₖⱼ≉FXₖⱼ , Xₖⱼⁱ , |Xₖⱼ|<|FXᵢⱼ|) = begin
+  ... | (k , Xₖⱼ≉FXₖⱼ , Xₖⱼⁱ , |Xₖⱼ|<|FXᵢⱼ|) = begin-strict
     Hᶜ + hⁱ (F X i j)                 <⟨ +-monoʳ-< Hᶜ (hⁱ-mono Xₖⱼⁱ FXᵢⱼⁱ |Xₖⱼ|<|FXᵢⱼ|) ⟩
     Hᶜ + hⁱ (X k j)                   ≤⟨ +-monoʳ-≤ Hᶜ (m≤m⊔n _ _) ⟩
     Hᶜ + (hⁱ (X k j) ⊔ hⁱ (F X k j))  ≡⟨ H+rⁱ≡r ≈-refl ≈-refl Xₖⱼ≉FXₖⱼ (inj₁ Xₖⱼⁱ) ⟩
@@ -89,7 +89,7 @@ module _ {e : Epoch} {p : Subset n} where
                            Hᶜ + hⁱ (F (F X) i j) < v
   rⁱ-strContrOrbits-F²X {X} {i} {j} F²Xᵢⱼⁱ {v} r≤v with FXᵢⱼⁱ⇒Xₖⱼⁱ≉FXₖⱼ (F X) i j F²Xᵢⱼⁱ
   ... | (l , _ , FXₗⱼⁱ , |FXₗⱼ|<|F²Xₗⱼ|) with FXᵢⱼⁱ⇒Xₖⱼⁱ≉FXₖⱼ X l j FXₗⱼⁱ
-  ...   | (k , Xₖⱼ≉FXₖⱼ , Xₖⱼⁱ , |Xₖⱼ|<|FXₖⱼ|) = begin
+  ...   | (k , Xₖⱼ≉FXₖⱼ , Xₖⱼⁱ , |Xₖⱼ|<|FXₖⱼ|) = begin-strict
     Hᶜ + hⁱ (F (F X) i j)             <⟨ +-monoʳ-< Hᶜ (hⁱ-mono Xₖⱼⁱ F²Xᵢⱼⁱ (<-trans |Xₖⱼ|<|FXₖⱼ| |FXₗⱼ|<|F²Xₗⱼ|)) ⟩
     Hᶜ + hⁱ (X k j)                   ≤⟨ +-monoʳ-≤ Hᶜ (m≤m⊔n _ _) ⟩
     Hᶜ + (hⁱ (X k j) ⊔ hⁱ (F X k j))  ≡⟨ H+rⁱ≡r ≈-refl ≈-refl Xₖⱼ≉FXₖⱼ (inj₁ Xₖⱼⁱ) ⟩
@@ -100,7 +100,7 @@ module _ {e : Epoch} {p : Subset n} where
                     ∀ {v} → (∀ k l → r (X k l) (Y k l) ≤ v) →
                     Hᶜ + rⁱ (F X i j) (F Y i j) < v
   rⁱ-strContrOn𝑪 {X} {Y} {i} {j} Xᶜ FYᵢⱼⁱ {v} r≤v with FXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ Y i j FYᵢⱼⁱ
-  ... | (k , FYᵢⱼ≈AᵢₖYₖⱼ , Yₖⱼⁱ) = begin
+  ... | (k , FYᵢⱼ≈AᵢₖYₖⱼ , Yₖⱼⁱ) = begin-strict
     Hᶜ + rⁱ (F X i j) (F Y i j)  ≡⟨ cong (Hᶜ +_) (rⁱxᶜyⁱ≡hⁱyⁱ (F-pres-𝑪ₘ Xᶜ i j) FYᵢⱼⁱ) ⟩
     Hᶜ + hⁱ (F Y i j)            ≡⟨ cong (Hᶜ +_) (hⁱ-cong FYᵢⱼ≈AᵢₖYₖⱼ) ⟩
     Hᶜ + hⁱ (A i k ▷ Y k j)      <⟨ +-monoʳ-< Hᶜ (hⁱ-decr (𝑰-cong FYᵢⱼ≈AᵢₖYₖⱼ FYᵢⱼⁱ)) ⟩
@@ -125,7 +125,7 @@ module _ {e : Epoch} {p : Subset n} where
                    ∀ {i j} (FXᵢⱼᶜ : 𝑪 (F X i j)) (FYᵢⱼᶜ : 𝑪 (F Y i j)) →
                    ∀ {v} → 0 < v → (∀ k l → r (X k l) (Y k l) ≤ v) →
                    rᶜ FXᵢⱼᶜ FYᵢⱼᶜ < v
-  rᶜ-strContr-𝑪𝑪 {X} {Y} Xᶜ Yᶜ {i} {j} FXᵢⱼᶜ FYᵢⱼᶜ {v} 0<v r≤v = begin
+  rᶜ-strContr-𝑪𝑪 {X} {Y} Xᶜ Yᶜ {i} {j} FXᵢⱼᶜ FYᵢⱼᶜ {v} 0<v r≤v = begin-strict
     rᶜ FXᵢⱼᶜ FYᵢⱼᶜ                           ≡⟨⟩
     DV.r (toCRoute FXᵢⱼᶜ) (toCRoute FYᵢⱼᶜ)   ≡⟨ DVP.r-cong ≈-refl ≈-refl ⟩
     DV.r (cFX i j) (cFY i j)                 ≡⟨ DVP.r-cong (F-toCMatrix-commute Xᶜ (F-pres-𝑪ₘ Xᶜ) i j) (F-toCMatrix-commute Yᶜ (F-pres-𝑪ₘ Yᶜ) i j) ⟩
@@ -149,15 +149,15 @@ module _ {e : Epoch} {p : Subset n} where
                    ∀ {v} → (∀ k l → r (X k l) (Y k l) ≤ v) →
                    rᶜ FXᵢⱼᶜ FYᵢⱼᶜ < v
   rᶜ-strContr-𝑪𝑰 {X} {Y} (inj₁ (Xⁱ , Yᶜ)) FXᵢⱼᶜ FYᵢⱼᶜ {v} r≤v with 𝑰ₘ-witness Xⁱ
-  ...   | (k , l , Xₖₗⁱ) = begin
-    rᶜ FXᵢⱼᶜ  FYᵢⱼᶜ            <⟨ rᶜ<Hᶜ+x FXᵢⱼᶜ FYᵢⱼᶜ _ ⟩
+  ...   | (k , l , Xₖₗⁱ) = begin-strict
+    rᶜ FXᵢⱼᶜ  FYᵢⱼᶜ          <⟨ rᶜ<Hᶜ+x FXᵢⱼᶜ FYᵢⱼᶜ _ ⟩
     Hᶜ + rⁱ (X k l) (Y k l)  ≡⟨ H+rⁱ≡r ≈-refl ≈-refl (𝑪𝑰⇒≉ (Yᶜ k l) Xₖₗⁱ ∘ ≈-sym) (inj₁ Xₖₗⁱ) ⟩
     r (X k l) (Y k l)        ≤⟨ r≤v k l ⟩
     v                        ∎
     where open ≤-Reasoning
   rᶜ-strContr-𝑪𝑰 {X} {Y} (inj₂ (Xᶜ , Yⁱ)) FXᵢⱼᶜ FYᵢⱼᶜ {v} r≤v with 𝑰ₘ-witness Yⁱ
-  ... | (k , l , Yₖₗⁱ) = begin
-    rᶜ FXᵢⱼᶜ  FYᵢⱼᶜ            <⟨ rᶜ<Hᶜ+x FXᵢⱼᶜ FYᵢⱼᶜ _ ⟩
+  ... | (k , l , Yₖₗⁱ) = begin-strict
+    rᶜ FXᵢⱼᶜ  FYᵢⱼᶜ          <⟨ rᶜ<Hᶜ+x FXᵢⱼᶜ FYᵢⱼᶜ _ ⟩
     Hᶜ + rⁱ (X k l) (Y k l)  ≡⟨ H+rⁱ≡r ≈-refl ≈-refl (𝑪𝑰⇒≉ (Xᶜ k l) Yₖₗⁱ) (inj₂ Yₖₗⁱ) ⟩
     r (X k l) (Y k l)        ≤⟨ r≤v k l ⟩
     v                        ∎
@@ -173,8 +173,8 @@ module _ {e : Epoch} {p : Subset n} where
   ... | no  Xⁱ | yes FXᶜ = rᶜ-strContr-𝑪𝑰 (inj₁ (Xⁱ , FXᶜ)) FXᵢⱼᶜ F²Xᵢⱼᶜ r≤v
   ... | no  Xⁱ | no  FXⁱ with 𝑰ₘ-witness FXⁱ
   ...   | (m , n , FXₘₙⁱ) with FXᵢⱼⁱ⇒Xₖⱼⁱ≉FXₖⱼ X m n FXₘₙⁱ
-  ...     | (k , Xₖₙ≉FXₖₙ , Xₖₙⁱ , _) = begin
-    rᶜ FXᵢⱼᶜ  F²Xᵢⱼᶜ            <⟨ rᶜ<Hᶜ+x FXᵢⱼᶜ F²Xᵢⱼᶜ _ ⟩
+  ...     | (k , Xₖₙ≉FXₖₙ , Xₖₙⁱ , _) = begin-strict
+    rᶜ FXᵢⱼᶜ  F²Xᵢⱼᶜ          <⟨ rᶜ<Hᶜ+x FXᵢⱼᶜ F²Xᵢⱼᶜ _ ⟩
     Hᶜ + rⁱ (X k n) (F X k n) ≡⟨ H+rⁱ≡r ≈-refl ≈-refl Xₖₙ≉FXₖₙ (inj₁ Xₖₙⁱ) ⟩
     r (X k n) (F X k n)       ≤⟨ r≤v k n ⟩
     v                         ∎
@@ -249,7 +249,7 @@ module _ {e : Epoch} {p : Subset n} where
 
   Fₜ-strContrOnFP : ∀ {X} → WellFormed p X → ∀ {X*} → F X* ≈ₘ X* → X ≉ₘ[ p ] X* →
                    D p X* (F X) < D p X* X
-  Fₜ-strContrOnFP {X} wfX {X*} FX*≈X* X≉X* = begin
+  Fₜ-strContrOnFP {X} wfX {X*} FX*≈X* X≉X* = begin-strict
     D p X*     (F X) ≡⟨ D-cong p (≈ₘ-sym FX*≈X*) (≈ₘ-refl {x = F′ e p X}) ⟩
     D p (F X*) (F X) <⟨ Fₜ-strContrOn𝑪 (X*-wf network e p FX*≈X*) wfX X≉X* (fixedPointᶜ FX*≈X*) ⟩
     D p X*     X     ∎

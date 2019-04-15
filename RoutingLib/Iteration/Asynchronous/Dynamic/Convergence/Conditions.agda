@@ -28,7 +28,7 @@ open import Relation.Unary.Properties using (U-Universal)
 open import Relation.Nullary.Decidable using (⌊_⌋)
 
 open import RoutingLib.Data.Table using (Table; max)
-open import RoutingLib.Data.Table.Relation.Pointwise using (Pointwise)
+open import RoutingLib.Data.Table.Relation.Binary.Pointwise using (Pointwise)
 open import RoutingLib.Function.Metric.Nat
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (Setoid_at_)
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as SubsetEq
@@ -178,86 +178,3 @@ partialAMCO⇒AMCO _∈Q partialAMCO = record
 
 partialAMCO⇒AMCO′ : PartialAMCO U → AMCO
 partialAMCO⇒AMCO′ = partialAMCO⇒AMCO U-Universal
-
-
-{-
----------------------------------
--- Other sufficient conditions --
----------------------------------
--- Sufficient but not necessary conditions by Üresin and Dubois
-
-record SynchronousConditions p o : Set (lsuc (a ⊔ ℓ ⊔ p ⊔ o)) where
-
-  field
-    D₀               : Pred Sᵢ p
-    D₀-cong          : ∀ {x y} → x ∈ᵢ D₀ → x ≈ y → y ∈ᵢ D₀
-    D₀-closed        : ∀ {x} → x ∈ᵢ D₀ → F x ∈ᵢ D₀
-
-    _≤ᵢ_              : IRel Sᵢ o
-    ≤ᵢ-isPartialOrder : IsIndexedPartialOrder Sᵢ _≈ᵢ_ _≤ᵢ_
-
-  open IsIndexedPartialOrder ≤ᵢ-isPartialOrder public
-    renaming
-    ( reflexive  to ≤-reflexive
-    ; refl       to ≤-refl
-    ; trans      to ≤-trans
-    ; antisym    to ≤-antisym
-    ; reflexiveᵢ to ≤ᵢ-reflexive
-    ; reflᵢ      to ≤ᵢ-refl
-    ; transᵢ     to ≤ᵢ-trans
-    ; antisymᵢ   to ≤ᵢ-antisym
-    )
-
-  _≤_ = Lift Sᵢ _≤ᵢ_
-
-  field
-    F-monotone       : ∀ {x y} → x ∈ᵢ D₀ → y ∈ᵢ D₀ → x ≤ y → F x ≤ F y
-    F-cong           : ∀ {x y} → x ≈ y → F x ≈ F y
-    iter-decreasing  : ∀ {x} → x ∈ᵢ D₀ → ∀ K → syncIter x (suc K) ≤ syncIter x K
-
-    ξ                : S
-    ξ-fixed          : F ξ ≈ ξ
-    iter-converge    : ∀ {x} → x ∈ᵢ D₀ → ∃ λ T → syncIter x T ≈ ξ
-
-
-
-
-
-
-record FiniteConditions p o : Set (lsuc (a ⊔ ℓ ⊔ p ⊔ o)) where
-  open Membership (setoid) using () renaming (_∈_ to _∈L_)
-
-  field
-    D₀                : Pred Sᵢ p
-    D₀-cong           : ∀ {x y} → x ∈ᵢ D₀ → x ≈ y → y ∈ᵢ D₀
-    D₀-closed         : ∀ {x} → x ∈ᵢ D₀ → F x ∈ᵢ D₀
-    D₀-finite         : ∃ λ xs → ∀ {x} → x ∈ᵢ D₀ → x ∈L xs
-
-    -- ξ∈D₀              : ξ ∈ᵢ D₀
-
-    _≤ᵢ_              : IRel Sᵢ o
-    ≤ᵢ-isPartialOrder : IsIndexedPartialOrder Sᵢ _≈ᵢ_ _≤ᵢ_
-    _≟ᵢ_              : Decidable Sᵢ _≈ᵢ_
-
-  open IsIndexedPartialOrder ≤ᵢ-isPartialOrder public
-    renaming
-    ( reflexive  to ≤-reflexive
-    ; refl       to ≤-refl
-    ; trans      to ≤-trans
-    ; antisym    to ≤-antisym
-    ; reflexiveᵢ to ≤ᵢ-reflexive
-    ; reflᵢ      to ≤ᵢ-refl
-    ; transᵢ     to ≤ᵢ-trans
-    ; antisymᵢ   to ≤ᵢ-antisym
-    )
-
-  _≤_ = Lift Sᵢ _≤ᵢ_
-  open NonStrictToStrict _≈_ _≤_ using (_<_)
-
-  field
-    ξ               : S
-    ξ∈D₀            : ξ ∈ᵢ D₀
-    F-strictlyDecr  : ∀ {x} → x ∈ᵢ D₀ → x ≉ ξ → F x < x
-    F-monotone      : ∀ {x y} → x ∈ᵢ D₀ → y ∈ᵢ D₀ → x ≤ y → F x ≤ F y
-    F-cong          : ∀ {x y} → x ≈ y → F x ≈ F y
--}

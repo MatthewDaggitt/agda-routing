@@ -8,13 +8,11 @@ open import Algebra.FunctionProperties hiding (Op₂)
 open import Relation.Binary
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
+open import Relation.Nullary.Construct.Add.Point using (Pointed; ∙; [_])
+import Relation.Binary.Construct.Add.Point.Equality as PointedEquality
 open import Data.Sum using (inj₁; inj₂; map)
-open import Data.Maybe using (Maybe; Eq; decSetoid; drop-just)
+open import Data.Maybe using (Maybe)
 open import Data.Product using (_,_)
-
-open import RoutingLib.Algebra.FunctionProperties
-open import RoutingLib.Relation.Nullary.Construct.Add.Point using (Pointed; ∙; [_])
-import RoutingLib.Relation.Binary.Construct.Add.Point.Equality as PointedEquality
 
 _⊕∙_ : Op₂ (Pointed A)
 ∙      ⊕∙ y     = y

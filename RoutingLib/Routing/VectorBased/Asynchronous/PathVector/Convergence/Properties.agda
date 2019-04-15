@@ -2,12 +2,13 @@ open import Data.Fin using (Fin) renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Subset using (Subset; _∈_)
 open import Data.Fin.Dec using (_∈?_)
 open import Data.Nat hiding (_≟_)
-open import Data.Nat.Properties hiding (module ≤-Reasoning; _≟_)
+open import Data.Nat.Properties hiding (_≟_)
 open import Data.Sum using (_⊎_; inj₁; inj₂; map₂)
 open import Data.Product using (∃; _,_; proj₂)
 open import Function using (_∘_)
 open import Relation.Binary using (_Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality
+import Relation.Binary.Reasoning.PartialOrder as POR
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
@@ -17,7 +18,6 @@ open import RoutingLib.Data.Nat.Properties
 open import RoutingLib.Function.Metric.Nat
 import RoutingLib.Function.Metric.Construct.Condition as Condition
 import RoutingLib.Function.Metric.Construct.MaxLift as MaxLift
-import RoutingLib.Relation.Binary.Reasoning.PartialOrder as PO-Reasoning
 
 open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.Algebra.Construct.Consistent as Consistent
@@ -278,13 +278,18 @@ r≤Hᶜ+Hⁱ x y with x ≟ y
 r-bounded : Bounded r
 r-bounded = Hᶜ + Hⁱ , r≤Hᶜ+Hⁱ
 
-r-isPreMetric : IsPreMetric _≈_ r
-r-isPreMetric = record
+r-isProtoMetric : IsProtoMetric _≈_ r
+r-isProtoMetric = record
   { isTotalOrder    = ≤-isTotalOrder
   ; 0#-minimum      = z≤n
   ; ≈-isEquivalence = ≈-isEquivalence
   ; cong            = r-cong
-  ; eq⇒0            = x≈y⇒r≡0
+  }
+
+r-isPreMetric : IsPreMetric _≈_ r
+r-isPreMetric = record
+  { isProtoMetric = r-isProtoMetric
+  ; eq⇒0          = x≈y⇒r≡0
   }
 
 r-isQuasiSemiMetric : IsQuasiSemiMetric _≈_ r

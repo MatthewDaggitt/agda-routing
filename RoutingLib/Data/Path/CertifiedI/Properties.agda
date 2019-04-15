@@ -1,4 +1,7 @@
 open import Data.Maybe
+import Data.Maybe.Relation.Unary.Any as Any
+import Data.Maybe.Relation.Unary.All as All
+import Data.Maybe.Relation.Binary.Pointwise as Pointwise
 open import Data.Nat using (ℕ; suc; z≤n; s≤s) renaming (_≟_ to _≟ℕ_; _≤?_ to _≤ℕ?_; _≤_ to _≤ℕ_; _<_ to _<ℕ_)
 open import Data.Nat.Properties using (<-trans; ≤-trans; m≢1+m+n; <⇒≢; <⇒≯; ≤-refl; m+n≮n; suc-injective; <-cmp)
 open import Data.Fin using (Fin; _<_; _≤?_; suc; zero)
@@ -7,11 +10,10 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_,_; _×_)
 open import Level using () renaming (zero to 0ℓ)
 open import Relation.Binary using (Decidable; Total; _⇒_; Reflexive; Symmetric; Antisymmetric; Transitive; _Respects_; tri≈; tri<; tri>; IsEquivalence; IsDecEquivalence; Setoid; DecSetoid; _Preserves_⟶_)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; trans; subst; cong)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; subst; cong)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Data.Maybe
 open import RoutingLib.Data.Nat.Properties using (n≢1+n)
 
 
@@ -43,7 +45,7 @@ open CertifiedProperties public
 infix 4 _⇿?_
 
 _⇿?_ : ∀ {n} → Decidable (_⇿_ {n})
-e ⇿? p = anyDec (e ⇿ᵥ?_) p
+e ⇿? p = Any.dec (e ⇿ᵥ?_) p
 
 ⇿-resp-≈ₚ : ∀ {n} {e : Edge n} → (e ⇿_) Respects _≈ₚ_
 ⇿-resp-≈ₚ invalid     e⇿p         = e⇿p
@@ -53,7 +55,7 @@ e ⇿? p = anyDec (e ⇿ᵥ?_) p
 -- Membership
 
 _∉ₚ?_ : ∀ {n} → Decidable (_∉ₚ_ {n})
-k ∉ₚ? p = allDec (k ∉ᵥₚ?_) p
+k ∉ₚ? p = All.dec (k ∉ᵥₚ?_) p
 
 ∉ₚ-resp-≈ₚ : ∀ {n} {k : Fin n} → (k ∉ₚ_) Respects _≈ₚ_
 ∉ₚ-resp-≈ₚ invalid     invalid     = invalid
@@ -77,16 +79,16 @@ module _ {n : ℕ} where
   p≉i∷p (valid v) = p≉ᵛi∷p v
 
   ≈ₚ-refl : Reflexive (_≈ₚ_ {n})
-  ≈ₚ-refl = Eq-refl ≈ₚᵛ-refl
+  ≈ₚ-refl = Pointwise.refl ≈ₚᵛ-refl
 
   ≈ₚ-reflexive : _≡_ ⇒ (_≈ₚ_ {n})
   ≈ₚ-reflexive refl = ≈ₚ-refl
 
   ≈ₚ-sym : Symmetric (_≈ₚ_ {n})
-  ≈ₚ-sym = Eq-sym ≈ₚᵛ-sym
+  ≈ₚ-sym = Pointwise.sym ≈ₚᵛ-sym
 
   ≈ₚ-trans : Transitive (_≈ₚ_ {n})
-  ≈ₚ-trans = Eq-trans ≈ₚᵛ-trans
+  ≈ₚ-trans = Pointwise.trans ≈ₚᵛ-trans
 {-
   _≟ₚ_ : Decidable (_≈ₚ_ {n})
   invalid ≟ₚ invalid = yes invalid

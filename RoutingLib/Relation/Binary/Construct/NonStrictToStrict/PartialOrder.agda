@@ -47,17 +47,3 @@ module RoutingLib.Relation.Binary.Construct.NonStrictToStrict.PartialOrder
 
   <-respʳ-≈ : _<_ Respectsʳ _≈_
   <-respʳ-≈ = NonStrictToStrict.<-respʳ-≈ _ _≤_ Eq.sym Eq.trans (proj₁ ≤-resp-≈)
-
-  ≤-<-isOrderingPair : IsOrderingPair _≈_ _≤_ _<_
-  ≤-<-isOrderingPair = record
-    { isEquivalence        = isEquivalence
-    ; isPartialOrder       = isPartialOrder
-    ; isStrictPartialOrder = <-isStrictPartialOrder
-    ; <⇒≤                  = <⇒≤
-    ; ≤∧≉⇒<                = ≤∧≉⇒<
-    ; <-≤-trans            = <-≤-trans
-    ; ≤-<-trans            = ≤-<-trans
-    }
-
-  ≤-<-orderingPair : OrderingPair a ℓ₁ ℓ₂ (ℓ₁ ⊔ ℓ₂)
-  ≤-<-orderingPair = record { isOrderingPair = ≤-<-isOrderingPair }

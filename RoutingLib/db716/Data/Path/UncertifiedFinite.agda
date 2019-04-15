@@ -9,7 +9,6 @@ open import Data.List.Properties
 open import Data.List.Relation.Pointwise using (Pointwise; []; _∷_; Pointwise-≡⇒≡) renaming (refl to ≈ₚ-refl)
 open import Data.List.Membership.Propositional using (_∈_; find; mapWith∈; lose)
 open import Data.List.Membership.Propositional.Properties using (∈-lookup; ∈-∃++)
-open import Data.List.Membership.DecPropositional
 open import Data.Product using (_×_; _,_; <_,_>; proj₁; proj₂; ∃; ∃₂)
 open import Data.Product.Relation.Pointwise.NonDependent using (≡⇒≡×≡; ≡×≡⇒≡)
 open import Data.Sum using (_⊎_)
@@ -20,8 +19,8 @@ open import Relation.Unary using (Pred)
 open import Relation.Binary using (Rel)
 open import Algebra using (Semiring)
 open import Level using () renaming (zero to ℓ₀)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; cong₂) renaming (refl to ≡-refl; cong to ≡-cong; sym to ≡-sym; trans to ≡-trans)
-open import RoutingLib.Data.Matrix.Relation.Equality using (_≈ₘ_)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; cong₂) renaming (refl to ≡-refl; cong to ≡-cong; sym to ≡-sym)
+open import RoutingLib.Data.Matrix.Relation.Binary.Equality using (_≈ₘ_)
 
 module RoutingLib.db716.Data.Path.UncertifiedFinite where
 

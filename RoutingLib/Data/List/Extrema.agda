@@ -1,4 +1,6 @@
 open import Algebra.FunctionProperties
+import Algebra.Construct.NaturalChoice.Min as Min
+import Algebra.Construct.NaturalChoice.Max as Max
 open import Data.List using (List; foldr)
 open import Data.List.Any as Any using (Any; here; there)
 open import Data.List.All using (All; []; _∷_; lookup; map; tabulate)
@@ -15,8 +17,6 @@ open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Construct.On as On
 
 open import RoutingLib.Data.List.Properties
-import RoutingLib.Algebra.Construct.NaturalChoice.Min as Min
-import RoutingLib.Algebra.Construct.NaturalChoice.Max as Max
 open import RoutingLib.Algebra.Construct.Lifting
 open import Data.List.Membership.Propositional.Properties
   using (foldr-selective)

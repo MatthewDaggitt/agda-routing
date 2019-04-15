@@ -7,6 +7,8 @@
 
 module RoutingLib.Routing.Algebra  where
 
+open import Algebra
+open import Algebra.Structures
 open import Algebra.FunctionProperties
 open import Data.Fin using (Fin; toℕ)
 open import Data.List using (List)
@@ -27,8 +29,8 @@ open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.Table using (Table)
 import RoutingLib.Data.Path.UncertifiedI as UncertifiedPaths
 import RoutingLib.Data.Path.CertifiedI as CertifiedPaths
-import RoutingLib.Data.Matrix.Relation.DecidableEquality as MatrixDecEquality
-import RoutingLib.Data.Table.Relation.DecidableEquality as TableDecEquality
+import RoutingLib.Data.Matrix.Relation.Binary.DecidableEquality as MatrixDecEquality
+import RoutingLib.Data.Table.Relation.Binary.DecidableEquality as TableDecEquality
 import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
 
 --------------------------------------------------------------------------------

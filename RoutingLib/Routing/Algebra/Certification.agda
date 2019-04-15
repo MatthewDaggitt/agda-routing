@@ -17,6 +17,7 @@ module RoutingLib.Routing.Algebra.Certification
 open import Data.Fin using (Fin; toℕ)
 open import Data.List using (_∷_)
 open import Data.Maybe
+open import Data.Maybe.Properties using (just-injective)
 open import Data.Product using (_,_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Function using (_∘_)

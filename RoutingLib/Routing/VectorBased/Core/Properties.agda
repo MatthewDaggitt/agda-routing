@@ -1,7 +1,7 @@
 open import Algebra using (Semilattice)
 open import Algebra.Structures using (IsSemilattice)
 import Algebra.FunctionProperties as FunctionProperties
-open import Algebra.FunctionProperties.Consequences using (sel⇒idem)
+open import Algebra.FunctionProperties.Consequences.Propositional using (sel⇒idem)
 open import Data.Nat using (suc; zero; _+_)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
@@ -19,12 +19,12 @@ open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; sym; trans)
 import Relation.Binary.EqReasoning as EqReasoning
+import Relation.Binary.Reasoning.PartialOrder as POR
 
 open import RoutingLib.Data.List.Properties using (foldr≤ₗe; foldr≤ᵣxs)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
-open import RoutingLib.Data.List.Relation.Pointwise
+open import RoutingLib.Data.List.Relation.Binary.Pointwise
   using (foldr⁺)
-import RoutingLib.Relation.Binary.Reasoning.PartialOrder as POR
 
 open import RoutingLib.Routing using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra
@@ -48,8 +48,8 @@ open FunctionProperties _≈_
 ------------------------------------------------------------------------------
 -- Identity matrix
 
-Iᵢᵢ-zeᵣ-⊕ : ∀ i → RightZero (I i i) _⊕_
-Iᵢᵢ-zeᵣ-⊕ i x rewrite Iᵢᵢ≡0# i = ⊕-zeroʳ x
+⊕-zeroʳ-Iᵢᵢ : ∀ i → RightZero (I i i) _⊕_
+⊕-zeroʳ-Iᵢᵢ i x rewrite Iᵢᵢ≡0# i = ⊕-zeroʳ x
 
 ------------------------------------------------------------------------------
 -- Synchronous properties
@@ -64,15 +64,15 @@ FXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j with foldr-selective S ⊕-sel (I i
 -- Under the following assumptions about ⊕, A▷ₘ always chooses the "best"
 -- option with respect to ⊕
 FXᵢⱼ≤Aᵢₖ▷Xₖⱼ : ∀ X i j k → F X i j ≤₊ A i k ▷ X k j
-FXᵢⱼ≤Aᵢₖ▷Xₖⱼ X i j k = foldr≤ᵣxs ⊕-semilattice (I i j) (∈-tabulate⁺ S k)
+FXᵢⱼ≤Aᵢₖ▷Xₖⱼ X i j k = ≈-sym (foldr≤ᵣxs ⊕-semilattice (I i j) (∈-tabulate⁺ S k))
 
 -- After an iteration, the diagonal of the RMatrix is always the identity
 FXᵢᵢ≈Iᵢᵢ : ∀ X i → F X i i ≈ I i i
 FXᵢᵢ≈Iᵢᵢ X i with FXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i i
 ... | inj₂ FXᵢᵢ≈Iᵢᵢ           = FXᵢᵢ≈Iᵢᵢ
 ... | inj₁ (k , FXᵢᵢ≈AᵢₖXₖⱼ) = begin
-  F X i i         ≈⟨ ≈-sym (foldr≤ₗe ⊕-semilattice (I i i) (tabulate (λ k → A i k ▷ X k i))) ⟩
-  F X i i ⊕ I i i ≈⟨ Iᵢᵢ-zeᵣ-⊕ i (F X i i) ⟩
+  F X i i         ≈⟨ foldr≤ₗe ⊕-semilattice (I i i) (tabulate (λ k → A i k ▷ X k i)) ⟩
+  F X i i ⊕ I i i ≈⟨ ⊕-zeroʳ-Iᵢᵢ i (F X i i) ⟩
   I i i           ∎
   where open EqReasoning S
 
@@ -84,7 +84,7 @@ FXᵢᵢ≈FYᵢᵢ X Y {i} refl = ≈-trans (FXᵢᵢ≈Iᵢᵢ X i) (≈-sym (
 FXᵢⱼ<FYᵢⱼ⇒FXᵢⱼ≉Iᵢⱼ : ∀ X Y {i j} → F X i j <₊ F Y i j → F X i j ≉ I i j
 FXᵢⱼ<FYᵢⱼ⇒FXᵢⱼ≉Iᵢⱼ X Y {i} {j} FXᵢⱼ<FYᵢⱼ@(FXᵢⱼ≤FYᵢⱼ , FXᵢⱼ≉FYᵢⱼ) with i ≟𝔽 j
 ... | yes i≡j = contradiction (FXᵢᵢ≈FYᵢᵢ X Y i≡j) FXᵢⱼ≉FYᵢⱼ
-... | no  i≢j = <₊⇒≉ (begin
+... | no  i≢j = <₊⇒≉ (begin-strict
   F X i j <⟨ FXᵢⱼ<FYᵢⱼ ⟩
   F Y i j ≤⟨ ⊕-identityˡ (F Y i j) ⟩
   ∞#      ≡⟨ sym (Iᵢⱼ≡∞ (i≢j ∘ sym)) ⟩

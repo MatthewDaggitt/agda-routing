@@ -1,13 +1,12 @@
 open import Data.Fin using (Fin)
 open import Data.Nat using (ℕ; _≤_; z≤n; suc; _⊔_)
-open import Data.Nat.Properties using (≤-antisym; ⊔-mono-≤; ≤-refl; ≤-isTotalOrder)
+open import Data.Nat.Properties using (≤-antisym; ⊔-mono-≤; ≤-refl; ≤-isTotalOrder; module ≤-Reasoning)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (∃; _,_; proj₁; proj₂)
 open import Relation.Binary using (_Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality as P using (_≡_; refl; subst)
 open import Relation.Binary.Indexed.Homogeneous using (IndexedSetoid)
 
-open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning)
 open import RoutingLib.Data.Table using (Table; max; zipWith)
 open import RoutingLib.Data.Table.Properties using (max-cong; t≤max[t]; max-constant; max[s]≤max[t]₂)
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
@@ -65,13 +64,18 @@ bounded dᵢ-bounded =
     (max 0 (λ i → proj₁ (dᵢ-bounded {i}))) ,
     (λ x y → max[s]≤max[t]₂ (≤-refl {0}) (λ i → proj₂ (dᵢ-bounded {i}) (x i) (y i)))
 
-isPreMetric : (∀ {i} → IsPreMetric _≈ᵢ_ (dᵢ i)) → IsPreMetric _≈_ d
-isPreMetric pm = record
+isProtoMetric : (∀ {i} → IsProtoMetric _≈ᵢ_ (dᵢ i)) → IsProtoMetric _≈_ d
+isProtoMetric pm = record
   { isTotalOrder    = ≤-isTotalOrder
   ; 0#-minimum      = z≤n
   ; ≈-isEquivalence = ≈-isEquivalence
-  ; cong            = cong (IsPreMetric.cong pm)
-  ; eq⇒0            = x≈y⇒d≡0 (IsPreMetric.eq⇒0 pm)
+  ; cong            = cong (IsProtoMetric.cong pm)
+  }
+
+isPreMetric : (∀ {i} → IsPreMetric _≈ᵢ_ (dᵢ i)) → IsPreMetric _≈_ d
+isPreMetric pm = record
+  { isProtoMetric = isProtoMetric (IsPreMetric.isProtoMetric pm)
+  ; eq⇒0          = x≈y⇒d≡0 (IsPreMetric.eq⇒0 pm)
   }
 
 isQuasiSemiMetric : (∀ {i} → IsQuasiSemiMetric _≈ᵢ_ (dᵢ i)) → IsQuasiSemiMetric _≈_ d

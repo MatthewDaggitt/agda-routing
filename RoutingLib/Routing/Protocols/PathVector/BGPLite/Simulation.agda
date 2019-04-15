@@ -7,14 +7,16 @@
 
 module RoutingLib.Routing.Protocols.PathVector.BGPLite.Simulation where
 
-open import Data.Maybe using (just; nothing; Is-just; just-injective)
+import Algebra.Construct.NaturalChoice.Min as Min
+open import Data.Maybe using (just; nothing; Is-just)
+open import Data.Maybe.Properties using (just-injective)
 open import Data.Nat using (_≤_)
 open import Data.Nat.Properties using (≤-refl; <-cmp; <-transˡ)
 open import Data.List.Properties using (∷-injectiveˡ)
 open import Data.Fin using (Fin; toℕ)
 open import Data.Fin.Properties using (toℕ-injective)
 open import Data.Product using (∃; ∃₂; _×_; _,_)
-open import Data.Product.Properties using (,-injectiveʳ)
+open import Data.Product.Properties.WithK using (,-injectiveʳ)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Function using (id; _∘_; _$_)
 open import Relation.Binary using (tri<; tri≈; tri>)
@@ -26,7 +28,6 @@ open import RoutingLib.Data.Path.UncertifiedI using (Path; invalid; valid; sourc
 open import RoutingLib.Data.Path.UncertifiedI.Properties using (valid-injective)
 open import RoutingLib.Data.Path.Uncertified using ([]; _∷_; inflate; deflate; length; _⇿_; _∈ₚ_)
 open import RoutingLib.Data.Path.Uncertified.Properties
-import RoutingLib.Algebra.Construct.NaturalChoice.Min.TotalOrder as Min
 
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Protocols.PathVector.BGPLite

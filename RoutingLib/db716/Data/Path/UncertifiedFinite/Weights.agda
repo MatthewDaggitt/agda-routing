@@ -25,7 +25,7 @@ open import Relation.Binary using (Rel)
 open import Algebra using (Semiring)
 open import Level using () renaming (zero to ℓ₀)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; cong₂) renaming (refl to ≡-refl; cong to ≡-cong; sym to ≡-sym; trans to ≡-trans)
-open import RoutingLib.Data.Matrix.Relation.Equality using (_≈ₘ_)
+open import RoutingLib.Data.Matrix.Relation.Binary.Equality using (_≈ₘ_)
 
 open import RoutingLib.Data.Matrix using (SquareMatrix) renaming (map to matmap)
 open import RoutingLib.db716.Algebra.SemiringMatrix S

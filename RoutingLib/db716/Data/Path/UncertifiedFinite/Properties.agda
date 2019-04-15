@@ -37,10 +37,10 @@ all-all-k-length-paths-correct {suc n} {k} {i} {(r , s) ∷ vs} |vs|≡k vs:*→
     
     lem : ∀ {n} r → r ∈ allFins n
     lem zero = here ≡-refl
-    lem (Fin.suc r) = there (∈-map⁺ (lem r))
+    lem (Fin.suc r) = there (∈-map⁺ ? (lem r))
     
     step2 : all-k-length-paths-from-to (suc n) k r i ∈ all-all-k-length-paths-from-to (suc n) k i
-    step2 = ∈-map⁺ (lem r)
+    step2 = ∈-map⁺ ? (lem r)
 
 all-k-length-paths-to-correct {ℕ.zero} {k} {()}
 all-k-length-paths-to-correct {suc n} {k} {i} {vs} |vs|≡k vs:*→i valid = ∈-concat⁺ (all-all-k-length-paths-correct {suc n} {k} {i} {vs} |vs|≡k vs:*→i valid)
@@ -67,7 +67,7 @@ all-k-length-paths-from-to-correct {suc n} {suc (suc k)} {i} {j} {(i , s) ∷ p}
       -- z∈all-all-paths : z ∈ map (λ i → all-k-length-paths-from-to (suc n) (suc k) i j) (allFins (suc n))
       -- p∈z : p ∈ z
       (z , z∈all-all-paths , p∈z) = find (all-all-k-length-paths-correct {suc n} {suc k} {j} {p} (≡-pred (i , s) p |vs|≡k) vs:*→j vp)
-  in (∈-map⁺ (∈-concat⁺′ p∈z z∈all-all-paths))
+  in (∈-map⁺ ? (∈-concat⁺′ p∈z z∈all-all-paths))
 
 all-≤k-length-paths-from-to-correct : ∀ {n k i j vs} → length vs ≤ k → PathFrom i vs → PathTo j vs → ValidPath vs →  vs ∈ all-≤k-length-paths-from-to n k i j
 

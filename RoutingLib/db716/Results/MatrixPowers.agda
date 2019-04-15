@@ -12,7 +12,7 @@ module RoutingLib.db716.Results.MatrixPowers {c ℓ} (S : Semiring c ℓ) where
   open import Relation.Nullary using (yes; no)
   open import Relation.Unary using (Pred)
   open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; cong₂) renaming (refl to ≡-refl; cong to ≡-cong; sym to ≡-sym; trans to ≡-trans)
-  open import RoutingLib.Data.Matrix.Relation.Equality using (_≈ₘ_)
+  open import RoutingLib.Data.Matrix.Relation.Binary.Equality using (_≈ₘ_)
 
 
   open import RoutingLib.Data.Matrix using (SquareMatrix)

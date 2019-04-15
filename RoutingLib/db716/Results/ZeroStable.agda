@@ -93,7 +93,7 @@ trimPath : ∀ {n i j} m → stableSemiring 0 S → (p : Path (suc n)) → PathF
 trimPath {n} {i} {j} m 0stab p p:i→* p:*→j |p|≡1+n valid i≢j =
   cutLoop p loop ,
   cutLoopFrom i j p loop p:i→* p:*→j valid i≢j ,
-  {! cutLoopTo i j p loop p:i→* p:*→j valid i≢j !} ,
+  cutLoopTo i j p loop p:i→* p:*→j valid i≢j  ,
   <⇒≤pred (≤-trans (cutLoopDecreasesLength p loop) (≤-reflexive |p|≡1+n))  ,
   cutLoopValid p loop valid ,
   0-stable⇒negligibleLoops S p m loop 0stab

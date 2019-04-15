@@ -37,10 +37,10 @@ all-all-k-length-paths-correct {suc n} {k} {i} {(r , s) ∷ vs} |vs|≡k vs:*→
     
     lem : ∀ {n} r → r ∈ allFins n
     lem zero = here ≡-refl
-    lem (Fin.suc r) = there (∈-map⁺ ? (lem r))
+    lem (Fin.suc r) = there (∈-map⁺ _ (lem r))
     
     step2 : all-k-length-paths-from-to (suc n) k r i ∈ all-all-k-length-paths-from-to (suc n) k i
-    step2 = ∈-map⁺ ? (lem r)
+    step2 = ∈-map⁺ _ (lem r)
 
 all-k-length-paths-to-correct {ℕ.zero} {k} {()}
 all-k-length-paths-to-correct {suc n} {k} {i} {vs} |vs|≡k vs:*→i valid = ∈-concat⁺ (all-all-k-length-paths-correct {suc n} {k} {i} {vs} |vs|≡k vs:*→i valid)
@@ -67,7 +67,7 @@ all-k-length-paths-from-to-correct {suc n} {suc (suc k)} {i} {j} {(i , s) ∷ p}
       -- z∈all-all-paths : z ∈ map (λ i → all-k-length-paths-from-to (suc n) (suc k) i j) (allFins (suc n))
       -- p∈z : p ∈ z
       (z , z∈all-all-paths , p∈z) = find (all-all-k-length-paths-correct {suc n} {suc k} {j} {p} (≡-pred (i , s) p |vs|≡k) vs:*→j vp)
-  in (∈-map⁺ ? (∈-concat⁺′ p∈z z∈all-all-paths))
+  in (∈-map⁺ _ (∈-concat⁺′ p∈z z∈all-all-paths))
 
 all-≤k-length-paths-from-to-correct : ∀ {n k i j vs} → length vs ≤ k → PathFrom i vs → PathTo j vs → ValidPath vs →  vs ∈ all-≤k-length-paths-from-to n k i j
 
@@ -75,8 +75,8 @@ all-≤k-length-paths-from-to-correct {n} {ℕ.zero} {i} {j} {.((i , _) ∷ _)} 
 all-≤k-length-paths-from-to-correct {n} {suc k} {i} {j} {[]} |vs|≤k ()
 
 all-≤k-length-paths-from-to-correct {n} {suc k} {i} {j} {vs} (s≤s |vs|≤k) here vs:*→j valid with length vs ≟N suc k
-... | yes |vs|≡k =  ∈-++⁺ʳ (Path n) _ (all-k-length-paths-from-to-correct |vs|≡k here vs:*→j valid) 
-... | no |vs|≢k = ∈-++⁺ˡ (Path n) (all-≤k-length-paths-from-to-correct (≤∧≢⇒< |vs|≤k (|vs|≢k ∘ (≡-cong suc))) here vs:*→j valid)
+... | yes |vs|≡k =  ∈-++⁺ʳ  _ (all-k-length-paths-from-to-correct |vs|≡k here vs:*→j valid) 
+... | no |vs|≢k = ∈-++⁺ˡ (all-≤k-length-paths-from-to-correct (≤∧≢⇒< |vs|≤k (|vs|≢k ∘ (≡-cong suc))) here vs:*→j valid)
 
 -- Lemma for induction over the lists returned by k-length-paths-from-to
 path-len-induction : ∀ {a} (P : ∀ {n k} → Pred (Path n) a)
@@ -227,7 +227,7 @@ i≡j⇒[]∈paths0 (suc n) i i ≡-refl with i ≟ i
 ... | no i≢i = contradiction ≡-refl i≢i
 
 paths≤k⊂paths≤k+1 : ∀ n k i j p → p ∈ all-≤k-length-paths-from-to n k i j → p ∈ all-≤k-length-paths-from-to n (suc k) i j
-paths≤k⊂paths≤k+1 n k i j p p∈paths≤k = ∈-++⁺ˡ (Path n) p∈paths≤k
+paths≤k⊂paths≤k+1 n k i j p p∈paths≤k = ∈-++⁺ˡ p∈paths≤k
 
 i≡j⇒[]∈paths≤k : ∀ n k (i j : Fin n) → i ≡ j → [] ∈ all-≤k-length-paths-from-to n k i j
 i≡j⇒[]∈paths≤k ℕ.zero k ()

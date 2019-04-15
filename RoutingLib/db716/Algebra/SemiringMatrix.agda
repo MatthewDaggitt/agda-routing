@@ -202,7 +202,6 @@ mat-zero n = (mat-zeroˡ n , mat-zeroʳ n)
 
 -- Packaging the properties up as as an IsSemiring
 
-{-
 ⊗-isMagma : (n : ℕ) → IsMagma (_≈ₘ_ {n}) _⊗_
 ⊗-isMagma n = record
   { isEquivalence = ≈ₘ-isEquivalence
@@ -214,19 +213,16 @@ mat-zero n = (mat-zeroˡ n , mat-zeroʳ n)
   { isEquivalence = ≈ₘ-isEquivalence
   ; ∙-cong = ⊕-cong n
   }
--}
 
 ⊗-isSemigroup : (n : ℕ) → IsSemigroup (_≈ₘ_ {n}) _⊗_
 ⊗-isSemigroup n = record
-  { isEquivalence = ≈ₘ-isEquivalence
-  ; ∙-cong = ⊗-cong n
+  { isMagma = ⊗-isMagma n
   ; assoc = ⊗-assoc n
   }
 
 ⊕-isSemigroup : (n : ℕ) → IsSemigroup (_≈ₘ_ {n}) _⊕_
 ⊕-isSemigroup n = record
-  { isEquivalence = ≈ₘ-isEquivalence
-  ; ∙-cong = ⊕-cong n
+  { isMagma = ⊕-isMagma n
   ; assoc = ⊕-assoc n
   }
 

@@ -12,7 +12,7 @@ module RoutingLib.Iteration.Asynchronous.Static.Convergence.AMCOImpliesACO
 open import Data.Fin.Dec using (_∈?_)
 open import Data.Fin.Subset using (Subset) renaming (_∈_ to _∈ₛ_; _∉_ to _∉ₛ_; ⊤ to ⊤ₛ)
 open import Data.Nat using (ℕ; _≤_; _<_; z≤n; s≤s; zero; suc; _+_; _∸_; ≤-pred)
-open import Data.Nat.Properties hiding (module ≤-Reasoning; _≟_)
+open import Data.Nat.Properties hiding (_≟_)
 open import Data.Product using (∃; ∃₂; _×_; _,_; proj₁; proj₂)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Unit using (⊤; tt)
@@ -29,7 +29,7 @@ open import Relation.Unary using (Pred; _∈_)
 open import RoutingLib.Data.Table using (max)
 open import RoutingLib.Data.Table.Properties using (max[t]≤x; x≤max[t]; max-cong)
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
-open import RoutingLib.Data.Nat.Properties using (m+[n∸o]≤[m+n]∸o; module ≤-Reasoning)
+open import RoutingLib.Data.Nat.Properties using (m+[n∸o]≤[m+n]∸o)
 import RoutingLib.Function.Metric.Construct.Condition as Condition
 open import RoutingLib.Relation.Binary.PropositionalEquality using (inspect′)
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as SubsetEquality
@@ -167,7 +167,7 @@ F-mono-D {k} {x} x∈D i with x ≟ x*
   dᵢ (x* i) (x*   i)  ≡⟨ x≈y⇒dᵢ≡0 ≈ᵢ-refl ⟩
   0                   ≤⟨ z≤n ⟩
   r[ suc k ]          ∎)
-...   | no  x≉x* = X₀-closed (proj₁ ∘ x∈D) i , (v<r[k]⇒v≤r[1+k] (begin
+...   | no  x≉x* = X₀-closed (proj₁ ∘ x∈D) i , (v<r[k]⇒v≤r[1+k] (begin-strict
   dᵢ (x* i) (F x i) ≤⟨ dᵢ≤d x* (F x) ⟩
   d x*   (F x)      <⟨ F-strContrOnFP Fx*≈x* (proj₁ ∘ x∈D) x≉x* ⟩
   d x*    x         ≤⟨ ∈D⇒d≤r x∈D ⟩

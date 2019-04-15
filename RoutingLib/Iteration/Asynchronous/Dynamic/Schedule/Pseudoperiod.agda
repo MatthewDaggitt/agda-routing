@@ -126,29 +126,12 @@ record Pseudocycle (period : TimePeriod) : Set₁ where
     midᵢ≤end   : ∀ i → m i ≤ end
     
     β[s,m]     : ∀ i → MessagesTo i ExpireIn [ start , m i ]
-    α[m,e]     : ∀{i} (i∈ρₛ : i ∈ ρ start) → i IsActiveIn [ m i , end ]
+    α[m,e]     : ∀ {i} (i∈ρₛ : i ∈ ρ start) → i IsActiveIn [ m i , end ]
 
   open SubEpoch η[s,e] public
 
   postulate η[s,m] : ∀ i → SubEpoch [ start , m i ]
   postulate η[m,e] : ∀ i → SubEpoch [ m i   , end ]
-  
-{-
-  open ExpiryPeriod β[s,m] public
-    renaming (start≤end to start≤mid; ηₛ≡ηₑ to ηₛ≡ηₘ; η[s,e] to η[s,m])
-  open ActivationPeriod α[m,e] public
-    renaming (start≤end to mid≤end;   ηₛ≡ηₑ to ηₘ≡ηₑ; η[s,e] to η[m,e])
-
-
-  start≤end : start ≤ end
-  start≤end = ≤-trans start≤mid mid≤end
-
-  ηₛ≡ηₑ : η start ≡ η end
-  ηₛ≡ηₑ = trans ηₛ≡ηₘ ηₘ≡ηₑ
-
-  η[s,e] : SubEpoch [ start , end ]
-  η[s,e] = mkₛₑ start≤end ηₛ≡ηₑ
--}
 
 --------------------------------------------------------------------------------
 -- Multi-pseudocycles

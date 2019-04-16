@@ -36,34 +36,24 @@ indexCertified (there pxs) =
   in Fin.suc i , pxs[i]-}
 
 vertexLoop→edgeLoop : ∀ {n : ℕ} {l : List (Vertex n)} (i j : Fin (length l)) → i < j → lookup l i ≡ lookup l j → HasLoop ( fromVertexList l)
-vertexLoop→edgeLoop {0} {() ∷ l}
-vertexLoop→edgeLoop {n} {[]} ()
-vertexLoop→edgeLoop {n} {x ∷ []} i Fin.zero ()
-vertexLoop→edgeLoop {n} {x ∷ []} i (fsuc ())
-vertexLoop→edgeLoop {suc n} {x ∷ y ∷ l} Fin.zero Fin.zero () l[i]≡l[j]
 vertexLoop→edgeLoop {suc n} {x ∷ y ∷ l} Fin.zero (fsuc Fin.zero) 0<1 l[0]≡l[1] rewrite l[0]≡l[1] = trivial
 vertexLoop→edgeLoop {suc n} {x ∷ y ∷ l} Fin.zero (fsuc (fsuc j)) 0<2+j x≡l[j] =
   let (z , [z,x]∈zip) = zip-∈ʳ (y ∷ l) (l) x (n≤1+n _) (Data.List.Any.map (λ l[j]≡? → trans x≡l[j] l[j]≡?) (∈-lookup l j))
   in here {suc n} {fromVertexList (y ∷ l)} {z} {x} {y} [z,x]∈zip
   where
     zip-∈ʳ : ∀ {a} {A : Set a} (xs ys : List A) (y : A) → length ys ≤ length xs → y ∈ ys → ∃ λ x → (x , y) ∈ (zip xs ys)
-    zip-∈ʳ xs [] _ _ ()
-    zip-∈ʳ [] (y₀ ∷ ys) _ ()
     zip-∈ʳ (x₀ ∷ xs) (y₀ ∷ ys) (y) ys≤xs (here y≡y₀) rewrite y≡y₀ = x₀ , here refl
     zip-∈ʳ (x₀ ∷ xs) (y₀ ∷ ys) (y)(s≤s ys≤xs) (there y∈ys) =
       let x , [x,y]∈zip = zip-∈ʳ xs ys y ys≤xs y∈ys
       in x , there ([x,y]∈zip)
-vertexLoop→edgeLoop {suc n} {x ∷ y ∷ l} (fsuc i) Fin.zero ()
 vertexLoop→edgeLoop {suc n} {x ∷ y ∷ l} (fsuc i) (fsuc j) (s≤s i<j) l[i]≡l[j] = there (vertexLoop→edgeLoop {l = y ∷ l} i j i<j l[i]≡l[j])
 
 findLoop : {n : ℕ} {p : Path (suc n)} → ValidPath p → (suc n) ≤ length p → HasLoop p
-findLoop {n} {[]} pIsValid ()
 findLoop {n} {x ∷ p} pIsValid n≤|p| rewrite (cong (HasLoop) (sym (from-toVertexList-≡ pIsValid))) = vertexLoop→edgeLoop {l = vertices} i' j' i'<j' p[i']≡p[j']
   where
     vertices = toVertexList (x ∷ p)
 
     lem0 : ∀ {k} (xs : Path (suc n)) → (suc k) ≤ length xs → (suc (suc k)) ≤ length (toVertexList xs)
-    lem0 {k} [] ()
     lem0 {k} (x ∷ xs) k≤|xs| rewrite (length-toVertexList xs x) = s≤s k≤|xs|
     
     loop : ∃₂ λ i j → i ≢ j × lookup (toVertexList (x ∷ p)) i ≡ lookup (toVertexList (x ∷ p)) j
@@ -83,7 +73,6 @@ findLoop {n} {x ∷ p} pIsValid n≤|p| rewrite (cong (HasLoop) (sym (from-toVer
 
 
 long-paths-have-loops : ∀ {n} {k} {i j : Fin n} (xs : Path n) → n ≤ k → xs ∈ all-k-length-paths-from-to n k i j → HasLoop xs
-long-paths-have-loops {0} {_} {()}
 long-paths-have-loops {suc n} {k} {i} {j} xs n≤k xs∈paths =
   let xs-valid : ValidPath xs
       xs-valid =  k-length-paths-valid k xs i j xs∈paths

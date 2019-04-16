@@ -22,7 +22,7 @@ module RoutingLib.db716.Algebra.SemiringMatrix {c ℓ} (S : Semiring c ℓ ) whe
 open Semiring S renaming (Carrier to C; refl to ≈-refl; sym to ≈-sym; trans to ≈-trans; setoid to ≈-setoid)
 
 open import RoutingLib.db716.Algebra.Properties.Summation S
-open import Relation.Binary.EqReasoning ≈-setoid
+open import Relation.Binary.Reasoning.Setoid ≈-setoid
 open import RoutingLib.Data.Matrix.Relation.Binary.Equality ≈-setoid
 
 private Mat : (n : ℕ) → Set _
@@ -89,7 +89,6 @@ v∙0≈0 v = ∑0≈0 (v ⊛ 0ᵥ) (λ i → zeroʳ (v i))
 ∙-distʳ u v c = ≈-trans (∑-distʳ (u ⊛ v) c) ((∑-cong (λ i → *-assoc (u i) (v i) c)))
 
 𝟙ᵢ∙v≈vᵢ : ∀ {n} i v → (𝟙 {n} i) ∙ v ≈ v i
-𝟙ᵢ∙v≈vᵢ {zero} ()
 𝟙ᵢ∙v≈vᵢ {suc n} zero v = begin
   1# * (v 0ᶠ) + 0ᵥ ∙ (tail v)
     ≈⟨ +-cong (*-identityˡ (v 0ᶠ)) (0∙v≈0 (tail v)) ⟩
@@ -108,7 +107,6 @@ v∙0≈0 v = ∑0≈0 (v ⊛ 0ᵥ) (λ i → zeroʳ (v i))
   v (suc i)                                                ∎
 
 v∙𝟙ᵢ≈vᵢ : ∀ {n} i v → v ∙ (𝟙 {n} i) ≈ v i
-v∙𝟙ᵢ≈vᵢ {zero} ()
 v∙𝟙ᵢ≈vᵢ {n} zero v = begin
   (v 0ᶠ) * 1# + (tail v) ∙ 0ᵥ
     ≈⟨ +-cong (*-identityʳ (v 0ᶠ)) (v∙0≈0 (tail v)) ⟩

@@ -74,7 +74,6 @@ module RoutingLib.db716.Results.MatrixPowers {c ℓ} (S : Semiring c ℓ) where
 
   folds-lemma3 : ∀ (n : ℕ) (i : Fin n) (μ : Path n → Carrier) (l1 l2 : List (Path n)) →
     accumFunc (i ▻* l1) μ + accumFunc (i ▻* l2) μ ≈ accumFunc (i ▻* (l1 ++ l2)) μ
-  folds-lemma3 ℕ.zero ()
   folds-lemma3 (suc n) i μ l1 l2 = begin
     accumFunc (i ▻* l1) μ + accumFunc (i ▻* l2) μ
       ≈⟨ folds-lemma2 (suc n) μ (i ▻* l1) (i ▻* l2) ⟩
@@ -101,7 +100,6 @@ module RoutingLib.db716.Results.MatrixPowers {c ℓ} (S : Semiring c ℓ) where
   folds-lemma : ∀ (n : ℕ) (i : Fin n) (μ : Path n → Carrier) (pathsFrom : Fin n → (List (Path n))) →
     ∑ (λ k → accumFunc (pathsFrom k) (μ ∘ (i ▻_))) ≈ accumFunc (i ▻* (concat (map pathsFrom (allFins n)))) μ
 
-  folds-lemma ℕ.zero ()
   folds-lemma (suc n) i μ pathsFrom = begin
     ∑ (λ k → foldr (λ p x → (μ (i ▻ p)) + x) 0# (pathsFrom k))
       ≈⟨ ∑-cong (λ k → folds-lemma1 (λ p → μ (i ▻ p)) _+_ 0# (pathsFrom k)) ⟩
@@ -118,7 +116,7 @@ module RoutingLib.db716.Results.MatrixPowers {c ℓ} (S : Semiring c ℓ) where
     accum (map μ (map (i ▻_) (concat (map pathsFrom (allFins (suc n))))))
       ≡⟨⟩
     accum (map μ (i ▻* (concat (map pathsFrom (allFins (suc n))))))
-      ≈⟨ sym (folds-lemma1 μ _+_ 0# (i ▻* (concat (map pathsFrom (allFins (suc n)))))) ⟩
+      ≈˘⟨ folds-lemma1 μ _+_ 0# (i ▻* (concat (map pathsFrom (allFins (suc n))))) ⟩
     foldr (λ p x → (μ p) + x) 0# (i ▻* (concat (map pathsFrom (allFins (suc n))))) ∎
     where open import Relation.Binary.EqReasoning setoid
 
@@ -145,7 +143,6 @@ module RoutingLib.db716.Results.MatrixPowers {c ℓ} (S : Semiring c ℓ) where
   startsWith-lemma i ((j , k) ∷ p) = startsWith ((j , k) ∷ p) i
 
   addVertex-lemma1 : ∀ n (i l : Vertex n) (x : Path n) (M : SquareMatrix Carrier n) → M i l * weight M (l ▻ x) ≈ weight M (i ▻ (l ▻ x))
-  addVertex-lemma1 ℕ.zero ()
   addVertex-lemma1 (suc n) i l x M = addVertex-weights-lemma (startsWith-lemma l x)
 
   paths-lemma : ∀ n k (i l j : Vertex (suc n)) (M : SquareMatrix Carrier (suc n)) →
@@ -156,11 +153,9 @@ module RoutingLib.db716.Results.MatrixPowers {c ℓ} (S : Semiring c ℓ) where
 
   folds-lemma6 : ∀ (n k : ℕ) (i l j : Fin n) (M : SquareMatrix Carrier n) →
     accumFunc (all-k-length-paths-from-to n (suc k) l j) (λ p → M i l * (weight M p)) ≈ accumFunc (all-k-length-paths-from-to n (suc k) l j) (λ p → weight M (i ▻ p))
-  folds-lemma6 0 _ ()
   folds-lemma6 (suc n) k i l j M = accumFunc-cong (all-k-length-paths-from-to (suc n) (suc k) l j) (paths-lemma n k i l j M)
 
   mat-pows-find-best-paths : (n k : ℕ) → (i j : Fin n) → (M : SquareMatrix Carrier n) → pow M k i j ≈ best-path-weight M (all-k-length-paths-from-to n k i j)
-  mat-pows-find-best-paths 0 _ ()
   mat-pows-find-best-paths (suc n) ℕ.zero i j M with i ≟ j
   ... | yes i≡j = sym (+-identityʳ 1#)
   ... | no i≢j = refl

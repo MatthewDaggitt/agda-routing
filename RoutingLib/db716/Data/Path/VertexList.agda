@@ -33,18 +33,13 @@ from-toVertexList-≡ : ∀ {n} {p : Path n} → ValidPath p → (fromVertexList
 from-toVertexList-≡ valid = Pointwise-≡⇒≡ (from-toVertexList-≈ₚ valid)
 
 length-toVertexList : ∀ {n} (p : Path n) (x : Edge n) → length (toVertexList (x ∷ p)) ≡ suc (length (x ∷ p))
-length-toVertexList {0} p (() , _)
 length-toVertexList {suc n} [] x = refl
 length-toVertexList {suc n} (x₁ ∷ p) x = cong suc (length-toVertexList p x₁)
 
 fromVertexList-lookup : ∀ {n} {y : Vertex n} {l : List (Vertex n)} {l0 : Vertex n} → suc 0 ≤ length l → y ∈ l → ∃ λ x → (x , y) ∈ fromVertexList (l0 ∷ l)
-fromVertexList-lookup {0} {()}
-fromVertexList-lookup {suc n} {y} {[]} ()
 fromVertexList-lookup {suc n} {y} {l1 ∷ l} {l0} 1≤l y∈l = zip-∈ʳ (l0 ∷ l1 ∷ l) (l1 ∷ l) y (s≤s (n≤1+n _)) y∈l
   where
     zip-∈ʳ : ∀ {a} {A : Set a} (xs ys : List A) (y : A) → length ys ≤ length xs → y ∈ ys → ∃ λ x → (x , y) ∈ (zip xs ys)
-    zip-∈ʳ xs [] _ _ ()
-    zip-∈ʳ [] (y₀ ∷ ys) _ ()
     zip-∈ʳ (x₀ ∷ xs) (y₀ ∷ ys) (y) ys≤xs (here y≡y₀) rewrite y≡y₀ = x₀ , here refl
     zip-∈ʳ (x₀ ∷ xs) (y₀ ∷ ys) (y)(s≤s ys≤xs) (there y∈ys) =
       let x , [x,y]∈zip = zip-∈ʳ xs ys y ys≤xs y∈ys

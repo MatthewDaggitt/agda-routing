@@ -46,12 +46,6 @@ module _ {c ℓ} (S : Semiring c ℓ)  where
   open import RoutingLib.db716.Results.MatrixPowerSums S
   open import RoutingLib.Data.Matrix using (Matrix; SquareMatrix)
 
-  {-
-  finLemma : (x y : Fin 1) → x ≡ y
-  finLemma Fin.zero Fin.zero = _≡_.refl
-  finLemma Fin.zero (Fin.suc ())
-  finLemma (Fin.suc ())-}
-
   loopWeightAux : ∀ {n} (m : SquareMatrix Carrier n) (e : Edge n) (p : Path n) → e ∈ p → Carrier
   loopWeightAux m e (e' ∷ p) (here e≡e') = edgeWeight m e'
   loopWeightAux m e (e' ∷ p) (there e∈p) = edgeWeight m e' * loopWeightAux m e p e∈p
@@ -70,7 +64,6 @@ module _ {c ℓ} (S : Semiring c ℓ)  where
     → ∃₂ λ w1 w2 → w1 * w2 ≈ weight m (cutLoop p loop) × weight m p ≈ w1 * (loopWeight p m loop) * w2
   factoriseLoop1 {n} ((i , i) ∷ p) m trivial
     = 1# , weight m p , *-identityˡ _ , sym (trans (*-assoc _ _ _) (*-identityˡ _))
-  factoriseLoop1 {n} ((i , j) ∷ []) m (here ())
   factoriseLoop1 {n} ((i , j) ∷ (k , l) ∷ p) m (here {_} {a} ai∈p)
     = 1# , weight m (cutLoop ((i , j) ∷ (k , l) ∷ p) (here ai∈p)) , *-identityˡ _ , proof
     where
@@ -78,11 +71,11 @@ module _ {c ℓ} (S : Semiring c ℓ)  where
         m i j * (weight m ((k , l) ∷ p))
           ≈⟨ *-cong refl (factoriseLoopAux m (a , i) ((k , l) ∷ p) ai∈p) ⟩
         m i j * ((loopWeightAux m (a , i) ((k , l) ∷ p) ai∈p) * (weight m (cutLoopAux (a , i) ((k , l) ∷ p) ai∈p)))
-          ≈⟨ sym (*-identityˡ _) ⟩
+          ≈˘⟨ *-identityˡ _ ⟩
         1# * (m i j * ((loopWeightAux m (a , i) ((k , l) ∷ p) ai∈p) * (weight m (cutLoopAux (a , i) ((k , l) ∷ p) ai∈p))))
           ≈⟨ *-cong refl (sym (*-assoc _ _ _)) ⟩
         1# * ((m i j * (loopWeightAux m (a , i) ((k , l) ∷ p) ai∈p)) * (weight m (cutLoopAux (a , i) ((k , l) ∷ p) ai∈p)))
-          ≈⟨ sym (*-assoc _ _ _) ⟩
+          ≈˘⟨ *-assoc _ _ _ ⟩
         1# * (m i j * loopWeightAux m (a , i) ((k , l) ∷ p) ai∈p) * (weight m (cutLoopAux (a , i) ((k , l) ∷ p) ai∈p))
           ≡⟨⟩
         1# * (loopWeight ((i , j) ∷ (k , l) ∷ p) m (here ai∈p)) * (weight m (cutLoop ((i , j) ∷ (k , l) ∷ p) (here ai∈p))) ∎
@@ -108,7 +101,7 @@ module _ {c ℓ} (S : Semiring c ℓ)  where
         w1 * loopWeight p m loop * w2 + w1 * w2
           ≈⟨ +-cong refl (*-cong (sym (*-identityʳ _)) refl) ⟩
         w1 * loopWeight p m loop * w2 + w1 * 1# * w2
-          ≈⟨ sym (distribʳ _ _ _) ⟩
+          ≈˘⟨ distribʳ _ _ _ ⟩
         (w1 * loopWeight p m loop + w1 * 1#) * w2
           ≈⟨ *-cong (sym (distribˡ _ _ _)) refl ⟩
         (w1 * (loopWeight p m loop + 1#)) * w2
@@ -138,9 +131,9 @@ module _ {c ℓ} (S : Semiring c ℓ)  where
   0-stable⇒+Idempotent : stableSemiring 0 S  → Idempotent _+_
   0-stable⇒+Idempotent 0stab x = begin
     x + x
-      ≈⟨ sym (+-cong (*-identityʳ x) (*-identityʳ x)) ⟩
+      ≈˘⟨ +-cong (*-identityʳ x) (*-identityʳ x) ⟩
     x * 1# + x * 1#
-      ≈⟨ sym (distribˡ x 1# 1#) ⟩
+      ≈˘⟨ distribˡ x 1# 1# ⟩
     x * (1# + 1#)
       ≈⟨ *-cong refl (0stab 1#) ⟩
     x * 1#

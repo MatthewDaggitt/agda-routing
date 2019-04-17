@@ -76,7 +76,6 @@ cutLoopAux e (e' ∷ p) (there e∈p) = cutLoopAux e p e∈p
 
 cutLoop : {n : ℕ} (p : Path n) → HasLoop p → Path n
 cutLoop p (trivial {p'}) = p'
-cutLoop ((b , c) ∷ []) (here ())
 cutLoop {n} ((b , c) ∷ e ∷ p) (here {_} {a} [a,b]∈e∷p) = cutLoopAux (a , b) (e ∷ p) [a,b]∈e∷p
 cutLoop (e ∷ p) (there pHasLoop) = e ∷ (cutLoop p pHasLoop)
 
@@ -103,12 +102,6 @@ data PathTo {n : ℕ} (j : Fin n) : Path n → Set where
   here : {i : Fin n} → PathTo j ((i , j) ∷ [])
   there : {e : Edge n} {p : Path n} → PathTo j p → PathTo j (e ∷ p)
 
-PathFrom' : {n : ℕ} (i : Fin n) → Path n → Set
-PathFrom' i p = PathFrom i p ⊎ p ≡ []
-
-PathTo' : {n : ℕ} (j : Fin n) → Path n → Set
-PathTo' j p = PathTo j p ⊎ p ≡ []
-
 all-k-length-paths-from-to : ∀ n → ℕ → (Vertex n) → (Vertex n) → List (Path n)
 all-k-length-paths-to : ∀ n → ℕ → (Vertex n) → List (Path n)
 
@@ -120,11 +113,8 @@ all-k-length-paths-from-to (suc n) (suc 0) u v = ((u , v) ∷ []) ∷ []
 all-k-length-paths-from-to (suc n) (suc (suc k)) u v = Data.List.map (addVertex u) (all-k-length-paths-to (suc n) (suc k) v)
 
 all-all-k-length-paths-from-to : ∀ n → ℕ → Fin n → List (List (Path n))
-all-all-k-length-paths-from-to ℕ.zero k ()
---all-all-k-length-paths-from-to (suc n) 0 v = ([] ∷ []) ∷ []
 all-all-k-length-paths-from-to (suc n) k v = Data.List.map (λ u → all-k-length-paths-from-to (suc n) k u v) (allFins (suc n))
 
-all-k-length-paths-to 0 k ()
 all-k-length-paths-to (suc n) k v = concat (all-all-k-length-paths-from-to (suc n) k v)
 
 all-≤k-length-paths-from-to : ∀ n → ℕ → Vertex n → Vertex n → List (Path n)
@@ -132,7 +122,3 @@ all-≤k-length-paths-from-to n 0 i j with i ≟ j
 ... | yes i≡j = [] ∷ []
 ... | no i≢j = []
 all-≤k-length-paths-from-to n (suc k) i j = all-≤k-length-paths-from-to n k i j ++ all-k-length-paths-from-to n (suc k) i j
-
-
-
- 

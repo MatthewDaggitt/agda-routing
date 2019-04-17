@@ -13,7 +13,6 @@ module RoutingLib.Data.List.Extrema.Nat where
 
   module Extrema = ExtremaGen ≤-totalOrder
 
-
   private
     <⇒<× : ∀ {x y} → x < y → x ≤ y × x ≢ y
     <⇒<× x<y = <⇒≤ x<y , <⇒≢ x<y

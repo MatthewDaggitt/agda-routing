@@ -1,15 +1,28 @@
 --------------------------------------------------------------------------------
 -- This core module contains the definitions for the pre-conditions for a
--- dynamic asynchronous iteration being convergent. Users interested in using
--- these conditions should not import them from here directly but from
+-- dynamic asynchronous iteration being convergent.
+--------------------------------------------------------------------------------
+
+-- Note these conditions should not be imported from here directly but from
 -- `RoutingLib.Iteration.Asynchronous.Dynamic.Convergence` which also exports
 -- the associated proofs of convergence.
---------------------------------------------------------------------------------
+
+-- Each of the conditions comes in two forms `X` and `PartialX`, e.g. `ACO` and
+-- `PartialACO`. The `X` forms guarantee convergence from any initial state for
+-- any schedule. The `PartialX` forms only guarantee convergence from a subset
+-- of initial states and schedules. The sets of valid initial states and
+-- schedules are passed as parameters to the `PartialX` records.
+
+-- Note that the `X` forms are not defined in terms of the `PartialX` forms
+-- parameterised by the entire state space and all possible schedules, in order
+-- to avoid users of the `X` forms having to provide extraneous proofs that the
+-- states and schedules are members of these universal sets.
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic
 
 module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
   {a ℓ n} (𝓘 : AsyncIterable a ℓ n) where
+
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (Subset; _∉_; ⊤) renaming (_∈_ to _∈ₛ_)
 open import Data.Fin.Dec using (_∈?_)
@@ -40,8 +53,7 @@ open AsyncIterable 𝓘
 --------------------------------------------------------------------------------
 -- Asynchronously contracting operator (ACO) --
 --------------------------------------------------------------------------------
--- Sufficient (and necessary conditions) for convergence
--- as inspired by Üresin and Dubois
+-- Sufficient conditions for convergence
 
 record ACO ℓ₃ : Set (a ⊔ ℓ ⊔ lsuc ℓ₃) where
   field
@@ -52,7 +64,6 @@ record ACO ℓ₃ : Set (a ⊔ ℓ ⊔ lsuc ℓ₃) where
                      (x* ∈ᵢ B e p k × (∀ {x} → x ∈ᵢ B e p k → x ≈ x*))
     B-null       : ∀ {e p k i} → i ∉ p → ⊥ i ∈ B e p k i
     F-mono-B     : ∀ {e p k x} → x ∈ Accordant p → x ∈ᵢ B e p k → F e p x ∈ᵢ B e p (suc k)
-
 
 record PartialACO {ℓ₁ ℓ₂}
                   (B₀ : IPred Sᵢ ℓ₁)          -- Set of allowable initial states
@@ -69,14 +80,16 @@ record PartialACO {ℓ₁ ℓ₂}
     F-mono-B   : ∀ {e p} (p∈Q : p ∈ Q) → ∀ {k x} → x ∈ Accordant p →
                  x ∈ᵢ B e p∈Q k → F e p x ∈ᵢ B e p∈Q (suc k)
     F-resp-B₀  : ∀ {e p} → p ∈ Q → ∀ {x} → x ∈ᵢ B₀ → F e p x ∈ᵢ B₀
-  
+
+-- Converting between partial and non-partial forms
+
 ACO⇒partialACO : ∀ {ℓ₃} → ACO ℓ₃ → PartialACO Uᵢ U ℓ₃
 ACO⇒partialACO aco = record
   { B₀-cong   = λ _ _ _ → tt
   ; F-resp-B₀ = λ _ _ _ → tt
   ; B         = λ e {p} _ → B e p
   ; B₀-eqᵢ    = λ _ → (λ _ → B₀-universal _ _ _ _) , (λ _ → tt)
-  ; Bᵢ-cong   = λ _ → Bᵢ-cong --λ { refl refl _ _ → Bᵢ-cong }
+  ; Bᵢ-cong   = λ _ → Bᵢ-cong
   ; B-finish  = λ e {p} _ → B-finish e p
   ; B-null    = λ _ → B-null
   ; F-mono-B  = λ _ → F-mono-B
@@ -87,7 +100,7 @@ partialACO⇒ACO : ∀ {ℓ₁ ℓ₂ ℓ₃} {B₀ : IPred Sᵢ ℓ₁} {Q : Pr
                  PartialACO B₀ Q ℓ₃ → ACO ℓ₃
 partialACO⇒ACO _∈B₀ _∈Q pACO = record
   { B            = λ e p → B e (p ∈Q)
-  ; Bᵢ-cong       = Bᵢ-cong (_ ∈Q)
+  ; Bᵢ-cong      = Bᵢ-cong (_ ∈Q)
   ; B₀-universal = λ e p x i → proj₁ (B₀-eqᵢ (_ ∈Q)) (_ ∈B₀)
   ; B-finish     = λ e p → B-finish e (p ∈Q)
   ; B-null       = B-null (_ ∈Q)
@@ -100,7 +113,7 @@ partialACO⇒ACO′ = partialACO⇒ACO (Uᵢ-universal Sᵢ) U-Universal
 --------------------------------------------------------------------------------
 -- Asynchronously Metrically Contracting Operator (AMCO)
 --------------------------------------------------------------------------------
--- Sufficient (and necessary) conditions as defined by Gurney
+-- Sufficient conditions for convergence
 
 record AMCO : Set (a ⊔ ℓ) where
   field

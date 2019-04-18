@@ -224,7 +224,7 @@ _≤ₗₑₓ?_ : Decidable _≤ₗₑₓ_
 ≤ₗₑₓ-totalOrder = record
   { isTotalOrder = ≤ₗₑₓ-isTotalOrder
   }
-  
+
 ≤ₗₑₓ-decTotalOrder : DecTotalOrder _ _ _
 ≤ₗₑₓ-decTotalOrder = record
   { isDecTotalOrder = ≤ₗₑₓ-isDecTotalOrder
@@ -248,7 +248,7 @@ p≮ₗₑₓ[] {[]}    (_ , []≉[]) = []≉[] refl
 p≮ₗₑₓ[] {e ∷ p} (() , _)
 
 ∷-mono-≤ₗₑₓ : ∀ e {p q} → p ≤ₗₑₓ q → (e ∷ p) ≤ₗₑₓ (e ∷ q)
-∷-mono-≤ₗₑₓ e {p} {q} p≤q =  step refl refl p≤q 
+∷-mono-≤ₗₑₓ e {p} {q} p≤q =  step refl refl p≤q
 
 ----------------------------------------------------------------------------
 -- length

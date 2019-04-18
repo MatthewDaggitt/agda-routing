@@ -49,7 +49,7 @@ module _ {a p} {A : Set a} {P : Pred A p} where
   ↭-pres-Any (swap x y xs↭ys) (there (here py))   = here py
   ↭-pres-Any (swap x y xs↭ys) (there (there pxs)) = there (there (↭-pres-Any xs↭ys pxs))
   ↭-pres-Any (trans ↭₁ ↭₂)    pxs                 = ↭-pres-Any ↭₂ (↭-pres-Any ↭₁ pxs)
-  
+
   ↭-pres-All : ∀ {xs ys} → xs ↭ ys → All P xs → All P ys
   ↭-pres-All refl                pxs             = pxs
   ↭-pres-All (prep x xs↭ys)      (px ∷ pxs)      = px ∷ ↭-pres-All xs↭ys pxs
@@ -67,14 +67,14 @@ module _ {a ℓ} {A : Set a} {_∼_ : Rel A ℓ} (sym : Symmetric _∼_) where
 module _ {a ℓ} (S : Setoid a ℓ) where
 
   open Membership S
-  
+
   ↭-pres-∈ : ∀ {x xs ys} → xs ↭ ys → x ∈ xs → x ∈ ys
   ↭-pres-∈ = ↭-pres-Any
 
 module _ {a ℓ} (S : Setoid a ℓ) where
 
   open Setoid S
-  
+
   ↭-pres-! : ∀ {xs ys} → xs ↭ ys → Unique S xs → Unique S ys
   ↭-pres-! xs↭ys xs! = ↭-pres-AllPairs (_∘ sym) xs↭ys xs!
 

@@ -35,7 +35,7 @@ module RoutingLib.Data.List.Relation.Unary.AllPairs.Properties where
 
   {-
   mapMaybe⁺ : ∀ {a b ℓ₁ ℓ₂} {A : Set a} {B : Set b} {_~₁_ : Rel A ℓ₁} {_~₂_ : Rel B ℓ₂}
-              (f : A → Maybe B) → (∀ {x y} → x ~₁ y → (f x ≡ nothing) ⊎ (f y ≡ nothing) ⊎ (Eq _~₂_ (f x) (f y))) → 
+              (f : A → Maybe B) → (∀ {x y} → x ~₁ y → (f x ≡ nothing) ⊎ (f y ≡ nothing) ⊎ (Eq _~₂_ (f x) (f y))) →
               AllPairs _~₁_ ⋐ AllPairs _~₂_ ∘ mapMaybe f
   mapMaybe⁺ _ _ [] = []
   mapMaybe⁺ {_~₁_ = _~₁_} {_~₂_} f f-inj {x ∷ xs} (px ∷ pxs) with f x | inspect f x

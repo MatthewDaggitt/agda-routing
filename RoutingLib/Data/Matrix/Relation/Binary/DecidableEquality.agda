@@ -12,7 +12,7 @@ open import Relation.Nullary.Negation using (contradiction)
 open import RoutingLib.Data.Matrix
 open import RoutingLib.Data.Matrix.Relation.Binary.Pointwise
   using () renaming (decSetoid to pointwiseDecSetoid)
-  
+
 open DecSetoid DS using (_≈_; _≟_) renaming (setoid to S; Carrier to A)
 open import RoutingLib.Data.Matrix.Relation.Binary.Equality S public
 open import RoutingLib.Data.Table.Relation.Binary.DecidableEquality DS

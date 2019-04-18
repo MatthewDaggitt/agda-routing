@@ -135,7 +135,7 @@ module RoutingLib.Data.Fin.Subset.Properties where
 
   Nonfull-witness : ∀ {n} {p : Subset n} → Nonfull p → ∃ λ i → i ∉ p
   Nonfull-witness {n} {p} ¬pᶠ = ¬∀⟶∃¬ n (_∈ p) (_∈? p) ¬pᶠ
-  
+
   ∣p∣≡n⇒p≡⊤ : ∀ {n} {p : Subset n} → ∣ p ∣ ≡ n → p ≡ ⊤
   ∣p∣≡n⇒p≡⊤ {p = []}          _     = refl
   ∣p∣≡n⇒p≡⊤ {p = outside ∷ p} |p|≡n = contradiction |p|≡n (<⇒≢ (s≤s (∣p∣≤n p)))
@@ -144,10 +144,10 @@ module RoutingLib.Data.Fin.Subset.Properties where
   Nonfull⁅i⁆ : ∀ {n} (i : Fin (suc (suc n))) → Nonfull ⁅ i ⁆
   Nonfull⁅i⁆ zero    full = ∉⊥ (drop-there (full (suc zero)))
   Nonfull⁅i⁆ (suc i) full = contradiction (full zero) λ()
-  
+
   Nonfull⁅i⁆′ : ∀ {n} → 1 < n → (i : Fin n) → Nonfull ⁅ i ⁆
   Nonfull⁅i⁆′ (s≤s (s≤s 1<n)) = Nonfull⁅i⁆
-  
+
   i∉p⇒i∉p\\q : ∀ {n} {p : Subset n} {i} → i ∉ p → ∀ q → i ∉ p \\ q
   i∉p⇒i∉p\\q {0} {[]} {i} i∉p [] = ∉⊥
   i∉p⇒i∉p\\q {suc n} {outside ∷ p} {zero} i∉p (outside ∷ q) ()

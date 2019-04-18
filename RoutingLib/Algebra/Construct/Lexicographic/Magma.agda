@@ -32,7 +32,7 @@ private
   _≈ₗₑₓ_ = Pointwise _≈ᵃ_ _≈ᵇ_
 
   ≈ᵃ-isDecEquivalence : IsDecEquivalence _≈ᵃ_
-  ≈ᵃ-isDecEquivalence = record { isEquivalence = ≈ᵃ-isEquivalence ; _≟_ = _≟ᵃ_ } 
+  ≈ᵃ-isDecEquivalence = record { isEquivalence = ≈ᵃ-isEquivalence ; _≟_ = _≟ᵃ_ }
 
 ------------------------------------------------------------------------
 -- Definition
@@ -44,22 +44,22 @@ _⊕ₗₑₓ_ = Lex Mᵃ._≟_ _∙ᵃ_ _∙ᵇ_
 -- Algebraic properties
 
 assoc : Associative _≈ᵃ_ _∙ᵃ_ → Associative _≈ᵇ_ _∙ᵇ_ → Selective _≈ᵃ_ _∙ᵃ_ → Commutative _≈ᵃ_ _∙ᵃ_ → Associative _≈ₗₑₓ_ _⊕ₗₑₓ_
-assoc = Lex.assoc ≈ᵃ-isDecEquivalence ≈ᵇ-isEquivalence _∙ᵃ_ _∙ᵇ_ ∙ᵃ-cong ∙ᵇ-cong 
+assoc = Lex.assoc ≈ᵃ-isDecEquivalence ≈ᵇ-isEquivalence _∙ᵃ_ _∙ᵇ_ ∙ᵃ-cong ∙ᵇ-cong
 
 comm : Commutative _≈ᵃ_ _∙ᵃ_ → Commutative _≈ᵇ_ _∙ᵇ_ → Commutative _≈ₗₑₓ_ _⊕ₗₑₓ_
-comm = Lex.comm ≈ᵃ-isDecEquivalence ≈ᵇ-isEquivalence  _∙ᵃ_ _∙ᵇ_ ∙ᵃ-cong ∙ᵇ-cong 
+comm = Lex.comm ≈ᵃ-isDecEquivalence ≈ᵇ-isEquivalence  _∙ᵃ_ _∙ᵇ_ ∙ᵃ-cong ∙ᵇ-cong
 
 sel : Selective _≈ᵃ_ _∙ᵃ_ → Selective _≈ᵇ_ _∙ᵇ_ → Selective _≈ₗₑₓ_ _⊕ₗₑₓ_
-sel = Lex.sel ≈ᵃ-isDecEquivalence ≈ᵇ-isEquivalence  _∙ᵃ_ _∙ᵇ_ ∙ᵃ-cong ∙ᵇ-cong 
+sel = Lex.sel ≈ᵃ-isDecEquivalence ≈ᵇ-isEquivalence  _∙ᵃ_ _∙ᵇ_ ∙ᵃ-cong ∙ᵇ-cong
 
 zeroʳ : ∀ {0₁ 0₂} → RightZero _≈ᵃ_ 0₁ _∙ᵃ_ → RightZero _≈ᵇ_ 0₂ _∙ᵇ_ → RightZero _≈ₗₑₓ_ (0₁ , 0₂) _⊕ₗₑₓ_
-zeroʳ = Lex.zeroʳ ≈ᵃ-isDecEquivalence ≈ᵇ-isEquivalence  _∙ᵃ_ _∙ᵇ_ ∙ᵃ-cong ∙ᵇ-cong 
+zeroʳ = Lex.zeroʳ ≈ᵃ-isDecEquivalence ≈ᵇ-isEquivalence  _∙ᵃ_ _∙ᵇ_ ∙ᵃ-cong ∙ᵇ-cong
 
 identityʳ : ∀ {e f} → RightIdentity _≈ᵃ_ e _∙ᵃ_ → RightIdentity _≈ᵇ_ f _∙ᵇ_ → RightIdentity _≈ₗₑₓ_ (e , f) _⊕ₗₑₓ_
-identityʳ = Lex.identityʳ ≈ᵃ-isDecEquivalence ≈ᵇ-isEquivalence  _∙ᵃ_ _∙ᵇ_ ∙ᵃ-cong ∙ᵇ-cong 
+identityʳ = Lex.identityʳ ≈ᵃ-isDecEquivalence ≈ᵇ-isEquivalence  _∙ᵃ_ _∙ᵇ_ ∙ᵃ-cong ∙ᵇ-cong
 
 cong : Congruent₂ _≈ₗₑₓ_ _⊕ₗₑₓ_
-cong = Lex.cong ≈ᵃ-isDecEquivalence ≈ᵇ-isEquivalence  _∙ᵃ_ _∙ᵇ_ ∙ᵃ-cong ∙ᵇ-cong 
+cong = Lex.cong ≈ᵃ-isDecEquivalence ≈ᵇ-isEquivalence  _∙ᵃ_ _∙ᵇ_ ∙ᵃ-cong ∙ᵇ-cong
 
 -- ------------------------------------------------------------------------
 -- -- Other properties

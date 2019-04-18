@@ -22,7 +22,7 @@ x      ⊕∙ ∙     = x
 module _ {ℓ} {_≈_ : Rel A ℓ} (refl : Reflexive _≈_) where
 
   open PointedEquality _≈_
-  
+
   ⊕∙-comm : Commutative _≈_ _⊕_ → Commutative _≈∙_ _⊕∙_
   ⊕∙-comm comm ∙     ∙     = ∙≈∙
   ⊕∙-comm comm [ _ ] ∙     = [ refl ]

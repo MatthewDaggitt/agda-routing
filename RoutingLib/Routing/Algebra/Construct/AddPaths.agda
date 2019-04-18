@@ -1,4 +1,6 @@
 --------------------------------------------------------------------------------
+-- Agda routing library
+--
 -- This module turns a distance vector protocol into a path vector protocol by
 -- adding a component that tracks and removes paths. Note that the choice and
 -- extension operators of the original algebra cannot access the paths and
@@ -18,21 +20,21 @@ open import Data.Fin using (Fin; toℕ)
 open import Data.Maybe using (Maybe; just)
 open import Data.Product.Relation.Pointwise.NonDependent as Pointwise using (Pointwise)
 open import Data.Sum as Sum using (_⊎_; inj₁; inj₂)
-open import Relation.Binary
 open import Data.Product
+open import Level using (_⊔_)
+open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
+open import Relation.Binary.Construct.Add.Point.Equality as PointedEq
+  renaming (_≈∙_ to PointedEq)
+  using (∙≈∙; [_]; [≈]-injective; ≈∙-refl; ≈∙-sym; ≈∙-trans)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
-
+open import Relation.Nullary.Construct.Add.Point renaming (∙ to invalid; [_] to valid)
 
 open import RoutingLib.Algebra.Construct.Add.Identity as AddIdentity
   renaming (_⊕∙_ to AddIdentity) using (⊕∙-comm)
 open import RoutingLib.Algebra.Construct.Lexicographic as Lex using (Lex; Lex₂; Lex-case-1;Lex-case-2;Lex-case-3)
 open import RoutingLib.Algebra.Construct.Lexicographic.Magma as OpLexProperties′
-open import RoutingLib.Relation.Nullary.Construct.Add.Point renaming (∙ to invalid; [_] to valid)
-open import RoutingLib.Relation.Binary.Construct.Add.Point.Equality as PointedEq
-  renaming (_≈∙_ to PointedEq)
-  using (∙≈∙; [_]; [≈]-injective; ≈∙-refl; ≈∙-sym; ≈∙-trans)
 open import RoutingLib.Data.Path.Uncertified renaming (_∈ₚ_ to _∈ᴱ_; _∉ₚ_ to _∉̂ᴱ_; Path to EPath; _⇿_ to _⇿ᴱ_)
 open import RoutingLib.Data.Path.Uncertified.Choice
 open import RoutingLib.Data.Path.Uncertified.Properties
@@ -81,7 +83,7 @@ module _ (⊕-assoc : Associative _≈_ _⊕_) (⊕-sel : Selective _≈_ _⊕_)
   Step⁺ : ∀ {n} → Fin n → Fin n → Set b
   Step⁺ i j = Step i j
 
-  _≈⁺_ : Rel Route⁺ ℓ
+  _≈⁺_ : Rel Route⁺ _
   _≈⁺_ = PointedEq _≈ₓ_ 
 
   ≈⁺-refl : Reflexive _≈⁺_
@@ -93,7 +95,7 @@ module _ (⊕-assoc : Associative _≈_ _⊕_) (⊕-sel : Selective _≈_ _⊕_)
   ≈⁺-trans : Transitive _≈⁺_
   ≈⁺-trans = ≈∙-trans _≈ₓ_ ( Pointwise.×-transitive {_∼₁_ = _≈_} {_∼₂_ = _≡_} ≈-trans trans ) 
 
-  _≉⁺_ : Rel Route⁺ ℓ
+  _≉⁺_ : Rel Route⁺ _
   x ≉⁺ y = ¬ (x ≈⁺ y)
 
   _⊕⁺_ : Op₂ Route⁺
@@ -150,7 +152,7 @@ module _ (⊕-assoc : Associative _≈_ _⊕_) (⊕-sel : Selective _≈_ _⊕_)
   ... | no _      | yes _ | yes _ = ∙≈∙
   ... | no f∞▷x≉∞  | yes _ | no _  = contradiction (f∞-reject i j x) f∞▷x≉∞ 
 
-  AddPaths : RawRoutingAlgebra a b ℓ
+  AddPaths : RawRoutingAlgebra a b (a ⊔ ℓ)
   AddPaths = record
     { Route              = Route⁺
     ; Step               = Step⁺

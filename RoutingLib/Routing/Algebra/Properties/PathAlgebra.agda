@@ -1,4 +1,6 @@
 --------------------------------------------------------------------------------
+-- Agda routing library
+--
 -- Properties of path algebras -- note that many more properties can be found
 -- for certified path algebras.
 --------------------------------------------------------------------------------

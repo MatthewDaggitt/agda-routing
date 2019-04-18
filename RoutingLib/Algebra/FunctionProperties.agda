@@ -58,6 +58,3 @@ forcesᵇ⇒forcesˡ forces a b P = proj₁ (forces a b P)
 forcesᵇ⇒forcesʳ : ∀ {_•_} {p} {P : Pred A p} →
                   _•_ Forcesᵇ P → _•_ Forcesʳ P
 forcesᵇ⇒forcesʳ forces a b P = proj₂ (forces a b P)
-
-
-

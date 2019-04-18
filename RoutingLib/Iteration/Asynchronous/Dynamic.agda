@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
--- Dynamic asynchronous iterations
+-- Agda routing library
 --
 -- This module contains the definition of what it means to be a dynamic
 -- asynchronous iteration as well as the definition of the state function

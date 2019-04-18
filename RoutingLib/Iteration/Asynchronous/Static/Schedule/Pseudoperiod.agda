@@ -1,4 +1,6 @@
 --------------------------------------------------------------------------------
+-- Agda routing library
+--
 -- This module defines what it means for a period of time to be a pseudoperiod
 -- with respect to some schedule. As is shown by the proofs in the module
 -- `RoutingLib.Iteration.Asynchronous.Static.Convergence.ACOImpliesConvergent`
@@ -60,10 +62,10 @@ record MessagesTo_ExpireIn_ (i : Fin n) (period : TimePeriod) : Set where
   open TimePeriod period
   field
     start≤end : start ≤ end
-    expiryᵢ   : ∀ {t} j → end < t → start ≤ β t i j
+    expiryᵢ   : ∀ {t} → end < t → ∀ j → start ≤ β t i j
 
 β[0,0] : ∀ i → MessagesTo i ExpireIn [ 0 , 0 ]
-β[0,0] i = mkₑ z≤n (λ j 0<t → z≤n)
+β[0,0] i = mkₑ z≤n (λ 0<t j → z≤n)
 
 --------------------------------------------------------------------------------
 -- Pseudocycle

@@ -1,10 +1,11 @@
+
+module RoutingLib.Relation.Binary where
+
 open import Data.Product
 open import Function using (flip)
 open import Relation.Binary
 open import Relation.Nullary using (¬_)
 open import Level
-
-module RoutingLib.Relation.Binary where
 
 --------------------------------------------------------------------------------
 -- Decidable preorders

@@ -1,4 +1,6 @@
 --------------------------------------------------------------------------------
+-- Agda routing library
+--
 -- Proof that any algebra that is a path algebra is also a certified path
 -- algebra. Certified path algebras are much easier to reason about as all nodes
 -- are guaranteed to be members of the network and the path type itself contains
@@ -16,6 +18,7 @@ module RoutingLib.Routing.Algebra.Certification
 
 open import Data.Fin using (Fin; toℕ)
 open import Data.List using (_∷_)
+open import Data.Nat using (ℕ)
 open import Data.Maybe
 open import Data.Maybe.Properties using (just-injective)
 open import Data.Product using (_,_)
@@ -37,6 +40,12 @@ open import RoutingLib.Data.Path.CertifiedI.Properties hiding (_⇿?_)
 open RawRoutingAlgebra algebra
 open IsPathAlgebra isPathAlgebra
 
+private
+  variable
+    i j : Fin n
+    r : Route
+    p : Pathᵛ n
+
 --------------------------------------------------------------------------------
 -- Definition of a new path function that applies the `certify` function to any
 -- valid path. The certify function effectively discards any part of the path
@@ -53,18 +62,18 @@ pathᶜ r = map certify (path r)
 pathᶜ-cong : pathᶜ Preserves _≈_ ⟶ _≈ₚ_
 pathᶜ-cong r≈s = ≈ₚ-reflexive (cong (map certify) (path-cong r≈s))
 
-r≈0⇒pathᶜ[r]≈[] : ∀ {r} → r ≈ 0# → pathᶜ r ≈ₚ valid []
+r≈0⇒pathᶜ[r]≈[] : r ≈ 0# → pathᶜ r ≈ₚ valid []
 r≈0⇒pathᶜ[r]≈[] r≈0# rewrite r≈0⇒path[r]≈[] r≈0# = valid []
 
-r≈∞⇒pathᶜ[r]≈∅ : {r : Route} → r ≈ ∞# → pathᶜ r ≈ₚ nothing
+r≈∞⇒pathᶜ[r]≈∅ : r ≈ ∞# → pathᶜ r ≈ₚ nothing
 r≈∞⇒pathᶜ[r]≈∅ r≈∞ rewrite r≈∞⇒path[r]≈∅ r≈∞ = ≈ₚ-refl
 
-pathᶜ[r]≈∅⇒r≈∞ : {r : Route} → pathᶜ r ≈ₚ nothing → r ≈ ∞#
+pathᶜ[r]≈∅⇒r≈∞ : pathᶜ r ≈ₚ nothing → r ≈ ∞#
 pathᶜ[r]≈∅⇒r≈∞ {r} p[r]≡∅ with path r | inspect path r
 ... | invalid | [ eq ] = path[r]≈∅⇒r≈∞ eq
 ... | valid p | _      = contradiction p[r]≡∅ λ()
 
-pathᶜ-reject : ∀ {i j} {r p} (f : Step i j) → pathᶜ r ≈ₚ valid p →
+pathᶜ-reject : ∀ (f : Step i j) → pathᶜ r ≈ₚ valid p →
                ¬ (i , j) ⇿ᵛ p ⊎ i ∈ᵥₚ p → f ▷ r ≈ ∞#
 pathᶜ-reject {r = r} {p} f p[r]≈p reason with path r | inspect path r | p[r]≈p
 ... | invalid | _      | ()
@@ -72,7 +81,7 @@ pathᶜ-reject {r = r} {p} f p[r]≈p reason with path r | inspect path r | p[r]
 ...   | inj₁ ¬ij⇿p = path-reject f eq (inj₁ (¬ij⇿p ∘ ⇿ᵥ-resp-≈ᵥₚ qᶜ≈p ∘ ⇿-certify⁺ refl refl))
 ...   | inj₂ i∈p   = path-reject f eq (inj₂ (∈ₚ-certify⁻ refl (i∈p ∘ ∉ᵥₚ-resp-≈ᵥₚ qᶜ≈p)))
 
-pathᶜ-accept : ∀ {i j r p} (f : Step i j) → pathᶜ r ≈ₚ valid p → f ▷ r ≉ ∞# →
+pathᶜ-accept : ∀ (f : Step i j) → pathᶜ r ≈ₚ valid p → f ▷ r ≉ ∞# →
                (ij⇿p : (i , j) ⇿ᵛ p) (i∉p : i ∉ᵥₚ p) →
                pathᶜ (f ▷ r) ≈ₚ valid ((i , j) ∷ p ∣ ij⇿p ∣ i∉p)
 pathᶜ-accept {i} {j} {r} {p} f p[r]≈p fr≉∞ ij⇿p i∉p with path r | inspect path r | p[r]≈p

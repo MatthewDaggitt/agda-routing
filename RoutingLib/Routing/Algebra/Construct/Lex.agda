@@ -1,3 +1,24 @@
+--------------------------------------------------------------------------------
+-- Agda routing library
+--
+-- This module combines two routing algebras into a third composite routing
+-- algebra via a lexicographic product. The routes are combined as pairs of the
+-- old routes, with choice being implemented as the lexicographic product of the
+-- two old choice operators, and extension being implemented pointwise using the
+-- two old extension operators.
+--
+-- See RoutingLib.Protocols.ShortestWidestPaths for an example of how this may
+-- be used.
+--------------------------------------------------------------------------------
+
+open import RoutingLib.Routing.Algebra
+
+module RoutingLib.Routing.Algebra.Construct.Lex
+  {a₁ a₂ b₁ b₂ ℓ₁ ℓ₂}
+  (algebraA : RawRoutingAlgebra a₁ b₁ ℓ₁)
+  (algebraB : RawRoutingAlgebra a₂ b₂ ℓ₂)
+  where
+
 open import Algebra.FunctionProperties
 open import Algebra.FunctionProperties.Consequences
 open import Data.Nat
@@ -16,25 +37,12 @@ open import RoutingLib.Algebra.Construct.Lexicographic.Magma
   as OpLexProperties′
 
 open import RoutingLib.Function
-open import RoutingLib.Routing.Algebra
-
-module RoutingLib.Routing.Algebra.Construct.Lex
-  {a₁ a₂ b₁ b₂ ℓ₁ ℓ₂}
-  (algebraA : RawRoutingAlgebra a₁ b₁ ℓ₁)
-  (algebraB : RawRoutingAlgebra a₂ b₂ ℓ₂)
-  where
-
-
-------------------------------------------------------------------------
--- Prelude
 
 private
-
   module A = RawRoutingAlgebra algebraA
   module B = RawRoutingAlgebra algebraB
 
   module LexProperties = OpLexProperties′ A.⊕-decMagma B.⊕-magma
-
 
 ------------------------------------------------------------------------
 -- Algebra
@@ -89,21 +97,18 @@ Lex = record
   ; f∞-reject          = f∞-reject
   }
 
-
 open RawRoutingAlgebra Lex using (_≤₊_)
 
 ------------------------------------------------------------------------
--- IsRoutinAlgebra is preserved
-
-
+-- IsRoutingAlgebra is preserved
 
 isRoutingAlgebra : IsRoutingAlgebra algebraA →
                    IsRoutingAlgebra algebraB →
                    IsRoutingAlgebra Lex
 isRoutingAlgebra A-isRA B-isRA = record
-  { ⊕-sel         = LexProperties.sel      Aᵣ.⊕-sel      Bᵣ.⊕-sel
-  ; ⊕-comm        = LexProperties.comm     Aᵣ.⊕-comm     Bᵣ.⊕-comm
-  ; ⊕-assoc       = LexProperties.assoc    Aᵣ.⊕-assoc    Bᵣ.⊕-assoc Aᵣ.⊕-sel Aᵣ.⊕-comm
+  { ⊕-sel         = LexProperties.sel       Aᵣ.⊕-sel       Bᵣ.⊕-sel
+  ; ⊕-comm        = LexProperties.comm      Aᵣ.⊕-comm      Bᵣ.⊕-comm
+  ; ⊕-assoc       = LexProperties.assoc     Aᵣ.⊕-assoc     Bᵣ.⊕-assoc Aᵣ.⊕-sel Aᵣ.⊕-comm
   ; ⊕-zeroʳ       = LexProperties.zeroʳ     Aᵣ.⊕-zeroʳ     Bᵣ.⊕-zeroʳ
   ; ⊕-identityʳ   = LexProperties.identityʳ Aᵣ.⊕-identityʳ Bᵣ.⊕-identityʳ
   ; ▷-fixedPoint = λ {(f , g) → Aᵣ.▷-fixedPoint f , Bᵣ.▷-fixedPoint g}

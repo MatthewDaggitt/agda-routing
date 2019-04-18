@@ -1,6 +1,19 @@
+
+open import Data.Nat hiding (_≟_)
+open import RoutingLib.Routing using (Network)
+open import RoutingLib.Routing.Algebra
+
+module RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.StrictlyContracting
+  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
+  (isStrictlyIncreasing : IsStrictlyIncreasing algebra)
+  (network : Network algebra n)
+  (1≤n : 1 ≤ n)
+  where
+
 open import Data.Fin.Subset using (Subset; _∈_)
 open import Data.Fin.Subset.Properties using (_∈?_)
-open import Data.Nat hiding (_≟_)
 open import Data.Nat.Properties hiding (_≟_)
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
 open import Data.Sum using (_⊎_; inj₁; inj₂; swap)
@@ -17,13 +30,10 @@ import RoutingLib.Function.Metric as Metric
 import RoutingLib.Relation.Nullary.Decidable as Dec
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
-
-open import RoutingLib.Routing using (Network)
-open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
 import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra as PathAlgebraProperties
 import RoutingLib.Routing.Algebra.Construct.Consistent as Consistent
-import RoutingLib.Routing.VectorBased.Core as VectorBasedRoutingCore
+import RoutingLib.Routing.VectorBased.Synchronous as VectorBasedRoutingCore
 import RoutingLib.Routing.VectorBased.Asynchronous as PathVector
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Properties as DistanceVectorProperties
 import RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Properties as PathVectorProperties
@@ -34,20 +44,12 @@ import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.St
 
 open ≤-Reasoning
 
-module RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.StrictlyContracting
-  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
-  (isStrictlyIncreasing : IsStrictlyIncreasing algebra)
-  (network : Network algebra n)
-  (1≤n : 1 ≤ n)
-  where
-
 open RawRoutingAlgebra algebra
 open IsCertifiedPathAlgebra isPathAlgebra
 open PathAlgebraProperties isRoutingAlgebra isPathAlgebra
 
 open PathVector algebra network hiding (F)
+
 
 module _ {e : Epoch} {p : Subset n} where
 
@@ -57,7 +59,6 @@ module _ {e : Epoch} {p : Subset n} where
 
     A : AdjacencyMatrix
     A = Aₜ e p
-
 
   open Metrics isRoutingAlgebra isPathAlgebra A public
   open MetricProperties isRoutingAlgebra isPathAlgebra A 1≤n p public

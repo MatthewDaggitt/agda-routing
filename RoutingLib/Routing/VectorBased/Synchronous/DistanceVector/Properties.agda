@@ -1,14 +1,23 @@
-open import Algebra using (Semilattice)
-open import Algebra.Structures using (IsSemilattice)
+--------------------------------------------------------------------------------
+-- Agda routing library
+--
+-- This module contains some basic properties of F, the synchronous iteration
+-- underlying vector based routing, under the assumption that the routing
+-- algebra is a distance-vector algebra.
+--------------------------------------------------------------------------------
+
+open import RoutingLib.Routing using (AdjacencyMatrix)
+open import RoutingLib.Routing.Algebra
+
+module RoutingLib.Routing.VectorBased.Synchronous.DistanceVector.Properties
+  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  {n} (A : AdjacencyMatrix algebra n)
+  where
+
 import Algebra.FunctionProperties as FunctionProperties
-open import Algebra.FunctionProperties.Consequences.Propositional using (sel⇒idem)
-open import Data.Nat using (suc; zero; _+_)
-open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
-open import Data.Fin.Subset using (⊤; _∈_)
-open import Data.Fin.Dec using (_∈?_)
 open import Data.List using (tabulate)
-open import Data.List.Relation.Pointwise using (tabulate⁺)
 open import Data.List.Membership.Setoid.Properties
   using (foldr-selective; ∈-tabulate⁻; ∈-tabulate⁺)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
@@ -18,41 +27,29 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; sym; trans)
-import Relation.Binary.EqReasoning as EqReasoning
 import Relation.Binary.Reasoning.PartialOrder as POR
 
 open import RoutingLib.Data.List.Properties using (foldr≤ₗe; foldr≤ᵣxs)
-open import RoutingLib.Data.Matrix using (SquareMatrix)
-open import RoutingLib.Data.List.Relation.Binary.Pointwise
-  using (foldr⁺)
+import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra
+  as RoutingAlgebraProperties
+import RoutingLib.Routing.VectorBased.Synchronous as VectorBasedRouting
 
-open import RoutingLib.Routing using (AdjacencyMatrix)
-open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
-
-import RoutingLib.Routing.VectorBased.Synchronous as VectorBased
-
-module RoutingLib.Routing.VectorBased.Core.Properties
-  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  {n} (A : AdjacencyMatrix algebra n)
-  where
-
+open VectorBasedRouting algebra A
 open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
 open RoutingAlgebraProperties isRoutingAlgebra
 
-open VectorBased algebra A
 open FunctionProperties _≈_
+open POR ≤₊-poset
 
 ------------------------------------------------------------------------------
--- Identity matrix
+-- Properties of I, the identity matrix/initial state
 
 ⊕-zeroʳ-Iᵢᵢ : ∀ i → RightZero (I i i) _⊕_
 ⊕-zeroʳ-Iᵢᵢ i x rewrite Iᵢᵢ≡0# i = ⊕-zeroʳ x
 
 ------------------------------------------------------------------------------
--- Synchronous properties
+-- Properties of F, the iteration
 
 -- F either extends the route by going through some k or it chooses a
 -- trivial route from the identity matrix
@@ -70,11 +67,10 @@ FXᵢⱼ≤Aᵢₖ▷Xₖⱼ X i j k = ≈-sym (foldr≤ᵣxs ⊕-semilattice (I
 FXᵢᵢ≈Iᵢᵢ : ∀ X i → F X i i ≈ I i i
 FXᵢᵢ≈Iᵢᵢ X i with FXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i i
 ... | inj₂ FXᵢᵢ≈Iᵢᵢ           = FXᵢᵢ≈Iᵢᵢ
-... | inj₁ (k , FXᵢᵢ≈AᵢₖXₖⱼ) = begin
+... | inj₁ (k , FXᵢᵢ≈AᵢₖXₖⱼ) = begin-equality
   F X i i         ≈⟨ foldr≤ₗe ⊕-semilattice (I i i) (tabulate (λ k → A i k ▷ X k i)) ⟩
   F X i i ⊕ I i i ≈⟨ ⊕-zeroʳ-Iᵢᵢ i (F X i i) ⟩
   I i i           ∎
-  where open EqReasoning S
 
 -- After an iteration, the diagonals of any two RMatrices are equal
 FXᵢᵢ≈FYᵢᵢ : ∀ X Y {i j} → i ≡ j → F X i j ≈ F Y i j
@@ -89,4 +85,3 @@ FXᵢⱼ<FYᵢⱼ⇒FXᵢⱼ≉Iᵢⱼ X Y {i} {j} FXᵢⱼ<FYᵢⱼ@(FXᵢⱼ�
   F Y i j ≤⟨ ⊕-identityˡ (F Y i j) ⟩
   ∞#      ≡⟨ sym (Iᵢⱼ≡∞ (i≢j ∘ sym)) ⟩
   I i j   ∎)
-  where open POR ≤₊-poset

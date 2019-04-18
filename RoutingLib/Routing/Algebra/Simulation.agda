@@ -1,4 +1,6 @@
 --------------------------------------------------------------------------------
+-- Agda routing library
+--
 -- This module defines the notion of an algebra A simulating another algebra B.
 -- In such a case the behaviour of B can be reasoned about using the behaviour
 -- of A.
@@ -13,6 +15,7 @@ module RoutingLib.Routing.Algebra.Simulation
   where
 
 open import Data.Fin using (Fin)
+open import Data.Nat using (ℕ)
 open import Level using (Level; _⊔_) renaming (suc to lsuc)
 open import Relation.Binary.PropositionalEquality using (_≡_)
 
@@ -24,28 +27,34 @@ open RawRoutingAlgebra A using ()
 open RawRoutingAlgebra B using ()
   renaming (_≈_ to _≈ᵇ_; _⊕_ to _⊕ᵇ_; _▷_ to _▷ᵇ_; 0# to 0#ᵇ; ∞# to ∞#ᵇ; f∞ to f∞ᵇ)
 
+open Comparable A
+  
+private
+  variable
+    n : ℕ
+    i j : Fin n
+    x y z : Route A
+  
 --------------------------------------------------------------------------------
 -- Definition
 
-record Simulates : Set (lsuc (a₁ ⊔ a₂ ⊔ b₁ ⊔ b₂ ⊔ ℓ₁ ⊔ ℓ₂))where
-  open Comparable A
-
+record _Simulates_ : Set (lsuc (a₁ ⊔ a₂ ⊔ b₁ ⊔ b₂ ⊔ ℓ₁ ⊔ ℓ₂))where
   field
     to        : Route A → Route B
     from      : Route B → Route A
     to-from   : ∀ x → to (from x) ≈ᵇ x
 
-    toₛ       : ∀ {n} {i j : Fin n} → Step A i j → Step B i j
-    fromₛ     : ∀ {n} {i j : Fin n} → Step B i j → Step A i j
-    toₛ-fromₛ : ∀ {n} {i j : Fin n} (e : Step B i j) → toₛ (fromₛ e) ≡ e
+    toₛ       : Step A i j → Step B i j
+    fromₛ     : Step B i j → Step A i j
+    toₛ-fromₛ : (e : Step B i j) → toₛ (fromₛ e) ≡ e
 
     to-0#     : to 0#ᵃ ≈ᵇ 0#ᵇ
     to-∞      : to ∞#ᵃ ≈ᵇ ∞#ᵇ
-    to-cong   : ∀ {x y} → x ≈ᵃ y → to x ≈ᵇ to y
-    to-▷      : ∀ {n} {i j : Fin n} (f : Step A i j) x → to (f  ▷ᵃ x) ≈ᵇ toₛ f ▷ᵇ to x
-    to-f∞     : ∀ {n} {i j : Fin n} → toₛ (f∞ᵃ i j) ≡ f∞ᵇ i j
+    to-cong   : x ≈ᵃ y → to x ≈ᵇ to y
+    to-▷      : ∀ (f : Step A i j) x → to (f  ▷ᵃ x) ≈ᵇ toₛ f ▷ᵇ to x
+    to-f∞     : toₛ (f∞ᵃ i j) ≡ f∞ᵇ i j
     
     -- Note that A need only simulate B's choice for routes that are comparable.
     -- This allows only "morally" commutative routing algebras to be proved correct.
-    to-⊕     : ∀ {x y} → x ≎ y → to x ⊕ᵇ to y ≈ᵇ to (x ⊕ᵃ y)
-    ⊕-pres-≎ : ∀ {x y z} → x ≎ y → x ≎ z → x ≎ (y ⊕ᵃ z)
+    to-⊕     : x ≎ y → to x ⊕ᵇ to y ≈ᵇ to (x ⊕ᵃ y)
+    ⊕-pres-≎ : x ≎ y → x ≎ z → x ≎ (y ⊕ᵃ z)

@@ -1,4 +1,6 @@
 ------------------------------------------------------------------------
+-- Agda routing library
+--
 -- This module publicly exports various pre-conditions for the
 -- convergence of a dynamic asynchronous iteration as well as the
 -- associated theorems.
@@ -95,7 +97,7 @@ module _ {a ℓ n} {I∥ : AsyncIterable a ℓ n} where
     { x*         = Sync.x*
     ; k*         = Sync.k*
     ; x*-fixed   = Sync.x*-fixed
-    ; x*-reached = λ x∈X₀ → PartiallyConverges.x*-reached (ACO⇒converges-partial (SyncProofs.aco x∈X₀)) (SyncProofs.y∈B₀ x∈X₀)
+    ; x*-reached = λ x∈X₀ → PartiallyConverges.x*-reached (ACO⇒converges-partial (SyncProofs.aco x∈X₀)) (SyncProofs.y∈D₀ x∈X₀)
     } where
     module Sync       = PartialSynchronousConditions sync
     module SyncProofs = SyncImpliesACO I∥ sync

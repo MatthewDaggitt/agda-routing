@@ -1,9 +1,13 @@
 --------------------------------------------------------------------------
+-- Agda routing library
+--
 -- A proof that F being an ACO implies that the iteration converges over
 -- the initial box. The same result is also derived in
--- `RoutingLib.Iteration.Asynchronous.Static.ToDynamic` by going via
--- dynamic iterations. This version of the proof is included for the
--- JAR 2019 paper submission.
+-- 
+--   `RoutingLib.Iteration.Asynchronous.Static.ToDynamic`
+--
+-- by going via dynamic iterations. This version of the proof is included
+-- for the JAR 2019 paper submission.
 --
 -- It's also instructive to compare this with the dynamic proof in
 -- `RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.ACOImpliesConvergent`
@@ -78,13 +82,13 @@ module _ {x : S} (x∈X₀ : x ∈ᵢ X₀) (ψ : Schedule n) where
   -- The concept of being locally safe
 
   StateOfNode_InBox_AtTime_ : Fin n → ℕ → 𝕋 → Set ℓ₃
-  StateOfNode i InBox k AtTime t = (tₐ : Acc _<_ t) → δ' x tₐ i ∈ D k i
+  StateOfNode i InBox k AtTime t = (tₐ : Acc _<_ t) → δ' x tₐ i ∈ B k i
 
   StateInBox_AtTime_ : ℕ → 𝕋 → Set ℓ₃
   StateInBox k AtTime t = ∀ i → StateOfNode i InBox k AtTime t
 
   MessagesToNode_InBox_AtTime_ : Fin n → ℕ → 𝕋 → Set ℓ₃
-  MessagesToNode i InBox k AtTime t = ∀ {s} → t < s → ∀ {j} → (βₐ : Acc _<_ (β s i j)) → δ' x βₐ j ∈ D k j
+  MessagesToNode i InBox k AtTime t = ∀ {s} → t < s → ∀ {j} → (βₐ : Acc _<_ (β s i j)) → δ' x βₐ j ∈ B k j
 
   MessagesInBox_AtTime_ : ℕ → 𝕋 → Set ℓ₃
   MessagesInBox k AtTime t = ∀ i → MessagesToNode i InBox k AtTime t
@@ -98,17 +102,17 @@ module _ {x : S} (x∈X₀ : x ∈ᵢ X₀) (ψ : Schedule n) where
 --------------------------------------------------------------------------
 -- Base case: the asynchronous iteration is always in the initial box
 
-  state∈D₀ : ∀ t → StateInBox 0 AtTime t
-  state∈D₀ zero    i (acc rec) = proj₁ X₀≋D₀ (x∈X₀ i)
-  state∈D₀ (suc t) i (acc rec) with i ∈? α (suc t)
-  ... | no  _ = state∈D₀ t i (rec t _)
-  ... | yes _ = F-resp-D₀ (λ j → state∈D₀ (β (suc t) i j) j _) i 
+  state∈B₀ : ∀ t → StateInBox 0 AtTime t
+  state∈B₀ zero    i (acc rec) = proj₁ X₀≋B₀ (x∈X₀ i)
+  state∈B₀ (suc t) i (acc rec) with i ∈? α (suc t)
+  ... | no  _ = state∈B₀ t i (rec t _)
+  ... | yes _ = F-resp-B₀ (λ j → state∈B₀ (β (suc t) i j) j _) i 
 
-  messages∈D₀ : ∀ t → MessagesInBox 0 AtTime t
-  messages∈D₀ t i {s} t<s {j} = state∈D₀ (β s i j) j
+  messages∈B₀ : ∀ t → MessagesInBox 0 AtTime t
+  messages∈B₀ t i {s} t<s {j} = state∈B₀ (β s i j) j
 
-  computation∈D₀ : ∀ t → ComputationInBox 0 AtTime t
-  computation∈D₀ t i = messages∈D₀ t i , state∈D₀ t i
+  computation∈B₀ : ∀ t → ComputationInBox 0 AtTime t
+  computation∈B₀ t i = messages∈B₀ t i , state∈B₀ t i
   
 --------------------------------------------------------------------------
 -- Preservation: if the asynchronous iteration is in a box, 
@@ -118,14 +122,14 @@ module _ {x : S} (x∈X₀ : x ∈ᵢ X₀) (ψ : Schedule n) where
                     MessagesToNode i InBox (k ∸ 1) AtTime s ×
                     StateOfNode i InBox k AtTime s →
                     StateOfNode i InBox k AtTime e
-  state-stability {k}     {s} {zero}  {i} z≤n   (_ , s∈Dₖ) = s∈Dₖ
-  state-stability {zero}  {s} {suc e} {i} s≤1+e (_ , _) = state∈D₀ (suc e) i
-  state-stability {suc k} {s} {suc e} {i} s≤1+e (m∈Dₖ , s∈D₁₊ₖ) (acc rec) with <-cmp s (suc e)
-  ... | tri≈ _ refl _      = s∈D₁₊ₖ (acc rec)
+  state-stability {k}     {s} {zero}  {i} z≤n   (_ , s∈Bₖ) = s∈Bₖ
+  state-stability {zero}  {s} {suc e} {i} s≤1+e (_ , _) = state∈B₀ (suc e) i
+  state-stability {suc k} {s} {suc e} {i} s≤1+e (m∈Bₖ , s∈B₁₊ₖ) (acc rec) with <-cmp s (suc e)
+  ... | tri≈ _ refl _      = s∈B₁₊ₖ (acc rec)
   ... | tri> _ _ s>1+e     = contradiction s≤1+e (<⇒≱ s>1+e)
   ... | tri< (s≤s s≤e) _ _ with i ∈? α (suc e)
-  ...   | no  _ = state-stability s≤e (m∈Dₖ , s∈D₁₊ₖ) (rec e ≤-refl)
-  ...   | yes _ = F-mono-D (λ j → m∈Dₖ (s≤s s≤e) _) i
+  ...   | no  _ = state-stability s≤e (m∈Bₖ , s∈B₁₊ₖ) (rec e ≤-refl)
+  ...   | yes _ = F-mono-B (λ j → m∈Bₖ (s≤s s≤e) _) i
 
   message-stability : ∀ {k s e i} → s ≤ e →
                       MessagesToNode i InBox k AtTime s →
@@ -135,8 +139,8 @@ module _ {x : S} (x∈X₀ : x ∈ᵢ X₀) (ψ : Schedule n) where
   computation-stability : ∀ {k s e} → s ≤ e →
                           ComputationInBox k AtTime s →
                           ComputationInBox k AtTime e
-  computation-stability s≤e c∈Dₖ i =
-    message-stability s≤e (proj₁ (c∈Dₖ i)) , state-stability s≤e (c∈Dₖ i)
+  computation-stability s≤e c∈Bₖ i =
+    message-stability s≤e (proj₁ (c∈Bₖ i)) , state-stability s≤e (c∈Bₖ i)
 
 --------------------------------------------------------------------------
 -- Step: after one pseudoperiod the node is guaranteed to have
@@ -147,38 +151,38 @@ module _ {x : S} (x∈X₀ : x ∈ᵢ X₀) (ψ : Schedule n) where
                    MessagesToNode i InBox k AtTime s →
                    StateOfNode i InBox (suc k) AtTime e
   advance-state {s} {zero}  {i} (mkₐ m ()  z≤n   i∈αₘ)
-  advance-state {s} {suc e} {i} (mkₐ m s<m m≤1+e i∈αₘ) m∈Dₖ (acc recₑ)
+  advance-state {s} {suc e} {i} (mkₐ m s<m m≤1+e i∈αₘ) m∈Bₖ (acc recₑ)
     with i ∈? α (suc e)
-  ...   | yes _ = F-mono-D (λ j → m∈Dₖ (≤-trans s<m m≤1+e) _) i
+  ...   | yes _ = F-mono-B (λ j → m∈Bₖ (≤-trans s<m m≤1+e) _) i
   ...   | no  i∉α₁₊ₑ with m ≟ℕ suc e
   ...     | yes refl  = contradiction i∈αₘ i∉α₁₊ₑ
-  ...     | no  m≢1+e = advance-state (mkₐ m s<m m≤e i∈αₘ) m∈Dₖ _
+  ...     | no  m≢1+e = advance-state (mkₐ m s<m m≤e i∈αₘ) m∈Bₖ _
     where m≤e = ≤-pred (≤∧≢⇒< m≤1+e m≢1+e)
 
   advance-messages : ∀ {s e k i} →
                      MessagesTo i ExpireIn [ s , e ] →
                      ComputationInBox k AtTime s →
                      MessagesToNode i InBox k AtTime e
-  advance-messages (mkₑ _ expiryᵢ) c∈Dₖ e<t {j} =
-    state-stability (expiryᵢ j e<t) (c∈Dₖ j)
+  advance-messages (mkₑ _ expiryᵢ) c∈Bₖ e<t {j} =
+    state-stability (expiryᵢ e<t j) (c∈Bₖ j)
 
   advance-computation₁ : ∀ {s e k} →
                          Pseudocycle [ s , e ] →
                          ComputationInBox k       AtTime s →
                          ComputationInBox (suc k) AtTime e
-  advance-computation₁ pp c∈Dₖ i = messagesᵉ∈Dₖ , stateᵉ∈Dₖ₊₁ 
+  advance-computation₁ pp c∈Bₖ i = messagesᵉ∈Bₖ , stateᵉ∈Bₖ₊₁ 
     where
     open Pseudocycle pp
-    messagesᵐ∈Dₖ  = advance-messages (β[s,m] i) c∈Dₖ
-    messagesᵉ∈Dₖ  = message-stability (midᵢ≤end i) messagesᵐ∈Dₖ
-    stateᵉ∈Dₖ₊₁   = advance-state (α[m,e] i) messagesᵐ∈Dₖ
+    messagesᵐ∈Bₖ  = advance-messages (β[s,m] i) c∈Bₖ
+    messagesᵉ∈Bₖ  = message-stability (midᵢ≤end i) messagesᵐ∈Bₖ
+    stateᵉ∈Bₖ₊₁   = advance-state (α[m,e] i) messagesᵐ∈Bₖ
 
   advance-computationₙ : ∀ {s e k n} →
                          MultiPseudocycle n [ s , e ] →
                          ComputationInBox k       AtTime s →
                          ComputationInBox (k + n) AtTime e
-  advance-computationₙ {_} {_} {k} {zero}  none            c∈Dₖ rewrite +-identityʳ k = c∈Dₖ
-  advance-computationₙ {s} {e} {k} {suc n} (next m pp mpp) c∈Dₖ = begin⟨ c∈Dₖ ⟩
+  advance-computationₙ {_} {_} {k} {zero}  none            c∈Bₖ rewrite +-identityʳ k = c∈Bₖ
+  advance-computationₙ {s} {e} {k} {suc n} (next m pp mpp) c∈Bₖ = begin⟨ c∈Bₖ ⟩
     ∴ ComputationInBox k           AtTime s $⟨ advance-computation₁ pp ⟩
     ∴ ComputationInBox (suc k)     AtTime m $⟨ advance-computationₙ mpp ⟩
     ∴ ComputationInBox (suc k + n) AtTime e $⟨ subst (ComputationInBox_AtTime e) (sym (+-suc k n)) ⟩
@@ -191,11 +195,11 @@ module _ {x : S} (x∈X₀ : x ∈ᵢ X₀) (ψ : Schedule n) where
                MultiPseudocycle k* [ s , e ] →
                ∀ {t : 𝕋} → e ≤ t → 
                δ x t ≈ x*
-  x*-reached {s} {e} mpp {t} e≤t = begin⟨ computation∈D₀ s ⟩
+  x*-reached {s} {e} mpp {t} e≤t = begin⟨ computation∈B₀ s ⟩
     ∴ ComputationInBox 0  AtTime s $⟨ advance-computationₙ mpp ⟩
     ∴ ComputationInBox k* AtTime e $⟨ state-stability e≤t ∘_ ⟩
     ∴ StateInBox k* AtTime t       $⟨ (λ prf i → prf i (<-wellFounded t)) ⟩
-    ∴ δ x t ∈ᵢ D k*                $⟨ x∈D[k*]⇒x≈x* ⟩
+    ∴ δ x t ∈ᵢ B k*                $⟨ x∈B[k*]⇒x≈x* ⟩
     ∴ δ x t ≈ x*                   ∎
 
 convergent : PartiallyConverges I∥ X₀ 

@@ -6,7 +6,7 @@ open import Function using (_∘_)
 open import Level
 open import Relation.Unary using (Pred)
 
-open import Data.Maybe.Base public
+open import Data.Maybe public
   using (Maybe)
   renaming
   ( nothing    to ∙ᵢ
@@ -14,6 +14,9 @@ open import Data.Maybe.Base public
   ; Is-just    to IsValueᵢ
   ; to-witness to extractValueᵢ
   )
+
+open import Data.Maybe.Relation.Unary.Any public
+  renaming (just to [_]ᵢ)
 
 Pointedᵢ : ∀ {a} (A : I → Set a) → (I → Set a)
 Pointedᵢ A i = Maybe (A i)

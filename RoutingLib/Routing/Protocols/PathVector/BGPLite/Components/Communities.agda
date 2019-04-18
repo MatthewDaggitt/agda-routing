@@ -1,3 +1,12 @@
+--------------------------------------------------------------------------------
+-- Agda routing library
+--
+-- Communities, ala BGP. In this implementation, communities are implemented as
+-- a 32 bit vector. The choice of 32 is obviously arbitrary.
+--------------------------------------------------------------------------------
+
+module RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Communities where
+
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (Subset; ⊥)
 open import Data.Fin.Dec using () renaming (_∈?_ to _∈ₛ?_)
@@ -12,12 +21,13 @@ open import Relation.Nullary.Decidable using (⌊_⌋)
 open import Level using () renaming (zero to ℓ₀)
 
 open import RoutingLib.Data.Vec.Relation.Binary.Lex
-  using (Lex; ≤-isDecTotalOrder; ≤-minimum)
+  as Lex using (Lex)
 open import RoutingLib.Data.Bool
 
-module RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Communities where
-
 abstract
+
+--------------------------------------------------------------------------------
+-- Types
 
   Community : Set
   Community = Fin 32
@@ -25,8 +35,14 @@ abstract
   CommunitySet : Set
   CommunitySet = Subset 32
 
+--------------------------------------------------------------------------------
+-- Special sets
+
   ∅ : CommunitySet
   ∅ = ⊥
+
+--------------------------------------------------------------------------------
+-- Operations over community sets
 
   add : Community → CommunitySet → CommunitySet
   add c cs = cs [ c ]≔ true
@@ -34,26 +50,34 @@ abstract
   remove : Community → CommunitySet → CommunitySet
   remove c cs = cs [ c ]≔ false
 
-  _∈?_ : Community → CommunitySet → Bool
-  c ∈? cs = ⌊ c ∈ₛ? cs ⌋
-
-  _≤ᶜˢ_ : Rel CommunitySet ℓ₀
-  _≤ᶜˢ_ = Lex _<_
-
-  ≤ᶜˢ-minimum : Minimum _≤ᶜˢ_ ∅
-  ≤ᶜˢ-minimum = ≤-minimum _<_ _≟_ <-minimum
-
-  ≤ᶜˢ-isDecTotalOrder : IsDecTotalOrder _≡_ _≤ᶜˢ_
-  ≤ᶜˢ-isDecTotalOrder = ≤-isDecTotalOrder _<_ <-isStrictTotalOrder
-
-  ∈-resp-≈ᶜˢ : ∀ c {cs ds} → cs ≡ ds → c ∈? cs ≡ c ∈? ds
-  ∈-resp-≈ᶜˢ c refl = refl
-
+{-
   add-cong : ∀ c {cs ds} → cs ≡ ds → add c cs ≡ add c ds
   add-cong c refl = refl
 
   remove-cong : ∀ c {cs ds} → cs ≡ ds → remove c cs ≡ remove c ds
   remove-cong c refl = refl
+-}
+
+--------------------------------------------------------------------------------
+-- Set membership
+
+  _∈?_ : Community → CommunitySet → Bool
+  c ∈? cs = ⌊ c ∈ₛ? cs ⌋
+
+  ∈-resp-≈ᶜˢ : ∀ c {cs ds} → cs ≡ ds → c ∈? cs ≡ c ∈? ds
+  ∈-resp-≈ᶜˢ c refl = refl
+
+--------------------------------------------------------------------------------
+-- An ordering over community sets
+
+  _≤ᶜˢ_ : Rel CommunitySet ℓ₀
+  _≤ᶜˢ_ = Lex _<_
+
+  ≤ᶜˢ-minimum : Minimum _≤ᶜˢ_ ∅
+  ≤ᶜˢ-minimum = Lex.≤-minimum _<_ _≟_ <-minimum
+
+  ≤ᶜˢ-isDecTotalOrder : IsDecTotalOrder _≡_ _≤ᶜˢ_
+  ≤ᶜˢ-isDecTotalOrder = Lex.≤-isDecTotalOrder _ <-isStrictTotalOrder
 
   -- Re-exporting properties
 
@@ -68,6 +92,9 @@ abstract
     ; ≤-respˡ-≈ to ≤ᶜˢ-respˡ-≈ᶜˢ
     ; ≤-respʳ-≈ to ≤ᶜˢ-respʳ-≈ᶜˢ
     )
+
+--------------------------------------------------------------------------------
+-- Equality over community sets (just propositional equality)
 
   open IsDecEquivalence Eq.isDecEquivalence public
     using ()

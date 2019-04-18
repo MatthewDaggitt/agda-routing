@@ -5,20 +5,25 @@ module RoutingLib.Routing.Algebra.Construct.AddPathsProperties
   {a b ℓ} (A : RawRoutingAlgebra a b ℓ)
           (A-IsRoutingAlgebra  : IsRoutingAlgebra A) where
 
+open import Algebra.Construct.NaturalChoice.Min
 open import Algebra.FunctionProperties
 open import Data.Nat using (zero; suc)
 open import Data.Fin using (Fin; toℕ)
 open import Data.Maybe using (Maybe; just)
---open import Data.Product using (_×_; _,_)
+open import Data.Product
 open import Data.Product.Relation.Pointwise.NonDependent as Pointwise using (Pointwise)
 open import Data.Sum as Sum using (_⊎_; inj₁; inj₂)
 --open import Function using (_∘_)
+open import Level using (_⊔_)
 open import Relation.Binary
-open import Data.Product
 open import Relation.Binary.PropositionalEquality
 import Relation.Binary.EqReasoning as EqReasoning
+open import Relation.Binary.Construct.Add.Point.Equality as PointedEq
+  renaming (_≈∙_ to PointedEq)
+  using (∙≈∙; [_]; [≈]-injective; ≈∙-refl; ≈∙-sym; ≈∙-trans)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
+open import Relation.Nullary.Construct.Add.Point renaming (∙ to invalid; [_] to valid)
 
 open import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right using (antisym) 
 open import RoutingLib.Algebra.Construct.Add.Identity as AddIdentity
@@ -26,15 +31,9 @@ open import RoutingLib.Algebra.Construct.Add.Identity as AddIdentity
 open import RoutingLib.Algebra.Construct.Lexicographic as Lex
   using (Lex; Lex₂)
 open import RoutingLib.Algebra.Construct.Lexicographic.Magma as OpLexProperties′
---open import RoutingLib.Function
-open import RoutingLib.Relation.Nullary.Construct.Add.Point renaming (∙ to invalid; [_] to valid)
-open import RoutingLib.Relation.Binary.Construct.Add.Point.Equality as PointedEq
-  renaming (_≈∙_ to PointedEq)
-  using (∙≈∙; [_]; [≈]-injective; ≈∙-refl; ≈∙-sym; ≈∙-trans)
 open import RoutingLib.Data.Path.Uncertified.Choice using (_⊓ₗₑₓ_)  --- Minₗₑₓ._⊓_
 open import RoutingLib.Data.Path.Uncertified.Properties
 
-open import RoutingLib.Algebra.Construct.NaturalChoice.Min.TotalOrder
 open import RoutingLib.Data.Path.UncertifiedI using (Pathᵛ; Path; _∉ᵥₚ_; _∈ᵥₚ_; _⇿ᵥ_; _∈ₚ_; _∉ₚ_;_⇿_;_∷_ ) 
 
 open import RoutingLib.Routing.Algebra.Construct.AddPaths A
@@ -86,7 +85,7 @@ no-∞-sum {x} {y} x≉∞ y≉∞  with ⊕ᴬ-sel x y
 
 
 
-Aᵖ : RawRoutingAlgebra a b ℓ
+Aᵖ : RawRoutingAlgebra a b (a ⊔ ℓ)
 Aᵖ = AddPaths ⊕-assoc ⊕-sel ⊕-comm 
      where open IsRoutingAlgebra A-IsRoutingAlgebra
 

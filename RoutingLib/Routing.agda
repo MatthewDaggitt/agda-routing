@@ -1,11 +1,27 @@
+--------------------------------------------------------------------------------
+-- Agda routing library
+--
+-- This module contains the basic definitions needed for all next-hop routing
+-- routing algorithms. This contains the definition of things like the network,
+-- the adjacency matrix, routing tables, global routing state etc.
+--------------------------------------------------------------------------------
+
+open import RoutingLib.Routing.Algebra
+open import Data.Nat using (ℕ)
+
+module RoutingLib.Routing
+  {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) (n : ℕ)
+  where
+
 open import Data.Fin using (Fin) renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Subset using (Subset; _∉_)
 open import Data.Fin.Subset.Properties using (_∈?_)
-open import Data.Nat using (ℕ)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Relation.Binary using (Setoid; DecSetoid)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; trans)
-open import Relation.Binary.Indexed.Homogeneous using (IndexedSetoid; IndexedDecSetoid)
+open import Relation.Binary.PropositionalEquality
+  using (_≡_; _≢_; refl; sym; trans)
+open import Relation.Binary.Indexed.Homogeneous
+  using (IndexedSetoid; IndexedDecSetoid)
 import Relation.Binary.EqReasoning as EqReasoning
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
@@ -17,12 +33,7 @@ import RoutingLib.Data.Matrix.Relation.Binary.DecidableEquality as MatrixDecEqua
 import RoutingLib.Data.Table.Relation.Binary.DecidableEquality as TableDecEquality
 open import RoutingLib.Data.Table using (Table)
 
-open import RoutingLib.Routing.Algebra
 import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule as Schedule
-
-module RoutingLib.Routing
-  {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) (n : ℕ)
-  where
 
 open RawRoutingAlgebra algebra
 

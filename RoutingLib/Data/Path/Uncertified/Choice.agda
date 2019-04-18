@@ -3,12 +3,12 @@
 module RoutingLib.Data.Path.Uncertified.Choice where
 
 open import Algebra.FunctionProperties
+open import Algebra.Construct.NaturalChoice.Min as Min
 open import Data.Sum
 open import Relation.Binary.PropositionalEquality
 
 open import RoutingLib.Data.Path.Uncertified
 open import RoutingLib.Data.Path.Uncertified.Properties
-open import RoutingLib.Algebra.Construct.NaturalChoice.Min.TotalOrder as Min
 
 abstract
 

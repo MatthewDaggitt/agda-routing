@@ -1,4 +1,6 @@
 --------------------------------------------------------------------------------
+-- Agda routing library
+--
 -- Proof that the metrics associated with a strictly increasing finite routing
 -- algebra are strictly contracting in the right ways so as to ensure that
 -- F∥ is an asynchronously metrically contracting operator (AMCO).
@@ -34,20 +36,18 @@ open import RoutingLib.Relation.Nullary.Decidable using ([_,_])
 open import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right using () 
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
-open import RoutingLib.Routing as Routing using (AdjacencyMatrix; Network)
-open import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra using (≤₊-antisym) -- tgg22 : explicity use this ≤₊-antisym
-import RoutingLib.Routing.VectorBased.Core as CoreVectorBasedRouting
-import RoutingLib.Routing.VectorBased.Core.Properties as CoreVectorBasedRoutingProperties
-import RoutingLib.Routing.VectorBased.Asynchronous as DistanceVectorRouting
-import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Properties as DistanceVectorRoutingProperties
+open import RoutingLib.Routing algebra as Routing using (AdjacencyMatrix; Network)
 import RoutingLib.Routing.Algebra.Properties.FiniteRoutingAlgebra as FiniteRoutingAlgebraProperties
-import RoutingLib.Routing.VectorBased.Asynchronous as AsyncVectorBased
+import RoutingLib.Routing.VectorBased.Synchronous                            as CoreVectorBasedRouting
+import RoutingLib.Routing.VectorBased.Synchronous.DistanceVector.Properties  as CoreVectorBasedRoutingProperties
+import RoutingLib.Routing.VectorBased.Asynchronous                           as DistanceVectorRouting
+import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Properties as DistanceVectorRoutingProperties
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Metrics as Metrics
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Properties as MetricsProperties
 
 open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
-open FiniteRoutingAlgebraProperties isRoutingAlgebra isFinite hiding (≤₊-antisym) -- tgg22 : why is hiding needed? 
+open FiniteRoutingAlgebraProperties isRoutingAlgebra isFinite
 
 open Metrics isRoutingAlgebra isFinite
 open MetricsProperties isRoutingAlgebra isFinite
@@ -55,7 +55,7 @@ open MetricsProperties isRoutingAlgebra isFinite
 --------------------------------------------------------------------------------
 -- Proof for an individual adjacency matrix
 
-module _ {n} (A : AdjacencyMatrix algebra n) where
+module _ {n} (A : AdjacencyMatrix n) where
 
   open CoreVectorBasedRouting algebra A
   open CoreVectorBasedRoutingProperties isRoutingAlgebra A
@@ -76,7 +76,7 @@ module _ {n} (A : AdjacencyMatrix algebra n) where
     where    
 
     FYᵢⱼ≰AᵢₖXₖⱼ : F Y i j ≰₊ A i k ▷ X k j
-    FYᵢⱼ≰AᵢₖXₖⱼ FYᵢⱼ≤AᵢₖXₖⱼ = FXᵢⱼ≉FYᵢⱼ (≤₊-antisym isRoutingAlgebra FXᵢⱼ≤FYᵢⱼ -- tgg22 : added isRoutingAlgebra argument 
+    FYᵢⱼ≰AᵢₖXₖⱼ FYᵢⱼ≤AᵢₖXₖⱼ = FXᵢⱼ≉FYᵢⱼ (≤₊-antisym FXᵢⱼ≤FYᵢⱼ
       (begin 
       F Y i j       ≤⟨ FYᵢⱼ≤AᵢₖXₖⱼ ⟩
       A i k ▷ X k j ≈⟨ ≈-sym FXᵢⱼ≈AᵢₖXₖⱼ ⟩
@@ -115,7 +115,7 @@ module _ {n} (A : AdjacencyMatrix algebra n) where
 --------------------------------------------------------------------------------
 -- Proof for a dynamic network
 
-module _ {n} (network : Network algebra n) where
+module _ {n} (network : Network n) where
 
   open DistanceVectorRouting algebra network hiding (F)
   open DistanceVectorRoutingProperties isRoutingAlgebra network

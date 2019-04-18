@@ -1,4 +1,6 @@
 --------------------------------------------------------------------------------
+-- Agda routing library
+--
 -- This module defines the notion of two routes being comparable. A pair of
 -- routes are comparable if there exists a chance that a router may at some
 -- point in some computation be forced to choose between them.
@@ -34,6 +36,12 @@ open import RoutingLib.Data.Path.UncertifiedI
 open RawRoutingAlgebra algebra
 open FunctionProperties _≈_
 
+private
+  variable
+    n : ℕ
+    i j k : Fin n
+    w x y z : Route
+ 
 --------------------------------------------------------------------------------
 -- Definition
 --------------------------------------------------------------------------------
@@ -45,14 +53,14 @@ open FunctionProperties _≈_
 infix 4 _≎_
 
 data _≎_ : Rel Route (a ⊔ b ⊔ ℓ) where
-  0∞# : ∀ {x y} → x ≈ 0# → y ≈ ∞#  → x ≎ y
-  ∞0# : ∀ {x y} → x ≈ ∞#  → y ≈ 0# → x ≎ y
-  ∞∞# : ∀ {x y} → x ≈ ∞#  → y ≈ ∞#  → x ≎ y
-  0e# : ∀ {x y} → ∀ {n} {i j : Fin n} (g : Step i j) (w : Route) → x ≈ 0# → y ≈ g ▷ w → x ≎ y
-  e0# : ∀ {x y} → ∀ {n} {i j : Fin n} (f : Step i j) (v : Route) → x ≈ f ▷ v → y ≈ 0# → x ≎ y
-  ∞e# : ∀ {x y} → ∀ {n} {i j : Fin n} (g : Step i j) (w : Route) → x ≈ ∞# → y ≈ g ▷ w → x ≎ y
-  e∞# : ∀ {x y} → ∀ {n} {i j : Fin n} (f : Step i j) (v : Route) → x ≈ f ▷ v → y ≈ ∞# → x ≎ y
-  ee# : ∀ {x y} → ∀ {n} {i j k : Fin n} (f : Step i j) (g : Step i k) (v w : Route) → j ≢ k → x ≈ f ▷ v → y ≈ g ▷ w → x ≎ y
+  0∞# : x ≈ 0# → y ≈ ∞# → x ≎ y
+  ∞0# : x ≈ ∞# → y ≈ 0# → x ≎ y
+  ∞∞# : x ≈ ∞# → y ≈ ∞# → x ≎ y
+  0e# : (g : Step i j) (w : Route) → x ≈ 0# → y ≈ g ▷ w → x ≎ y
+  e0# : (f : Step i j) (v : Route) → x ≈ f ▷ v → y ≈ 0# → x ≎ y
+  ∞e# : (g : Step i j) (w : Route) → x ≈ ∞# → y ≈ g ▷ w → x ≎ y
+  e∞# : (f : Step i j) (v : Route) → x ≈ f ▷ v → y ≈ ∞# → x ≎ y
+  ee# : (f : Step i j) (g : Step i k) (v w : Route) → j ≢ k → x ≈ f ▷ v → y ≈ g ▷ w → x ≎ y
 
 --------------------------------------------------------------------------------
 -- Properties
@@ -67,7 +75,7 @@ data _≎_ : Rel Route (a ⊔ b ⊔ ℓ) where
 ≎-sym (e∞# g w x≈fv y≈∞)          = ∞e# g w y≈∞ x≈fv
 ≎-sym (ee# f g x y j≢k x≈fv y≈gw) = ee# g f y x (j≢k ∘ sym) y≈gw x≈fv
 
-≎-resp-≈ : ∀ {w x y z} → w ≈ x → y ≈ z → w ≎ y → x ≎ z
+≎-resp-≈ : w ≈ x → y ≈ z → w ≎ y → x ≎ z
 ≎-resp-≈ w≈x y≈z (0∞# w≈0 y≈∞)               = 0∞# (≈-trans (≈-sym w≈x) w≈0) (≈-trans (≈-sym y≈z) y≈∞)
 ≎-resp-≈ w≈x y≈z (∞0# w≈∞ y≈0)               = ∞0# (≈-trans (≈-sym w≈x) w≈∞) (≈-trans (≈-sym y≈z) y≈0)
 ≎-resp-≈ w≈x y≈z (∞∞# w≈∞ y≈∞)               = ∞∞# (≈-trans (≈-sym w≈x) w≈∞) (≈-trans (≈-sym y≈z) y≈∞)

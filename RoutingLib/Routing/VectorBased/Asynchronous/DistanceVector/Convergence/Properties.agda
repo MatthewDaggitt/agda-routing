@@ -1,3 +1,12 @@
+
+open import RoutingLib.Routing.Algebra
+
+module RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Properties
+  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  (isFinite : IsFinite algebra)
+  where
+
 open import Data.Fin using (Fin; toℕ) renaming (_≟_ to _≟𝔽_; _<_ to _<𝔽_)
 open import Data.Fin.Properties using (toℕ≤pred[n])
 open import Data.Fin.Subset using (Subset; _∈_)
@@ -24,16 +33,9 @@ open import RoutingLib.Function.Metric.Nat
 open import RoutingLib.Data.List.Membership.Setoid.Properties using (index-cong)
 open import RoutingLib.Function.Reasoning
 
-open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.Algebra.Properties.FiniteRoutingAlgebra as FiniteRoutingAlgebraProperties
 import RoutingLib.Routing as Routing
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Metrics as Metrics
-
-module RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Properties
-  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  (isFinite : IsFinite algebra)
-  where
 
 open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
@@ -42,26 +44,30 @@ open Metrics isRoutingAlgebra isFinite
 
 open Sorting ≥₊-decTotalOrder using (index-mono-<)
 
+private
+  variable
+    x y : Route
+    
 ------------------------------------------------------------------------
 -- Properties of h
 
 h-cong : h Preserves _≈_ ⟶ _≡_
-h-cong {u} {v} u≈v = begin⟨ u≈v ⟩
- ∴ u      ≈ v       $⟨ index-cong S (∈-routes u) (∈-routes v) routes! ⟩
- ∴ i[ u ] ≡ i[ v ]  $⟨ cong (suc ∘ toℕ) ⟩
- ∴ h u    ≡ h v     ∎
+h-cong {x} {y} x≈y = begin⟨ x≈y ⟩
+ ∴ x      ≈ y       $⟨ index-cong S (∈-routes x) (∈-routes y) routes! ⟩
+ ∴ i[ x ] ≡ i[ y ]  $⟨ cong (suc ∘ toℕ) ⟩
+ ∴ h x    ≡ h y     ∎
 
-h-resp-< : ∀ {u v} → u <₊ v → h v < h u
-h-resp-< {u} {v} u<v = begin⟨ u<v ⟩
- ∴ (u ≤₊ v) × (u ≉ v)   $⟨ map id (λ u≉v → u≉v ∘ ≈-sym) ⟩
- ∴ (u ≤₊ v) × (v ≉ u)   $⟨ index-mono-< routes↗ (∈-routes _) (∈-routes _) ⟩
- ∴ i[ v ] <𝔽 i[ u ]     $⟨ s≤s ∘ toℕ-mono-< ⟩
- ∴ h v < h u            ∎
+h-resp-< : h Preserves _<₊_ ⟶ _>_
+h-resp-< {x} {y} x<y = begin⟨ x<y ⟩
+ ∴ (x ≤₊ y) × (x ≉ y)   $⟨ map id (λ x≉y → x≉y ∘ ≈-sym) ⟩
+ ∴ (x ≤₊ y) × (y ≉ x)   $⟨ index-mono-< routes↗ (∈-routes _) (∈-routes _) ⟩
+ ∴ i[ y ] <𝔽 i[ x ]     $⟨ s≤s ∘ toℕ-mono-< ⟩
+ ∴ h y < h x            ∎
 
 h-resp-≤ : h Preserves _≤₊_ ⟶ _≥_
-h-resp-≤ {u} {v} u≤v with u ≟ v
-... | yes u≈v = ≤-reflexive (h-cong (≈-sym u≈v))
-... | no  u≉v = <⇒≤ (h-resp-< (u≤v , u≉v))
+h-resp-≤ {x} {y} x≤y with x ≟ y
+... | yes x≈y = ≤-reflexive (h-cong (≈-sym x≈y))
+... | no  x≉y = <⇒≤ (h-resp-< (x≤y , x≉y))
 
 1≤h : ∀ x → 1 ≤ h x
 1≤h _ = s≤s z≤n
@@ -79,12 +85,12 @@ r-cong {x} {y} {u} {v} x≈y u≈v with x ≟ u | y ≟ v
 ... | no  x≉u | yes y≈v = contradiction (≈-trans (≈-trans x≈y y≈v) (≈-sym u≈v)) x≉u
 ... | no  _   | no  _   = cong₂ _⊔_ (h-cong x≈y) (h-cong u≈v)
 
-x≈y⇒r≡0 : ∀ {x y} → x ≈ y → r x y ≡ 0
+x≈y⇒r≡0 : x ≈ y → r x y ≡ 0
 x≈y⇒r≡0 {x} {y} x≈y with x ≟ y
 ... | yes _   = refl
 ... | no  x≉y = contradiction x≈y x≉y
 
-r≡0⇒x≈y : ∀ {x y} → r x y ≡ 0 → x ≈ y
+r≡0⇒x≈y : r x y ≡ 0 → x ≈ y
 r≡0⇒x≈y {x} {y} r≡0 with x ≟ y
 ... | yes x≈y = x≈y
 ... | no  _   = contradiction (sym r≡0) (<⇒≢ (m≤n⇒m≤n⊔o (h y) (1≤h x)))
@@ -112,7 +118,7 @@ r-maxTriIneq x y z with x ≟ y | y ≟ z | x ≟ z
 ... | no  _   | yes y≈z | no _   = ≤-reflexive (cong (h x ⊔_) (h-cong (≈-sym y≈z)))
 ... | no  _   | no  _   | no _   = ⊔-mono-≤ (m≤m⊔n (h x) (h y)) (n≤m⊔n (h y) (h z))
 
-r[x,y]≡hx⊔hy : ∀ {x y} → x ≉ y → r x y ≡ h x ⊔ h y
+r[x,y]≡hx⊔hy : x ≉ y → r x y ≡ h x ⊔ h y
 r[x,y]≡hx⊔hy {x} {y} x≉y with x ≟ y
 ... | yes x≈y = contradiction x≈y x≉y
 ... | no  _   = refl
@@ -202,14 +208,15 @@ module _ {n : ℕ} (p : Subset n) where
 module _ {n : ℕ} (p : Subset n) where
 
   open Routing algebra n
-  private module MaxLiftₘ = MaxLift ℝ𝕄ₛⁱ (dᶜ p)
-  private module Conditionₜ = Condition (d {n}) (_∈? p)
-  Dₚ = D p
+  private
+    module MaxLiftₘ = MaxLift ℝ𝕄ₛⁱ (dᶜ p)
+    module Conditionₜ = Condition (d {n}) (_∈? p)
+    Dₚ = D p
 
   D-sym : ∀ X Y → Dₚ X Y ≡ Dₚ Y X
   D-sym = MaxLiftₘ.sym (dᶜ-sym p _)
 
-  D-cong : (Dₚ) Preserves₂ _≈ₘ_ ⟶ _≈ₘ_ ⟶ _≡_
+  D-cong : Dₚ Preserves₂ _≈ₘ_ ⟶ _≈ₘ_ ⟶ _≡_
   D-cong = MaxLiftₘ.cong (dᶜ-cong p _)
 
   D≡0⇒X≈ₛY : ∀ {X Y} → Dₚ X Y ≡ 0 → X ≈ₘ[ p ] Y

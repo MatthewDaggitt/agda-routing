@@ -1,4 +1,10 @@
-
+--------------------------------------------------------------------------------
+-- Agda routing library
+--
+-- This module contains the definition of the algebra underlying a distance
+-- vector protocol that solves the shortest-widest paths problem, i.e. tries to
+-- choose the highest bandwidth path and breaks ties based on path length.
+--------------------------------------------------------------------------------
 
 module RoutingLib.Routing.Protocols.DistanceVector.ShortestWidestPaths where
 
@@ -6,8 +12,6 @@ open import Algebra.FunctionProperties using (Op₂)
 
 open import Data.Fin using (Fin)
 open import Data.Maybe using (Maybe)
--- open import Data.Nat hiding (_≟_)
--- open import Data.Nat.Properties hiding (_≟_)
 open import Data.Product using (_×_; _,_)
 open import Level using (0ℓ)
 open import Relation.Binary
@@ -31,7 +35,7 @@ Aˢʷ : RawRoutingAlgebra 0ℓ 0ℓ 0ℓ
 Aˢʷ = Lex Aʷⁱᵈᵉˢᵗ Aˢʰᵒʳᵗᵉˢᵗ
 
 isRoutingAlgebra : IsRoutingAlgebra Aˢʷ
-isRoutingAlgebra =  Lex.isRoutingAlgebra Aʷⁱᵈᵉˢᵗ Aˢʰᵒʳᵗᵉˢᵗ Widest.isRoutingAlgebra Shortest.isRoutingAlgebra
+isRoutingAlgebra = Lex.isRoutingAlgebra Aʷⁱᵈᵉˢᵗ Aˢʰᵒʳᵗᵉˢᵗ Widest.isRoutingAlgebra Shortest.isRoutingAlgebra
 
 {-
 ------------------------------------------------------------------------

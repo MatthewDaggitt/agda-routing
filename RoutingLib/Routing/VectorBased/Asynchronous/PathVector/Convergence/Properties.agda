@@ -1,7 +1,20 @@
-open import Data.Fin using (Fin) renaming (_≟_ to _≟𝔽_)
-open import Data.Fin.Subset using (Subset; _∈_)
-open import Data.Fin.Dec using (_∈?_)
 open import Data.Nat hiding (_≟_)
+open import Data.Fin.Subset using (Subset; _∈_)
+
+open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
+
+
+module RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.Properties
+  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
+  (A : AdjacencyMatrix algebra n)
+  (1≤n : 1 ≤ n) (p : Subset n)
+  where
+
+open import Data.Fin using (Fin) renaming (_≟_ to _≟𝔽_)
+open import Data.Fin.Dec using (_∈?_)
 open import Data.Nat.Properties hiding (_≟_)
 open import Data.Sum using (_⊎_; inj₁; inj₂; map₂)
 open import Data.Product using (∃; _,_; proj₂)
@@ -19,25 +32,14 @@ open import RoutingLib.Function.Metric.Nat
 import RoutingLib.Function.Metric.Construct.Condition as Condition
 import RoutingLib.Function.Metric.Construct.MaxLift as MaxLift
 
-open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.Algebra.Construct.Consistent as Consistent
 import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra as PathAlgebraProperties
 import RoutingLib.Routing.Algebra.Properties.FiniteRoutingAlgebra as FiniteRoutingAlgebraProperties
-open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
-
 import RoutingLib.Routing.VectorBased.Asynchronous as AsyncVectorBased
 import RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.Metrics as Metrics
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Properties as DistanceVectorMetricProperties
 
 open ≤-Reasoning
-
-module RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.Properties
-  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
-  (A : AdjacencyMatrix algebra n)
-  (1≤n : 1 ≤ n) (p : Subset n)
-  where
 
 open RawRoutingAlgebra algebra
 open IsCertifiedPathAlgebra isPathAlgebra
@@ -48,15 +50,20 @@ open Routing algebra n
 open Metrics isRoutingAlgebra isPathAlgebra A
 private module DVP = DistanceVectorMetricProperties isRoutingAlgebraᶜ isFiniteᶜ
 
+private
+  variable
+    i j : Fin n
+    w x y z : Route
+
 ------------------------------------------------------------------------
 -- General properties
 
-1<1+n∸∣x∣ : ∀ {r} → 1 < suc n ∸ size r
-1<1+n∸∣x∣ {r} = begin
+1<1+n∸∣x∣ : 1 < suc n ∸ size x
+1<1+n∸∣x∣ {x} = begin
   2                    ≡⟨ sym (m+n∸n≡m 2 n) ⟩
-  2 + n ∸ n            ≤⟨ ∸-monoʳ-≤ (suc (suc n)) (size<n 1≤n r) ⟩
-  2 + n ∸ suc (size r) ≡⟨⟩
-  1 + n ∸ size r       ∎
+  2 + n ∸ n            ≤⟨ ∸-monoʳ-≤ (suc (suc n)) (size<n 1≤n x) ⟩
+  2 + n ∸ suc (size x) ≡⟨⟩
+  1 + n ∸ size x       ∎
 
 ------------------------------------------------------------------------
 -- Properties of hⁱ
@@ -64,47 +71,47 @@ private module DVP = DistanceVectorMetricProperties isRoutingAlgebraᶜ isFinite
 Hⁱ : ℕ
 Hⁱ = suc n
 
-hⁱ-cong : ∀ {r s} → r ≈ s → hⁱ r ≡ hⁱ s
-hⁱ-cong {r} {s} r≈s with 𝑪? r | 𝑪? s
+hⁱ-cong : x ≈ y → hⁱ x ≡ hⁱ y
+hⁱ-cong {x} {y} x≈y with 𝑪? x | 𝑪? y
 ... | yes _  | yes _  = refl
-... | no  rⁱ | yes sᶜ = contradiction (𝑪-cong (≈-sym r≈s) sᶜ) rⁱ
-... | yes rᶜ | no  sⁱ = contradiction (𝑪-cong r≈s rᶜ) sⁱ
-... | no  _  | no  _  = cong (suc n ∸_) (size-cong r≈s)
+... | no  xⁱ | yes yᶜ = contradiction (𝑪-cong (≈-sym x≈y) yᶜ) xⁱ
+... | yes xᶜ | no  yⁱ = contradiction (𝑪-cong x≈y xᶜ) yⁱ
+... | no  _  | no  _  = cong (suc n ∸_) (size-cong x≈y)
 
-hⁱ-mono : ∀ {x y} → 𝑰 x → 𝑰 y → size x < size y → hⁱ y < hⁱ x
+hⁱ-mono : 𝑰 x → 𝑰 y → size x < size y → hⁱ y < hⁱ x
 hⁱ-mono {x} {y} xⁱ yⁱ |x|<|y| with 𝑪? x | 𝑪? y
 ... | yes xᶜ | _      = contradiction xᶜ xⁱ
 ... | no  _  | yes yᶜ = contradiction yᶜ yⁱ
 ... | no  _  | no  _  = ∸-monoʳ-< |x|<|y| (size≤n+1 _)
 
-hⁱ-decr : ∀ {i j x} → 𝑰 (A i j ▷ x) → hⁱ (A i j ▷ x) < hⁱ x
+hⁱ-decr : 𝑰 (A i j ▷ x) → hⁱ (A i j ▷ x) < hⁱ x
 hⁱ-decr Aᵢⱼxⁱ = hⁱ-mono (▷-forces-𝑰 Aᵢⱼxⁱ) Aᵢⱼxⁱ (≤-reflexive (sizeⁱ-incr Aᵢⱼxⁱ))
 
-1≤hⁱ : ∀ r → 1 ≤ hⁱ r
-1≤hⁱ r with 𝑪? r
+1≤hⁱ : ∀ x → 1 ≤ hⁱ x
+1≤hⁱ x with 𝑪? x
 ... | yes _ = s≤s z≤n
-... | no  _ = m<n⇒0<n∸m (s≤s (<⇒≤ (size<n 1≤n r)))
+... | no  _ = m<n⇒0<n∸m (s≤s (<⇒≤ (size<n 1≤n x)))
 
-hⁱ≤Hⁱ : ∀ r → hⁱ r ≤ Hⁱ
-hⁱ≤Hⁱ r with 𝑪? r
+hⁱ≤Hⁱ : ∀ x → hⁱ x ≤ Hⁱ
+hⁱ≤Hⁱ x with 𝑪? x
 ... | yes _ = s≤s z≤n
-... | no  _ = n∸m≤n (size r) Hⁱ
+... | no  _ = n∸m≤n (size x) Hⁱ
 
 
-h[sᶜ]≤h[r] : ∀ {s} → 𝑪 s → ∀ r → hⁱ s ≤ hⁱ r
-h[sᶜ]≤h[r] {s} sᶜ r with 𝑪? s
-... | no sⁱ  = contradiction sᶜ sⁱ
-... | yes _  = 1≤hⁱ r
+h[yᶜ]≤h[x] : 𝑪 y → ∀ x → hⁱ y ≤ hⁱ x
+h[yᶜ]≤h[x] {y} yᶜ x with 𝑪? y
+... | no yⁱ  = contradiction yᶜ yⁱ
+... | yes _  = 1≤hⁱ x
 
-h[sᶜ]<h[rⁱ] : ∀ {s r} → 𝑪 s → 𝑰 r → hⁱ s < hⁱ r
-h[sᶜ]<h[rⁱ] {s} {r} sᶜ rⁱ with 𝑪? s | 𝑪? r
-... | no sⁱ | _      = contradiction sᶜ sⁱ
-... | _     | yes rᶜ = contradiction rᶜ rⁱ
+h[yᶜ]<h[xⁱ] : 𝑪 y → 𝑰 x → hⁱ y < hⁱ x
+h[yᶜ]<h[xⁱ] {y} {x} yᶜ xⁱ with 𝑪? y | 𝑪? x
+... | no yⁱ | _      = contradiction yᶜ yⁱ
+... | _     | yes xᶜ = contradiction xᶜ xⁱ
 ... | yes _ | no  _  = 1<1+n∸∣x∣
 
-hⁱ-force-𝑰 : ∀ {x y} → 𝑰 x ⊎ 𝑰 y → hⁱ x ≤ hⁱ y → 𝑰 y
+hⁱ-force-𝑰 : 𝑰 x ⊎ 𝑰 y → hⁱ x ≤ hⁱ y → 𝑰 y
 hⁱ-force-𝑰 (inj₂ yⁱ) hx≤hy yᶜ = yⁱ yᶜ
-hⁱ-force-𝑰 (inj₁ xⁱ) hx≤hy yᶜ = contradiction (h[sᶜ]<h[rⁱ] yᶜ xⁱ) (≤⇒≯ hx≤hy)
+hⁱ-force-𝑰 (inj₁ xⁱ) hx≤hy yᶜ = contradiction (h[yᶜ]<h[xⁱ] yᶜ xⁱ) (≤⇒≯ hx≤hy)
 
 ------------------------------------------------------------------------
 -- Properties of rⁱ
@@ -115,7 +122,7 @@ rⁱ-cong x≈y u≈v = cong₂ _⊔_ (hⁱ-cong x≈y) (hⁱ-cong u≈v)
 rⁱ-sym : ∀ x y → rⁱ x y ≡ rⁱ y x
 rⁱ-sym x y = ⊔-comm (hⁱ x) (hⁱ y)
 
-rⁱ≡0⇒x≈y : ∀ {x y} → rⁱ x y ≡ 0 → x ≈ y
+rⁱ≡0⇒x≈y : rⁱ x y ≡ 0 → x ≈ y
 rⁱ≡0⇒x≈y {x} {y} rⁱ≡0 = contradiction rⁱ≡0 (m<n⇒n≢0 (m≤o⇒m≤n⊔o (hⁱ x) (1≤hⁱ y)))
 
 rⁱ-maxTriIneq : MaxTriangleInequality rⁱ
@@ -133,7 +140,7 @@ rⁱ≤Hⁱ x y = n≤m×o≤m⇒n⊔o≤m (hⁱ≤Hⁱ x) (hⁱ≤Hⁱ y)
 rⁱ-bounded : Bounded rⁱ
 rⁱ-bounded = Hⁱ , rⁱ≤Hⁱ
 
-rⁱxⁱyᶜ≡hⁱxⁱ : ∀ {x y} → 𝑰 x → 𝑪 y → rⁱ x y ≡ hⁱ x
+rⁱxⁱyᶜ≡hⁱxⁱ : 𝑰 x → 𝑪 y → rⁱ x y ≡ hⁱ x
 rⁱxⁱyᶜ≡hⁱxⁱ {x} {y} xⁱ yᶜ with x ≟ y
 ... | yes x≈y = contradiction (𝑪-cong (≈-sym x≈y) yᶜ) xⁱ
 ... | no  _   with 𝑪? x | 𝑪? y
@@ -141,14 +148,14 @@ rⁱxⁱyᶜ≡hⁱxⁱ {x} {y} xⁱ yᶜ with x ≟ y
 ...   | no  _  | no yⁱ = contradiction yᶜ yⁱ
 ...   | no  _  | yes _ = m≤n⇒n⊔m≡n (<⇒≤ 1<1+n∸∣x∣)
 
-rⁱxᶜyⁱ≡hⁱyⁱ : ∀ {x y} → 𝑪 x → 𝑰 y → rⁱ x y ≡ hⁱ y
+rⁱxᶜyⁱ≡hⁱyⁱ : 𝑪 x → 𝑰 y → rⁱ x y ≡ hⁱ y
 rⁱxᶜyⁱ≡hⁱyⁱ xᶜ yⁱ = trans (rⁱ-sym _ _) (rⁱxⁱyᶜ≡hⁱxⁱ yⁱ xᶜ)
 
-xⁱyᶜzᶜ⇒rⁱxz≤rⁱxy : ∀ {x y z} → 𝑰 x → 𝑪 y → 𝑪 z → rⁱ x z ≤ rⁱ x y
+xⁱyᶜzᶜ⇒rⁱxz≤rⁱxy : 𝑰 x → 𝑪 y → 𝑪 z → rⁱ x z ≤ rⁱ x y
 xⁱyᶜzᶜ⇒rⁱxz≤rⁱxy xⁱ yᶜ zᶜ =
   ≤-reflexive (trans (rⁱxⁱyᶜ≡hⁱxⁱ xⁱ zᶜ) (sym (rⁱxⁱyᶜ≡hⁱxⁱ xⁱ yᶜ)))
 
-xᶜyᶜzⁱ⇒rⁱxz≤rⁱyz : ∀ {x y z} → 𝑪 x → 𝑪 y → 𝑰 z → rⁱ x z ≤ rⁱ y z
+xᶜyᶜzⁱ⇒rⁱxz≤rⁱyz : 𝑪 x → 𝑪 y → 𝑰 z → rⁱ x z ≤ rⁱ y z
 xᶜyᶜzⁱ⇒rⁱxz≤rⁱyz {x} {y} {z} xᶜ yᶜ zⁱ =
   subst₂ _≤_ (rⁱ-sym z x) (rⁱ-sym z y) (xⁱyᶜzᶜ⇒rⁱxz≤rⁱxy zⁱ yᶜ xᶜ)
 
@@ -158,29 +165,29 @@ xᶜyᶜzⁱ⇒rⁱxz≤rⁱyz {x} {y} {z} xᶜ yᶜ zⁱ =
 Hᶜ : ℕ
 Hᶜ = suc (FiniteRoutingAlgebraProperties.H isRoutingAlgebraᶜ isFiniteᶜ)
 
-rᶜ-cong : ∀ {x y w z} (wᶜ : 𝑪 w) (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) (zᶜ : 𝑪 z) →
+rᶜ-cong : (wᶜ : 𝑪 w) (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) (zᶜ : 𝑪 z) →
            w ≈ y → x ≈ z → rᶜ wᶜ xᶜ ≡ rᶜ yᶜ zᶜ
 rᶜ-cong wᶜ xᶜ yᶜ zᶜ w≈y x≈z = DVP.r-cong
   {x = toCRoute wᶜ} {y = toCRoute yᶜ}
   {u = toCRoute xᶜ} {v = toCRoute zᶜ} w≈y x≈z
 
-rᶜ-sym : ∀ {x y} (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → rᶜ xᶜ yᶜ ≡ rᶜ yᶜ xᶜ
+rᶜ-sym : ∀ (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → rᶜ xᶜ yᶜ ≡ rᶜ yᶜ xᶜ
 rᶜ-sym xᶜ yᶜ = DVP.r-sym (toCRoute xᶜ) (toCRoute yᶜ)
 
-x≈y⇒rᶜ≡0 : ∀ {x y} (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → x ≈ y → rᶜ xᶜ yᶜ ≡ 0
+x≈y⇒rᶜ≡0 : ∀ (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → x ≈ y → rᶜ xᶜ yᶜ ≡ 0
 x≈y⇒rᶜ≡0 xᶜ yᶜ x≈y = DVP.x≈y⇒r≡0 {toCRoute xᶜ} {toCRoute yᶜ} x≈y
 
-rᶜ≡0⇒x≈y : ∀ {x y} (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → rᶜ xᶜ yᶜ ≡ 0 → x ≈ y
+rᶜ≡0⇒x≈y : ∀ (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → rᶜ xᶜ yᶜ ≡ 0 → x ≈ y
 rᶜ≡0⇒x≈y xᶜ yᶜ d≡0 = DVP.r≡0⇒x≈y {toCRoute xᶜ} {toCRoute yᶜ} d≡0
 
-rᶜ-maxTriIneq : ∀ {x y z} (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) (zᶜ : 𝑪 z) →
+rᶜ-maxTriIneq : ∀ (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) (zᶜ : 𝑪 z) →
                 rᶜ xᶜ zᶜ ≤ rᶜ xᶜ yᶜ ⊔ rᶜ yᶜ zᶜ
 rᶜ-maxTriIneq xᶜ yᶜ zᶜ = DVP.r-maxTriIneq (toCRoute xᶜ) (toCRoute yᶜ) (toCRoute zᶜ)
 
-rᶜ<Hᶜ : ∀ {x y} (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → rᶜ xᶜ yᶜ < Hᶜ
+rᶜ<Hᶜ : ∀ (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → rᶜ xᶜ yᶜ < Hᶜ
 rᶜ<Hᶜ xᶜ yᶜ = s≤s (DVP.r≤H (toCRoute xᶜ) (toCRoute yᶜ))
 
-rᶜ<Hᶜ+x : ∀ {x y} (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) z → rᶜ xᶜ yᶜ < Hᶜ + z
+rᶜ<Hᶜ+x : ∀ (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) z → rᶜ xᶜ yᶜ < Hᶜ + z
 rᶜ<Hᶜ+x xᶜ yᶜ z = <-transˡ (rᶜ<Hᶜ xᶜ yᶜ) (m≤m+n Hᶜ z)
 
 Hᶜ<Hᶜ+rⁱ : ∀ x y → Hᶜ < Hᶜ + rⁱ x y
@@ -233,7 +240,7 @@ r-sym X Y with X ≟ Y | Y ≟ X
 
 r-maxTriIneq-lemma : ∀ X Y Z → Hᶜ + rⁱ X Z ≤ (Hᶜ + rⁱ X Y) ⊔ (Hᶜ + rⁱ Y Z)
 r-maxTriIneq-lemma X Y Z = begin
-  Hᶜ + rⁱ X Z                    ≤⟨ +-monoʳ-≤ Hᶜ (rⁱ-maxTriIneq X Y Z) ⟩
+  Hᶜ + rⁱ X Z                   ≤⟨ +-monoʳ-≤ Hᶜ (rⁱ-maxTriIneq X Y Z) ⟩
   Hᶜ + (rⁱ X Y ⊔ rⁱ Y Z)        ≡⟨ +-distribˡ-⊔ Hᶜ _ _ ⟩
   (Hᶜ + rⁱ X Y) ⊔ (Hᶜ + rⁱ Y Z) ∎
   where open ≤-Reasoning
@@ -316,7 +323,7 @@ r-ultraMetric = record
   ; isUltraMetric = r-isUltraMetric
   }
 
-H<r : ∀ {x y} → x ≉ y → 𝑰 x ⊎ 𝑰 y → Hᶜ < r x y
+H<r : x ≉ y → 𝑰 x ⊎ 𝑰 y → Hᶜ < r x y
 H<r {x} {y} x≉y xⁱ⊎yⁱ with x ≟ y
 ... | yes x≈y = contradiction x≈y x≉y
 ... | no  _   with 𝑪? x | 𝑪? y | xⁱ⊎yⁱ
@@ -325,10 +332,10 @@ H<r {x} {y} x≉y xⁱ⊎yⁱ with x ≟ y
 ... | no  _  | _      | _       = Hᶜ<Hᶜ+rⁱ x y
 ... | yes _  | no  _  | _       = Hᶜ<Hᶜ+rⁱ x y
 
-rᶜ<r : ∀ {w x y z} (wᶜ : 𝑪 w) (xᶜ : 𝑪 x) → y ≉ z → 𝑰 y ⊎ 𝑰 z  → rᶜ wᶜ xᶜ < r y z
+rᶜ<r : ∀ (wᶜ : 𝑪 w) (xᶜ : 𝑪 x) → y ≉ z → 𝑰 y ⊎ 𝑰 z  → rᶜ wᶜ xᶜ < r y z
 rᶜ<r wᶜ xᶜ y≉z yⁱ⊎zⁱ = <-transʳ (<⇒≤ (rᶜ<Hᶜ wᶜ xᶜ)) (H<r y≉z yⁱ⊎zⁱ)
 
-rᶜ≤r : ∀ {x y} → x ≉ y → (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → rᶜ xᶜ yᶜ ≤ r x y
+rᶜ≤r : x ≉ y → (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → rᶜ xᶜ yᶜ ≤ r x y
 rᶜ≤r {x} {y} x≉y xᶜ yᶜ with x ≟ y
 ... | yes x≈y = contradiction x≈y x≉y
 ... | no  _ with 𝑪? x | 𝑪? y
@@ -340,15 +347,15 @@ rᶜ≤r {x} {y} x≉y xᶜ yᶜ with x ≟ y
   DV.r (toCRoute xᶜ') (toCRoute yᶜ')      ≤⟨ ≤-refl ⟩
   rᶜ _ _                                 ∎
 
-rᶜ≡r : ∀ {x y p q} (pᶜ : 𝑪 p) (qᶜ : 𝑪 q) → x ≈ p → y ≈ q → x ≉ y → rᶜ pᶜ qᶜ ≡ r x y
+rᶜ≡r : ∀ {p q} (pᶜ : 𝑪 p) (qᶜ : 𝑪 q) → x ≈ p → y ≈ q → x ≉ y → rᶜ pᶜ qᶜ ≡ r x y
 rᶜ≡r {x} {y} {p} {q} pᶜ qᶜ x≈p y≈q x≉y with x ≟ y | 𝑪? x | 𝑪? y
 ... | yes x≈y | _      | _      = contradiction x≈y x≉y
 ... | _       | no  xⁱ | _      = contradiction (𝑪-cong (≈-sym x≈p) pᶜ) xⁱ
 ... | _       | _      | no  yⁱ = contradiction (𝑪-cong (≈-sym y≈q) qᶜ) yⁱ
 ... | no _    | yes xᶜ | yes yᶜ = rᶜ-cong pᶜ qᶜ xᶜ yᶜ (≈-sym x≈p) (≈-sym y≈q)
 
-H+rⁱ≡r : ∀ {x y} {w z} → w ≈ x → z ≈ y → x ≉ y → 𝑰 x ⊎ 𝑰 y → Hᶜ + rⁱ w z ≡ r x y
-H+rⁱ≡r {x} {y} w≈x z≈y x≉y xⁱ⊎yⁱ with x ≟ y
+H+rⁱ≡r : w ≈ x → z ≈ y → x ≉ y → 𝑰 x ⊎ 𝑰 y → Hᶜ + rⁱ w z ≡ r x y
+H+rⁱ≡r {w} {x} {z} {y} w≈x z≈y x≉y xⁱ⊎yⁱ with x ≟ y
 ... | yes x≈y = contradiction x≈y x≉y
 ... | no  _   with 𝑪? x | 𝑪? y | xⁱ⊎yⁱ
 ...   | yes xᶜ | yes yᶜ | inj₁ xⁱ = contradiction xᶜ xⁱ

@@ -1,3 +1,11 @@
+--------------------------------------------------------------------------------
+-- Agda routing library
+--
+-- This module contains the definition of dynamic schedules.
+--------------------------------------------------------------------------------
+
+module RoutingLib.Iteration.Asynchronous.Dynamic.Schedule where
+
 open import Level using (_⊔_) renaming (zero to lzero; suc to lsuc)
 open import Data.Nat using (ℕ; zero; suc; pred; z≤n; s≤s; _≟_; _<_; _≤_; _∸_; _+_)
 open import Data.Nat.Properties using (n≤1+n; ≤-trans; ≤-antisym)
@@ -10,8 +18,6 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; sym; tran
 open import Relation.Unary using (Pred) renaming (_∈_ to _∈ᵤ_)
 
 import RoutingLib.Iteration.Asynchronous.Static.Schedule as StaticSchedules
-
-module RoutingLib.Iteration.Asynchronous.Dynamic.Schedule where
 
 --------------------------------------------------------------------------------
 -- Re-export contents of static schedules publicly

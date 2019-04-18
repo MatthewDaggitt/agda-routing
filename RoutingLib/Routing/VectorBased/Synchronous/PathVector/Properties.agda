@@ -1,10 +1,29 @@
+--------------------------------------------------------------------------------
+-- Agda routing library
+--
+-- This module contains some basic properties of F, the synchronous iteration
+-- underlying vector based routing, under the assumption that the routing
+-- algebra is a path-vector algebra.
+--------------------------------------------------------------------------------
+
+open import RoutingLib.Routing using (AdjacencyMatrix)
+open import RoutingLib.Routing.Algebra
+
+module RoutingLib.Routing.VectorBased.Synchronous.PathVector.Properties
+  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
+  (A : AdjacencyMatrix algebra n)
+  where
+
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Dec using (¬∀⟶∃¬; all?)
 open import Data.List using (List; foldr)
 import Data.List.All.Properties as All
 open import Data.List.Relation.Pointwise as Pointwise using (Pointwise; []; _∷_)
 open import Data.Nat using (_<_)
-open import Data.Nat.Properties using (≤-reflexive; <-trans; module ≤-Reasoning)
+open import Data.Nat.Properties
+  using (≤-reflexive; <-trans; module ≤-Reasoning)
 open import Data.Product using (∃; ∃₂; _×_; _,_; proj₁)
 open import Data.Sum using (inj₁; inj₂)
 open import Function using (_∘_)
@@ -12,28 +31,20 @@ open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Decidable)
-import Relation.Binary.EqReasoning as EqReasoning
+import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import Induction.WellFounded using (Acc; acc)
 open import Induction.Nat using (<-wellFounded)
 
 open import RoutingLib.Data.List.Properties using (foldr-presᵇ)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.Path.CertifiedI
-open import RoutingLib.Data.Path.CertifiedI.Properties using (∉ₚ-resp-≈ₚ; ≈ₚ-trans; ≈ₚ-sym; ≈ₚ-reflexive; ℙₛ; _∉ᵥₚ?_; _⇿ᵥ?_)
+open import RoutingLib.Data.Path.CertifiedI.Properties
+  using (∉ₚ-resp-≈ₚ; ≈ₚ-trans; ≈ₚ-sym; ≈ₚ-reflexive; ℙₛ; _∉ᵥₚ?_; _⇿ᵥ?_)
 
-open import RoutingLib.Routing using (AdjacencyMatrix)
-open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra as PathAlgebraProperties
 import RoutingLib.Routing.Algebra.Construct.Consistent as Consistent
 import RoutingLib.Routing.VectorBased.Synchronous as VectorBased
-import RoutingLib.Routing.VectorBased.Core.Properties as CoreProperties
-
-module RoutingLib.Routing.VectorBased.Core.PathProperties
-  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
-  (A : AdjacencyMatrix algebra n)
-  where
+import RoutingLib.Routing.VectorBased.Synchronous.DistanceVector.Properties as CoreProperties
 
 open RawRoutingAlgebra algebra
 open IsCertifiedPathAlgebra isPathAlgebra

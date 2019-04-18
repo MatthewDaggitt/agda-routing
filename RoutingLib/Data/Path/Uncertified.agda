@@ -9,12 +9,11 @@ open import Data.Nat using (ℕ; _<_; zero; suc; _≟_)
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
 open import Data.List using (List; []; _∷_; map)
 open import Data.List.Any using (Any)
-open import Level using () renaming (zero to ℓ₀)
+open import Level using (0ℓ)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Binary using (Rel)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
 import Relation.Binary.Construct.NonStrictToStrict as ToStrict
-
 
 ------------------------------------------------------------------------------
 -- Vertices and edges
@@ -62,10 +61,10 @@ data _⇿_ : Edge → Path → Set where
 
 infix 4 _≈ₚ_ _≉ₚ_
 
-_≈ₚ_ : Rel Path ℓ₀
+_≈ₚ_ : Rel Path 0ℓ
 _≈ₚ_ = _≡_
 
-_≉ₚ_ : Rel Path ℓ₀
+_≉ₚ_ : Rel Path 0ℓ
 p ≉ₚ q = ¬ (p ≈ₚ q)
 
 ------------------------------------------------------------------------------
@@ -73,7 +72,7 @@ p ≉ₚ q = ¬ (p ≈ₚ q)
 
 infix 4 _≤ₗₑₓ_
 
-data _≤ₗₑₓ_ : Rel Path ℓ₀ where
+data _≤ₗₑₓ_ : Rel Path 0ℓ where
   stop  : ∀ {p} → [] ≤ₗₑₓ p
   here₁ : ∀ {i j k l p q} → i < k → (i , j) ∷ p ≤ₗₑₓ (k , l) ∷ q
   here₂ : ∀ {i j k l p q} → i ≡ k → j < l → (i , j) ∷ p ≤ₗₑₓ (k , l) ∷ q

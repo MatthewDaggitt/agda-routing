@@ -1,4 +1,6 @@
 --------------------------------------------------------------------------------
+-- Agda routing library
+--
 -- This module contains the core definitions for routing algebras and some
 -- simple associated properties. A routing algebra is an abstract representation
 -- of some problem that we want our routing protocol to solve (e.g. the

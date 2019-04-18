@@ -83,7 +83,6 @@ module _ {a p} {A : Set a} {P : Pred A p} {_•_ : Op₂ A} where
 
   foldr-presᵒ : _•_ Preservesᵒ P → ∀ e xs → P e ⊎ Any P xs → P (foldr _•_ e xs)
   foldr-presᵒ pres e []       (inj₁ pe) = pe
-  foldr-presᵒ pres e []       (inj₂ ())
   foldr-presᵒ pres e (x ∷ xs) (inj₁ pe) = pres _ _ (inj₂ (foldr-presᵒ pres e xs (inj₁ pe)))
   foldr-presᵒ pres e (x ∷ xs) (inj₂ (here px))   = pres _ _ (inj₁ px)
   foldr-presᵒ pres e (x ∷ xs) (inj₂ (there pxs)) = pres _ _ (inj₂ (foldr-presᵒ pres e xs (inj₂ pxs)))
@@ -130,7 +129,6 @@ module _ {a p} {A : Set a} {P : Pred A p} {_•_ : Op₂ A} where
 module _ {a} {A : Set a} where
 
   lookup∈xs : ∀ (xs : List A) (i : Fin (length xs)) → lookup xs i ∈ xs
-  lookup∈xs []       ()
   lookup∈xs (x ∷ xs) zero    = here refl
   lookup∈xs (x ∷ xs) (suc i) = there (lookup∈xs xs i)
 
@@ -149,9 +147,9 @@ module _ {a ℓ} (S : Semilattice a ℓ)  where
   foldr≤ᵣe e [] = ≈-sym (idem e)
   foldr≤ᵣe e (x ∷ xs) = ≈-sym (begin
     e ∧ (x  ∧ foldr _∧_ e xs)  ≈⟨ ≈-sym (assoc e x _) ⟩
-    (e ∧ x) ∧ foldr _∧_ e xs   ≈⟨ ∧-congˡ (comm e x) ⟩
+    (e ∧ x) ∧ foldr _∧_ e xs   ≈⟨ ∧-congʳ (comm e x) ⟩
     (x ∧ e) ∧ foldr _∧_ e xs   ≈⟨ assoc x e _ ⟩
-    x ∧ (e  ∧ foldr _∧_ e xs)  ≈⟨ ∧-congʳ (≈-sym (foldr≤ᵣe e xs)) ⟩
+    x ∧ (e  ∧ foldr _∧_ e xs)  ≈⟨ ∧-congˡ (≈-sym (foldr≤ᵣe e xs)) ⟩
     x       ∧ foldr _∧_ e xs   ∎)
 
   foldr≤ₗe : ∀ e xs → foldr _∧_ e xs ≤ₗ e
@@ -160,15 +158,15 @@ module _ {a ℓ} (S : Semilattice a ℓ)  where
   foldr≤ᵣxs : ∀ e {x xs} → x ∈ₛ xs → foldr _∧_ e xs ≤ᵣ x
   foldr≤ᵣxs e {x} {y ∷ xs} (here x≈y) = ≈-sym (begin
     x ∧ (y  ∧ foldr _∧_ e xs) ≈⟨ ≈-sym (assoc x y _) ⟩
-    (x ∧ y) ∧ foldr _∧_ e xs  ≈⟨ ∧-congˡ (∧-cong x≈y ≈-refl) ⟩
-    (y ∧ y) ∧ foldr _∧_ e xs  ≈⟨ ∧-congˡ (idem y) ⟩
+    (x ∧ y) ∧ foldr _∧_ e xs  ≈⟨ ∧-congʳ (∧-cong x≈y ≈-refl) ⟩
+    (y ∧ y) ∧ foldr _∧_ e xs  ≈⟨ ∧-congʳ (idem y) ⟩
     y       ∧ foldr _∧_ e xs  ∎)
   foldr≤ᵣxs e {x} {y ∷ xs} (there x∈xs) = ≈-sym (begin
-    x ∧ (y ∧ foldr _∧_ e xs) ≈⟨ ≈-sym (assoc x y _) ⟩
-    (x ∧ y) ∧ foldr _∧_ e xs ≈⟨ ∧-congˡ (comm x y) ⟩
-    (y ∧ x) ∧ foldr _∧_ e xs ≈⟨ assoc y x _ ⟩
-    y ∧ (x ∧ foldr _∧_ e xs) ≈⟨ ∧-congʳ (≈-sym (foldr≤ᵣxs e x∈xs)) ⟩
-    y ∧ foldr _∧_ e xs       ∎)
+    x ∧ (y ∧ foldr _∧_ e xs)  ≈⟨ ≈-sym (assoc x y _) ⟩
+    (x ∧ y) ∧ foldr _∧_ e xs  ≈⟨ ∧-congʳ (comm x y) ⟩
+    (y ∧ x) ∧ foldr _∧_ e xs  ≈⟨ assoc y x _ ⟩
+    y ∧ (x ∧ foldr _∧_ e xs)  ≈⟨ ∧-congˡ (≈-sym (foldr≤ᵣxs e x∈xs)) ⟩
+    y ∧ foldr _∧_ e xs        ∎)
 
   foldr≤ₗxs : ∀ e {x xs} → x ∈ₛ xs → foldr _∧_ e xs ≤ₗ x
   foldr≤ₗxs e x∈xs = ≈-trans (foldr≤ᵣxs e x∈xs) (comm _ _)

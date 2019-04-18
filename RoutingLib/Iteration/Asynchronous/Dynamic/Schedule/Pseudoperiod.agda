@@ -119,7 +119,7 @@ record Pseudocycle (period : TimePeriod) : Set₁ where
     start≤midᵢ : ∀ i → start ≤ m i
     midᵢ≤end   : ∀ i → m i ≤ end
     
-    β[s,m]     : ∀ i → MessagesTo i ExpireIn [ start , m i ]
+    β[s,m]     : ∀ {i} (i∈ρₛ : i ∈ ρ start) → MessagesTo i ExpireIn [ start , m i ]
     α[m,e]     : ∀ {i} (i∈ρₛ : i ∈ ρ start) → i IsActiveIn [ m i , end ]
 
   open SubEpoch η[s,e] public

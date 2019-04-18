@@ -14,11 +14,10 @@ open import RoutingLib.Iteration.Asynchronous.Dynamic
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
 
 module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.ACOImpliesConvergent
-  {a ℓ n}
-  (I∥ : AsyncIterable a ℓ n)
-  {ℓ₁ ℓ₂ ℓ₃}
-  {B₀ : IPred _ ℓ₁}
-  {Q : Pred (Subset n) ℓ₂}
+  {a ℓ ℓ₁ ℓ₂ ℓ₃ n}
+  (I∥  : AsyncIterable a ℓ n)
+  {B₀  : IPred _ ℓ₁}
+  {Q   : Pred (Subset n) ℓ₂}
   (aco : PartialACO I∥ B₀ Q ℓ₃)
   where
 
@@ -119,7 +118,7 @@ module _ {x : S} (x∈B₀ : x ∈ᵢ B₀)
     × StateOfNode i InBox k AtTime t
 
   ComputationInBox_AtTime_ : ℕ → 𝕋 → Set _
-  ComputationInBox k AtTime t = ∀ {i} → i ∈ₛ ρ t → ComputationAtNode i InBox k AtTime t
+  ComputationInBox k AtTime t = ∀ i → i ∈ₛ ρ t → ComputationAtNode i InBox k AtTime t
   
 --------------------------------------------------------------------------
 -- Actual proofs
@@ -189,18 +188,19 @@ module _ {x : S} (x∈B₀ : x ∈ᵢ B₀)
   ...     | yes _      | yes _   | no  _ = begin⟨ state-stability (mkₛₑ s≤e ηₛ≡ηₑ) (wf , m∈Bₖ , s∈Bₖ) (rec e ≤-refl) ⟩
     ∴ δ' x {e} _ i ∈ Bₜ e       (suc k) i $⟨ δ'∈-resp-Bₜᵢ e ηₑ≡η₁₊ₑ ⟩
     ∴ δ' x {e} _ i ∈ Bₜ (suc e) (suc k) i ∎
-  ...     | yes i∈ρ₁₊ₑ | yes _   | yes _ = begin⟨ (λ j → m∈Bₖ (s≤s s≤e) η[s,1+e]) ⟩
+  ...     | yes i∈ρ₁₊ₑ | yes _   | yes _ with ∈ρ-subst (sym ηₛ≡η₁₊ₑ) i∈ρ₁₊ₑ
+  ...       | i∈ρₛ = begin⟨ (λ j → m∈Bₖ (s≤s s≤e) η[s,1+e]) ⟩
     ∴ (∀ j → δ' x {β (suc e) i j} _ j ∈ Bₜ s       k      j)  $⟨ (λ prf j → δ'∈-resp-Bₜᵢ (β (suc e) i j) ηₛ≡η₁₊ₑ (prf j)) ⟩
     ∴ (∀ j → δ' x {β (suc e) i j} _ j ∈ Bₜ (suc e) k      j)  $⟨ (λ prf → F-mono-B (ρ∈Q (suc e)) (wf (s≤s s≤e) η[s,1+e]) prf i) ⟩
     ∴ Fₜ (suc e) _ i                  ∈ Bₜ (suc e) (suc k) i  ∎
 
-  state-stability′ : ∀ {k s e i} → SubEpoch [ s , e ] →
-                    (i ∈ₛ ρ s → ComputationAtNode i InBox k AtTime s) →
-                    StateOfNode i InBox k AtTime e
-  state-stability′ {_} {s} {_} {i} η[s,e]@(mkₛₑ _ ηₛ≡ηₑ) ∈ρ⇒c∈Bₖ with i ∈? ρ s
-  ... | yes i∈ρₛ = state-stability η[s,e] (∈ρ⇒c∈Bₖ i∈ρₛ)
-  ... | no  i∉ρₛ = i∉ρ⇒state∈Bₖ (i∉ρₛ ∘ ∈ρ-subst (sym ηₛ≡ηₑ)) 
-
+  state-stability′ : ∀ {k s e} → SubEpoch [ s , e ] →
+                    ComputationInBox k AtTime s →
+                    StateInBox k AtTime e
+  state-stability′ {_} {s} η[s,e]@(mkₛₑ _ ηₛ≡ηₑ) c∈Bₖ i with i ∈? ρ s
+  ... | yes i∈ρₛ = state-stability η[s,e] (c∈Bₖ i i∈ρₛ)
+  ... | no  i∉ρₛ = i∉ρ⇒state∈Bₖ (i∉ρₛ ∘ ∈ρ-subst (sym ηₛ≡ηₑ))
+  
   message-stability : ∀ {k s e i} → SubEpoch [ s , e ] →
                       MessagesToNode i InBox k AtTime s →
                       MessagesToNode i InBox k AtTime e
@@ -236,26 +236,29 @@ module _ {x : S} (x∈B₀ : x ∈ᵢ B₀)
     with trans ηₛ≡ηₑ ηₑ≡ηₜ | expiryᵢ e<t j
   ... | ηₛ≡ηₜ | s≤β with η-inRange ηₛ≡ηₜ (s≤β , (β-decreasing i j (<-transʳ z≤n e<t)))
   ...   | (ηₛ≡ηβ , ηβ≡ηₜ) with trans ηβ≡ηₜ (sym ηₑ≡ηₜ)
-  ...     | ηβ≡ηₑ = δ'∈-resp-Bₜᵢ (β _ _ _) ηβ≡ηₑ (state-stability′ (mkₛₑ s≤β ηₛ≡ηβ) c∈Bₖ recβ)
+  ...     | ηβ≡ηₑ with j ∈? ρ s
+  ...       | yes j∈ρₛ = δ'∈-resp-Bₜᵢ (β _ _ _) ηβ≡ηₑ (state-stability (mkₛₑ s≤β ηₛ≡ηβ) (c∈Bₖ j j∈ρₛ) recβ)
+  ...       | no  j∉ρₛ = δ'∈-resp-Bₜᵢ (β _ _ _) ηβ≡ηₑ (i∉ρ⇒state∈Bₖ (j∉ρₛ ∘ ∈ρ-subst (sym ηₛ≡ηβ)) recβ)
   
   advance-computation₁ : ∀ {s e k} → Pseudocycle [ s , e ] →
                          ComputationInBox k       AtTime s →
                          ComputationInBox (suc k) AtTime e
-  advance-computation₁ {s} pp c∈Bₖ {i} i∈ρₑ = m∈wfᵉ , m∈Bₖᵉ , s∈B₁₊ₖ
+  advance-computation₁ {s} {e} {k} pp c∈Bₖ i i∈ρₑ = m∈wfᵉ , m∈Bₖᵉ , s∈B₁₊ₖ
     where
     open Pseudocycle pp
-    m∈wfᵐ  = expiry⇒wellFormed (β[s,m] i)
+    i∈ρₛ   = ∈ρ-subst (sym ηₛ≡ηₑ) i∈ρₑ
+    m∈wfᵐ  = expiry⇒wellFormed (β[s,m] i∈ρₛ)
     m∈wfᵉ  = wellFormed-stability (η[m,e] i) m∈wfᵐ
-    m∈Bₖᵐ  = advance-messages (β[s,m] i) c∈Bₖ
+    m∈Bₖᵐ  = advance-messages (β[s,m] i∈ρₛ) c∈Bₖ
     m∈Bₖᵉ  = message-stability (η[m,e] i) m∈Bₖᵐ
-    s∈B₁₊ₖ = advance-state (α[m,e] (∈ρ-subst (sym ηₛ≡ηₑ) i∈ρₑ)) m∈wfᵐ m∈Bₖᵐ
+    s∈B₁₊ₖ = advance-state (α[m,e] i∈ρₛ) m∈wfᵐ m∈Bₖᵐ
     
   advance-computationₙ : ∀ {s e k n} →
                          MultiPseudocycle n [ s , e ] →
                          ComputationInBox k       AtTime s →
                          ComputationInBox (k + n) AtTime e
   advance-computationₙ {_} {_} {k} {_}     none            c∈Bₖ rewrite +-identityʳ k = c∈Bₖ
-  advance-computationₙ {s} {e} {k} {suc n} (next m pp mpp) c∈Bₖ = begin⟨ (λ {i} → c∈Bₖ) ⟩
+  advance-computationₙ {s} {e} {k} {suc n} (next m pp mpp) c∈Bₖ = begin⟨ c∈Bₖ ⟩
     ∴ ComputationInBox k           AtTime s $⟨ advance-computation₁ pp ⟩
     ∴ ComputationInBox (suc k)     AtTime m $⟨ advance-computationₙ mpp ⟩
     ∴ ComputationInBox (suc k + n) AtTime e $⟨ subst (ComputationInBox_AtTime e) (sym (+-suc k n)) ⟩
@@ -265,13 +268,13 @@ module _ {x : S} (x∈B₀ : x ∈ᵢ B₀)
 -- Convergence
 
   computation∈B₁ : ∀ {s e} → Pseudocycle [ s , e ] → ComputationInBox 1 AtTime e
-  computation∈B₁ {s} {e} pp {i} i∈ρₑ = m∈wfᵉ , messages∈B₀ e i , s∈B₁₊ₖ
+  computation∈B₁ {s} {e} pp i i∈ρₑ = m∈wfᵉ , messages∈B₀ e i , s∈B₁
     where
     open Pseudocycle pp
-    m∈wfᵐ  = expiry⇒wellFormed (β[s,m] i)
+    i∈ρₛ   = ∈ρ-subst (sym ηₛ≡ηₑ) i∈ρₑ
+    m∈wfᵐ  = expiry⇒wellFormed (β[s,m] i∈ρₛ)
     m∈wfᵉ  = wellFormed-stability (η[m,e] i) m∈wfᵐ
-    m∈Bₖᵐ  = messages∈B₀ (m i) i
-    s∈B₁₊ₖ = advance-state (α[m,e] (∈ρ-subst (sym ηₛ≡ηₑ) i∈ρₑ)) m∈wfᵐ m∈Bₖᵐ
+    s∈B₁   = advance-state (α[m,e] i∈ρₛ) m∈wfᵐ (messages∈B₀ (m i) i)
 
   module _ {s e : 𝕋} where
 
@@ -286,9 +289,9 @@ module _ {x : S} (x∈B₀ : x ∈ᵢ B₀)
                     δ x t ∈ᵢ Bₜ t k*'
     B[k*]-reached pp {t} η[e,t] with k*' | pp
     ... | zero  | _              = λ i → state∈B₀ t i (<-wellFounded t)
-    ... | suc k | next m pp' mpp = begin⟨ (λ {i} → computation∈B₁ pp') ⟩
-      ∴ ComputationInBox 1       AtTime m   $⟨ advance-computationₙ mpp ⟩ -- ⟩
-      ∴ ComputationInBox (suc k) AtTime e   $⟨ (λ prf i → state-stability′ η[e,t] prf (<-wellFounded t)) ⟩
+    ... | suc k | next m pp' mpp = begin⟨ computation∈B₁ pp' ⟩
+      ∴ ComputationInBox 1       AtTime m   $⟨ advance-computationₙ mpp ⟩
+      ∴ ComputationInBox (suc k) AtTime e   $⟨ (λ prf i → state-stability′ η[e,t] prf i (<-wellFounded t)) ⟩
       ∴ δ x t ∈ᵢ Bₜ t (suc k)               ∎
     
     x*-reached : MultiPseudocycle k*' [ s , e ] →

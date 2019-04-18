@@ -24,13 +24,13 @@ A formalisation of the pre-existing theory of static asynchronous iterative
 algorithms can be found in the directory `RoutingLib.Iteration.Asynchronous.Static`
 and is organised as follows:
 
-* Static schedules:
+* Static schedules:  
 [RoutingLib.Iteration.Asynchronous.Static.Schedule](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Iteration/Asynchronous/Static/Schedule.agda)
 
-* Static pseudoperiods:
+* Static pseudoperiods:  
 [RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Iteration/Asynchronous/Static/Schedule/Pseudoperiod.agda)
 
-* The static asynchronous iteration state function δ, and what it means for it to be correct:
+* The static asynchronous iteration state function δ, and what it means for it to be correct:  
 [RoutingLib.Iteration.Asynchronous.Static](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Iteration/Asynchronous/Static.agda)
 
 * Conditions sufficient for convergence (ACO, AMCO etc.):
@@ -55,13 +55,14 @@ and is organised as follows:
 * Conditions sufficient for convergence (dynamic ACO, dynamic AMCO etc.):
 [RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Iteration/Asynchronous/Dynamic/Convergence/Conditions.agda)
 
-* Proof of Theorem 1 that ACO implies convergence:
+* Proof that `F` being a dynamic ACO implies that `δ` is convergent:
 [RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.ACOImpliesConvergent](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Iteration/Asynchronous/Dynamic/Convergence/ACOImpliesConvergent.agda)
 
-* Proof of Theorem 3 that F is a dynamic AMCO implies F is a dynamic ACO is found in:
+* Proof that `F` is a dynamic AMCO implies `F` is a dynamic ACO is found in:
 [RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.AMCOImpliesACO](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Iteration/Asynchronous/Dynamic/Convergence/AMCOImpliesACO.agda)
 
-* Public facing interface that should be used to prove new convergence results:
+* Public facing interface that contains all convergence conditions and theorems,
+which should be used to prove new convergence results:
 [RoutingLib.Iteration.Asynchronous.Dynamic.Convergence](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Iteration/Asynchronous/Dynamic/Convergence.agda)
 
 ## Chapter 4 - An algebraic model for vector-based protocols
@@ -104,6 +105,9 @@ organised as follows:
 [RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.StrictlyContracting](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/VectorBased/Asynchronous/DistanceVector/Convergence/StrictlyContracting.agda)
 
 The proof of convergence of increasing path-vector protocols is organised as follows:
+
+* The definition of the consistent sub-algebra is in:
+[RoutingLib.Routing.Algebra.Construct.Consistent](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/Algebra/Construct/Consistent.agda)
 
 * The definitions of the height function and associated metrics are in:
 [RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.Metrics](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/VectorBased/Asynchronous/PathVector/Convergence/Metrics.agda)

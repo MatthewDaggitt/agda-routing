@@ -19,7 +19,7 @@ open import Data.Fin.Subset using (_∈_; _∉_)
 open import Data.Nat using (ℕ; zero; suc; s≤s; _<_; _≤_; _∸_; _≟_; _⊔_; _+_)
 open import Data.Nat.Properties
 open import Data.List using (foldr; tabulate; applyUpTo)
-open import Data.Product using (∃; _×_; _,_; proj₁)
+open import Data.Product using (∃; _×_; _,_; proj₁; proj₂)
 open import Function using (_∘_)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; refl; trans; subst)
@@ -54,6 +54,12 @@ _++ₛₑ_ : ∀ {s m e} → SubEpoch [ s , m ] → SubEpoch [ m , e ] → SubEp
 
 η-trivial : ∀ t → SubEpoch [ t , t ]
 η-trivial t = mkₛₑ ≤-refl refl
+
+ηₛₑ-inRangeₛ : ∀ {s m e} → SubEpoch [ s , e ] → m ∈ₜ [ s , e ] → SubEpoch [ s , m ]
+ηₛₑ-inRangeₛ (mkₛₑ _ ηₛ≡ηₑ) m∈[s,e] = mkₛₑ (proj₁ m∈[s,e]) (η-inRangeₛ ηₛ≡ηₑ m∈[s,e])
+
+ηₛₑ-inRangeₑ : ∀ {s m e} → SubEpoch [ s , e ] → m ∈ₜ [ s , e ] → SubEpoch [ m , e ]
+ηₛₑ-inRangeₑ (mkₛₑ _ ηₛ≡ηₑ) m∈[s,e] = mkₛₑ (proj₂ m∈[s,e]) (η-inRangeₑ ηₛ≡ηₑ m∈[s,e])
 
 --------------------------------------------------------------------------------
 -- Activation periods --
@@ -118,8 +124,11 @@ record Pseudocycle (period : TimePeriod) : Set₁ where
 
   open SubEpoch η[s,e] public
 
-  postulate η[s,m] : ∀ i → SubEpoch [ start , m i ]
-  postulate η[m,e] : ∀ i → SubEpoch [ m i   , end ]
+  η[s,m] : ∀ i → SubEpoch [ start , m i ]
+  η[s,m] i = ηₛₑ-inRangeₛ η[s,e] (start≤midᵢ i , midᵢ≤end i)
+  
+  η[m,e] : ∀ i → SubEpoch [ m i   , end ]
+  η[m,e] i = ηₛₑ-inRangeₑ η[s,e] (start≤midᵢ i , midᵢ≤end i)
 
 --------------------------------------------------------------------------------
 -- Multi-pseudocycles

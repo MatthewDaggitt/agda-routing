@@ -54,13 +54,13 @@ open Conditions public
 simulate-partial : ∀ {ℓ₃ ℓ₄ ℓ₅} {Q : Pred (Subset n) ℓ₃}
                     {X₀ : IPred _ ℓ₄}
                     {Y₀ : IPred _ ℓ₅} →
-                    (I∥⇉J∥ : Simulates I∥ J∥) →
-                    (∀ {x} → x ∈ᵢ Y₀ → Simulates.from I∥⇉J∥ x ∈ᵢ X₀) →
+                    (I∥⇉J∥ : I∥ Simulates J∥) →
+                    (∀ {x} → x ∈ᵢ Y₀ → _Simulates_.from I∥⇉J∥ x ∈ᵢ X₀) →
                     PartiallyConvergent I∥ X₀ Q →
                     PartiallyConvergent J∥ Y₀ Q
 simulate-partial I∥⇉J∥ Y₀⊆X₀ = Simulation.simulate I∥⇉J∥ Y₀⊆X₀
 
-simulate : Simulates I∥ J∥ → Convergent I∥ → Convergent J∥
+simulate : I∥ Simulates J∥ → Convergent I∥ → Convergent J∥
 simulate {I∥ = I∥} {J∥ = J∥} I∥⇉J∥ = begin⟨_⟩
   ∴ Convergent I∥               $⟨ convergent⇒partiallyConvergent ⟩
   ∴ PartiallyConvergent I∥ Uᵢ U $⟨ simulate-partial I∥⇉J∥ (λ _ _ → tt) ⟩

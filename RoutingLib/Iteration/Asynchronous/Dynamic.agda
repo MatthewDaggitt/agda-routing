@@ -242,7 +242,7 @@ module _ {a₁ a₂ ℓ₁ ℓ₂ n}
     module P = AsyncIterable I∥
     module Q = AsyncIterable J∥
 
-  record Simulates : Set (a₁ ⊔ a₂ ⊔ ℓ₁ ⊔ ℓ₂) where
+  record _Simulates_ : Set (a₁ ⊔ a₂ ⊔ ℓ₁ ⊔ ℓ₂) where
     field
       toᵢ       : ∀ {i} → P.Sᵢ i → Q.Sᵢ i
       fromᵢ     : ∀ {i} → Q.Sᵢ i → P.Sᵢ i

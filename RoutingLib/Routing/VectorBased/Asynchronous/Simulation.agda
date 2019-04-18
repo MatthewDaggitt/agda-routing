@@ -115,7 +115,7 @@ module _ (Nᵇ : Network B n) where
     ∎
     where open EqReasoning (S B)
 
-  F∥ᵃ⇉F∥ᵇ : Async.Simulates F∥ᵃ F∥ᵇ
+  F∥ᵃ⇉F∥ᵇ : F∥ᵃ Async.Simulates F∥ᵇ
   F∥ᵃ⇉F∥ᵇ = record
     { toᵢ       = to ∘_
     ; fromᵢ     = from ∘_

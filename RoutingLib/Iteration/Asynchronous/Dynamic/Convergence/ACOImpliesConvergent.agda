@@ -1,5 +1,28 @@
+--------------------------------------------------------------------------
+-- Agda routing library
+--
+-- A proof that F being a dynamic ACO implies that the iteration is
+-- convergent over the initial box.
+--------------------------------------------------------------------------
+
+open import Data.Fin.Subset
+  using (Subset; ⊤) renaming (_∈_ to _∈ₛ_; _∉_ to _∉ₛ_)
+open import Relation.Unary using (Pred; _⊆_; _∈_)
+open import RoutingLib.Relation.Unary.Indexed
+
+open import RoutingLib.Iteration.Asynchronous.Dynamic
+open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
+
+module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.ACOImpliesConvergent
+  {a ℓ n}
+  (I∥ : AsyncIterable a ℓ n)
+  {ℓ₁ ℓ₂ ℓ₃}
+  {B₀ : IPred _ ℓ₁}
+  {Q : Pred (Subset n) ℓ₂}
+  (aco : PartialACO I∥ B₀ Q ℓ₃)
+  where
+
 open import Data.Fin using (Fin)
-open import Data.Fin.Subset using (Subset; ⊤) renaming (_∈_ to _∈ₛ_; _∉_ to _∉ₛ_)
 open import Data.Fin.Dec using (_∈?_)
 open import Data.Maybe using (just; nothing)
 open import Data.Nat renaming (_≟_ to _≟ℕ_)
@@ -14,32 +37,18 @@ open import Relation.Binary.PropositionalEquality
   using (_≡_; subst; subst₂; cong; cong₂; refl; sym; trans)
 open import Relation.Nullary using (yes; no; ¬_)
 open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Unary using (Pred; _⊆_; _∈_)
 
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous
-open import RoutingLib.Relation.Unary.Indexed
 open import RoutingLib.Relation.Unary.Properties
 open import RoutingLib.Function
 open import RoutingLib.Function.Reasoning
 
-open import RoutingLib.Iteration.Asynchronous.Dynamic
-open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Properties
 import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Properties.ACO
   as ACOProperties
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
 import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudoperiod
   as Pseudoperiod
-
-
-module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.ACOImpliesConvergent
-  {a ℓ n}
-  (I∥ : AsyncIterable a ℓ n)
-  {ℓ₁ ℓ₂ ℓ₃}
-  {B₀ : IPred _ ℓ₁}
-  {Q : Pred (Subset n) ℓ₂}
-  (aco : PartialACO I∥ B₀ Q ℓ₃)
-  where
 
 open AsyncIterable I∥
 open PartialACO  aco

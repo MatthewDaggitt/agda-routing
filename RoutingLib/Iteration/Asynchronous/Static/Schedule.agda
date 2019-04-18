@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- Agda routing library
 --
--- This module contains the definition of dynamic schedules.
+-- This module contains the definition of static schedules.
 --------------------------------------------------------------------------------
 
 module RoutingLib.Iteration.Asynchronous.Static.Schedule where

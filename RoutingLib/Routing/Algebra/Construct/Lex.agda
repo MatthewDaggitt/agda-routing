@@ -111,7 +111,7 @@ isRoutingAlgebra A-isRA B-isRA = record
   ; ⊕-assoc       = LexProperties.assoc     Aᵣ.⊕-assoc     Bᵣ.⊕-assoc Aᵣ.⊕-sel Aᵣ.⊕-comm
   ; ⊕-zeroʳ       = LexProperties.zeroʳ     Aᵣ.⊕-zeroʳ     Bᵣ.⊕-zeroʳ
   ; ⊕-identityʳ   = LexProperties.identityʳ Aᵣ.⊕-identityʳ Bᵣ.⊕-identityʳ
-  ; ▷-fixedPoint = λ {(f , g) → Aᵣ.▷-fixedPoint f , Bᵣ.▷-fixedPoint g}
+  ; ▷-fixedPoint  = λ {(f , g) → Aᵣ.▷-fixedPoint f , Bᵣ.▷-fixedPoint g}
   } where
   module Aᵣ = IsRoutingAlgebra A-isRA
   module Bᵣ = IsRoutingAlgebra B-isRA

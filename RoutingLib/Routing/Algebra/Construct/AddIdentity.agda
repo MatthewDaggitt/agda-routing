@@ -19,7 +19,7 @@ open import Relation.Binary
 open import Relation.Binary.Construct.Add.Point.Equality 
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Nullary.Construct.Add.Point renaming (∙ to identity) 
+open import Relation.Nullary.Construct.Add.Point renaming (∙ to identity)
 
 open import RoutingLib.Algebra.Construct.Add.Identity 
 
@@ -93,19 +93,19 @@ f∞ⁱ-reject i j ([ x ]) with  f∞ i j ▷ x ≟ ∞#
 
 Add-Identity : RawRoutingAlgebra a b (a ⊔ ℓ)
 Add-Identity = record
-    { Route              = Routeⁱ
-    ; Step               = Step
-    ; _≈_                = _≈ⁱ_
-    ; _⊕_                = _⊕ⁱ_
-    ; _▷_                = _▷ⁱ_
-    ; 0#                 = 0#ⁱ
-    ; ∞#                 = ∞#ⁱ
-    ; f∞                 = f∞ⁱ
-    ; ≈-isDecEquivalence = ≈ⁱ-isDecEquivalence 
-    ; ⊕-cong             = ⊕ⁱ-cong
-    ; ▷-cong             = ▷ⁱ-cong
-    ; f∞-reject          = f∞ⁱ-reject
-    }
+  { Route              = Routeⁱ
+  ; Step               = Step
+  ; _≈_                = _≈ⁱ_
+  ; _⊕_                = _⊕ⁱ_
+  ; _▷_                = _▷ⁱ_
+  ; 0#                 = 0#ⁱ
+  ; ∞#                 = ∞#ⁱ
+  ; f∞                 = f∞ⁱ
+  ; ≈-isDecEquivalence = ≈ⁱ-isDecEquivalence 
+  ; ⊕-cong             = ⊕ⁱ-cong
+  ; ▷-cong             = ▷ⁱ-cong
+  ; f∞-reject          = f∞ⁱ-reject
+  }
 
 --------------------------------------------------------------------------------
 -- The construction preserves the properties of a routing algebra
@@ -130,15 +130,11 @@ Add-Identity = record
 
 isRoutingAlgebra : IsRoutingAlgebra A → IsRoutingAlgebra Add-Identity
 isRoutingAlgebra A-isRoutingAlgebra = record
-    { ⊕-sel        = ⊕ⁱ-sel ⊕-sel
-    ; ⊕-comm       = ⊕ⁱ-comm ⊕-comm
+    { ⊕-sel        = ⊕ⁱ-sel   ⊕-sel
+    ; ⊕-comm       = ⊕ⁱ-comm  ⊕-comm
     ; ⊕-assoc      = ⊕ⁱ-assoc ⊕-assoc
-    ; ⊕-zeroʳ       = ⊕ⁱ-zeroʳ ⊕-zeroʳ 
-    ; ⊕-identityʳ   = ⊕ⁱ-identityʳ
+    ; ⊕-zeroʳ      = ⊕ⁱ-zeroʳ ⊕-zeroʳ 
+    ; ⊕-identityʳ  = ⊕ⁱ-identityʳ
     ; ▷-fixedPoint = ▷ⁱ-fixedPoint
     }
     where open IsRoutingAlgebra A-isRoutingAlgebra 
-
-
-
-

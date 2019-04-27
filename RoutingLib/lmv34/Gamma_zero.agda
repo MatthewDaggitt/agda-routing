@@ -14,6 +14,7 @@ open Gamma_zero_Algebra algebra n
 -- State model
 
 record Γ₀-State : Set a where
+  constructor S₀
   field
     Y : RoutingMatrix
 
@@ -24,4 +25,4 @@ record Γ₀-State : Set a where
 Γ₀ Y = A 〔 Y 〕 ⊕ₘ M
 
 Γ₀-Model : Γ₀-State → Γ₀-State
-Γ₀-Model State = record { Y = Γ₀ (Γ₀-State.Y State) }
+Γ₀-Model (S₀ Y) = S₀ (Γ₀ Y)

@@ -40,9 +40,9 @@ open Gamma_zero_Algebra algebra n
 -- Theorems
 
 -- Theorem 1
-FixedPoint-Γ₀ : ∀ {k Y} →
-                (Γ₀ ^ suc k) Y ≈ₘ (Γ₀ ^ k) Y →
-                (Γ₀ ^ k) Y ≈ₘ (A 〔 (Γ₀ ^ k) Y 〕 ⊕ₘ M)
+FixedPoint-Γ₀ : ∀ {k Y} → (Γ₀ ^ suc k) Y ≈ₘ (Γ₀ ^ k) Y →
+                let X = (Γ₀ ^ k) Y in
+                X ≈ₘ (A 〔 X 〕 ⊕ₘ M)
 FixedPoint-Γ₀ {k} {Y} FP = begin
   (Γ₀ ^ k) Y              ≈⟨ ≈ₘ-sym FP ⟩
   (Γ₀ ^ suc k) Y          ≈⟨ ≈ₘ-refl ⟩

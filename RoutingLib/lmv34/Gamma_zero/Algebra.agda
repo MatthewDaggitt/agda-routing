@@ -1,6 +1,6 @@
 open import Data.Nat using (ℕ)
 open import Data.Fin using (Fin)
-open import Algebra.FunctionProperties.Core
+open import Algebra.FunctionProperties.Core using (Op₂)
 open import Data.List using (foldr; tabulate)
 
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra)

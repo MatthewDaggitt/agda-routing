@@ -35,8 +35,14 @@ open RoutingAlgebra isRoutingAlgebra using (≤₊-decTotalOrder)
 RoutingSet : Set a
 RoutingSet = List (Fin n × Route)
 
+Ø : RoutingSet
+Ø = []
+
 RoutingVector : Set a
 RoutingVector = Table RoutingSet n
+
+Øᵥ : RoutingVector
+Øᵥ i = Ø
 
 -- RoutingVector setoid
 FinRoute-decSetoid = ×-decSetoid (Fin-decSetoid n) DS
@@ -55,22 +61,12 @@ open TableEquality ↭-setoid public using (𝕋ₛ) renaming
 --------------------------------
 -- Auxilaries
 
-Ø : RoutingSet
-Ø = []
-
-Øᵥ : RoutingVector
-Øᵥ i = Ø
-
-isValidRoute : (x : Route) → Dec (¬(x ≈ ∞#))
-isValidRoute x = ¬? (x ≟ ∞#)
-
+infix 11 _†
 _† : RoutingSet → RoutingSet
-xs † = filter (λ {(d , v) → isValidRoute v}) xs
+xs † = filter (λ {(d , v) → ¬? (v ≟ ∞#)}) xs
 
 decTotalOrder : DecTotalOrder a ℓ ℓ
 decTotalOrder = ×-decTotalOrder (fin-decTotalOrder n) ≤₊-decTotalOrder
-
-open InsertionSort decTotalOrder using (sort)
 
 mergeSorted : Op₂ RoutingSet
 mergeSorted [] ys = ys
@@ -87,6 +83,7 @@ mergeSorted ((d₁ , v₁) ∷ xs) ((d₂ , v₂) ∷ ys) with <-cmp d₁ d₂
 infixl 10 _⊕ₛ_
 _⊕ₛ_ : Op₂ RoutingSet
 S₁ ⊕ₛ S₂ = mergeSorted (sort S₁) (sort S₂)
+  where open InsertionSort decTotalOrder using (sort)
 
 -- Vector addition
 infixl 9 _⊕ᵥ_

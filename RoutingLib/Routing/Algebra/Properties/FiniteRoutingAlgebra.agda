@@ -1,4 +1,6 @@
 --------------------------------------------------------------------------------
+-- Agda routing library
+--
 -- Properties of finite routing algebras
 --------------------------------------------------------------------------------
 
@@ -19,8 +21,8 @@ open import Data.Nat using (ℕ; _≤_)
 open import Data.Product using (proj₁; proj₂)
 open import Function using (flip)
 
-open import RoutingLib.Data.List.Uniqueness.Setoid using (Unique)
-open import RoutingLib.Data.List.Uniqueness.Setoid.Properties using (deduplicate!⁺)
+open import RoutingLib.Data.List.Relation.Unary.Uniqueness.Setoid using (Unique)
+open import RoutingLib.Data.List.Relation.Unary.Uniqueness.Setoid.Properties using (deduplicate!⁺)
 open import RoutingLib.Data.List.Membership.DecSetoid.Properties using (∈-deduplicate⁺)
 import RoutingLib.Data.List.Sorting.InsertionSort as InsertionSort
 

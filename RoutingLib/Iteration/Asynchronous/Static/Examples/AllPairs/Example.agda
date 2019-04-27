@@ -15,11 +15,8 @@ module RoutingLib.Iteration.Asynchronous.Static.Examples.AllPairs.Example where
   pattern 2# = fsuc (fsuc fzero)
   pattern 3# = (fsuc (fsuc (fsuc fzero)))
   pattern 4# = (fsuc (fsuc (fsuc (fsuc fzero))))
-  pattern ## = (fsuc (fsuc (fsuc (fsuc (fsuc ())))))
   
   grid : Fin 5 → Fin 5 → ℕ∞
-  grid ## _
-  grid _ ##
   grid 0# 0# = N 0
   grid 0# 1# = N 3
   grid 0# 2# = N 8
@@ -52,4 +49,3 @@ module RoutingLib.Iteration.Asynchronous.Static.Examples.AllPairs.Example where
   Cᵢ,ᵢ 2# = refl
   Cᵢ,ᵢ 3# = refl
   Cᵢ,ᵢ 4# = refl
-  Cᵢ,ᵢ ##

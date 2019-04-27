@@ -1,5 +1,10 @@
+
+
+module RoutingLib.Data.Path.Uncertified.Properties where
+
 open import Data.List.Any using (any; there; here)
-open import Data.Maybe using (just; nothing; just-injective)
+open import Data.Maybe using (just; nothing)
+open import Data.Maybe.Properties using (just-injective)
 open import Data.Nat
 open import Data.Nat.Properties
 open import Data.Fin.Properties using (pigeonhole)
@@ -7,7 +12,7 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_,_; _×_; proj₁; proj₂)
 open import Level using (0ℓ)
 open import Function using (_∘_; flip)
-open import Relation.Binary.Product.Pointwise using (≡?×≡?⇒≡?)
+open import Data.Product.Relation.Binary.Pointwise.NonDependent using (≡?×≡?⇒≡?)
 open import Relation.Binary hiding (NonEmpty)
 open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary.Negation using (¬?)
@@ -21,8 +26,6 @@ import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.DecTotalOrder
 open import RoutingLib.Data.Path.Uncertified
 
 open ≡-Reasoning
-
-module RoutingLib.Data.Path.Uncertified.Properties where
 
 ----------------------------------------------------------------------------
 -- Edges
@@ -221,7 +224,7 @@ _≤ₗₑₓ?_ : Decidable _≤ₗₑₓ_
 ≤ₗₑₓ-totalOrder = record
   { isTotalOrder = ≤ₗₑₓ-isTotalOrder
   }
-  
+
 ≤ₗₑₓ-decTotalOrder : DecTotalOrder _ _ _
 ≤ₗₑₓ-decTotalOrder = record
   { isDecTotalOrder = ≤ₗₑₓ-isDecTotalOrder
@@ -245,7 +248,7 @@ p≮ₗₑₓ[] {[]}    (_ , []≉[]) = []≉[] refl
 p≮ₗₑₓ[] {e ∷ p} (() , _)
 
 ∷-mono-≤ₗₑₓ : ∀ e {p q} → p ≤ₗₑₓ q → (e ∷ p) ≤ₗₑₓ (e ∷ q)
-∷-mono-≤ₗₑₓ e {p} {q} p≤q =  step refl refl p≤q 
+∷-mono-≤ₗₑₓ e {p} {q} p≤q =  step refl refl p≤q
 
 ----------------------------------------------------------------------------
 -- length

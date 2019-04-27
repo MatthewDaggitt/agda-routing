@@ -28,11 +28,14 @@ import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod
 βˢʸⁿᶜ : 𝕋 → Fin n → Fin n → 𝕋
 βˢʸⁿᶜ t _ _ = t ∸ 1
 
+βˢʸⁿᶜ-causality : ∀ t i j → βˢʸⁿᶜ(suc t) i j ≤ t
+βˢʸⁿᶜ-causality _ _ _ = ≤-refl
+
 ψˢʸⁿᶜ : Schedule n
 ψˢʸⁿᶜ = record
   { α           = αˢʸⁿᶜ
   ; β           = βˢʸⁿᶜ
-  ; β-causality = λ _ _ _ → ≤-refl
+  ; β-causality = βˢʸⁿᶜ-causality
   }
 
 --------------------------------------------------------------------------------
@@ -47,7 +50,7 @@ open Pseudoperiod ψˢʸⁿᶜ
 ψˢʸⁿᶜ-activeIn t i = mkₐ (suc t) ≤-refl ≤-refl ∈⊤
 
 ψˢʸⁿᶜ-expiresIn : ∀ t i → MessagesTo i ExpireIn [ t , t ]
-ψˢʸⁿᶜ-expiresIn t i = mkₑ ≤-refl (βˢʸⁿᶜ-expiry i)
+ψˢʸⁿᶜ-expiresIn t i = mkₑ ≤-refl (λ t<s j → βˢʸⁿᶜ-expiry i j t<s)
 
 ψˢʸⁿᶜ-pseudocycle : ∀ t → Pseudocycle [ t , suc t ]
 ψˢʸⁿᶜ-pseudocycle t = record

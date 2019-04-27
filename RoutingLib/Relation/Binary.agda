@@ -1,49 +1,11 @@
+
+module RoutingLib.Relation.Binary where
+
 open import Data.Product
 open import Function using (flip)
 open import Relation.Binary
 open import Relation.Nullary using (¬_)
 open import Level
-
-module RoutingLib.Relation.Binary where
-
---------------------------------------------------------------------------------
--- Pairs of non-strict and strict partial orders
-
-record IsOrderingPair
-  {a ℓ₁ ℓ₂ ℓ₃} {A : Set a}
-  (_≈_ : Rel A ℓ₁) (_≤_ : Rel A ℓ₂) (_<_ : Rel A ℓ₃)
-  : Set (a ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃) where
-
-  field
-    isEquivalence : IsEquivalence _≈_
-    isPartialOrder : IsPartialOrder _≈_ _≤_
-    isStrictPartialOrder : IsStrictPartialOrder _≈_ _<_
-    <⇒≤       : _<_ ⇒ _≤_
-    ≤∧≉⇒<     : ∀ {x y} → x ≤ y → ¬ (x ≈ y) → x < y
-    <-≤-trans : Trans _<_ _≤_ _<_
-    ≤-<-trans : Trans _≤_ _<_ _<_
-
-  module Eq = IsEquivalence isEquivalence
-  module PO = IsPartialOrder isPartialOrder
-  module SPO = IsStrictPartialOrder isStrictPartialOrder
-
-  <-respʳ-≈ : _<_ Respectsʳ _≈_
-  <-respʳ-≈ = proj₁ SPO.<-resp-≈
-
-  <-respˡ-≈ : _<_ Respectsˡ _≈_
-  <-respˡ-≈ = proj₂ SPO.<-resp-≈
-
-
-record OrderingPair a ℓ₁ ℓ₂ ℓ₃ : Set (suc (a ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃)) where
-
-  field
-    Carrier        : Set a
-    _≈_            : Rel Carrier ℓ₁
-    _≤_            : Rel Carrier ℓ₂
-    _<_            : Rel Carrier ℓ₃
-    isOrderingPair : IsOrderingPair _≈_ _≤_ _<_
-
-  open IsOrderingPair isOrderingPair public
 
 --------------------------------------------------------------------------------
 -- Decidable preorders

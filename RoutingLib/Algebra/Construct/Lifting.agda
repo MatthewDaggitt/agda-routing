@@ -20,47 +20,46 @@ module RoutingLib.Algebra.Construct.Lifting
   (_≈ᵇ_ : Rel B ℓ) (•-sel : Selective _≈ᵇ_ _•_) (f : A → B)
   where
 
+Lift : Op₂ A
+Lift x y with •-sel (f x) (f y)
+... | inj₁ _ = x
+... | inj₂ _ = y
 
-  Lift : Op₂ A
-  Lift x y with •-sel (f x) (f y)
-  ... | inj₁ _ = x
-  ... | inj₂ _ = y
+sel : Selective _≡_ Lift
+sel x y with •-sel (f x) (f y)
+... | inj₁ _ = inj₁ refl
+... | inj₂ _ = inj₂ refl
 
-  sel : Selective _≡_ Lift
-  sel x y with •-sel (f x) (f y)
-  ... | inj₁ _ = inj₁ refl
-  ... | inj₂ _ = inj₂ refl
+presᵒ : ∀ {p} {P : Pred A p} →
+        (∀ {x y} → P x → (f x • f y) ≈ᵇ f y → P y) →
+        (∀ {x y} → P y → (f x • f y) ≈ᵇ f x → P x) →
+        Lift Preservesᵒ P
+presᵒ left right x y (inj₁ px) with •-sel (f x) (f y)
+... | inj₁ _        = px
+... | inj₂ fx•fy≈fx = left px fx•fy≈fx
+presᵒ left right x y (inj₂ py) with •-sel (f x) (f y)
+... | inj₁ fx•fy≈fy = right py fx•fy≈fy
+... | inj₂ _ = py
 
-  presᵒ : ∀ {p} {P : Pred A p} →
-          (∀ {x y} → P x → (f x • f y) ≈ᵇ f y → P y) →
-          (∀ {x y} → P y → (f x • f y) ≈ᵇ f x → P x) →
-          Lift Preservesᵒ P
-  presᵒ left right x y (inj₁ px) with •-sel (f x) (f y)
-  ... | inj₁ _        = px
-  ... | inj₂ fx•fy≈fx = left px fx•fy≈fx
-  presᵒ left right x y (inj₂ py) with •-sel (f x) (f y)
-  ... | inj₁ fx•fy≈fy = right py fx•fy≈fy
-  ... | inj₂ _ = py
+presʳ : ∀ {p} {P : Pred A p} →
+        (∀ {x y} → P y → (f x • f y) ≈ᵇ f x → P x) →
+        Lift Preservesʳ P
+presʳ right x {y} Py with •-sel (f x) (f y)
+... | inj₁ fx•fy≈fx = right Py fx•fy≈fx
+... | inj₂ fx•fy≈fy = Py
 
-  presʳ : ∀ {p} {P : Pred A p} →
-          (∀ {x y} → P y → (f x • f y) ≈ᵇ f x → P x) →
-          Lift Preservesʳ P
-  presʳ right x {y} Py with •-sel (f x) (f y)
-  ... | inj₁ fx•fy≈fx = right Py fx•fy≈fx
-  ... | inj₂ fx•fy≈fy = Py
+presᵇ : ∀ {p} (P : Pred A p) → Lift Preservesᵇ P
+presᵇ P {x} {y} Px Py with •-sel (f x) (f y)
+... | inj₁ _ = Px
+... | inj₂ _ = Py
 
-  presᵇ : ∀ {p} (P : Pred A p) → Lift Preservesᵇ P
-  presᵇ P {x} {y} Px Py with •-sel (f x) (f y)
-  ... | inj₁ _ = Px
-  ... | inj₂ _ = Py
-
-  forcesᵇ : ∀ {p} {P : Pred A p} →
-            (∀ {x y} → P x → (f x • f y) ≈ᵇ f x → P y) →
-            (∀ {x y} → P y → (f x • f y) ≈ᵇ f y → P x) →
-            Lift Forcesᵇ P
-  forcesᵇ presˡ presʳ x y P[x•y] with •-sel (f x) (f y)
-  ... | inj₁ fx•fy≈fx = P[x•y] , presˡ P[x•y] fx•fy≈fx
-  ... | inj₂ fx•fy≈fy = presʳ P[x•y] fx•fy≈fy , P[x•y]
+forcesᵇ : ∀ {p} {P : Pred A p} →
+          (∀ {x y} → P x → (f x • f y) ≈ᵇ f x → P y) →
+          (∀ {x y} → P y → (f x • f y) ≈ᵇ f y → P x) →
+          Lift Forcesᵇ P
+forcesᵇ presˡ presʳ x y P[x•y] with •-sel (f x) (f y)
+... | inj₁ fx•fy≈fx = P[x•y] , presˡ P[x•y] fx•fy≈fx
+... | inj₂ fx•fy≈fy = presʳ P[x•y] fx•fy≈fy , P[x•y]
 
 
 {-

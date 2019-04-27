@@ -1,4 +1,6 @@
 --------------------------------------------------------------------------------
+-- Agda routing library
+--
 -- This module proofs that if I∥ simulates J∥ then if I∥ converges so does J∥
 --------------------------------------------------------------------------------
 
@@ -8,7 +10,7 @@ module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Simulation
   {a₁ a₂ ℓ₁ ℓ₂ n}
   {I∥ : AsyncIterable a₁ ℓ₁ n}
   {J∥ : AsyncIterable a₂ ℓ₂ n}
-  (I∥⇉J∥ : Simulates I∥ J∥)
+  (I∥⇉J∥ : I∥ Simulates J∥)
   where
 
 open import Data.Nat using (zero; suc; _<_; _+_)
@@ -28,7 +30,7 @@ open import RoutingLib.Relation.Unary.Indexed using (IPred; _∈ᵢ_; Uᵢ)
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudoperiod
 
-open Simulates I∥⇉J∥
+open _Simulates_ I∥⇉J∥
 
 private
   module I = AsyncIterable I∥

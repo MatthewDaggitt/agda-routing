@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- Agda routing library
+--
+-- The underlying data contained in each route in the BGPLite algebra. Each
+-- route is either invalid or consists of a level, a set of communities and a
+-- path along which it was generated.
+--------------------------------------------------------------------------------
+
+module RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Route where
+
 open import Data.Nat using (ℕ; _<_; _≤_; _≟_)
 open import Data.Nat.Properties hiding (≡-isDecEquivalence)
 open import Data.Fin using (Fin)
@@ -15,8 +25,6 @@ open import RoutingLib.Data.Path.Uncertified.Properties
 
 open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Communities
 
-module RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Route where
-
 ------------------------------------------------------------------------
 -- Types
 
@@ -27,8 +35,8 @@ data Route : Set where
   invalid : Route
   valid   : (l : Level) → (cs : CommunitySet) → (p : Path) → Route
 
-data IsValid : Route → Set where
-  isValid : ∀ l cs p → IsValid (valid l cs p)
+-- data IsValid : Route → Set where
+--   isValid : ∀ l cs p → IsValid (valid l cs p)
 
 ------------------------------------------------------------------------
 -- Equality over routes
@@ -187,4 +195,3 @@ r ≰ᵣ s = ¬ (r ≤ᵣ s)
 ≤ᵣ-reject l≤k |p|<|q| (length< _ |q|<|p|) = <-asym |p|<|q| |q|<|p|
 ≤ᵣ-reject l≤k |p|<|q| (plex< _ |q|≡|p| _) = <-irrefl (sym |q|≡|p|) |p|<|q|
 ≤ᵣ-reject l≤k |p|<|q| (comm≤ _ refl _)    = <-irrefl refl |p|<|q|
-

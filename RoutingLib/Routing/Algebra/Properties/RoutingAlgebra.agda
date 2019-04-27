@@ -1,4 +1,6 @@
 --------------------------------------------------------------------------------
+-- Agda routing library
+--
 -- Properties of routing algebras
 --------------------------------------------------------------------------------
 
@@ -13,9 +15,10 @@ open import Algebra
 open import Algebra.Structures
 import Algebra.FunctionProperties as FunctionProperties
 import Algebra.FunctionProperties.Consequences as Consequences
-open import Algebra.FunctionProperties.Consequences using (sel⇒idem)
+open import Algebra.FunctionProperties.Consequences.Propositional using (sel⇒idem)
 open import Data.Product using (proj₁; _,_)
 open import Data.Fin using (Fin)
+open import Data.Sum using (inj₁; inj₂)
 open import Relation.Nullary using (yes; no)
 open import Relation.Binary using (DecTotalOrder; StrictTotalOrder)
 import Relation.Binary.Construct.Converse as Converse
@@ -34,7 +37,9 @@ open FunctionProperties _≈_
 -- _⊕_
 
 ⊕-idem : Idempotent _⊕_
-⊕-idem = Consequences.sel⇒idem S ⊕-sel
+⊕-idem x with ⊕-sel x x
+... | inj₁ v = v
+... | inj₂ v = v
 
 ⊕-identityˡ : LeftIdentity ∞# _⊕_
 ⊕-identityˡ x = ≈-trans (⊕-comm ∞# x) (⊕-identityʳ x)
@@ -44,9 +49,8 @@ open FunctionProperties _≈_
 
 ⊕-isSemigroup : IsSemigroup _≈_ _⊕_
 ⊕-isSemigroup = record
-  { isEquivalence = ≈-isEquivalence
-  ; assoc         = ⊕-assoc
-  ; ∙-cong        = ⊕-cong
+  { isMagma = ⊕-isMagma
+  ; assoc   = ⊕-assoc
   }
 
 ⊕-isBand : IsBand _≈_ _⊕_
@@ -130,7 +134,7 @@ strIncr⇒incr strIncr f x with x ≟ ∞#
 ... | yes x≈∞ = begin
   (f ▷ x)  ⊕ x  ≈⟨ ⊕-cong (▷-cong f x≈∞) x≈∞ ⟩
   (f ▷ ∞#) ⊕ ∞# ≈⟨ ⊕-cong (▷-fixedPoint f) ≈-refl ⟩
-  ∞#       ⊕ ∞# ≈⟨ sel⇒idem S ⊕-sel ∞# ⟩
+  ∞#       ⊕ ∞# ≈⟨ ⊕-idem ∞# ⟩
   ∞#            ≈⟨ ≈-sym x≈∞ ⟩
   x             ∎
   where open EqReasoning S

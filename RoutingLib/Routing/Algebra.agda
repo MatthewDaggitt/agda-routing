@@ -1,4 +1,6 @@
 --------------------------------------------------------------------------------
+-- Agda routing library
+--
 -- This module contains the core definitions for routing algebras and some
 -- simple associated properties. A routing algebra is an abstract representation
 -- of some problem that we want our routing protocol to solve (e.g. the
@@ -7,6 +9,8 @@
 
 module RoutingLib.Routing.Algebra  where
 
+open import Algebra
+open import Algebra.Structures
 open import Algebra.FunctionProperties
 open import Data.Fin using (Fin; toℕ)
 open import Data.List using (List)
@@ -14,7 +18,7 @@ import Data.List.Membership.Setoid as ListMembership
 open import Data.Nat using (ℕ; zero; suc)
 open import Data.Product using (Σ; _,_)
 open import Data.Sum using (_⊎_)
-open import Level using (Lift; _⊔_) renaming (suc to lsuc)
+open import Level using (Lift; lift; _⊔_) renaming (suc to lsuc)
 open import Relation.Nullary using (¬_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
@@ -27,8 +31,8 @@ open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.Table using (Table)
 import RoutingLib.Data.Path.UncertifiedI as UncertifiedPaths
 import RoutingLib.Data.Path.CertifiedI as CertifiedPaths
-import RoutingLib.Data.Matrix.Relation.DecidableEquality as MatrixDecEquality
-import RoutingLib.Data.Table.Relation.DecidableEquality as TableDecEquality
+import RoutingLib.Data.Matrix.Relation.Binary.DecidableEquality as MatrixDecEquality
+import RoutingLib.Data.Table.Relation.Binary.DecidableEquality as TableDecEquality
 import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
 
 --------------------------------------------------------------------------------
@@ -174,14 +178,12 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
   IsLevel_Distributive : ℕ → Set _
   IsLevel k Distributive = Level k DistributiveIn[ 0# , ∞# ]
 
-
-
   Level_DistributiveIn[_,_]Alt : ℕ → Route → Route → Set _
   Level 0       DistributiveIn[ ⊥ , ⊤ ]Alt = Lift (a ⊔ b ⊔ ℓ) (⊥ ≈ ⊤)
   Level (suc k) DistributiveIn[ ⊥ , ⊤ ]Alt =
     ∀ {n} {i j : Fin n} (f : Step i j) →
     ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
-    Level k DistributiveIn[ f ▷ (x ⊕ y) , (f ▷ x) ⊕ (f ▷ y) ]
+    Level k DistributiveIn[ f ▷ (x ⊕ y) , (f ▷ x) ⊕ (f ▷ y) ]Alt
 
   IsLevel_DistributiveAlt : ℕ → Set _
   IsLevel k DistributiveAlt = Level k DistributiveIn[ 0# , ∞# ]Alt
@@ -302,6 +304,25 @@ module PathDistributivity
   PathDistributive = ∀ {n} {i j : Fin n} (f : Step i j) →
                      ∀ {x y} → toℕ i ∉ₚ path x → toℕ i ∉ₚ path y → f ▷ (x ⊕ y) ≈ (f ▷ x) ⊕ (f ▷ y)
 
+
+  IsLevel_PathDistributiveIn[_,_]Alt : ℕ → Route → Route → Set _
+  IsLevel 0       PathDistributiveIn[ ⊥ , ⊤ ]Alt = Lift (a ⊔ b ⊔ ℓ) (⊥ ≈ ⊤)
+  IsLevel (suc k) PathDistributiveIn[ ⊥ , ⊤ ]Alt =
+    ∀ {n} {i j : Fin n} (f : Step i j) →
+    ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
+    toℕ i ∉ₚ path x → toℕ i ∉ₚ path y →
+    (toℕ i , toℕ j) ⇿ path x → (toℕ i , toℕ j) ⇿ path y →
+    IsLevel k PathDistributiveIn[ f ▷ (x ⊕ y) , (f ▷ x) ⊕ (f ▷ y) ]Alt
+
+  isLevelPDistrib-cong : ∀ k {w x y z} → w ≈ x → y ≈ z →
+                         IsLevel k PathDistributiveIn[ w , y ]Alt →
+                         IsLevel k PathDistributiveIn[ x , z ]Alt
+  isLevelPDistrib-cong zero    w≈x y≈z distrib = {!!}
+  isLevelPDistrib-cong (suc k) w≈x y≈z distrib = {!!}
+  
+  isLevelPDistrib-equal : ∀ k {x y} → x ≈ y → IsLevel k PathDistributiveIn[ x , y ]Alt
+  isLevelPDistrib-equal zero    x≈y = lift x≈y
+  isLevelPDistrib-equal (suc k) x≈y f _ _ _ _ _ _ _ _ = isLevelPDistrib-cong k {!!} {!!} {!!}
   
   -- kᵗʰ level distributivity
   IsLevel_PathDistributiveIn[_,_] : ℕ → Route → Route → Set _

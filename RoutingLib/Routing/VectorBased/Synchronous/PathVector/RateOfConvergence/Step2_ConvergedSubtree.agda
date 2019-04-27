@@ -41,123 +41,118 @@ module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.S
   (C⊆𝓒ₜ : ∀ {i} → i ∈ C → i ∈ᵤ Step1_NodeSets.𝓒 isRoutingAlgebra isPathAlgebra A X j (suc t-1))
   where
 
-  open Prelude isRoutingAlgebra isPathAlgebra A
+open Prelude isRoutingAlgebra isPathAlgebra A
+open Notation X j
+open Step1_NodeSets isRoutingAlgebra isPathAlgebra A X j
 
+open Extrema ≤₊-totalOrder
+open POR ≤₊-poset
 
-  open Notation X j
-  open Step1_NodeSets isRoutingAlgebra isPathAlgebra A X j
+private
 
-  open Extrema ≤₊-totalOrder
+  t : ℕ
+  t = suc t-1
 
-  private
+  e↷C⇒w[t+s]≡w[t] : ∀ {e} → e ↷ C → ∀ s → weightₑ (t + s) e ≈ weightₑ t e
+  e↷C⇒w[t+s]≡w[t] (_ , k∈C) s = ▷-cong (A _ _) (proj₁ (C⊆𝓒ₜ k∈C) s)
 
-    t : ℕ
-    t = suc t-1
+------------------------------------------------------------------------------
+-- Finding the fixed minimal edge entering the fixed set
 
-    e↷C⇒w[t+s]≡w[t] : ∀ {e} → e ↷ C → ∀ s → weightₑ (t + s) e ≈ weightₑ t e
-    e↷C⇒w[t+s]≡w[t] (_ , k∈C) s = ▷-cong (A _ _) (proj₁ (C⊆𝓒ₜ k∈C) s)
+-- At least one edge entering the fixed set exists
 
-  ------------------------------------------------------------------------------
-  -- Finding the fixed minimal edge entering the fixed set
+  eₐ : Edge
+  eₐ = (proj₁ (Nonfull-witness C-nonFull) , j)
 
-  -- At least one edge entering the fixed set exists
+  eₐ↷C : eₐ ↷ C
+  eₐ↷C = (proj₂ (Nonfull-witness C-nonFull) , j∈C)
 
-    eₐ : Edge
-    eₐ = (proj₁ (Nonfull-witness C-nonFull) , j)
+-- We can therefore find the minimum weight edge out of the fixed set
 
-    eₐ↷C : eₐ ↷ C
-    eₐ↷C = (proj₂ (Nonfull-witness C-nonFull) , j∈C)
+abstract
 
-  -- We can therefore find the minimum weight edge out of the fixed set
+  eₘᵢₙ : Edge
+  eₘᵢₙ = argmin (weightₑ t) eₐ (cutset C)
 
-  abstract
+  eₘᵢₙ↷C : eₘᵢₙ ↷ C
+  eₘᵢₙ↷C = argmin-all (weightₑ t) eₐ↷C (∈cutset⇒↷ C)
 
-    eₘᵢₙ : Edge
-    eₘᵢₙ = argmin (weightₑ t) eₐ (cutset C)
+iₘᵢₙ : Vertex
+iₘᵢₙ = proj₁ eₘᵢₙ
 
-    eₘᵢₙ↷C : eₘᵢₙ ↷ C
-    eₘᵢₙ↷C = argmin-all (weightₑ t) eₐ↷C (∈cutset⇒↷ C)
+iₘᵢₙ∉C : iₘᵢₙ ∉ C
+iₘᵢₙ∉C = proj₁ eₘᵢₙ↷C
 
-  iₘᵢₙ : Vertex
-  iₘᵢₙ = proj₁ eₘᵢₙ
+kₘᵢₙ : Vertex
+kₘᵢₙ = proj₂ eₘᵢₙ
 
-  iₘᵢₙ∉C : iₘᵢₙ ∉ C
-  iₘᵢₙ∉C = proj₁ eₘᵢₙ↷C
+kₘᵢₙ∈C : kₘᵢₙ ∈ C
+kₘᵢₙ∈C = proj₂ eₘᵢₙ↷C
 
-  kₘᵢₙ : Vertex
-  kₘᵢₙ = proj₂ eₘᵢₙ
+------------------------------------------------------------------------------
+-- Properties of eₘᵢₙ
 
-  kₘᵢₙ∈C : kₘᵢₙ ∈ C
-  kₘᵢₙ∈C = proj₂ eₘᵢₙ↷C
+abstract
 
-  ------------------------------------------------------------------------------
-  -- Properties of eₘᵢₙ
+  j≢iₘᵢₙ : j ≢ iₘᵢₙ
+  j≢iₘᵢₙ j≡iₘᵢₙ = iₘᵢₙ∉C (subst (_∈ C) j≡iₘᵢₙ j∈C)
 
-  abstract
+  kₘᵢₙ∈𝓒ₜ : kₘᵢₙ ∈ᵤ 𝓒 t
+  kₘᵢₙ∈𝓒ₜ = C⊆𝓒ₜ kₘᵢₙ∈C
 
-    j≢iₘᵢₙ : j ≢ iₘᵢₙ
-    j≢iₘᵢₙ j≡iₘᵢₙ = iₘᵢₙ∉C (subst (_∈ C) j≡iₘᵢₙ j∈C)
-
-    kₘᵢₙ∈𝓒ₜ : kₘᵢₙ ∈ᵤ 𝓒 t
-    kₘᵢₙ∈𝓒ₜ = C⊆𝓒ₜ kₘᵢₙ∈C
-
-    -- Any edge that cuts the fixed set is -always- less than the minimum edge
-    eₘᵢₙ-isMinₜ₊ₛ : ∀ {e} → e ↷ C → ∀ s →
-                    weightₑ (t + s) eₘᵢₙ ≤₊ weightₑ (t + s) e
-    eₘᵢₙ-isMinₜ₊ₛ {e} e↷C s = begin
-      weightₑ (t + s) eₘᵢₙ  ≈⟨ e↷C⇒w[t+s]≡w[t] eₘᵢₙ↷C s ⟩
-      weightₑ t       eₘᵢₙ  ≤⟨ lookup (f[argmin]≤f[xs] eₐ (cutset C)) (↷⇒∈cutset e↷C) ⟩
-      weightₑ t       e     ≈⟨ ≈-sym (e↷C⇒w[t+s]≡w[t] e↷C s) ⟩
-      weightₑ (t + s) e     ∎
-      where open POR ≤₊-poset
-
-
-
-  -- Safe extension
-
-    safe-extension : ∀ {s r i k l} → σ^ (t + r) X k j ≈ A k l ▷ (σ^ (t + s) X l j) →
-                     eₘᵢₙ ≤[ t + s ] (k , l) → eₘᵢₙ ≤[ t + r ] (i , k)
-    safe-extension {s} {r} {i} {k} {l} σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ eₘᵢₙ≤kl = (begin
-      A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + r) X kₘᵢₙ j   ≈⟨ ▷-cong (A iₘᵢₙ kₘᵢₙ) (𝓒-eq t kₘᵢₙ r s kₘᵢₙ∈𝓒ₜ) ⟩
-      A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + s) X kₘᵢₙ j   ≤⟨ eₘᵢₙ≤kl ⟩
-      A k l ▷ σ^ (t + s) X l j           ≤⟨ isIncreasing (A i k) (A k l ▷ σ^ (t + s) X l j) ⟩
-      A i k ▷ (A k l ▷ σ^ (t + s) X l j) ≈⟨ ▷-cong (A i k) (≈-sym σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ) ⟩
-      A i    k   ▷ σ^ (t + r) X k   j    ∎)
-      where open POR ≤₊-poset
+  -- Any edge that cuts the fixed set is -always- less than the minimum edge
+  eₘᵢₙ-isMinₜ₊ₛ : ∀ {e} → e ↷ C → ∀ s →
+                  weightₑ (t + s) eₘᵢₙ ≤₊ weightₑ (t + s) e
+  eₘᵢₙ-isMinₜ₊ₛ {e} e↷C s = begin
+    weightₑ (t + s) eₘᵢₙ  ≈⟨ e↷C⇒w[t+s]≡w[t] eₘᵢₙ↷C s ⟩
+    weightₑ t       eₘᵢₙ  ≤⟨ lookup (f[argmin]≤f[xs] eₐ (cutset C)) (↷⇒∈cutset e↷C) ⟩
+    weightₑ t       e     ≈⟨ ≈-sym (e↷C⇒w[t+s]≡w[t] e↷C s) ⟩
+    weightₑ (t + s) e     ∎
 
 
 
-  ------------------------------------------------------------------------------
-  -- Any "real" route ending in a node outside of the fixed set is worse
-  -- than that ending with the minimal edge.
+-- Safe extension
+
+  safe-extension : ∀ {s r i k l} → σ (t + r) X k j ≈ A k l ▷ (σ (t + s) X l j) →
+                   eₘᵢₙ ≤[ t + s ] (k , l) → eₘᵢₙ ≤[ t + r ] (i , k)
+  safe-extension {s} {r} {i} {k} {l} σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ eₘᵢₙ≤kl = (begin
+    A iₘᵢₙ kₘᵢₙ ▷ σ (t + r) X kₘᵢₙ j   ≈⟨ ▷-cong (A iₘᵢₙ kₘᵢₙ) (𝓒-eq t kₘᵢₙ r s kₘᵢₙ∈𝓒ₜ) ⟩
+    A iₘᵢₙ kₘᵢₙ ▷ σ (t + s) X kₘᵢₙ j   ≤⟨ eₘᵢₙ≤kl ⟩
+    A k l ▷ σ (t + s) X l j           ≤⟨ isIncreasing (A i k) (A k l ▷ σ (t + s) X l j) ⟩
+    A i k ▷ (A k l ▷ σ (t + s) X l j) ≈⟨ ▷-cong (A i k) (≈-sym σ¹⁺ᵗ⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ) ⟩
+    A i    k   ▷ σ (t + r) X k   j    ∎)
 
 
-  ∈𝓡-invalid : ∀ s {i k} →
-                  path (σ^ (t + s) X k j) ≈ₚ invalid →
-                  eₘᵢₙ ≤[ t + s ] (i , k)
-  ∈𝓡-invalid s {i} {k} p[σᵗ⁺ˢXₖⱼ]≈∅ = begin
-    A iₘᵢₙ kₘᵢₙ ▷ σ^ (t + s) X kₘᵢₙ j ≤⟨ ⊕-identityˡ _ ⟩
-    ∞#                               ≈⟨ ≈-sym (▷-fixedPoint (A i k)) ⟩
-    A i    k    ▷ ∞#                 ≈⟨ ▷-cong (A i k) (≈-sym (path[r]≈∅⇒r≈∞ p[σᵗ⁺ˢXₖⱼ]≈∅)) ⟩
-    A i    k    ▷ σ^ (t + s) X k j   ∎
-    where open POR ≤₊-poset
+------------------------------------------------------------------------------
+-- Any "real" route ending in a node outside of the fixed set is worse
+-- than that ending with the minimal edge.
 
-  ∈𝓡-trivial : ∀ s {i k} → k ∉ C →
-                  path (σ^ (t + s) X k j) ≈ₚ valid [] →
-                  eₘᵢₙ ≤[ t + s ] (i , k)
-  ∈𝓡-trivial s {i} {k} k∉C p[σᵗ⁺ˢXₖⱼ]≈[]
-    with p[FXᵢⱼ]≈[]⇒i≡j (σ^ (t-1 + s) X) k j p[σᵗ⁺ˢXₖⱼ]≈[]
-  ... | refl = contradiction j∈C k∉C
 
-  ∈𝓡 : ∀ s i {k} → k ∈ᵤ 𝓡 (t + s) → k ∉ C →
-          ∀ {p} → path (σ^ (t + s) X k j) ≈ₚ p →
-          eₘᵢₙ ≤[ t + s ] (i , k)
-  ∈𝓡 s i _      _    {invalid}  p[σᵗ⁺ˢXₖⱼ]≈∅  = ∈𝓡-invalid s p[σᵗ⁺ˢXₖⱼ]≈∅
-  ∈𝓡 s i k∈Rₛ₊ₜ k∉C {valid []} p[σᵗ⁺ˢXₖⱼ]≈[] = ∈𝓡-trivial s k∉C p[σᵗ⁺ˢXₖⱼ]≈[]
-  ∈𝓡 s i k∈Rₛ₊ₜ k∉C {valid ((_ , l) ∷ p ∣ _ ∣ _)} p[σᵗ⁺ˢXₖⱼ]≈kl∷p
-    with 𝓡-path {t-1 + s} p[σᵗ⁺ˢXₖⱼ]≈kl∷p k∈Rₛ₊ₜ
-  ... | valid ([ _ , l∈Rₛ₊ₜ ]∷ _)
+∈𝓡-invalid : ∀ s {i k} →
+                path (σ (t + s) X k j) ≈ₚ invalid →
+                eₘᵢₙ ≤[ t + s ] (i , k)
+∈𝓡-invalid s {i} {k} p[σᵗ⁺ˢXₖⱼ]≈∅ = begin
+  A iₘᵢₙ kₘᵢₙ ▷ σ (t + s) X kₘᵢₙ j ≤⟨ ⊕-identityˡ _ ⟩
+  ∞#                               ≈⟨ ≈-sym (▷-fixedPoint (A i k)) ⟩
+  A i    k    ▷ ∞#                 ≈⟨ ▷-cong (A i k) (≈-sym (path[r]≈∅⇒r≈∞ p[σᵗ⁺ˢXₖⱼ]≈∅)) ⟩
+  A i    k    ▷ σ (t + s) X k j    ∎
+
+∈𝓡-trivial : ∀ s {i k} → k ∉ C →
+                path (σ (t + s) X k j) ≈ₚ valid [] →
+                eₘᵢₙ ≤[ t + s ] (i , k)
+∈𝓡-trivial s {i} {k} k∉C p[σᵗ⁺ˢXₖⱼ]≈[]
+  with p[FXᵢⱼ]≈[]⇒i≡j (σ (t-1 + s) X) k j p[σᵗ⁺ˢXₖⱼ]≈[]
+... | refl = contradiction j∈C k∉C
+
+∈𝓡 : ∀ s i {k} → k ∈ᵤ 𝓡 (t + s) → k ∉ C →
+        ∀ {p} → path (σ (t + s) X k j) ≈ₚ p →
+        eₘᵢₙ ≤[ t + s ] (i , k)
+∈𝓡 s i _      _   {invalid}  p[σᵗ⁺ˢXₖⱼ]≈∅  = ∈𝓡-invalid s p[σᵗ⁺ˢXₖⱼ]≈∅
+∈𝓡 s i k∈Rₛ₊ₜ k∉C {valid []} p[σᵗ⁺ˢXₖⱼ]≈[] = ∈𝓡-trivial s k∉C p[σᵗ⁺ˢXₖⱼ]≈[]
+∈𝓡 s i k∈Rₛ₊ₜ k∉C {valid ((_ , l) ∷ p ∣ _ ∣ _)} p[σᵗ⁺ˢXₖⱼ]≈kl∷p
+  with 𝓡-path {t-1 + s} p[σᵗ⁺ˢXₖⱼ]≈kl∷p k∈Rₛ₊ₜ
+... | valid ([ _ , l∈Rₛ₊ₜ ]∷ _)
     with 𝓡-alignment (t-1 + s) k∈Rₛ₊ₜ p[σᵗ⁺ˢXₖⱼ]≈kl∷p
-  ...   | refl , σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ , p[σᵗ⁺ˢXₗⱼ]≈p with l ∈? C
-  ...     | no  l∉C = safe-extension σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ (∈𝓡 s _ l∈Rₛ₊ₜ l∉C p[σᵗ⁺ˢXₗⱼ]≈p)
-  ...     | yes l∈C = safe-extension σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ (eₘᵢₙ-isMinₜ₊ₛ (k∉C , l∈C) s)
+...   | refl , σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ , p[σᵗ⁺ˢXₗⱼ]≈p with l ∈? C
+...     | no  l∉C = safe-extension σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ (∈𝓡 s _ l∈Rₛ₊ₜ l∉C p[σᵗ⁺ˢXₗⱼ]≈p)
+...     | yes l∈C = safe-extension σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ (eₘᵢₙ-isMinₜ₊ₛ (k∉C , l∈C) s)

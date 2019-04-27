@@ -24,15 +24,12 @@ module RoutingLib.Data.Fin.Properties where
 -- Ordering properties --
 -------------------------
 
--- stdlib
 ≤-respₗ-≡ : ∀ {n} → (_≤_ {n}) Respectsʳ _≡_
 ≤-respₗ-≡ refl x≤y = x≤y
 
--- stdlib
 ≤-respᵣ-≡ : ∀ {n} → (_≤_ {n}) Respectsˡ _≡_
 ≤-respᵣ-≡ refl x≤y = x≤y
 
--- stdlib
 ≤-resp₂-≡ : ∀ {n} → (_≤_ {n}) Respects₂ _≡_
 ≤-resp₂-≡ = ≤-respₗ-≡ , ≤-respᵣ-≡
 
@@ -58,7 +55,7 @@ toℕ-mono-< i<j = i<j
 
 fromℕ≤-cong : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
                i ≡ j → fromℕ≤ i<n ≡ fromℕ≤ j<n
-fromℕ≤-cong i<n j<n refl = cong fromℕ≤ (ℕₚ.≤-irrelevance i<n j<n)
+fromℕ≤-cong i<n j<n refl = cong fromℕ≤ (ℕₚ.≤-irrelevant i<n j<n)
 
 fromℕ≤-injective : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
                     fromℕ≤ i<n ≡ fromℕ≤ j<n → i ≡ j

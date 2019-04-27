@@ -1,7 +1,23 @@
-open import Data.Fin.Dec using (_∈?_)
+--------------------------------------------------------------------------
+-- Agda routing library
+--
+-- A proof that if F is a dynamic AMCO then F is also a dynamic ACO.
+--------------------------------------------------------------------------
+
 open import Data.Fin.Subset using (Subset) renaming (_∈_ to _∈ₛ_; _∉_ to _∉ₛ_; ⊤ to ⊤ₛ)
+open import Relation.Unary using (Pred; _∈_)
+
+open import RoutingLib.Iteration.Asynchronous.Dynamic using (AsyncIterable; Epoch)
+open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions using (PartialACO; PartialAMCO)
+
+module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.AMCOImpliesACO
+  {a ℓ n} {I∥ : AsyncIterable a ℓ n}
+  {q} {Q : Pred (Subset n) q}
+  (amco : PartialAMCO I∥ Q) where
+
+open import Data.Fin.Dec using (_∈?_)
 open import Data.Nat using (ℕ; _≤_; _<_; z≤n; s≤s; zero; suc; _+_; _∸_; ≤-pred)
-open import Data.Nat.Properties hiding (module ≤-Reasoning; _≟_)
+open import Data.Nat.Properties hiding (_≟_)
 open import Data.Product using (∃; ∃₂; _×_; _,_; proj₁; proj₂)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Unit using (⊤; tt)
@@ -12,30 +28,22 @@ open import Relation.Binary using (Rel; Decidable; _Respects_; _Preserves₂_⟶
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; subst; cong; sym; trans)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Unary using (Pred; _∈_)
 
 open import RoutingLib.Data.Table using (max)
 open import RoutingLib.Data.Table.Properties using (max[t]≤x; x≤max[t]; max-cong)
 open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
-open import RoutingLib.Data.Nat.Properties using (m+[n∸o]≤[m+n]∸o; module ≤-Reasoning)
+open import RoutingLib.Data.Nat.Properties using (m+[n∸o]≤[m+n]∸o)
 import RoutingLib.Function.Metric.Construct.Condition as Condition
 open import RoutingLib.Relation.Unary.Indexed
 open import RoutingLib.Relation.Binary.PropositionalEquality using (inspect′)
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as SubsetEquality
 import RoutingLib.Function.Reasoning as FunctionReasoning
 
-open import RoutingLib.Iteration.Asynchronous.Dynamic using (AsyncIterable; Epoch)
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Properties using (xy∈Aₚ∧x≈ₚy⇒x≈y)
-open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions using (PartialACO; PartialAMCO)
 
 open ≤-Reasoning
 
-module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.AMCOImpliesACO
-  {a ℓ n} {𝓘 : AsyncIterable a ℓ n}
-  {q} {Q : Pred (Subset n) q}
-  (amco : PartialAMCO 𝓘 Q) where
-
-open AsyncIterable 𝓘
+open AsyncIterable I∥
 open PartialAMCO amco
 
 ----------------------------------------------
@@ -219,22 +227,22 @@ F-mono-B {e} {p} p∈Q {k} {x} x∈Aₚ x∈B i with i ∈? p
 ... | no  i∉p = F-inactive e p∈Q x i∉p
 ... | yes i∈p with x ≟[ p ] x* e p∈Q
 ...   | yes x≈ₚx* = lift (begin
-  dᵢ e p∈Q (x* e p∈Q i) (F e p x        i)   ≡⟨ dᵢ-cong e p∈Q ≈ᵢ-refl (F-cong e p (xy∈Aₚ∧x≈ₚy⇒x≈y 𝓘 x∈Aₚ (x*-wellFormed e p∈Q) x≈ₚx*) i∈p) ⟩
+  dᵢ e p∈Q (x* e p∈Q i) (F e p x        i)   ≡⟨ dᵢ-cong e p∈Q ≈ᵢ-refl (F-cong e p (xy∈Aₚ∧x≈ₚy⇒x≈y I∥ x∈Aₚ (x*-wellFormed e p∈Q) x≈ₚx*) i∈p) ⟩
   dᵢ e p∈Q (x* e p∈Q i) (F e p (x* e p∈Q) i) ≡⟨ dᵢ-cong e p∈Q ≈ᵢ-refl (Fx*≈ₚx* e p∈Q i∈p) ⟩
   dᵢ e p∈Q (x* e p∈Q i) (x* e p∈Q i)         ≡⟨ x≈y⇒dᵢ≡0 e p∈Q ≈ᵢ-refl ⟩
   0                                          ≤⟨ z≤n ⟩
   r[_] e p∈Q (suc k)                         ∎)
-...   | no  x≉ₚx* = lift (v<r[k]⇒v≤r[1+k] e p∈Q (begin
+...   | no  x≉ₚx* = lift (v<r[k]⇒v≤r[1+k] e p∈Q (begin-strict
   dᵢ e p∈Q (x* e p∈Q i) (F e p x i) ≤⟨ dᵢ≤d e p∈Q (x* e p∈Q) (F e p x) i∈p ⟩
-  d e p∈Q (x* e p∈Q)   (F e p x)   <⟨ F-strContrOnFP p∈Q x∈Aₚ (Fx*≈x* e p∈Q) x≉ₚx* ⟩
-  d e p∈Q (x* e p∈Q)    x          ≤⟨ ∈B⇒d≤r p∈Q x∈B ⟩
-  r[_] e p∈Q k                     ∎))
+  d e p∈Q (x* e p∈Q)   (F e p x)    <⟨ F-strContrOnFP p∈Q x∈Aₚ (Fx*≈x* e p∈Q) x≉ₚx* ⟩
+  d e p∈Q (x* e p∈Q)    x           ≤⟨ ∈B⇒d≤r p∈Q x∈B ⟩
+  r[_] e p∈Q k                      ∎))
 
 ----------------------
 -- ACO construction --
 ----------------------
 
-aco : PartialACO 𝓘 Uᵢ Q ℓ
+aco : PartialACO I∥ Uᵢ Q ℓ
 aco = record
   { B₀-cong      = λ _ _ _ → tt
   ; F-resp-B₀    = λ _ _ _ → tt

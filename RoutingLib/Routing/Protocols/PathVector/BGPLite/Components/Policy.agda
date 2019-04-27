@@ -1,3 +1,13 @@
+--------------------------------------------------------------------------------
+-- Agda routing library
+--
+-- A simple conditional policy language inspired by that of BGP. Policy
+-- decisions can depend on any part of the route, and hence decisions can be
+-- made on its level, its communities and the path along which it was generated.
+--------------------------------------------------------------------------------
+
+module RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Policy where
+
 open import Data.Bool as 𝔹 using (Bool; true; false; _∧_; _∨_; if_then_else_)
 open import Data.Fin using (fromℕ≤)
 open import Data.Nat using (ℕ; _≟_; _+_; _≤_; zero; suc; s≤s)
@@ -17,8 +27,6 @@ open import RoutingLib.Data.Nat.Properties using (n≢1+n)
 
 open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Route
 open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Communities
-
-module RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Policy where
 
 --------------------------------------------------------------------------------
 -- A language for writing conditional expressions
@@ -84,17 +92,3 @@ apply-result (compose pol₁ pol₂) l cs p with apply-result pol₁ l cs p
   valid m es (Path.inflate (Path.inflate p i) j) ≡⟨ cong (valid m es) (inflate-inflate p i j) ⟩
   valid m es (Path.inflate p (i + j))            ∎))
   where open ≡-Reasoning
-
-
-{-
-apply-nonDecreasing : ∀ pol {l cs e p} →
-                      apply pol (valid l cs (e ∷ p)) ≰ᵣ valid l cs p
-apply-nonDecreasing pol {l} {cs} {e} {p} with apply-result pol l cs p
-...   | inj₁ v                        = {!!} --contradiction (subst (_≤ᵣ valid l cs (e ∷ p)) {!!} {!!}) λ()
-...   | inj₂ (k , ds , i , l≤k , eq)  = {!!}
-with leq
-...     | (level< k<l)          = contradiction k<l (≤⇒≯ l≤k)
-...     | (length< _ 2+|p|<|p|) = ? --contradiction 2+|p|<|p| (<⇒≯ |p|<|q|)
-...     | (plex< _ 1+|p|≡|p| _) = ? --contradiction 1+|p|≡|p| (<⇒≢ |p|<|q| ∘ sym)
-...     | (comm≤ _ e∷p≈p _)     = ? --contradiction e∷p≈p (|p|≢|q|⇒p≉q (<⇒≢ |p|<|q| ∘ sym))
--}

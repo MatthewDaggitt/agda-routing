@@ -1,3 +1,9 @@
+--------------------------------------------------------------------------------
+-- Agda routing library
+--
+-- This module takes an existing routing algebra and returns a new routing
+-- algebra with a new invalid route.
+--------------------------------------------------------------------------------
 
 open import RoutingLib.Routing.Algebra
 
@@ -8,13 +14,17 @@ open RawRoutingAlgebra A
 
 open import Algebra.FunctionProperties
 open import Data.Fin using (Fin; toℕ)
+open import Level using (_⊔_)
 open import Relation.Binary
+open import Relation.Binary.Construct.Add.Point.Equality 
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
+open import Relation.Nullary.Construct.Add.Point renaming (∙ to identity)
 
 open import RoutingLib.Algebra.Construct.Add.Identity 
-open import RoutingLib.Relation.Nullary.Construct.Add.Point renaming (∙ to identity ) 
-open import RoutingLib.Relation.Binary.Construct.Add.Point.Equality 
+
+--------------------------------------------------------------------------------
+-- Definition of the algebra
 
 infix 4 _≈ⁱ_
 infix 7 _⊕ⁱ_
@@ -23,7 +33,7 @@ infix 6 _▷ⁱ_
 Routeⁱ : Set a
 Routeⁱ = Pointed Route 
 
-_≈ⁱ_ : Rel Routeⁱ ℓ
+_≈ⁱ_ : Rel Routeⁱ (a ⊔ ℓ)
 _≈ⁱ_ = _≈∙_ _≈_
 
 ≈ⁱ-refl : Reflexive _≈ⁱ_
@@ -60,19 +70,15 @@ f∞ⁱ = f∞
 ≈ⁱ-isDecEquivalence =  ≈∙-isDecEquivalence _≈_ ≈-isDecEquivalence
 
 _≟ⁱ_ : Decidable _≈ⁱ_
-_≟ⁱ_ = ≈∙-dec _ _≟_ -- 
+_≟ⁱ_ = ≈∙-dec _ _≟_
 
 ⊕ⁱ-cong : Congruent₂ _≈ⁱ_ _⊕ⁱ_
 ⊕ⁱ-cong = ⊕∙-cong _ ≈-refl ⊕-cong 
 
-
--- TGG : how to prove this simple fact? 
-postulate []≉identity : ∀ x → ¬([ x ] ≈ⁱ identity) 
-
 ▷ⁱ-cong : ∀ {n} {i j : Fin n} (f : Step i j) → Congruent₁ _≈ⁱ_ (f ▷ⁱ_)
 ▷ⁱ-cong {_} {i} {j} f {identity} {identity} ∙≈∙  = ∙≈∙
-▷ⁱ-cong {_} {i} {j} f {[ x ]}    {identity} x≈y  = contradiction x≈y ([]≉identity x)
-▷ⁱ-cong {_} {i} {j} f {identity} {[ y ]} x≈y     = contradiction (≈ⁱ-sym x≈y) ([]≉identity y)
+▷ⁱ-cong {_} {i} {j} f {[ x ]}    {identity} x≈y  = contradiction x≈y λ()
+▷ⁱ-cong {_} {i} {j} f {identity} {[ y ]} x≈y     = contradiction (≈ⁱ-sym x≈y) λ()
 ▷ⁱ-cong {_} {i} {j} f {[ x ]} {[ y ]} x≈y with (f ▷ x) ≟ ∞# | (f ▷ y) ≟ ∞#
 ...| yes p | yes p₁ = ∙≈∙
 ...| yes p | no ¬p = contradiction (≈-trans (▷-cong f (≈-sym ([≈]-injective _ x≈y))) p) ¬p  
@@ -85,22 +91,24 @@ f∞ⁱ-reject i j ([ x ]) with  f∞ i j ▷ x ≟ ∞#
 ... | yes f∞▷x≈∞      = ∙≈∙  -- 
 ... | no  f∞▷x≉∞ = contradiction (f∞-reject i j x) f∞▷x≉∞
 
-Add-Identity : RawRoutingAlgebra a b ℓ
+Add-Identity : RawRoutingAlgebra a b (a ⊔ ℓ)
 Add-Identity = record
-    { Route              = Routeⁱ
-    ; Step               = Step
-    ; _≈_                = _≈ⁱ_
-    ; _⊕_                = _⊕ⁱ_
-    ; _▷_                = _▷ⁱ_
-    ; 0#                 = 0#ⁱ
-    ; ∞#                 = ∞#ⁱ
-    ; f∞                 = f∞ⁱ
-    ; ≈-isDecEquivalence = ≈ⁱ-isDecEquivalence 
-    ; ⊕-cong             = ⊕ⁱ-cong
-    ; ▷-cong             = ▷ⁱ-cong
-    ; f∞-reject          = f∞ⁱ-reject
-    }
+  { Route              = Routeⁱ
+  ; Step               = Step
+  ; _≈_                = _≈ⁱ_
+  ; _⊕_                = _⊕ⁱ_
+  ; _▷_                = _▷ⁱ_
+  ; 0#                 = 0#ⁱ
+  ; ∞#                 = ∞#ⁱ
+  ; f∞                 = f∞ⁱ
+  ; ≈-isDecEquivalence = ≈ⁱ-isDecEquivalence 
+  ; ⊕-cong             = ⊕ⁱ-cong
+  ; ▷-cong             = ▷ⁱ-cong
+  ; f∞-reject          = f∞ⁱ-reject
+  }
 
+--------------------------------------------------------------------------------
+-- The construction preserves the properties of a routing algebra
 
 ⊕ⁱ-sel : Selective _≈_ _⊕_ → Selective _≈ⁱ_ _⊕ⁱ_
 ⊕ⁱ-sel ⊕-sel = ⊕∙-sel _ ≈-refl ⊕-sel 
@@ -122,15 +130,11 @@ Add-Identity = record
 
 isRoutingAlgebra : IsRoutingAlgebra A → IsRoutingAlgebra Add-Identity
 isRoutingAlgebra A-isRoutingAlgebra = record
-    { ⊕-sel        = ⊕ⁱ-sel ⊕-sel
-    ; ⊕-comm       = ⊕ⁱ-comm ⊕-comm
+    { ⊕-sel        = ⊕ⁱ-sel   ⊕-sel
+    ; ⊕-comm       = ⊕ⁱ-comm  ⊕-comm
     ; ⊕-assoc      = ⊕ⁱ-assoc ⊕-assoc
-    ; ⊕-zeroʳ       = ⊕ⁱ-zeroʳ ⊕-zeroʳ 
-    ; ⊕-identityʳ   = ⊕ⁱ-identityʳ
+    ; ⊕-zeroʳ      = ⊕ⁱ-zeroʳ ⊕-zeroʳ 
+    ; ⊕-identityʳ  = ⊕ⁱ-identityʳ
     ; ▷-fixedPoint = ▷ⁱ-fixedPoint
     }
     where open IsRoutingAlgebra A-isRoutingAlgebra 
-
-
-
-

@@ -1,4 +1,6 @@
 --------------------------------------------------------------------------------
+-- Agda routing library
+--
 -- Proof that the metrics associated with a strictly increasing finite routing
 -- algebra are strictly contracting in the right ways so as to ensure that
 -- F∥ is an asynchronously metrically contracting operator (AMCO).
@@ -17,37 +19,35 @@ module RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.St
 open import Data.Fin.Subset using (Subset; _∈_)
 open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Nat hiding (_≟_)
-open import Data.Nat.Properties hiding (_≟_; module ≤-Reasoning)
+open import Data.Nat.Properties hiding (_≟_)
 open import Data.Product using (_,_; proj₁; proj₂)
 open import Data.Sum using (inj₁; inj₂)
 open import Function using (_∘_)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; sym; subst)
+import Relation.Binary.Reasoning.PartialOrder as POR
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.Table using (max)
 open import RoutingLib.Data.Table.Properties using (max[t]<x; x≤max[t])
-open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning; n≢0⇒0<n)
+open import RoutingLib.Data.Nat.Properties using (n≢0⇒0<n)
 import RoutingLib.Function.Metric.Construct.Condition as Condition
-import RoutingLib.Relation.Binary.Reasoning.PartialOrder as POR
 open import RoutingLib.Relation.Nullary.Decidable using ([_,_])
 open import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right using () 
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
-open import RoutingLib.Routing as Routing using (AdjacencyMatrix; Network)
-open import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra using (≤₊-antisym) -- tgg22 : explicity use this ≤₊-antisym
-import RoutingLib.Routing.VectorBased.Core as CoreVectorBasedRouting
-import RoutingLib.Routing.VectorBased.Core.Properties as CoreVectorBasedRoutingProperties
-import RoutingLib.Routing.VectorBased.Asynchronous as DistanceVectorRouting
-import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Properties as DistanceVectorRoutingProperties
+open import RoutingLib.Routing algebra as Routing using (AdjacencyMatrix; Network)
 import RoutingLib.Routing.Algebra.Properties.FiniteRoutingAlgebra as FiniteRoutingAlgebraProperties
-import RoutingLib.Routing.VectorBased.Asynchronous as AsyncVectorBased
+import RoutingLib.Routing.VectorBased.Synchronous                            as CoreVectorBasedRouting
+import RoutingLib.Routing.VectorBased.Synchronous.DistanceVector.Properties  as CoreVectorBasedRoutingProperties
+import RoutingLib.Routing.VectorBased.Asynchronous                           as DistanceVectorRouting
+import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Properties as DistanceVectorRoutingProperties
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Metrics as Metrics
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Properties as MetricsProperties
 
 open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
-open FiniteRoutingAlgebraProperties isRoutingAlgebra isFinite hiding (≤₊-antisym) -- tgg22 : why is hiding needed? 
+open FiniteRoutingAlgebraProperties isRoutingAlgebra isFinite
 
 open Metrics isRoutingAlgebra isFinite
 open MetricsProperties isRoutingAlgebra isFinite
@@ -55,7 +55,7 @@ open MetricsProperties isRoutingAlgebra isFinite
 --------------------------------------------------------------------------------
 -- Proof for an individual adjacency matrix
 
-module _ {n} (A : AdjacencyMatrix algebra n) where
+module _ {n} (A : AdjacencyMatrix n) where
 
   open CoreVectorBasedRouting algebra A
   open CoreVectorBasedRoutingProperties isRoutingAlgebra A
@@ -65,7 +65,7 @@ module _ {n} (A : AdjacencyMatrix algebra n) where
                     h (F X i j) ⊔ h (F Y i j) < v
   h[FXᵢⱼ]⊔h[FYᵢⱼ]<v X Y {i} {j} {v} FXᵢⱼ<FYᵢⱼ@(FXᵢⱼ≤FYᵢⱼ , FXᵢⱼ≉FYᵢⱼ) d≤v with FXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
   ...   | inj₂ FXᵢⱼ≈Iᵢⱼ = contradiction FXᵢⱼ≈Iᵢⱼ (FXᵢⱼ<FYᵢⱼ⇒FXᵢⱼ≉Iᵢⱼ X Y FXᵢⱼ<FYᵢⱼ)
-  ...   | inj₁ (k , FXᵢⱼ≈AᵢₖXₖⱼ) = begin
+  ...   | inj₁ (k , FXᵢⱼ≈AᵢₖXₖⱼ) = begin-strict
     h (F X i j) ⊔ h (F Y i j) ≡⟨ m≤n⇒n⊔m≡n (h-resp-≤ FXᵢⱼ≤FYᵢⱼ) ⟩
     h (F X i j)               ≡⟨ h-cong FXᵢⱼ≈AᵢₖXₖⱼ ⟩
     h (A i k ▷ X k j)         <⟨ h-resp-< (isStrictlyIncreasing (A i k) Xₖⱼ≉∞) ⟩
@@ -76,7 +76,7 @@ module _ {n} (A : AdjacencyMatrix algebra n) where
     where    
 
     FYᵢⱼ≰AᵢₖXₖⱼ : F Y i j ≰₊ A i k ▷ X k j
-    FYᵢⱼ≰AᵢₖXₖⱼ FYᵢⱼ≤AᵢₖXₖⱼ = FXᵢⱼ≉FYᵢⱼ (≤₊-antisym isRoutingAlgebra FXᵢⱼ≤FYᵢⱼ -- tgg22 : added isRoutingAlgebra argument 
+    FYᵢⱼ≰AᵢₖXₖⱼ FYᵢⱼ≤AᵢₖXₖⱼ = FXᵢⱼ≉FYᵢⱼ (≤₊-antisym FXᵢⱼ≤FYᵢⱼ
       (begin 
       F Y i j       ≤⟨ FYᵢⱼ≤AᵢₖXₖⱼ ⟩
       A i k ▷ X k j ≈⟨ ≈-sym FXᵢⱼ≈AᵢₖXₖⱼ ⟩
@@ -106,7 +106,7 @@ module _ {n} (A : AdjacencyMatrix algebra n) where
   ... | yes FXᵢⱼ≈FYᵢⱼ = 0<v
   ... | no  FXᵢⱼ≉FYᵢⱼ with ≤₊-total (F X i j) (F Y i j)
   ...   | inj₁ FXᵢⱼ≤FYᵢⱼ = h[FXᵢⱼ]⊔h[FYᵢⱼ]<v X Y (FXᵢⱼ≤FYᵢⱼ , FXᵢⱼ≉FYᵢⱼ) r≤v
-  ...   | inj₂ FYᵢⱼ≤FXᵢⱼ = begin
+  ...   | inj₂ FYᵢⱼ≤FXᵢⱼ = begin-strict
     h (F X i j) ⊔ h (F Y i j) ≡⟨ ⊔-comm (h (F X i j)) (h (F Y i j)) ⟩
     h (F Y i j) ⊔ h (F X i j) <⟨ h[FXᵢⱼ]⊔h[FYᵢⱼ]<v Y X (FYᵢⱼ≤FXᵢⱼ , FXᵢⱼ≉FYᵢⱼ ∘ ≈-sym) (λ k Yₖⱼ≉Xₖⱼ → subst (_≤ v) (r-sym (X k j) (Y k j)) (r≤v k (Yₖⱼ≉Xₖⱼ ∘ ≈-sym))) ⟩
     v                         ∎
@@ -115,7 +115,7 @@ module _ {n} (A : AdjacencyMatrix algebra n) where
 --------------------------------------------------------------------------------
 -- Proof for a dynamic network
 
-module _ {n} (network : Network algebra n) where
+module _ {n} (network : Network n) where
 
   open DistanceVectorRouting algebra network hiding (F)
   open DistanceVectorRoutingProperties isRoutingAlgebra network
@@ -150,7 +150,7 @@ module _ {n} (network : Network algebra n) where
 
     F-strContrOnFP : ∀ {X} → WellFormed p X → ∀ {X*} → F X* ≈ₘ X* → X ≉ₘ[ p ] X* →
                      D p X* (F X) < D p X* X
-    F-strContrOnFP {X} wfX {X*} FX*≈X* X≉X* = begin
+    F-strContrOnFP {X} wfX {X*} FX*≈X* X≉X* = begin-strict
       D p X*     (F X) ≡⟨ D-cong p (≈ₘ-sym FX*≈X*) (≈ₘ-refl {x = F′ e p X}) ⟩
       D p (F X*) (F X) <⟨ F-strContr (X*-wf e p FX*≈X*) wfX X≉X* ⟩
       D p X*     X     ∎

@@ -1,33 +1,6 @@
-open import Data.Fin using (Fin) renaming (_≟_ to _≟𝔽_)
-open import Data.Fin.Subset using (Subset; _∈_)
-open import Data.Fin.Dec using (_∈?_)
-open import Data.Nat hiding (_≟_)
-open import Data.Sum using (_⊎_; inj₁; inj₂)
-open import Data.Bool using (if_then_else_)
-open import Data.Product using (∃; _,_; proj₂)
-open import Function using (_∘_)
-open import Relation.Binary using (_Preserves₂_⟶_⟶_)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; sym)
-open import Relation.Nullary using (¬_; yes; no)
-open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Nullary.Decidable using (⌊_⌋)
-
-open import RoutingLib.Data.Table using (max; zipWith)
-open import RoutingLib.Data.Table.Properties using (max[t]<x; x≤max[t])
-open import RoutingLib.Data.Nat.Properties using (module ≤-Reasoning; n≢0⇒0<n)
-import RoutingLib.Function.Metric.Construct.Condition as Condition
-import RoutingLib.Function.Metric.Construct.MaxLift as MaxLift
-import RoutingLib.Function.Metric as Metric
-import RoutingLib.Relation.Binary.Reasoning.PartialOrder as PO-Reasoning
-
-open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
 
 open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing.Algebra.Properties.FiniteRoutingAlgebra as FiniteRoutingAlgebraProperties
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
-import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Metrics as DistanceVectorMetrics
-import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Properties as DistanceVectorMetricProperties
-import RoutingLib.Routing.Algebra.Construct.Consistent as Consistent
 
 module RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.Metrics
   {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
@@ -35,6 +8,20 @@ module RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.Metric
   (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
   (A : AdjacencyMatrix algebra n)
   where
+
+open import Data.Fin using (Fin) renaming (_≟_ to _≟𝔽_)
+open import Data.Fin.Subset using (Subset; _∈_)
+open import Data.Fin.Dec using (_∈?_)
+open import Data.Nat hiding (_≟_)
+open import Data.Bool using (if_then_else_)
+open import Relation.Nullary using (¬_; yes; no)
+open import Relation.Nullary.Decidable using (⌊_⌋)
+
+open import RoutingLib.Data.Table using (max; zipWith)
+
+import RoutingLib.Routing.Algebra.Properties.FiniteRoutingAlgebra as FiniteRoutingAlgebraProperties
+import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Metrics as DistanceVectorMetrics
+import RoutingLib.Routing.Algebra.Construct.Consistent as Consistent
 
 open Routing algebra n
 open RawRoutingAlgebra algebra

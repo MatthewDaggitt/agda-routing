@@ -13,6 +13,11 @@ import Relation.Binary.EqReasoning as EqReasoning
 
 open import RoutingLib.lmv34.Function using (_^_)
 import RoutingLib.Data.List.Sorting.InsertionSort as InsertionSort
+<<<<<<< HEAD
+=======
+import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid as PermutationEq
+open import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties
+>>>>>>> e77e6dd3328852e250b76131aa33ab781fe5d593
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
 open import RoutingLib.Data.Matrix using (SquareMatrix)

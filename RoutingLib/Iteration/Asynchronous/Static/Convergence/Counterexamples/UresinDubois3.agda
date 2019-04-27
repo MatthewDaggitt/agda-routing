@@ -1,4 +1,6 @@
 --------------------------------------------------------------------------
+-- Agda routing library
+--
 -- A counter-example of proposition 3 by Uresin & Dubois
 --------------------------------------------------------------------------
 
@@ -34,9 +36,9 @@ record SynchronousConditions {a ℓ n} (F∥ : AsyncIterable a ℓ n) p o
     σ k = (F ^ k)
 
   field
-    D₀               : IPred Sᵢ p
-    D₀-cong          : ∀ {x y} → x ∈ᵢ D₀ → x ≈ y → y ∈ᵢ D₀
-    D₀-closed        : ∀ {x} → x ∈ᵢ D₀ → F x ∈ᵢ D₀
+    B₀               : IPred Sᵢ p
+    B₀-cong          : ∀ {x y} → x ∈ᵢ B₀ → x ≈ y → y ∈ᵢ B₀
+    B₀-closed        : ∀ {x} → x ∈ᵢ B₀ → F x ∈ᵢ B₀
 
     _≤ᵢ_              : IRel Sᵢ o
     ≤ᵢ-isPartialOrder : IsIndexedPartialOrder Sᵢ _≈ᵢ_ _≤ᵢ_
@@ -45,10 +47,10 @@ record SynchronousConditions {a ℓ n} (F∥ : AsyncIterable a ℓ n) p o
   _≤_ = Lift Sᵢ _≤ᵢ_
 
   field
-    F-monotone    : ∀ {x y} → x ∈ᵢ D₀ → y ∈ᵢ D₀ → x ≤ y → F x ≤ F y
+    F-monotone    : ∀ {x y} → x ∈ᵢ B₀ → y ∈ᵢ B₀ → x ≤ y → F x ≤ F y
     F-cong        : ∀ {x y} → x ≈ y → F x ≈ F y
-    σ-decreasing  : ∀ {x} → x ∈ᵢ D₀ → ∀ k → σ (suc k) x ≤ σ k x
-    σ-converges   : ∀ {x} → x ∈ᵢ D₀ → ∃ λ k* → ∀ k → σ k* x ≈ σ (k* + k) x
+    σ-decreasing  : ∀ {x} → x ∈ᵢ B₀ → ∀ k → σ (suc k) x ≤ σ k x
+    σ-converges   : ∀ {x} → x ∈ᵢ B₀ → ∃ λ k* → ∀ k → σ k* x ≈ σ (k* + k) x
 
 
 --------------------------------------------------------------------------
@@ -135,36 +137,36 @@ F∥ = record
 --------------------------------------------------------------------------
 -- The setup above fulfils all the required properties
 
-D₀ : IPred Sᵢ _
-D₀ i x = U x
+B₀ : IPred Sᵢ _
+B₀ i x = U x
 
-_∈D₀ : S → Set _
-x ∈D₀ = ∀ i → D₀ i (x i)
+_∈B₀ : S → Set _
+x ∈B₀ = ∀ i → B₀ i (x i)
 
-D₀-cong : ∀ {x y} → x ∈D₀ → x ≈ y → y ∈D₀
-D₀-cong {_} {y} _ _ i = U-Universal (y i)
+B₀-cong : ∀ {x y} → x ∈B₀ → x ≈ y → y ∈B₀
+B₀-cong {_} {y} _ _ i = U-Universal (y i)
 
-D₀-closed : ∀ {s} → s ∈D₀ → F s ∈D₀
-D₀-closed {s} s∈D₀ i = U-Universal (s i)
+B₀-closed : ∀ {s} → s ∈B₀ → F s ∈B₀
+B₀-closed {s} s∈B₀ i = U-Universal (s i)
 
-F-monotone : ∀ {x y} → x ∈D₀ → y ∈D₀ → x ≤ y → F x ≤ F y
+F-monotone : ∀ {x y} → x ∈B₀ → y ∈B₀ → x ≤ y → F x ≤ F y
 F-monotone _ _ x≼y i = x≼y i
 
 σᵏ≗id : ∀ k x → x ≈ σ k x
 σᵏ≗id zero    x i = refl
 σᵏ≗id (suc k) x i = σᵏ≗id k x i
 
-σ-decreasing : ∀ {x} → x ∈D₀ → ∀ k → σ (suc k) x ≤ σ k x
+σ-decreasing : ∀ {x} → x ∈B₀ → ∀ k → σ (suc k) x ≤ σ k x
 σ-decreasing _ k i = refl
 
-σ-converges : ∀ {x} → x ∈D₀ → ∃ λ k* → ∀ k → σ k* x ≈ σ (k* + k) x
+σ-converges : ∀ {x} → x ∈B₀ → ∃ λ k* → ∀ k → σ k* x ≈ σ (k* + k) x
 σ-converges {x} _ = 0 , λ k → σᵏ≗id k x
 
 syncConditions : SynchronousConditions F∥ _ _
 syncConditions = record
-  { D₀                = D₀
-  ; D₀-cong           = D₀-cong
-  ; D₀-closed         = λ {s} → D₀-closed {s}
+  { B₀                = B₀
+  ; B₀-cong           = B₀-cong
+  ; B₀-closed         = λ {s} → B₀-closed {s}
   ; _≤ᵢ_              = _≡_
   ; ≤ᵢ-isPartialOrder = ≡-isIndexedPartialOrder
   ; F-monotone        = F-monotone

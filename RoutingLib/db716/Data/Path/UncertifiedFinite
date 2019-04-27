@@ -1,3 +1,0 @@
-module db716.Data.Path.UncertifiedFinite where
-
-Vertex : \bN

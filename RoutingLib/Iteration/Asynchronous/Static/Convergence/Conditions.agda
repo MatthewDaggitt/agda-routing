@@ -1,4 +1,6 @@
 --------------------------------------------------------------------------------
+-- Agda routing library
+--
 -- This core module contains the definitions for the pre-conditions for a
 -- static asynchronous iteration being convergent. Users interested in using
 -- these conditions should not import them from here directly but from
@@ -43,60 +45,60 @@ open AsyncIterable I∥
 
 record ACO p : Set (a ⊔ lsuc p ⊔ ℓ) where
   field
-    D             : ℕ → IPred Sᵢ p
-    Dᵢ-cong       : ∀ {k i} → (_∈ D k i) Respects _≈ᵢ_
-    D₀-universal  : ∀ i x → x ∈ D 0 i
-    F-mono-D      : ∀ {k x} → x ∈ᵢ D k → F x ∈ᵢ D (suc k)
+    B             : ℕ → IPred Sᵢ p
+    Bᵢ-cong       : ∀ {k i} → (_∈ B k i) Respects _≈ᵢ_
+    B₀-universal  : ∀ i x → x ∈ B 0 i
+    F-mono-B      : ∀ {k x} → x ∈ᵢ B k → F x ∈ᵢ B (suc k)
 
     -- There exists a point k* after which the boxes only contain x*
     x*         : S
     k*         : ℕ
-    D-finish   : ∀ {k} → k* ≤ k → Singletonᵢ _≈_ (D k) x*
+    B-finish   : ∀ {k} → k* ≤ k → Singletonᵢ _≈_ (B k) x*
 
-  D-cong : ∀ {k} → (_∈ᵢ D k) Respects _≈_
-  D-cong x≈y x∈Dₖ i = Dᵢ-cong (x≈y i) (x∈Dₖ i)
+  B-cong : ∀ {k} → (_∈ᵢ B k) Respects _≈_
+  B-cong x≈y x∈Bₖ i = Bᵢ-cong (x≈y i) (x∈Bₖ i)
 
 record PartialACO {ℓ₁} (X₀ : IPred Sᵢ ℓ₁) ℓ₂ : Set (a ⊔ lsuc ℓ₂ ⊔ ℓ ⊔ ℓ₁) where
   field
-    D          : ℕ → IPred Sᵢ ℓ₂
+    B          : ℕ → IPred Sᵢ ℓ₂
 
-    X₀≋D₀      : X₀ ≋ᵢ D 0
+    X₀≋B₀      : X₀ ≋ᵢ B 0
     
-    Dᵢ-cong    : ∀ {k i} → (_∈ D k i) Respects _≈ᵢ_
-    F-resp-D₀  : ∀ {x} → x ∈ᵢ D 0 → F x ∈ᵢ D 0
-    F-mono-D   : ∀ {k x} → x ∈ᵢ D k → F x ∈ᵢ D (suc k)
+    Bᵢ-cong    : ∀ {k i} → (_∈ B k i) Respects _≈ᵢ_
+    F-resp-B₀  : ∀ {x} → x ∈ᵢ B 0 → F x ∈ᵢ B 0
+    F-mono-B   : ∀ {k x} → x ∈ᵢ B k → F x ∈ᵢ B (suc k)
 
     -- There exists a point k* after which the boxes only contain x*
     x*         : S
     k*         : ℕ
-    D-finish   : ∀ {k} → k* ≤ k → Singletonᵢ _≈_ (D k) x*
+    B-finish   : ∀ {k} → k* ≤ k → Singletonᵢ _≈_ (B k) x*
 
-  D-cong : ∀ {k} → (_∈ᵢ D k) Respects _≈_
-  D-cong x≈y x∈Dₖ i = Dᵢ-cong (x≈y i) (x∈Dₖ i)
+  B-cong : ∀ {k} → (_∈ᵢ B k) Respects _≈_
+  B-cong x≈y x∈Bₖ i = Bᵢ-cong (x≈y i) (x∈Bₖ i)
 
 ACO⇒partialACO : ∀ {ℓ₃} → ACO ℓ₃ → PartialACO Uᵢ ℓ₃
 ACO⇒partialACO aco = record
-  { D         = D
-  ; F-resp-D₀ = λ {x} x∈D₀ → λ i → D₀-universal i (F x i) 
-  ; X₀≋D₀     = (λ _ → D₀-universal _ _) , λ _ → tt
-  ; Dᵢ-cong   = Dᵢ-cong
-  ; F-mono-D  = F-mono-D
+  { B         = B
+  ; F-resp-B₀ = λ {x} x∈B₀ → λ i → B₀-universal i (F x i) 
+  ; X₀≋B₀     = (λ _ → B₀-universal _ _) , λ _ → tt
+  ; Bᵢ-cong   = Bᵢ-cong
+  ; F-mono-B  = F-mono-B
   ; x*        = x*
   ; k*        = k*
-  ; D-finish  = D-finish
+  ; B-finish  = B-finish
   } where open ACO aco
 
 partialACO⇒ACO : ∀ {ℓ₁ ℓ₃} {X₀ : IPred Sᵢ ℓ₁} →
                  Universalᵢ X₀ →
                  PartialACO X₀ ℓ₃ → ACO ℓ₃
 partialACO⇒ACO _∈X₀ pACO = record
-  { D            = D
-  ; Dᵢ-cong      = Dᵢ-cong
-  ; D₀-universal = λ i x → proj₁ X₀≋D₀ (x ∈X₀)
-  ; F-mono-D     = F-mono-D
+  { B            = B
+  ; Bᵢ-cong      = Bᵢ-cong
+  ; B₀-universal = λ i x → proj₁ X₀≋B₀ (x ∈X₀)
+  ; F-mono-B     = F-mono-B
   ; x*           = x*
   ; k*           = k*
-  ; D-finish     = D-finish
+  ; B-finish     = B-finish
   } where open PartialACO pACO
 
 partialACO⇒ACO′ : ∀ {ℓ₁} → PartialACO Uᵢ ℓ₁ → ACO ℓ₁
@@ -233,10 +235,10 @@ record SynchronousConditions o : Set (lsuc (a ⊔ ℓ ⊔ o)) where
     )
 
 
-record PartialSynchronousConditions {p} (D : IPred Sᵢ p) o : Set (lsuc (a ⊔ ℓ ⊔ p ⊔ o)) where
+record PartialSynchronousConditions {p} (B : IPred Sᵢ p) o : Set (lsuc (a ⊔ ℓ ⊔ p ⊔ o)) where
 
   field
-    Dᵢ-cong           : ∀ {i} → (_∈ D i) Respects _≈ᵢ_
+    Bᵢ-cong           : ∀ {i} → (_∈ B i) Respects _≈ᵢ_
     _≤ᵢ_              : IRel Sᵢ o
     ≤ᵢ-isPartialOrder : IsIndexedPartialOrder Sᵢ _≈ᵢ_ _≤ᵢ_
 
@@ -244,15 +246,15 @@ record PartialSynchronousConditions {p} (D : IPred Sᵢ p) o : Set (lsuc (a ⊔ 
   x ≤ₛ y = ∀ i → x i ≤ᵢ y i
 
   field
-    D-closed          : ∀ {x} → x ∈ᵢ D → F x ∈ᵢ D
-    F-monotone        : ∀ {x y} → x ∈ᵢ D → y ∈ᵢ D → x ≤ₛ y → F x ≤ₛ F y
-    F-decreasing      : ∀ {x} → x ∈ᵢ D → F x ≤ₛ x
+    B-closed          : ∀ {x} → x ∈ᵢ B → F x ∈ᵢ B
+    F-monotone        : ∀ {x y} → x ∈ᵢ B → y ∈ᵢ B → x ≤ₛ y → F x ≤ₛ F y
+    F-decreasing      : ∀ {x} → x ∈ᵢ B → F x ≤ₛ x
     
     -- σ converges to a unique fixed point
     x*                : S
     x*-fixed          : F x* ≈ x*
     k*                : ℕ
-    σ-convergesTo-x*  : ∀ {x} → x ∈ᵢ D → σ k* x ≈ x*
+    σ-convergesTo-x*  : ∀ {x} → x ∈ᵢ B → σ k* x ≈ x*
     
   open IsIndexedPartialOrder ≤ᵢ-isPartialOrder public
     renaming
@@ -266,8 +268,8 @@ record PartialSynchronousConditions {p} (D : IPred Sᵢ p) o : Set (lsuc (a ⊔ 
     ; antisymᵢ   to ≤ᵢ-antisym
     )
 
-  D-cong : (_∈ᵢ D) Respects _≈_
-  D-cong x≈y x∈Dₖ i = Dᵢ-cong (x≈y i) (x∈Dₖ i)
+  B-cong : (_∈ᵢ B) Respects _≈_
+  B-cong x≈y x∈Bₖ i = Bᵢ-cong (x≈y i) (x∈Bₖ i)
 
 
 
@@ -275,10 +277,10 @@ record PartialSynchronousConditions {p} (D : IPred Sᵢ p) o : Set (lsuc (a ⊔ 
 
 sync⇒partialSync : ∀ {ℓ₃} → SynchronousConditions ℓ₃ → PartialSynchronousConditions Uᵢ ℓ₃
 sync⇒partialSync sync = record
-  { Dᵢ-cong           = λ _ _ → tt
+  { Bᵢ-cong           = λ _ _ → tt
   ; _≤ᵢ_              = _≤ᵢ_
   ; ≤ᵢ-isPartialOrder = ≤ᵢ-isPartialOrder
-  ; D-closed          = λ _ _ → tt
+  ; B-closed          = λ _ _ → tt
   ; F-monotone        = λ _ _ → F-monotone
   ; F-decreasing      = λ _ → F-decreasing _
   ; x*                = x*
@@ -311,12 +313,12 @@ record FiniteConditions p o : Set (lsuc (a ⊔ ℓ ⊔ p ⊔ o)) where
   open Membership (setoid) using () renaming (_∈_ to _∈L_)
 
   field
-    D₀                : Pred Sᵢ p
-    D₀-cong           : ∀ {x y} → x ∈ D₀ → x ≈ y → y ∈ D₀
-    D₀-closed         : ∀ {x} → x ∈ D₀ → F x ∈ D₀
-    D₀-finite         : ∃ λ xs → ∀ {x} → x ∈ D₀ → x ∈L xs
+    B₀                : Pred Sᵢ p
+    B₀-cong           : ∀ {x y} → x ∈ B₀ → x ≈ y → y ∈ B₀
+    B₀-closed         : ∀ {x} → x ∈ B₀ → F x ∈ B₀
+    B₀-finite         : ∃ λ xs → ∀ {x} → x ∈ B₀ → x ∈L xs
 
-    -- ξ∈D₀              : ξ ∈ D₀
+    -- ξ∈B₀              : ξ ∈ B₀
 
     _≤ᵢ_              : IRel Sᵢ o
     ≤ᵢ-isPartialOrder : IsIndexedPartialOrder Sᵢ _≈ᵢ_ _≤ᵢ_
@@ -339,8 +341,8 @@ record FiniteConditions p o : Set (lsuc (a ⊔ ℓ ⊔ p ⊔ o)) where
 
   field
     ξ               : S
-    ξ∈D₀            : ξ ∈ D₀
-    F-strictlyDecr  : ∀ {x} → x ∈ D₀ → x ≉ ξ → F x < x
-    F-monotone      : ∀ {x y} → x ∈ D₀ → y ∈ D₀ → x ≤ y → F x ≤ F y
+    ξ∈B₀            : ξ ∈ B₀
+    F-strictlyDecr  : ∀ {x} → x ∈ B₀ → x ≉ ξ → F x < x
+    F-monotone      : ∀ {x y} → x ∈ B₀ → y ∈ B₀ → x ≤ y → F x ≤ F y
     F-cong          : ∀ {x y} → x ≈ y → F x ≈ F y
 -}

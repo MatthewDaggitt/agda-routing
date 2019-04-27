@@ -24,7 +24,7 @@ ShortestPathAlgebra = record
   ; _⊕_ = _⊓_
   ; _▷_ = _$_
   ; 0# = (N zero)
-  ; ∞ = ∞
+  ; ∞# = ∞
   ; f∞ = λ i j n → ∞
   
   ; ≈-isDecEquivalence = record

@@ -1,71 +1,66 @@
+
+
+module RoutingLib.Function.Metric.Core where
+
 open import Algebra.FunctionProperties
 open import Data.Product
-open import Level using (_⊔_)
+open import Level using (Level; _⊔_)
 open import Relation.Binary hiding (Symmetric)
 open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Construct.NonStrictToStrict as NonStrictToStrict
 open import Relation.Nullary using (¬_)
 open import Relation.Unary
 
-module RoutingLib.Function.Metric.Core {a i} {A : Set a} {I : Set i} where
-
-{-
-open Setoid S renaming (Carrier to A)
-open Poset P renaming (Carrier to I; _≈_ to _≈ᵢ_)
-open NonStrictToStrict _≈ᵢ_ _≤_ using (_<_)
-
 private
-  infix 4 _≉_
-  _≉_ : Rel A ℓ₁
-  x ≉ y = ¬ (x ≈ y)
--}
+  variable
+    a i ℓ ℓ₁ ℓ₂ : Level
+    A : Set a
+    I : Set i
 
 ------------------------------------------------------------------------
 -- Definition
 
-DistanceFunction : Set _
-DistanceFunction = A → A → I
-
-Symmetric : ∀ {ℓ} → Rel I ℓ → Pred DistanceFunction (a ⊔ ℓ)
-Symmetric _≈_ d = ∀ x y → d x y ≈ d y x
-
-Bounded : ∀ {ℓ} → Rel I ℓ → Pred DistanceFunction (a ⊔ i ⊔ ℓ)
-Bounded _≤_ d = ∃ λ n → ∀ x y → d x y ≤ n
-
-TriangleIneq : ∀ {ℓ} → Rel I ℓ → Op₂ I → Pred DistanceFunction (a ⊔ ℓ)
-TriangleIneq _≤_ _∙_ d = ∀ x y z → d x z ≤ (d x y ∙ d y z)
+Distance : Set a → Set i → Set _
+Distance A I = A → A → I
 
 ------------------------------------------------------------------------
--- Predicates over distance functions
+-- Properties
 
-{-
-Indiscernable : DistanceFunction → I → Set _
-Indiscernable d 0# = ∀ {x y} → d x y ≈ᵢ 0# → x ≈ y
+-- Basic
 
-PositiveDefinite : DistanceFunction → I → Set _
-PositiveDefinite d 0# = ∀ {x y} → x ≈ y → d x y ≈ᵢ 0#
+Indiscernability : Rel A ℓ₁ → Rel I ℓ₂ → Distance A I → I → Set _
+Indiscernability _≈ₐ_ _≈ᵢ_ d 0# = ∀ {x y} → d x y ≈ᵢ 0# → x ≈ₐ y
 
+PositiveDefinite : Rel A ℓ₁ → Rel I ℓ₂ →  Distance A I → I → Set _
+PositiveDefinite _≈ₐ_ _≈ᵢ_ d 0# = ∀ {x y} → x ≈ₐ y → d x y ≈ᵢ 0#
 
+Symmetric : Rel I ℓ → Distance A I → Set _
+Symmetric _≈_ d = ∀ x y → d x y ≈ d y x
 
-{-
--}
+TriangleIneq : Rel I ℓ → Op₂ I → Distance A I → _
+TriangleIneq _≤_ _∙_ d = ∀ x y z → d x z ≤ (d x y ∙ d y z)
 
-GeneralTriangleInequality : Op₂ I → Pred DistanceFunction (a₁ ⊔ ℓ₃)
-GeneralTriangleInequality _⊕_ d = ∀ x y z → d x z ≤ d x y ⊕ d y z
+-- Contractions
 
+Contracting : Rel I ℓ → (A → A) → Distance A I → Set _
+Contracting _≤_ f d = ∀ x y → d (f x) (f y) ≤ d x y
 
-_ContrOver_ : Op₁ A → DistanceFunction → Set _
-f ContrOver d = ∀ x y → d (f x) (f y) ≤ d x y
+ContractingOnOrbits : Rel I ℓ → (A → A) → Distance A I → Set _
+ContractingOnOrbits _≤_ f d = ∀ x → d (f x) (f (f x)) ≤ d x (f x)
 
-_StrContrOver_ : Op₁ A → DistanceFunction → Set _
-f StrContrOver d = ∀ {x y} → y ≉ x → d (f x) (f y) < d x y
+StrictlyContracting : Rel A ℓ₁ → Rel I ℓ₂ → (A → A) → Distance A I → Set _
+StrictlyContracting _≈_ _<_ f d = ∀ {x y} → ¬ (y ≈ x) → d (f x) (f y) < d x y
 
-_ContrOnOrbitsOver_ : Op₁ A → DistanceFunction → Set _
-f ContrOnOrbitsOver d = ∀ x → d (f x) (f (f x)) ≤ d x (f x)
+StrictlyContractingOnOrbits : Rel A ℓ₁ → Rel I ℓ₂ → (A → A) → Distance A I → Set _
+StrictlyContractingOnOrbits _≈_ _<_ f d = ∀ {x} → ¬ (f x ≈ x) → d (f x) (f (f x)) < d x (f x)
 
-_StrContrOnOrbitsOver_ : Op₁ A → DistanceFunction → Set _
-f StrContrOnOrbitsOver d = ∀ {x} → f x ≉ x → d (f x) (f (f x)) < d x (f x)
+StrictlyContractingOnFixedPoints : Rel A ℓ₁ → Rel I ℓ₂ → (A → A) → Distance A I → Set _
+StrictlyContractingOnFixedPoints _≈_ _<_ f d = ∀ {x x*} → f x* ≈ x* → ¬ (x ≈ x*) → d x* (f x) < d x* x
 
-_StrContrOnFixedPointOver_ : Op₁ A → DistanceFunction → Set _
-f StrContrOnFixedPointOver d = ∀ {x x*} → f x* ≈ x* → x ≉ x* → d x* (f x) < d x* x
--}
+-- Others
+
+Bounded : Rel I ℓ → Distance A I → Set _
+Bounded _≤_ d = ∃ λ n → ∀ x y → d x y ≤ n
+
+TranslationInvariant : Rel I ℓ₂ → Op₂ A → Distance A I → Set _
+TranslationInvariant _≈_ _∙_ d = ∀ {x y a} → d (x ∙ a) (y ∙ a) ≈ d x y

@@ -1,6 +1,9 @@
 open import Data.Fin using (Fin)
 open import Data.Fin.Properties using (_≟_)
 open import Data.Maybe as Maybe hiding (module Maybe)
+open import Data.Maybe.Relation.Unary.Any as MaybeAny
+open import Data.Maybe.Relation.Unary.All as MaybeAll
+open import Data.Maybe.Relation.Binary.Pointwise as MaybePointwise using (Pointwise)
 open import Data.Nat using (ℕ)
 open import Data.Product using (_×_)
 open import Level using () renaming (zero to 0ℓ)
@@ -23,11 +26,11 @@ open Certified public
   ; nonEmpty
   )
   renaming
-  ( Path to Pathᵛ
-  ; _≈ₚ_ to _≈ᵥₚ_
-  ; _∉ₚ_  to _∉ᵥₚ_
-  ; _∈ₚ_  to _∈ᵥₚ_
-  ; _⇿_  to _⇿ᵛ_
+  ( Path   to Pathᵛ
+  ; _≈ₚ_   to _≈ᵥₚ_
+  ; _∉ₚ_   to _∉ᵥₚ_
+  ; _∈ₚ_   to _∈ᵥₚ_
+  ; _⇿_    to _⇿ᵛ_
   ; length to lengthᵛ
   )
 
@@ -38,6 +41,9 @@ Path : ℕ → Set
 Path n = Maybe (Pathᵛ n)
 
 open Maybe public using () renaming (nothing to invalid; just to valid)
+open MaybePointwise public using () renaming (nothing to invalid; just to valid)
+open MaybeAll public using () renaming (nothing to invalid; just to valid)
+open MaybeAny public using () renaming (just to valid)
 
 ----------------------------------------------------------------------------
 -- Linkage
@@ -67,7 +73,7 @@ i ∈ₚ p = ¬ (i ∉ₚ p)
 infix 4 _≈ₚ_ _≉ₚ_
 
 _≈ₚ_ : ∀ {n} → Rel (Path n) 0ℓ
-_≈ₚ_ = Eq _≈ᵥₚ_
+_≈ₚ_ = Pointwise _≈ᵥₚ_
 
 _≉ₚ_ : ∀ {n} → Rel (Path n) 0ℓ
 xs ≉ₚ ys = ¬ (xs ≈ₚ ys)

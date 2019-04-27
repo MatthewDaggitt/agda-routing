@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
--- Dynamic asynchronous iterations
+-- Agda routing library
 --
--- This module contains teh definition of what it means to be a dynamic
+-- This module contains the definition of what it means to be a dynamic
 -- asynchronous iteration as well as the definition of the state function
 -- and what it means for such processes to be "correct".
 --------------------------------------------------------------------------------
@@ -242,7 +242,7 @@ module _ {a₁ a₂ ℓ₁ ℓ₂ n}
     module P = AsyncIterable I∥
     module Q = AsyncIterable J∥
 
-  record Simulates : Set (a₁ ⊔ a₂ ⊔ ℓ₁ ⊔ ℓ₂) where
+  record _Simulates_ : Set (a₁ ⊔ a₂ ⊔ ℓ₁ ⊔ ℓ₂) where
     field
       toᵢ       : ∀ {i} → P.Sᵢ i → Q.Sᵢ i
       fromᵢ     : ∀ {i} → Q.Sᵢ i → P.Sᵢ i

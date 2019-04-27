@@ -1,6 +1,6 @@
 open import Level using () renaming (zero to 0ℓ)
 open import Data.Nat
-open import Data.Nat.Properties hiding (module ≤-Reasoning; +-monoʳ-<)
+open import Data.Nat.Properties hiding (+-monoʳ-<)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (∃; _,_; _×_; proj₁; map₂)
 open import Relation.Binary
@@ -14,7 +14,6 @@ open import Algebra.FunctionProperties {A = ℕ} _≡_
 
 open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Relation.Binary
-import RoutingLib.Relation.Binary.Reasoning.StrictCore as StrictReasoning
 open import RoutingLib.Function.Metric.Nat
 
 module RoutingLib.Data.Nat.Properties where
@@ -63,20 +62,6 @@ n≤suc∘pred[n] (suc n) = s≤s ≤-refl
 ≥-decTotalOrder : DecTotalOrder 0ℓ 0ℓ 0ℓ
 ≥-decTotalOrder = Flip.decTotalOrder ≤-decTotalOrder
 
-≤-<-isOrderingPair : IsOrderingPair _≡_ _≤_ _<_
-≤-<-isOrderingPair = record
-  { isEquivalence        = isEquivalence
-  ; isPartialOrder       = ≤-isPartialOrder
-  ; isStrictPartialOrder = <-isStrictPartialOrder
-  ; <⇒≤                  = <⇒≤
-  ; ≤∧≉⇒<                = ≤∧≢⇒<
-  ; <-≤-trans            = <-transˡ
-  ; ≤-<-trans            = <-transʳ
-  }
-
-≤-<-orderingPair : OrderingPair 0ℓ 0ℓ 0ℓ 0ℓ
-≤-<-orderingPair = record { isOrderingPair = ≤-<-isOrderingPair }
-
 abstract
 
   >⇒≰ : _>_ ⇒ _≰_
@@ -99,10 +84,6 @@ abstract
 
 
   -- Equality reasoning
-
-  module ≤-Reasoning where
-    open StrictReasoning ≤-<-orderingPair public
-      hiding (_≈⟨_⟩_)
 
   n<1+n : ∀ n → n < suc n
   n<1+n n = ≤-refl
@@ -155,18 +136,18 @@ m≤∣m-n∣+n m n = subst (m ≤_) (+-comm n _) (m≤n+∣m-n∣ m n)
   where open ≤-Reasoning
 ∣-∣-triangle (suc x) (suc y) (suc z) = ∣-∣-triangle x y z
 
-∣-∣-isPreMetric : IsPreMetric _≡_ ∣_-_∣
-∣-∣-isPreMetric = record
+∣-∣-isProtoMetric : IsProtoMetric _≡_ ∣_-_∣
+∣-∣-isProtoMetric = record
   { isTotalOrder    = ≤-isTotalOrder
   ; ≈-isEquivalence = isEquivalence
   ; cong            = cong₂ ∣_-_∣
-  ; eq⇒0            = n≡m⇒∣n-m∣≡0
   ; 0#-minimum      = z≤n
   }
 
-∣-∣-preMetric : PreMetric 0ℓ 0ℓ 0ℓ 0ℓ 0ℓ
-∣-∣-preMetric = record
-  { isPreMetric = ∣-∣-isPreMetric
+∣-∣-isPreMetric : IsPreMetric _≡_ ∣_-_∣
+∣-∣-isPreMetric = record
+  { isProtoMetric = ∣-∣-isProtoMetric
+  ; eq⇒0          = n≡m⇒∣n-m∣≡0
   }
 
 ∣-∣-isQuasiSemiMetric : IsQuasiSemiMetric _≡_ ∣_-_∣
@@ -175,15 +156,21 @@ m≤∣m-n∣+n m n = subst (m ≤_) (+-comm n _) (m≤n+∣m-n∣ m n)
   ; 0⇒eq        = ∣n-m∣≡0⇒n≡m
   }
 
-∣-∣-quasiSemiMetric : QuasiSemiMetric 0ℓ 0ℓ 0ℓ 0ℓ 0ℓ
-∣-∣-quasiSemiMetric = record
-  { isQuasiSemiMetric = ∣-∣-isQuasiSemiMetric
-  }
-
 ∣-∣-isSemiMetric : IsSemiMetric _≡_ ∣_-_∣
 ∣-∣-isSemiMetric = record
   { isQuasiSemiMetric = ∣-∣-isQuasiSemiMetric
   ; sym               = ∣-∣-comm
+  }
+
+∣-∣-isMetric : IsMetric _≡_ ∣_-_∣
+∣-∣-isMetric = record
+  { isSemiMetric = ∣-∣-isSemiMetric
+  ; triangle     = ∣-∣-triangle
+  }
+
+∣-∣-quasiSemiMetric : QuasiSemiMetric 0ℓ 0ℓ 0ℓ 0ℓ 0ℓ
+∣-∣-quasiSemiMetric = record
+  { isQuasiSemiMetric = ∣-∣-isQuasiSemiMetric
   }
 
 ∣-∣-semiMetric : SemiMetric 0ℓ 0ℓ 0ℓ 0ℓ 0ℓ
@@ -191,10 +178,9 @@ m≤∣m-n∣+n m n = subst (m ≤_) (+-comm n _) (m≤n+∣m-n∣ m n)
   { isSemiMetric = ∣-∣-isSemiMetric
   }
 
-∣-∣-isMetric : IsMetric _≡_ ∣_-_∣
-∣-∣-isMetric = record
-  { isSemiMetric = ∣-∣-isSemiMetric
-  ; triangle     = ∣-∣-triangle
+∣-∣-preMetric : PreMetric 0ℓ 0ℓ 0ℓ 0ℓ 0ℓ
+∣-∣-preMetric = record
+  { isPreMetric = ∣-∣-isPreMetric
   }
 
 ∣-∣-metric : Metric 0ℓ 0ℓ
@@ -244,8 +230,6 @@ a≤b*a a b = m≤m+n _ _
 -- _⊔_ and _≤_
 
 
-m≤n⇒m≤n⊔o : ∀ {m} → _⊔_ Preservesˡ (m ≤_)
-m≤n⇒m≤n⊔o o m≤n = ≤-trans m≤n (m≤m⊔n _ o)
 
 m≤o⇒m≤n⊔o : ∀ {m} → _⊔_ Preservesʳ (m ≤_)
 m≤o⇒m≤n⊔o n m≤o = ≤-trans m≤o (n≤m⊔n n _)
@@ -280,11 +264,7 @@ n⊔o≤m⇒n≤m⊎o≤m n o n⊔o≤m = inj₁ (n⊔o≤m⇒n≤m n o n⊔o≤
 -- _⊓_ and _≤_
 
 
-m⊔n≤o⇒m≤o : ∀ {m n o} → m ⊔ n ≤ o → m ≤ o
-m⊔n≤o⇒m≤o m⊔n≤o = ≤-trans (m≤m⊔n _ _) m⊔n≤o
 
-m⊔n≤o⇒n≤o : ∀ {m n o} → m ⊔ n ≤ o → n ≤ o
-m⊔n≤o⇒n≤o m⊔n≤o = ≤-trans (n≤m⊔n _ _) m⊔n≤o
 
 n≤m⇒n⊓o≤m : ∀ {m} → _⊓_ Preservesˡ (_≤ m)
 n≤m⇒n⊓o≤m o m≤n = ≤-trans (m⊓n≤m _ o) m≤n
@@ -302,12 +282,6 @@ n≤m×o≤m⇒n⊓o≤m n≤m o≤m = n≤m⇒n⊓o≤m _ n≤m
 m≤n×m≤o⇒m≤n⊓o : ∀ {m} → _⊓_ Preservesᵇ (m ≤_)
 m≤n×m≤o⇒m≤n⊓o m≤n m≤o = subst (_≤ _) (⊓-idem _) (⊓-mono-≤ m≤n m≤o)
 
-
-m≤n⊓o⇒m≤n : ∀ {m} → _⊓_ Forcesˡ (m ≤_)
-m≤n⊓o⇒m≤n n o m≤n⊓o = ≤-trans m≤n⊓o (m⊓n≤m n o)
-
-m≤n⊓o⇒m≤o : ∀ {m} → _⊓_ Forcesʳ (m ≤_)
-m≤n⊓o⇒m≤o n o m≤n⊓o = ≤-trans m≤n⊓o (m⊓n≤n n o)
 
 m≤n⊓o⇒m≤n×m≤o : ∀ {m} → _⊓_ Forcesᵇ (m ≤_)
 m≤n⊓o⇒m≤n×m≤o n o m≤n⊓o = m≤n⊓o⇒m≤n n o m≤n⊓o , m≤n⊓o⇒m≤o n o m≤n⊓o

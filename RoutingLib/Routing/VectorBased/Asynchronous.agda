@@ -1,29 +1,40 @@
-open import Data.List.Relation.Pointwise using (tabulate⁺)
-open import Data.Fin.Subset using (Subset; _∉_)
-open import Relation.Binary.Indexed.Homogeneous using (IndexedDecSetoid)
+--------------------------------------------------------------------------------
+-- Agda routing library
+--
+-- This module contains an asynchronous implementation of an abstract vector
+-- based routing protocol designed to solve the routing problem described by the
+-- provided routing algebra.
+--------------------------------------------------------------------------------
 
-open import RoutingLib.Data.List.Relation.Pointwise using (foldr⁺)
-
-open import RoutingLib.Iteration.Asynchronous.Dynamic
-  using (IsAsyncIterable; AsyncIterable; asyncIter)
-open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
-  using (Schedule; 𝕋)
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing as Routing using (Network)
-import RoutingLib.Routing.VectorBased.Core as Core
 
 module RoutingLib.Routing.VectorBased.Asynchronous
   {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)
   {n} (network : Network algebra n)
   where
 
+open import Data.List.Relation.Binary.Pointwise using (tabulate⁺)
+open import Data.Fin.Subset using (Subset; _∉_)
+open import Relation.Binary.Indexed.Homogeneous using (IndexedDecSetoid)
+
+open import RoutingLib.Data.List.Relation.Binary.Pointwise using (foldr⁺)
+
+open import RoutingLib.Iteration.Asynchronous.Dynamic
+  using (IsAsyncIterable; AsyncIterable; asyncIter)
+open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
+  using (Schedule; 𝕋)
+import RoutingLib.Routing.VectorBased.Synchronous as Synchronous
+
 open RawRoutingAlgebra algebra
 
 ------------------------------------------------------------------------
 -- Publicly re-export core iteration and contents of routing
 
-open Core algebra public
-open Routing algebra n public hiding (Aₜ)
+open Synchronous algebra public
+  using (F; σ; F-cong)
+open Routing algebra n public
+  hiding (Aₜ)
 
 ------------------------------------------------------------------------
 -- The adjacency matrix at time e with participants p
@@ -54,7 +65,7 @@ F∥ = record
 ------------------------------------------------------------------------
 -- The asynchronous state function
 --
--- Given a schedule "𝓢" and an initial state "X" then "δ 𝓢 X t" is
+-- Given a schedule "ψ" and an initial state "X" then "δ ψ X t" is
 -- the resulting state at time "t"
 
 δ : Schedule n → RoutingMatrix → 𝕋 → RoutingMatrix

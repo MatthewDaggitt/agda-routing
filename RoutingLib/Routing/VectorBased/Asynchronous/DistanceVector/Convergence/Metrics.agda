@@ -1,3 +1,12 @@
+
+open import RoutingLib.Routing.Algebra
+
+module RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Metrics
+  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  (isFinite : IsFinite algebra)
+  where
+
 open import Data.Fin using (Fin; toℕ)
 open import Data.Fin.Subset using (Subset)
 open import Data.Fin.Dec using (_∈?_)
@@ -9,16 +18,9 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Decidable using (⌊_⌋)
 
 open import RoutingLib.Data.Table using (max; zipWith)
-
 import RoutingLib.Routing as Routing
-open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing.Algebra.Properties.FiniteRoutingAlgebra as FiniteRoutingAlgebraProperties
-
-module RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Metrics
-  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  (isFinite : IsFinite algebra)
-  where
+import RoutingLib.Routing.Algebra.Properties.FiniteRoutingAlgebra
+  as FiniteRoutingAlgebraProperties
 
 open Routing algebra
 open RawRoutingAlgebra algebra

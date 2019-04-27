@@ -1,9 +1,14 @@
 --------------------------------------------------------------------------------
+-- Agda routing library
+--
 -- This module defines the notion of a value of a route being consistent with
 -- the current network. This means that if you traversed the path along which
 -- it claims it was generated along you would arrive at the same value. For
 -- example a route may be inconsistent with the current network topology if a
 -- link on it's path has since failed or its weight has changed.
+--
+-- Using this notion it is possible to construct a new algebra using only the
+-- set of consistent routes.
 --------------------------------------------------------------------------------
 
 open import RoutingLib.Routing using (AdjacencyMatrix)

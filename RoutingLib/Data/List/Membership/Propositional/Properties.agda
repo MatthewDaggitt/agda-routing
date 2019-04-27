@@ -10,7 +10,6 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (∃; _,_; _×_; proj₂)
 open import Relation.Binary using (Setoid; Decidable; DecSetoid)
 open import Relation.Binary.PropositionalEquality using (_≡_; setoid; refl; cong; cong₂)
-open import Relation.Binary.List.Pointwise using (≡⇒Rel≡)
 open import Relation.Nullary using (yes; no)
 open import Relation.Unary using () renaming (Decidable to Decidableᵤ)
 open import Function using (_∘_; id)
@@ -18,7 +17,7 @@ open import Function using (_∘_; id)
 open import RoutingLib.Data.List using (combine; allFinPairs)
 open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 import RoutingLib.Data.List.Membership.Setoid as SetoidMembership
-open import RoutingLib.Data.List.Relation.Permutation.Inductive using (↭-pres-∈)
+open import RoutingLib.Data.List.Relation.Binary.Permutation.Inductive using (↭-pres-∈)
 
 module RoutingLib.Data.List.Membership.Propositional.Properties where
 

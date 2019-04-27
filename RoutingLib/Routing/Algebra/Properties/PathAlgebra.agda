@@ -1,4 +1,6 @@
 --------------------------------------------------------------------------------
+-- Agda routing library
+--
 -- Properties of path algebras -- note that many more properties can be found
 -- for certified path algebras.
 --------------------------------------------------------------------------------
@@ -13,6 +15,7 @@ module RoutingLib.Routing.Algebra.Properties.PathAlgebra
 
 open import Data.Fin using (toℕ)
 open import Data.Maybe renaming (just to valid; nothing to invalid)
+open import Data.Maybe.Properties using (just-injective)
 open import Data.Product using (_,_)
 open import Function using (_∘_)
 open import Relation.Binary.PropositionalEquality

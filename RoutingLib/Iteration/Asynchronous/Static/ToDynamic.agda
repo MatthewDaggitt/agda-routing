@@ -1,4 +1,6 @@
 ------------------------------------------------------------------------
+-- Agda routing library
+--
 -- This module shows that a static asynchronous iteration is merely a
 -- special type of a dynamic asynchronous iteration, and therefore
 -- convergence (and the associated pre-conditions) can be converted to
@@ -173,17 +175,17 @@ module DynamicToStaticConvergence
   k*ₛ : ℕ
   k*ₛ = k* 0 ⊤-full
 
-  x*ₛ-reached : ∀ {x₀ : S} → x₀ ∈ᵢ Uᵢ →
+  x*ₛ-reached : ∀ (x₀ : S) →
                 ∀ (ψ : Static.Schedule n) →
                 ∀ {s m : 𝕋} →
                 Static.MultiPseudocycle ψ k*ₛ [ s , m ]ₜ →
                 ∀ {e} → m ≤ e →
                 Static.asyncIter I∥ ψ x₀ e ≈ x*ₛ
-  x*ₛ-reached {x₀} _ ψ mpp {e} m≤e = [≈]-injective (begin
+  x*ₛ-reached x₀ ψ mpp {e} m≤e = [≈]-injective (begin
     [ Static.asyncIter I∥ ψ x₀ e   ]  ≈⟨ asyncIter-sim ψ x₀ (<-wellFounded e) ⟩
     Dynamic.asyncIter I∙∥ ψᵈ [ x₀ ] e ≈⟨ x*-reached IsValue[ x₀ ] ψᵈ-full ψᵈ-mpp ψᵈ-η[m,e] ⟩
-    x*∙                              ≈⟨ extract-IsValue x*∙-isValue ⟩
-    [ x*ₛ ]                          ∎)
+    x*∙                               ≈⟨ extract-IsValue x*∙-isValue ⟩
+    [ x*ₛ ]                           ∎)
     where
     open EqReasoning ≈∙-setoid
     ψᵈ        = convert ψ
@@ -204,9 +206,9 @@ open DynamicToStaticConvergence public using (dynamicToStaticConvergence)
 ------------------------------------------------------------------------
 -- Translation from static ACO to a dynamic ACO
 
-module StaticToDynamicACO {ℓ} (aco : Static.ACO I∥ ℓ) where
+module StaticToDynamicACO {ℓ} {B₀ : IPred Sᵢ ℓ} (aco : Static.PartialACO I∥ B₀ ℓ) where
 
-  open Static.ACO aco
+  open Static.PartialACO aco
   open Dynamic.AsyncIterable using (Accordant)
 
   -- Initial box
@@ -227,12 +229,10 @@ module StaticToDynamicACO {ℓ} (aco : Static.ACO I∥ ℓ) where
   B∙ e p k = Lift∙ (B k)
 
   B∙₀⊆B∙₀ₑ : ∀ e {p} .(p∈F : p ∈ Full) → B∙₀ ⊆ᵢ B∙ e p∈F 0
-  B∙₀⊆B∙₀ₑ e p∈F {i} {∙ᵢ}     ()
-  B∙₀⊆B∙₀ₑ e p∈F {i} {[ xᵢ ]ᵢ} x∈B₀ = x∈B₀
+  B∙₀⊆B∙₀ₑ e p∈F x∈B₀ = x∈B₀
 
   B∙₀ₑ⊆B∙₀ : ∀ e {p} .(p∈F : p ∈ Full) → B∙ e p∈F 0 ⊆ᵢ B∙₀
-  B∙₀ₑ⊆B∙₀ e p∈F {i} {∙ᵢ}     ()
-  B∙₀ₑ⊆B∙₀ e p∈F {i} {[ xᵢ ]ᵢ} x∈B₀ = x∈B₀
+  B∙₀ₑ⊆B∙₀ e p∈F x∈B₀ = x∈B₀
 
   B∙₀-eqᵢ : ∀ {e p} .(p∈F : p ∈ Full) → B∙₀ ≋ᵢ B∙ e p∈F 0
   B∙₀-eqᵢ {e} p∈F = (λ {i xᵢ} → B∙₀⊆B∙₀ₑ e p∈F {i} {xᵢ}) , (λ {i xᵢ} → B∙₀ₑ⊆B∙₀ e p∈F {i} {xᵢ})
@@ -246,16 +246,15 @@ module StaticToDynamicACO {ℓ} (aco : Static.ACO I∥ ℓ) where
                 ∀ {k} → k* ≤ k →
                   (x* ∈ᵢ B∙ e p∈F k) ×
                   (∀ {x} → x ∈ᵢ B∙ e p∈F k → x ≈∙ x*))
-  B∙-finish e p with B-finish
-  ... | k* , x* , res = k* , [ x* ] , λ k*≤k → x*∈B∙ₖ k*≤k , x∈B∙ₖ⇒x≈x* k*≤k
+  B∙-finish e p = k* , [ x* ] , λ k*≤k → x*∈B∙ₖ k*≤k , x∈B∙ₖ⇒x≈x* k*≤k
     where
     x*∈B∙ₖ : ∀ {k} → k* ≤ k → [ x* ] ∈ᵢ B∙ e p k
-    x*∈B∙ₖ k*≤k = proj₁ (res k*≤k)
+    x*∈B∙ₖ k*≤k = proj₁ (B-finish k*≤k)
 
     x∈B∙ₖ⇒x≈x* : ∀ {k} → k* ≤ k → ∀ {x} → x ∈ᵢ B∙ e p k → x ≈∙ [ x* ]
     x∈B∙ₖ⇒x≈x* {k} k*≤k {x} x∈B∙ₑₚₖ = begin
       x                   ≈⟨ extract-IsValue xᵥ ⟩
-      [ extractValue xᵥ ] ≈⟨ [ proj₂ (res k*≤k) (∈-extractValue xᵥ x∈B∙ₑₚₖ) ]≈ ⟩
+      [ extractValue xᵥ ] ≈⟨ [ proj₂ (B-finish k*≤k) (∈-extractValue xᵥ x∈B∙ₑₚₖ) ]≈ ⟩
       [ x*              ] ∎
       where
       open EqReasoning ≈∙-setoid

@@ -14,7 +14,7 @@ open import Relation.Nullary using (¬_; yes; no)
 open import RoutingLib.Data.NatInf
 open import RoutingLib.Data.NatInf.Properties
 open import RoutingLib.Data.Table using (Table; min∞)
-open import RoutingLib.Data.Table.All using (All)
+open import RoutingLib.Data.Table.Relation.Unary.All using (All)
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous
   using (triviallyIndexSetoid)
 

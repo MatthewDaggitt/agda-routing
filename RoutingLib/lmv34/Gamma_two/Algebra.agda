@@ -15,7 +15,7 @@ import RoutingLib.lmv34.Gamma_one.Algebra as Gamma_one_Algebra
 module RoutingLib.lmv34.Gamma_two.Algebra
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  (n : ℕ) where
+  (n : ℕ) (_●_ : ∀ {i j : Fin n} → Op₂ (RawRoutingAlgebra.Step algebra i j)) where
 
 open Routing algebra n using (RoutingMatrix; AdjacencyMatrix)
 open RawRoutingAlgebra algebra
@@ -61,5 +61,17 @@ infix 11 _↓
 _↓ : RoutingVector₂ → RoutingVector
 (I ↓) i = ⨁ₛ (λ q → I i q) 
 
-IsComposition : (A ImpProt : AdjacencyMatrix) (Exp : AdjacencyMatrixᵀ) → Set (a ⊔ ℓ)
-IsComposition A ImpProt Exp = ∀ {i j} → (s : Route) → (A i j) ▷ s ≈  (ImpProt i j) ▷ ((Exp j i) ▷ s) 
+infix 12 _●ₘ_
+_●ₘ_ : Op₂ AdjacencyMatrix
+(A ●ₘ A') i j = (A i j) ● (A' i j)
+
+infix 5 _≈ₐ_
+_≈ₐ_ : ∀ {i j : Fin n} → (f f' : Step i j) → Set (a ⊔ ℓ)
+f ≈ₐ f' = (s : Route) → f ▷ s ≈ f' ▷ s
+
+infix 5 _≈ₐ,₂_
+_≈ₐ,₂_ : AdjacencyMatrix → AdjacencyMatrix → Set (a ⊔ ℓ)
+A ≈ₐ,₂ A' = ∀ i j → (A i j) ≈ₐ (A' i j)
+
+IsComposition : AdjacencyMatrix → AdjacencyMatrix → AdjacencyMatrix → AdjacencyMatrixᵀ → Set (a ⊔ ℓ)
+IsComposition A Imp Prot Exp = A ≈ₐ,₂ ((Imp ●ₘ Prot) ●ₘ (Exp ᵀ))

@@ -8,7 +8,12 @@ import Relation.Binary.EqReasoning as EqReasoning
 open import Data.List using (List; _∷_)
 open import Level using (_⊔_)
 
+<<<<<<< HEAD:RoutingLib/Data/List/Relation/Permutation/Setoid.agda
+module RoutingLib.Data.List.Relation.Permutation.Setoid
+  {b} {ℓ} (S : Setoid b ℓ) where
+=======
 module RoutingLib.Data.List.Relation.Binary.Permutation.Setoid {b} {ℓ} (S : Setoid b ℓ) where
+>>>>>>> e77e6dd3328852e250b76131aa33ab781fe5d593:RoutingLib/Data/List/Relation/Binary/Permutation/Setoid.agda
 
 open Setoid S using (Carrier; _≈_; sym)
 
@@ -20,8 +25,8 @@ data _↭_ : Rel (List Carrier) (b ⊔ ℓ) where
   refl : ∀ {xs} → xs ↭ xs
   prep : ∀ {xs ys} {x} {x'} (eq : x ≈ x') → xs ↭ ys →
                x ∷ xs ↭ x' ∷ ys
-  swap : ∀ {xs ys} {x} {y} {x'} {y'} (eq₁ : x ≈ x') (eq₂ : y ≈ y') → xs ↭ ys →
-               x ∷ y ∷ xs ↭ y' ∷ x' ∷ ys
+  swap : ∀ {xs ys} {x} {y} {x'} {y'} (eq₁ : x ≈ x') (eq₂ : y ≈ y') →
+               xs ↭ ys → x ∷ y ∷ xs ↭ y' ∷ x' ∷ ys
   trans : ∀ {xs ys zs} → xs ↭ ys → ys ↭ zs → xs ↭ zs
 
 -- _↭_ is an equivalence

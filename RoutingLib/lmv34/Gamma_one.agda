@@ -16,6 +16,7 @@ open Gamma_one_Algebra isRoutingAlgebra n
 -- State model
 
 record Γ₁-State : Set a where
+  constructor S₁
   field
     V : RoutingVector
 
@@ -26,4 +27,4 @@ record Γ₁-State : Set a where
 Γ₁ V = A 〚 V 〛 ⊕ᵥ ~ M
 
 Γ₁-Model : Γ₁-State → Γ₁-State
-Γ₁-Model State = record { V = Γ₁ (Γ₁-State.V State) }
+Γ₁-Model (S₁ V) = S₁ (Γ₁ V)

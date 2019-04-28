@@ -75,38 +75,6 @@ module _ {a p} {A : Set a} {P : A → Set p} where
   applyDownFrom⁺₂ : ∀ f n → (∀ i → P (f i)) → All P (applyDownFrom f n)
   applyDownFrom⁺₂ f n Pf = applyDownFrom⁺₁ f n (λ _ → Pf _)
 
-{-
-  applyDownFrom⁻ : ∀ f n → All P (applyDownFrom f n) → ∀ {i} → i < n → P (f i)
-  applyDownFrom⁻ f zero    pxs        ()
-  applyDownFrom⁻ f (suc n) (px ∷ _)   (s≤s z≤n)       = {!!} --px
-  applyDownFrom⁻ f (suc n) (_  ∷ pxs) (s≤s (s≤s i<n)) = {!!}
--}
---    applyDownFrom⁻ (f ∘ suc) n pxs (s≤s i<n)
-
-{-
-------------------------------------------------------------------------
--- applyBetween
-
-module _ {a p} {A : Set a} {P : A → Set p} where
-
-  applyBetween⁺₁ : ∀ f s e → (∀ {i} → s ≤ i → i < e → P (f i)) → All P (applyBetween f s e)
-  applyBetween⁺₁ f zero    e       Pf = applyUpTo⁺₁ f e (Pf z≤n)
-  applyBetween⁺₁ f (suc s) zero    Pf = []
-  applyBetween⁺₁ f (suc s) (suc e) Pf = applyBetween⁺₁ (f ∘ suc) s e (λ s≤i i<e → Pf (s≤s s≤i) (s≤s i<e))
-
-  applyBetween⁺₂ : ∀ f s e → (∀ {i} → P (f i)) → All P (applyBetween f s e)
-  applyBetween⁺₂ f s e Pf = applyBetween⁺₁ f s e (λ _ _ → Pf)
-
-------------------------------------------------------------------------
--- between
-
-s≤betweenₛₑ : ∀ s e → All (s ≤_) (between s e)
-s≤betweenₛₑ s e = All-applyBetween⁺₁ id s e (λ s≤i _ → s≤i)
-
-betweenₛₑ<e : ∀ s e → All (_< e) (between s e)
-betweenₛₑ<e s e = All-applyBetween⁺₁ id s e (λ _ i<e → i<e)
--}
-
 ------------------------------------------------------------------------
 -- deduplicate
 
@@ -140,9 +108,6 @@ module _ {a ℓ} (S : Setoid a ℓ) where
             (∀ {x} → x ∈ xs → P (f x)) → All P (map f xs)
   map-all f {[]}     pres = []
   map-all f {x ∷ xs} pres = pres (here refl) ∷ map-all f (pres ∘ there)
-
-
-
 
 
 module _ {a₁ ℓ₁} (S₁ : Setoid a₁ ℓ₁)

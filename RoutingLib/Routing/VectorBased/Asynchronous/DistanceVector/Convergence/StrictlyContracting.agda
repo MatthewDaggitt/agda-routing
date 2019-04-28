@@ -85,7 +85,7 @@ module _ {n} (A : AdjacencyMatrix n) where
 
     Xₖⱼ≉∞ : X k j ≉ ∞#
     Xₖⱼ≉∞ Xₖⱼ≈∞ = FYᵢⱼ≰AᵢₖXₖⱼ (begin
-      F Y i j       ≤⟨ ⊕-identityˡ _ ⟩
+      F Y i j       ≤⟨ ≤₊-maximum _ ⟩
       ∞#            ≈⟨ ≈-sym (▷-fixedPoint (A i k)) ⟩
       A i k ▷ ∞#    ≈⟨ ▷-cong (A i k) (≈-sym Xₖⱼ≈∞) ⟩
       A i k ▷ X k j ∎)

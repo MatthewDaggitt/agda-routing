@@ -11,6 +11,7 @@ open import Data.Fin.Properties using (toℕ<n; fromℕ≤-toℕ)
 open import Data.Nat
 open import Data.Nat.Properties using (≤⇒≤″; +-assoc; +-comm; +-identityʳ)
 open import Data.Nat.DivMod
+open import Data.Nat.DivMod.Core
 open import Relation.Binary.PropositionalEquality
 
 open import RoutingLib.Data.Nat.DivMod.Core
@@ -25,7 +26,7 @@ a%n≤a : ∀ a n → a % (suc n) ≤ a
 a%n≤a a n = a[modₕ]n≤a 0 a n
 
 a%[1+n]≤n : ∀ a n → a % suc n ≤ n
-a%[1+n]≤n a n = mod-lemma 0 a n
+a%[1+n]≤n a n = a[modₕ]n<n 0 a n
 
 a≤n⇒a%n≡a : ∀ {a n} → a ≤ n → a % suc n ≡ a
 a≤n⇒a%n≡a {a} {n} a≤n with ≤⇒≤″ a≤n
@@ -59,7 +60,6 @@ toℕ-mod {n} i = begin
   fromℕ≤ (a%n<n (toℕ i) n)  ≡⟨ fromℕ≤-cong _ _ (a≤n⇒a%n≡a (≤-pred (toℕ<n i))) ⟩
   fromℕ≤ (toℕ<n i)          ≡⟨ fromℕ≤-toℕ i (toℕ<n i) ⟩
   i                         ∎
-
 
 +ˡ-mod : ∀ a b {n} → a mod suc n ≡ zero → (a + b) mod suc n ≡ b mod suc n
 +ˡ-mod a b eq = fromℕ≤-cong _ _ (+ˡ-% a b (fromℕ≤-injective _ (s≤s z≤n) eq))

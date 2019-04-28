@@ -35,7 +35,8 @@ open import RoutingLib.Algebra.Construct.Add.Identity as AddIdentity
   renaming (_⊕∙_ to AddIdentity) using (⊕∙-comm)
 open import RoutingLib.Algebra.Construct.Lexicographic as Lex using (Lex; Lex₂)
 open import RoutingLib.Algebra.Construct.Lexicographic.Magma as OpLexProperties′
-open import RoutingLib.Data.Path.Uncertified renaming (_∈ₚ_ to _∈ᴱ_; _∉ₚ_ to _∉̂ᴱ_; Path to EPath; _⇿_ to _⇿ᴱ_)
+open import RoutingLib.Data.Path.Uncertified
+  renaming (_∈ₚ_ to _∈ᴱ_; _∉ₚ_ to _∉ᴱ_; Path to EPath; _⇿_ to _⇿ᴱ_)
 open import RoutingLib.Data.Path.Uncertified.Choice
 open import RoutingLib.Data.Path.Uncertified.Properties
 open import RoutingLib.Relation.Nullary.Negation using (contradiction₂)
@@ -130,7 +131,6 @@ f∞⁺ = f∞
 ... | no f▷x≉∞  | no  f▷y≉∞  | no _  | _     = ∙≈∙
 ... | no f▷x≉∞  | no  f▷y≉∞  | yes _ | yes _ = ∙≈∙
 ... | no f▷x≉∞  | no  f▷y≉∞  | yes _ | no _  = [ ▷-cong f x≈y , refl ]
-
 
 f∞⁺-reject : ∀ {n} (i j : Fin n) (x : Route⁺) → f∞⁺ i j ▷⁺ x ≈⁺ ∞#⁺
 f∞⁺-reject i j invalid         = ∙≈∙
@@ -278,12 +278,27 @@ isPathAlgebra = record
 ⊕⁺-case₁ : ∀ {a b} x y  → (a ⊕ b) ≈ a → (a ⊕ b) ≉ b → valid(a , x) ⊕⁺ valid(b , y) ≈⁺ valid(a , x) 
 ⊕⁺-case₁ x y ab=a ¬ab=b = [ LexProperties.Lex-case₁ x y ab=a ¬ab=b  ]
 
+⊕⁺-case₁⁻¹ : ∀ {a b x y}  → valid(a , x) ⊕⁺ valid(b , y) ≈⁺ valid(a , x) → a ⊕ b ≈ a 
+⊕⁺-case₁⁻¹ [ fst , _ ] = fst
+
 ⊕⁺-case₂ : ∀ {a b} x y  → (a ⊕ b) ≉ a → (a ⊕ b) ≈ b → valid(a , x) ⊕⁺ valid(b , y) ≈⁺ valid(b , y) 
 ⊕⁺-case₂ x y ¬ab=a ab=b = [ LexProperties.Lex-case₂  x y ¬ab=a ab=b  ]
+
+⊕⁺-case₂⁻¹ : ∀ {a b x y}  → valid(a , x) ⊕⁺ valid(b , y) ≈⁺ valid(b , y) → a ⊕ b ≈ b 
+⊕⁺-case₂⁻¹ [ fst , _ ] = fst
 
 ⊕⁺-case₃ : ∀ {a b} x y  → (a ⊕ b) ≈ a → (a ⊕ b) ≈ b → valid(a , x) ⊕⁺ valid(b , y) ≈⁺ valid(a , x ⊓ₗₑₓ y) 
 ⊕⁺-case₃ x y ab=a ab=b = [ LexProperties.Lex-case₃ x y ab=a ab=b  ]
 
 
-≤₊⁺⇒≤⁺ : ∀ {x y p q} → valid (x , p) ⊕⁺ valid (y , q) ≈⁺ valid (x , p) → x ⊕ y ≈ x
+≤₊⁺⇒≤⁺ : ∀ {x y p q} → valid (x , p) ≤₊⁺ valid (y , q) → x ≤₊ y
 ≤₊⁺⇒≤⁺ [ x⊕y≈x , _ ] = x⊕y≈x
+
+▷⁺-accept : ∀ {n} {i j : Fin n} {f : Step⁺ i j} {x p} →
+            f ▷ x ≉ ∞# → (toℕ i , toℕ j) ⇿ᴱ p → toℕ i ∉ᴱ p → 
+            f ▷⁺ valid (x , p) ≈⁺ valid (f ▷ x , (toℕ i , toℕ j) ∷ p)
+▷⁺-accept {n} {i} {j} {f} {x} {p} f▷x≉∞ ij⇿p i∉p with f ▷ x ≟ ∞# | (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p
+... | yes f▷x≈∞ | _        | _       = contradiction f▷x≈∞ f▷x≉∞
+... | no  _     | no ¬ij⇿p | _       = contradiction ij⇿p ¬ij⇿p
+... | no  _     | yes _    | yes i∈p = contradiction i∈p i∉p
+... | no  _     | yes _    | no  _   = [ ≈-refl , refl ]

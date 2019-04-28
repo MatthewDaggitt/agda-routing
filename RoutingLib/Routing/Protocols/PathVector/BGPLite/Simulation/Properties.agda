@@ -73,7 +73,7 @@ open Min ≤ᵣ-totalOrder
 isIncreasing : IsIncreasing Aₐₗₜ
 isIncreasing {_} {_} {_} f invalid        = refl
 isIncreasing {_} {i} {j} f (valid l cs p) with ▷-result f l cs p
-... | inj₁ f▷v≡i                      = ⊕ₐₗₜ-cong f▷v≡i refl
+... | inj₁ f▷v≡i                      = sym (⊕ₐₗₜ-cong f▷v≡i refl)
 ... | inj₂ (k , ds , m , l≤k , f▷v≡r) with ≤ᵣ-total (f ▷ valid l cs p) (valid l cs p)
 ...   | inj₂ v≤f▷v = refl
 ...   | inj₁ f▷v≤v = contradiction

@@ -20,13 +20,13 @@ open import Data.Product using (proj₁; _,_)
 open import Data.Fin using (Fin)
 open import Data.Sum using (inj₁; inj₂)
 open import Relation.Nullary using (yes; no)
-open import Relation.Binary using (DecTotalOrder; StrictTotalOrder)
+open import Relation.Binary using (DecTotalOrder; StrictTotalOrder; Maximum; Minimum)
 import Relation.Binary.Construct.Converse as Converse
+import Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
 import Relation.Binary.EqReasoning as EqReasoning
 
 open import RoutingLib.Algebra
 open import RoutingLib.Algebra.Structures
-import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
 import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.DecTotalOrder as NonStrictToStrict
 
 open RawRoutingAlgebra algebra
@@ -92,6 +92,12 @@ open FunctionProperties _≈_
 ≥₊-decTotalOrder : DecTotalOrder _ _ _
 ≥₊-decTotalOrder = Converse.decTotalOrder ≤₊-decTotalOrder
 
+≤₊-minimum : Minimum _≤₊_ 0#
+≤₊-minimum x = ≈-sym (⊕-zeroʳ x)
+
+≤₊-maximum : Maximum _≤₊_ ∞#
+≤₊-maximum x = ≈-sym (⊕-identityˡ x)
+
 open DecTotalOrder ≤₊-decTotalOrder public
   using ()
   renaming
@@ -131,12 +137,12 @@ open NonStrictToStrict ≤₊-decTotalOrder public
 strIncr⇒incr : IsStrictlyIncreasing algebra → IsIncreasing algebra
 strIncr⇒incr strIncr f x with x ≟ ∞#
 ... | no  x≉∞ = proj₁ (strIncr f x≉∞)
-... | yes x≈∞ = begin
+... | yes x≈∞ = ≈-sym (begin
   (f ▷ x)  ⊕ x  ≈⟨ ⊕-cong (▷-cong f x≈∞) x≈∞ ⟩
-  (f ▷ ∞#) ⊕ ∞# ≈⟨ ⊕-cong (▷-fixedPoint f) ≈-refl ⟩
+  (f ▷ ∞#) ⊕ ∞# ≈⟨ ⊕-congʳ (▷-fixedPoint f) ⟩
   ∞#       ⊕ ∞# ≈⟨ ⊕-idem ∞# ⟩
   ∞#            ≈⟨ ≈-sym x≈∞ ⟩
-  x             ∎
+  x             ∎)
   where open EqReasoning S
 
 ------------------------------------------------------------------------------

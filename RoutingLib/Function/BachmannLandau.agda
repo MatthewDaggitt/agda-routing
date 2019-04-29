@@ -1,13 +1,17 @@
-open import Data.Nat
-open import Data.Nat.Properties
+open import Data.Nat as ℕ using (ℕ; suc; _∸_)
+-- open import Data.Nat.Properties
 open import Data.Product
+open import Data.Rational
+open import Data.Rational.Properties
 open import Function using (_∘_)
 open import Level using () renaming (zero to 0ℓ)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (sym; _≗_)
 
-open import RoutingLib.Data.Nat.Properties hiding (module ≤-Reasoning)
-open ≤-Reasoning
+open import RoutingLib.Data.Rational
+open import RoutingLib.Data.Rational.Properties
+open import RoutingLib.Data.Nat.Properties using (a≤b*a)
+-- open ≤-Reasoning
 
 module RoutingLib.Function.BachmannLandau where
 
@@ -16,24 +20,26 @@ module RoutingLib.Function.BachmannLandau where
 
 open import Relation.Unary public using (_∈_)
 
-O[_] : Rel (ℕ → ℕ) 0ℓ
+O[_] : Rel (ℚ → ℚ) 0ℓ
 O[ g ] f = ∃₂ λ c k → ∀ {n} → k ≤ n → f n ≤ c * g n
 
-Ω[_] : Rel (ℕ → ℕ) 0ℓ
-Ω[ g ] f = ∃₂ λ c-1 k → ∀ {n} → k ≤ n → (suc c-1) * g n ≤ f n
+Ω[_] : Rel (ℚ → ℚ) 0ℓ
+Ω[ g ] f = ∃₂ λ c k → 0ℚ < c → ∀ {n} → k ≤ n → c * g n ≤ f n
 
-Θ[_] : Rel (ℕ → ℕ) 0ℓ
-Θ[ g ] f = ∃₂ λ c-1 d → ∃ λ k → ∀ {n} → k ≤ n → (suc c-1) * g n ≤ f n × f n ≤ d * g n
+Θ[_] : Rel (ℚ → ℚ) 0ℓ
+Θ[ g ] f = ∃₂ λ c d → 0ℚ < c → ∃ λ k → ∀ {n} → k ≤ n → c * g n ≤ f n × f n ≤ d * g n
 
 --------------------------------------------------------------------------------
 -- Properties of O
 
 O-refl : ∀ {f} → f ∈ O[ f ]
-O-refl = 1 , 0 , λ _ → ≤-reflexive (sym (+-identityʳ _))
+O-refl = 1ℚ , 0ℚ , λ 0≤n → ≤-reflexive (sym (*-identityˡ _))
 
 O-trans : ∀ {f g h} → f ∈ O[ g ] → g ∈ O[ h ] → f ∈ O[ h ]
-O-trans {f} {g} {h} (c , k , cg≤f) (d , l , dh≤g) = {!!}
+O-trans {f} {g} {h} (c , k , cg≤f) (d , l , dh≤g) = c * d , k ⊔ l , λ {n} k⊔l≤n →
+  {!!}
 
+{-
 O-scaling⁺ : ∀ {f g a} → f ∈ O[ (λ n → a * g n) ] → f ∈ O[ g ]
 O-scaling⁺ {f} {g} {a} (c , k , f≤cag) = c * a , k , λ {n} k≤n → begin
   f n             ≤⟨ f≤cag k≤n ⟩
@@ -55,10 +61,10 @@ O-scaling⁻ {f} {g} {a} (c , k , f≤cg) = c , k , λ {n} k≤n → begin
 Ω-trans : ∀ {f g h} → f ∈ Ω[ g ] → g ∈ Ω[ h ] → f ∈ Ω[ h ]
 Ω-trans {f} {g} {h} (c-1 , k , cg≤f) (d-1 , l , dh≤g) =
   (c * d) ∸ 1 , k ⊔ l , λ {n} k⊔l≤n → begin
-  suc (c * d ∸ 1) * h n ≈⟨⟩
+  suc (c * d ∸ 1) * h n ≡⟨⟩
   c * d       * h n     ≡⟨ *-assoc c d (h n) ⟩
-  c * (d * h n)         ≤⟨ *-monoʳ-≤ c (dh≤g (m⊔n≤o⇒n≤o k⊔l≤n)) ⟩
-  c * g n               ≤⟨ cg≤f (m⊔n≤o⇒m≤o k⊔l≤n) ⟩
+  c * (d * h n)         ≤⟨ *-monoʳ-≤ c (dh≤g (m⊔n≤o⇒n≤o k l k⊔l≤n)) ⟩
+  c * g n               ≤⟨ cg≤f (m⊔n≤o⇒m≤o k l k⊔l≤n) ⟩
   f n                   ∎
   where c = suc c-1; d = suc d-1
 
@@ -82,7 +88,7 @@ O-scaling⁻ {f} {g} {a} (c , k , f≤cg) = c , k , λ {n} k≤n → begin
 
 O+Ω⇒Θ : ∀ {f g} → f ∈ O[ g ] → f ∈ Ω[ g ] → f ∈ Θ[ g ]
 O+Ω⇒Θ (d , k₂ , geq) (c , k₁ , leq) =
-  c , d , k₁ ⊔ k₂ , < leq ∘ m⊔n≤o⇒m≤o , geq ∘ m⊔n≤o⇒n≤o >
+  c , d , k₁ ⊔ k₂ , < leq ∘ m⊔n≤o⇒m≤o k₁ k₂ , geq ∘ m⊔n≤o⇒n≤o k₁ k₂ >
 
 θ-refl : ∀ {f} → f ∈ Θ[ f ]
 θ-refl = O+Ω⇒Θ O-refl Ω-refl
@@ -91,3 +97,4 @@ O+Ω⇒Θ (d , k₂ , geq) (c , k₁ , leq) =
 Θ-trans f∈Θ[g] g∈Θ[h] = O+Ω⇒Θ
   (O-trans (Θ⇒O f∈Θ[g]) (Θ⇒O g∈Θ[h]))
   (Ω-trans (Θ⇒Ω f∈Θ[g]) (Θ⇒Ω g∈Θ[h]))
+-}

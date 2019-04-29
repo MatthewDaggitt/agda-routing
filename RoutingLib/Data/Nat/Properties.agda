@@ -11,6 +11,10 @@ open import Relation.Nullary using (yes; no)
 open import Function using (_∘_)
 
 open import Algebra.FunctionProperties {A = ℕ} _≡_
+  hiding (LeftCancellative; RightCancellative; Cancellative)
+open import Algebra.FunctionProperties
+  using  (LeftCancellative; RightCancellative; Cancellative)
+import Algebra.FunctionProperties.Consequences.Propositional as Consequences
 
 open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Relation.Binary
@@ -62,39 +66,48 @@ n≤suc∘pred[n] (suc n) = s≤s ≤-refl
 ≥-decTotalOrder : DecTotalOrder 0ℓ 0ℓ 0ℓ
 ≥-decTotalOrder = Flip.decTotalOrder ≤-decTotalOrder
 
-abstract
+*-cancelʳ-< : RightCancellative _<_ _*_
+*-cancelʳ-< {zero}  zero    (suc o) _     = s≤s z≤n
+*-cancelʳ-< {suc m} zero    (suc o) _     = s≤s z≤n
+*-cancelʳ-< {m}     (suc n) (suc o) nm<om = s≤s (*-cancelʳ-< n o (+-cancelˡ-< m nm<om))
 
-  >⇒≰ : _>_ ⇒ _≰_
-  >⇒≰ = <⇒≱
+*-cancelˡ-< : LeftCancellative _<_ _*_
+*-cancelˡ-< x {y} {z} rewrite *-comm x y | *-comm x z = *-cancelʳ-< y z
 
-  ∀x≤m:n≢x⇒m<n : ∀ m n → (∀ {x} → x ≤ m → n ≢ x) → m < n
-  ∀x≤m:n≢x⇒m<n _       zero    x≤m⇒n≢x = contradiction refl (x≤m⇒n≢x z≤n)
-  ∀x≤m:n≢x⇒m<n zero    (suc n) x≤0⇒n≢x = s≤s z≤n
-  ∀x≤m:n≢x⇒m<n (suc m) (suc n) x≤m+1⇒n≢x = s≤s (∀x≤m:n≢x⇒m<n m n (λ x≤m n≡x → x≤m+1⇒n≢x (s≤s x≤m) (cong suc n≡x)))
+*-cancel-< : Cancellative _<_ _*_
+*-cancel-< = *-cancelˡ-< , *-cancelʳ-<
 
-  ∀x<m:n≢x⇒m≤n : ∀ m n → (∀ {x} → x < m → n ≢ x) → m ≤ n
-  ∀x<m:n≢x⇒m≤n zero    n       f = z≤n
-  ∀x<m:n≢x⇒m≤n (suc m) zero    f = contradiction refl (f (s≤s z≤n))
-  ∀x<m:n≢x⇒m≤n (suc m) (suc n) f = s≤s (∀x<m:n≢x⇒m≤n m n (λ x<m n≡x → f (s≤s x<m) (cong suc n≡x)))
+>⇒≰ : _>_ ⇒ _≰_
+>⇒≰ = <⇒≱
 
-  n≢0⇒0<n : ∀ {n} → n ≢ 0 → 0 < n
-  n≢0⇒0<n {zero} 0≢0 = contradiction refl 0≢0
-  n≢0⇒0<n {suc n} n+1≢0 = s≤s z≤n
+∀x≤m:n≢x⇒m<n : ∀ m n → (∀ {x} → x ≤ m → n ≢ x) → m < n
+∀x≤m:n≢x⇒m<n _       zero    x≤m⇒n≢x = contradiction refl (x≤m⇒n≢x z≤n)
+∀x≤m:n≢x⇒m<n zero    (suc n) x≤0⇒n≢x = s≤s z≤n
+∀x≤m:n≢x⇒m<n (suc m) (suc n) x≤m+1⇒n≢x = s≤s (∀x≤m:n≢x⇒m<n m n (λ x≤m n≡x → x≤m+1⇒n≢x (s≤s x≤m) (cong suc n≡x)))
+
+∀x<m:n≢x⇒m≤n : ∀ m n → (∀ {x} → x < m → n ≢ x) → m ≤ n
+∀x<m:n≢x⇒m≤n zero    n       f = z≤n
+∀x<m:n≢x⇒m≤n (suc m) zero    f = contradiction refl (f (s≤s z≤n))
+∀x<m:n≢x⇒m≤n (suc m) (suc n) f = s≤s (∀x<m:n≢x⇒m≤n m n (λ x<m n≡x → f (s≤s x<m) (cong suc n≡x)))
+
+n≢0⇒0<n : ∀ {n} → n ≢ 0 → 0 < n
+n≢0⇒0<n {zero} 0≢0 = contradiction refl 0≢0
+n≢0⇒0<n {suc n} n+1≢0 = s≤s z≤n
 
 
 
-  -- Equality reasoning
+-- Equality reasoning
 
-  n<1+n : ∀ n → n < suc n
-  n<1+n n = ≤-refl
+n<1+n : ∀ n → n < suc n
+n<1+n n = ≤-refl
 
-  m<n⇒n≡1+o : ∀ {m n} → m < n → ∃ λ o → n ≡ suc o
-  m<n⇒n≡1+o {_} {zero} ()
-  m<n⇒n≡1+o {_} {suc o} m<n = o , refl
+m<n⇒n≡1+o : ∀ {m n} → m < n → ∃ λ o → n ≡ suc o
+m<n⇒n≡1+o {_} {zero} ()
+m<n⇒n≡1+o {_} {suc o} m<n = o , refl
 
-  <⇒≤suc : ∀ {x y} → x < y → x ≤ suc y
-  <⇒≤suc (s≤s z≤n)       = z≤n
-  <⇒≤suc (s≤s (s≤s x<y)) = s≤s (<⇒≤suc (s≤s x<y))
+<⇒≤suc : ∀ {x y} → x < y → x ≤ suc y
+<⇒≤suc (s≤s z≤n)       = z≤n
+<⇒≤suc (s≤s (s≤s x<y)) = s≤s (<⇒≤suc (s≤s x<y))
 
 ------------------------------------------------------------------------
 -- Distance

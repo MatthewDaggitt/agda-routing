@@ -86,9 +86,9 @@ is in:
 [RoutingLib.Routing.Algebra.Construct.AddPaths](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/Algebra/Construct/AddPaths.agda)
 
 * Some examples of basic routing algebras can be found in:  
-[RoutingLib.Routing.Protocols.DistanceVector.ShortestPaths](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/Protocols/DistanceVector/ShortestPaths.agda)
+[RoutingLib.Routing.Protocols.DistanceVector.ShortestPaths](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/Protocols/DistanceVector/ShortestPaths.agda)__
 
-[RoutingLib.Routing.Protocols.DistanceVector.WidestPaths](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/Protocols/DistanceVector/WidestPaths.agda)
+[RoutingLib.Routing.Protocols.DistanceVector.WidestPaths](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/Protocols/DistanceVector/WidestPaths.agda)__
 
 [RoutingLib.Routing.Protocols.DistanceVector.ShortestWidestPaths](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/Protocols/DistanceVector/ShortestWidestPaths.agda)
 

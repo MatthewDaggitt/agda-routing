@@ -1,23 +1,22 @@
+{-# OPTIONS --allow-unsolved-metas #-}
+
 open import Algebra.FunctionProperties
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties using () renaming (setoid to Fin-setoid)
 open import Data.Nat using (ℕ; zero; suc)
 open import Data.Product using (_,_; _×_)
 open import Data.List using (List; []; _∷_; filter; tabulate; map)
+open import Level using (Level)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (¬?; contradiction)
 open import Relation.Unary using (Pred; Decidable)
 open import Function using (_∘_)
-open import Relation.Binary using (Setoid; DecSetoid; Rel)
+open import Relation.Binary using (Setoid; DecSetoid; Rel; _Respects_)
 import Relation.Binary.EqReasoning as EqReasoning
 
 open import RoutingLib.lmv34.Function using (_^_)
 import RoutingLib.Data.List.Sorting.InsertionSort as InsertionSort
-<<<<<<< HEAD
-=======
-import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid as PermutationEq
-open import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties
->>>>>>> e77e6dd3328852e250b76131aa33ab781fe5d593
+import Data.List.Relation.Binary.Permutation.Setoid as PermutationEq
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
@@ -68,9 +67,36 @@ postulate
 Øᵥ-identityᵣ : ∀ {A} → A ⊕ᵥ Øᵥ ≈ᵥ A
 Øᵥ-identityᵣ i = Ø-identityᵣ
 
+filter-cong : ∀ {A A' : RoutingSet} {p} {P : Pred (Fin n × Route) p} {P? : Decidable P} →
+              P Respects _≈ᵣ_ → A ↭ A' → filter P? A ↭ filter P? A'  
+filter-cong P≈ refl = refl
+filter-cong P≈ (trans A=A' A'=A'') = trans (filter-cong P≈ A=A') (filter-cong P≈ A'=A'')
+filter-cong {x ∷ A} {x' ∷ A'} {P? = P?} P≈ (prep x=x' A=A') with P? x | P? x'
+... | yes Px | yes Px' = prep x=x' (filter-cong P≈ A=A')
+... | yes Px | no ¬Px' = contradiction (P≈ x=x' Px) ¬Px'
+... | no ¬Px | yes Px' = contradiction (P≈ (≈ᵣ-sym x=x') Px') ¬Px
+... | no ¬Px | no ¬Px' = filter-cong P≈ A=A'
+filter-cong {x ∷ y ∷ A} {y' ∷ x' ∷ A'} {P? = P?} P≈ (swap x=x' y=y' A=A')
+  with P? x | P? x' | P? y | P? y'
+... | yes Px | no ¬Px' | _      | _       = contradiction (P≈ x=x' Px) ¬Px'
+... | no ¬Px | yes Px' | _      | _       = contradiction (P≈ (≈ᵣ-sym x=x') Px') ¬Px
+... | _      | _       | yes Py | no ¬Py' = contradiction (P≈ y=y' Py) ¬Py'
+... | _      | _       | no ¬Py | yes Py' = contradiction (P≈ (≈ᵣ-sym y=y') Py') ¬Py
+... | yes _  | yes _   | yes _  | yes _   = {!swap (x=x' y=y' (filter-cong P≈ A=A'))!}
+... | no _   | no _    | no _   | no _    = {!filter-cong P≈ A=A'!}
+... | yes _  | yes _   | no _   | no _    = {!prep x=x' (filter-cong P≈ A=A')!}
+... | no _   | no _    | yes _  | yes _   = {!prep y=y' (filter-cong P≈ A=A')!}
+
+†-respects-≈ᵣ : (λ {(d , v) → ¬ (v ≈ ∞#)}) Respects _≈ᵣ_
+†-respects-≈ᵣ {d₁ , v₁} {d₂ , v₂} (d₁=d₂ , v₁=v₂) ¬v₁=∞# =
+  λ v₂=∞# → contradiction (≈-trans (v₁=v₂) v₂=∞#) ¬v₁=∞#
+
+†-cong : ∀ {A A' : RoutingSet} → A ↭ A' → A † ↭ A' †
+†-cong A=A' = filter-cong †-respects-≈ᵣ A=A'
+
 postulate
-  †-cong : ∀ {A A' : RoutingSet} → A ↭ A' → A † ↭ A' †
-  
+  †-cong' : ∀ {A A' : RoutingSet} → A ↭ A' → A † ↭ A' †
+
 {-†-cong : ∀ {A A' : RoutingSet} → A ↭ A' → A † ↭ A' †
 †-cong {A} {.A} refl = refl
 †-cong {A} {A'} (trans A=A' A'=A'') = trans (†-cong A=A') (†-cong A'=A'')
@@ -88,10 +114,10 @@ postulate
 ... | no ¬p | yes p | _     | _      = contradiction (≈-trans s₁=s₁' p) ¬p
 ... | _     | _     | yes p | no ¬p  = contradiction (≈-trans (≈-sym s₂=s₂') p) ¬p
 ... | _     | _     | no ¬p | yes p  = contradiction (≈-trans s₂=s₂' p) ¬p
-... | yes _ | yes _ | no _  | no _   = {!prep (d₂=d₂' , s₂=s₂') (†-cong A=A')!}
-... | no _  | no _  | yes _ | yes _  = {!prep (d₂=d₂' , s₂=s₂') (†-cong A=A')!}
+... | yes _ | yes _ | no _  | no _   = {!!}
+... | no _  | no _  | yes _ | yes _  = {!!}
 ... | no _  | no _  | no _  | no _   = {!!}
-... | yes _ | yes _ | yes _ | yes _  = {!!}-}
+... | yes _ | yes _ | yes _ | yes _  = {!†-cong {xs} {ys} A=A'!}-}
 
 []-cong : ∀ {i j} {f : Step i j} {A A'} →
           A ↭ A' → f [ A ] ↭ f [ A' ]

@@ -46,6 +46,7 @@ open Gamma_two_Algebra isRAlg n _●_
 
 open DecSetoid FinRoute-decSetoid using () renaming (_≈_ to _≈ᵣ_)
 
+------------------------------------
 -- Γ₂-State setoid
 infix 2 _≈ₛ_
 
@@ -216,9 +217,10 @@ private
     where open PropositionalEq.≡-Reasoning
 
 -- Theorem 7
-Γ₁=Γ₂ : ∀ {k} →
+Γ₁=Γ₂ : ∀ {k} → let I' = (Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ k) (~ M))
+                    O' = Γ₂,ₒ ((Γ₁ ^ k) (~ M)) in
         (Γ₂-Model ^ (3 * (suc k))) (S₂ (~ M) Øᵥ,₂ Øᵥ,₂) ≈ₛ
-        S₂ ((Γ₁ ^ (suc k)) (~ M)) ((Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ k) (~ M))) (Γ₂,ₒ ((Γ₁ ^ k) (~ M)))
+        S₂ ((Γ₁ ^ (suc k)) (~ M)) I' O'
 Γ₁=Γ₂ {zero} = begin
         (Γ₂-Model ^ 3) (S₂ (~ M) Øᵥ,₂ Øᵥ,₂)
           ≈⟨ ≈ₛ-refl ⟩

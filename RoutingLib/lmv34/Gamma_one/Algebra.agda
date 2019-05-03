@@ -19,7 +19,7 @@ import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebra
 open import RoutingLib.Data.Table using (Table)
 import RoutingLib.Data.Table.Relation.Binary.Equality as TableEquality
 import RoutingLib.Data.List.Sorting.InsertionSort as InsertionSort
-import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid as PermutationEq
+import Data.List.Relation.Binary.Permutation.Setoid as PermutationEq
 
 module RoutingLib.lmv34.Gamma_one.Algebra
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}

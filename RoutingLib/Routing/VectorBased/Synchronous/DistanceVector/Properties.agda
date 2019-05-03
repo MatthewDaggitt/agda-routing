@@ -61,7 +61,7 @@ FXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j with foldr-selective S ⊕-sel (I i
 -- Under the following assumptions about ⊕, A▷ₘ always chooses the "best"
 -- option with respect to ⊕
 FXᵢⱼ≤Aᵢₖ▷Xₖⱼ : ∀ X i j k → F X i j ≤₊ A i k ▷ X k j
-FXᵢⱼ≤Aᵢₖ▷Xₖⱼ X i j k = ≈-sym (foldr≤ᵣxs ⊕-semilattice (I i j) (∈-tabulate⁺ S k))
+FXᵢⱼ≤Aᵢₖ▷Xₖⱼ X i j k = foldr≤ᵣxs ⊕-semilattice (I i j) (∈-tabulate⁺ S k)
 
 -- After an iteration, the diagonal of the RMatrix is always the identity
 FXᵢᵢ≈Iᵢᵢ : ∀ X i → F X i i ≈ I i i
@@ -82,6 +82,6 @@ FXᵢⱼ<FYᵢⱼ⇒FXᵢⱼ≉Iᵢⱼ X Y {i} {j} FXᵢⱼ<FYᵢⱼ@(FXᵢⱼ�
 ... | yes i≡j = contradiction (FXᵢᵢ≈FYᵢᵢ X Y i≡j) FXᵢⱼ≉FYᵢⱼ
 ... | no  i≢j = <₊⇒≉ (begin-strict
   F X i j <⟨ FXᵢⱼ<FYᵢⱼ ⟩
-  F Y i j ≤⟨ ⊕-identityˡ (F Y i j) ⟩
+  F Y i j ≤⟨ ≤₊-maximum (F Y i j) ⟩
   ∞#      ≡⟨ sym (Iᵢⱼ≡∞ (i≢j ∘ sym)) ⟩
   I i j   ∎)

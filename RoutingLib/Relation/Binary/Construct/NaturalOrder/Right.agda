@@ -10,7 +10,7 @@ module RoutingLib.Relation.Binary.Construct.NaturalOrder.Right
   {a ℓ} {A : Set a} (_≈_ : Rel A ℓ) (_∙_ : Op₂ A) where
 
 -- All added to standard library
-
+{-
 open import Algebra.FunctionProperties _≈_
 
 sel⇒idem : Selective _∙_ → Idempotent _∙_
@@ -132,3 +132,4 @@ decTotalOrder : IsSemilattice _≈_ _∙_ → Selective _∙_ →
 decTotalOrder latt sel dec = record
   { isDecTotalOrder = isDecTotalOrder latt sel dec
   }
+-}

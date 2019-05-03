@@ -19,11 +19,13 @@ open import Data.Nat using (ℕ; zero; suc)
 open import Data.Product using (Σ; _,_)
 open import Data.Sum using (_⊎_)
 open import Level using (Lift; lift; _⊔_) renaming (suc to lsuc)
+open import Function using (_∘_)
 open import Relation.Nullary using (¬_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 import Relation.Binary.Construct.NonStrictToStrict as NonStrictToStrict
-import Relation.Binary.EqReasoning as EqReasonin
+import Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
+import Relation.Binary.Reasoning.Setoid as EqReasoning
 
 open import RoutingLib.Algebra
 open import RoutingLib.Algebra.Structures
@@ -31,9 +33,9 @@ open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.Table using (Table)
 import RoutingLib.Data.Path.UncertifiedI as UncertifiedPaths
 import RoutingLib.Data.Path.CertifiedI as CertifiedPaths
+open import RoutingLib.Data.Path.UncertifiedI.Properties
 import RoutingLib.Data.Matrix.Relation.Binary.DecidableEquality as MatrixDecEquality
 import RoutingLib.Data.Table.Relation.Binary.DecidableEquality as TableDecEquality
-import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
 
 --------------------------------------------------------------------------------
 -- Raw routing algebras --
@@ -99,23 +101,13 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
   DS = record { isDecEquivalence = ≈-isDecEquivalence }
 
   -- Publicly re-export some useful terminology
-  open RightNaturalOrder _≈_ _⊕_ public using () renaming ( _≤_ to _≤₊_ )
-  open NonStrictToStrict _≈_ _≤₊_ public using () renaming ( _<_ to _<₊_)
-
+  open RightNaturalOrder _≈_ _⊕_ public using () renaming (_≤_ to _≤₊_)
+  open NonStrictToStrict _≈_ _≤₊_ public using () renaming (_<_ to _<₊_)
 
   infix 4 _≉_
   _≉_ : Rel Route ℓ
   x ≉ y = ¬ (x ≈ y)
 
-  infix 4 _≰₊_
-  _≰₊_ : Rel Route ℓ
-  x ≰₊ y = ¬ (x ≤₊ y)
-
-  ≤₊-respʳ-≈ : _≤₊_ Respectsʳ _≈_
-  ≤₊-respʳ-≈ = RightNaturalOrder.respʳ _≈_  _⊕_ ≈-isEquivalence ⊕-cong  
-
-  ≤₊-respˡ-≈ : _≤₊_ Respectsˡ _≈_
-  ≤₊-respˡ-≈ = RightNaturalOrder.respˡ _≈_  _⊕_ ≈-isEquivalence ⊕-cong  
 
   ⊕-isMagma : IsMagma _≈_ _⊕_
   ⊕-isMagma = record
@@ -138,7 +130,23 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
   ⊕-decMagma = record
     { isDecMagma = ⊕-isDecMagma
     }
-  
+
+  open Magma ⊕-magma public using ()
+    renaming
+    ( ∙-congˡ to ⊕-congˡ
+    ; ∙-congʳ to ⊕-congʳ
+    )
+
+  infix 4 _≰₊_
+  _≰₊_ : Rel Route ℓ
+  x ≰₊ y = ¬ (x ≤₊ y)
+
+  ≤₊-respʳ-≈ : _≤₊_ Respectsʳ _≈_
+  ≤₊-respʳ-≈ = RightNaturalOrder.respʳ _≈_  _⊕_ ⊕-isMagma  
+
+  ≤₊-respˡ-≈ : _≤₊_ Respectsˡ _≈_
+  ≤₊-respˡ-≈ = RightNaturalOrder.respˡ _≈_  _⊕_ ⊕-isMagma
+
 --------------------------------------------------------------------------------
 -- Basic properties
 --------------------------------------------------------------------------------
@@ -292,9 +300,9 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 
 
 module PathDistributivity
-       {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
-       (isPathAlgebra : IsPathAlgebra algebra)
-       where
+  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
+  (isPathAlgebra : IsPathAlgebra algebra)
+  where
 
   open RawRoutingAlgebra algebra
   open IsPathAlgebra isPathAlgebra
@@ -314,16 +322,7 @@ module PathDistributivity
     (toℕ i , toℕ j) ⇿ path x → (toℕ i , toℕ j) ⇿ path y →
     IsLevel k PathDistributiveIn[ f ▷ (x ⊕ y) , (f ▷ x) ⊕ (f ▷ y) ]Alt
 
-  isLevelPDistrib-cong : ∀ k {w x y z} → w ≈ x → y ≈ z →
-                         IsLevel k PathDistributiveIn[ w , y ]Alt →
-                         IsLevel k PathDistributiveIn[ x , z ]Alt
-  isLevelPDistrib-cong zero    w≈x y≈z distrib = {!!}
-  isLevelPDistrib-cong (suc k) w≈x y≈z distrib = {!!}
-  
-  isLevelPDistrib-equal : ∀ k {x y} → x ≈ y → IsLevel k PathDistributiveIn[ x , y ]Alt
-  isLevelPDistrib-equal zero    x≈y = lift x≈y
-  isLevelPDistrib-equal (suc k) x≈y f _ _ _ _ _ _ _ _ = isLevelPDistrib-cong k {!!} {!!} {!!}
-  
+
   -- kᵗʰ level distributivity
   IsLevel_PathDistributiveIn[_,_] : ℕ → Route → Route → Set _
   IsLevel 0       PathDistributiveIn[ ⊥ , ⊤ ] =

@@ -27,7 +27,7 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Nullary.Construct.Add.Point renaming (∙ to invalid; [_] to valid)
 
-open import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right using (antisym) 
+import RoutingLib.Routing.Algebra.Properties.PathAlgebra as PathAlgebraProperties
 open import RoutingLib.Algebra.Construct.Add.Identity as AddIdentity
   renaming (_⊕∙_ to AddIdentity) using (⊕∙-comm)
 open import RoutingLib.Algebra.Construct.Lexicographic as Lex
@@ -36,9 +36,10 @@ open import RoutingLib.Algebra.Construct.Lexicographic.Magma as OpLexProperties�
 open import RoutingLib.Data.Path.Uncertified.Choice using (_⊓ₗₑₓ_)  --- Minₗₑₓ._⊓_
 open import RoutingLib.Data.Path.Uncertified.Properties
 open import RoutingLib.Data.Path.UncertifiedI using (Pathᵛ; Path; _∉ᵥₚ_; _∈ᵥₚ_; _⇿ᵥ_; _∈ₚ_; _∉ₚ_;_⇿_;_∷_ ) 
+open import RoutingLib.Relation.Nullary.Negation using (contradiction₂)
 
 open import RoutingLib.Routing.Algebra.Construct.AddPaths A
-     using (AddPaths; isRoutingAlgebra; isPathAlgebra; ⊕⁺-idem; ⊕⁺invalidᵣ; ⊕⁺invalidₗ; ≤₊⁺⇒≤⁺) 
+  hiding (⊕⁺-comm; ⊕⁺-identityʳ)
 
 
 open RawRoutingAlgebra A
@@ -55,19 +56,7 @@ Aᵖ : RawRoutingAlgebra a b (a ⊔ ℓ)
 Aᵖ = AddPaths
 
 open RawRoutingAlgebra Aᵖ using () renaming
-     (Route              to Route⁺ ; 
-      Step               to Step⁺  ;
-      _≈_                to _≈⁺_   ;
-      _⊕_                to _⊕⁺_   ; 
-      _▷_                to _▷⁺_   ;
-      0#                 to 0#⁺    ;
-      ∞#                 to ∞#⁺    ; 
-      f∞                 to f∞⁺    ;
-      ≈-isDecEquivalence to ≈⁺-isDecEquivalence ;
-      ⊕-cong             to ⊕⁺-cong    ; 
-      ▷-cong             to ▷⁺-cong    ;
-      f∞-reject          to f∞⁺-reject ;
-      ≤₊-respˡ-≈          to  ≤₊⁺-respˡ-≈⁺;
+     (≤₊-respˡ-≈          to  ≤₊⁺-respˡ-≈⁺;
       ≤₊-respʳ-≈          to  ≤₊⁺-respʳ-≈⁺;
       _≤₊_               to _≤₊⁺_;
       S             to S⁺
@@ -78,95 +67,48 @@ Aᵖ-IsRoutingAlgebra = isRoutingAlgebra A-IsRoutingAlgebra
      where open IsRoutingAlgebra A-IsRoutingAlgebra
 
 open IsRoutingAlgebra Aᵖ-IsRoutingAlgebra  renaming
-     (⊕-sel        to ⊕⁺-sel        ;
-      ⊕-comm       to ⊕⁺-comm       ;
-      ⊕-assoc      to ⊕⁺-assoc      ;
-      ⊕-zeroʳ      to ⊕⁺-zeroʳ       ;
-      ⊕-identityʳ  to ⊕⁺-identityʳ   ;
-      ▷-fixedPoint to ▷⁺-fixedPoint  
-      )
-
-open IsDecEquivalence ≈⁺-isDecEquivalence renaming
-     (_≟_  to _≟⁺_    ;
-      isEquivalence to ≈⁺-isEquivalence
-     )
-
-open IsEquivalence ≈⁺-isEquivalence renaming
-     (refl  to ≈⁺-refl ;
-      sym   to ≈⁺-sym ;
-      trans to ≈⁺-trans
-     )
+  ( ⊕-sel        to ⊕⁺-sel
+  ; ⊕-comm       to ⊕⁺-comm
+  ; ⊕-assoc      to ⊕⁺-assoc
+  ; ⊕-zeroʳ      to ⊕⁺-zeroʳ
+  ; ⊕-identityʳ  to ⊕⁺-identityʳ
+  ; ▷-fixedPoint to ▷⁺-fixedPoint  
+  )
 
 Aᵖ-IsPathAlgebra : IsPathAlgebra Aᵖ
 Aᵖ-IsPathAlgebra = isPathAlgebra
 
-open IsPathAlgebra Aᵖ-IsPathAlgebra 
-{-   using 
-     (path ;          
-      path-cong ;
-      r≈0⇒path[r]≈[] ;
-      r≈∞⇒path[r]≈∅ ;
-      path[r]≈∅⇒r≈∞ ;
-      path-reject    ;
-      path-accept    
-    )
--}
-
-
+open IsPathAlgebra Aᵖ-IsPathAlgebra
 open PathDistributivity Aᵖ-IsPathAlgebra
+open PathAlgebraProperties Aᵖ-IsRoutingAlgebra Aᵖ-IsPathAlgebra
 
-cong-path-distrib : ∀ a b c d  → a ≈⁺ c → b ≈⁺ d → ∀ k →
-                    IsLevel k PathDistributiveIn[ a , b ] →
-                    IsLevel k PathDistributiveIn[ c , d ]
-
-cong-path-distrib a b c d a≈⁺c b≈⁺d zero dis[a,b] {n} {i} {j} f {x} {y} c≤₊x x≤₊d c≤₊y y≤₊d i∉ₚpathx i∉ₚpathy  ij⇿pathx ij⇿pathy =  cnc
+pres-distrib : ∀ {k ⊤ ⊥} p → Level_DistributiveIn[_,_]Alt A k ⊥ ⊤ →
+               IsLevel_PathDistributiveIn[_,_]Alt k (valid (⊥ , p)) (valid (⊤ , p))
+pres-distrib {zero}  p (lift ⊥≈⊤) = Level.lift [ ⊥≈⊤ , refl ]
+pres-distrib {suc k} p _ f {invalid} {invalid} _ _ _ _ _ _ _ _ = isLevelPDistrib-equal k ∙≈∙
+pres-distrib {suc k} p _ f {invalid} {valid y} _ _ _ _ _ _ _ _ = isLevelPDistrib-equal k ≈⁺-refl
+pres-distrib {suc k} p _ f {valid x} {invalid} _ _ _ _ _ _ _ _ = isLevelPDistrib-equal k (≈⁺-sym (⊕⁺-identityʳ _))
+pres-distrib {suc k} p distrib {n} {i} {j} f {valid (x , r)} {valid (y , s)} ⊥≤x x≤⊤ ⊥≤y y≤⊤ i∉r i∉s (just ij⇿r) (just ij⇿s)
+  with distrib f (≤₊⁺⇒≤⁺ ⊥≤x) (≤₊⁺⇒≤⁺ x≤⊤) (≤₊⁺⇒≤⁺ ⊥≤y) (≤₊⁺⇒≤⁺ y≤⊤)
+... | alg-distrib with x ⊕ y ≟ x | x ⊕ y ≟ y
+...   | no  x⊕y≉x | no  x⊕y≉y = contradiction₂ (⊕-sel x y) x⊕y≉x x⊕y≉y
+...   | no  x⊕y≉x | yes x⊕y≈y = isLevelPDistrib-cong k eq₁ {!!} (pres-distrib ((toℕ i , toℕ j) ∷ s) alg-distrib)
   where
-  cnc : f ▷⁺ (x ⊕⁺ y) ≈⁺  (f ▷⁺ x) ⊕⁺ (f ▷⁺ y)
-  cnc =  dis[a,b] {n} {i} {j} f {x} {y}
-      (≤₊⁺-respˡ-≈⁺ {x} (≈⁺-sym a≈⁺c) c≤₊x) 
-      (≤₊⁺-respʳ-≈⁺ (≈⁺-sym b≈⁺d) x≤₊d)
-      (≤₊⁺-respˡ-≈⁺ {y}  (≈⁺-sym a≈⁺c) c≤₊y) 
-      (≤₊⁺-respʳ-≈⁺ (≈⁺-sym b≈⁺d) y≤₊d) 
-      i∉ₚpathx  i∉ₚpathy  ij⇿pathx ij⇿pathy  
-  
-cong-path-distrib a b c d a≈⁺c b≈⁺d (suc k) dis[a,b] {n} {i} {j} f {x} {y} c≤₊x x≤₊d c≤₊y y≤₊d i∉ₚpathx i∉ₚpathy  =  cnc
+  eq₁ : valid (f ▷ x ⊕ y , (toℕ i , toℕ j) ∷ s) ≈⁺ f ▷⁺ (valid (x ⊕ y , s))
+  eq₁ = ≈⁺-sym (▷⁺-accept {!!} ij⇿s (i∉s ∘ just))
+
+  eq₂ : valid ((f ▷ x) ⊕ (f ▷ y) , (toℕ i , toℕ j) ∷ s) ≈⁺ (f ▷⁺ valid (x , r)) ⊕⁺ (f ▷⁺ valid (y , s))
+  eq₂ with f ▷ x ≟ ∞# | f ▷ y ≟ ∞#
+  ... | yes f▷x≈∞ | yes f▷y≈∞ = contradiction {!!} x⊕y≉x
+  ... | yes _     | no      _ = {!!}
+  ... | no  _     | yes _     = {!!}
+  ... | no  _     | no  _     = ≈⁺-trans {!!} {!!}
+
+...   | yes x⊕y≈x | no  x⊕y≉y = isLevelPDistrib-cong k {!!} {!!} (pres-distrib ((toℕ i , toℕ j) ∷ r) alg-distrib)
+...   | yes x⊕y≈x | yes x⊕y≈y = isLevelPDistrib-cong k eq₁ {!!}  (pres-distrib ((toℕ i , toℕ j) ∷ (r ⊓ₗₑₓ s)) alg-distrib)
   where
-  cnc : IsLevel k PathDistributiveIn[ f ▷⁺ (x ⊕⁺ y) ,  (f ▷⁺ x) ⊕⁺ (f ▷⁺ y)  ]
-  cnc =  dis[a,b] {n} {i} {j} f {x} {y}
-      (≤₊⁺-respˡ-≈⁺ {x} (≈⁺-sym a≈⁺c) c≤₊x) 
-      (≤₊⁺-respʳ-≈⁺ (≈⁺-sym b≈⁺d) x≤₊d) 
-      (≤₊⁺-respˡ-≈⁺ {y}  (≈⁺-sym a≈⁺c) c≤₊y) 
-      (≤₊⁺-respʳ-≈⁺ (≈⁺-sym b≈⁺d) y≤₊d) 
-      i∉ₚpathx  i∉ₚpathy
+  eq₁ : valid (f ▷ x ⊕ y , (toℕ i , toℕ j) ∷ (r ⊓ₗₑₓ s)) ≈⁺ f ▷⁺ (valid (x ⊕ y , r ⊓ₗₑₓ s))
+  eq₁ = ≈⁺-sym (▷⁺-accept {!!} {!!} {!!})
 
-
-≤₊⁺-antisym : Antisymmetric _≈⁺_ _≤₊⁺_
-≤₊⁺-antisym = antisym _ _ ≈⁺-isEquivalence ⊕⁺-comm       
-
-∉ₚto∉̂ᴱ : ∀ {n x p} {i : Fin n} → toℕ i ∉ₚ path (valid (x , p)) → toℕ i ∉ᵥₚ p 
-∉ₚto∉̂ᴱ i∉ₚ = i∉ₚ ∘ just
-
-∈ᵥₚ=>∈ₚ : ∀ {n p} {i : Fin n} → toℕ i ∈ᵥₚ p → toℕ i ∈ₚ (valid p)
-∈ᵥₚ=>∈ₚ {n} {p} {i} i∈ᵥₚp = just i∈ᵥₚp
-
-
-pres-distrib : ∀ {k ⊤ ⊥} p q → Level_DistributiveIn[_,_]Alt A k ⊥ ⊤ →
-               IsLevel_PathDistributiveIn[_,_]Alt k (valid (⊥ , p)) (valid (⊤ , q))
-pres-distrib {zero}  {⊤} {⊥} p q (lift ⊥≈⊤) = Level.lift [ ⊥≈⊤ , {!!} ]
-pres-distrib {suc k} {⊤} {⊥} p q distrib f {invalid} {invalid} ⊥≤x x≤⊤ ⊥≤y y≤⊤ i∉px i∉py ij⇿px ij⇿py = res
-  where
-  res : IsLevel k PathDistributiveIn[ invalid , invalid ]Alt
-  res = {!!}
-pres-distrib {suc k} {⊤} {⊥} p q distrib f {invalid} {valid y}       ⊥≤x x≤⊤ ⊥≤y y≤⊤ i∉px i∉py ij⇿px ij⇿py = res
-  where
-  res : IsLevel k PathDistributiveIn[ f ▷⁺ (valid y) , f ▷⁺ (valid y) ]Alt
-  res = {!!}
-pres-distrib {suc k} {⊤} {⊥} p q distri f {valid x}       {invalid} ⊥≤x x≤⊤ ⊥≤y y≤⊤ i∉px i∉py ij⇿px ij⇿py = res
-  where
-  res : IsLevel k PathDistributiveIn[ f ▷⁺ valid x , (f ▷⁺ valid x) ⊕⁺ invalid ]Alt
-  res = {!!}
-pres-distrib {suc k} {⊤} {⊥} p q distrib f {valid (x , r)} {valid (y , s)} ⊥≤x x≤⊤ ⊥≤y y≤⊤ i∉px i∉py ij⇿px ij⇿py
-  = {!distrib ? ? ? ? ?!}
-  where
-  test : Level_DistributiveIn[_,_]Alt A k (f ▷ x ⊕ y) ((f ▷ x) ⊕ (f ▷ y))
-  test = distrib f {!≤₊⁺⇒≤⁺ ?!} {!!} {!!} {!!} 
+  eq₂ : valid ((f ▷ x) ⊕ (f ▷ y) , (toℕ i , toℕ j) ∷ r ⊓ₗₑₓ s) ≈⁺ (f ▷⁺ valid (x , r)) ⊕⁺ (f ▷⁺ valid (y , s))
+  eq₂ = ≈⁺-sym {!!}

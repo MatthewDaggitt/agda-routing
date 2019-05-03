@@ -91,7 +91,7 @@ abstract
   ...         | pᵣ≈q | _        | no  i∈q = contradiction (path-reject (A i k) pᵣ≈q (inj₂ i∈q))   AᵢₖXₖⱼ≉∞
   ...         | pᵣ≈q | yes ik⇿q | yes i∉q = contradiction (begin
     valid (_ ∷ q ∣ _ ∣ _) ≈⟨ ≈ₚ-sym (path-accept (A i k) pᵣ≈q AᵢₖXₖⱼ≉∞ ik⇿q i∉q) ⟩
-    path (A i k ▷ X k j)  ≈⟨ path-cong (≈-sym FXᵢⱼ≈AᵢₖXₖⱼ) ⟩
+    path (A i k ▷ X k j)  ≈⟨ ≈ₚ-sym (path-cong FXᵢⱼ≈AᵢₖXₖⱼ) ⟩
     path (F X i j)        ≈⟨ p[FXᵢⱼ]≈[] ⟩
     valid []              ∎) λ {(valid ())}
     where open EqReasoning (ℙₛ n)

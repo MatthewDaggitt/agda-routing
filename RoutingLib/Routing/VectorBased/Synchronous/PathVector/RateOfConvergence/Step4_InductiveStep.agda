@@ -71,15 +71,15 @@ module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.S
   iₘᵢₙ-pred≤ : ∀ s → A iₘᵢₙ kₘᵢₙ ▷ σ (t + n-1 + s) X kₘᵢₙ j ≤₊ σ (suc (t + n-1 + s)) X iₘᵢₙ j
   iₘᵢₙ-pred≤ s with FXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ (σ (t + n-1 + s) X) iₘᵢₙ j
   ... | inj₂ σXᵢⱼ≈Iᵢⱼ    = begin
-    A iₘᵢₙ kₘᵢₙ ▷ σ (t + n-1 + s) X kₘᵢₙ j  ≤⟨ ⊕-identityˡ _ ⟩
-    ∞#                                      ≈⟨ ≈-reflexive (sym (Iᵢⱼ≡∞ j≢iₘᵢₙ)) ⟩
+    A iₘᵢₙ kₘᵢₙ ▷ σ (t + n-1 + s) X kₘᵢₙ j  ≤⟨ ≤₊-maximum _ ⟩
+    ∞#                                      ≡⟨ sym (Iᵢⱼ≡∞ j≢iₘᵢₙ) ⟩
     I iₘᵢₙ j                                ≈⟨ ≈-sym σXᵢⱼ≈Iᵢⱼ ⟩
     σ (suc (t + n-1 + s)) X iₘᵢₙ j          ∎
     where open POR ≤₊-poset
   ... | inj₁ (k , σXᵢⱼ≈AᵢₖXₖⱼ) = begin
-    A iₘᵢₙ kₘᵢₙ ▷ σ (t + n-1 + s)   X kₘᵢₙ j  ≈⟨ ≈-reflexive (cong (λ v → A iₘᵢₙ kₘᵢₙ ▷ σ v X kₘᵢₙ j) (+-assoc t n-1 s)) ⟩
+    A iₘᵢₙ kₘᵢₙ ▷ σ (t + n-1 + s)   X kₘᵢₙ j  ≡⟨ cong (λ v → A iₘᵢₙ kₘᵢₙ ▷ σ v X kₘᵢₙ j) (+-assoc t n-1 s) ⟩
     A iₘᵢₙ kₘᵢₙ ▷ σ (t + (n-1 + s)) X kₘᵢₙ j  ≤⟨ eₘᵢₙ≤ₜ₊ₙ₋₁₊ₛe s k ⟩
-    A iₘᵢₙ k    ▷ σ (t + (n-1 + s)) X k    j  ≈⟨ ≈-reflexive (cong (λ v → A iₘᵢₙ k ▷ σ v X k j) (sym (+-assoc t n-1 s))) ⟩
+    A iₘᵢₙ k    ▷ σ (t + (n-1 + s)) X k    j  ≡⟨ cong (λ v → A iₘᵢₙ k ▷ σ v X k j) (sym (+-assoc t n-1 s)) ⟩
     A iₘᵢₙ k    ▷ σ (t + n-1 + s)   X k    j  ≈⟨ ≈-sym σXᵢⱼ≈AᵢₖXₖⱼ ⟩
     σ (suc (t + n-1 + s)) X iₘᵢₙ j            ∎
     where open POR ≤₊-poset

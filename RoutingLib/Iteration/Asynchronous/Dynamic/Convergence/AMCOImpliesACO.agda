@@ -140,8 +140,8 @@ module _ (e : Epoch) {p : Subset n} .(p∈Q : p ∈ Q) where
       f : S → S
       f = F e p
 
-      fixedPoint : S → ∃ (λ x → f x ≈ x)
-      fixedPoint v = inner (F-inactive e p∈Q v) (<-wellFounded (d e p∈Q (f v) (f (f v))))
+      fixedPoint : ∃ (λ x → f x ≈ x)
+      fixedPoint = inner {⊥} (λ _ → ≈ᵢ-refl) (<-wellFounded (d e p∈Q ⊥ (f ⊥)))
         where
         inner : ∀ {x} → x ∈ Accordant p → Acc _<_ (d e p∈Q x (f x)) → ∃ (λ x* → f x* ≈ x*)
         inner {x} x∈Aₚ (acc x-acc) with F e p x ≟[ p ] x
@@ -149,10 +149,10 @@ module _ (e : Epoch) {p : Subset n} .(p∈Q : p ∈ Q) where
         ... | no  fx≉ₚx = inner (F-inactive e p∈Q x) (x-acc _ (F-strContrOnOrbits p∈Q x∈Aₚ fx≉ₚx))
 
     x* : S
-    x* = proj₁ (fixedPoint ⊥)
+    x* = proj₁ fixedPoint
 
     Fx*≈x* : F e p x* ≈ x*
-    Fx*≈x* = proj₂ (fixedPoint ⊥)
+    Fx*≈x* = proj₂ fixedPoint
 
     Fx*≈ₚx* : F e p x* ≈[ p ] x*
     Fx*≈ₚx* = ≈⇒≈ₛ Fx*≈x*

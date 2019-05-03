@@ -299,11 +299,11 @@ isRoutingAlgebraᶜ = record
 
 isIncreasingᶜ : IsIncreasing algebra → IsIncreasing algebraᶜ
 isIncreasingᶜ incr (valid (k , l) , _) (r , _) = incr (A k l) r
-isIncreasingᶜ incr (nothing       , _) (r , _) = ⊕-identityˡ r
+isIncreasingᶜ incr (nothing       , _) (r , _) = ≈-sym (⊕-identityˡ r)
 
 isStrictlyIncreasingᶜ : IsStrictlyIncreasing algebra → IsStrictlyIncreasing algebraᶜ
 isStrictlyIncreasingᶜ sIncr (valid (k , l) , _)     = sIncr (A k l)
-isStrictlyIncreasingᶜ sIncr (nothing       , _) r≉∞ = (⊕-identityˡ _) , r≉∞
+isStrictlyIncreasingᶜ sIncr (nothing       , _) r≉∞ = ≈-sym (⊕-identityˡ _) , r≉∞
 
 isFiniteᶜ : IsFinite algebraᶜ
 isFiniteᶜ = allCRoutes , ∈-allCRoutes

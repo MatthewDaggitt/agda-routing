@@ -58,10 +58,8 @@ k ∈ₚ? p = All.dec (k ∈ᵥₚ?_) p
 ∈ₚ-resp-≡ : ∀ {k} → (k ∈ₚ_) Respects _≡_
 ∈ₚ-resp-≡ refl k∈p = k∈p
 
-{-
-∈-resp-≈ₚ : ∀ {k : Fin n} → (k ∈_) Respects _≈ₚ_
-∈-resp-≈ₚ x≈y k∈x k∉y = k∈x (∉-resp-≈ₚ {!≈ₚ-sym ?!} k∉y)
--}
+-- ∉ₚ-resp-≈ : ∀ {k : Fin n} → (k ∈_) Respects _≈ₚ_
+-- ∉ₚ-resp-≈ x≈y k∈x k∉y = k∈x (∉-resp-≈ₚ {!≈ₚ-sym ?!} k∉y)
 
 ----------------------------------------------------------------------------
 -- Equality

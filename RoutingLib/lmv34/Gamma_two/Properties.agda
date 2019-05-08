@@ -121,23 +121,6 @@ A〚〛-cong {F} {F'} {V} F=F' i = ⨁ₛ-cong (λ {q} → f[]-cong {X = V q} (F
 postulate
   LemmaA₃ : ∀ {i j} → {f g : Step i j} → {X : RoutingSet} →
             f [ g [ X ] ] ↭ (f ● g) [ X ]
-
-LemmaA₃' : ∀ {i j} → {f g : Step i j} → {X : RoutingSet} →
-            f [ g [ X ] ] ↭ (f ● g) [ X ]
-LemmaA₃' {i} {j} {f} {g} {[]} = ↭-refl
-LemmaA₃' {i} {j} {f} {g} {(d , v) ∷ X} with ¬? (v ≟ ∞#)
-... | yes _ = {!!}
-... | no p  = begin
-                f [ g [ (d , v) ∷ X ] ] ↭⟨ ↭-refl ⟩
-                f [ filter (λ { (d , v) → ¬? (v ≟ ∞#)}) ((d , g ▷ v) ∷ map (λ { (d , v) → d , g ▷ v }) X) ] ↭⟨ {!!} ⟩
-                f [ filter (λ { (d , v) → ¬? (v ≟ ∞#)}) (map (λ { (d , v) → d , g ▷ v }) X) ] ↭⟨ ↭-refl ⟩
-                f [ g [ X ] ] ↭⟨ LemmaA₃' {X = X} ⟩
-                (f ● g) [ X ] ↭⟨ ↭-refl ⟩
-                filter (λ { (d , v) → ¬? (v ≟ ∞#)}) (map (λ { (d , v) → d , (f ● g) ▷ v }) X) ↭⟨ {!!} ⟩
-                filter (λ { (d , v) → ¬? (v ≟ ∞#)}) ((d , (f ● g) ▷ v) ∷ map (λ { (d , v) → d , (f ● g) ▷ v }) X) ↭⟨ ↭-refl ⟩
-                (map (λ {(d , v) → (d , (f ● g) ▷ v)}) ((d , v) ∷ X)) † ↭⟨ ↭-refl ⟩
-                (f ● g) [ (d , v) ∷ X ] ∎
-                where open PermutationReasoning
   
 -- Lemma A.4
 LemmaA₄ : ∀ {F G V} → (F 〖 G 【 V 】 〗) ↓ ≈ᵥ (F ●ₘ (G ᵀ)) 〚 V 〛

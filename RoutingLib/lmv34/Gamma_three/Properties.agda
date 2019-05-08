@@ -22,6 +22,7 @@ import RoutingLib.lmv34.Gamma_one.Algebra as Gamma_one_Algebra
 import RoutingLib.lmv34.Gamma_one.Properties as Gamma_one_Properties
 import RoutingLib.lmv34.Gamma_two as Gamma_two
 open import RoutingLib.lmv34.Gamma_two.Algebra as Gamma_two_Algebra using (IsComposition; AdjacencyMatrixᵀ)
+import RoutingLib.lmv34.Gamma_two.Properties as Gamma_two_Properties
 import RoutingLib.lmv34.Gamma_three as Gamma_three
 import RoutingLib.lmv34.Gamma_three.Algebra as Gamma_three_Algebra
 
@@ -44,6 +45,8 @@ open Gamma_one_Algebra isRAlg n
 open Gamma_one_Properties isRAlg A
 open Gamma_two isRAlg _●_ Imp Prot Exp
 open Gamma_two_Algebra isRAlg n _●_
+open Gamma_two_Properties isRAlg _●_ A Imp Prot Exp A=Imp∘Prot∘Exp
+  hiding (_≈ₛ_; ≈ₛ-refl; ≈ₛ-sym; ≈ₛ-trans; 𝕊ₛ)
 open Gamma_three isRAlg _●_ Imp Prot Exp
 open Gamma_three_Algebra isRAlg n _●_
 
@@ -55,12 +58,12 @@ open Membership FinRoute-decSetoid using (_∈?_)
 infix 2 _≈ₛ_
 
 _≈ₛ_ : Rel Γ₃-State (a ⊔ ℓ)
-S ≈ₛ S' =
-  Γ₃-State.V S ≈ᵥ Γ₃-State.V S'   ×
-  Γ₃-State.O S ≈ᵥ,₂ Γ₃-State.O S' ×
-  Γ₃-State.I S ≈ᵥ,₂ Γ₃-State.I S' ×
-  π₁ (Γ₃-State.∇,Δ S) ≈ᵥ,₂ π₁ (Γ₃-State.∇,Δ S') ×
-  π₂ (Γ₃-State.∇,Δ S) ≈ᵥ,₂ π₂ (Γ₃-State.∇,Δ S')
+(S₃ V O I ∇,Δ) ≈ₛ (S₃ V' O' I' ∇,Δ') =
+  V ≈ᵥ V'   ×
+  O ≈ᵥ,₂ O' ×
+  I ≈ᵥ,₂ I' ×
+  π₁ ∇,Δ ≈ᵥ,₂ π₁ ∇,Δ' ×
+  π₂ ∇,Δ ≈ᵥ,₂ π₂ ∇,Δ'
 
 ≈ₛ-refl : Reflexive _≈ₛ_
 ≈ₛ-refl = (≈ᵥ-refl , ≈ᵥ,₂-refl , ≈ᵥ,₂-refl , ≈ᵥ,₂-refl , ≈ᵥ,₂-refl)
@@ -88,17 +91,32 @@ S ≈ₛ S' =
 ++-cong (prep eq A=A') B=B'         = prep eq (++-cong A=A' B=B')
 ++-cong (swap eq₁ eq₂ A=A') B=B'    = swap eq₁ eq₂ (++-cong A=A' B=B')
 
-minus-cong : ∀ {A A' B B'} → A ↭ A' → B ↭ B' →
-             A - B ↭ A' - B'
-minus-cong {[]} {[]} A=A' B=B' = refl
-minus-cong {x ∷ A} {.x ∷ .A} refl B=B' = {!!}
-minus-cong {x ∷ A} {.(_ ∷ _)} (prep eq A=A') B=B' = {!!}
-minus-cong {x ∷ .(_ ∷ _)} {.(_ ∷ _ ∷ _)} (swap eq₁ eq₂ A=A') B=B' = {!!}
-minus-cong {A} {A'} (trans A=A' A'=A'') B=B' = trans (minus-cong A=A' refl) (minus-cong A'=A'' B=B')
+postulate
+  minus-cong : ∀ {A A' B B'} → A ↭ A' → B ↭ B' → A - B ↭ A' - B'
+
+minusᵥ-cong : ∀ {U U' V V'} → U ≈ᵥ,₂ U' → V ≈ᵥ,₂ V' →
+          (U -ᵥ V) ≈ᵥ,₂ (U' -ᵥ V')
+minusᵥ-cong U=U' V=V' i j = minus-cong (U=U' i j) (V=V' i j)
 
 ∪-cong : ∀ {A A' B B'} → A ↭ A' → B ↭ B' →
          A ∪ B ↭ A' ∪ B'
 ∪-cong {A} {A'} {B} {B'} A=A' B=B' = ++-cong A=A' (minus-cong B=B' A=A')
+
+∪ᵥ-cong : ∀ {U U' V V'} → U ≈ᵥ,₂ U' → V ≈ᵥ,₂ V' →
+          (U ∪ᵥ V) ≈ᵥ,₂ (U' ∪ᵥ V')
+∪ᵥ-cong U=U' V=V' i j = ∪-cong (U=U' i j) (V=V' i j)
+
+diff-cong : ∀ {A A' B B'} → A ↭ A' → B ↭ B' →
+            π₁ (diff A B) ↭ π₁ (diff A' B') ×
+            π₂ (diff A B) ↭ π₂ (diff A' B')
+diff-cong A=A' B=B' = minus-cong A=A' B=B' , minus-cong B=B' A=A'
+
+diffᵥ-cong : ∀ {U U' V V'} → U ≈ᵥ,₂ U' → V ≈ᵥ,₂ V' →
+            π₁ (diffᵥ U V) ≈ᵥ,₂ π₁ (diffᵥ U' V') ×
+            π₂ (diffᵥ U V) ≈ᵥ,₂ π₂ (diffᵥ U' V')
+diffᵥ-cong A=A' B=B' =
+  (λ i j → minus-cong (A=A' i j) (B=B' i j)) ,
+  (λ i j → minus-cong (B=B' i j) (A=A' i j))
 
 []-xs : ∀ xs → [] - xs ↭ []
 []-xs xs = ↭-refl
@@ -120,34 +138,39 @@ xs-[] (x ∷ xs) = prep ≈ᵣ-refl (xs-[] xs)
 ∪-identityᵣ : ∀ xs → xs ∪ [] ↭ xs
 ∪-identityᵣ xs = ++-identityᵣ xs
 
+Γ₃,ᵥ-cong : ∀ {I I'} → I ≈ᵥ,₂ I' → Γ₃,ᵥ I ≈ᵥ Γ₃,ᵥ I'
+Γ₃,ᵥ-cong = Γ₂,ᵥ-cong
+
+Γ₃,ᵢ-cong : ∀ {I I' ∇ ∇' Δ Δ'} → I ≈ᵥ,₂ I' → ∇ ≈ᵥ,₂ ∇' → Δ ≈ᵥ,₂ Δ' →
+            Γ₃,ᵢ I (∇ , Δ) ≈ᵥ,₂ Γ₃,ᵢ I' (∇' , Δ')
+Γ₃,ᵢ-cong I=I' ∇=∇' Δ=Δ' = ∪ᵥ-cong (minusᵥ-cong I=I' (Γ₂,ᵢ-cong ∇=∇')) (Γ₂,ᵢ-cong Δ=Δ')
+
+Γ₃,ₒ-cong : ∀ {V V'} → V ≈ᵥ V' → Γ₃,ₒ V ≈ᵥ,₂ Γ₃,ₒ V'
+Γ₃,ₒ-cong = Γ₂,ₒ-cong
+
+Γ₃,ₓ-cong : ∀ {V V' O O'} → V ≈ᵥ V' → O ≈ᵥ,₂ O' →
+            (π₁ (Γ₃,ₓ V O) ≈ᵥ,₂ π₁(Γ₃,ₓ V' O')) ×
+            (π₂ (Γ₃,ₓ V O) ≈ᵥ,₂ π₂(Γ₃,ₓ V' O'))
+Γ₃,ₓ-cong V=V' O=O' = diffᵥ-cong O=O' (Γ₃,ₒ-cong V=V')
+
+Γ₃-cong : ∀ {S S'} → S ≈ₛ S' → Γ₃-Model S ≈ₛ Γ₃-Model S'
+Γ₃-cong (V=V' , I=I' , O=O' , ∇=∇' , Δ=Δ') = 
+  Γ₃,ᵥ-cong I=I' ,
+  Γ₃,ᵢ-cong I=I' ∇=∇' Δ=Δ' ,
+  Γ₃,ₒ-cong V=V' ,
+  π₁ (Γ₃,ₓ-cong V=V' O=O') ,
+  π₂ (Γ₃,ₓ-cong V=V' O=O')
+
 ------------------------------------
 -- Theorems
 
--- Lemma A.5
-F-union-cong : ∀ {i j} → (f : Step i j) → (A B : RoutingSet)
-               → f [ A ∪ B ] ↭ f [ A ] ∪ f [ B ]
-F-union-cong f [] B = begin
-  f [ [] ∪ B ] ↭⟨ ↭-refl ⟩
-  f [ B - [] ] ↭⟨ []-cong (xs-[] B)⟩
-  f [ B ] ↭⟨ ↭-sym (xs-[] (f [ B ])) ⟩
-  f [ [] ] ∪ f [ B ] ∎
-  where open PermutationReasoning
-F-union-cong f (x ∷ A) B = begin
-  f [(x ∷ A) ∪ B ] ↭⟨ ↭-refl ⟩
-  f [(x ∷ A) ++ (B - (x ∷ A))] ↭⟨ {!!} ⟩
-  f [ x ∷ A ] ∪ f [ B ] ∎
-  where open PermutationReasoning
-
--- Lemma A.6
-F-minus-cong : ∀ {i j} → (f : Step i j) → (A B : RoutingSet)
-               → f [ A - B ] ↭ f [ A ] - f [ B ]
-F-minus-cong f [] B = ↭-refl
-F-minus-cong f ((d , v) ∷ A) B with v ≟ ∞# | (d , v) ∈? B
-... | yes _ | no _  = {!!}
-... | yes _ | yes _ = {!!}
-... | no _  | _ = {!!}
-
 postulate
+  -- Lemma A.5
+  F-union-cong : ∀ {i j} → (f : Step i j) → (A B : RoutingSet)
+                 → f [ A ∪ B ] ↭ f [ A ] ∪ f [ B ]
+  -- Lemma A.6
+  F-minus-cong : ∀ {i j} → (f : Step i j) → (A B : RoutingSet)
+               → f [ A - B ] ↭ f [ A ] - f [ B ]
   diff-lemma : ∀ A B → let (∇ , Δ) = diff A B in
           (A - ∇) ∪ Δ ↭ B
 
@@ -167,13 +190,20 @@ F-diff-cong F A B i j = let (∇ , Δ) = diffᵥ A B in begin
   (F 〖 B 〗) i j ∎
   where open PermutationReasoning
 
+private
+  Lemma : ∀ {k S} → (Γ₃-Model ^ (suc k)) S ≈ₛ (Γ₃-Model ^ k) (Γ₃-Model S)
+  Lemma {zero} = ≈ₛ-refl
+  Lemma {suc k} = Γ₃-cong (Lemma {k})
+
 -- Theorem 8
 Γ₁=Γ₃ : ∀ {k} → let I' = (Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ k) (~ M))
                     O' = Γ₂,ₒ ((Γ₁ ^ k) (~ M)) in
         (Γ₃-Model ^ (3 * (suc k))) (S₃ (~ M) Øᵥ,₂ Øᵥ,₂ (Øᵥ,₂ , Øᵥ,₂)) ≈ₛ
         S₃ ((Γ₁ ^ (suc k)) (~ M)) I' O' (Øᵥ,₂ , Øᵥ,₂)
 Γ₁=Γ₃ {zero} = begin
-  (Γ₃-Model ^ 3) (S₃ (~ M) Øᵥ,₂ Øᵥ,₂ (Øᵥ,₂ , Øᵥ,₂)) ≈⟨ {!!} ⟩
+  (Γ₃-Model ^ 3) (S₃ (~ M) Øᵥ,₂ Øᵥ,₂ (Øᵥ,₂ , Øᵥ,₂)) ≈⟨ Lemma {2} {S₃ (~ M) Øᵥ,₂ Øᵥ,₂ (Øᵥ,₂ , Øᵥ,₂)} ⟩
+  (Γ₃-Model ^ 2) (S₃ (Γ₃,ᵥ Øᵥ,₂) (Γ₃,ᵢ Øᵥ,₂ (Øᵥ,₂ , Øᵥ,₂)) (Γ₃,ₒ (~ M)) (Γ₃,ₓ (~ M) Øᵥ,₂)) ≈⟨ 
+            ({!!} , {!!} , {!!} , {!!} , {!!}) ⟩ 
   S₃ (Γ₁ (~ M)) I' O' (Øᵥ,₂ , Øᵥ,₂) ∎
   where open EqReasoning 𝕊ₛ
         I' = (Γ₂,ᵢ ∘ Γ₂,ₒ) (~ M)

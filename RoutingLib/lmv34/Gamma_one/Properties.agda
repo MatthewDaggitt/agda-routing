@@ -1,5 +1,3 @@
-{-# OPTIONS --allow-unsolved-metas #-}
-
 open import Algebra.FunctionProperties
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties using () renaming (setoid to Fin-setoid)
@@ -67,25 +65,51 @@ postulate
 Øᵥ-identityᵣ : ∀ {A} → A ⊕ᵥ Øᵥ ≈ᵥ A
 Øᵥ-identityᵣ i = Ø-identityᵣ
 
+
 filter-cong : ∀ {A A' : RoutingSet} {p} {P : Pred (Fin n × Route) p} {P? : Decidable P} →
-              P Respects _≈ᵣ_ → A ↭ A' → filter P? A ↭ filter P? A'  
+              P Respects _≈ᵣ_ → A ↭ A' → filter P? A ↭ filter P? A'
 filter-cong P≈ refl = refl
 filter-cong P≈ (trans A=A' A'=A'') = trans (filter-cong P≈ A=A') (filter-cong P≈ A'=A'')
-filter-cong {x ∷ A} {x' ∷ A'} {P? = P?} P≈ (prep x=x' A=A') with P? x | P? x'
+filter-cong {x ∷ A} {x' ∷ A'} {P? = P?} P≈ (prep x=x' A=A') with
+      P? x   | P? x'
 ... | yes Px | yes Px' = prep x=x' (filter-cong P≈ A=A')
 ... | yes Px | no ¬Px' = contradiction (P≈ x=x' Px) ¬Px'
 ... | no ¬Px | yes Px' = contradiction (P≈ (≈ᵣ-sym x=x') Px') ¬Px
 ... | no ¬Px | no ¬Px' = filter-cong P≈ A=A'
-filter-cong {x ∷ y ∷ A} {y' ∷ x' ∷ A'} {P? = P?} P≈ (swap x=x' y=y' A=A')
-  with P? x | P? x' | P? y | P? y'
-... | yes Px | no ¬Px' | _      | _       = contradiction (P≈ x=x' Px) ¬Px'
-... | no ¬Px | yes Px' | _      | _       = contradiction (P≈ (≈ᵣ-sym x=x') Px') ¬Px
-... | _      | _       | yes Py | no ¬Py' = contradiction (P≈ y=y' Py) ¬Py'
-... | _      | _       | no ¬Py | yes Py' = contradiction (P≈ (≈ᵣ-sym y=y') Py') ¬Py
-... | yes _  | yes _   | yes _  | yes _   = {!swap (x=x' y=y' (filter-cong P≈ A=A'))!}
-... | no _   | no _    | no _   | no _    = {!filter-cong P≈ A=A'!}
-... | yes _  | yes _   | no _   | no _    = {!prep x=x' (filter-cong P≈ A=A')!}
-... | no _   | no _    | yes _  | yes _   = {!prep y=y' (filter-cong P≈ A=A')!}
+filter-cong {x ∷ y ∷ A} {y' ∷ x' ∷ A'} {P? = P?} P≈ (swap x=x' y=y' A=A') with
+      P? x   | P? y'
+... | no ¬Px | no ¬Py' = prf
+    where
+      prf : filter P? (y ∷ A) ↭ filter P? (x' ∷ A')
+      prf with
+            P? x' | P? y
+      ... | no ¬Px' | no ¬Py = filter-cong P≈ A=A'
+      ... | no ¬Px' | yes Py = contradiction (P≈ y=y' Py) ¬Py'
+      ... | yes Px' | _      = contradiction (P≈ (≈ᵣ-sym x=x') Px') ¬Px
+... | no ¬Px | yes Py' = prf
+    where
+      prf : filter P? (y ∷ A) ↭ y' ∷ filter P? (x' ∷ A')
+      prf with
+            P? x'   | P? y
+      ... | no ¬Px' | no ¬Py = contradiction (P≈ (≈ᵣ-sym y=y') Py') ¬Py
+      ... | no ¬Px' | yes Py = prep y=y' (filter-cong P≈ A=A')
+      ... | yes Px' | _      = contradiction (P≈ (≈ᵣ-sym x=x') Px') ¬Px
+... | yes Px | no ¬Py' = prf
+    where
+      prf : x ∷ filter P? (y ∷ A) ↭ filter P? (x' ∷ A')
+      prf with
+            P? x'   | P? y
+      ... | no ¬Px' | _      = contradiction (P≈ x=x' Px) ¬Px'
+      ... | yes Px' | no ¬Py = prep x=x' (filter-cong P≈ A=A')
+      ... | yes Px' | yes Py = contradiction (P≈ y=y' Py) ¬Py'
+... | yes Px | yes Py' = prf
+    where
+      prf : x ∷ filter P? (y ∷ A) ↭ y' ∷ filter P? (x' ∷ A')
+      prf with
+            P? x'   | P? y
+      ... | no ¬Px' | _      = contradiction (P≈ x=x' Px) ¬Px'
+      ... | yes Px' | no ¬Py = contradiction (P≈ (≈ᵣ-sym y=y') Py') ¬Py
+      ... | yes Px' | yes Py = swap x=x' y=y' (filter-cong P≈ A=A')
 
 †-respects-≈ᵣ : (λ {(d , v) → ¬ (v ≈ ∞#)}) Respects _≈ᵣ_
 †-respects-≈ᵣ {d₁ , v₁} {d₂ , v₂} (d₁=d₂ , v₁=v₂) ¬v₁=∞# =
@@ -93,31 +117,6 @@ filter-cong {x ∷ y ∷ A} {y' ∷ x' ∷ A'} {P? = P?} P≈ (swap x=x' y=y' A=
 
 †-cong : ∀ {A A' : RoutingSet} → A ↭ A' → A † ↭ A' †
 †-cong A=A' = filter-cong †-respects-≈ᵣ A=A'
-
-postulate
-  †-cong' : ∀ {A A' : RoutingSet} → A ↭ A' → A † ↭ A' †
-
-{-†-cong : ∀ {A A' : RoutingSet} → A ↭ A' → A † ↭ A' †
-†-cong {A} {.A} refl = refl
-†-cong {A} {A'} (trans A=A' A'=A'') = trans (†-cong A=A') (†-cong A'=A'')
-†-cong {(d , s) ∷ xs} {(d' , s') ∷ ys}
-                (prep (d=d' , s=s') A=A')
-                with ((s ≟ ∞#)) | ((s' ≟ ∞#))
-... | yes p | no ¬p = contradiction (≈-trans (≈-sym s=s') p) ¬p
-... | no ¬p | yes p = contradiction (≈-trans s=s' p) ¬p
-... | yes _ | yes _ = †-cong A=A'
-... | no _  | no _  = prep (d=d' , s=s') (†-cong A=A')
-†-cong {((d₁ , s₁) ∷ (d₂ , s₂) ∷ xs)} {((d₂' , s₂') ∷ (d₁' , s₁') ∷ ys)}
-                (swap (d₁=d₁' , s₁=s₁') (d₂=d₂' , s₂=s₂') A=A')
-                with s₁ ≟ ∞# | s₁' ≟ ∞# | s₂ ≟ ∞# | s₂' ≟ ∞#
-... | yes p | no ¬p | _     | _      = contradiction (≈-trans (≈-sym s₁=s₁') p) ¬p
-... | no ¬p | yes p | _     | _      = contradiction (≈-trans s₁=s₁' p) ¬p
-... | _     | _     | yes p | no ¬p  = contradiction (≈-trans (≈-sym s₂=s₂') p) ¬p
-... | _     | _     | no ¬p | yes p  = contradiction (≈-trans s₂=s₂' p) ¬p
-... | yes _ | yes _ | no _  | no _   = {!!}
-... | no _  | no _  | yes _ | yes _  = {!!}
-... | no _  | no _  | no _  | no _   = {!!}
-... | yes _ | yes _ | yes _ | yes _  = {!†-cong {xs} {ys} A=A'!}-}
 
 []-cong : ∀ {i j} {f : Step i j} {A A'} →
           A ↭ A' → f [ A ] ↭ f [ A' ]
@@ -154,13 +153,6 @@ postulate
 -- Lemma A.1
 postulate
   distributive~⊕ : ∀ {A B} → (~ A) ⊕ᵥ (~ B) ≈ᵥ ~(A ⊕ₘ B)
-  {-distributive~⊕ {A} {B} i = begin
-    (~ A) i ⊕ₛ (~ B) i ↭⟨ ↭-refl ⟩
-    (tabulate λ j → (j , A i j)) † ⊕ₛ (tabulate λ j → (j , B i j)) † ↭⟨ {!!} ⟩
-    (tabulate λ j → (j , (A i j) ⊕ (B i j))) † ↭⟨ ↭-refl ⟩
-    (tabulate λ j → (j , (A ⊕ₘ B) i j)) † ↭⟨ ↭-refl ⟩
-    (~(A ⊕ₘ B)) i ∎
-    where open PermutationReasoning-}
 
 postulate
   lemma₄ : ∀ {i q Y} → map (λ {(d , v) → (d , (A i q) ▷ v)}) ((~ Y) q) † ↭  (tabulate λ d → (d , (A i q) ▷ (Y q d))) †

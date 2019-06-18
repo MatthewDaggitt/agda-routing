@@ -3,10 +3,12 @@ open import Algebra.FunctionProperties
 open import Data.Nat using (ℕ; zero; suc; _+_; _∸_)
 open import Data.Nat.Properties using (+-suc)
 open import Data.List
+open import Data.List.Properties
 open import Data.List.All using (All; []; _∷_; universal)
 open import Data.List.Any using (Any; here; there)
 open import Data.List.Membership.Propositional using (_∈_)
 open import Data.List.Relation.Pointwise using (Pointwise; []; _∷_)
+open import Data.List.Relation.Unary.AllPairs using (AllPairs; []; _∷_)
 open import Data.Fin using (Fin; toℕ; zero; suc)
 open import Data.Maybe using (Maybe; just; nothing)
 open import Data.Maybe.Properties using (just-injective)
@@ -19,14 +21,12 @@ open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; cong; cong₂; trans)
 open import Function using (id; _∘_)
-import Relation.Binary.EqReasoning as EqReasoning
+import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import Relation.Nullary using (¬_)
 open import Relation.Unary using (∁; U)
 open import Relation.Unary.Properties using (U-Universal)
 
 open import RoutingLib.Data.List
-open import RoutingLib.Data.List.Relation.Unary.AllPairs
-  using (AllPairs; []; _∷_)
 open import RoutingLib.Data.Nat.Properties
 open import RoutingLib.Algebra.FunctionProperties
 
@@ -65,27 +65,6 @@ module _ {a b} {A : Set a} {B : Set b} (f : A → Maybe B) where
 
 ------------------------------------------------------------------------
 -- Properties of foldr
-
-module _ {a p} {A : Set a} {P : Pred A p} {_•_ : Op₂ A} where
-
-  foldr-forcesᵇ : _•_ Forcesᵇ P → ∀ e xs → P (foldr _•_ e xs) → All P xs
-  foldr-forcesᵇ _          _ []       _     = []
-  foldr-forcesᵇ forces _ (x ∷ xs) Pfold with forces _ _ Pfold
-  ... | (px , pfxs) = px ∷ foldr-forcesᵇ forces _ xs pfxs
-
-  foldr-presᵇ : _•_ Preservesᵇ P → ∀ {e xs} → P e → All P xs → P (foldr _•_ e xs)
-  foldr-presᵇ _    pe []         = pe
-  foldr-presᵇ pres pe (px ∷ pxs) = pres px (foldr-presᵇ pres pe pxs)
-
-  foldr-presʳ : _•_ Preservesʳ P → ∀ {e} → P e → ∀ xs → P (foldr _•_ e xs)
-  foldr-presʳ pres pe []       = pe
-  foldr-presʳ pres pe (_ ∷ xs) = pres _ (foldr-presʳ pres pe xs)
-
-  foldr-presᵒ : _•_ Preservesᵒ P → ∀ e xs → P e ⊎ Any P xs → P (foldr _•_ e xs)
-  foldr-presᵒ pres e []       (inj₁ pe) = pe
-  foldr-presᵒ pres e (x ∷ xs) (inj₁ pe) = pres _ _ (inj₂ (foldr-presᵒ pres e xs (inj₁ pe)))
-  foldr-presᵒ pres e (x ∷ xs) (inj₂ (here px))   = pres _ _ (inj₁ px)
-  foldr-presᵒ pres e (x ∷ xs) (inj₂ (there pxs)) = pres _ _ (inj₂ (foldr-presᵒ pres e xs (inj₂ pxs)))
 
 module _ {a ℓ} (M : Magma a ℓ) where
 
@@ -172,8 +151,6 @@ module _ {a ℓ} (S : Semilattice a ℓ)  where
   foldr≤ₗxs e x∈xs = ≈-trans (foldr≤ᵣxs e x∈xs) (comm _ _)
 
 
-
-
 module _ {a ℓ} (S : Setoid a ℓ)  where
 
   open Setoid S renaming (Carrier to A; refl to ≈-refl; sym to ≈-sym; trans to ≈-trans)
@@ -187,7 +164,7 @@ module _ {a ℓ} (S : Setoid a ℓ)  where
   foldr-map-commute-gen₁ cong •-pres-P P-pres-f pd []         = ≈-refl
   foldr-map-commute-gen₁ cong •-pres-P P-pres-f pd (px ∷ pxs) = ≈-trans
     (cong ≈-refl (foldr-map-commute-gen₁ cong •-pres-P P-pres-f pd pxs))
-    (P-pres-f px (foldr-presᵇ •-pres-P pd pxs))
+    (P-pres-f px (foldr-preservesᵇ •-pres-P pd pxs))
 
   foldr-map-commute-gen₂ : ∀ {b} {B : Set b} {_•ᵃ_ _•ᵇ_} {f : B → A} → Congruent₂ _≈_ _•ᵃ_ →
                            ∀ {ℓ} {_~_ : Rel B ℓ} → (∀ {x} → _•ᵇ_ Preservesᵇ (x ~_)) →
@@ -197,7 +174,7 @@ module _ {a ℓ} (S : Setoid a ℓ)  where
   foldr-map-commute-gen₂ {_}           {_}    {_} cong •ᵇ-pres-~ ~-pres-f {_} pd []       = ≈-refl
   foldr-map-commute-gen₂ {_•ᵃ_ = _•ᵃ_} {_•ᵇ_} {f} cong {_} {_~_} •ᵇ-pres-~ ~-pres-f {d} {x ∷ xs} (x~d ∷ xs~d) (px ∷ pxs) = begin
     (f x •ᵃ foldr _•ᵃ_ (f d) (map f xs)) ≈⟨ cong ≈-refl (foldr-map-commute-gen₂ cong •ᵇ-pres-~ ~-pres-f xs~d pxs) ⟩
-    (f x •ᵃ f (foldr _•ᵇ_ d xs))         ≈⟨ ~-pres-f (foldr-presᵇ •ᵇ-pres-~ x~d px) ⟩
+    (f x •ᵃ f (foldr _•ᵇ_ d xs))         ≈⟨ ~-pres-f (foldr-preservesᵇ •ᵇ-pres-~ x~d px) ⟩
     f (x •ᵇ foldr _•ᵇ_ d xs)             ∎
 
   foldr-map-commute : ∀ {b} {B : Set b} {_•ᵃ_ _•ᵇ_} {f : B → A} →

@@ -24,8 +24,8 @@ open import Algebra.FunctionProperties using (Op₂; RightIdentity; Selective)
 open import RoutingLib.Data.List
 import RoutingLib.Data.List.Membership.Setoid as Membership
 open import RoutingLib.Data.List.Relation.Unary.Any.Properties
-open import RoutingLib.Data.List.Relation.Unary.Uniqueness.Setoid using (Unique; _∷_)
-open import RoutingLib.Data.List.Relation.Unary.AllPairs using ([]; _∷_)
+open import Data.List.Relation.Unary.Unique.Setoid using (Unique; _∷_)
+open import Data.List.Relation.Unary.AllPairs using ([]; _∷_)
 
 
 module RoutingLib.Data.List.Membership.Setoid.Properties where
@@ -42,14 +42,6 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     open import Data.List.Membership.Setoid S using (_∈_; _∉_)
     open import Data.List.Membership.Setoid.Properties
     open import Data.List.Membership.Setoid (list-setoid S) using () renaming (_∈_ to _∈ₗ_)
-
-    {-
-    ∈-applyBetween⁺ : ∀ f {s e i} → s ≤ i → i < e → f i ∈ applyBetween f s e
-    ∈-applyBetween⁺ f s≤i i<e = Any-applyBetween⁺ f s≤i i<e ≈-refl
-
-    ∈-applyBetween⁻ : ∀ f s e {v} → v ∈ applyBetween f s e → ∃ λ i → s ≤ i × i < e × v ≈ f i
-    ∈-applyBetween⁻ f s e v∈ = Any-applyBetween⁻ f s e v∈
-    -}
 
 
     ∉-filter₁ : ∀ {p} {P : A → Set p} (P? : Decidable P) {v} {xs} → v ∉ xs → v ∉ filter P? xs
@@ -71,30 +63,6 @@ module RoutingLib.Data.List.Membership.Setoid.Properties where
     index-cong (here x≈z)   (there y∈xs) (z≉xs ∷ xs!) x≈y = contradiction (∈-resp-≈ S (trans (sym x≈y) x≈z) y∈xs) (All¬⇒¬Any z≉xs)
     index-cong (there x∈xs) (here y≈z)   (z≉xs ∷ xs!) x≈y = contradiction (∈-resp-≈ S (trans x≈y y≈z) x∈xs) (All¬⇒¬Any z≉xs)
     index-cong (there x∈xs) (there y∈xs) (_ ∷ xs!)    x≈y = cong Fin.suc (index-cong x∈xs y∈xs xs! x≈y)
-
-
-
-
-  ------------------------------------
-  -- Properties involving 2 setoids --
-  ------------------------------------
-
-  module _ {c₁ c₂ ℓ₁ ℓ₂} (S₁ : Setoid c₁ ℓ₁) (S₂ : Setoid c₂ ℓ₂) where
-
-    open Setoid S₁ using () renaming (Carrier to A; _≈_ to _≈₁_; refl to refl₁; reflexive to reflexive₁; sym to sym₁; trans to trans₁)
-    open Setoid S₂ using () renaming (Carrier to B; _≈_ to _≈₂_; refl to refl₂; reflexive to reflexive₂; sym to sym₂; trans to trans₂)
-    open import Data.List.Membership.Setoid S₁ using () renaming (_∈_ to _∈₁_)
-    open import Data.List.Membership.Setoid S₂ using () renaming (_∈_ to _∈₂_)
-
-    {-
-    ∈-mapMaybe : ∀ P {v xs a} → v ∈₁ xs → Eq _≈₂_ (P v) (just a) → (∀ {x y} → x ≈₁ y → Eq _≈₂_ (P x) (P y)) → a ∈₂ mapMaybe P xs
-    ∈-mapMaybe _ {_} {[]}     ()
-    ∈-mapMaybe P {v} {x ∷ xs} v∈xs Pᵥ≈justₐ P-resp-≈ with P x | inspect P x | v∈xs
-    ... | nothing | [ Px≡nothing ] | here v≈x    = contradiction (Eq-trans trans₂ (Eq-trans trans₂ (Eq-reflexive reflexive₂ (≡-sym Px≡nothing)) (P-resp-≈ (sym₁ v≈x))) Pᵥ≈justₐ) λ()
-    ... | nothing | [ _ ]          | there v∈xs₂ = ∈-mapMaybe P v∈xs₂ Pᵥ≈justₐ P-resp-≈
-    ... | just b  | [ Px≡justb ]   | here v≈x    = here (drop-just (Eq-trans trans₂ (Eq-trans trans₂ (Eq-sym sym₂ Pᵥ≈justₐ) (P-resp-≈ v≈x)) (Eq-reflexive reflexive₂ Px≡justb)))
-    ... | just b  | _              | there v∈xs₂ = there (∈-mapMaybe P v∈xs₂ Pᵥ≈justₐ P-resp-≈)
-    -}
 
 
   ------------------------------------

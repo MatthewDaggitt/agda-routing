@@ -6,6 +6,7 @@ open import Data.Nat.Properties using (+-comm)
 open import Data.Product using (_,_; proj₁; proj₂)
 open import Data.List using (List)
 open import Data.List.All using (lookup)
+import Data.List.Extrema as Extrema
 open import Relation.Unary using () renaming (_∈_ to _∈ᵤ_)
 import Relation.Binary.PartialOrderReasoning as POR
 open import Relation.Binary.PropositionalEquality
@@ -18,7 +19,6 @@ open import RoutingLib.Data.Fin.Subset using (Nonfull)
 open import RoutingLib.Data.Fin.Subset.Properties using (Nonfull-witness)
 open import RoutingLib.Data.Fin.Subset.Cutset
 open import RoutingLib.Data.List using (allFinPairs)
-import RoutingLib.Data.List.Extrema as Extrema
 open import RoutingLib.Data.Path.CertifiedI.All
 
 open import RoutingLib.Routing.Algebra

@@ -12,7 +12,7 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_,_; _×_; proj₁; proj₂)
 open import Level using (0ℓ)
 open import Function using (_∘_; flip)
-open import Data.Product.Relation.Binary.Pointwise.NonDependent using (≡?×≡?⇒≡?)
+open import Data.Product.Properties using (≡-dec)
 open import Relation.Binary hiding (NonEmpty)
 open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary.Negation using (¬?)
@@ -31,7 +31,7 @@ open ≡-Reasoning
 -- Edges
 
 _≟ₑ_ : Decidable {A = Edge} _≡_
-_≟ₑ_ = ≡?×≡?⇒≡? _≟_ _≟_
+_≟ₑ_ = ≡-dec _≟_ _≟_
 
 𝕍ₛ : Setoid _ _
 𝕍ₛ = setoid Vertex
@@ -67,12 +67,6 @@ ij⇿p⇒i≢j (continue i≢j) = i≢j
 ⇿-source⁺ : ∀ {i j p} → i ≢ j → source p ≡ just j → (i , j) ⇿ p
 ⇿-source⁺ {p = []}    i≢j ()
 ⇿-source⁺ {p = x ∷ p} i≢j refl = continue i≢j
-
-{-
-⇿-source⁻ : ∀ {i j p} → (i , j) ⇿ p → source p ≡ just j
-⇿-source⁻ (start    i≢j) = {!!}
-⇿-source⁻ (continue i≢j) = refl
--}
 
 p₀≡n⇒p≡[] : ∀ {p} → source p ≡ nothing → p ≡ []
 p₀≡n⇒p≡[] {[]}    refl = refl

@@ -65,19 +65,19 @@ fromℕ≤″-cong i<n j<n eq =
   subst₂ _≡_
     (fromℕ≤≡fromℕ≤″ (ℕₚ.≤″⇒≤ i<n) i<n)
     (fromℕ≤≡fromℕ≤″ (ℕₚ.≤″⇒≤ j<n) j<n)
-    (fromℕ≤-cong _ _ eq)
+    (fromℕ≤-cong (ℕₚ.≤″⇒≤ i<n) (ℕₚ.≤″⇒≤ j<n) eq)
 
 fromℕ≤″-toℕ : ∀ {n} {i : Fin n} (toℕ<n : toℕ i ℕ.<″ n) →
                 fromℕ≤″ (toℕ i) toℕ<n ≡ i
 fromℕ≤″-toℕ {n} {i} toℕ<n = begin
-  fromℕ≤″ (toℕ i) _  ≡⟨ sym (fromℕ≤≡fromℕ≤″ _ toℕ<n) ⟩
+  fromℕ≤″ (toℕ i) _  ≡⟨ sym (fromℕ≤≡fromℕ≤″ (ℕₚ.≤″⇒≤ toℕ<n) toℕ<n) ⟩
   fromℕ≤ _           ≡⟨ fromℕ≤-toℕ i (ℕₚ.≤″⇒≤ toℕ<n) ⟩
   i ∎
   where open ≡-Reasoning
 
 fromℕ≤″-injective : ∀ {n i j} (i<n : i ℕ.<″ n) (j<n : j ℕ.<″ n) →
                     fromℕ≤″ i i<n ≡ fromℕ≤″ j j<n → i ≡ j
-fromℕ≤″-injective i<n j<n eq = fromℕ≤-injective _ _ (subst₂ _≡_
+fromℕ≤″-injective i<n j<n eq = fromℕ≤-injective (ℕₚ.≤″⇒≤ i<n) (ℕₚ.≤″⇒≤ j<n) (subst₂ _≡_
     (sym (fromℕ≤≡fromℕ≤″ (ℕₚ.≤″⇒≤ i<n) i<n))
     (sym (fromℕ≤≡fromℕ≤″ (ℕₚ.≤″⇒≤ j<n) j<n))
     eq)

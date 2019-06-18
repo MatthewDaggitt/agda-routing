@@ -7,16 +7,16 @@ open import Data.List using (List; []; _∷_)
 open import Data.List.Relation.Unary.All using ([]; _∷_; map)
 open import Data.List.Relation.Binary.Permutation.Inductive using (_↭_; ↭-sym)
   renaming (refl to ↭-refl; trans to ↭-trans)
+open import Data.List.Relation.Unary.AllPairs using ([]; _∷_)
+import Data.List.Relation.Unary.Unique.Setoid as Uniqueness
 open import Data.Sum using (inj₁; inj₂)
 import Data.List.Membership.Setoid as Membership
 
 open import RoutingLib.Data.List using (insert)
-open import RoutingLib.Data.List.Relation.Unary.AllPairs using ([]; _∷_)
 open import RoutingLib.Data.List.Relation.Unary.All.Properties as All
 open import RoutingLib.Data.List.Relation.Binary.Permutation.Inductive
 import RoutingLib.Data.List.Sorting as Sorting
 import RoutingLib.Data.List.Sorting.Properties as Sortingₚ
-import RoutingLib.Data.List.Relation.Unary.Uniqueness.Setoid as Uniqueness
 import RoutingLib.Data.List.Relation.Binary.Permutation.Inductive as Perm
 
 open DecTotalOrder decTotalOrder renaming (Carrier to A)

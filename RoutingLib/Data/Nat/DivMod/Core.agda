@@ -17,10 +17,7 @@ open ≡-Reasoning
 -------------------------------------------------------------------------
 -- mod lemmas
 
-a[modₕ]n≤a : ∀ acc a n → modₕ acc (acc + n) a n ≤ acc + a
-a[modₕ]n≤a acc zero    n       = ≤-reflexive (sym (+-identityʳ acc))
-a[modₕ]n≤a acc (suc a) zero    rewrite +-identityʳ acc = ≤-trans (a[modₕ]n≤a 0 a acc) (≤-trans (n≤1+n a) (n≤m+n acc (suc a)))
-a[modₕ]n≤a acc (suc a) (suc n) rewrite +-suc acc n | +-suc acc a = a[modₕ]n≤a (suc acc) a n
+-- stdlib
 
 modₕ-minus : ∀ acc a n → modₕ 0 (acc + n) ((acc + a) ∸ modₕ acc (acc + n) a n) (acc + n) ≡ 0
 modₕ-minus acc (suc a) (suc n) rewrite +-suc acc a     | +-suc acc n = modₕ-minus (suc acc) a n

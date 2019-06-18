@@ -20,6 +20,7 @@ open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Dec using (¬∀⟶∃¬; all?)
 open import Data.List using (List; foldr)
 import Data.List.All.Properties as All
+open import Data.List.Properties
 open import Data.List.Relation.Pointwise as Pointwise using (Pointwise; []; _∷_)
 open import Data.Nat using (_<_)
 open import Data.Nat.Properties
@@ -35,7 +36,6 @@ import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import Induction.WellFounded using (Acc; acc)
 open import Induction.Nat using (<-wellFounded)
 
-open import RoutingLib.Data.List.Properties using (foldr-presᵇ)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.Path.CertifiedI
 open import RoutingLib.Data.Path.CertifiedI.Properties
@@ -159,7 +159,7 @@ abstract
   ... | no  _ = ∞ᶜ
 
   F-pres-𝑪ₘ : ∀ {X} → 𝑪ₘ X → 𝑪ₘ (F X)
-  F-pres-𝑪ₘ Xᶜ i j = foldr-presᵇ {P = 𝑪} ⊕-pres-𝑪
+  F-pres-𝑪ₘ Xᶜ i j = foldr-preservesᵇ {P = 𝑪} ⊕-pres-𝑪
     (Iᶜ i j) (All.tabulate⁺ (λ k → ▷-pres-𝑪 i k (Xᶜ k j)))
 
   FXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ : ∀ X i j → 𝑰 (F X i j) → ∃ λ k → F X i j ≈ A i k ▷ X k j × 𝑰 (X k j)

@@ -24,6 +24,8 @@ open import Data.List using (foldr; tabulate; map)
 open import Data.List.Properties using (tabulate-cong)
 open import Data.List.All using (All; []; _∷_)
 open import Data.List.All.Properties using (tabulate⁺)
+open import Data.List.Relation.Unary.AllPairs using (AllPairs; []; _∷_)
+import Data.List.Relation.Unary.AllPairs.Properties as AllPairs
 open import Data.Nat using (ℕ)
 import Data.List.Relation.Equality.Setoid as ListEq
 open import Function using (_∘_)
@@ -35,8 +37,6 @@ open import Relation.Binary.PropositionalEquality using (_≡_; cong)
 
 open import RoutingLib.Routing using (Network)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
-open import RoutingLib.Data.List.Relation.Unary.AllPairs using (AllPairs; []; _∷_)
-import RoutingLib.Data.List.Relation.Unary.AllPairs.Properties as AllPairs
 open import RoutingLib.Data.List.Properties using (foldr-map-commute-gen₂)
 open import RoutingLib.Data.List.Relation.Binary.Equality.Setoid using (foldr⁺; map-tabulate)
 

@@ -18,7 +18,9 @@ import Algebra.FunctionProperties.Consequences as Consequences
 open import Algebra.FunctionProperties.Consequences.Propositional using (sel⇒idem)
 open import Data.Product using (proj₁; _,_)
 open import Data.Fin using (Fin)
+open import Data.Nat using (zero; suc)
 open import Data.Sum using (inj₁; inj₂)
+open import Level using (lift)
 open import Relation.Nullary using (yes; no)
 open import Relation.Binary using (DecTotalOrder; StrictTotalOrder; Maximum; Minimum)
 import Relation.Binary.Construct.Converse as Converse
@@ -106,9 +108,9 @@ open DecTotalOrder ≤₊-decTotalOrder public
   ; reflexive       to ≤₊-reflexive
   ; trans           to ≤₊-trans
   ; antisym         to ≤₊-antisym
-  ; poset           to ≤₊-poset
   ; total           to ≤₊-total
   ; ≤-resp-≈        to ≤₊-resp-≈
+  ; poset           to ≤₊-poset
   ; totalOrder      to ≤₊-totalOrder
   ; isDecTotalOrder to ≤₊-isDecTotalOrder
   )
@@ -145,6 +147,38 @@ strIncr⇒incr strIncr f x with x ≟ ∞#
   x             ∎)
   where open EqReasoning S
 
+--------------------------------------------------------------------------------
+-- kᵗʰ-level distributivity properties
+
+isLevelDistrib-shrink : ∀ k {w x y z} → w ≤₊ x → x ≤₊ z → z ≤₊ y →
+                        Level_DistributiveIn[_,_]Alt algebra k w y →
+                        Level_DistributiveIn[_,_]Alt algebra k x z
+isLevelDistrib-shrink zero    w≤x x≤z z≤y (lift w≈y) = lift (≤₊-antisym x≤z (≤₊-trans z≤y (≤₊-respˡ-≈ w≈y w≤x)))
+isLevelDistrib-shrink (suc k) {w} {x} {y} {z} w≤x _ z≤y distrib f x≤u u≤z x≤v v≤z =
+  (distrib f
+    (≤₊-trans w≤x x≤u)
+    (≤₊-trans u≤z z≤y)
+    (≤₊-trans w≤x x≤v)
+    (≤₊-trans v≤z z≤y))
+
+isLevelDistrib-equal : ∀ k {x y} → x ≈ y → Level_DistributiveIn[_,_]Alt algebra k x y 
+isLevelDistrib-equal zero    {_} {_} x≈y = lift x≈y
+isLevelDistrib-equal (suc k) {x} {y} x≈y f {u} {v} x≤u u≤y x≤v v≤y =
+  isLevelDistrib-equal k (begin
+    f ▷ (u ⊕ v)       ≈⟨ ▷-cong f (⊕-congˡ (≈-sym u≈v)) ⟩
+    f ▷ (u ⊕ u)       ≈⟨ ▷-cong f (⊕-idem u) ⟩
+    f ▷ u             ≈⟨ ≈-sym (⊕-idem (f ▷ u)) ⟩
+    (f ▷ u) ⊕ (f ▷ u) ≈⟨ ⊕-congˡ (▷-cong f u≈v) ⟩
+    (f ▷ u) ⊕ (f ▷ v) ∎)
+    where
+    open EqReasoning S
+    u≈v : u ≈ v
+    u≈v = begin
+      u  ≈⟨ ≤₊-antisym (≤₊-respʳ-≈ (≈-sym x≈y) u≤y) x≤u ⟩
+      x  ≈⟨ ≤₊-antisym x≤v (≤₊-respʳ-≈ (≈-sym x≈y) v≤y) ⟩
+      v  ∎
+
+
 ------------------------------------------------------------------------------
 -- Other
 
@@ -153,3 +187,5 @@ r≈∞⇒f▷r≈∞ {f = f} {r} r≈∞ = ≈-trans (▷-cong _ r≈∞) (▷-
 
 f▷r≉∞⇒r≉∞ : ∀ {n} {i j : Fin n} {f : Step i j} {r} → f ▷ r ≉ ∞# → r ≉ ∞#
 f▷r≉∞⇒r≉∞ f▷r≉∞ r≈∞ = f▷r≉∞ (r≈∞⇒f▷r≈∞ r≈∞)
+
+

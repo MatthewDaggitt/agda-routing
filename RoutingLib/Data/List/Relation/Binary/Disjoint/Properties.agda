@@ -17,26 +17,9 @@ open import RoutingLib.Data.List.Relation.Unary.All.Properties using (∈-All)
 
 module RoutingLib.Data.List.Relation.Binary.Disjoint.Properties {c ℓ} (S : Setoid c ℓ) where
 
-  open Setoid S renaming (Carrier to A)
-  open import Data.List.Membership.Setoid S using (_∈_; _∉_)
-  open import RoutingLib.Data.List.Relation.Binary.Disjoint S
+open Setoid S renaming (Carrier to A)
+open import Data.List.Membership.Setoid S using (_∈_; _∉_)
+open import Data.List.Relation.Binary.Disjoint.Setoid S
 
-
-  #-sym : Symmetric _#_
-  #-sym xs#ys ∈both = xs#ys (swap ∈both)
-
-  xs#[] : ∀ xs → xs # []
-  xs#[] _ (_ , ())
-
-
-  -- Operations on disjoint #
-
-  #-concat : ∀ {vs xss} → All (vs #_) xss → vs # (concat xss)
-  #-concat [] (_ , ())
-  #-concat {xss = xs ∷ xss} (vs#xs ∷ vs#xss) (v∈vs , v∈xs++concatxss) with ++⁻ xs v∈xs++concatxss
-  ... | inj₁ v∈xs  = vs#xs (v∈vs , v∈xs)
-  ... | inj₂ v∈xss = #-concat vs#xss (v∈vs , v∈xss)
-
-  -- Other
-  #⇒AllAll≉ : ∀ {xs ys} → xs # ys → All (λ x → All (λ y → ¬ x ≈ y) ys) xs
-  #⇒AllAll≉ xs#ys = map (¬Any⇒All¬ _) (∈-All S _ (λ v∈xs v∈ys → xs#ys (v∈xs , v∈ys)))
+xs#[] : ∀ xs → Disjoint xs []
+xs#[] _ (_ , ())

@@ -6,6 +6,8 @@ open import Data.List.Any
 import Data.List.Membership.Setoid as Membership
 open import Data.List.Relation.Binary.Permutation.Inductive
 open import Data.List.Relation.Binary.Permutation.Inductive.Properties
+open import Data.List.Relation.Unary.AllPairs
+open import Data.List.Relation.Unary.Unique.Setoid
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (∃₂; _,_)
 open import Function using (_∘_)
@@ -15,8 +17,6 @@ open import Relation.Binary.PropositionalEquality
 open import Relation.Unary using (Pred)
 
 open import RoutingLib.Data.List using (insert)
-open import RoutingLib.Data.List.Relation.Unary.AllPairs
-open import RoutingLib.Data.List.Relation.Unary.Uniqueness.Setoid
 
 open PermutationReasoning
 

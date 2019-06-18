@@ -7,22 +7,23 @@
 
 module RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Communities where
 
+open import Data.Bool
+open import Data.Bool.Properties
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (Subset; ⊥)
 open import Data.Fin.Dec using () renaming (_∈?_ to _∈ₛ?_)
 open import Data.Vec using (_[_]≔_; toList)
-open import Data.Bool using (Bool; true; false; _≟_)
 open import Data.List.Relation.Lex.Strict using (Lex-≤)
 open import Function using (_on_)
 open import Relation.Binary
 open import Relation.Binary.Lattice using (Minimum)
 open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary.Decidable using (⌊_⌋)
+open import Relation.Nullary.Negation
 open import Level using () renaming (zero to ℓ₀)
 
 open import RoutingLib.Data.Vec.Relation.Binary.Lex
   as Lex using (Lex)
-open import RoutingLib.Data.Bool
 
 abstract
 
@@ -50,14 +51,6 @@ abstract
   remove : Community → CommunitySet → CommunitySet
   remove c cs = cs [ c ]≔ false
 
-{-
-  add-cong : ∀ c {cs ds} → cs ≡ ds → add c cs ≡ add c ds
-  add-cong c refl = refl
-
-  remove-cong : ∀ c {cs ds} → cs ≡ ds → remove c cs ≡ remove c ds
-  remove-cong c refl = refl
--}
-
 --------------------------------------------------------------------------------
 -- Set membership
 
@@ -70,6 +63,10 @@ abstract
 --------------------------------------------------------------------------------
 -- An ordering over community sets
 
+  <-minimum : {x : Bool} → x ≢ false → false < x
+  <-minimum {false} f≢f = contradiction refl f≢f
+  <-minimum {true}  _   = f<t
+  
   _≤ᶜˢ_ : Rel CommunitySet ℓ₀
   _≤ᶜˢ_ = Lex _<_
 

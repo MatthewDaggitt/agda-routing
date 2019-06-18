@@ -70,7 +70,7 @@ x*∈B₀ : ∀ {x} → x ∈ᵢ B 0 → x* ∈ᵢ B 0
 x*∈B₀ {x} x∈B₀ = begin⟨ x∈B₀ ⟩
   ∴ x ∈ᵢ B 0            $⟨ Fᵏx∈Bₖ k* ⟩
   ∴ (F ^ k*) x ∈ᵢ B k*  $⟨ x∈B[k*]⇒x≈x* ⟩
-  ∴ (F ^ k*) x ≈ x*     $⟨ B-cong ◌ (Fᵏx∈B₀ k* x∈B₀) ⟩
+  ∴ (F ^ k*) x ≈ x*     $⟨ (λ p → B-cong p (Fᵏx∈B₀ k* x∈B₀)) ⟩
   ∴ x* ∈ᵢ B 0           ∎
 
 x*∈Bₖ : ∀ {x} → x ∈ᵢ B 0 → ∀ k → x* ∈ᵢ B k

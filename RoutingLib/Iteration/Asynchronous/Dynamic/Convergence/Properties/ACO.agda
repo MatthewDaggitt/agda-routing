@@ -85,7 +85,7 @@ module _ (e : Epoch) {p} (p∈Q : p ∈ Q) where
   
   k*≤k∧x∈Bₖᵢ⇒x≈x*ᵢ : ∀ {k} → k* ≤ k → ∀ {i} {xᵢ : Sᵢ i} → xᵢ ∈ B e p∈Q k i → xᵢ ≈ᵢ x* i
   k*≤k∧x∈Bₖᵢ⇒x≈x*ᵢ {k} k*≤k {i} {xᵢ} xᵢ∈Bₖᵢ = begin⟨ k*≤k⇒x*∈Bₖ k*≤k ⟩
-    ∴ x*             ∈ᵢ B e p∈Q k  $⟨ ∈-replace (B e p∈Q k) ◌ xᵢ∈Bₖᵢ ⟩
+    ∴ x*             ∈ᵢ B e p∈Q k  $⟨ (λ p → ∈-replace (B e p∈Q k) p xᵢ∈Bₖᵢ) ⟩
     ∴ replace x* xᵢ   ∈ᵢ B e p∈Q k $⟨ k*≤k∧x∈Bₖ⇒x≈x* k*≤k ⟩
     ∴ replace x* xᵢ   ≈ x*         $⟨ _$ i ⟩
     ∴ replace x* xᵢ i ≈ᵢ x* i      $⟨ ≈ᵢ-trans (≈ᵢ-sym (≈ᵢ-reflexive (≡-replace x* xᵢ))) ⟩

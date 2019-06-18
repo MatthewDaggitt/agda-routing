@@ -9,6 +9,7 @@ open import Data.List using ([]; _∷_; length; lookup)
 open import Data.List.All as All using (All; []; _∷_)
 open import Data.List.Any using (here; there; index)
 open import Data.List.Membership.Setoid.Properties using (∈-lookup)
+open import Data.List.Relation.Unary.AllPairs using ([]; _∷_)
 open import Data.Product using (_,_; proj₁; proj₂; uncurry′)
 open import Data.Sum using (inj₁; inj₂)
 open import Relation.Binary.PropositionalEquality
@@ -18,8 +19,6 @@ open import Relation.Unary using (Pred)
 
 open import RoutingLib.Data.List using (insert)
 open import RoutingLib.Data.List.Relation.Unary.All.Properties as Allₚ
-open import RoutingLib.Data.List.Relation.Unary.AllPairs using ([]; _∷_)
-open import RoutingLib.Data.List.Relation.Unary.Uniqueness.Setoid using (Unique)
 
 open DecTotalOrder order renaming (Carrier to A)
 open Eq using () renaming (setoid to S; trans to ≈-trans; sym to ≈-sym)

@@ -66,17 +66,6 @@ n≤suc∘pred[n] (suc n) = s≤s ≤-refl
 ≥-decTotalOrder : DecTotalOrder 0ℓ 0ℓ 0ℓ
 ≥-decTotalOrder = Flip.decTotalOrder ≤-decTotalOrder
 
-*-cancelʳ-< : RightCancellative _<_ _*_
-*-cancelʳ-< {zero}  zero    (suc o) _     = s≤s z≤n
-*-cancelʳ-< {suc m} zero    (suc o) _     = s≤s z≤n
-*-cancelʳ-< {m}     (suc n) (suc o) nm<om = s≤s (*-cancelʳ-< n o (+-cancelˡ-< m nm<om))
-
-*-cancelˡ-< : LeftCancellative _<_ _*_
-*-cancelˡ-< x {y} {z} rewrite *-comm x y | *-comm x z = *-cancelʳ-< y z
-
-*-cancel-< : Cancellative _<_ _*_
-*-cancel-< = *-cancelˡ-< , *-cancelʳ-<
-
 >⇒≰ : _>_ ⇒ _≰_
 >⇒≰ = <⇒≱
 
@@ -136,7 +125,7 @@ m≤∣m-n∣+n m n = subst (m ≤_) (+-comm n _) (m≤n+∣m-n∣ m n)
 ∣-∣-triangle : ∀ x y z → ∣ x - z ∣ ≤ ∣ x - y ∣ + ∣ y - z ∣
 ∣-∣-triangle zero    y       z       = m≤n+∣n-m∣ z y
 ∣-∣-triangle x       zero    z       = begin
-  ∣ x - z ∣     ≤⟨ ∣n-m∣≤n⊔m x z ⟩
+  ∣ x - z ∣     ≤⟨ ∣m-n∣≤m⊔n x z ⟩
   x ⊔ z         ≤⟨ m⊔n≤m+n x z ⟩
   x + z         ≡⟨ cong₂ _+_ (sym (∣-∣-identityʳ x)) refl ⟩
   ∣ x - 0 ∣ + z ∎
@@ -160,13 +149,13 @@ m≤∣m-n∣+n m n = subst (m ≤_) (+-comm n _) (m≤n+∣m-n∣ m n)
 ∣-∣-isPreMetric : IsPreMetric _≡_ ∣_-_∣
 ∣-∣-isPreMetric = record
   { isProtoMetric = ∣-∣-isProtoMetric
-  ; eq⇒0          = n≡m⇒∣n-m∣≡0
+  ; eq⇒0          = m≡n⇒∣m-n∣≡0
   }
 
 ∣-∣-isQuasiSemiMetric : IsQuasiSemiMetric _≡_ ∣_-_∣
 ∣-∣-isQuasiSemiMetric = record
   { isPreMetric = ∣-∣-isPreMetric
-  ; 0⇒eq        = ∣n-m∣≡0⇒n≡m
+  ; 0⇒eq        = ∣m-n∣≡0⇒m≡n
   }
 
 ∣-∣-isSemiMetric : IsSemiMetric _≡_ ∣_-_∣

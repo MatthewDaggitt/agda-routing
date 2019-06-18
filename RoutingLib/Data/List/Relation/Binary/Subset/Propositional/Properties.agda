@@ -3,8 +3,7 @@ open import Data.List using (applyUpTo)
 open import Data.List.Any using (here; there)
 open import Data.List.Relation.Subset.Propositional
 
-module RoutingLib.Data.List.Relation.Subset.Propositional.Properties where
-
+module RoutingLib.Data.List.Relation.Binary.Subset.Propositional.Properties where
 
 module _ {a} {A : Set a} where
 

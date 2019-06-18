@@ -8,12 +8,8 @@ import Relation.Binary.EqReasoning as EqReasoning
 open import Data.List using (List; _∷_)
 open import Level using (_⊔_)
 
-<<<<<<< HEAD:RoutingLib/Data/List/Relation/Permutation/Setoid.agda
-module RoutingLib.Data.List.Relation.Permutation.Setoid
+module RoutingLib.Data.List.Relation.Binary.Permutation.Setoid
   {b} {ℓ} (S : Setoid b ℓ) where
-=======
-module RoutingLib.Data.List.Relation.Binary.Permutation.Setoid {b} {ℓ} (S : Setoid b ℓ) where
->>>>>>> e77e6dd3328852e250b76131aa33ab781fe5d593:RoutingLib/Data/List/Relation/Binary/Permutation/Setoid.agda
 
 open Setoid S using (Carrier; _≈_; sym)
 

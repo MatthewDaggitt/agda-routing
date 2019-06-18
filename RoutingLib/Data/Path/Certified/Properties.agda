@@ -7,7 +7,7 @@ open import Data.Fin using (Fin; _<_; _≤?_) renaming (zero to fzero; suc to fs
 open import Data.Fin.Properties using (<-cmp; ≤-antisym; ≤-total; pigeonhole) renaming (_≟_ to _≟𝔽_)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (_,_; _×_; proj₁; proj₂)
-open import Data.Product.Relation.Binary.Pointwise.NonDependent using (≡?×≡?⇒≡?)
+open import Data.Product.Properties using (≡-dec)
 open import Function using (_∘_)
 open import Relation.Binary hiding (NonEmpty)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; trans; subst; cong; cong₂; setoid)
@@ -24,7 +24,7 @@ module RoutingLib.Data.Path.Certified.Properties where
 -- Edges
 
 _≟ₑ_ : ∀ {n} → Decidable {A = Edge n} _≡_
-_≟ₑ_ = ≡?×≡?⇒≡? _≟𝔽_ _≟𝔽_
+_≟ₑ_ = ≡-dec _≟𝔽_ _≟𝔽_
 
 𝕍ₛ : ℕ → Setoid _ _
 𝕍ₛ n = setoid (Vertex n)

@@ -9,9 +9,10 @@ open import Agda.Builtin.Nat using (div-helper; mod-helper)
 open import Data.Fin using (Fin; zero; toℕ; fromℕ≤″; fromℕ≤)
 open import Data.Fin.Properties using (toℕ<n; fromℕ≤-toℕ)
 open import Data.Nat
-open import Data.Nat.Properties using (≤⇒≤″; +-assoc; +-comm; +-identityʳ)
+open import Data.Nat.Properties
 open import Data.Nat.DivMod
 open import Data.Nat.DivMod.Core
+open import Data.Nat.Divisibility
 open import Relation.Binary.PropositionalEquality
 
 open import RoutingLib.Data.Nat.DivMod.Core
@@ -22,47 +23,28 @@ open ≡-Reasoning
 ------------------------------------------------------------------------
 -- _%_
 
-a%n≤a : ∀ a n → a % (suc n) ≤ a
-a%n≤a a n = a[modₕ]n≤a 0 a n
 
+-- Check if needed
 a%[1+n]≤n : ∀ a n → a % suc n ≤ n
 a%[1+n]≤n a n = a[modₕ]n<n 0 a n
-
-a≤n⇒a%n≡a : ∀ {a n} → a ≤ n → a % suc n ≡ a
-a≤n⇒a%n≡a {a} {n} a≤n with ≤⇒≤″ a≤n
-... | less-than-or-equal {k} refl = modₕ-skipToEnd 0 (a + k) a k
 
 [a∸a%n]%n≡0 : ∀ a n → (a ∸ a % suc n) % suc n ≡ 0
 [a∸a%n]%n≡0 a n = modₕ-minus 0 a n
 
-+ˡ-% : ∀ a b {n} → a % suc n ≡ 0 → (a + b) % suc n ≡ b % suc n
-+ˡ-% a b {n} eq = begin
-  (a + b) % suc n                 ≡⟨ %-distribˡ-+ a b n ⟩
-  (a % suc n + b % suc n) % suc n ≡⟨ cong (λ v → (v + b % suc n) % suc n) eq ⟩
-  (b % suc n) % suc n             ≡⟨ a%n%n≡a%n b n ⟩
-  b % suc n                       ∎
-
-+ʳ-% : ∀ a b {n} → b % suc n ≡ 0 → (a + b) % suc n ≡ a % suc n
-+ʳ-% a b {n} eq = trans (cong (_% suc n) (+-comm a b)) (+ˡ-% b a eq)
-
-
-
-
-
 %⇒mod≡0 : ∀ a {n} → a % suc n ≡ zero → a mod suc n ≡ zero
-%⇒mod≡0 a eq = fromℕ≤-cong _ (s≤s z≤n) eq
+%⇒mod≡0 a eq = fromℕ≤-cong (a%n<n a _) (s≤s z≤n) eq
 
 n[mod]n≡0 : ∀ n → suc n mod suc n ≡ zero
-n[mod]n≡0 n = fromℕ≤-cong _ (s≤s z≤n) (n%n≡0 n)
+n[mod]n≡0 n = fromℕ≤-cong (a%n<n (suc n) n) (s≤s z≤n) (n%n≡0 n)
 
 toℕ-mod : ∀ {n} (i : Fin (suc n)) → toℕ i mod suc n ≡ i
 toℕ-mod {n} i = begin
-  fromℕ≤ (a%n<n (toℕ i) n)  ≡⟨ fromℕ≤-cong _ _ (a≤n⇒a%n≡a (≤-pred (toℕ<n i))) ⟩
+  fromℕ≤ (a%n<n (toℕ i) n)  ≡⟨ fromℕ≤-cong (a%n<n (toℕ i) n) (toℕ<n i) (m≤n⇒m%n≡m (≤-pred (toℕ<n i))) ⟩
   fromℕ≤ (toℕ<n i)          ≡⟨ fromℕ≤-toℕ i (toℕ<n i) ⟩
   i                         ∎
 
-+ˡ-mod : ∀ a b {n} → a mod suc n ≡ zero → (a + b) mod suc n ≡ b mod suc n
-+ˡ-mod a b eq = fromℕ≤-cong _ _ (+ˡ-% a b (fromℕ≤-injective _ (s≤s z≤n) eq))
++ˡ-mod : ∀ {a} b {n} → suc n ∣ a → (a + b) mod suc n ≡ b mod suc n
++ˡ-mod {a} b eq = fromℕ≤-cong (a%n<n (a + b) _) (a%n<n b _) (%-remove-+ˡ b eq)
 
-+ʳ-mod : ∀ a b {n} → b mod suc n ≡ zero → (a + b) mod suc n ≡ a mod suc n
-+ʳ-mod a b eq = fromℕ≤-cong _ _ (+ʳ-% a b (fromℕ≤-injective _ (s≤s z≤n) eq))
++ʳ-mod : ∀ a {b} {n} → suc n ∣ b → (a + b) mod suc n ≡ a mod suc n
++ʳ-mod a {b} eq = fromℕ≤-cong (a%n<n (a + b) _) (a%n<n a _) (%-remove-+ʳ a eq)

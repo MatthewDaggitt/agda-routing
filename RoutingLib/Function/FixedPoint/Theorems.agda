@@ -10,7 +10,7 @@ open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Function.Metric using (_StrContrOnOrbitsOver_; _StrContrOnFixedPointOver_)
 
-module RoutingLib.Function.Metric.FixedPoint
+module RoutingLib.Function.FixedPoint.Theorems
   {a ℓ} (DS : DecSetoid a ℓ)
   d {f} (strContrOnOrbits : _StrContrOnOrbitsOver_ (DecSetoid.setoid DS) f d)
   where

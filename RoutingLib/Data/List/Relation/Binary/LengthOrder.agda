@@ -11,20 +11,20 @@ open import RoutingLib.Relation.Binary using (DecTotalPreorder)
 
 module RoutingLib.Data.List.Relation.Binary.LengthOrder where
 
-  ≤ₗ-decTotalPreorder : ∀ {a} (A : Set a) → DecTotalPreorder a ℓ₀ ℓ₀
-  ≤ₗ-decTotalPreorder A = decTotalPreorder ≤-decTotalPreorder (length {A = A})
+≤ₗ-decTotalPreorder : ∀ {a} (A : Set a) → DecTotalPreorder a ℓ₀ ℓ₀
+≤ₗ-decTotalPreorder A = decTotalPreorder ≤-decTotalPreorder (length {A = A})
 
-  --<ₗ-strict
+--<ₗ-strict
 
-  module _ {a} {A : Set a} where
+module _ {a} {A : Set a} where
 
-    open DecTotalPreorder (≤ₗ-decTotalPreorder A) public
-      using () renaming
-      ( _≤_ to _≤ₗ_
-      ; reflexive       to ≤ₗ-reflexive
-      ; refl            to ≤ₗ-refl
-      ; trans           to ≤ₗ-trans
-      ; total           to ≤ₗ-total
-      ; isPreorder      to ≤ₗ-isPreorder
-      ; isTotalPreorder to ≤ₗ-isTotalPreorder
-      )
+  open DecTotalPreorder (≤ₗ-decTotalPreorder A) public
+    using () renaming
+    ( _≤_ to _≤ₗ_
+    ; reflexive       to ≤ₗ-reflexive
+    ; refl            to ≤ₗ-refl
+    ; trans           to ≤ₗ-trans
+    ; total           to ≤ₗ-total
+    ; isPreorder      to ≤ₗ-isPreorder
+    ; isTotalPreorder to ≤ₗ-isTotalPreorder
+    )

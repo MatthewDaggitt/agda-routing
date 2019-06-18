@@ -75,7 +75,7 @@ apply (if p then pol)     r              = if (evaluate p r) then (apply pol r) 
 apply-result : ∀ pol l cs p → apply pol (valid l cs p) ≡ invalid ⊎
              ∃₂ λ k ds → ∃ λ i → l ≤ k × apply pol (valid l cs p) ≡ valid k ds (Path.inflate p i)
 apply-result reject             l cs p = inj₁ refl
-apply-result (raise x)          l cs p = inj₂ (x + l , cs          , 0 , n≤m+n x l , refl)
+apply-result (raise x)          l cs p = inj₂ (x + l , cs          , 0 , m≤n+m l x , refl)
 apply-result (inflate n)        l cs p = inj₂ (l     , cs          , n , ≤-refl    , refl)
 apply-result (addComm c)        l cs p = inj₂ (l     , add    c cs , 0 , ≤-refl    , refl)
 apply-result (delComm c)        l cs p = inj₂ (l     , remove c cs , 0 , ≤-refl    , refl)

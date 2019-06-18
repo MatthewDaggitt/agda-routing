@@ -302,3 +302,9 @@ isPathAlgebra = record
 ... | no  _     | no ¬ij⇿p | _       = contradiction ij⇿p ¬ij⇿p
 ... | no  _     | yes _    | yes i∈p = contradiction i∈p i∉p
 ... | no  _     | yes _    | no  _   = [ ≈-refl , refl ]
+
+▷⁺-reject-≈∞ : ∀ {n} {i j : Fin n} {f : Step⁺ i j} {x p} →
+               f ▷ x ≈ ∞# → f ▷⁺ valid (x , p) ≈⁺ ∞#⁺
+▷⁺-reject-≈∞ {n} {i} {j} {f} {x} {p} f▷x≈∞ with f ▷ x ≟ ∞#
+... | yes _     = ∙≈∙
+... | no  f▷x≉∞ = contradiction f▷x≈∞ f▷x≉∞

@@ -31,10 +31,12 @@ open import Level using (lift)
 open import Relation.Binary
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation
+
 open import RoutingLib.Algebra.Construct.Lexicographic
   as OpLex renaming (Lex to OpLex)
 open import RoutingLib.Algebra.Construct.Lexicographic.Magma
   as OpLexProperties′
+import RoutingLib.Routing.Algebra.Properties.RawRoutingAlgebra
 
 open import RoutingLib.Function
 
@@ -116,9 +118,31 @@ isRoutingAlgebra A-isRA B-isRA = record
   module Aᵣ = IsRoutingAlgebra A-isRA
   module Bᵣ = IsRoutingAlgebra B-isRA
 
-{-
 ------------------------------------------------------------------------
 -- Other properties
+
+module _ (⊕ᴬ-comm : Commutative A._≈_ A._⊕_) (⊕ᴬ-sel : Selective A._≈_ A._⊕_) where
+
+  distrib-bump :  ∀ {k ⊥ᴮ ⊤ᴮ} →
+                  IsLevel_DistributiveAlt algebraA 1 →
+                  Level_DistributiveIn[_,_]Alt algebraB k ⊥ᴮ ⊤ᴮ →
+                  Level_DistributiveIn[_,_]Alt Lex (suc k) (A.0# , ⊥ᴮ) (A.∞# , ⊤ᴮ)
+  distrib-bump {zero}  eq (lift 0ᴮ≈∞ᴮ)        (f , g) {x , a} {y , b} ⊥≤x x≤⊤ ⊥≤y y≤⊤ = Level.lift ({!!} , {!!})
+  distrib-bump {suc k} A-distrib    B-distrib (f , g) {x , a} {y , b} ⊥≤x x≤⊤ ⊥≤y y≤⊤ =
+    rec
+    -- distrib-bump ? {!B-distrib g ? ? ? ?!}
+    where
+    rec : Level_DistributiveIn[_,_]Alt Lex (suc k) ((f , g) ▷ (x , a) ⊕ (y , b)) (((f , g) ▷ (x , a)) ⊕ ((f , g) ▷ (y , b)))
+    rec = {!isLevelDistrib-cong ? ? ?!}
+    
+    recA : Level_DistributiveIn[_,_]Alt algebraA k (f A.▷ x A.⊕ y) ((f A.▷ x) A.⊕ (f A.▷ y))
+    recA = {!!}
+
+    recB : {!!}
+    recB = {!!}
+
+{-
+
 
 distrib-1st-comp : Selective A._≈_ A._⊕_ → 
                    IsDistributive algebraA →

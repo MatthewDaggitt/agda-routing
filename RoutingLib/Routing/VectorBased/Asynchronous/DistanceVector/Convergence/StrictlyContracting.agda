@@ -33,7 +33,6 @@ open import RoutingLib.Data.Table.Properties using (max[t]<x; x≤max[t])
 open import RoutingLib.Data.Nat.Properties using (n≢0⇒0<n)
 import RoutingLib.Function.Metric.Construct.Condition as Condition
 open import RoutingLib.Relation.Nullary.Decidable using ([_,_])
-open import RoutingLib.Relation.Binary.Construct.NaturalOrder.Right using () 
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
 open import RoutingLib.Routing algebra as Routing using (AdjacencyMatrix; Network)

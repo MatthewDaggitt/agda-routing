@@ -6,8 +6,8 @@ open import Data.List.Any
 import Data.List.Membership.Setoid as Membership
 open import Data.List.Relation.Binary.Permutation.Inductive
 open import Data.List.Relation.Binary.Permutation.Inductive.Properties
-open import Data.List.Relation.Unary.AllPairs
-open import Data.List.Relation.Unary.Unique.Setoid
+open import Data.List.Relation.Unary.AllPairs using (AllPairs; _∷_)
+import Data.List.Relation.Unary.Unique.Setoid as Unique
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (∃₂; _,_)
 open import Function using (_∘_)
@@ -74,8 +74,9 @@ module _ {a ℓ} (S : Setoid a ℓ) where
 module _ {a ℓ} (S : Setoid a ℓ) where
 
   open Setoid S
-
-  ↭-pres-! : ∀ {xs ys} → xs ↭ ys → Unique S xs → Unique S ys
+  open Unique S
+  
+  ↭-pres-! : ∀ {xs ys} → xs ↭ ys → Unique xs → Unique ys
   ↭-pres-! xs↭ys xs! = ↭-pres-AllPairs (_∘ sym) xs↭ys xs!
 
 --------------------------------------------------------------------------------

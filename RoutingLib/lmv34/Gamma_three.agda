@@ -35,6 +35,7 @@ record Γ₃-State : Set a where
 
 ------------------------------------
 -- Computation Model
+
 Γ₃,ᵥ : RoutingVector₂ →  RoutingVector
 Γ₃,ᵥ = Γ₂,ᵥ
 

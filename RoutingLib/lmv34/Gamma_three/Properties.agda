@@ -1,9 +1,11 @@
 open import Algebra.FunctionProperties.Core using (Op₂)
 open import Data.Fin using (Fin)
-open import Data.Product using (_,_; _×_; proj₁; proj₂)
+open import Data.Product using (_,_; _×_) renaming (proj₁ to π₁; proj₂ to π₂)
 open import Data.List using (List; filter; tabulate; []; _∷_; _++_; map)
 import Data.List.Membership.DecSetoid as Membership
 open import Data.Nat using (zero; suc; ℕ; _*_; _+_)
+open import Function using (_∘_)
+open import Level using (_⊔_)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction; ¬?)
 open import Relation.Binary using (Setoid; DecSetoid; Rel; Reflexive; Symmetric; Transitive; _⇒_)
@@ -20,6 +22,7 @@ import RoutingLib.lmv34.Gamma_one.Algebra as Gamma_one_Algebra
 import RoutingLib.lmv34.Gamma_one.Properties as Gamma_one_Properties
 import RoutingLib.lmv34.Gamma_two as Gamma_two
 open import RoutingLib.lmv34.Gamma_two.Algebra as Gamma_two_Algebra using (IsComposition; AdjacencyMatrixᵀ)
+import RoutingLib.lmv34.Gamma_two.Properties as Gamma_two_Properties
 import RoutingLib.lmv34.Gamma_three as Gamma_three
 import RoutingLib.lmv34.Gamma_three.Algebra as Gamma_three_Algebra
 
@@ -42,11 +45,41 @@ open Gamma_one_Algebra isRAlg n
 open Gamma_one_Properties isRAlg A
 open Gamma_two isRAlg _●_ Imp Prot Exp
 open Gamma_two_Algebra isRAlg n _●_
+open Gamma_two_Properties isRAlg _●_ A Imp Prot Exp A=Imp∘Prot∘Exp
+  hiding (_≈ₛ_; ≈ₛ-refl; ≈ₛ-sym; ≈ₛ-trans; 𝕊ₛ)
 open Gamma_three isRAlg _●_ Imp Prot Exp
 open Gamma_three_Algebra isRAlg n _●_
 
 open DecSetoid FinRoute-decSetoid using () renaming (refl to ≈ᵣ-refl; _≟_ to _≟ᵣ_)
 open Membership FinRoute-decSetoid using (_∈?_)
+
+------------------------------------
+-- Γ₃-State
+infix 2 _≈ₛ_
+
+_≈ₛ_ : Rel Γ₃-State (a ⊔ ℓ)
+(S₃ V O I ∇,Δ) ≈ₛ (S₃ V' O' I' ∇,Δ') =
+  V ≈ᵥ V'   ×
+  O ≈ᵥ,₂ O' ×
+  I ≈ᵥ,₂ I' ×
+  π₁ ∇,Δ ≈ᵥ,₂ π₁ ∇,Δ' ×
+  π₂ ∇,Δ ≈ᵥ,₂ π₂ ∇,Δ'
+
+≈ₛ-refl : Reflexive _≈ₛ_
+≈ₛ-refl = (≈ᵥ-refl , ≈ᵥ,₂-refl , ≈ᵥ,₂-refl , ≈ᵥ,₂-refl , ≈ᵥ,₂-refl)
+≈ₛ-sym : Symmetric _≈ₛ_
+≈ₛ-sym (V=V' , I=I' , O=O' , ∇=∇' , Δ=Δ') =
+  (≈ᵥ-sym V=V' , ≈ᵥ,₂-sym I=I' , ≈ᵥ,₂-sym O=O' , ≈ᵥ,₂-sym ∇=∇' , ≈ᵥ,₂-sym Δ=Δ')
+≈ₛ-trans : Transitive _≈ₛ_
+≈ₛ-trans (V=V' , I=I' , O=O' , ∇=∇' , Δ=Δ') (V'=V'' , I'=I'' , O'=O'' , ∇'=∇'' , Δ'=Δ'') =
+  (≈ᵥ-trans V=V' V'=V'' , ≈ᵥ,₂-trans I=I' I'=I'' , ≈ᵥ,₂-trans O=O' O'=O'' , ≈ᵥ,₂-trans ∇=∇' ∇'=∇'' , ≈ᵥ,₂-trans Δ=Δ' Δ'=Δ'')
+  
+𝕊ₛ : Setoid a (a ⊔ ℓ)
+𝕊ₛ = record {Carrier = Γ₃-State;
+             _≈_ = _≈ₛ_;
+             isEquivalence =
+               record {refl = ≈ₛ-refl; sym = ≈ₛ-sym; trans = ≈ₛ-trans}}
+
 
 ------------------------------------
 -- Operation properties
@@ -58,13 +91,32 @@ open Membership FinRoute-decSetoid using (_∈?_)
 ++-cong (prep eq A=A') B=B'         = prep eq (++-cong A=A' B=B')
 ++-cong (swap eq₁ eq₂ A=A') B=B'    = swap eq₁ eq₂ (++-cong A=A' B=B')
 
-minus-cong : ∀ {A A' B B'} → A ↭ A' → B ↭ B' →
-             A - B ↭ A' - B'
-minus-cong A=A' B=B' = {!!}
+postulate
+  minus-cong : ∀ {A A' B B'} → A ↭ A' → B ↭ B' → A - B ↭ A' - B'
+
+minusᵥ-cong : ∀ {U U' V V'} → U ≈ᵥ,₂ U' → V ≈ᵥ,₂ V' →
+          (U -ᵥ V) ≈ᵥ,₂ (U' -ᵥ V')
+minusᵥ-cong U=U' V=V' i j = minus-cong (U=U' i j) (V=V' i j)
 
 ∪-cong : ∀ {A A' B B'} → A ↭ A' → B ↭ B' →
          A ∪ B ↭ A' ∪ B'
 ∪-cong {A} {A'} {B} {B'} A=A' B=B' = ++-cong A=A' (minus-cong B=B' A=A')
+
+∪ᵥ-cong : ∀ {U U' V V'} → U ≈ᵥ,₂ U' → V ≈ᵥ,₂ V' →
+          (U ∪ᵥ V) ≈ᵥ,₂ (U' ∪ᵥ V')
+∪ᵥ-cong U=U' V=V' i j = ∪-cong (U=U' i j) (V=V' i j)
+
+diff-cong : ∀ {A A' B B'} → A ↭ A' → B ↭ B' →
+            π₁ (diff A B) ↭ π₁ (diff A' B') ×
+            π₂ (diff A B) ↭ π₂ (diff A' B')
+diff-cong A=A' B=B' = minus-cong A=A' B=B' , minus-cong B=B' A=A'
+
+diffᵥ-cong : ∀ {U U' V V'} → U ≈ᵥ,₂ U' → V ≈ᵥ,₂ V' →
+            π₁ (diffᵥ U V) ≈ᵥ,₂ π₁ (diffᵥ U' V') ×
+            π₂ (diffᵥ U V) ≈ᵥ,₂ π₂ (diffᵥ U' V')
+diffᵥ-cong A=A' B=B' =
+  (λ i j → minus-cong (A=A' i j) (B=B' i j)) ,
+  (λ i j → minus-cong (B=B' i j) (A=A' i j))
 
 []-xs : ∀ xs → [] - xs ↭ []
 []-xs xs = ↭-refl
@@ -72,15 +124,6 @@ minus-cong A=A' B=B' = {!!}
 xs-[] : ∀ xs → xs - [] ↭ xs
 xs-[] [] = ↭-refl
 xs-[] (x ∷ xs) = prep ≈ᵣ-refl (xs-[] xs)
-
-minus-cancellation : ∀ xs → xs - xs ↭ []
-minus-cancellation [] = ↭-refl
-minus-cancellation (y ∷ xs) with y ≟ᵣ y
-... | no ¬p  = contradiction ≈ᵣ-refl ¬p
-... | yes _ = ↭-trans (lemma y xs) (minus-cancellation xs)
-  where lemma : ∀ y xs → xs - (y ∷ xs) ↭ xs - xs
-        lemma y [] = ↭-refl
-        lemma y (x ∷ xs) = {!!}
 
 ++-identityₗ : ∀ xs → [] ++ xs ↭ xs
 ++-identityₗ xs = ↭-refl
@@ -95,25 +138,74 @@ minus-cancellation (y ∷ xs) with y ≟ᵣ y
 ∪-identityᵣ : ∀ xs → xs ∪ [] ↭ xs
 ∪-identityᵣ xs = ++-identityᵣ xs
 
+Γ₃,ᵥ-cong : ∀ {I I'} → I ≈ᵥ,₂ I' → Γ₃,ᵥ I ≈ᵥ Γ₃,ᵥ I'
+Γ₃,ᵥ-cong = Γ₂,ᵥ-cong
+
+Γ₃,ᵢ-cong : ∀ {I I' ∇ ∇' Δ Δ'} → I ≈ᵥ,₂ I' → ∇ ≈ᵥ,₂ ∇' → Δ ≈ᵥ,₂ Δ' →
+            Γ₃,ᵢ I (∇ , Δ) ≈ᵥ,₂ Γ₃,ᵢ I' (∇' , Δ')
+Γ₃,ᵢ-cong I=I' ∇=∇' Δ=Δ' = ∪ᵥ-cong (minusᵥ-cong I=I' (Γ₂,ᵢ-cong ∇=∇')) (Γ₂,ᵢ-cong Δ=Δ')
+
+Γ₃,ₒ-cong : ∀ {V V'} → V ≈ᵥ V' → Γ₃,ₒ V ≈ᵥ,₂ Γ₃,ₒ V'
+Γ₃,ₒ-cong = Γ₂,ₒ-cong
+
+Γ₃,ₓ-cong : ∀ {V V' O O'} → V ≈ᵥ V' → O ≈ᵥ,₂ O' →
+            (π₁ (Γ₃,ₓ V O) ≈ᵥ,₂ π₁(Γ₃,ₓ V' O')) ×
+            (π₂ (Γ₃,ₓ V O) ≈ᵥ,₂ π₂(Γ₃,ₓ V' O'))
+Γ₃,ₓ-cong V=V' O=O' = diffᵥ-cong O=O' (Γ₃,ₒ-cong V=V')
+
+Γ₃-cong : ∀ {S S'} → S ≈ₛ S' → Γ₃-Model S ≈ₛ Γ₃-Model S'
+Γ₃-cong (V=V' , I=I' , O=O' , ∇=∇' , Δ=Δ') = 
+  Γ₃,ᵥ-cong I=I' ,
+  Γ₃,ᵢ-cong I=I' ∇=∇' Δ=Δ' ,
+  Γ₃,ₒ-cong V=V' ,
+  π₁ (Γ₃,ₓ-cong V=V' O=O') ,
+  π₂ (Γ₃,ₓ-cong V=V' O=O')
+
 ------------------------------------
 -- Theorems
 
--- Lemma A.5
-F-union-cong : ∀ {i j} → (f : Step i j) → (A B : RoutingSet)
-               → f [ A ∪ B ] ↭ f [ A ] ∪ f [ B ]
-F-union-cong = {!!}
-
--- Lemma A.6
-F-minus-cong : ∀ {i j} → (f : Step i j) → (A B : RoutingSet)
+postulate
+  -- Lemma A.5
+  F-union-cong : ∀ {i j} → (f : Step i j) → (A B : RoutingSet)
+                 → f [ A ∪ B ] ↭ f [ A ] ∪ f [ B ]
+  -- Lemma A.6
+  F-minus-cong : ∀ {i j} → (f : Step i j) → (A B : RoutingSet)
                → f [ A - B ] ↭ f [ A ] - f [ B ]
-F-minus-cong = {!!}
+  diff-lemma : ∀ A B → let (∇ , Δ) = diff A B in
+          (A - ∇) ∪ Δ ↭ B
 
 -- Lemma 3.3
-F-diff-cong : ∀ F A B → ((F 〖 A 〗 -ᵥ F 〖 proj₁ (diffᵥ A B) 〗) ∪ᵥ F 〖 proj₂ (diffᵥ A B) 〗) ≈ᵥ,₂ (F 〖 B 〗)
-F-diff-cong F A B i j = begin
-  ((F 〖 A 〗 -ᵥ F 〖 proj₁ (diffᵥ A B) 〗) ∪ᵥ F 〖 proj₂ (diffᵥ A B) 〗) i j ↭⟨ ↭-refl ⟩
-  ((F i j) [ A j i ] - (F i j) [ (A j i) - (B j i) ]) ∪ (F i j) [ (B j i) - (A j i)] ↭⟨ ∪-cong (↭-sym (F-minus-cong (F i j) (A j i) ((A j i) - (B j i)))) ↭-refl ⟩
-  ((F i j) [ ((A j i) - ((A j i) - (B j i))) ]) ∪ (F i j) [ (B j i) - (A j i)] ↭⟨ {!!} ⟩
+F-diff-cong : ∀ F A B → let (∇ , Δ) = diffᵥ A B in
+              ((F 〖 A 〗 -ᵥ F 〖 ∇ 〗) ∪ᵥ F 〖 Δ 〗) ≈ᵥ,₂ (F 〖 B 〗)
+F-diff-cong F A B i j = let (∇ , Δ) = diffᵥ A B in begin
+  ((F 〖 A 〗 -ᵥ F 〖 ∇ 〗) ∪ᵥ F 〖 Δ 〗) i j ↭⟨ ↭-refl ⟩
+  ((F i j) [ A j i ] - (F i j) [ ∇ j i ]) ∪ (F i j) [ Δ j i ]
+    ↭⟨ ∪-cong {A = ((F i j) [ A j i ] - (F i j) [ ∇ j i ])}
+              {A' = ((F i j) [ (A j i) - (∇ j i) ])}
+              {B = (F i j) [ Δ j i ]}
+              (↭-sym (F-minus-cong (F i j) (A j i) (∇ j i))) ↭-refl ⟩
+  ((F i j) [ ((A j i) - (∇ j i)) ]) ∪ (F i j) [ Δ j i ]
+    ↭⟨ ↭-sym (F-union-cong (F i j) ((A j i) - (∇ j i)) (Δ j i)) ⟩
+  (F i j) [  ((A j i) - (∇ j i)) ∪ (Δ j i) ] ↭⟨ []-cong (diff-lemma (A j i) (B j i)) ⟩
   (F 〖 B 〗) i j ∎
   where open PermutationReasoning
-  
+
+private
+  Lemma : ∀ {k S} → (Γ₃-Model ^ (suc k)) S ≈ₛ (Γ₃-Model ^ k) (Γ₃-Model S)
+  Lemma {zero} = ≈ₛ-refl
+  Lemma {suc k} = Γ₃-cong (Lemma {k})
+
+-- Theorem 8
+Γ₁=Γ₃ : ∀ {k} → let I' = (Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ k) (~ M))
+                    O' = Γ₂,ₒ ((Γ₁ ^ k) (~ M)) in
+        (Γ₃-Model ^ (3 * (suc k))) (S₃ (~ M) Øᵥ,₂ Øᵥ,₂ (Øᵥ,₂ , Øᵥ,₂)) ≈ₛ
+        S₃ ((Γ₁ ^ (suc k)) (~ M)) I' O' (Øᵥ,₂ , Øᵥ,₂)
+Γ₁=Γ₃ {zero} = begin
+  (Γ₃-Model ^ 3) (S₃ (~ M) Øᵥ,₂ Øᵥ,₂ (Øᵥ,₂ , Øᵥ,₂)) ≈⟨ Lemma {2} {S₃ (~ M) Øᵥ,₂ Øᵥ,₂ (Øᵥ,₂ , Øᵥ,₂)} ⟩
+  (Γ₃-Model ^ 2) (S₃ (Γ₃,ᵥ Øᵥ,₂) (Γ₃,ᵢ Øᵥ,₂ (Øᵥ,₂ , Øᵥ,₂)) (Γ₃,ₒ (~ M)) (Γ₃,ₓ (~ M) Øᵥ,₂)) ≈⟨ 
+            ({!!} , {!!} , {!!} , {!!} , {!!}) ⟩ 
+  S₃ (Γ₁ (~ M)) I' O' (Øᵥ,₂ , Øᵥ,₂) ∎
+  where open EqReasoning 𝕊ₛ
+        I' = (Γ₂,ᵢ ∘ Γ₂,ₒ) (~ M)
+        O' = Γ₂,ₒ (~ M)
+Γ₁=Γ₃ {suc k} = {!!}

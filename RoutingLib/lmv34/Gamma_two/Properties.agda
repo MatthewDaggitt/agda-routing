@@ -46,6 +46,7 @@ open Gamma_two_Algebra isRAlg n _●_
 
 open DecSetoid FinRoute-decSetoid using () renaming (_≈_ to _≈ᵣ_)
 
+------------------------------------
 -- Γ₂-State setoid
 infix 2 _≈ₛ_
 
@@ -120,23 +121,6 @@ A〚〛-cong {F} {F'} {V} F=F' i = ⨁ₛ-cong (λ {q} → f[]-cong {X = V q} (F
 postulate
   LemmaA₃ : ∀ {i j} → {f g : Step i j} → {X : RoutingSet} →
             f [ g [ X ] ] ↭ (f ● g) [ X ]
-
-LemmaA₃' : ∀ {i j} → {f g : Step i j} → {X : RoutingSet} →
-            f [ g [ X ] ] ↭ (f ● g) [ X ]
-LemmaA₃' {i} {j} {f} {g} {[]} = ↭-refl
-LemmaA₃' {i} {j} {f} {g} {(d , v) ∷ X} with ¬? (v ≟ ∞#)
-... | yes _ = {!!}
-... | no p  = begin
-                f [ g [ (d , v) ∷ X ] ] ↭⟨ ↭-refl ⟩
-                f [ filter (λ { (d , v) → ¬? (v ≟ ∞#)}) ((d , g ▷ v) ∷ map (λ { (d , v) → d , g ▷ v }) X) ] ↭⟨ {!!} ⟩
-                f [ filter (λ { (d , v) → ¬? (v ≟ ∞#)}) (map (λ { (d , v) → d , g ▷ v }) X) ] ↭⟨ ↭-refl ⟩
-                f [ g [ X ] ] ↭⟨ LemmaA₃' {X = X} ⟩
-                (f ● g) [ X ] ↭⟨ ↭-refl ⟩
-                filter (λ { (d , v) → ¬? (v ≟ ∞#)}) (map (λ { (d , v) → d , (f ● g) ▷ v }) X) ↭⟨ {!!} ⟩
-                filter (λ { (d , v) → ¬? (v ≟ ∞#)}) ((d , (f ● g) ▷ v) ∷ map (λ { (d , v) → d , (f ● g) ▷ v }) X) ↭⟨ ↭-refl ⟩
-                (map (λ {(d , v) → (d , (f ● g) ▷ v)}) ((d , v) ∷ X)) † ↭⟨ ↭-refl ⟩
-                (f ● g) [ (d , v) ∷ X ] ∎
-                where open PermutationReasoning
   
 -- Lemma A.4
 LemmaA₄ : ∀ {F G V} → (F 〖 G 【 V 】 〗) ↓ ≈ᵥ (F ●ₘ (G ᵀ)) 〚 V 〛
@@ -216,9 +200,10 @@ private
     where open PropositionalEq.≡-Reasoning
 
 -- Theorem 7
-Γ₁=Γ₂ : ∀ {k} →
+Γ₁=Γ₂ : ∀ {k} → let I' = (Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ k) (~ M))
+                    O' = Γ₂,ₒ ((Γ₁ ^ k) (~ M)) in
         (Γ₂-Model ^ (3 * (suc k))) (S₂ (~ M) Øᵥ,₂ Øᵥ,₂) ≈ₛ
-        S₂ ((Γ₁ ^ (suc k)) (~ M)) ((Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ k) (~ M))) (Γ₂,ₒ ((Γ₁ ^ k) (~ M)))
+        S₂ ((Γ₁ ^ (suc k)) (~ M)) I' O'
 Γ₁=Γ₂ {zero} = begin
         (Γ₂-Model ^ 3) (S₂ (~ M) Øᵥ,₂ Øᵥ,₂)
           ≈⟨ ≈ₛ-refl ⟩

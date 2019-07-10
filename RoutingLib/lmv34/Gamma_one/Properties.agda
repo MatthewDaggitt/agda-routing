@@ -4,6 +4,9 @@ open import Data.Fin.Properties using () renaming (setoid to Fin-setoid)
 open import Data.Nat using (ℕ; zero; suc)
 open import Data.Product using (_,_; _×_)
 open import Data.List using (List; []; _∷_; filter; tabulate; map)
+open import Data.List.Relation.Binary.Permutation.Inductive
+  using ()
+  renaming (_↭_ to _≡-↭_; refl to ≡-refl; prep to ≡-prep; trans to ≡-trans; swap to ≡-swap)
 open import Level using (Level)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (¬?; contradiction)
@@ -14,7 +17,6 @@ import Relation.Binary.EqReasoning as EqReasoning
 
 open import RoutingLib.lmv34.Function using (_^_)
 import RoutingLib.Data.List.Sorting.InsertionSort as InsertionSort
-import Data.List.Relation.Binary.Permutation.Setoid as PermutationEq
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
@@ -37,20 +39,43 @@ open Gamma_one isRoutingAlgebra A
 open Gamma_one_Algebra isRoutingAlgebra n
 
 open Setoid (Fin-setoid n) using () renaming (refl to Fin-refl)
-open DecSetoid FinRoute-decSetoid using () renaming (_≈_ to _≈ᵣ_; trans to ≈ᵣ-trans; sym to ≈ᵣ-sym)
-open InsertionSort decTotalOrder using (sort)
+open DecSetoid FinRoute-decSetoid
+  using ()
+  renaming (_≈_ to _≈ᵣ_; refl to ≈ᵣ-refl; trans to ≈ᵣ-trans; sym to ≈ᵣ-sym)
+open InsertionSort decTotalOrder using (sort) renaming (sort↭ to sort≡-↭)
 
 ------------------------------------
 -- Operation properties
 
 postulate
   ⊕ₛ-cong : Congruent₂ _↭_ _⊕ₛ_
-  sort↭ : ∀ xs → sort xs ↭ xs
-  Ø-identityᵣ : ∀ {A} → A ⊕ₛ Ø ↭ A
+
+≡-↭⇒↭ : ∀ {xs ys} → xs ≡-↭ ys → xs ↭ ys
+≡-↭⇒↭ ≡-refl = refl
+≡-↭⇒↭ (≡-prep x xs=ys) = prep ≈ᵣ-refl (≡-↭⇒↭ xs=ys)
+≡-↭⇒↭ (≡-swap x y xs=ys) = swap ≈ᵣ-refl ≈ᵣ-refl (≡-↭⇒↭ xs=ys)
+≡-↭⇒↭ (≡-trans xs=ys ys=zs) = trans (≡-↭⇒↭ xs=ys) (≡-↭⇒↭ ys=zs)
+
+sort↭ : ∀ {xs} → sort xs ↭ xs
+sort↭ {xs} = ≡-↭⇒↭ (sort≡-↭ xs)
 
 Ø-identityₗ : ∀ {A} → Ø ⊕ₛ A ↭ A
-Ø-identityₗ {A} = sort↭ A
-  
+Ø-identityₗ {A} = sort↭ {A}
+
+Ø-identityᵣ : ∀ {A} → A ⊕ₛ Ø ↭ A
+Ø-identityᵣ {A} = ↭-trans prf (sort↭ {A})
+   where prf : ∀ {xs} → mergeSorted xs Ø ↭ xs
+         prf {[]} = ↭-refl
+         prf {x ∷ xs}= ↭-refl
+
+sort-cong : Congruent₁ _↭_ sort
+sort-cong {A} {A'} A=A' = begin
+  sort A ↭⟨ sort↭ {A} ⟩
+  A      ↭⟨ A=A' ⟩
+  A'     ↭⟨ ↭-sym (sort↭ {A'}) ⟩
+  sort A' ∎
+  where open PermutationReasoning
+
 ⨁ₛ-cong : ∀ {k} → {f g : Fin k → RoutingSet} →
           (∀ {i} → f i ↭ g i) → ⨁ₛ f ↭ ⨁ₛ g
 ⨁ₛ-cong {zero} {f} {g} f=g = ↭-refl

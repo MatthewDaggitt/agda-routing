@@ -103,8 +103,7 @@ open FunctionProperties _≈_
 open DecTotalOrder ≤₊-decTotalOrder public
   using ()
   renaming
-  ( _≤?_            to _≤₊?_
-  ; refl            to ≤₊-refl
+  ( refl            to ≤₊-refl
   ; reflexive       to ≤₊-reflexive
   ; trans           to ≤₊-trans
   ; antisym         to ≤₊-antisym
@@ -118,17 +117,19 @@ open DecTotalOrder ≤₊-decTotalOrder public
 open NonStrictToStrict ≤₊-decTotalOrder public
   using ()
   renaming
-  ( _<?_      to _<₊?_
-  ; <-≤-trans to <-≤₊-trans
+  ( <-≤-trans to <-≤₊-trans
   ; ≤-<-trans to ≤-<₊-trans
   ; <⇒≉       to <₊⇒≉
   ; <⇒≱       to <₊⇒≱₊
   ; ≤⇒≯       to ≤₊⇒≯₊
   ; ≰⇒>       to ≰₊⇒>₊
   ; <-asym    to <₊-asym
+  ; <-trans   to <₊-trans
   ; <-respʳ-≈ to <₊-respʳ-≈
   ; <-respˡ-≈ to <₊-respˡ-≈
+  ; <-resp-≈  to <₊-resp-≈
   ; <-cmp     to <₊-cmp
+  ; <-irrefl  to <₊-irrefl
   ; <-strictPartialOrder to <₊-strictPartialOrder
   ; <-strictTotalOrder   to <₊-strictTotalOrder
   )

@@ -104,10 +104,22 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
   open RightNaturalOrder _≈_ _⊕_ public using () renaming (_≤_ to _≤₊_)
   open NonStrictToStrict _≈_ _≤₊_ public using () renaming (_<_ to _<₊_)
 
-  infix 4 _≉_
+  infix 4 _≉_ _≤₊?_ _<₊?_ _≮₊_ _≰₊_
+  
   _≉_ : Rel Route ℓ
   x ≉ y = ¬ (x ≈ y)
 
+  _≮₊_ : Rel Route ℓ
+  x ≮₊ y = ¬ (x <₊ y)
+
+  _≰₊_ : Rel Route ℓ
+  x ≰₊ y = ¬ (x ≤₊ y)
+
+  _≤₊?_ : Decidable _≤₊_
+  x ≤₊? y = x ≟ y ⊕ x
+  
+  _<₊?_ : Decidable _<₊_
+  _<₊?_ = NonStrictToStrict.<-decidable _≈_ _≤₊_ _≟_ _≤₊?_
 
   ⊕-isMagma : IsMagma _≈_ _⊕_
   ⊕-isMagma = record
@@ -136,10 +148,6 @@ record RawRoutingAlgebra a b ℓ : Set (lsuc (a ⊔ b ⊔ ℓ)) where
     ( ∙-congˡ to ⊕-congˡ
     ; ∙-congʳ to ⊕-congʳ
     )
-
-  infix 4 _≰₊_
-  _≰₊_ : Rel Route ℓ
-  x ≰₊ y = ¬ (x ≤₊ y)
 
   ≤₊-respʳ-≈ : _≤₊_ Respectsʳ _≈_
   ≤₊-respʳ-≈ = RightNaturalOrder.respʳ _≈_  _⊕_ ⊕-isMagma  

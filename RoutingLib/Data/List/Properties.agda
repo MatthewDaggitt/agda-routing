@@ -14,6 +14,7 @@ open import Data.Maybe using (Maybe; just; nothing)
 open import Data.Maybe.Properties using (just-injective)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_,_)
+open import Level using (Level)
 open import Relation.Binary using (Rel; Setoid)
 open import Relation.Unary using (Decidable; Pred; ∁)
 open import Relation.Unary.Properties using (∁?)
@@ -23,7 +24,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; con
 open import Function using (id; _∘_)
 import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import Relation.Nullary using (¬_)
-open import Relation.Unary using (∁; U)
+open import Relation.Unary using (∁; U; Pred)
 open import Relation.Unary.Properties using (U-Universal)
 
 open import RoutingLib.Data.List
@@ -32,21 +33,27 @@ open import RoutingLib.Algebra.FunctionProperties
 
 module RoutingLib.Data.List.Properties where
 
+private
+  variable
+    a b p q ℓ : Level
+    A : Set a
+    B : Set b
+
 ------------------------------------------------------------------------
 -- Properties of filter
 
-module _ {a p} {A : Set a} {P : A → Set p} (P? : Decidable P) where
+module _ {P : A → Set p} (P? : Decidable P) where
 
   filter-length₂ : ∀ xs → length (filter (∁? P?) xs) + length (filter P? xs) ≡ length xs
   filter-length₂ [] = refl
   filter-length₂ (x ∷ xs) with P? x
   ... | no  _ = cong suc (filter-length₂ xs)
   ... | yes _ = trans (+-suc (length (filter (∁? P?) xs)) (length (filter P? xs))) (cong suc (filter-length₂ xs))
-
+  
 ------------------------------------------------------------------------
 -- Properties of mapMaybe
 
-module _ {a b} {A : Set a} {B : Set b} (f : A → Maybe B) where
+module _ (f : A → Maybe B) where
 
   mapMaybe≡[] : ∀ {xs} → All (λ x → f x ≡ nothing) xs → mapMaybe f xs ≡ []
   mapMaybe≡[] {_}     [] = refl
@@ -66,7 +73,7 @@ module _ {a b} {A : Set a} {B : Set b} (f : A → Maybe B) where
 ------------------------------------------------------------------------
 -- Properties of foldr
 
-module _ {a ℓ} (M : Magma a ℓ) where
+module _ (M : Magma a ℓ) where
 
   open Magma M
   open import Relation.Binary.EqReasoning setoid
@@ -88,7 +95,7 @@ module _ {a ℓ} (M : Magma a ℓ) where
 ------------------------------------------------------------------------
 -- Properties of foldl
 
-module _ {a p} {A : Set a} {P : Pred A p} {_•_ : Op₂ A} where
+module _ {P : Pred A p} {_•_ : Op₂ A} where
 
   foldl-×pres : _•_ Preservesᵇ P → ∀ {e xs} → P e → All P xs → P (foldl _•_ e xs)
   foldl-×pres _    pe []         = pe
@@ -105,16 +112,14 @@ module _ {a p} {A : Set a} {P : Pred A p} {_•_ : Op₂ A} where
 ------------------------------------------------------------------------
 -- Properties of lookup
 
-module _ {a} {A : Set a} where
-
-  lookup∈xs : ∀ (xs : List A) (i : Fin (length xs)) → lookup xs i ∈ xs
-  lookup∈xs (x ∷ xs) zero    = here refl
-  lookup∈xs (x ∷ xs) (suc i) = there (lookup∈xs xs i)
+lookup∈xs : ∀ (xs : List A) (i : Fin (length xs)) → lookup xs i ∈ xs
+lookup∈xs (x ∷ xs) zero    = here refl
+lookup∈xs (x ∷ xs) (suc i) = there (lookup∈xs xs i)
 
 ------------------------------------------------------------------------
 -- Semilattice properties
 
-module _ {a ℓ} (S : Semilattice a ℓ)  where
+module _ (S : Semilattice a ℓ)  where
 
   open Semilattice S renaming (Carrier to A; refl to ≈-refl; sym to ≈-sym; trans to ≈-trans)
   open import Data.List.Membership.Setoid setoid using () renaming (_∈_ to _∈ₛ_)
@@ -151,12 +156,12 @@ module _ {a ℓ} (S : Semilattice a ℓ)  where
   foldr≤ₗxs e x∈xs = ≈-trans (foldr≤ᵣxs e x∈xs) (comm _ _)
 
 
-module _ {a ℓ} (S : Setoid a ℓ)  where
+module _ (S : Setoid a ℓ)  where
 
-  open Setoid S renaming (Carrier to A; refl to ≈-refl; sym to ≈-sym; trans to ≈-trans)
+  open Setoid S renaming (Carrier to C; refl to ≈-refl; sym to ≈-sym; trans to ≈-trans)
   open EqReasoning S
 
-  foldr-map-commute-gen₁ : ∀ {b} {B : Set b} {_•ᵃ_ _•ᵇ_} {f : B → A} → Congruent₂ _≈_ _•ᵃ_ →
+  foldr-map-commute-gen₁ : ∀ {_•ᵃ_ _•ᵇ_} {f : B → C} → Congruent₂ _≈_ _•ᵃ_ →
                            ∀ {p} {P : Pred B p} → _•ᵇ_ Preservesᵇ P →
                            (∀ {x y} → P x → P y → f x •ᵃ f y ≈ f (x •ᵇ y)) →
                            ∀ {d : B} {xs : List B} → P d → All P xs →
@@ -166,7 +171,7 @@ module _ {a ℓ} (S : Setoid a ℓ)  where
     (cong ≈-refl (foldr-map-commute-gen₁ cong •-pres-P P-pres-f pd pxs))
     (P-pres-f px (foldr-preservesᵇ •-pres-P pd pxs))
 
-  foldr-map-commute-gen₂ : ∀ {b} {B : Set b} {_•ᵃ_ _•ᵇ_} {f : B → A} → Congruent₂ _≈_ _•ᵃ_ →
+  foldr-map-commute-gen₂ : ∀ {_•ᵃ_ _•ᵇ_} {f : B → C} → Congruent₂ _≈_ _•ᵃ_ →
                            ∀ {ℓ} {_~_ : Rel B ℓ} → (∀ {x} → _•ᵇ_ Preservesᵇ (x ~_)) →
                            (∀ {x y} → x ~ y → f x •ᵃ f y ≈ f (x •ᵇ y)) →
                            ∀ {d : B} {xs : List B} → All (_~ d) xs → AllPairs _~_ xs →
@@ -177,7 +182,7 @@ module _ {a ℓ} (S : Setoid a ℓ)  where
     (f x •ᵃ f (foldr _•ᵇ_ d xs))         ≈⟨ ~-pres-f (foldr-preservesᵇ •ᵇ-pres-~ x~d px) ⟩
     f (x •ᵇ foldr _•ᵇ_ d xs)             ∎
 
-  foldr-map-commute : ∀ {b} {B : Set b} {_•ᵃ_ _•ᵇ_} {f : B → A} →
+  foldr-map-commute : ∀ {_•ᵃ_ _•ᵇ_} {f : B → C} →
                       Congruent₂ _≈_ _•ᵃ_ →
                       (∀ x y → f x •ᵃ f y ≈ f (x •ᵇ y)) →
                       ∀ d xs → foldr _•ᵃ_ (f d) (map f xs) ≈  f (foldr _•ᵇ_ d xs)

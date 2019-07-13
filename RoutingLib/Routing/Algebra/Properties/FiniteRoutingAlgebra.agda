@@ -16,22 +16,24 @@ open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
 
 open import Data.List using (List; length)
+open import Data.List.Membership.Setoid S using (_∈_)
 open import Data.List.Membership.Setoid.Properties using (∈-length)
 open import Data.List.Relation.Unary.Unique.Setoid using (Unique)
 open import Data.Nat using (ℕ; _≤_)
 open import Data.Product using (proj₁; proj₂)
 open import Function using (flip)
+open import Relation.Binary using (Decidable)
 
+open import RoutingLib.Data.List.Sorting (flip _≤₊_) using (Sorted)
+open import RoutingLib.Data.List.Membership.DecSetoid DS using (deduplicate)
 open import RoutingLib.Data.List.Relation.Unary.Uniqueness.Setoid.Properties using (deduplicate!⁺)
 open import RoutingLib.Data.List.Membership.DecSetoid.Properties using (∈-deduplicate⁺)
 import RoutingLib.Data.List.Sorting.InsertionSort as InsertionSort
 
+open import RoutingLib.Routing
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra
   as RoutingAlgebraProperties
 
-open import RoutingLib.Data.List.Sorting (flip _≤₊_) using (Sorted)
-open import RoutingLib.Data.List.Membership.DecSetoid DS using (deduplicate)
-open import Data.List.Membership.Setoid S using (_∈_)
 
 private
 
@@ -45,6 +47,14 @@ private
 -- Publically re-export the properties of routing algebras
 
 open RoutingAlgebraProperties isRoutingAlgebra public
+
+--------------------------------------------------------------------------------
+-- Extension is decidable
+
+open import RoutingLib.Routing.Extensions ? ?
+
+_↝*?_ : Decidable _↝*?_
+x ↝*? y = ?
 
 --------------------------------------------------------------------------------
 -- If the algebra is finite then we can create a complete sorted list of routes

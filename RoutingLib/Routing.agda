@@ -15,15 +15,18 @@ module RoutingLib.Routing
 
 open import Data.Fin using (Fin) renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Subset using (Subset; _∉_)
+open import Data.Fin.Properties using (any?)
 open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
-open import Relation.Binary using (Setoid; DecSetoid)
+open import Data.Product using (∃₂)
+open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; sym; trans)
 open import Relation.Binary.Indexed.Homogeneous
   using (IndexedSetoid; IndexedDecSetoid)
+import Relation.Binary.Construct.Closure.Transitive as TransitiveClosure
 import Relation.Binary.EqReasoning as EqReasoning
-open import Relation.Nullary using (yes; no)
+open import Relation.Nullary using (Dec; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous

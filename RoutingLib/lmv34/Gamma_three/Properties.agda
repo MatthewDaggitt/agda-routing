@@ -153,7 +153,7 @@ xs-[] (x ∷ xs) = prep ≈ᵣ-refl (xs-[] xs)
             (π₂ (Γ₃,ₓ V O) ≈ᵥ,₂ π₂(Γ₃,ₓ V' O'))
 Γ₃,ₓ-cong V=V' O=O' = diffᵥ-cong O=O' (Γ₃,ₒ-cong V=V')
 
-Γ₃-cong : ∀ {S S'} → S ≈ₛ S' → Γ₃-Model S ≈ₛ Γ₃-Model S'
+Γ₃-cong : ∀ {S S'} → S ≈ₛ S' → Γ₃ S ≈ₛ Γ₃ S'
 Γ₃-cong (V=V' , I=I' , O=O' , ∇=∇' , Δ=Δ') = 
   Γ₃,ᵥ-cong I=I' ,
   Γ₃,ᵢ-cong I=I' ∇=∇' Δ=Δ' ,
@@ -190,9 +190,47 @@ F-diff-cong F A B i j = let (∇ , Δ) = diffᵥ A B in begin
   (F 〖 B 〗) i j ∎
   where open PermutationReasoning
 
-postulate
-  -- Theorem 8
-  Γ₁=Γ₃ : ∀ {k} → let I' = (Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ k) (~ M))
-                      O' = Γ₂,ₒ ((Γ₁ ^ k) (~ M)) in
-          (Γ₃-Model ^ (3 * (suc k))) (S₃ (~ M) Øᵥ,₂ Øᵥ,₂ (Øᵥ,₂ , Øᵥ,₂)) ≈ₛ
-          S₃ ((Γ₁ ^ (suc k)) (~ M)) I' O' (Øᵥ,₂ , Øᵥ,₂)
+-- postulate
+  -- -- Theorem 8
+  -- Γ₁=Γ₃ : ∀ {k} → let I' = (Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ k) (~ M))
+  --                     O' = Γ₂,ₒ ((Γ₁ ^ k) (~ M)) in
+  --         (Γ₃-Model ^ (3 * (suc k))) (S₃ (~ M) Øᵥ,₂ Øᵥ,₂ (Øᵥ,₂ , Øᵥ,₂)) ≈ₛ
+  --         S₃ ((Γ₁ ^ (suc k)) (~ M)) I' O' (Øᵥ,₂ , Øᵥ,₂)
+
+-- tgg: we made some mistakes regarding Γ₃ !
+
+-- To fix, we simply need an invariant, so that we can equate each step of Γ₃ with a step of Γ₂.
+-- We only need to ensure that at each step the I component of Γ₃ is equal to the I component of Γ₂.
+-- Then the V, I, and O components will be the same at each step. 
+
+Γ₃-invariant : Γ₃-State → Set (a ⊔ ℓ)
+Γ₃-invariant (S₃ V I O (∇ , Δ)) = Γ₂,ᵢ O ≈ᵥ,₂ Γ₃,ᵢ I  (∇ , Δ)
+
+Γ₃-invariant-maintained : ∀ (S : Γ₃-State) → Γ₃-invariant S → Γ₃-invariant (Γ₃ S) 
+Γ₃-invariant-maintained (S₃ V I O (∇ , Δ)) inv = {!!} 
+-- 
+-- hand proof: 
+-- let 
+--  Γ₃ (S₃ V I O (∇ , Δ)) = (S₃ V' I' O' (∇' , Δ'))
+--
+--  Need to show Γ₂,ᵢ O' ≈ᵥ,₂ Γ₃,ᵢ I'  (∇' , Δ')
+--  That is,
+--  Γ₂,ᵢ (Γ₂,ₒ V) ≈ᵥ,₂ Γ₃,ᵢ (Γ₃,ᵢ I  (∇ , Δ))  diffᵥ O (Γ₃,ₒ V)
+--
+
+-- proof:
+--
+-- Γ₃,ᵢ (Γ₃,ᵢ I  (∇ , Δ))  diffᵥ O (Γ₃,ₒ V)
+-- = by invariant 
+-- Γ₃,ᵢ (Γ₂,ᵢ O)  diffᵥ O (Γ₃,ₒ V)
+-- =
+-- Γ₃,ᵢ (Γ₂,ᵢ O)  (O - (Γ₃,ₒ V), (Γ₃,ₒ V) - O) 
+-- =
+-- ((Γ₂,ᵢ O) - (Γ₂,ᵢ (O - (Γ₃,ₒ V)))) ∪ (Γ₂,ᵢ ((Γ₃,ₒ V) - O))
+-- = by magic ;-) 
+-- Γ₂,ᵢ (O - (O - (Γ₃,ₒ V)) ∪ ((Γ₃,ₒ V) - O))
+-- = by algebra 
+-- Γ₂,ᵢ (Γ₂,ₒ V)
+
+-- 
+

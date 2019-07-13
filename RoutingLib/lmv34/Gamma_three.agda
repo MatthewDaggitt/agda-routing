@@ -48,5 +48,5 @@ record Γ₃-State : Set a where
 Γ₃,ₓ : RoutingVector → RoutingVector₂ → RoutingVector₂ × RoutingVector₂
 Γ₃,ₓ V O = diffᵥ O (Γ₃,ₒ V)
 
-Γ₃-Model : Γ₃-State → Γ₃-State
-Γ₃-Model (S₃ V I O (∇ , Δ)) = S₃ (Γ₃,ᵥ I) (Γ₃,ᵢ I (∇ , Δ)) (Γ₃,ₒ V) (Γ₃,ₓ V O)
+Γ₃ : Γ₃-State → Γ₃-State
+Γ₃ (S₃ V I O (∇ , Δ)) = S₃ (Γ₃,ᵥ I) (Γ₃,ᵢ I (∇ , Δ)) (Γ₃,ₒ V) (Γ₃,ₓ V O)

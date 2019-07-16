@@ -103,7 +103,7 @@ infix 12 ~_
 -- Function application to sets
 infix 13 _[_]
 _[_] : ∀ {i j : Fin n} → (Step i j) → RoutingSet → RoutingSet
-f [ X ] = (map (λ {(d , v) → (d , f ▷ v)})  X) †
+f [ X ] = (map (λ {(d , v) → (d , f ▷ v)}) X) †
 
 -- Matrix application to vector-of-sets
 infix 10 _〚_〛

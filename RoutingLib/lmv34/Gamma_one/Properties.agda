@@ -167,6 +167,10 @@ filter-cong {x ∷ y ∷ A} {y' ∷ x' ∷ A'} {P? = P?} P≈ (swap x=x' y=y' A=
 Γ₁-cong : ∀ {V V'} → V ≈ᵥ V' → Γ₁ V ≈ᵥ Γ₁ V'
 Γ₁-cong V=V' = ⊕ᵥ-cong (〚〛-cong V=V') (≈ₘ⇒≈ᵥ ≈ₘ-refl)
 
+Γ₁-iter-cong : ∀ {V V'} k → V ≈ᵥ V' → (Γ₁ ^ k) V ≈ᵥ (Γ₁ ^ k) V'
+Γ₁-iter-cong zero    V=V' = V=V'
+Γ₁-iter-cong (suc k) V=V' = Γ₁-cong (Γ₁-iter-cong k V=V')
+
 ------------------------------------
 -- Theorems 
 

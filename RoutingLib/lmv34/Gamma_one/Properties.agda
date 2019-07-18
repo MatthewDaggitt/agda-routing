@@ -143,16 +143,19 @@ filter-cong {x ∷ y ∷ A} {y' ∷ x' ∷ A'} {P? = P?} P≈ (swap x=x' y=y' A=
 †-cong : ∀ {A A' : RoutingSet} → A ↭ A' → A † ↭ A' †
 †-cong A=A' = filter-cong †-respects-≈ᵣ A=A'
 
-[]-cong : ∀ {i j} {f : Step i j} {A A'} →
-          A ↭ A' → f [ A ] ↭ f [ A' ]
-[]-cong A=A' = †-cong (lemma A=A')
-  where lemma : {A A' : RoutingSet} → {i j : Fin n} → {f : Step i j} →
-                A ↭ A' → map (λ {(d , v) → (d , f ▷ v)}) A ↭ map (λ {(d , v) → (d , f ▷ v)}) A'
-        lemma refl = refl
-        lemma (trans A=A'' A''=A') = trans (lemma A=A'') (lemma A''=A')
-        lemma {f = f} (prep (d=d' , v=v') A=A') = prep (d=d' , ▷-cong f v=v') (lemma A=A')
-        lemma {f = f} (swap (d₁=d₁' , v₁=v₁') (d₂=d₂' , v₂=v₂')  A=A') =
-                swap ((d₁=d₁' , ▷-cong f v₁=v₁')) ((d₂=d₂' , ▷-cong f v₂=v₂')) (lemma A=A')
+postulate 
+  []-cong : ∀ {f : Route → Route} {A A'} →
+            A ↭ A' → f [ A ] ↭ f [ A' ]
+
+-- tgg : need to fix 
+-- []-cong A=A' = †-cong (lemma A=A')
+--   where lemma : {A A' : RoutingSet} → {f : Route → Route} →
+--                 A ↭ A' → map (λ {(d , v) → (d , f v)}) A ↭ map (λ {(d , v) → (d , f v)}) A'
+--         lemma refl = refl
+--         lemma (trans A=A'' A''=A') = trans (lemma A=A'') (lemma A''=A')
+--         lemma {f = f} (prep (d=d' , v=v') A=A') = prep (d=d' , {!!}) (lemma A=A')
+--         lemma {f = f} (swap (d₁=d₁' , v₁=v₁') (d₂=d₂' , v₂=v₂')  A=A') =
+--                 swap ((d₁=d₁' , {!!})) ((d₂=d₂' , {!!})) (lemma A=A')
 
 〚〛-cong : ∀ {V V'} → V ≈ᵥ V' → A 〚 V 〛 ≈ᵥ A 〚 V' 〛
 〚〛-cong V=V' i = ⨁ₛ-cong (λ {q} → []-cong (V=V' q))
@@ -190,7 +193,8 @@ postulate
 Lemma-Γ₀=Γ₁ : ∀ {Y} → A 〚 ~ Y 〛 ≈ᵥ ~ (A 〔 Y 〕)
 Lemma-Γ₀=Γ₁ {Y} i = begin
   (A 〚 ~ Y 〛) i                                                ↭⟨ ↭-refl ⟩
-  ⨁ₛ (λ q → (A i q) [ (~ Y) q ])                                 ↭⟨ ↭-refl ⟩
+  ⨁ₛ (λ q → (toRouteMap (A i q)) [ (~ Y) q ])                   ↭⟨ ↭-refl ⟩
+  ⨁ₛ (λ q → (λ s → (A i q) ▷ s) [ (~ Y) q ])                   ↭⟨ ↭-refl ⟩  
   ⨁ₛ (λ q → (map (λ {(d , v) → (d , (A i q) ▷ v)}) ((~ Y) q)) †) ↭⟨ ⨁ₛ-cong (λ {q} → lemma₄ {i} {q} {Y}) ⟩
   ⨁ₛ (λ q → (tabulate λ d → (d , (A i q) ▷ (Y q d))) †)          ↭⟨ LemmaA₂ (λ q d → (A i q) ▷ (Y q d)) ⟩
   (tabulate λ q → (q , ⨁ (λ k → (A i k) ▷ (Y k q)))) † ↭⟨        ↭-refl ⟩

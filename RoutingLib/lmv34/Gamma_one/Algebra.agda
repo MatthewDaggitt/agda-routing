@@ -102,10 +102,13 @@ infix 12 ~_
 
 -- Function application to sets
 infix 13 _[_]
-_[_] : ∀ {i j : Fin n} → (Step i j) → RoutingSet → RoutingSet
-f [ X ] = (map (λ {(d , v) → (d , f ▷ v)}) X) †
+_[_] : (Route → Route) → RoutingSet → RoutingSet
+f [ X ] = (map (λ {(d , v) → (d , f v)}) X) †
+
+toRouteMap : ∀ {i j : Fin n} → (f : Step i j) → Route → Route
+toRouteMap f = λ s → f ▷ s
 
 -- Matrix application to vector-of-sets
 infix 10 _〚_〛
 _〚_〛 : AdjacencyMatrix → RoutingVector → RoutingVector
-(A 〚 V 〛) i = ⨁ₛ (λ q → (A i q) [ V q ])
+(A 〚 V 〛) i = ⨁ₛ (λ q → (toRouteMap (A i q)) [ V q ])

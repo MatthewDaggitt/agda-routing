@@ -22,35 +22,100 @@ import RoutingLib.lmv34.Gamma_zero.Algebra as Gamma_zero_Algebra
 import RoutingLib.lmv34.Gamma_one as Gamma_one
 import RoutingLib.lmv34.Gamma_one.Algebra as Gamma_one_Algebra
 import RoutingLib.lmv34.Gamma_one.Properties as Gamma_one_Properties
-import RoutingLib.lmv34.Gamma_two as Gamma_two
-open import RoutingLib.lmv34.Gamma_two.Algebra as Gamma_two_Algebra using (CompositionOp; AdjacencyMatrixᵀ)
-                                                                    renaming (IsCompositionOp to IsCompositionOp')
+import RoutingLib.lmv34.Gamma_two as Gamma_two 
+import RoutingLib.lmv34.Gamma_two.Algebra as Gamma_two_Algebra
 
 module RoutingLib.lmv34.Gamma_two.Properties
   {a b ℓ} {alg : RawRoutingAlgebra a b ℓ}
   (isRAlg : IsRoutingAlgebra alg) {n}
-  {_●_ : CompositionOp isRAlg n}
-  (●-isCompositionOp : IsCompositionOp' isRAlg n _●_)
   (A    : AdjacencyMatrix' alg n)
-  (Imp Prot : AdjacencyMatrix' alg n)
-  (Exp  : AdjacencyMatrixᵀ isRAlg n)
-  (A=Imp∘Prot∘Exp : Gamma_two_Algebra.Composition.IsComposition isRAlg n _●_ A Imp Prot Exp)
+  (Imp Prot Exp : Gamma_two_Algebra.RouteMapMatrix isRAlg n )
+  (A=Imp∘Prot∘Exp : Gamma_two_Algebra.IsComposition isRAlg n A Imp Prot Exp)
   where
 
 open RawRoutingAlgebra alg
 open Routing alg n renaming (I to M) using (RoutingMatrix; _≈ₘ_; ≈ₘ-refl)
+
 open Gamma_zero alg A
 open Gamma_zero_Algebra alg n
+
 open Gamma_one isRAlg A
-open Gamma_one_Algebra isRAlg n
+open Gamma_one_Algebra isRAlg n using (_≈ᵥ_; FinRoute-decSetoid; ↭-setoid; RoutingSet; _[_]; _↭_; _〚_〛; Øᵥ; ⨁ₛ; ↭-refl; ↭-trans; ~_; 𝕍ₛ; ≈ᵥ-refl; ≈ᵥ-sym; ≈ᵥ-trans; _⊕ᵥ_; RoutingVector) 
 open Gamma_one_Properties isRAlg A
-open Gamma_two isRAlg ●-isCompositionOp Imp Prot Exp
+
 open Gamma_two_Algebra isRAlg n
-open Composition _●_
+open Gamma_two isRAlg A Imp Prot Exp A=Imp∘Prot∘Exp
 
 open DecSetoid FinRoute-decSetoid using () renaming (_≈_ to _≈ᵣ_)
 
+import RoutingLib.Data.Matrix.Relation.Binary.Equality as MatrixEquality
+--open MatrixEquality ↭-setoid using (_≈ₘ_)
+
 ------------------------------------
+------------------------------------
+-- Operation properties
+
+-- RoutingVector₂ setoid
+open MatrixEquality ↭-setoid public using (𝕄ₛ) renaming
+       ( _≈ₘ_             to _≈ᵥ,₂_
+       ; ≈ₘ-reflexive     to ≈ᵥ,₂-reflexive
+       ; ≈ₘ-refl          to ≈ᵥ,₂-refl
+       ; ≈ₘ-sym           to ≈ᵥ,₂-sym
+       ; ≈ₘ-trans         to ≈ᵥ,₂-trans
+       ; ≈ₘ-isEquivalence to ≈ᵥ,₂-isEquivalence
+       )
+𝕍₂ₛ = 𝕄ₛ n n
+
+
+【】-cong : ∀ {F V V'} → V ≈ᵥ V' → (F 【 V 】) ≈ᵥ,₂ (F 【 V' 】)
+【】-cong V=V' i j = []-cong (V=V' i)
+
+〖〗-cong : ∀ {F O O'} → O ≈ᵥ,₂ O' → (F 〖 O 〗) ≈ᵥ,₂ (F 〖 O' 〗)
+〖〗-cong O=O' i j = []-cong (O=O' j i)
+
+postulate 
+  f[]-cong : ∀ {f f' : Route → Route} → {X : RoutingSet} →
+           f ≈ₐ f' → f [ X ] ↭ f' [ X ]
+-- f[]-cong {i} {j} {f} {f'} {X} f=f' = †-cong (lemma {xs = X} λ {(d , v) → (refl , f=f' v)})
+--   where lemma : {f g : Fin n × Route → Fin n × Route} → {xs : RoutingSet} →
+--                 (∀ r → f r ≈ᵣ g r) → map f xs ↭ map g xs
+--         lemma {f} {g} {[]} f=g = ↭-refl
+--         lemma {f} {g} {x ∷ xs} f=g = prep (f=g x) (lemma {xs = xs} f=g)
+
+A〚〛-cong : ∀ {F F' V} → (toRouteMapMatrix F) ≈ₐ,₂ (toRouteMapMatrix F') → F 〚 V 〛 ≈ᵥ  F' 〚 V 〛
+A〚〛-cong {F} {F'} {V} F=F' i = ⨁ₛ-cong (λ {q} → f[]-cong {X = V q} (F=F' i q))
+
+↓-cong : ∀ {I I'} → I ≈ᵥ,₂ I' → I ↓ ≈ᵥ I' ↓
+↓-cong I=I' i = ⨁ₛ-cong (λ {q} → I=I' i q)
+
+Øᵥ,₂↓=Øᵥ : Øᵥ,₂ ↓ ≈ᵥ Øᵥ
+Øᵥ,₂↓=Øᵥ i = lemma {n}
+  where lemma : ∀ {k} → ⨁ₛ (λ (q : Fin k) → []) ↭ []
+        lemma {zero} = ↭-refl
+        lemma {suc k} = ↭-trans Ø-identityₗ (lemma {k})
+
+postulate 
+  Γ₂,ᵥØ=~M : Γ₂,ᵥ Øᵥ,₂ ≈ᵥ ~ M
+-- Γ₂,ᵥØ=~M = begin
+--         Γ₂,ᵥ Øᵥ,₂ ≈⟨ ≈ᵥ-refl ⟩
+--         Øᵥ,₂ ↓ ⊕ᵥ ~ M ≈⟨ ⊕ᵥ-cong {Øᵥ,₂ ↓} {Øᵥ} {~ M} {~ M} Øᵥ,₂↓=Øᵥ ≈ᵥ-refl ⟩
+--         Øᵥ ⊕ᵥ ~ M ≈⟨ Øᵥ-identityₗ ⟩
+--         ~ M ∎
+--         where open EqReasoning 𝕍ₛ
+
+Γ₂,ᵥ-cong : ∀ {I I'} → I ≈ᵥ,₂ I' → Γ₂,ᵥ I ≈ᵥ Γ₂,ᵥ I'
+Γ₂,ᵥ-cong {I} {I'} I=I' = ⊕ᵥ-cong (↓-cong I=I') (≈ₘ⇒≈ᵥ ≈ₘ-refl)
+
+Γ₂,ᵢ-cong : ∀ {O O'} → O ≈ᵥ,₂ O' → Γ₂,ᵢ O ≈ᵥ,₂ Γ₂,ᵢ O'
+Γ₂,ᵢ-cong = 〖〗-cong
+
+Γ₂,ₒ-cong : ∀ {V V'} → V ≈ᵥ V' → Γ₂,ₒ V ≈ᵥ,₂ Γ₂,ₒ V'
+Γ₂,ₒ-cong = 【】-cong
+
+Γ₂-comp-cong : ∀ {V V'} → V ≈ᵥ V' → (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) V ≈ᵥ (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) V'
+Γ₂-comp-cong V=V' = (Γ₂,ᵥ-cong ∘ Γ₂,ᵢ-cong ∘ Γ₂,ₒ-cong) V=V'
+
+
 -- Γ₂-State setoid
 infix 2 _≈ₛ_
 
@@ -73,54 +138,6 @@ S ≈ₛ S' = Γ₂-State.V S ≈ᵥ   Γ₂-State.V S' ×
              isEquivalence =
                record {refl = ≈ₛ-refl; sym = ≈ₛ-sym; trans = ≈ₛ-trans}}
 
-------------------------------------
--- Operation properties
-
-【】-cong : ∀ {F V V'} → V ≈ᵥ V' → (F 【 V 】) ≈ᵥ,₂ (F 【 V' 】)
-【】-cong V=V' i j = []-cong (V=V' i)
-
-〖〗-cong : ∀ {F O O'} → O ≈ᵥ,₂ O' → (F 〖 O 〗) ≈ᵥ,₂ (F 〖 O' 〗)
-〖〗-cong O=O' i j = []-cong (O=O' j i)
-
-f[]-cong : ∀ {i j} → {f f' : Step i j} → {X : RoutingSet} →
-           f ≈ₐ f' → f [ X ] ↭ f' [ X ]
-f[]-cong {i} {j} {f} {f'} {X} f=f' = †-cong (lemma {xs = X} λ {(d , v) → (refl , f=f' v)})
-  where lemma : {f g : Fin n × Route → Fin n × Route} → {xs : RoutingSet} →
-                (∀ r → f r ≈ᵣ g r) → map f xs ↭ map g xs
-        lemma {f} {g} {[]} f=g = ↭-refl
-        lemma {f} {g} {x ∷ xs} f=g = prep (f=g x) (lemma {xs = xs} f=g)
-
-A〚〛-cong : ∀ {F F' V} → F ≈ₐ,₂ F' → F 〚 V 〛 ≈ᵥ  F' 〚 V 〛
-A〚〛-cong {F} {F'} {V} F=F' i = ⨁ₛ-cong (λ {q} → f[]-cong {X = V q} (F=F' i q))
-
-↓-cong : ∀ {I I'} → I ≈ᵥ,₂ I' → I ↓ ≈ᵥ I' ↓
-↓-cong I=I' i = ⨁ₛ-cong (λ {q} → I=I' i q)
-
-Øᵥ,₂↓=Øᵥ : Øᵥ,₂ ↓ ≈ᵥ Øᵥ
-Øᵥ,₂↓=Øᵥ i = lemma {n}
-  where lemma : ∀ {k} → ⨁ₛ (λ (q : Fin k) → []) ↭ []
-        lemma {zero} = ↭-refl
-        lemma {suc k} = ↭-trans Ø-identityₗ (lemma {k})
-
-Γ₂,ᵥØ=~M : Γ₂,ᵥ Øᵥ,₂ ≈ᵥ ~ M
-Γ₂,ᵥØ=~M = begin
-        Γ₂,ᵥ Øᵥ,₂ ≈⟨ ≈ᵥ-refl ⟩
-        Øᵥ,₂ ↓ ⊕ᵥ ~ M ≈⟨ ⊕ᵥ-cong {Øᵥ,₂ ↓} {Øᵥ} {~ M} {~ M} Øᵥ,₂↓=Øᵥ ≈ᵥ-refl ⟩
-        Øᵥ ⊕ᵥ ~ M ≈⟨ Øᵥ-identityₗ ⟩
-        ~ M ∎
-        where open EqReasoning 𝕍ₛ
-
-Γ₂,ᵥ-cong : ∀ {I I'} → I ≈ᵥ,₂ I' → Γ₂,ᵥ I ≈ᵥ Γ₂,ᵥ I'
-Γ₂,ᵥ-cong {I} {I'} I=I' = ⊕ᵥ-cong (↓-cong I=I') (≈ₘ⇒≈ᵥ ≈ₘ-refl)
-
-Γ₂,ᵢ-cong : ∀ {O O'} → O ≈ᵥ,₂ O' → Γ₂,ᵢ O ≈ᵥ,₂ Γ₂,ᵢ O'
-Γ₂,ᵢ-cong = 〖〗-cong
-
-Γ₂,ₒ-cong : ∀ {V V'} → V ≈ᵥ V' → Γ₂,ₒ V ≈ᵥ,₂ Γ₂,ₒ V'
-Γ₂,ₒ-cong = 【】-cong
-
-Γ₂-comp-cong : ∀ {V V'} → V ≈ᵥ V' → (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) V ≈ᵥ (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) V'
-Γ₂-comp-cong V=V' = (Γ₂,ᵥ-cong ∘ Γ₂,ᵢ-cong ∘ Γ₂,ₒ-cong) V=V'
 
 Γ₂-cong : ∀ {S S'} → S ≈ₛ S' → Γ₂ S ≈ₛ Γ₂ S'
 Γ₂-cong (V=V' , I=I' , O=O') = Γ₂,ᵥ-cong I=I' , Γ₂,ᵢ-cong O=O' , Γ₂,ₒ-cong V=V'
@@ -135,6 +152,7 @@ A〚〛-cong {F} {F'} {V} F=F' i = ⨁ₛ-cong (λ {q} → f[]-cong {X = V q} (F
 ------------------------------------
 -- Theorems
 
+
 -- Theorem 5
 FixedPoint-Γ₂ : ∀ {V I O} →
                 Γ₂ (S₂ V I O) ≈ₛ S₂ V I O →
@@ -147,26 +165,35 @@ FixedPoint-Γ₂ (V=V , I=I , O=O) = ≈ᵥ-sym V=V , ≈ᵥ,₂-sym I=I , ≈�
 -- Use ●-isComposotionOp and ▷-fixedPoint on f.
 -- @tgg: I cannot manage to reduce f [ g [ (d , v) ∷ X ] ] to f [ g [ X ] ],
 --       knowing that f ▷ (g ▷ v) ≟ ∞# is yes.
-LemmaA₃ : ∀ {i j} → (f g : Step i j) → (X : RoutingSet) →
+LemmaA₃ : ∀ (f g : (Route → Route)) → (X : RoutingSet) →
             f [ g [ X ] ] ↭ (f ● g) [ X ]
-LemmaA₃ {i} {j} f g [] = ↭-refl
-LemmaA₃ {i} {j} f g ((d , v) ∷ X) with g ▷ v ≟ ∞# | f ▷ (g ▷ v) ≟ ∞#
+LemmaA₃ f g [] = ↭-refl
+LemmaA₃ f g ((d , v) ∷ X) with g v ≟ ∞# | f (g v) ≟ ∞#
 ... | _ | no _  = {!!}
 ... | _ | yes _ = {!!}
 
-LemmaA₄ : ∀ {F G V} → (F 〖 G 【 V 】 〗) ↓ ≈ᵥ (F ●ₘ (G ᵀ)) 〚 V 〛
-LemmaA₄ {F} {G} {V} i = begin
-  ((F 〖 G 【 V 】 〗) ↓) i ↭⟨ ↭-refl ⟩
-  ⨁ₛ (λ q → (F i q) [ (G q i) [ V q ] ]) ↭⟨ ⨁ₛ-cong (λ {q} → (LemmaA₃ (F i q) (G q i) (V q))) ⟩
-  ⨁ₛ (λ q → ((F i q) ● (G q i)) [ V q ]) ↭⟨ ↭-refl ⟩
-  ((F ●ₘ (G ᵀ)) 〚 V 〛) i ∎
-  where open PermutationReasoning
+
+-- tgg : temporary hack??? 
+infix 10 _||_||
+_||_|| : RouteMapMatrix → RoutingVector → RoutingVector
+(A || V || ) i = ⨁ₛ (λ q → (A i q) [ V q ])
+
+
+postulate 
+  LemmaA₄ : ∀ F G V → (F 〖 G 【 V 】 〗) ↓ ≈ᵥ (F ●ₘ (G ᵀ)) || V ||
+-- LemmaA₄ F G V i = begin
+--   ((F 〖 G 【 V 】 〗) ↓) i ↭⟨ ↭-refl ⟩
+--   ⨁ₛ (λ q → (F i q) [ (G q i) [ V q ] ]) ↭⟨ ⨁ₛ-cong (λ {q} → (LemmaA₃ (F i q) (G q i) (V q))) ⟩
+--   ⨁ₛ (λ q → ((F i q) ● (G q i)) [ V q ]) ↭⟨ ↭-refl ⟩
+--   ((F ●ₘ (G ᵀ)) 〚 V 〛) i ∎
+--   where open PermutationReasoning
 
 Γ₁=Γ₂-comp : ∀ (V : RoutingVector) → Γ₁ V ≈ᵥ (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) V 
 Γ₁=Γ₂-comp V = begin 
         Γ₁ V                                          ≈⟨ ≈ᵥ-refl ⟩
-        A 〚 V 〛 ⊕ᵥ ~ M                              ≈⟨ ⊕ᵥ-cong (A〚〛-cong { V = V } A=Imp∘Prot∘Exp) (≈ₘ⇒≈ᵥ ≈ₘ-refl)  ⟩ 
-        ((Imp ●ₘ Prot) ●ₘ (Exp ᵀ)) 〚 V 〛 ⊕ᵥ ~ M    ≈⟨ ⊕ᵥ-cong (≈ᵥ-sym (LemmaA₄ {Imp ●ₘ Prot} {Exp} { V = V })) (≈ₘ⇒≈ᵥ ≈ₘ-refl)   ⟩ 
+        A 〚 V 〛 ⊕ᵥ ~ M                              ≈⟨ {!!} ⟩ -- need lemma here 
+        ((toRouteMapMatrix A) || V || ) ⊕ᵥ ~ M        ≈⟨ {!!} ⟩ -- ≈⟨ ⊕ᵥ-cong (A〚〛-cong { V = V } A=Imp∘Prot∘Exp) (≈ₘ⇒≈ᵥ ≈ₘ-refl)  ⟩
+        ((Imp ●ₘ Prot) ●ₘ (Exp ᵀ)) || V || ⊕ᵥ ~ M    ≈⟨ ⊕ᵥ-cong (≈ᵥ-sym (LemmaA₄ (Imp ●ₘ Prot) Exp V)) (≈ₘ⇒≈ᵥ ≈ₘ-refl)   ⟩ 
         ((Imp ●ₘ Prot) 〖 Exp 【 V 】 〗) ↓ ⊕ᵥ ~ M   ≈⟨ ≈ᵥ-refl ⟩
         (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) V                         ∎
         where open EqReasoning 𝕍ₛ using (begin_; _∎; _≈⟨_⟩_)

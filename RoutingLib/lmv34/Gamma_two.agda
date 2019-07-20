@@ -11,17 +11,13 @@ module RoutingLib.lmv34.Gamma_two
   {a b ℓ} {n : ℕ}
   {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  (A : AdjacencyMatrix algebra n)
   (Imp Prot Exp : RouteMapMatrix isRoutingAlgebra n )
-  (●-isCompositionOp : IsComposition isRoutingAlgebra n A Imp Prot Exp)
-  
   where
 
 open Routing algebra n renaming (I to M)
 open RawRoutingAlgebra algebra
 open Gamma_one_Algebra isRoutingAlgebra n using (RoutingVector; _⊕ᵥ_; ~_;_≈ᵥ_)
 open Gamma_two_Algebra isRoutingAlgebra n
-
 
 ------------------------------------
 -- State model

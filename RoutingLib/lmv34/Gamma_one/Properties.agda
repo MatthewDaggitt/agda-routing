@@ -90,7 +90,6 @@ sort-cong {A} {A'} A=A' = begin
 Øᵥ-identityᵣ : ∀ {A} → A ⊕ᵥ Øᵥ ≈ᵥ A
 Øᵥ-identityᵣ i = Ø-identityᵣ
 
-
 filter-cong : ∀ {A A' : RoutingSet} {p} {P : Pred (Fin n × Route) p} {P? : Decidable P} →
               P Respects _≈ᵣ_ → A ↭ A' → filter P? A ↭ filter P? A'
 filter-cong P≈ refl = refl
@@ -143,19 +142,20 @@ filter-cong {x ∷ y ∷ A} {y' ∷ x' ∷ A'} {P? = P?} P≈ (swap x=x' y=y' A=
 †-cong : ∀ {A A' : RoutingSet} → A ↭ A' → A † ↭ A' †
 †-cong A=A' = filter-cong †-respects-≈ᵣ A=A'
 
-postulate 
-  []-cong : ∀ {f : Route → Route} {A A'} →
-            A ↭ A' → f [ A ] ↭ f [ A' ]
+private
+  postulate
+    f-cong : ∀ (f : Route → Route) {s s' : Route} → s ≈ s' → f s ≈ f s' -- need this to prove []-cong
 
--- tgg : need to fix 
--- []-cong A=A' = †-cong (lemma A=A')
---   where lemma : {A A' : RoutingSet} → {f : Route → Route} →
---                 A ↭ A' → map (λ {(d , v) → (d , f v)}) A ↭ map (λ {(d , v) → (d , f v)}) A'
---         lemma refl = refl
---         lemma (trans A=A'' A''=A') = trans (lemma A=A'') (lemma A''=A')
---         lemma {f = f} (prep (d=d' , v=v') A=A') = prep (d=d' , {!!}) (lemma A=A')
---         lemma {f = f} (swap (d₁=d₁' , v₁=v₁') (d₂=d₂' , v₂=v₂')  A=A') =
---                 swap ((d₁=d₁' , {!!})) ((d₂=d₂' , {!!})) (lemma A=A')
+[]-cong : ∀ {f : Route → Route} {A A'} →
+            A ↭ A' → f [ A ] ↭ f [ A' ]
+[]-cong A=A' = †-cong (lemma A=A')
+   where lemma : {A A' : RoutingSet} → {f : Route → Route} →
+                 A ↭ A' → map (λ {(d , v) → (d , f v)}) A ↭ map (λ {(d , v) → (d , f v)}) A'
+         lemma refl = refl
+         lemma (trans A=A'' A''=A') = trans (lemma A=A'') (lemma A''=A')
+         lemma {f = f} (prep (d=d' , v=v') A=A') = prep (d=d' , f-cong f v=v') (lemma A=A')
+         lemma {f = f} (swap (d₁=d₁' , v₁=v₁') (d₂=d₂' , v₂=v₂')  A=A') =
+                 swap ((d₁=d₁' , f-cong f v₁=v₁')) ((d₂=d₂' , f-cong f v₂=v₂')) (lemma A=A')
 
 〚〛-cong : ∀ {V V'} → V ≈ᵥ V' → A 〚 V 〛 ≈ᵥ A 〚 V' 〛
 〚〛-cong V=V' i = ⨁ₛ-cong (λ {q} → []-cong (V=V' q))
@@ -193,8 +193,8 @@ postulate
 Lemma-Γ₀=Γ₁ : ∀ {Y} → A 〚 ~ Y 〛 ≈ᵥ ~ (A 〔 Y 〕)
 Lemma-Γ₀=Γ₁ {Y} i = begin
   (A 〚 ~ Y 〛) i                                                ↭⟨ ↭-refl ⟩
-  ⨁ₛ (λ q → (toRouteMap (A i q)) [ (~ Y) q ])                   ↭⟨ ↭-refl ⟩
-  ⨁ₛ (λ q → (λ s → (A i q) ▷ s) [ (~ Y) q ])                   ↭⟨ ↭-refl ⟩  
+  ⨁ₛ (λ q → (toRouteMap (A i q)) [ (~ Y) q ])                    ↭⟨ ↭-refl ⟩
+  ⨁ₛ (λ q → (λ s → (A i q) ▷ s) [ (~ Y) q ])                     ↭⟨ ↭-refl ⟩  
   ⨁ₛ (λ q → (map (λ {(d , v) → (d , (A i q) ▷ v)}) ((~ Y) q)) †) ↭⟨ ⨁ₛ-cong (λ {q} → lemma₄ {i} {q} {Y}) ⟩
   ⨁ₛ (λ q → (tabulate λ d → (d , (A i q) ▷ (Y q d))) †)          ↭⟨ LemmaA₂ (λ q d → (A i q) ▷ (Y q d)) ⟩
   (tabulate λ q → (q , ⨁ (λ k → (A i k) ▷ (Y k q)))) † ↭⟨        ↭-refl ⟩

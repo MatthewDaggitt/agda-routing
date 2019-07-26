@@ -18,11 +18,12 @@ import RoutingLib.lmv34.Gamma_two.Algebra as Gamma_two_Algebra
 module RoutingLib.lmv34.Gamma_three.Algebra
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  (n : ℕ) (_●_ : ∀ {i j : Fin n} → Op₂ (RawRoutingAlgebra.Step algebra i j)) where
+  (n : ℕ)
+  where
 
 open RawRoutingAlgebra algebra
 open Gamma_one_Algebra isRoutingAlgebra n
-open Gamma_two_Algebra isRoutingAlgebra n _●_
+open Gamma_two_Algebra isRoutingAlgebra n using (RoutingVector₂)
 
 open DecSetoid FinRoute-decSetoid renaming (_≟_ to _≟ᵣ_; _≈_ to _≈ᵣ_) 
 open Membership FinRoute-decSetoid using (_∈?_; _∈_) 

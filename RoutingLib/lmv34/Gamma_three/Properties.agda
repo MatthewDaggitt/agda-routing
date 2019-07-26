@@ -21,7 +21,7 @@ import RoutingLib.lmv34.Gamma_one as Gamma_one
 import RoutingLib.lmv34.Gamma_one.Algebra as Gamma_one_Algebra
 import RoutingLib.lmv34.Gamma_one.Properties as Gamma_one_Properties
 import RoutingLib.lmv34.Gamma_two as Gamma_two
-open import RoutingLib.lmv34.Gamma_two.Algebra as Gamma_two_Algebra using (IsComposition; AdjacencyMatrixᵀ)
+open import RoutingLib.lmv34.Gamma_two.Algebra as Gamma_two_Algebra using (IsComposition; RouteMapMatrix)
 import RoutingLib.lmv34.Gamma_two.Properties as Gamma_two_Properties
 import RoutingLib.lmv34.Gamma_three as Gamma_three
 import RoutingLib.lmv34.Gamma_three.Algebra as Gamma_three_Algebra
@@ -29,11 +29,9 @@ import RoutingLib.lmv34.Gamma_three.Algebra as Gamma_three_Algebra
 module RoutingLib.lmv34.Gamma_three.Properties
   {a b ℓ} {alg : RawRoutingAlgebra a b ℓ}
   (isRAlg : IsRoutingAlgebra alg) {n}
-  (_●_ : ∀ {i j : Fin n} → Op₂ (RawRoutingAlgebra.Step alg i j))
   (A    : AdjacencyMatrix' alg n)
-  (Imp Prot : AdjacencyMatrix' alg n)
-  (Exp  : AdjacencyMatrixᵀ isRAlg n _●_)
-  (A=Imp∘Prot∘Exp : IsComposition isRAlg n _●_ A Imp Prot Exp)
+  (Imp Prot Exp : RouteMapMatrix isRAlg n )
+  (A=Imp∘Prot∘Exp : IsComposition isRAlg n A Imp Prot Exp)
   where
 
 open RawRoutingAlgebra alg
@@ -43,12 +41,12 @@ open Gamma_zero_Algebra alg n
 open Gamma_one isRAlg A
 open Gamma_one_Algebra isRAlg n
 open Gamma_one_Properties isRAlg A
-open Gamma_two isRAlg _●_ Imp Prot Exp
-open Gamma_two_Algebra isRAlg n _●_
-open Gamma_two_Properties isRAlg _●_ A Imp Prot Exp A=Imp∘Prot∘Exp
+open Gamma_two isRAlg Imp Prot Exp
+open Gamma_two_Algebra isRAlg n 
+open Gamma_two_Properties isRAlg A Imp Prot Exp A=Imp∘Prot∘Exp
   hiding (_≈ₛ_; ≈ₛ-refl; ≈ₛ-sym; ≈ₛ-trans; 𝕊ₛ)
-open Gamma_three isRAlg _●_ Imp Prot Exp
-open Gamma_three_Algebra isRAlg n _●_
+open Gamma_three isRAlg Imp Prot Exp
+open Gamma_three_Algebra isRAlg n
 
 open DecSetoid FinRoute-decSetoid using () renaming (refl to ≈ᵣ-refl; _≟_ to _≟ᵣ_)
 open Membership FinRoute-decSetoid using (_∈?_)
@@ -166,10 +164,10 @@ xs-[] (x ∷ xs) = prep ≈ᵣ-refl (xs-[] xs)
 
 postulate
   -- Lemma A.5
-  F-union-cong : ∀ {i j} → (f : Step i j) → (A B : RoutingSet)
+  F-union-cong : ∀ (f : Route → Route) → (A B : RoutingSet)
                  → f [ A ∪ B ] ↭ f [ A ] ∪ f [ B ]
   -- Lemma A.6
-  F-minus-cong : ∀ {i j} → (f : Step i j) → (A B : RoutingSet)
+  F-minus-cong : ∀ (f : Route → Route) → (A B : RoutingSet)
                → f [ A - B ] ↭ f [ A ] - f [ B ]
   diff-lemma : ∀ A B → let (∇ , Δ) = diff A B in
           (A - ∇) ∪ Δ ↭ B
@@ -190,47 +188,135 @@ F-diff-cong F A B i j = let (∇ , Δ) = diffᵥ A B in begin
   (F 〖 B 〗) i j ∎
   where open PermutationReasoning
 
--- postulate
-  -- -- Theorem 8
-  -- Γ₁=Γ₃ : ∀ {k} → let I' = (Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ k) (~ M))
-  --                     O' = Γ₂,ₒ ((Γ₁ ^ k) (~ M)) in
-  --         (Γ₃-Model ^ (3 * (suc k))) (S₃ (~ M) Øᵥ,₂ Øᵥ,₂ (Øᵥ,₂ , Øᵥ,₂)) ≈ₛ
-  --         S₃ ((Γ₁ ^ (suc k)) (~ M)) I' O' (Øᵥ,₂ , Øᵥ,₂)
+postulate 
+  map-distrib : ∀ {f} {X} {Y}  → map f (X - Y) ↭ (map f X) - (map f Y)
 
--- tgg: we made some mistakes regarding Γ₃ !
+  †-distrib : ∀ {X} {Y}  → (X - Y) † ↭ (X †) - (Y †)
 
--- To fix, we simply need an invariant, so that we can equate each step of Γ₃ with a step of Γ₂.
+distrib1 : ∀ f X Y  → f [ X - Y ] ↭ f [ X ] - f [ Y ] 
+distrib1 f X Y = begin
+                 f [ X - Y ]                                                                      ↭⟨ ↭-refl ⟩
+                 (map (λ {(d , v) → (d , f v)}) (X - Y)) †                                       ↭⟨ †-cong (map-distrib {X = X}) ⟩
+                 ((map (λ {(d , v) → (d , f v)}) X) - (map (λ {(d , v) → (d , f v)}) Y)) †      ↭⟨ †-distrib {X = (map (λ {(d , v) → (d , f v)}) X)} ⟩
+                 ((map (λ {(d , v) → (d , f v)}) X) †) - ((map (λ {(d , v) → (d , f v)}) Y) †)  ↭⟨ ↭-refl ⟩
+                 f [ X ] - f [ Y ] 
+                 ∎
+                 where open PermutationReasoning
+
+distrib2 : ∀ F O O'  → (F 〖 O -ᵥ O' 〗) ≈ᵥ,₂ ((F 〖 O  〗) -ᵥ (F 〖 O' 〗))
+distrib2 F O O' i j = begin
+                     (F 〖 O -ᵥ O' 〗) i j                      ↭⟨ ↭-refl ⟩
+                     (F i j) [ (O -ᵥ O') j i ]                  ↭⟨ ↭-refl ⟩
+                     (F i j) [ (O j i) - (O' j i) ]             ↭⟨ distrib1 (F i j) (O j i) (O' j i) ⟩
+                     ((F i j) [ O j i ]) - ((F i j) [ O' j i ]) ↭⟨ ↭-refl ⟩
+                     ((F 〖 O 〗) i j) - ((F 〖 O' 〗) i j)     ↭⟨ ↭-refl ⟩
+                     ((F 〖 O 〗) -ᵥ (F 〖 O' 〗)) i j 
+                     ∎
+                     where open PermutationReasoning
+
+Γ₂,ᵢ-distrib : ∀ O O' → Γ₂,ᵢ (O -ᵥ O') ≈ᵥ,₂ (Γ₂,ᵢ (O) -ᵥ Γ₂,ᵢ (O'))
+Γ₂,ᵢ-distrib O O' i j = begin
+                       (Γ₂,ᵢ (O -ᵥ O')) i j                                               ↭⟨ ↭-refl ⟩
+                       ((Imp ●ₘ Prot) 〖 O -ᵥ O' 〗) i j                                 ↭⟨ distrib2 (Imp ●ₘ Prot) O O' i j ⟩
+                       (((Imp ●ₘ Prot) 〖 O  〗) i j) - (((Imp ●ₘ Prot) 〖 O' 〗) i j)  ↭⟨ ↭-refl ⟩                       
+                       ((Γ₂,ᵢ (O)) i j) - ((Γ₂,ᵢ (O')) i j)                               ↭⟨ ↭-refl ⟩
+                       (Γ₂,ᵢ (O) -ᵥ Γ₂,ᵢ (O')) i j 
+                       ∎
+                       where open PermutationReasoning
+
+-- To show relationship of Γ₃ and Γ₂ 
+-- we simply need an invariant, so that we can equate each step of Γ₃ with a step of Γ₂.
 -- We only need to ensure that at each step the I component of Γ₃ is equal to the I component of Γ₂.
--- Then the V, I, and O components will be the same at each step. 
+-- Then the V, I, and O components will be the same at each step.
 
 Γ₃-invariant : Γ₃-State → Set (a ⊔ ℓ)
 Γ₃-invariant (S₃ V I O (∇ , Δ)) = Γ₂,ᵢ O ≈ᵥ,₂ Γ₃,ᵢ I  (∇ , Δ)
 
+-- the outer parens on lhs are needed.  fix?
+postulate 
+  lemma0 : ∀ x y → ((x - (x - y)) ∪ (y - x)) ↭ y 
+
+lemma1 : ∀ X Y → ((X -ᵥ (X -ᵥ Y)) ∪ᵥ (Y -ᵥ X)) ≈ᵥ,₂ Y 
+lemma1 X Y i j = begin
+                 ((X -ᵥ (X -ᵥ Y)) ∪ᵥ (Y -ᵥ X)) i j                       ↭⟨ ↭-refl ⟩                                        
+                 ((X -ᵥ (X -ᵥ Y)) i j) ∪ ((Y -ᵥ X) i j)                  ↭⟨ ↭-refl ⟩                                        
+                 ((X i j) - ((X i j) - (Y i j))) ∪ ((Y i j) - (X i j))  ↭⟨ lemma0 (X i j) (Y i j) ⟩                                
+                 Y i j 
+                 ∎
+                 where open PermutationReasoning
+
+
 Γ₃-invariant-maintained : ∀ (S : Γ₃-State) → Γ₃-invariant S → Γ₃-invariant (Γ₃ S) 
-Γ₃-invariant-maintained (S₃ V I O (∇ , Δ)) inv = {!!} 
--- 
--- hand proof: 
--- let 
---  Γ₃ (S₃ V I O (∇ , Δ)) = (S₃ V' I' O' (∇' , Δ'))
---
---  Need to show Γ₂,ᵢ O' ≈ᵥ,₂ Γ₃,ᵢ I'  (∇' , Δ')
---  That is,
---  Γ₂,ᵢ (Γ₂,ₒ V) ≈ᵥ,₂ Γ₃,ᵢ (Γ₃,ᵢ I  (∇ , Δ))  diffᵥ O (Γ₃,ₒ V)
---
+Γ₃-invariant-maintained (S₃ V I O (∇ , Δ)) inv = prf
+   where
+     prf : Γ₂,ᵢ (Γ₂,ₒ V) ≈ᵥ,₂ Γ₃,ᵢ (Γ₃,ᵢ I  (∇ , Δ))  (diffᵥ O (Γ₃,ₒ V))
+     prf = begin
+             Γ₂,ᵢ (Γ₂,ₒ V)                                                       ≈⟨ ≈ᵥ,₂-sym (lemma1 ((Γ₂,ᵢ O)) ((Γ₂,ᵢ (Γ₂,ₒ V)))) ⟩
+             ((Γ₂,ᵢ O) -ᵥ (Γ₂,ᵢ (O) -ᵥ Γ₂,ᵢ (Γ₂,ₒ V))) ∪ᵥ (Γ₂,ᵢ (Γ₂,ₒ V) -ᵥ (Γ₂,ᵢ O)) ≈⟨ ≈ᵥ,₂-refl  ⟩                    
+             ((Γ₂,ᵢ O) -ᵥ (Γ₂,ᵢ (O) -ᵥ Γ₂,ᵢ (Γ₃,ₒ V))) ∪ᵥ (Γ₂,ᵢ (Γ₃,ₒ V) -ᵥ (Γ₂,ᵢ O)) ≈⟨ ∪ᵥ-cong {U = ((Γ₂,ᵢ O) -ᵥ (Γ₂,ᵢ (O) -ᵥ Γ₂,ᵢ (Γ₃,ₒ V)))}  {V = (Γ₂,ᵢ (Γ₃,ₒ V) -ᵥ (Γ₂,ᵢ O))} ((minusᵥ-cong {U = Γ₂,ᵢ O}  ≈ᵥ,₂-refl (≈ᵥ,₂-sym (Γ₂,ᵢ-distrib O (Γ₃,ₒ V))))) ≈ᵥ,₂-refl  ⟩   
+             ((Γ₂,ᵢ O) -ᵥ (Γ₂,ᵢ (O -ᵥ (Γ₃,ₒ V)))) ∪ᵥ (Γ₂,ᵢ (Γ₃,ₒ V) -ᵥ (Γ₂,ᵢ O))     ≈⟨ ∪ᵥ-cong ≈ᵥ,₂-refl ((≈ᵥ,₂-sym ((Γ₂,ᵢ-distrib (Γ₃,ₒ V) O))))  ⟩
+             ((Γ₂,ᵢ O) -ᵥ (Γ₂,ᵢ (O -ᵥ (Γ₃,ₒ V)))) ∪ᵥ (Γ₂,ᵢ ((Γ₃,ₒ V) -ᵥ O)) ≈⟨ ≈ᵥ,₂-refl  ⟩                                       
+             Γ₃,ᵢ (Γ₂,ᵢ O)  (O -ᵥ (Γ₃,ₒ V) , (Γ₃,ₒ V) -ᵥ O)               ≈⟨ ≈ᵥ,₂-refl ⟩                          
+             Γ₃,ᵢ (Γ₂,ᵢ O)  (O -ᵥ (Γ₃,ₒ V) , (Γ₃,ₒ V) -ᵥ O)               ≈⟨ Γ₃,ᵢ-cong {I = (Γ₂,ᵢ O)} {∇ = (O -ᵥ (Γ₃,ₒ V))} {Δ = ((Γ₃,ₒ V) -ᵥ O)}  inv ≈ᵥ,₂-refl ≈ᵥ,₂-refl  ⟩
+             Γ₃,ᵢ ((Γ₃,ᵢ I  (∇ , Δ)))  (O -ᵥ (Γ₃,ₒ V) , (Γ₃,ₒ V) -ᵥ O)   ≈⟨ ≈ᵥ,₂-refl ⟩                                       
+             Γ₃,ᵢ (Γ₃,ᵢ I  (∇ , Δ))  (diffᵥ O (Γ₃,ₒ V))
+            ∎
+            where open EqReasoning 𝕍₂ₛ
 
--- proof:
---
--- Γ₃,ᵢ (Γ₃,ᵢ I  (∇ , Δ))  diffᵥ O (Γ₃,ₒ V)
--- = by invariant 
--- Γ₃,ᵢ (Γ₂,ᵢ O)  diffᵥ O (Γ₃,ₒ V)
--- =
--- Γ₃,ᵢ (Γ₂,ᵢ O)  (O - (Γ₃,ₒ V), (Γ₃,ₒ V) - O) 
--- =
--- ((Γ₂,ᵢ O) - (Γ₂,ᵢ (O - (Γ₃,ₒ V)))) ∪ (Γ₂,ᵢ ((Γ₃,ₒ V) - O))
--- = by magic ;-) 
--- Γ₂,ᵢ (O - (O - (Γ₃,ₒ V)) ∪ ((Γ₃,ₒ V) - O))
--- = by algebra 
--- Γ₂,ᵢ (Γ₂,ₒ V)
+Γ₃-invariant-maintained-iter : ∀ (S : Γ₃-State) k → Γ₃-invariant S → Γ₃-invariant ((Γ₃ ^ k) S) 
+Γ₃-invariant-maintained-iter S zero inv = inv 
+Γ₃-invariant-maintained-iter S (suc k) inv = Γ₃-invariant-maintained ((Γ₃ ^ k) S) (Γ₃-invariant-maintained-iter S k inv)  
 
--- 
 
+S₃≈S₂ : Γ₃-State → Γ₂-State → Set (a ⊔ ℓ)
+-- why doesn't this work? 
+-- S₃≈S₂ (S₃ V I O (∇ , Δ)) (S₂ V' I' O') = (S₂ V I O) ≈ₛ (S₂ V' I' O')
+S₃≈S₂ S3 S2 = Γ₃-State.V S3 ≈ᵥ   Γ₂-State.V S2 ×
+              Γ₃-State.I S3 ≈ᵥ,₂ Γ₂-State.I S2 ×
+              Γ₃-State.O S3 ≈ᵥ,₂ Γ₂-State.O S2
+
+S₃≈S₂-maintained : ∀ (S3 : Γ₃-State) (S2 : Γ₂-State) → S₃≈S₂ S3 S2 → Γ₃-invariant S3 → S₃≈S₂ (Γ₃ S3) (Γ₂ S2)
+S₃≈S₂-maintained  (S₃ V I O (∇ , Δ)) (S₂ V' I' O') ( V≈V' , (I≈I' , O≈O') ) inv = prfV , (prfI , prfO)
+  where
+    prfV : (Γ₃,ᵥ I) ≈ᵥ (Γ₂,ᵥ I')
+    prfV = Γ₂,ᵥ-cong I≈I'
+
+    prfI : (Γ₃,ᵢ I (∇ , Δ)) ≈ᵥ,₂ (Γ₂,ᵢ O')
+    prfI = begin
+            Γ₃,ᵢ I (∇ , Δ)  ≈⟨ ≈ᵥ,₂-sym inv ⟩             
+            Γ₂,ᵢ O          ≈⟨ Γ₂,ᵢ-cong O≈O' ⟩             
+            Γ₂,ᵢ O' 
+            ∎
+            where open EqReasoning 𝕍₂ₛ
+
+    prfO : (Γ₃,ₒ V) ≈ᵥ,₂ (Γ₂,ₒ V')
+    prfO = Γ₂,ₒ-cong V≈V'  
+
+
+S₃≈S₂-maintained-iter : ∀ (S3 : Γ₃-State) (S2 : Γ₂-State) k → S₃≈S₂ S3 S2 → Γ₃-invariant S3 → S₃≈S₂ ((Γ₃ ^ k) S3) ((Γ₂ ^ k) S2)
+S₃≈S₂-maintained-iter S3 S2 zero eq inv = eq 
+S₃≈S₂-maintained-iter S3 S2 (suc k) eq inv =
+   S₃≈S₂-maintained ((Γ₃ ^ k) S3) ((Γ₂ ^ k) S2) (S₃≈S₂-maintained-iter S3 S2 k eq inv)  (Γ₃-invariant-maintained-iter S3 k inv) 
+
+S₃≈S₂-init : S₃≈S₂ (S₃ (~ M) Øᵥ,₂ Øᵥ,₂ (Øᵥ,₂ , Øᵥ,₂)) (S₂ (~ M) Øᵥ,₂ Øᵥ,₂)
+S₃≈S₂-init = ≈ᵥ-refl , ( ≈ᵥ,₂-refl , ≈ᵥ,₂-refl )
+
+Γ₂,ᵢØ≈Ø : Γ₂,ᵢ Øᵥ,₂ ≈ᵥ,₂ Øᵥ,₂
+Γ₂,ᵢØ≈Ø i j = ↭-refl 
+
+Ø∪Ø≈Ø : (Øᵥ,₂ ∪ᵥ Øᵥ,₂) ≈ᵥ,₂ Øᵥ,₂
+Ø∪Ø≈Ø i j = ↭-refl 
+
+Ø-Ø≈Ø : (Øᵥ,₂ -ᵥ Øᵥ,₂) ≈ᵥ,₂ Øᵥ,₂
+Ø-Ø≈Ø i j = ↭-refl 
+
+init-invariant : Γ₃-invariant (S₃ (~ M) Øᵥ,₂ Øᵥ,₂ (Øᵥ,₂ , Øᵥ,₂))
+init-invariant  = prf
+  where
+    prf : Γ₂,ᵢ Øᵥ,₂ ≈ᵥ,₂ Γ₃,ᵢ Øᵥ,₂  (Øᵥ,₂ , Øᵥ,₂)
+    prf = ≈ᵥ,₂-refl
+         
+S₃≈S₂-maintained-init : ∀ k → S₃≈S₂ ((Γ₃ ^ k) (S₃ (~ M) Øᵥ,₂ Øᵥ,₂ (Øᵥ,₂ , Øᵥ,₂))) ((Γ₂ ^ k) (S₂ (~ M) Øᵥ,₂ Øᵥ,₂))
+S₃≈S₂-maintained-init  k = S₃≈S₂-maintained-iter (S₃ (~ M) Øᵥ,₂ Øᵥ,₂ (Øᵥ,₂ , Øᵥ,₂)) (S₂ (~ M) Øᵥ,₂ Øᵥ,₂) k S₃≈S₂-init init-invariant
+
+-- now, related gamma-3 to gamma-1 and gamma-0 ... 

@@ -90,13 +90,13 @@ A〚〛-cong {F} {F'} {V} F=F' i = ⨁ₛ-cong (λ {q} → f[]-cong {X = V q} (F
 Øᵥ,₂↓=Øᵥ i = lemma {n}
   where lemma : ∀ {k} → ⨁ₛ (λ (q : Fin k) → []) ↭ []
         lemma {zero} = ↭-refl
-        lemma {suc k} = ↭-trans Ø-identityₗ (lemma {k})
+        lemma {suc k} = ↭-trans ⊕ₛ-identityₗ (lemma {k})
 
 Γ₂,ᵥØ=~M : Γ₂,ᵥ Øᵥ,₂ ≈ᵥ ~ M
 Γ₂,ᵥØ=~M = begin
          Γ₂,ᵥ Øᵥ,₂ ≈⟨ ≈ᵥ-refl ⟩
          Øᵥ,₂ ↓ ⊕ᵥ ~ M ≈⟨ ⊕ᵥ-cong {Øᵥ,₂ ↓} {Øᵥ} {~ M} {~ M} Øᵥ,₂↓=Øᵥ ≈ᵥ-refl ⟩
-         Øᵥ ⊕ᵥ ~ M ≈⟨ Øᵥ-identityₗ ⟩
+         Øᵥ ⊕ᵥ ~ M ≈⟨ ⊕ᵥ-identityₗ ⟩
          ~ M ∎
          where open EqReasoning 𝕍ₛ
 

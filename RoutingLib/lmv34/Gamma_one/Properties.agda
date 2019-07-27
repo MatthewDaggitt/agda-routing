@@ -192,12 +192,12 @@ LemmaA₂-bin : ∀ (f g : Fin n → Route) →
            ((tabulate λ d → (d , f d)) †) ⊕ₛ ((tabulate λ d → (d , g d)) †) ↭
            (tabulate λ d → (d , f d ⊕ g d)) †
 LemmaA₂-bin f g = begin
-  ((tabulate λ d → (d , f d)) †) ⊕ₛ ((tabulate λ d → (d , g d)) †) ↭⟨ ↭-sym (⊕ₛ-identityᵣ) ⟩
-  ((tabulate λ d → (d , f d)) †) ⊕ₛ ((tabulate λ d → (d , g d)) †) ⊕ₛ Ø ↭⟨ ⊕ₛ-assoc {(tabulate λ d → (d , f d)) †} {(tabulate λ d → (d , g d)) †} {Ø} ⟩
+  ((tabulate λ d → (d , f d)) †) ⊕ₛ ((tabulate λ d → (d , g d)) †)        ↭⟨ ↭-sym (⊕ₛ-identityᵣ) ⟩
+  ((tabulate λ d → (d , f d)) †) ⊕ₛ ((tabulate λ d → (d , g d)) †) ⊕ₛ Ø   ↭⟨ ⊕ₛ-assoc {(tabulate λ d → (d , f d)) †} {(tabulate λ d → (d , g d)) †} {Ø} ⟩
   ((tabulate λ d → (d , f d)) †) ⊕ₛ (((tabulate λ d → (d , g d)) †) ⊕ₛ Ø) ↭⟨ ↭-refl ⟩
-  ⨁ₛ (λ q → ((tabulate λ d → (d , iter q d)) †)) ↭⟨ LemmaA₂ iter ⟩
-  (tabulate λ d → (d , (⨁ λ q → iter q d))) † ↭⟨ ↭-refl ⟩
-  (tabulate λ d → (d , f d ⊕ (g d ⊕ ∞#))) † ↭⟨ †-cong (tabulate-cong (λ {d} → Fin-refl , ⊕-cong ≈-refl (⊕-identityʳ (g d)))) ⟩
+  ⨁ₛ (λ q → ((tabulate λ d → (d , iter q d)) †))                          ↭⟨ LemmaA₂ iter ⟩
+  (tabulate λ d → (d , (⨁ λ q → iter q d))) †                             ↭⟨ ↭-refl ⟩
+  (tabulate λ d → (d , f d ⊕ (g d ⊕ ∞#))) †                               ↭⟨ †-cong (tabulate-cong (λ {d} → Fin-refl , ⊕-cong ≈-refl (⊕-identityʳ (g d)))) ⟩
   (tabulate λ d → (d , f d ⊕ g d)) † ∎
   where open PermutationReasoning
         iter : Fin 2 → Fin n → Route

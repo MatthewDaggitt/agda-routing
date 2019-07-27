@@ -1,4 +1,4 @@
-open import Algebra.FunctionProperties.Core using (Op₂)
+open import Algebra.FunctionProperties using (Op₂; Associative)
 open import Data.Fin using (Fin)
 open import Data.Product using (_,_; _×_) renaming (proj₁ to π₁; proj₂ to π₂)
 open import Data.List using (List; filter; tabulate; []; _∷_; _++_; map)
@@ -44,7 +44,8 @@ open Gamma_one_Properties isRAlg A
 open Gamma_two isRAlg Imp Prot Exp
 open Gamma_two_Algebra isRAlg n 
 open Gamma_two_Properties isRAlg A Imp Prot Exp A=Imp∘Prot∘Exp
-  hiding (_≈ₛ_; ≈ₛ-refl; ≈ₛ-sym; ≈ₛ-trans; 𝕊ₛ)
+  hiding (≈ₛ-refl; ≈ₛ-sym; ≈ₛ-trans; 𝕊ₛ)
+  renaming (_≈ₛ_ to _≈ₛ,₂_)
 open Gamma_three isRAlg Imp Prot Exp
 open Gamma_three_Algebra isRAlg n
 
@@ -89,6 +90,17 @@ _≈ₛ_ : Rel Γ₃-State (a ⊔ ℓ)
 ++-cong (prep eq A=A') B=B'         = prep eq (++-cong A=A' B=B')
 ++-cong (swap eq₁ eq₂ A=A') B=B'    = swap eq₁ eq₂ (++-cong A=A' B=B')
 
+++-identityₗ : ∀ xs → [] ++ xs ↭ xs
+++-identityₗ xs = ↭-refl
+
+++-identityᵣ : ∀ xs → xs ++ [] ↭ xs
+++-identityᵣ [] = ↭-refl
+++-identityᵣ (x ∷ xs) = prep ≈ᵣ-refl (++-identityᵣ xs)
+
+++-assoc : Associative _↭_ _++_
+++-assoc [] ys zs = ↭-refl
+++-assoc (x ∷ xs) ys zs = prep ≈ᵣ-refl (++-assoc xs ys zs)
+
 postulate
   minus-cong : ∀ {A A' B B'} → A ↭ A' → B ↭ B' → A - B ↭ A' - B'
 
@@ -96,9 +108,22 @@ minusᵥ-cong : ∀ {U U' V V'} → U ≈ᵥ,₂ U' → V ≈ᵥ,₂ V' →
           (U -ᵥ V) ≈ᵥ,₂ (U' -ᵥ V')
 minusᵥ-cong U=U' V=V' i j = minus-cong (U=U' i j) (V=V' i j)
 
+[]-xs : ∀ xs → [] - xs ↭ []
+[]-xs xs = ↭-refl
+
+xs-[] : ∀ xs → xs - [] ↭ xs
+xs-[] [] = ↭-refl
+xs-[] (x ∷ xs) = prep ≈ᵣ-refl (xs-[] xs)
+
 ∪-cong : ∀ {A A' B B'} → A ↭ A' → B ↭ B' →
          A ∪ B ↭ A' ∪ B'
 ∪-cong {A} {A'} {B} {B'} A=A' B=B' = ++-cong A=A' (minus-cong B=B' A=A')
+
+∪-identityₗ : ∀ xs → [] ∪ xs ↭ xs
+∪-identityₗ xs = xs-[] xs
+
+∪-identityᵣ : ∀ xs → xs ∪ [] ↭ xs
+∪-identityᵣ xs = ++-identityᵣ xs
 
 ∪ᵥ-cong : ∀ {U U' V V'} → U ≈ᵥ,₂ U' → V ≈ᵥ,₂ V' →
           (U ∪ᵥ V) ≈ᵥ,₂ (U' ∪ᵥ V')
@@ -115,26 +140,6 @@ diffᵥ-cong : ∀ {U U' V V'} → U ≈ᵥ,₂ U' → V ≈ᵥ,₂ V' →
 diffᵥ-cong A=A' B=B' =
   (λ i j → minus-cong (A=A' i j) (B=B' i j)) ,
   (λ i j → minus-cong (B=B' i j) (A=A' i j))
-
-[]-xs : ∀ xs → [] - xs ↭ []
-[]-xs xs = ↭-refl
-
-xs-[] : ∀ xs → xs - [] ↭ xs
-xs-[] [] = ↭-refl
-xs-[] (x ∷ xs) = prep ≈ᵣ-refl (xs-[] xs)
-
-++-identityₗ : ∀ xs → [] ++ xs ↭ xs
-++-identityₗ xs = ↭-refl
-
-++-identityᵣ : ∀ xs → xs ++ [] ↭ xs
-++-identityᵣ [] = ↭-refl
-++-identityᵣ (x ∷ xs) = prep ≈ᵣ-refl (++-identityᵣ xs)
-
-∪-identityₗ : ∀ xs → [] ∪ xs ↭ xs
-∪-identityₗ xs = xs-[] xs
-
-∪-identityᵣ : ∀ xs → xs ∪ [] ↭ xs
-∪-identityᵣ xs = ++-identityᵣ xs
 
 Γ₃,ᵥ-cong : ∀ {I I'} → I ≈ᵥ,₂ I' → Γ₃,ᵥ I ≈ᵥ Γ₃,ᵥ I'
 Γ₃,ᵥ-cong = Γ₂,ᵥ-cong
@@ -232,15 +237,11 @@ distrib2 F O O' i j = begin
 Γ₃-invariant : Γ₃-State → Set (a ⊔ ℓ)
 Γ₃-invariant (S₃ V I O (∇ , Δ)) = Γ₂,ᵢ O ≈ᵥ,₂ Γ₃,ᵢ I  (∇ , Δ)
 
--- the outer parens on lhs are needed.  fix?
-postulate 
-  lemma0 : ∀ x y → ((x - (x - y)) ∪ (y - x)) ↭ y 
-
 lemma1 : ∀ X Y → ((X -ᵥ (X -ᵥ Y)) ∪ᵥ (Y -ᵥ X)) ≈ᵥ,₂ Y 
 lemma1 X Y i j = begin
                  ((X -ᵥ (X -ᵥ Y)) ∪ᵥ (Y -ᵥ X)) i j                       ↭⟨ ↭-refl ⟩                                        
                  ((X -ᵥ (X -ᵥ Y)) i j) ∪ ((Y -ᵥ X) i j)                  ↭⟨ ↭-refl ⟩                                        
-                 ((X i j) - ((X i j) - (Y i j))) ∪ ((Y i j) - (X i j))  ↭⟨ lemma0 (X i j) (Y i j) ⟩                                
+                 ((X i j) - ((X i j) - (Y i j))) ∪ ((Y i j) - (X i j))  ↭⟨ diff-lemma (X i j) (Y i j) ⟩                                
                  Y i j 
                  ∎
                  where open PermutationReasoning
@@ -269,11 +270,7 @@ lemma1 X Y i j = begin
 
 
 S₃≈S₂ : Γ₃-State → Γ₂-State → Set (a ⊔ ℓ)
--- why doesn't this work? 
--- S₃≈S₂ (S₃ V I O (∇ , Δ)) (S₂ V' I' O') = (S₂ V I O) ≈ₛ (S₂ V' I' O')
-S₃≈S₂ S3 S2 = Γ₃-State.V S3 ≈ᵥ   Γ₂-State.V S2 ×
-              Γ₃-State.I S3 ≈ᵥ,₂ Γ₂-State.I S2 ×
-              Γ₃-State.O S3 ≈ᵥ,₂ Γ₂-State.O S2
+S₃≈S₂ (S₃ V I O (∇ , Δ)) (S₂ V' I' O') = (S₂ V I O) ≈ₛ,₂ (S₂ V' I' O')
 
 S₃≈S₂-maintained : ∀ (S3 : Γ₃-State) (S2 : Γ₂-State) → S₃≈S₂ S3 S2 → Γ₃-invariant S3 → S₃≈S₂ (Γ₃ S3) (Γ₂ S2)
 S₃≈S₂-maintained  (S₃ V I O (∇ , Δ)) (S₂ V' I' O') ( V≈V' , (I≈I' , O≈O') ) inv = prfV , (prfI , prfO)

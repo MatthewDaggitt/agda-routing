@@ -2,13 +2,15 @@ open import Algebra.FunctionProperties using (Op₂; Associative)
 open import Data.Fin using (Fin)
 open import Data.Product using (_,_; _×_) renaming (proj₁ to π₁; proj₂ to π₂)
 open import Data.List using (List; filter; tabulate; []; _∷_; _++_; map)
+open import Data.List.Relation.Unary.Any using (here; there)
 import Data.List.Membership.DecSetoid as Membership
 open import Data.Nat using (zero; suc; ℕ; _*_; _+_)
 open import Function using (_∘_)
 open import Level using (_⊔_)
-open import Relation.Nullary using (yes; no)
-open import Relation.Nullary.Negation using (contradiction; ¬?)
-open import Relation.Binary using (Setoid; DecSetoid; Rel; Reflexive; Symmetric; Transitive; _⇒_)
+open import Relation.Nullary using (yes; no; ¬_)
+open import Relation.Nullary.Negation using (contradiction; contraposition; ¬?)
+open import Relation.Unary using (Pred; Decidable; _⇒_)
+open import Relation.Binary using (Setoid; DecSetoid; Rel; Reflexive; Symmetric; Transitive; _Respects_)
 open import Relation.Binary.PropositionalEquality as PropositionalEq using (_≡_; refl; cong)
 import Relation.Binary.EqReasoning as EqReasoning
 
@@ -49,8 +51,8 @@ open Gamma_two_Properties isRAlg A Imp Prot Exp A=Imp∘Prot∘Exp
 open Gamma_three isRAlg Imp Prot Exp
 open Gamma_three_Algebra isRAlg n
 
-open DecSetoid FinRoute-decSetoid using () renaming (refl to ≈ᵣ-refl; _≟_ to _≟ᵣ_)
-open Membership FinRoute-decSetoid using (_∈?_)
+open DecSetoid FinRoute-decSetoid using () renaming (_≈_ to _≈ᵣ_; refl to ≈ᵣ-refl; trans to ≈ᵣ-trans; sym to ≈ᵣ-sym; _≟_ to _≟ᵣ_)
+open Membership FinRoute-decSetoid using (_∈?_; _∈_)
 
 ------------------------------------
 -- Γ₃-State
@@ -101,8 +103,53 @@ _≈ₛ_ : Rel Γ₃-State (a ⊔ ℓ)
 ++-assoc [] ys zs = ↭-refl
 ++-assoc (x ∷ xs) ys zs = prep ≈ᵣ-refl (++-assoc xs ys zs)
 
-postulate
-  minus-cong : ∀ {A A' B B'} → A ↭ A' → B ↭ B' → A - B ↭ A' - B'
+-- lmv34: Couldn't find bi-implication in the stdlib
+infix 4 _⇔_
+_⇔_ : ∀ {a ℓ₁ ℓ₂} {A : Set a} → Pred A ℓ₁ → Pred A ℓ₂ → Pred A _
+P ⇔ Q = λ x → (P x → Q x) × (Q x → P x)
+
+filter-lemma : ∀ {p} {P P' : Pred (Fin n × Route) p} {P? : Decidable P} {P?' : Decidable P'}
+               xs → (∀ x → (P ⇔ P') x) → filter P? xs ↭ filter P?' xs
+filter-lemma [] P=P' = ↭-refl
+filter-lemma {P? = P?} {P?' = P?'} (x ∷ xs) P=P' with P? x | P?' x
+... | yes _  | yes _    = prep ≈ᵣ-refl (filter-lemma xs P=P')
+... | yes Px | no ¬P'x  = contradiction ((π₁ (P=P' x)) Px) ¬P'x
+... | no ¬Px | yes P'x  = contradiction ((π₂ (P=P' x)) P'x) ¬Px
+... | no _   | no _     = filter-lemma xs P=P'
+
+∈-congₗ : ∀ {xs x y} → x ≈ᵣ y → x ∈ xs → y ∈ xs
+∈-congₗ {[]} _ ()
+∈-congₗ {x' ∷ xs} x=y (here px) = here (≈ᵣ-trans (≈ᵣ-sym x=y) px)
+∈-congₗ {x' ∷ xs} x=y (there x∈xs) = there (∈-congₗ x=y x∈xs)
+
+∈-congᵣ : ∀ {x xs ys} → xs ↭ ys → x ∈ xs → x ∈ ys
+∈-congᵣ refl x∈xs = x∈xs
+∈-congᵣ (prep x₁=y₁ xs=ys) (here x=x₁) = here (≈ᵣ-trans x=x₁ x₁=y₁)
+∈-congᵣ (prep x₁=y₁ xs=ys) (there x∈xs) = there (∈-congᵣ xs=ys x∈xs)
+∈-congᵣ (swap x₁=y₂ x₂=y₁ xs=ys) (here x=x₁) = there (here (≈ᵣ-trans x=x₁ x₁=y₂))
+∈-congᵣ (swap x₁=y₂ x₂=y₁ xs=ys) (there (here x=x₂)) = here (≈ᵣ-trans x=x₂ x₂=y₁)
+∈-congᵣ (swap x₁=y₂ x₂=y₁ xs=ys) (there (there x∈xs)) = there (there (∈-congᵣ xs=ys x∈xs))
+∈-congᵣ (trans xs=ys ys=zs) x∈xs = ∈-congᵣ ys=zs (∈-congᵣ xs=ys x∈xs)
+
+minus-respects-≈ᵣ : ∀ xs → (λ x → ¬ (x ∈ xs)) Respects _≈ᵣ_
+minus-respects-≈ᵣ [] {y} {y'} y=y' Py = λ ()
+minus-respects-≈ᵣ (x ∷ xs) {y} {y'} y=y' Py with y' ∈? (x ∷ xs)
+... | yes (here y'=x) = contradiction (here (≈ᵣ-trans y=y' y'=x)) Py
+... | yes (there Py') = contradiction (there (∈-congₗ (≈ᵣ-sym y=y') Py')) Py
+... | no ¬Py' = ¬Py'
+
+minus-congₗ : ∀ {A A' B} → A ↭ A' → A - B ↭ A' - B
+minus-congₗ {A} {A'} {B} A=A' = filter-cong (minus-respects-≈ᵣ B) A=A'
+
+minus-congᵣ : ∀ {A B B'} → B ↭ B' → A - B ↭ A - B'
+minus-congᵣ {A} B=B' = filter-lemma A (λ x → (contraposition (∈-congᵣ (↭-sym B=B'))) , (contraposition (∈-congᵣ B=B')))
+
+minus-cong : ∀ {A A' B B'} → A ↭ A' → B ↭ B' → A - B ↭ A' - B'
+minus-cong {A} {A'} {B} {B'} A=A' B=B' = begin
+  A - B ↭⟨ minus-congₗ A=A' ⟩
+  A' - B ↭⟨ minus-congᵣ {A'} B=B' ⟩
+  A' - B' ∎
+  where open PermutationReasoning
 
 minusᵥ-cong : ∀ {U U' V V'} → U ≈ᵥ,₂ U' → V ≈ᵥ,₂ V' →
           (U -ᵥ V) ≈ᵥ,₂ (U' -ᵥ V')

@@ -1,4 +1,4 @@
-open import Algebra.FunctionProperties using (Op₂; Associative)
+open import Algebra.FunctionProperties
 open import Data.Fin using (Fin)
 open import Data.Product using (_,_; _×_) renaming (proj₁ to π₁; proj₂ to π₂)
 open import Data.List using (List; filter; tabulate; []; _∷_; _++_; map)
@@ -52,7 +52,7 @@ open Gamma_three isRAlg Imp Prot Exp
 open Gamma_three_Algebra isRAlg n
 
 open DecSetoid FinRoute-decSetoid using () renaming (_≈_ to _≈ᵣ_; refl to ≈ᵣ-refl; trans to ≈ᵣ-trans; sym to ≈ᵣ-sym; _≟_ to _≟ᵣ_)
-open Membership FinRoute-decSetoid using (_∈?_; _∈_)
+open Membership FinRoute-decSetoid using (_∈?_; _∈_; _∉_)
 
 ------------------------------------
 -- Γ₃-State
@@ -84,18 +84,17 @@ _≈ₛ_ : Rel Γ₃-State (a ⊔ ℓ)
 
 ------------------------------------
 -- Operation properties
-++-cong : ∀ {A A' B B'} → A ↭ A' → B ↭ B' →
-          A ++ B ↭ A' ++ B'
+++-cong : Congruent₂ _↭_ _++_
 ++-cong {[]} {[]} A=A' B=B'         = B=B'
 ++-cong {x ∷ A} {.x ∷ .A} refl B=B' = prep ≈ᵣ-refl (++-cong refl B=B') 
 ++-cong (trans A=A' A'=A'') B=B'    = trans (++-cong A=A' refl) (++-cong A'=A'' B=B')
 ++-cong (prep eq A=A') B=B'         = prep eq (++-cong A=A' B=B')
 ++-cong (swap eq₁ eq₂ A=A') B=B'    = swap eq₁ eq₂ (++-cong A=A' B=B')
 
-++-identityₗ : ∀ xs → [] ++ xs ↭ xs
+++-identityₗ : LeftIdentity _↭_ Ø _++_
 ++-identityₗ xs = ↭-refl
 
-++-identityᵣ : ∀ xs → xs ++ [] ↭ xs
+++-identityᵣ : RightIdentity _↭_ Ø _++_
 ++-identityᵣ [] = ↭-refl
 ++-identityᵣ (x ∷ xs) = prep ≈ᵣ-refl (++-identityᵣ xs)
 
@@ -131,49 +130,46 @@ filter-lemma {P? = P?} {P?' = P?'} (x ∷ xs) P=P' with P? x | P?' x
 ∈-congᵣ (swap x₁=y₂ x₂=y₁ xs=ys) (there (there x∈xs)) = there (there (∈-congᵣ xs=ys x∈xs))
 ∈-congᵣ (trans xs=ys ys=zs) x∈xs = ∈-congᵣ ys=zs (∈-congᵣ xs=ys x∈xs)
 
-minus-respects-≈ᵣ : ∀ xs → (λ x → ¬ (x ∈ xs)) Respects _≈ᵣ_
-minus-respects-≈ᵣ [] {y} {y'} y=y' Py = λ ()
-minus-respects-≈ᵣ (x ∷ xs) {y} {y'} y=y' Py with y' ∈? (x ∷ xs)
+minus-respects-≈ᵣ : ∀ {xs} → (λ x → ¬ (x ∈ xs)) Respects _≈ᵣ_
+minus-respects-≈ᵣ {[]} {y} {y'} y=y' Py = λ ()
+minus-respects-≈ᵣ {(x ∷ xs)} {y} {y'} y=y' Py with y' ∈? (x ∷ xs)
 ... | yes (here y'=x) = contradiction (here (≈ᵣ-trans y=y' y'=x)) Py
 ... | yes (there Py') = contradiction (there (∈-congₗ (≈ᵣ-sym y=y') Py')) Py
 ... | no ¬Py' = ¬Py'
 
-minus-congₗ : ∀ {A A' B} → A ↭ A' → A - B ↭ A' - B
-minus-congₗ {A} {A'} {B} A=A' = filter-cong (minus-respects-≈ᵣ B) A=A'
+minus-congₗ : LeftCongruent _↭_ _-_
+minus-congₗ {A} B=B' = filter-lemma A (λ x → (contraposition (∈-congᵣ (↭-sym B=B'))) , (contraposition (∈-congᵣ B=B')))
 
-minus-congᵣ : ∀ {A B B'} → B ↭ B' → A - B ↭ A - B'
-minus-congᵣ {A} B=B' = filter-lemma A (λ x → (contraposition (∈-congᵣ (↭-sym B=B'))) , (contraposition (∈-congᵣ B=B')))
+minus-congᵣ : RightCongruent _↭_ _-_
+minus-congᵣ A=A' = filter-cong minus-respects-≈ᵣ A=A'
 
-minus-cong : ∀ {A A' B B'} → A ↭ A' → B ↭ B' → A - B ↭ A' - B'
+minus-cong : Congruent₂ _↭_ _-_
 minus-cong {A} {A'} {B} {B'} A=A' B=B' = begin
-  A - B ↭⟨ minus-congₗ A=A' ⟩
-  A' - B ↭⟨ minus-congᵣ {A'} B=B' ⟩
+  A - B ↭⟨ minus-congᵣ A=A' ⟩
+  A' - B ↭⟨ minus-congₗ {A'} B=B' ⟩
   A' - B' ∎
   where open PermutationReasoning
 
-minusᵥ-cong : ∀ {U U' V V'} → U ≈ᵥ,₂ U' → V ≈ᵥ,₂ V' →
-          (U -ᵥ V) ≈ᵥ,₂ (U' -ᵥ V')
-minusᵥ-cong U=U' V=V' i j = minus-cong (U=U' i j) (V=V' i j)
+minusᵥ-cong : Congruent₂ _≈ᵥ,₂_ _-ᵥ_
+minusᵥ-cong {U} {U'} {V} {V'} U=U' V=V' i j = minus-cong (U=U' i j) (V=V' i j)
 
-[]-xs : ∀ xs → [] - xs ↭ []
-[]-xs xs = ↭-refl
+minus-zeroₗ : LeftZero _↭_ Ø _-_
+minus-zeroₗ xs = ↭-refl
 
-xs-[] : ∀ xs → xs - [] ↭ xs
-xs-[] [] = ↭-refl
-xs-[] (x ∷ xs) = prep ≈ᵣ-refl (xs-[] xs)
+minus-identityᵣ : RightIdentity _↭_ Ø _-_
+minus-identityᵣ [] = ↭-refl
+minus-identityᵣ (x ∷ xs) = prep ≈ᵣ-refl (minus-identityᵣ xs)
 
-∪-cong : ∀ {A A' B B'} → A ↭ A' → B ↭ B' →
-         A ∪ B ↭ A' ∪ B'
-∪-cong {A} {A'} {B} {B'} A=A' B=B' = ++-cong A=A' (minus-cong B=B' A=A')
+∪-cong : Congruent₂ _↭_ _∪_
+∪-cong A=A' B=B' = ++-cong A=A' (minus-cong B=B' A=A')
 
-∪-identityₗ : ∀ xs → [] ∪ xs ↭ xs
-∪-identityₗ xs = xs-[] xs
+∪-identityₗ : LeftIdentity _↭_ Ø _∪_
+∪-identityₗ xs = minus-identityᵣ xs
 
-∪-identityᵣ : ∀ xs → xs ∪ [] ↭ xs
+∪-identityᵣ : RightIdentity _↭_ Ø _∪_
 ∪-identityᵣ xs = ++-identityᵣ xs
 
-∪ᵥ-cong : ∀ {U U' V V'} → U ≈ᵥ,₂ U' → V ≈ᵥ,₂ V' →
-          (U ∪ᵥ V) ≈ᵥ,₂ (U' ∪ᵥ V')
+∪ᵥ-cong : Congruent₂ _≈ᵥ,₂_ _∪ᵥ_
 ∪ᵥ-cong U=U' V=V' i j = ∪-cong (U=U' i j) (V=V' i j)
 
 diff-cong : ∀ {A A' B B'} → A ↭ A' → B ↭ B' →
@@ -203,7 +199,7 @@ diffᵥ-cong A=A' B=B' =
             (π₂ (Γ₃,ₓ V O) ≈ᵥ,₂ π₂(Γ₃,ₓ V' O'))
 Γ₃,ₓ-cong V=V' O=O' = diffᵥ-cong O=O' (Γ₃,ₒ-cong V=V')
 
-Γ₃-cong : ∀ {S S'} → S ≈ₛ S' → Γ₃ S ≈ₛ Γ₃ S'
+Γ₃-cong : Congruent₁ _≈ₛ_ Γ₃
 Γ₃-cong (V=V' , I=I' , O=O' , ∇=∇' , Δ=Δ') = 
   Γ₃,ᵥ-cong I=I' ,
   Γ₃,ᵢ-cong I=I' ∇=∇' Δ=Δ' ,
@@ -214,52 +210,74 @@ diffᵥ-cong A=A' B=B' =
 ------------------------------------
 -- Theorems
 
+-- diff-lemma is false as it is. Take for example A = {0, 0}, B = {0}.
+-- What we need is:
+  -- A and B have no duplicates.
 postulate
-  -- Lemma A.5
-  F-union-cong : ∀ (f : Route → Route) → (A B : RoutingSet)
-                 → f [ A ∪ B ] ↭ f [ A ] ∪ f [ B ]
-  -- Lemma A.6
-  F-minus-cong : ∀ (f : Route → Route) → (A B : RoutingSet)
-               → f [ A - B ] ↭ f [ A ] - f [ B ]
   diff-lemma : ∀ A B → let (∇ , Δ) = diff A B in
           (A - ∇) ∪ Δ ↭ B
 
--- Lemma 3.3
-F-diff-cong : ∀ F A B → let (∇ , Δ) = diffᵥ A B in
-              ((F 〖 A 〗 -ᵥ F 〖 ∇ 〗) ∪ᵥ F 〖 Δ 〗) ≈ᵥ,₂ (F 〖 B 〗)
-F-diff-cong F A B i j = let (∇ , Δ) = diffᵥ A B in begin
-  ((F 〖 A 〗 -ᵥ F 〖 ∇ 〗) ∪ᵥ F 〖 Δ 〗) i j ↭⟨ ↭-refl ⟩
-  ((F i j) [ A j i ] - (F i j) [ ∇ j i ]) ∪ (F i j) [ Δ j i ]
-    ↭⟨ ∪-cong {A = ((F i j) [ A j i ] - (F i j) [ ∇ j i ])}
-              {A' = ((F i j) [ (A j i) - (∇ j i) ])}
-              {B = (F i j) [ Δ j i ]}
-              (↭-sym (F-minus-cong (F i j) (A j i) (∇ j i))) ↭-refl ⟩
-  ((F i j) [ ((A j i) - (∇ j i)) ]) ∪ (F i j) [ Δ j i ]
-    ↭⟨ ↭-sym (F-union-cong (F i j) ((A j i) - (∇ j i)) (Δ j i)) ⟩
-  (F i j) [  ((A j i) - (∇ j i)) ∪ (Δ j i) ] ↭⟨ []-cong (diff-lemma (A j i) (B j i)) ⟩
-  (F 〖 B 〗) i j ∎
-  where open PermutationReasoning
+-- map-distrib is false as it is. Take for example f(x) = (0, ∞), X = {(0,0)}, Y = {(0,∞)}.
+-- What we need is:
+  -- Y ⊆ X, and
+  -- f is an injective function, or:
+    -- f only acts on the second projection of the elements in X and Y (leaving the first unchanged), and
+    -- X and Y have unique destinations (no two (d, s) and (d, s') with s≠s').
+postulate
+  map-distrib : ∀ {f} {X} {Y} → map f (X - Y) ↭ (map f X) - (map f Y)
 
-postulate 
-  map-distrib : ∀ {f} {X} {Y}  → map f (X - Y) ↭ (map f X) - (map f Y)
+∈-†-lemma₁ : ∀ {X d v} → (d , v) ∈ X → ¬(v ≈ ∞#) → (d , v) ∈ X †
+∈-†-lemma₁ {(d' , v') ∷ X} (here (d=d' , v=v')) v≠∞ with v' ≟ ∞#
+... | yes v'=∞ = contradiction (≈-trans v=v' v'=∞) v≠∞
+... | no _     = here (d=d' , v=v')
+∈-†-lemma₁ {(d' , v') ∷ X} (there dv∈X) v≠∞ with v' ≟ ∞#
+... | yes v'=∞ = ∈-†-lemma₁ dv∈X v≠∞
+... | no _     = there (∈-†-lemma₁ dv∈X v≠∞)
 
-  †-distrib : ∀ {X} {Y}  → (X - Y) † ↭ (X †) - (Y †)
+∈-†-lemma₂ : ∀ {X d v} → (d , v) ∈ X † → (d , v) ∈ X
+∈-†-lemma₂ {((d' , v') ∷ X)} dv∈X† with v' ≟ ∞#
+... | yes _ = there (∈-†-lemma₂ {X} dv∈X†)
+∈-†-lemma₂ {(d' , v') ∷ X} {d} {v} (here dv=dv') | no _ = here dv=dv'
+∈-†-lemma₂ {(d' , v') ∷ X} {d} {v} (there dv∈X†) | no _ = there (∈-†-lemma₂ dv∈X†)
 
-distrib1 : ∀ f X Y  → f [ X - Y ] ↭ f [ X ] - f [ Y ] 
-distrib1 f X Y = begin
-                 f [ X - Y ]                                                                      ↭⟨ ↭-refl ⟩
-                 (map (λ {(d , v) → (d , f v)}) (X - Y)) †                                       ↭⟨ †-cong (map-distrib {X = X}) ⟩
+†-distrib : ∀ {X Y} → (X - Y) † ↭ (X †) - (Y †)
+†-distrib {[]} {Y} = ↭-refl
+†-distrib {(d , v) ∷ X} {Y} with (d , v) ∈? Y
+... | yes dv∈Y = prf
+  where prf : (X - Y) † ↭ (((d , v) ∷ X) †) - (Y †)
+        prf with v ≟ ∞#
+        ... | yes _  = †-distrib {X} {Y}
+        ... | no v≠∞ = prf'
+          where prf' : (X - Y) † ↭ ((d , v) ∷ (X †)) - (Y †)
+                prf' with (d , v) ∈? Y †
+                ... | yes _    = †-distrib {X} {Y}
+                ... | no dv∉Y† = contradiction (∈-†-lemma₁ dv∈Y v≠∞) dv∉Y†
+... | no dv∉Y  = prf
+  where prf : ((d , v) ∷ (X - Y)) † ↭ ((d , v) ∷ X) † - Y †
+        prf with v ≟ ∞#
+        ... | yes _ = †-distrib {X} {Y}
+        ... | no _  = prf'
+          where prf' : (d , v) ∷ ((X - Y) †) ↭ ((d , v) ∷ (X †)) - Y †
+                prf' with (d , v) ∈? Y †
+                ... | yes dv∈Y† = contradiction dv∈Y† (contraposition ∈-†-lemma₂ dv∉Y)
+                ... | no _      = prep ((refl , ≈-refl)) (†-distrib {X} {Y})
+
+-- Lemma A.6
+f-minus-distrib : ∀ f X Y  → f [ X - Y ] ↭ f [ X ] - f [ Y ] 
+f-minus-distrib f X Y = begin
+                 f [ X - Y ]                                                                    ↭⟨ ↭-refl ⟩
+                 (map (λ {(d , v) → (d , f v)}) (X - Y)) †                                      ↭⟨ †-cong (map-distrib {X = X}) ⟩
                  ((map (λ {(d , v) → (d , f v)}) X) - (map (λ {(d , v) → (d , f v)}) Y)) †      ↭⟨ †-distrib {X = (map (λ {(d , v) → (d , f v)}) X)} ⟩
                  ((map (λ {(d , v) → (d , f v)}) X) †) - ((map (λ {(d , v) → (d , f v)}) Y) †)  ↭⟨ ↭-refl ⟩
                  f [ X ] - f [ Y ] 
                  ∎
                  where open PermutationReasoning
 
-distrib2 : ∀ F O O'  → (F 〖 O -ᵥ O' 〗) ≈ᵥ,₂ ((F 〖 O  〗) -ᵥ (F 〖 O' 〗))
-distrib2 F O O' i j = begin
+F-minus-distrib : ∀ F O O'  → (F 〖 O -ᵥ O' 〗) ≈ᵥ,₂ ((F 〖 O  〗) -ᵥ (F 〖 O' 〗))
+F-minus-distrib F O O' i j = begin
                      (F 〖 O -ᵥ O' 〗) i j                      ↭⟨ ↭-refl ⟩
                      (F i j) [ (O -ᵥ O') j i ]                  ↭⟨ ↭-refl ⟩
-                     (F i j) [ (O j i) - (O' j i) ]             ↭⟨ distrib1 (F i j) (O j i) (O' j i) ⟩
+                     (F i j) [ (O j i) - (O' j i) ]             ↭⟨ f-minus-distrib (F i j) (O j i) (O' j i) ⟩
                      ((F i j) [ O j i ]) - ((F i j) [ O' j i ]) ↭⟨ ↭-refl ⟩
                      ((F 〖 O 〗) i j) - ((F 〖 O' 〗) i j)     ↭⟨ ↭-refl ⟩
                      ((F 〖 O 〗) -ᵥ (F 〖 O' 〗)) i j 
@@ -269,7 +287,7 @@ distrib2 F O O' i j = begin
 Γ₂,ᵢ-distrib : ∀ O O' → Γ₂,ᵢ (O -ᵥ O') ≈ᵥ,₂ (Γ₂,ᵢ (O) -ᵥ Γ₂,ᵢ (O'))
 Γ₂,ᵢ-distrib O O' i j = begin
                        (Γ₂,ᵢ (O -ᵥ O')) i j                                               ↭⟨ ↭-refl ⟩
-                       ((Imp ●ₘ Prot) 〖 O -ᵥ O' 〗) i j                                 ↭⟨ distrib2 (Imp ●ₘ Prot) O O' i j ⟩
+                       ((Imp ●ₘ Prot) 〖 O -ᵥ O' 〗) i j                                 ↭⟨ F-minus-distrib (Imp ●ₘ Prot) O O' i j ⟩
                        (((Imp ●ₘ Prot) 〖 O  〗) i j) - (((Imp ●ₘ Prot) 〖 O' 〗) i j)  ↭⟨ ↭-refl ⟩                       
                        ((Γ₂,ᵢ (O)) i j) - ((Γ₂,ᵢ (O')) i j)                               ↭⟨ ↭-refl ⟩
                        (Γ₂,ᵢ (O) -ᵥ Γ₂,ᵢ (O')) i j 
@@ -301,7 +319,7 @@ lemma1 X Y i j = begin
      prf = begin
              Γ₂,ᵢ (Γ₂,ₒ V)                                                       ≈⟨ ≈ᵥ,₂-sym (lemma1 ((Γ₂,ᵢ O)) ((Γ₂,ᵢ (Γ₂,ₒ V)))) ⟩
              ((Γ₂,ᵢ O) -ᵥ (Γ₂,ᵢ (O) -ᵥ Γ₂,ᵢ (Γ₂,ₒ V))) ∪ᵥ (Γ₂,ᵢ (Γ₂,ₒ V) -ᵥ (Γ₂,ᵢ O)) ≈⟨ ≈ᵥ,₂-refl  ⟩                    
-             ((Γ₂,ᵢ O) -ᵥ (Γ₂,ᵢ (O) -ᵥ Γ₂,ᵢ (Γ₃,ₒ V))) ∪ᵥ (Γ₂,ᵢ (Γ₃,ₒ V) -ᵥ (Γ₂,ᵢ O)) ≈⟨ ∪ᵥ-cong {U = ((Γ₂,ᵢ O) -ᵥ (Γ₂,ᵢ (O) -ᵥ Γ₂,ᵢ (Γ₃,ₒ V)))}  {V = (Γ₂,ᵢ (Γ₃,ₒ V) -ᵥ (Γ₂,ᵢ O))} ((minusᵥ-cong {U = Γ₂,ᵢ O}  ≈ᵥ,₂-refl (≈ᵥ,₂-sym (Γ₂,ᵢ-distrib O (Γ₃,ₒ V))))) ≈ᵥ,₂-refl  ⟩   
+             ((Γ₂,ᵢ O) -ᵥ (Γ₂,ᵢ (O) -ᵥ Γ₂,ᵢ (Γ₃,ₒ V))) ∪ᵥ (Γ₂,ᵢ (Γ₃,ₒ V) -ᵥ (Γ₂,ᵢ O)) ≈⟨ ∪ᵥ-cong {x = ((Γ₂,ᵢ O) -ᵥ (Γ₂,ᵢ (O) -ᵥ Γ₂,ᵢ (Γ₃,ₒ V)))}  {u = (Γ₂,ᵢ (Γ₃,ₒ V) -ᵥ (Γ₂,ᵢ O))} ((minusᵥ-cong {Γ₂,ᵢ O}  ≈ᵥ,₂-refl (≈ᵥ,₂-sym (Γ₂,ᵢ-distrib O (Γ₃,ₒ V))))) ≈ᵥ,₂-refl  ⟩   
              ((Γ₂,ᵢ O) -ᵥ (Γ₂,ᵢ (O -ᵥ (Γ₃,ₒ V)))) ∪ᵥ (Γ₂,ᵢ (Γ₃,ₒ V) -ᵥ (Γ₂,ᵢ O))     ≈⟨ ∪ᵥ-cong ≈ᵥ,₂-refl ((≈ᵥ,₂-sym ((Γ₂,ᵢ-distrib (Γ₃,ₒ V) O))))  ⟩
              ((Γ₂,ᵢ O) -ᵥ (Γ₂,ᵢ (O -ᵥ (Γ₃,ₒ V)))) ∪ᵥ (Γ₂,ᵢ ((Γ₃,ₒ V) -ᵥ O)) ≈⟨ ≈ᵥ,₂-refl  ⟩                                       
              Γ₃,ᵢ (Γ₂,ᵢ O)  (O -ᵥ (Γ₃,ₒ V) , (Γ₃,ₒ V) -ᵥ O)               ≈⟨ ≈ᵥ,₂-refl ⟩                          

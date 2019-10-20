@@ -27,7 +27,7 @@ module RoutingLib.Data.List.Membership.Propositional.Properties where
   ∈-combine⁺ : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c}
               {u v xs ys} (f : A → B → C) → u ∈ xs → v ∈ ys →
               f u v ∈ combine f xs ys
-  ∈-combine⁺ f = GM.∈-combine (setoid _) (setoid _) (setoid _) (cong₂ f)
+  ∈-combine⁺ f = GM.∈-combine⁺ (setoid _) (setoid _) (setoid _) (cong₂ f)
 
   ∈-upTo⁺ : ∀ {n i} → i < n → i ∈ upTo n
   ∈-upTo⁺ = GM2.∈-applyUpTo⁺ id

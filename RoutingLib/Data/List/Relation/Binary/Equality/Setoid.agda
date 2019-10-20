@@ -1,17 +1,17 @@
-open import Algebra.FunctionProperties using (Op₂)
-open import Data.Fin using (Fin)
-open import Data.List using (foldr; map; tabulate)
-import Data.List.Relation.Equality.Setoid as SetoidEquality
-import Data.List.Relation.Binary.Pointwise as Pointwise
-open import Function using (_∘_)
-open import Relation.Binary
-
-import RoutingLib.Data.List.Relation.Binary.Pointwise as PW
+open import Relation.Binary hiding (Decidable)
 
 module RoutingLib.Data.List.Relation.Binary.Equality.Setoid
   {a ℓ} (S : Setoid a ℓ) where
 
+open import Algebra.FunctionProperties using (Op₂)
+open import Data.Fin using (Fin)
+open import Data.List
+import Data.List.Relation.Equality.Setoid as SetoidEquality hiding (filter⁺)
+import Data.List.Relation.Binary.Pointwise as Pointwise
+open import Function using (_∘_)
+open import Relation.Unary
 
+import RoutingLib.Data.List.Relation.Binary.Pointwise as PW
 
 open Pointwise public using (head; tail)
 
@@ -28,3 +28,12 @@ foldr⁺ pres e~f (x~y ∷ xs~ys) = pres x~y (foldr⁺ pres e~f xs~ys)
 map-tabulate : ∀ {b} {B : Set b} {n} (f : B → A) (g : Fin n → B) →
                map f (tabulate g) ≋ tabulate (f ∘ g)
 map-tabulate = PW.map-tabulate refl
+
+module _ {p q} {P : Pred A p} {Q : Pred A q}
+         (P? : Decidable P) (Q? : Decidable Q)
+         (P⇒Q : ∀ {a b} → a ≈ b → P a → Q b)
+         (Q⇒P : ∀ {a b} → a ≈ b → Q b → P a)
+         where
+
+  filter⁺ : ∀ {as bs} → as ≋ bs → filter P? as ≋ filter Q? bs
+  filter⁺ = Pointwise.filter⁺ P? Q? P⇒Q Q⇒P

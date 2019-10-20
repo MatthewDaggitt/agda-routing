@@ -17,19 +17,25 @@ import Algebra.FunctionProperties as FunctionProperties
 import Algebra.FunctionProperties.Consequences as Consequences
 open import Algebra.FunctionProperties.Consequences.Propositional using (sel⇒idem)
 open import Data.Product using (proj₁; _,_)
-open import Data.Fin using (Fin)
+open import Data.Fin using (Fin; 0F; suc)
 open import Data.Nat using (zero; suc)
 open import Data.Sum using (inj₁; inj₂)
+open import Function using (_∘_)
 open import Level using (lift)
-open import Relation.Nullary using (yes; no)
+open import Relation.Nullary using (yes; no; ¬_)
 open import Relation.Binary using (DecTotalOrder; StrictTotalOrder; Maximum; Minimum)
 import Relation.Binary.Construct.Converse as Converse
 import Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
 import Relation.Binary.EqReasoning as EqReasoning
 
+open import RoutingLib.Routing algebra
 open import RoutingLib.Algebra
 open import RoutingLib.Algebra.Structures
+import RoutingLib.Relation.Binary.Construct.NonStrictToStrict as NSTS
 import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.DecTotalOrder as NonStrictToStrict
+
+open import RoutingLib.Data.FiniteSet using (⟦_∣_⟧) renaming (FiniteSet to FiniteSet⁺)
+open import RoutingLib.Relation.Binary
 
 open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
@@ -100,6 +106,12 @@ open FunctionProperties _≈_
 ≤₊-maximum : Maximum _≤₊_ ∞#
 ≤₊-maximum x = ≈-sym (⊕-identityˡ x)
 
+<₊-minimum : StrictMinimum _≈_ _<₊_ 0#
+<₊-minimum = NSTS.<-min _≈_ _≤₊_ ≤₊-minimum
+
+<₊-maximum : StrictMaximum _≈_ _<₊_ ∞#
+<₊-maximum = NSTS.<-max _≈_ _≤₊_ ≈-sym ≤₊-maximum
+
 open DecTotalOrder ≤₊-decTotalOrder public
   using ()
   renaming
@@ -148,6 +160,21 @@ strIncr⇒incr strIncr f x with x ≟ ∞#
   x             ∎)
   where open EqReasoning S
 
+-- If the algebra is strictly increasing then there is no cyclic set of routes
+postulate strIncr⇒∄cyclic : IsStrictlyIncreasing algebra →
+                  ∀ {n} (A : AdjacencyMatrix n) X → ¬ Cyclic _ A X
+{-
+strIncr⇒∄cyclic strInc A ⟦ zero  ∣ X ⟧ cyclic with cyclic 0F
+... | (k , j , AₖⱼX₀≤X₀) = ≤₊⇒≯₊ AₖⱼX₀≤X₀ (strInc (A k j) {!!})
+strIncr⇒∄cyclic strInc A ⟦ suc n ∣ X ⟧ cyclic =
+  strIncr⇒∄cyclic strInc A ⟦ n ∣ X ∘ suc ⟧ (λ i → {!!})
+-}
+
+-- If the algebra is strictly increasing then every topology is cycle-free
+strIncr⇒cycleFree : IsStrictlyIncreasing algebra →
+                    ∀ {n} (A : AdjacencyMatrix n) → CycleFree _ A
+strIncr⇒cycleFree strIncr A X cyclic = strIncr⇒∄cyclic strIncr A X cyclic
+
 --------------------------------------------------------------------------------
 -- kᵗʰ-level distributivity properties
 
@@ -188,5 +215,3 @@ r≈∞⇒f▷r≈∞ {f = f} {r} r≈∞ = ≈-trans (▷-cong _ r≈∞) (▷-
 
 f▷r≉∞⇒r≉∞ : ∀ {n} {i j : Fin n} {f : Step i j} {r} → f ▷ r ≉ ∞# → r ≉ ∞#
 f▷r≉∞⇒r≉∞ f▷r≉∞ r≈∞ = f▷r≉∞ (r≈∞⇒f▷r≈∞ r≈∞)
-
-

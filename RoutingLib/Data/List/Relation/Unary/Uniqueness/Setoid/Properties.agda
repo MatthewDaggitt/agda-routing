@@ -46,7 +46,7 @@ module RoutingLib.Data.List.Relation.Unary.Uniqueness.Setoid.Properties where
     combine!⁺ {x ∷ xs} {ys} f f-inj (x∉xs ∷ xs!) ys! = ++⁺ S₃ (map⁺ S₂ S₃ (proj₂ ∘ f-inj) ys!) (combine!⁺ f f-inj xs! ys!) map#combine
       where
       map#combine : Disjoint (map (f x) ys) (combine f xs ys)
-      map#combine (v∈map , v∈com) with ∈-map⁻ S₂ S₃ v∈map | combine-∈ S₁ S₂ S₃ f xs ys v∈com
+      map#combine (v∈map , v∈com) with ∈-map⁻ S₂ S₃ v∈map | ∈-combine⁻ S₁ S₂ S₃ f xs ys v∈com
       ... | (c , _ , v≈fxc) | (a , b , a∈xs , _ , v≈fab) = All¬⇒¬Any x∉xs (∈-resp-≈ S₁ (proj₁ (f-inj (trans (sym v≈fab) v≈fxc))) a∈xs)
 
   open TripleSetoid public

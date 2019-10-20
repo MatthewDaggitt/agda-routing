@@ -2,8 +2,8 @@
 -- Agda routing library
 --
 -- This module contains the basic definitions needed for all next-hop routing
--- routing algorithms. This contains the definition of things like the network,
--- the adjacency matrix, routing tables, global routing state etc.
+-- routing algorithms. This contains the definition of things like the adjacency
+-- matrix, routing tables, global routing state etc.
 --------------------------------------------------------------------------------
 
 open import RoutingLib.Routing.Algebra
@@ -13,12 +13,13 @@ module RoutingLib.Routing
   {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) (n : ℕ)
   where
 
-open import Data.Fin using (Fin) renaming (_≟_ to _≟𝔽_)
+open import Data.Fin using (Fin; 0F) renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Subset using (Subset; _∉_)
 open import Data.Fin.Properties using (any?)
 open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (∃₂)
+open import Level using (_⊔_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; sym; trans)
@@ -26,9 +27,11 @@ open import Relation.Binary.Indexed.Homogeneous
   using (IndexedSetoid; IndexedDecSetoid)
 import Relation.Binary.Construct.Closure.Transitive as TransitiveClosure
 import Relation.Binary.EqReasoning as EqReasoning
-open import Relation.Nullary using (Dec; yes; no)
+open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
+open import RoutingLib.Data.Fin using (_+ₘ_; _-ₘ_)
+open import RoutingLib.Data.FiniteSet using (⟦_∣_⟧) renaming (FiniteSet to FiniteSet⁺)
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.Equality as SubsetEquality
 open import RoutingLib.Data.Matrix
@@ -41,21 +44,10 @@ import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule as Schedule
 open RawRoutingAlgebra algebra
 
 --------------------------------------------------------------------------------
--- Publicly re-export the concept of an epoch
-
-open Schedule public using (Epoch)
-
---------------------------------------------------------------------------------
 -- Adjacency matrices represent the topology of the network at a point in time
 
 AdjacencyMatrix : Set b
 AdjacencyMatrix = ∀ (i j : Fin n) → Step i j
-
---------------------------------------------------------------------------------
--- A network is a epoch indexed family of adjacency matrices
-
-Network : Set b
-Network = Epoch → AdjacencyMatrix
 
 --------------------------------------------------------------------------------
 -- Routing tables store a node's routing decisions
@@ -131,44 +123,6 @@ Iᵢⱼ≡∞ {i} {j} i≢j with j ≟𝔽 i
 Iᵢⱼ≡Iₖₗ : ∀ {i j k l} → j ≢ i → l ≢ k → I i j ≡ I k l
 Iᵢⱼ≡Iₖₗ j≢i l≢k = trans (Iᵢⱼ≡∞ j≢i) (sym (Iᵢⱼ≡∞ l≢k))
 
-------------------------------------------------------------------------
--- The adjacency matrix in each epoch, adjusted for participants
-
-module _ (network : Network) where
-
-  -- abstract
-
-    -- Needs to be abstract otherwise unfolding causes all sorts of problems
-
-    Aₜ : Epoch → Subset n → AdjacencyMatrix
-    Aₜ e p i j with i ∈? p | j ∈? p
-    ... | yes _ | yes _ = network e i j
-    ... | _     | _     = f∞ i j
-
-    Aₜ-reject : ∀ e {p} i j → i ∉ p ⊎ j ∉ p → ∀ x → Aₜ e p i j ▷ x ≈ ∞#
-    Aₜ-reject e {p} i j op x with i ∈? p | j ∈? p
-    ... | yes _   | no  _   = f∞-reject i j x
-    ... | no  _   | yes _   = f∞-reject i j x
-    ... | no  _   | no  _   = f∞-reject i j x
-    ... | yes i∈p | yes j∈p with op
-    ...   | inj₁ i∉p = contradiction i∈p i∉p
-    ...   | inj₂ j∉p = contradiction j∈p j∉p
-
-    Aₜ-reject-eq : ∀ e {p} i j → i ∉ p → ∀ x y → Aₜ e p i j ▷ x ≈ Aₜ e p i j ▷ y
-    Aₜ-reject-eq e {p} i j i∉p x y = begin
-      Aₜ e p i j ▷ x ≈⟨ Aₜ-reject e i j (inj₁ i∉p) x ⟩
-      ∞#             ≈⟨ ≈-sym (Aₜ-reject e i j (inj₁ i∉p) y) ⟩
-      Aₜ e p i j ▷ y ∎
-      where open EqReasoning S
-
-    Aₜ-cong : ∀ e p {X Y : RoutingMatrix} → X ≈ₘ[ p ] Y →
-              ∀ {i j} k → Aₜ e p i k ▷ X k j ≈ Aₜ e p i k ▷ Y k j
-    Aₜ-cong e p {X} {Y} X≈Y {i} {j} k with i ∈? p | k ∈? p
-    ... | yes _ | yes k∈p = ▷-cong (network e i k) (X≈Y k∈p j)
-    ... | yes _ | no  _   = ≈-trans (f∞-reject i k (X k j)) (≈-sym (f∞-reject i k (Y k j)))
-    ... | no  _ | yes _   = ≈-trans (f∞-reject i k (X k j)) (≈-sym (f∞-reject i k (Y k j)))
-    ... | no  _ | no  _   = ≈-trans (f∞-reject i k (X k j)) (≈-sym (f∞-reject i k (Y k j)))
-
 --------------------------------------------------------------------------------
 -- WellFormed
 
@@ -181,3 +135,16 @@ WellFormed p X = ∀ {i} → i ∉ p → X i ≈ₜ I i
 WellFormed-cong : ∀ {X Y p} → WellFormed p X → WellFormed p Y →
                   ∀ {i} → i ∉ p → X i ≈ₜ Y i
 WellFormed-cong wfX wfY i∉p = ≈ₜ-trans (wfX i∉p) (≈ₜ-sym (wfY i∉p))
+
+--------------------------------------------------------------------------------
+-- Types of adjacency matrices
+
+-- A non-empty finite set of routes X is cyclic if every route
+-- in the set can be extended and still be preferred to the previous route.
+Cyclic : AdjacencyMatrix → FiniteSet⁺ Route → Set ℓ
+Cyclic A (⟦ _ ∣ X ⟧) = ∀ i → ∃₂ λ k j → A k j ▷ X (i -ₘ 1) ≤₊ X i
+
+-- A topology/adjacency matrix, is cycle free if there exists no cyclic set
+-- of routes.
+CycleFree : AdjacencyMatrix → Set (a ⊔ ℓ)
+CycleFree A = ∀ X → ¬ Cyclic A X

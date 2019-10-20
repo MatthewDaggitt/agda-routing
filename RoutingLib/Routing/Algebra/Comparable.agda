@@ -30,7 +30,6 @@ open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Algebra.FunctionProperties using (_Preservesᵇ_)
--- open import RoutingLib.Data.Maybe.Relation.Binary.Cross as Cross
 open import RoutingLib.Data.Path.UncertifiedI
 
 open RawRoutingAlgebra algebra

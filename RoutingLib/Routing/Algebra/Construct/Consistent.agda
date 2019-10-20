@@ -23,7 +23,7 @@ module RoutingLib.Routing.Algebra.Construct.Consistent
 
 open import Algebra.FunctionProperties as AlgebraicProperties using (Op₂)
 open import Data.Fin as Fin using (Fin)
-open import Data.List using (List; map)
+open import Data.List as List using (List; map; lookup)
 import Data.List.Membership.Setoid as Membership
 open import Data.List.Membership.Setoid.Properties using (∈-resp-≈; ∈-map⁺)
 open import Data.Maybe using (Maybe; nothing; just)
@@ -306,7 +306,10 @@ isStrictlyIncreasingᶜ sIncr (valid (k , l) , _)     = sIncr (A k l)
 isStrictlyIncreasingᶜ sIncr (nothing       , _) r≉∞ = ≈-sym (⊕-identityˡ _) , r≉∞
 
 isFiniteᶜ : IsFinite algebraᶜ
-isFiniteᶜ = allCRoutes , ∈-allCRoutes
+isFiniteᶜ = record
+  { n         = List.length allCRoutes
+  ; bijection = {!!}
+  }
   where
   open Membership Sᶜ using () renaming (_∈_ to _∈ₗ_)
 

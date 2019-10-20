@@ -29,7 +29,5 @@ All-witness (just x) = drop-just
 to-witness-subst : ∀ {x} {v : A} (eq : x ≡ just v) → to-witness (subst Is-just (sym eq) (just {x = v} tt)) ≡ to-witness (just {x = v} tt)
 to-witness-subst refl = refl
 
-
 postulate All-witness′ : ∀ {P : Pred A p} {x : Maybe A} {v : A} →
-               (eq : x ≡ just v) → All P x → P v
---All-witness′ eq = {!!}
+                         (eq : x ≡ just v) → All P x → All P (just v)

@@ -35,7 +35,7 @@ open import Relation.Nullary using (yes; no)
 import Relation.Binary.EqReasoning as EqReasoning
 open import Relation.Binary.PropositionalEquality using (_≡_; cong)
 
-open import RoutingLib.Routing using (Network)
+open import RoutingLib.Routing.Network using (Network)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.List.Properties using (foldr-map-commute-gen₂)
 open import RoutingLib.Data.List.Relation.Binary.Equality.Setoid using (foldr⁺; map-tabulate)

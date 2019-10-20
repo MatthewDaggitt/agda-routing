@@ -8,15 +8,23 @@ open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Product using (_,_; _×_)
 open import Data.Sum using (inj₁; inj₂)
 open import Function using (_∘_; id)
+open import Level
 open import Relation.Binary using (Rel; Total)
 open import Relation.Unary using (Decidable)
 open import Relation.Nullary using (yes; no)
+
+private
+  variable
+    a b c ℓ : Level
+    A : Set a
+    B : Set b
+    C : Set c
 
 -----------
 -- Other --
 -----------
 
-module _ {a ℓ} {A : Set a} {_≤_ : Rel A ℓ} (total : Total _≤_) where
+module _ {_≤_ : Rel A ℓ} (total : Total _≤_) where
 
   insert : A → List A → List A
   insert v []       = [ v ]
@@ -31,10 +39,12 @@ module _ {a ℓ} {A : Set a} {_≤_ : Rel A ℓ} (total : Total _≤_) where
   ... | inj₁ x≤y = x ∷ merge xs (y ∷ ys)
   ... | inj₂ y≤x = y ∷ merge (x ∷ xs) ys
 
-combine : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c} →
-          (A → B → C) → List A → List B → List C
+combine : (A → B → C) → List A → List B → List C
 combine f []       _  = []
 combine f (x ∷ xs) ys = map (f x) ys ++ combine f xs ys
 
+allPairs : List A → List B → List (A × B)
+allPairs = combine _,_
+
 allFinPairs : ∀ n → List (Fin n × Fin n)
-allFinPairs n = combine _,_ (allFin n) (allFin n)
+allFinPairs n = allPairs (allFin n) (allFin n)

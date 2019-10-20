@@ -10,21 +10,18 @@ module RoutingLib.Routing.VectorBased.Asynchronous.Results where
 open import Data.Nat using (zero; suc; s≤s; z≤n)
 open import Level using (Level)
 
-open import RoutingLib.Iteration.Asynchronous.Dynamic using (Convergent)
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence
   using (AMCO; AMCO⇒convergent; |0|-convergent)
 
-open import RoutingLib.Routing using (Network)
+open import RoutingLib.Routing.Network using (Network; IsFree)
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Algebra.Properties.PathAlgebra
 open import RoutingLib.Routing.Algebra.Certification
 open import RoutingLib.Routing.Algebra.Simulation using (_Simulates_)
 open import RoutingLib.Routing.VectorBased.Asynchronous using (F∥)
 import RoutingLib.Routing.VectorBased.Asynchronous.Simulation as Simulation
-import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.StrictlyContracting
-  as DVResults
-import RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.StrictlyContracting
-  as PVResults
+import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence as DV
+open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Definitions
 
 private
   variable
@@ -33,24 +30,24 @@ private
     B : RawRoutingAlgebra c d ℓ₂
 
 --------------------------------------------------------------------------------
--- Definition of correctness
-
-AlwaysConvergent : RawRoutingAlgebra a b ℓ₁ → Set _
-AlwaysConvergent A = ∀ {n} (N : Network A n) → Convergent (F∥ A N)
-
---------------------------------------------------------------------------------
 -- Finite strictly increasing distance vector protocols
 --
 -- The asynchronous state function δ is always guaranteed to converge
 -- asynchronously over any finite, strictly increasing routing algebra. This
 -- therefore applies to distance vector protocols.
 
-finiteStrictlyIncr⇒convergent : IsRoutingAlgebra A →
-                                IsFinite A →
-                                IsStrictlyIncreasing A →
-                                AlwaysConvergent A
-finiteStrictlyIncr⇒convergent routingAlg finite strIncr network =
-  AMCO⇒convergent (DVResults.F∥-isAMCO routingAlg finite strIncr network)
+finite⇒convergentOverFreeNetworks : IsRoutingAlgebra A →
+                                    IsFinite A →
+                                    PartiallyConvergent A (IsFree A)
+finite⇒convergentOverFreeNetworks routingAlg finite N isFree =
+  AMCO⇒convergent (DV.F∥-AMCO routingAlg finite N isFree)
+
+finite+strictlyIncr⇒convergent : IsRoutingAlgebra A →
+                                 IsFinite A →
+                                 IsStrictlyIncreasing A →
+                                 Convergent A
+finite+strictlyIncr⇒convergent routingAlg finite strIncr N =
+  finite⇒convergentOverFreeNetworks routingAlg finite N {!!}
 
 --------------------------------------------------------------------------------
 -- Strictly increasing path vector protocols
@@ -59,6 +56,7 @@ finiteStrictlyIncr⇒convergent routingAlg finite strIncr network =
 -- strictly increasing path algebra. This therefore applies to path vector
 -- algebras.
 
+{-
 incrPaths⇒convergent : IsRoutingAlgebra A →
                        IsPathAlgebra A →
                        IsIncreasing A →
@@ -81,3 +79,4 @@ simulate : A Simulates B →
            AlwaysConvergent A →
            AlwaysConvergent B
 simulate A⇉B conv = Simulation.simulate A⇉B conv
+-}

@@ -7,10 +7,24 @@ open import Relation.Binary
 open import Relation.Nullary using (¬_)
 open import Level
 
+private
+  variable
+    a ℓ₁ ℓ₂ : Level
+    A : Set a
+
+--------------------------------------------------------------------------------
+-- Minimums for strict orders
+
+StrictMinimum : Rel A ℓ₁ → Rel A ℓ₂ → A → Set _
+StrictMinimum _≈_ _<_ ⊥ = ∀ {x} → ¬ (⊥ ≈ x) → ⊥ < x 
+
+StrictMaximum : Rel A ℓ₁ → Rel A ℓ₂ → A → Set _
+StrictMaximum _≈_ _<_ ⊤ = ∀ {x} → ¬ (⊤ ≈ x) → x < ⊤
+
 --------------------------------------------------------------------------------
 -- Decidable preorders
 
-record IsDecPreorder {a ℓ₁ ℓ₂} {A : Set a}
+record IsDecPreorder {A : Set a}
                        (_≈_ : Rel A ℓ₁) (_≤_ : Rel A ℓ₂) :
                        Set (a ⊔ ℓ₁ ⊔ ℓ₂) where
   infix 4 _≟_ _≤?_
@@ -89,9 +103,7 @@ record TotalPreorder c ℓ₁ ℓ₂ : Set (suc (c ⊔ ℓ₁ ⊔ ℓ₂)) where
   preorder = record { isPreorder = isPreorder }
 
 
-record IsDecTotalPreorder {a ℓ₁ ℓ₂} {A : Set a}
-                       (_≈_ : Rel A ℓ₁) (_≤_ : Rel A ℓ₂) :
-                       Set (a ⊔ ℓ₁ ⊔ ℓ₂) where
+record IsDecTotalPreorder {A : Set a} (_≈_ : Rel A ℓ₁) (_≤_ : Rel A ℓ₂) : Set (a ⊔ ℓ₁ ⊔ ℓ₂) where
   infix 4 _≟_ _≤?_
 
   field

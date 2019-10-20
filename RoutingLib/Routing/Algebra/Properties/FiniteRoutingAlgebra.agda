@@ -33,7 +33,7 @@ import RoutingLib.Data.List.Sorting.InsertionSort as InsertionSort
 open import RoutingLib.Routing
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra
   as RoutingAlgebraProperties
-
+{-
 
 private
 
@@ -80,3 +80,4 @@ H = length routes
 
 1≤H : 1 ≤ H
 1≤H = ∈-length S (∈-routes ∞#)
+-}

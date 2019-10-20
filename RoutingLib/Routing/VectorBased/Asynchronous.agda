@@ -7,11 +7,11 @@
 --------------------------------------------------------------------------------
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing as Routing using (Network)
+open import RoutingLib.Routing.Network as Network using (Network)
 
 module RoutingLib.Routing.VectorBased.Asynchronous
   {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)
-  {n} (network : Network algebra n)
+  {n} (N : Network algebra n)
   where
 
 open import Data.List.Relation.Binary.Pointwise using (tabulate⁺)
@@ -20,6 +20,7 @@ open import Relation.Binary.Indexed.Homogeneous using (IndexedDecSetoid)
 
 open import RoutingLib.Data.List.Relation.Binary.Pointwise using (foldr⁺)
 
+import RoutingLib.Routing as Routing
 open import RoutingLib.Iteration.Asynchronous.Dynamic
   using (IsAsyncIterable; AsyncIterable; asyncIter)
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
@@ -34,13 +35,14 @@ open RawRoutingAlgebra algebra
 open Synchronous algebra public
   using (F; σ; F-cong)
 open Routing algebra n public
-  hiding (Aₜ)
+open Network algebra public
+  hiding (Aₜ; Network)
 
 ------------------------------------------------------------------------
 -- The adjacency matrix at time e with participants p
 
 Aₜ : Epoch → Subset n → AdjacencyMatrix
-Aₜ = Routing.Aₜ algebra n network
+Aₜ = Network.Aₜ algebra N
 
 ------------------------------------------------------------------------
 -- The iteration being computed during epoch e with participants p

@@ -1,11 +1,12 @@
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing as Routing using (Network)
+open import RoutingLib.Routing as Routing using ()
+open import RoutingLib.Routing.Network as Network using (Network)
 
 module RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Properties
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  {n} (network : Network algebra n)
+  {n} (N : Network algebra n)
   where
 
 open import Data.List using (tabulate)
@@ -33,7 +34,7 @@ open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
 open RoutingAlgebraProperties isRoutingAlgebra
 
-open VectorBased algebra network
+open VectorBased algebra N
 
 ------------------------------------------------------------------------
 -- Publicly re-export core properties
@@ -44,15 +45,15 @@ open CoreProperties isRoutingAlgebra public
 -- Properties of F′
 
 F′-cong' : ∀ e p {X Y} → X ≈ₘ[ p ] Y → F′ e p X ≈ₘ F′ e p Y
-F′-cong' e p X≈Y _ j = foldr⁺ _≈_ ⊕-cong ≈-refl (tabulate⁺ (Aₜ-cong network e p X≈Y))
+F′-cong' e p X≈Y _ j = foldr⁺ _≈_ ⊕-cong ≈-refl (tabulate⁺ (Aₜ-cong N e p X≈Y))
 
 F′-cong-∉ : ∀ e p {X Y} {i} → i ∉ p → F′ e p X i ≈ₜ F′ e p Y i
-F′-cong-∉ e p {X} {Y} i∉p j = foldr⁺ _≈_ ⊕-cong ≈-refl (tabulate⁺ (λ k → Aₜ-reject-eq network e _ k i∉p (X k j) (Y k j)))
+F′-cong-∉ e p {X} {Y} i∉p j = foldr⁺ _≈_ ⊕-cong ≈-refl (tabulate⁺ (λ k → Aₜ-reject-eq N e _ k i∉p (X k j) (Y k j)))
 
 F′-inactive : ∀ e p X → WellFormed p (F′ e p X)
 F′-inactive e p X {i} i∉p j with j ≟𝔽 i
 ... | yes j≡i = foldr-zeroʳ    ⊕-magma ⊕-zeroʳ (tabulate λ k → Aₜ e p i k ▷ X k j)
-... | no  j≢i = foldr-constant ⊕-magma (⊕-idem ∞#) (All.tabulate⁺ (λ k → Aₜ-reject network e i k (inj₁ i∉p) (X k j)))
+... | no  j≢i = foldr-constant ⊕-magma (⊕-idem ∞#) (All.tabulate⁺ (λ k → Aₜ-reject N e i k (inj₁ i∉p) (X k j)))
 
 ------------------------------------------------------------------------
 -- States in which the inactive nodes are actually inactive

@@ -16,8 +16,8 @@ open import Relation.Binary
 open import Relation.Binary.Construct.Closure.Transitive using (Plus′)
 open import Relation.Binary.Construct.Closure.Transitive public using ([_]; _∷_)
 
-open import RoutingLib.Relation.Binary.Construct.TransitiveClosure
 open import RoutingLib.Relation.Nullary using (Finite)
+open import RoutingLib.Relation.Binary.Construct.Closure.Transitive
 
 --------------------------------------------------------------------------------
 -- Definitions
@@ -26,13 +26,9 @@ open import RoutingLib.Relation.Nullary using (Finite)
 _↝_ : Route → Route → Set ℓ
 x ↝ y = ∃₂ λ i j → A i j ▷ x ≈ y 
 
-_↜_ : Route → Route → Set ℓ
-_↜_ = flip _↝_
-
 -- x can be extended to form y
 _↝*_ : Route → Route → Set _
 _↝*_ = Plus′ _↝_
-
 
 --------------------------------------------------------------------------------
 -- Properties of _↝_
@@ -64,6 +60,3 @@ x ↝? y = any? (λ i → any? (λ j → A i j ▷ x ≟ y))
 ↝*-trans : Transitive _↝*_
 ↝*-trans [ x↝y ]      y↝*z = x↝y ∷ y↝*z
 ↝*-trans (x↝y ∷ x↝*y) y↝*z = x↝y ∷ ↝*-trans x↝*y y↝*z
-
-↝*-dec : Finite Route → Decidable _↝*_
-↝*-dec finite = R⁺? finite _↝?_

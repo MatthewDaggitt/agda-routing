@@ -82,9 +82,6 @@ fromℕ≤″-injective i<n j<n eq = fromℕ≤-injective (ℕₚ.≤″⇒≤ i
     (sym (fromℕ≤≡fromℕ≤″ (ℕₚ.≤″⇒≤ j<n) j<n))
     eq)
 
-finite : ∀ n → Finite (Fin n)
-finite n = n , Bijection.id
-
 -----------
 -- Other --
 -----------

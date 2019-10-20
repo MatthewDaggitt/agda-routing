@@ -37,3 +37,9 @@ module RoutingLib.Relation.Binary.Construct.NonStrictToStrict
   ... | yes x≈y  | _        = refl (sym x≈y)
   ... | _        | inj₁ y≤x = y≤x
   ... | no  x≉y  | inj₂ x≤y = contradiction (x≤y , x≉y) x≮y
+
+  <-min : ∀ {⊥} → Minimum _≤_ ⊥ → StrictMinimum _≈_ _<_ ⊥
+  <-min min {x} ⊥≉x = min x , ⊥≉x
+
+  <-max : Symmetric _≈_ → ∀ {⊤} → Maximum _≤_ ⊤ → StrictMaximum _≈_ _<_ ⊤
+  <-max sym max {x} ⊤≉x = max x , ⊤≉x ∘ sym

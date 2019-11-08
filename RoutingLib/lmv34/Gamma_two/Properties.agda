@@ -6,9 +6,10 @@ open import Function using (_∘_)
 open import Level using (_⊔_)
 open import Data.List using (List; filter; tabulate; []; _∷_; map)
 open import Data.Nat using (zero; suc; ℕ; _*_; _+_)
-open import Data.Nat.Properties using (*-comm)
+open import Data.Nat.Properties using (*-comm; *-distribˡ-+)
 open import Relation.Nullary using (¬_; yes; no)
-open import Relation.Nullary.Negation using (¬?)
+open import Relation.Unary using (Pred; Decidable)
+open import Relation.Nullary.Negation using (¬?; contradiction)
 open import Relation.Binary using (Setoid; DecSetoid; Rel; Reflexive; Symmetric; Transitive; _⇒_)
 open import Relation.Binary.PropositionalEquality as PropositionalEq using (_≡_; refl; cong)
 import Relation.Binary.EqReasoning as EqReasoning
@@ -21,32 +22,97 @@ import RoutingLib.lmv34.Gamma_zero.Algebra as Gamma_zero_Algebra
 import RoutingLib.lmv34.Gamma_one as Gamma_one
 import RoutingLib.lmv34.Gamma_one.Algebra as Gamma_one_Algebra
 import RoutingLib.lmv34.Gamma_one.Properties as Gamma_one_Properties
-import RoutingLib.lmv34.Gamma_two as Gamma_two
-open import RoutingLib.lmv34.Gamma_two.Algebra as Gamma_two_Algebra using (IsComposition; AdjacencyMatrixᵀ)
+import RoutingLib.lmv34.Gamma_two as Gamma_two 
+import RoutingLib.lmv34.Gamma_two.Algebra as Gamma_two_Algebra
 
 module RoutingLib.lmv34.Gamma_two.Properties
   {a b ℓ} {alg : RawRoutingAlgebra a b ℓ}
   (isRAlg : IsRoutingAlgebra alg) {n}
-  (_●_ : ∀ {i j : Fin n} → Op₂ (RawRoutingAlgebra.Step alg i j))
   (A    : AdjacencyMatrix' alg n)
-  (Imp Prot : AdjacencyMatrix' alg n)
-  (Exp  : AdjacencyMatrixᵀ isRAlg n _●_)
-  (A=Imp∘Prot∘Exp : IsComposition isRAlg n _●_ A Imp Prot Exp)
+  (Imp Prot Exp : Gamma_two_Algebra.RouteMapMatrix isRAlg n )
+  (A=Imp∘Prot∘Exp : Gamma_two_Algebra.IsComposition isRAlg n A Imp Prot Exp)
   where
 
 open RawRoutingAlgebra alg
 open Routing alg n renaming (I to M) using (RoutingMatrix; _≈ₘ_; ≈ₘ-refl)
+
 open Gamma_zero alg A
 open Gamma_zero_Algebra alg n
+
 open Gamma_one isRAlg A
 open Gamma_one_Algebra isRAlg n
 open Gamma_one_Properties isRAlg A
-open Gamma_two isRAlg _●_ Imp Prot Exp
-open Gamma_two_Algebra isRAlg n _●_
+
+open Gamma_two_Algebra isRAlg n
+open Gamma_two isRAlg Imp Prot Exp
 
 open DecSetoid FinRoute-decSetoid using () renaming (_≈_ to _≈ᵣ_)
 
+import RoutingLib.Data.Matrix.Relation.Binary.Equality as MatrixEquality
+--open MatrixEquality ↭-setoid using (_≈ₘ_)
+
 ------------------------------------
+------------------------------------
+-- Operation properties
+
+-- RoutingVector₂ setoid
+open MatrixEquality ↭-setoid public using (𝕄ₛ) renaming
+       ( _≈ₘ_             to _≈ᵥ,₂_
+       ; ≈ₘ-reflexive     to ≈ᵥ,₂-reflexive
+       ; ≈ₘ-refl          to ≈ᵥ,₂-refl
+       ; ≈ₘ-sym           to ≈ᵥ,₂-sym
+       ; ≈ₘ-trans         to ≈ᵥ,₂-trans
+       ; ≈ₘ-isEquivalence to ≈ᵥ,₂-isEquivalence
+       )
+𝕍₂ₛ = 𝕄ₛ n n
+
+【】-cong : ∀ {F V V'} → V ≈ᵥ V' → (F 【 V 】) ≈ᵥ,₂ (F 【 V' 】)
+【】-cong V=V' i j = []-cong (V=V' i)
+
+〖〗-cong : ∀ {F O O'} → O ≈ᵥ,₂ O' → (F 〖 O 〗) ≈ᵥ,₂ (F 〖 O' 〗)
+〖〗-cong O=O' i j = []-cong (O=O' j i)
+
+f[]-cong : ∀ {f f' : Route → Route} → {X : RoutingSet} →
+           f ≈ₐ f' → f [ X ] ↭ f' [ X ]
+f[]-cong {f} {f'} {X} f=f' = †-cong (lemma {xs = X} λ {(d , v) → (refl , f=f' v)})
+   where lemma : {f g : Fin n × Route → Fin n × Route} → {xs : RoutingSet} →
+                 (∀ r → f r ≈ᵣ g r) → map f xs ↭ map g xs
+         lemma {f} {g} {[]} f=g = ↭-refl
+         lemma {f} {g} {x ∷ xs} f=g = prep (f=g x) (lemma {xs = xs} f=g)
+
+A〚〛-cong : ∀ {F F' V} → (toRouteMapMatrix F) ≈ₐ,₂ (toRouteMapMatrix F') → F 〚 V 〛 ≈ᵥ  F' 〚 V 〛
+A〚〛-cong {F} {F'} {V} F=F' i = ⨁ₛ-cong (λ {q} → f[]-cong {X = V q} (F=F' i q))
+
+↓-cong : ∀ {I I'} → I ≈ᵥ,₂ I' → I ↓ ≈ᵥ I' ↓
+↓-cong I=I' i = ⨁ₛ-cong (λ {q} → I=I' i q)
+
+Øᵥ,₂↓=Øᵥ : Øᵥ,₂ ↓ ≈ᵥ Øᵥ
+Øᵥ,₂↓=Øᵥ i = lemma {n}
+  where lemma : ∀ {k} → ⨁ₛ (λ (q : Fin k) → []) ↭ []
+        lemma {zero} = ↭-refl
+        lemma {suc k} = ↭-trans ⊕ₛ-identityₗ (lemma {k})
+
+Γ₂,ᵥØ=~M : Γ₂,ᵥ Øᵥ,₂ ≈ᵥ ~ M
+Γ₂,ᵥØ=~M = begin
+         Γ₂,ᵥ Øᵥ,₂ ≈⟨ ≈ᵥ-refl ⟩
+         Øᵥ,₂ ↓ ⊕ᵥ ~ M ≈⟨ ⊕ᵥ-cong {Øᵥ,₂ ↓} {Øᵥ} {~ M} {~ M} Øᵥ,₂↓=Øᵥ ≈ᵥ-refl ⟩
+         Øᵥ ⊕ᵥ ~ M ≈⟨ ⊕ᵥ-identityₗ ⟩
+         ~ M ∎
+         where open EqReasoning 𝕍ₛ
+
+Γ₂,ᵥ-cong : ∀ {I I'} → I ≈ᵥ,₂ I' → Γ₂,ᵥ I ≈ᵥ Γ₂,ᵥ I'
+Γ₂,ᵥ-cong {I} {I'} I=I' = ⊕ᵥ-cong (↓-cong I=I') (≈ₘ⇒≈ᵥ ≈ₘ-refl)
+
+Γ₂,ᵢ-cong : ∀ {O O'} → O ≈ᵥ,₂ O' → Γ₂,ᵢ O ≈ᵥ,₂ Γ₂,ᵢ O'
+Γ₂,ᵢ-cong = 〖〗-cong
+
+Γ₂,ₒ-cong : ∀ {V V'} → V ≈ᵥ V' → Γ₂,ₒ V ≈ᵥ,₂ Γ₂,ₒ V'
+Γ₂,ₒ-cong = 【】-cong
+
+Γ₂-comp-cong : ∀ {V V'} → V ≈ᵥ V' → (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) V ≈ᵥ (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) V'
+Γ₂-comp-cong V=V' = (Γ₂,ᵥ-cong ∘ Γ₂,ᵢ-cong ∘ Γ₂,ₒ-cong) V=V'
+
+
 -- Γ₂-State setoid
 infix 2 _≈ₛ_
 
@@ -69,91 +135,80 @@ S ≈ₛ S' = Γ₂-State.V S ≈ᵥ   Γ₂-State.V S' ×
              isEquivalence =
                record {refl = ≈ₛ-refl; sym = ≈ₛ-sym; trans = ≈ₛ-trans}}
 
-------------------------------------
--- Operation properties
 
-【】-cong : ∀ {F V V'} → V ≈ᵥ V' → (F 【 V 】) ≈ᵥ,₂ (F 【 V' 】)
-【】-cong V=V' i j = []-cong (V=V' i)
-
-〖〗-cong : ∀ {F O O'} → O ≈ᵥ,₂ O' → (F 〖 O 〗) ≈ᵥ,₂ (F 〖 O' 〗)
-〖〗-cong O=O' i j = []-cong (O=O' j i)
-
-f[]-cong : ∀ {i j} → {f f' : Step i j} → {X : RoutingSet} →
-           f ≈ₐ f' → f [ X ] ↭ f' [ X ]
-f[]-cong {i} {j} {f} {f'} {X} f=f' = †-cong (lemma {xs = X} λ {(d , v) → (refl , f=f' v)})
-  where lemma : {f g : Fin n × Route → Fin n × Route} → {xs : RoutingSet} →
-                (∀ r → f r ≈ᵣ g r) → map f xs ↭ map g xs
-        lemma {f} {g} {[]} f=g = ↭-refl
-        lemma {f} {g} {x ∷ xs} f=g = prep (f=g x) (lemma {xs = xs} f=g)
-
-A〚〛-cong : ∀ {F F' V} → F ≈ₐ,₂ F' → F 〚 V 〛 ≈ᵥ  F' 〚 V 〛
-A〚〛-cong {F} {F'} {V} F=F' i = ⨁ₛ-cong (λ {q} → f[]-cong {X = V q} (F=F' i q))
-
-↓-cong : ∀ {I I'} → I ≈ᵥ,₂ I' → I ↓ ≈ᵥ I' ↓
-↓-cong I=I' i = ⨁ₛ-cong (λ {q} → I=I' i q)
-
-Øᵥ,₂↓=Øᵥ : Øᵥ,₂ ↓ ≈ᵥ Øᵥ
-Øᵥ,₂↓=Øᵥ i = lemma {n}
-  where lemma : ∀ {k} → ⨁ₛ (λ (q : Fin k) → []) ↭ []
-        lemma {zero} = ↭-refl
-        lemma {suc k} = ↭-trans Ø-identityₗ (lemma {k})
-
-Γ₂,ᵥ-cong : ∀ {I I'} → I ≈ᵥ,₂ I' → Γ₂,ᵥ I ≈ᵥ Γ₂,ᵥ I'
-Γ₂,ᵥ-cong {I} {I'} I=I' = ⊕ᵥ-cong (↓-cong I=I') (≈ₘ⇒≈ᵥ ≈ₘ-refl)
-
-Γ₂,ᵢ-cong : ∀ {O O'} → O ≈ᵥ,₂ O' → Γ₂,ᵢ O ≈ᵥ,₂ Γ₂,ᵢ O'
-Γ₂,ᵢ-cong = 〖〗-cong
-
-Γ₂,ₒ-cong : ∀ {V V'} → V ≈ᵥ V' → Γ₂,ₒ V ≈ᵥ,₂ Γ₂,ₒ V'
-Γ₂,ₒ-cong = 【】-cong
-
-Γ₂-cong : ∀ {S S'} → S ≈ₛ S' → Γ₂-Model S ≈ₛ Γ₂-Model S'
+Γ₂-cong : ∀ {S S'} → S ≈ₛ S' → Γ₂ S ≈ₛ Γ₂ S'
 Γ₂-cong (V=V' , I=I' , O=O') = Γ₂,ᵥ-cong I=I' , Γ₂,ᵢ-cong O=O' , Γ₂,ₒ-cong V=V'
 
-Γ₂-iter-cong : ∀ {k S S'} → S ≈ₛ S' → (Γ₂-Model ^ k) S ≈ₛ (Γ₂-Model ^ k) S'
-Γ₂-iter-cong {zero} S=S' = S=S'
-Γ₂-iter-cong {suc k} S=S' = Γ₂-cong (Γ₂-iter-cong {k} S=S')
+Γ₂-iter-cong : ∀ {S S'} k → S ≈ₛ S' → (Γ₂ ^ k) S ≈ₛ (Γ₂ ^ k) S'
+Γ₂-iter-cong zero S=S' = S=S'
+Γ₂-iter-cong (suc k) S=S' = Γ₂-cong (Γ₂-iter-cong k S=S')
+
+Γ₂-iter-equiv : ∀ {a a' s} → a ≡ a' → (Γ₂ ^ a) s ≈ₛ (Γ₂ ^ a') s
+Γ₂-iter-equiv {a} {.a} {s} refl = Γ₂-iter-cong a ≈ₛ-refl
 
 ------------------------------------
 -- Theorems
 
--- Lemma A.3
-postulate
-  LemmaA₃ : ∀ {i j} → {f g : Step i j} → {X : RoutingSet} →
-            f [ g [ X ] ] ↭ (f ● g) [ X ]
-  
--- Lemma A.4
-LemmaA₄ : ∀ {F G V} → (F 〖 G 【 V 】 〗) ↓ ≈ᵥ (F ●ₘ (G ᵀ)) 〚 V 〛
-LemmaA₄ {F} {G} {V} i = begin
-  ((F 〖 G 【 V 】 〗) ↓) i ↭⟨ ↭-refl ⟩
-  ⨁ₛ (λ q → (F i q) [ (G q i) [ V q ] ]) ↭⟨ ⨁ₛ-cong (λ {q} → (LemmaA₃ {f = F i q} {g = G q i} {X = V q})) ⟩
-  ⨁ₛ (λ q → ((F i q) ● (G q i)) [ V q ]) ↭⟨ ↭-refl ⟩
-  ((F ●ₘ (G ᵀ)) 〚 V 〛) i ∎
-  where open PermutationReasoning
-
--- Lemma 3.2
-Γ₁=Γ₂,ᵥ : ∀ {k} {X : RoutingMatrix} →
-          (Γ₁ ^ (suc k)) (~ X) ≈ᵥ (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ k) (~ X))
-Γ₁=Γ₂,ᵥ {k} {X} = begin
-        (Γ₁ ^ (suc k)) (~ X) ≈⟨ ≈ᵥ-refl ⟩
-        A 〚 (Γ₁ ^ k) (~ X) 〛 ⊕ᵥ ~ M
-          ≈⟨ ⊕ᵥ-cong (A〚〛-cong {V = (Γ₁ ^ k) (~ X)} A=Imp∘Prot∘Exp) (≈ₘ⇒≈ᵥ ≈ₘ-refl) ⟩
-        ((Imp ●ₘ Prot) ●ₘ (Exp ᵀ)) 〚 (Γ₁ ^ k) (~ X) 〛 ⊕ᵥ ~ M
-          ≈⟨ ⊕ᵥ-cong (≈ᵥ-sym (LemmaA₄ {Imp ●ₘ Prot} {Exp} {V = (Γ₁ ^ k) (~ X)})) (≈ₘ⇒≈ᵥ ≈ₘ-refl) ⟩
-        ((Imp ●ₘ Prot) 〖 Exp 【 (Γ₁ ^ k) (~ X) 】 〗) ↓ ⊕ᵥ ~ M ≈⟨ ≈ᵥ-refl ⟩
-        (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ k) (~ X)) ∎
-        where open EqReasoning 𝕍ₛ using (begin_; _∎; _≈⟨_⟩_)
-
 -- Theorem 5
 FixedPoint-Γ₂ : ∀ {V I O} →
-                Γ₂-Model (S₂ V I O) ≈ₛ S₂ V I O →
+                Γ₂ (S₂ V I O) ≈ₛ S₂ V I O →
                 (V ≈ᵥ I ↓ ⊕ᵥ ~ M) ×
                 (I ≈ᵥ,₂ ((Imp ●ₘ Prot) 〖 O 〗)) ×
                 (O ≈ᵥ,₂ (Exp 【 V 】))
-FixedPoint-Γ₂ (V=V , I=I , O=O) =
-        ≈ᵥ-sym V=V ,
-        ≈ᵥ,₂-sym I=I ,
-        ≈ᵥ,₂-sym O=O
+FixedPoint-Γ₂ (V=V , I=I , O=O) = ≈ᵥ-sym V=V , ≈ᵥ,₂-sym I=I , ≈ᵥ,₂-sym O=O
+
+private
+  postulate
+    ▷-fixedPoint : ∀ (f : Route → Route) s → s ≈ ∞# → f s ≈ ∞# -- need this to prove LemmaA₃
+
+LemmaA₃ : ∀ (f g : (Route → Route)) → (X : RoutingSet) →
+            f [ g [ X ] ] ↭ (f ● g) [ X ]
+LemmaA₃ f g [] = ↭-refl
+LemmaA₃ f g ((d , v) ∷ X) with
+      g v ≟ ∞#
+... | yes gv=∞ = prf
+    where
+      prf : f [ g [ X ] ] ↭ (f ● g) [ (d , v) ∷ X ]
+      prf with
+            f (g v) ≟ ∞#
+      ... | no fg≠∞  = contradiction (▷-fixedPoint f (g v) gv=∞) fg≠∞
+      ... | yes _    = LemmaA₃ f g X
+... | no _  = prf
+    where
+      prf : f [(d , g v) ∷ (g [ X ])] ↭ (f ● g) [ (d , v) ∷ X ]
+      prf with
+            f (g v) ≟ ∞#
+      ... | yes _ = LemmaA₃ f g X
+      ... | no _  = prep (refl , ≈-refl) (LemmaA₃ f g X)
+
+-- tgg : temporary hack??? 
+infix 10 _||_||
+_||_|| : RouteMapMatrix → RoutingVector → RoutingVector
+(A || V || ) i = ⨁ₛ (λ q → (A i q) [ V q ])
+
+A||V||-cong : ∀ {F F' V} → F ≈ₐ,₂ F' → F || V || ≈ᵥ  F' || V ||
+A||V||-cong {F} {F'} {V} F=F' i = ⨁ₛ-cong (λ {q} → f[]-cong {X = V q} (F=F' i q))
+
+〚〛=|| : ∀ {A V} → A 〚 V 〛 ≈ᵥ (toRouteMapMatrix A) || V ||
+〚〛=|| {A} {V} = ≈ᵥ-refl
+
+LemmaA₄ : ∀ F G V → (F 〖 G 【 V 】 〗) ↓ ≈ᵥ (F ●ₘ (G ᵀ)) || V ||
+LemmaA₄ F G V i = begin
+   ((F 〖 G 【 V 】 〗) ↓) i ↭⟨ ↭-refl ⟩
+   ⨁ₛ (λ q → (F i q) [ (G q i) [ V q ] ]) ↭⟨ ⨁ₛ-cong (λ {q} → (LemmaA₃ (F i q) (G q i) (V q))) ⟩
+   ⨁ₛ (λ q → ((F i q) ● (G q i)) [ V q ]) ↭⟨ ↭-refl ⟩
+   ((F ●ₘ (G ᵀ)) || V ||) i ∎
+   where open PermutationReasoning
+
+Γ₁=Γ₂-comp : ∀ (V : RoutingVector) → Γ₁ V ≈ᵥ (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) V 
+Γ₁=Γ₂-comp V = begin 
+        Γ₁ V                                          ≈⟨ ≈ᵥ-refl ⟩
+        A 〚 V 〛 ⊕ᵥ ~ M                              ≈⟨ ⊕ᵥ-cong (〚〛=|| {A} {V}) (≈ₘ⇒≈ᵥ ≈ₘ-refl) ⟩ 
+        ((toRouteMapMatrix A) || V || ) ⊕ᵥ ~ M        ≈⟨ ⊕ᵥ-cong (A||V||-cong {V = V} A=Imp∘Prot∘Exp) (≈ₘ⇒≈ᵥ ≈ₘ-refl) ⟩
+        ((Imp ●ₘ Prot) ●ₘ (Exp ᵀ)) || V || ⊕ᵥ ~ M     ≈⟨ ⊕ᵥ-cong (≈ᵥ-sym (LemmaA₄ (Imp ●ₘ Prot) Exp V)) (≈ₘ⇒≈ᵥ ≈ₘ-refl)   ⟩ 
+        ((Imp ●ₘ Prot) 〖 Exp 【 V 】 〗) ↓ ⊕ᵥ ~ M    ≈⟨ ≈ᵥ-refl ⟩
+        (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) V                        ∎
+        where open EqReasoning 𝕍ₛ using (begin_; _∎; _≈⟨_⟩_)
 
 -- Theorem 6
 FixedPoint-Γ₀-Γ₂ : ∀ {X : RoutingMatrix} →
@@ -165,12 +220,12 @@ FixedPoint-Γ₀-Γ₂ : ∀ {X : RoutingMatrix} →
                    (V ≈ᵥ I ↓ ⊕ᵥ ~ M) ×
                    (I ≈ᵥ,₂ ((Imp ●ₘ Prot) 〖 O 〗) ×
                    (O ≈ᵥ,₂ (Exp 【 V 】)))
-FixedPoint-Γ₀-Γ₂ {X} X=AX⊕M  =
+FixedPoint-Γ₀-Γ₂ {X} X=AX⊕M  = 
         (begin
             ~ X                 ≈⟨ ≈ₘ⇒≈ᵥ X=AX⊕M ⟩
             ~ (A 〔 X 〕 ⊕ₘ M)  ≈⟨ ≈ₘ⇒≈ᵥ ≈ₘ-refl ⟩
             ~ (Γ₀ X)            ≈⟨ ≈ᵥ-sym Γ₀=Γ₁ ⟩
-            Γ₁ (~ X)            ≈⟨ Γ₁=Γ₂,ᵥ {zero} ⟩
+            Γ₁ (~ X)            ≈⟨ Γ₁=Γ₂-comp (~ X) ⟩
             Γ₂,ᵥ I              ≈⟨ ≈ᵥ-refl ⟩
             I ↓ ⊕ᵥ ~ M ∎) ,
         ≈ᵥ,₂-refl ,
@@ -180,74 +235,84 @@ FixedPoint-Γ₀-Γ₂ {X} X=AX⊕M  =
           I = (Imp ●ₘ Prot) 〖 Exp 【 ~ X 】 〗
 
 private
-  Lemma1 : ∀ {A : RoutingMatrix} → Γ₂,ₒ (Øᵥ,₂ ↓ ⊕ᵥ ~ A) ≈ᵥ,₂ Γ₂,ₒ (~ A)
-  Lemma1 {A} = Γ₂,ₒ-cong (≈ᵥ-trans (⊕ᵥ-cong Øᵥ,₂↓=Øᵥ (≈ₘ⇒≈ᵥ ≈ₘ-refl))
-                                 (Øᵥ-identityₗ {~ A}))
-  Lemma2 : ∀ {A} → (Γ₂,ᵢ ∘ Γ₂,ₒ) (Øᵥ,₂ ↓ ⊕ᵥ ~ A) ≈ᵥ,₂ (Γ₂,ᵢ ∘ Γ₂,ₒ) (~ A)
-  Lemma2 = Γ₂,ᵢ-cong Lemma1
+    lem1 : ∀ V I O → (Γ₂ ^ 3) (S₂ V I O)
+                      ≈ₛ
+                      S₂ ((Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) V) ((Γ₂,ᵢ ∘ Γ₂,ₒ ∘ Γ₂,ᵥ) I) ((Γ₂,ₒ ∘ Γ₂,ᵥ ∘ Γ₂,ᵢ) O)
+    lem1 V I O = ≈ₛ-refl
 
-  Lemma3 : ∀ {a a'} → {s : Γ₂-State} → a ≡ a' → (Γ₂-Model ^ a) s ≈ₛ (Γ₂-Model ^ a') s
-  Lemma3 {zero} {.zero} {s} refl = ≈ₛ-refl
-  Lemma3 {suc a} {.(suc a)} {s} refl = Γ₂-cong (Lemma3 {a} {a} refl)
+    lem2 : ∀ V I O k → (Γ₂ ^ (3 * k)) (S₂ V I O)
+                        ≈ₛ
+                        S₂ (((Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) ^ k) V) (((Γ₂,ᵢ ∘ Γ₂,ₒ ∘ Γ₂,ᵥ) ^ k) I) (((Γ₂,ₒ ∘ Γ₂,ᵥ ∘ Γ₂,ᵢ) ^ k) O)
+    lem2 V I O zero    = ≈ₛ-refl
+    lem2 V I O (suc k) = begin
+            (Γ₂ ^ (3 * suc k)) (S₂ V I O)                ≈⟨ Γ₂-iter-equiv (lem k) ⟩
+            ((Γ₂ ^ 3) ∘ (Γ₂ ^ (3 * k))) (S₂ V I O) ≈⟨ Γ₂-iter-cong 3 (lem2 V I O k) ⟩
+            S₂ (((Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) ^ suc k) V) (((Γ₂,ᵢ ∘ Γ₂,ₒ ∘ Γ₂,ᵥ) ^ suc k) I) (((Γ₂,ₒ ∘ Γ₂,ᵥ ∘ Γ₂,ᵢ) ^ suc k) O) ∎
+            where open EqReasoning 𝕊ₛ
+                  lem : ∀ k → 3 * suc k ≡ 3 + (3 * k)
+                  lem k = *-distribˡ-+ 3 1 k
 
-  Lemma4 : ∀ {k} → 3 * (suc (suc k)) ≡ 3 + (3 * suc k)
-  Lemma4 {zero} = refl
-  Lemma4 {suc k} =
-    3 * (suc (suc (suc k))) ≡⟨ *-comm 3 (suc (suc (suc k))) ⟩
-    (suc (suc (suc k))) * 3 ≡⟨ refl ⟩
-    3 + (suc (suc k)) * 3   ≡⟨ cong (3 +_) (*-comm (suc (suc k)) 3) ⟩
-    3 + (3 * suc (suc k)) ∎
-    where open PropositionalEq.≡-Reasoning
+    lem3 : ∀ k V  → ((Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) ^ k) V ≈ᵥ (Γ₁ ^ k) V
+    lem3 zero V    = ≈ᵥ-refl
+    lem3 (suc k) V = begin
+            ((Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) ^ suc k) V  ≈⟨ Γ₂-comp-cong (lem3 k V) ⟩
+            (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ k) V) ≈⟨ ≈ᵥ-sym (Γ₁=Γ₂-comp ((Γ₁ ^ k) V)) ⟩
+            (Γ₁ ^ suc k) V ∎
+            where open EqReasoning 𝕍ₛ
 
--- Theorem 7
-Γ₁=Γ₂ : ∀ {k} → let I' = (Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ k) (~ M))
-                    O' = Γ₂,ₒ ((Γ₁ ^ k) (~ M)) in
-        (Γ₂-Model ^ (3 * (suc k))) (S₂ (~ M) Øᵥ,₂ Øᵥ,₂) ≈ₛ
-        S₂ ((Γ₁ ^ (suc k)) (~ M)) I' O'
-Γ₁=Γ₂ {zero} = begin
-        (Γ₂-Model ^ 3) (S₂ (~ M) Øᵥ,₂ Øᵥ,₂)
-          ≈⟨ ≈ₛ-refl ⟩
-        S₂ ((Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) (~ M))
-             ((Γ₂,ᵢ ∘ Γ₂,ₒ) (Øᵥ,₂ ↓ ⊕ᵥ ~ M))
-             (Γ₂,ₒ (Øᵥ,₂ ↓ ⊕ᵥ ~ M))
-          ≈⟨ ≈ᵥ-sym (Γ₁=Γ₂,ᵥ {zero} {M}) , Lemma2 , Lemma1 ⟩
-        S₂ (Γ₁ (~ M)) ((Γ₂,ᵢ ∘ Γ₂,ₒ) (~ M)) (Γ₂,ₒ (~ M)) ∎
-        where open EqReasoning 𝕊ₛ
-Γ₁=Γ₂ {suc k} = begin
-        (Γ₂-Model ^ (3 * suc (suc k)))
-        (S₂ (~ M) Øᵥ,₂ Øᵥ,₂)
-          ≈⟨ Lemma3 (Lemma4 {k}) ⟩
-        (Γ₂-Model ^ 3) ((Γ₂-Model ^ (3 * (suc k)))
-        (S₂ (~ M) Øᵥ,₂ Øᵥ,₂))
-          ≈⟨ Γ₂-iter-cong {3} (Γ₁=Γ₂ {k}) ⟩
-        (Γ₂-Model ^ 3)
-        (S₂ ((Γ₁ ^ (suc k)) (~ M))
-              ((Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ k) (~ M)))
-              (Γ₂,ₒ ((Γ₁ ^ k) (~ M))))
-          ≈⟨ Γ₂-iter-cong {2}
-                 {Γ₂-Model (record {V = (Γ₁ ^ (suc k)) (~ M);
-                                    I = (Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ k) (~ M));
-                                    O = Γ₂,ₒ ((Γ₁ ^ k) (~ M))})}
-                 {(record {         V = (Γ₁ ^ (suc k)) (~ M);
-                                    I = (Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ k) (~ M));
-                                    O = Γ₂,ₒ ((Γ₁ ^ (suc k)) (~ M))})}
-                 (≈ᵥ-sym (Γ₁=Γ₂,ᵥ {k} {M}) , ≈ᵥ,₂-refl {n} {n} , ≈ᵥ,₂-refl {n} {n}) ⟩
-        (Γ₂-Model ^ 2)
-        (S₂ ((Γ₁ ^ (suc k)) (~ M))
-            ((Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ k) (~ M)))
-            O')
-          ≈⟨ Γ₂-iter-cong {1}
-                 {Γ₂-Model (record {V = (Γ₁ ^ (suc k)) (~ M);
-                                    I = (Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ k) (~ M));
-                                    O = Γ₂,ₒ ((Γ₁ ^ (suc k)) (~ M))})}
-                 {(record {         V = (Γ₁ ^ (suc k)) (~ M);
-                                    I = (Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ (suc k)) (~ M));
-                                    O = Γ₂,ₒ ((Γ₁ ^ (suc k)) (~ M))})}
-                 (≈ᵥ-sym (Γ₁=Γ₂,ᵥ {k} {M}) , ≈ᵥ,₂-refl , ≈ᵥ,₂-refl) ⟩
-        Γ₂-Model
-        (S₂ ((Γ₁ ^ (suc k)) (~ M)) I' O')
-          ≈⟨ ≈ᵥ-sym (Γ₁=Γ₂,ᵥ {suc k} {M}) , ≈ᵥ,₂-refl , ≈ᵥ,₂-refl ⟩
-        S₂ ((Γ₁ ^ suc (suc k)) (~ M)) I' O' ∎
-        where open EqReasoning 𝕊ₛ
-              I' = (Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ suc k) (~ M))
-              O' = Γ₂,ₒ ((Γ₁ ^ suc k) (~ M))
+    lem4 : ∀ k I  → ((Γ₂,ᵢ ∘ Γ₂,ₒ ∘ Γ₂,ᵥ) ^ (suc k)) I ≈ᵥ,₂ (Γ₂,ᵢ ∘ Γ₂,ₒ ∘ (Γ₁ ^ k) ∘ Γ₂,ᵥ) I
+    lem4 zero I    = ≈ᵥ,₂-refl
+    lem4 (suc k) I = begin
+            ((Γ₂,ᵢ ∘ Γ₂,ₒ ∘ Γ₂,ᵥ) ^ (suc (suc k))) I ≈⟨ ≈ᵥ,₂-refl ⟩
+            (Γ₂,ᵢ ∘ Γ₂,ₒ ∘ Γ₂,ᵥ ∘ ((Γ₂,ᵢ ∘ Γ₂,ₒ ∘ Γ₂,ᵥ) ^ (suc k))) I ≈⟨ (Γ₂,ᵢ-cong ∘ Γ₂,ₒ-cong ∘ Γ₂,ᵥ-cong) (lem4 k I) ⟩
+            (Γ₂,ᵢ ∘ Γ₂,ₒ ∘ Γ₂,ᵥ ∘ ((Γ₂,ᵢ ∘ Γ₂,ₒ ∘ (Γ₁ ^ k) ∘ Γ₂,ᵥ))) I ≈⟨ ≈ᵥ,₂-refl ⟩
+            (Γ₂,ᵢ ∘ Γ₂,ₒ ∘ Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ ∘ (Γ₁ ^ k) ∘ Γ₂,ᵥ) I ≈⟨ (Γ₂,ᵢ-cong ∘ Γ₂,ₒ-cong) (lem3 1 (((Γ₁ ^ k) ∘ Γ₂,ᵥ) I)) ⟩
+            (Γ₂,ᵢ ∘ Γ₂,ₒ ∘ Γ₁ ∘ (Γ₁ ^ k) ∘ Γ₂,ᵥ) I ≈⟨ ≈ᵥ,₂-refl ⟩
+            (Γ₂,ᵢ ∘ Γ₂,ₒ ∘ (Γ₁ ^ suc k) ∘ Γ₂,ᵥ) I  ∎
+            where open EqReasoning 𝕍₂ₛ
+
+    lem5 : ∀ k O  → ((Γ₂,ₒ ∘ Γ₂,ᵥ ∘ Γ₂,ᵢ) ^ (suc k)) O ≈ᵥ,₂ (Γ₂,ₒ ∘ (Γ₁ ^ k) ∘ Γ₂,ᵥ ∘ Γ₂,ᵢ) O
+    lem5 zero O    = ≈ᵥ,₂-refl
+    lem5 (suc k) O = begin
+            ((Γ₂,ₒ ∘ Γ₂,ᵥ ∘ Γ₂,ᵢ) ^ (suc (suc k))) O ≈⟨ ≈ᵥ,₂-refl ⟩
+            (Γ₂,ₒ ∘ Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ ((Γ₂,ₒ ∘ Γ₂,ᵥ ∘ Γ₂,ᵢ) ^ (suc k))) O ≈⟨ (Γ₂,ₒ-cong ∘ Γ₂,ᵥ-cong ∘ Γ₂,ᵢ-cong) (lem5 k O) ⟩
+            (Γ₂,ₒ ∘ Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ ((Γ₂,ₒ ∘ (Γ₁ ^ k) ∘ Γ₂,ᵥ ∘ Γ₂,ᵢ))) O ≈⟨ ≈ᵥ,₂-refl ⟩
+            (Γ₂,ₒ ∘ Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ ∘ (Γ₁ ^ k) ∘ Γ₂,ᵥ ∘ Γ₂,ᵢ) O ≈⟨ (Γ₂,ₒ-cong) (lem3 1 (((Γ₁ ^ k) ∘ Γ₂,ᵥ ∘ Γ₂,ᵢ) O)) ⟩
+            (Γ₂,ₒ ∘ Γ₁ ∘ (Γ₁ ^ k) ∘ Γ₂,ᵥ ∘ Γ₂,ᵢ) O ≈⟨ ≈ᵥ,₂-refl ⟩
+            (Γ₂,ₒ ∘ (Γ₁ ^ suc k) ∘ Γ₂,ᵥ ∘ Γ₂,ᵢ) O  ∎
+            where open EqReasoning 𝕍₂ₛ
+
+    lem6 : ∀ k V I O → (Γ₂ ^ (3 * (suc k))) (S₂ V I O)
+                        ≈ₛ
+                        S₂ ((Γ₁ ^ (suc k)) V) ((Γ₂,ᵢ ∘ Γ₂,ₒ ∘ (Γ₁ ^ k) ∘ Γ₂,ᵥ) I) ((Γ₂,ₒ ∘ (Γ₁ ^ k) ∘ Γ₂,ᵥ ∘ Γ₂,ᵢ) O)
+    lem6 k V I O = begin
+            (Γ₂ ^ (3 * (suc k))) (S₂ V I O) ≈⟨ lem2 V I O (suc k) ⟩
+            S₂ (((Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) ^ suc k) V) (((Γ₂,ᵢ ∘ Γ₂,ₒ ∘ Γ₂,ᵥ) ^ suc k) I) (((Γ₂,ₒ ∘ Γ₂,ᵥ ∘ Γ₂,ᵢ) ^ suc k) O)
+              ≈⟨ lem3 (suc k) V , lem4 k I , lem5 k O ⟩
+            S₂ ((Γ₁ ^ (suc k)) V) ((Γ₂,ᵢ ∘ Γ₂,ₒ ∘ (Γ₁ ^ k) ∘ Γ₂,ᵥ) I) ((Γ₂,ₒ ∘ (Γ₁ ^ k) ∘ Γ₂,ᵥ ∘ Γ₂,ᵢ) O) ∎
+            where open EqReasoning 𝕊ₛ
+
+    lem7 : ∀ k → (Γ₂,ᵢ ∘ Γ₂,ₒ ∘ (Γ₁ ^ k) ∘ Γ₂,ᵥ) Øᵥ,₂ ≈ᵥ,₂ (Γ₂,ᵢ ∘ Γ₂,ₒ ∘ (Γ₁ ^ k)) (~ M)
+    lem7 k = (Γ₂,ᵢ-cong ∘ Γ₂,ₒ-cong ∘ (Γ₁-iter-cong k)) Γ₂,ᵥØ=~M
+
+    lem8 : ∀ k →  (Γ₂,ₒ ∘ (Γ₁ ^ k) ∘ Γ₂,ᵥ ∘ Γ₂,ᵢ) Øᵥ,₂ ≈ᵥ,₂ (Γ₂,ₒ ∘ (Γ₁ ^ k)) (~ M) 
+    lem8 k = (Γ₂,ₒ-cong ∘ (Γ₁-iter-cong k)) Γ₂,ᵥØ=~M
+
+Γ₁=Γ₂ : ∀ k → (Γ₂ ^ (3 * (suc k))) (S₂ (~ M) Øᵥ,₂ Øᵥ,₂) ≈ₛ
+              S₂ ((Γ₁ ^ (suc k)) (~ M)) ((Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ k) (~ M))) (Γ₂,ₒ ((Γ₁ ^ k) (~ M)))
+Γ₁=Γ₂ k = begin
+  (Γ₂ ^ (3 * (suc k))) (S₂ (~ M) Øᵥ,₂ Øᵥ,₂)
+            ≈⟨ lem6 k (~ M) Øᵥ,₂ Øᵥ,₂ ⟩
+  S₂ ((Γ₁ ^ (suc k)) (~ M)) ((Γ₂,ᵢ ∘ Γ₂,ₒ ∘ (Γ₁ ^ k) ∘ Γ₂,ᵥ) Øᵥ,₂) ((Γ₂,ₒ ∘ (Γ₁ ^ k) ∘ Γ₂,ᵥ ∘ Γ₂,ᵢ) Øᵥ,₂)
+            ≈⟨ ≈ᵥ-refl , lem7 k , lem8 k ⟩
+  S₂ ((Γ₁ ^ (suc k)) (~ M)) ((Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ k) (~ M))) (Γ₂,ₒ ((Γ₁ ^ k) (~ M))) ∎
+  where open EqReasoning 𝕊ₛ
+
+Γ₀=Γ₂ : ∀ k → (Γ₂ ^ (3 * (suc k))) (S₂ (~ M) Øᵥ,₂ Øᵥ,₂) ≈ₛ
+              S₂ (~ ((Γ₀ ^ (suc k)) M)) ((Γ₂,ᵢ ∘ Γ₂,ₒ) (~ ((Γ₀ ^ k) M))) (Γ₂,ₒ (~ ((Γ₀ ^ k) M)))
+Γ₀=Γ₂ k = begin
+  (Γ₂ ^ (3 * (suc k))) (S₂ (~ M) Øᵥ,₂ Øᵥ,₂) ≈⟨ Γ₁=Γ₂ k ⟩
+  S₂ ((Γ₁ ^ (suc k)) (~ M)) ((Γ₂,ᵢ ∘ Γ₂,ₒ) ((Γ₁ ^ k) (~ M))) (Γ₂,ₒ ((Γ₁ ^ k) (~ M)))
+            ≈⟨ Γ₀=Γ₁-iter {suc k} {M} , (Γ₂,ᵢ-cong ∘ Γ₂,ₒ-cong) (Γ₀=Γ₁-iter {k} {M}) , Γ₂,ₒ-cong (Γ₀=Γ₁-iter {k} {M}) ⟩
+  S₂ (~ ((Γ₀ ^ (suc k)) M)) ((Γ₂,ᵢ ∘ Γ₂,ₒ) (~ ((Γ₀ ^ k) M))) (Γ₂,ₒ (~ ((Γ₀ ^ k) M))) ∎
+  where open EqReasoning 𝕊ₛ

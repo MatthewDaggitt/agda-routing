@@ -2,6 +2,7 @@ open import Data.Nat using (ℕ)
 open import Data.Fin using (Fin)
 open import Data.Fin.Properties using (_≤?_; <-cmp) renaming (_≟_ to _≟₁_; ≤-decTotalOrder to fin-decTotalOrder; decSetoid to Fin-decSetoid)
 open import Data.List using ([]; _∷_; List; foldr; filter; map; tabulate)
+import Data.List.Relation.Binary.Permutation.Setoid as PermutationEq
 open import Data.Product.Relation.Lex.NonStrict using (×-decTotalOrder)
 open import Data.Product.Relation.Pointwise.NonDependent using (×-decSetoid)
 open import Relation.Binary using (Rel; DecTotalOrder; Setoid; DecSetoid)
@@ -19,7 +20,6 @@ import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebra
 open import RoutingLib.Data.Table using (Table)
 import RoutingLib.Data.Table.Relation.Binary.Equality as TableEquality
 import RoutingLib.Data.List.Sorting.InsertionSort as InsertionSort
-import Data.List.Relation.Binary.Permutation.Setoid as PermutationEq
 
 module RoutingLib.lmv34.Gamma_one.Algebra
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
@@ -102,10 +102,13 @@ infix 12 ~_
 
 -- Function application to sets
 infix 13 _[_]
-_[_] : ∀ {i j : Fin n} → (Step i j) → RoutingSet → RoutingSet
-f [ X ] = (map (λ {(d , v) → (d , f ▷ v)})  X) †
+_[_] : (Route → Route) → RoutingSet → RoutingSet
+f [ X ] = (map (λ {(d , v) → (d , f v)}) X) †
+
+toRouteMap : ∀ {i j : Fin n} → (f : Step i j) → Route → Route
+toRouteMap f = λ s → f ▷ s
 
 -- Matrix application to vector-of-sets
 infix 10 _〚_〛
 _〚_〛 : AdjacencyMatrix → RoutingVector → RoutingVector
-(A 〚 V 〛) i = ⨁ₛ (λ q → (A i q) [ V q ])
+(A 〚 V 〛) i = ⨁ₛ (λ q → (toRouteMap (A i q)) [ V q ])

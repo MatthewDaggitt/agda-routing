@@ -12,9 +12,9 @@ open import Relation.Binary.PropositionalEquality
 open import Function using (_∘_)
 open import Algebra.FunctionProperties using (Op₂)
 
-import RoutingLib.Data.Table as Table
+import RoutingLib.Data.Vec.Functional as Vector
 open import RoutingLib.Data.Matrix
-import RoutingLib.Data.Table.Relation.Binary.Pointwise as Table
+import RoutingLib.Data.Vec.Functional.Relation.Binary.Pointwise as Vector
 
 ------------------------------------------------------------------------------
 -- Type
@@ -31,7 +31,7 @@ module _ {a ℓ} {A : Set a} {_~_ : Rel A ℓ} where
   abstract
 
     reflexive : _≡_ ⇒ _~_ → ∀ {m n} → _≡_ ⇒ Pointwise _~_ {m} {n}
-    reflexive reflexive ≡-refl = Table.reflexive (Table.reflexive reflexive) ≡-refl
+    reflexive reflexive ≡-refl = Vector.reflexive (Vector.reflexive reflexive) ≡-refl
 
     refl : Reflexive _~_ → ∀ {m n} → Reflexive (Pointwise _~_ {m} {n})
     refl reflexive i j = reflexive
@@ -98,12 +98,12 @@ fold-cong : ∀ {a b c d ℓ₁ ℓ₂}
              ∀ {m n} {M : Matrix A m n} {N : Matrix B m n} → Pointwise _~₁_ M N →
              fold f d M ~₂ fold g e N
 fold-cong fg-cong d~e {zero}  M~N = d~e
-fold-cong fg-cong d~e {suc n} M~N = Table.foldr-cong (λ {w x y z} → fg-cong {w} {x} {y} {z}) (fold-cong (λ {w x y z} → fg-cong {w} {x} {y} {z}) d~e (M~N ∘ fsuc)) (M~N fzero)
+fold-cong fg-cong d~e {suc n} M~N = Vector.foldr-cong (λ {w x y z} → fg-cong {w} {x} {y} {z}) (fold-cong (λ {w x y z} → fg-cong {w} {x} {y} {z}) d~e (M~N ∘ fsuc)) (M~N fzero)
 
 fold⁺-cong : ∀ {a b ℓ} {A : Set a} {B : Set b} {_~_ : REL A B ℓ}
               {_•_ : Op₂ A} {_◦_ : Op₂ B} →
               (∀ {w x y z} → w ~ x → y ~ z → (w • y) ~ (x ◦ z)) →
               ∀ {m n} {M : Matrix A (suc m) (suc n)} {N : Matrix B (suc m) (suc n)} →
               Pointwise _~_ M N → fold⁺ _•_ M ~ fold⁺ _◦_ N
-fold⁺-cong •◦-cong {zero}  M~N = Table.foldr⁺-cong (λ {w x y z} → •◦-cong {w} {x} {y} {z}) (M~N fzero)
-fold⁺-cong •◦-cong {suc m} M~N = •◦-cong (Table.foldr⁺-cong (λ {w x y z} → •◦-cong {w} {x} {y} {z}) (M~N fzero)) (fold⁺-cong (λ {w x y z} → •◦-cong {w} {x} {y} {z}) (M~N ∘ fsuc))
+fold⁺-cong •◦-cong {zero}  M~N = Vector.foldr⁺-cong (λ {w x y z} → •◦-cong {w} {x} {y} {z}) (M~N fzero)
+fold⁺-cong •◦-cong {suc m} M~N = •◦-cong (Vector.foldr⁺-cong (λ {w x y z} → •◦-cong {w} {x} {y} {z}) (M~N fzero)) (fold⁺-cong (λ {w x y z} → •◦-cong {w} {x} {y} {z}) (M~N ∘ fsuc))

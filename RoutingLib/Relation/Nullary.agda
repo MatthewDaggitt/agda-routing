@@ -4,14 +4,13 @@ import Data.List.Membership.Setoid as SetoidMembership
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_×_; ∃; _,_; proj₁; proj₂)
 open import Data.Nat using (ℕ; _+_)
+open import Function
 open import Level
 open import Relation.Binary as B hiding (Decidable)
 open import Relation.Binary.PropositionalEquality as P using (_≡_; refl; setoid)
 open import Relation.Unary using (Pred; Decidable)
 open import Relation.Nullary
 open import Relation.Nullary.Decidable
-
-open import RoutingLib.Function
 
 module RoutingLib.Relation.Nullary where
 
@@ -30,7 +29,7 @@ record Finiteₛ {a ℓ} (S : Setoid a ℓ) : Set (a ⊔ suc ℓ) where
   f⁻¹ i = proj₁ (surjective i)
 
   f∘f⁻¹ : ∀ x → f (f⁻¹ x) ≡ x
-  f∘f⁻¹ x = P.sym (proj₂ (surjective x))
+  f∘f⁻¹ i = proj₂ (surjective i)
 
   f⁻¹∘f : ∀ x → f⁻¹ (f x) ≈ x
   f⁻¹∘f x = injective (f∘f⁻¹ (f x))

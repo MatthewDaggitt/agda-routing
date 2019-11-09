@@ -22,6 +22,7 @@ open import Data.Fin using (Fin)
 open import Data.Fin.Dec using (_∈?_)
 open import Data.Product using (∃; proj₁; proj₂; _,_)
 open import Data.Sum using (_⊎_; inj₁; inj₂; map₂)
+open import Data.Vec.Functional using (zipWith)
 open import Level using (_⊔_)
 open import Function using (_∘_)
 open import Relation.Binary.PropositionalEquality using (_≡_; sym; subst)
@@ -29,8 +30,8 @@ open import Relation.Nullary
 open import Relation.Nullary.Decidable using (⌊_⌋)
 
 open import RoutingLib.Data.Nat.Properties
-open import RoutingLib.Data.Table using (max; zipWith)
-open import RoutingLib.Data.Table.Properties using (max[t]<x; x≤max[t])
+open import RoutingLib.Data.Vec.Functional using (max)
+open import RoutingLib.Data.Vec.Functional.Properties using (max[t]<x; x≤max[t])
 import RoutingLib.Function.Metric.Construct.Condition as Condition
 import RoutingLib.Function.Metric.Construct.MaxLift as MaxLift
 open import RoutingLib.Function.Metric.Nat 

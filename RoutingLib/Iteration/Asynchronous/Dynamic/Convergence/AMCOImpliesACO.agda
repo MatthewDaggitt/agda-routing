@@ -29,13 +29,12 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sub
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Data.Table using (max)
-open import RoutingLib.Data.Table.Properties using (max[t]≤x; x≤max[t]; max-cong)
-open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
+open import RoutingLib.Data.Vec.Functional using (max)
+open import RoutingLib.Data.Vec.Functional.Properties using (max[t]≤x; x≤max[t]; max-cong)
+open import RoutingLib.Data.Vec.Functional.Membership.Propositional.Properties using (max[t]∈t)
 open import RoutingLib.Data.Nat.Properties using (m+[n∸o]≤[m+n]∸o)
 import RoutingLib.Function.Metric.Construct.Condition as Condition
 open import RoutingLib.Relation.Unary.Indexed
-open import RoutingLib.Relation.Binary.PropositionalEquality using (inspect′)
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as SubsetEquality
 import RoutingLib.Function.Reasoning as FunctionReasoning
 

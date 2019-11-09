@@ -34,6 +34,7 @@ open import Data.List using (List)
 open import Data.Maybe using (Maybe)
 open import Data.Bool using (if_then_else_)
 open import Data.Unit using (tt)
+open import Data.Vec.Functional.Relation.Binary.Pointwise using (Pointwise)
 open import Level using (Level; _⊔_) renaming (suc to lsuc)
 open import Level.Literals using (#_)
 open import Relation.Binary as B using (DecSetoid; _Respects_; Total; _Preserves_⟶_; _Preserves₂_⟶_⟶_)
@@ -42,8 +43,7 @@ open import Relation.Unary using (Pred; Universal; U; _∈_)
 open import Relation.Unary.Properties using (U-Universal)
 open import Relation.Nullary.Decidable using (⌊_⌋)
 
-open import RoutingLib.Data.Table using (Table; max)
-open import RoutingLib.Data.Table.Relation.Binary.Pointwise using (Pointwise)
+open import RoutingLib.Data.Vec.Functional using (max)
 open import RoutingLib.Function.Metric.Nat
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (Setoid_at_)
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as SubsetEq

@@ -1,7 +1,7 @@
 Agda-routing for Matthew Daggitt's PhD thesis
 =============================================
 
-Requirements: Agda 2.6.0 and Standard Library 1.0
+Requirements: Agda 2.6.0 and Standard Library 1.2
 
 This library reasons about asynchronous iterative algorithms and network routing
 problems. It is organised in the same manner as the Agda standard library and

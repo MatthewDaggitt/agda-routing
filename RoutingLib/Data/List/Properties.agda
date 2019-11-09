@@ -1,5 +1,5 @@
 open import Algebra
-open import Algebra.FunctionProperties
+-- open import Algebra.FunctionProperties
 open import Data.Nat using (ℕ; zero; suc; _+_; _∸_)
 open import Data.Nat.Properties using (+-suc)
 open import Data.List
@@ -7,8 +7,10 @@ open import Data.List.Properties
 open import Data.List.All using (All; []; _∷_; universal)
 open import Data.List.Any using (Any; here; there)
 open import Data.List.Membership.Propositional using (_∈_)
-open import Data.List.Relation.Pointwise using (Pointwise; []; _∷_)
-open import Data.List.Relation.Unary.AllPairs using (AllPairs; []; _∷_)
+open import Data.List.Relation.Pointwise
+  using (Pointwise; []; _∷_)
+open import Data.List.Relation.Unary.AllPairs
+  using (AllPairs; []; _∷_)
 open import Data.Fin using (Fin; toℕ; zero; suc)
 open import Data.Maybe using (Maybe; just; nothing)
 open import Data.Maybe.Properties using (just-injective)

@@ -2,12 +2,14 @@
 module RoutingLib.Data.FiniteSet where
 
 open import Data.Fin
+open import Data.Fin.Patterns
 open import Data.Nat
 open import Data.Product
+open import Data.Vec.Functional
 open import Function
 open import Level using (Level)
 
-open import RoutingLib.Data.Table hiding (⟦_⟧)
+open import RoutingLib.Data.Vec.Functional hiding (⟦_⟧)
 
 private
   variable
@@ -22,7 +24,7 @@ record FiniteSet (A : Set a) : Set a where
   constructor ⟦_∣_⟧
   field
     m : ℕ
-    x : Table A (suc m)
+    x : Vector A (suc m)
 
 ∣_∣ : FiniteSet A → ℕ
 ∣ ⟦ n ∣ _ ⟧ ∣ = suc n

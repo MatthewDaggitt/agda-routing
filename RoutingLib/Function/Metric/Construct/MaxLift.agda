@@ -7,9 +7,9 @@ open import Relation.Binary using (_Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality as P using (_≡_; refl; subst)
 open import Relation.Binary.Indexed.Homogeneous using (IndexedSetoid)
 
-open import RoutingLib.Data.Table using (Table; max; zipWith)
-open import RoutingLib.Data.Table.Properties using (max-cong; t≤max[t]; max-constant; max[s]≤max[t]₂)
-open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
+open import RoutingLib.Data.Vec.Functional using (max)
+open import RoutingLib.Data.Vec.Functional.Properties using (max-cong; t≤max[t]; max-constant; max[s]≤max[t]₂)
+open import RoutingLib.Data.Vec.Functional.Membership.Propositional.Properties using (max[t]∈t)
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (Setoid_at_)
 open import RoutingLib.Function.Metric.Nat
 

@@ -13,9 +13,6 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Data.Nat.Properties using (n≢1+n)
-
-
 open import RoutingLib.Data.Path.UncertifiedI
 import RoutingLib.Data.Path.Uncertified.Properties as UncertifiedProperties
 

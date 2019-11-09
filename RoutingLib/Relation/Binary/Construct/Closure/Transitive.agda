@@ -1,26 +1,10 @@
-open import Relation.Binary
 
 module RoutingLib.Relation.Binary.Construct.Closure.Transitive where
 
-open import Data.Fin.Subset
-open import Data.Fin.Subset.Properties
-open import Data.Nat.Induction
-open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _<_; _≤_)
-open import Data.Nat.Properties using (≤-refl; ≤-trans; n≤1+n)
 open import Data.Product as Prod
-open import Level using (Level; _⊔_)
-open import Function using (_∘_)
+open import Level using (Level)
+open import Relation.Binary
 open import Relation.Binary.Construct.Closure.Transitive
-open import Relation.Nullary using (¬_; Dec; yes; no)
-import Relation.Nullary.Decidable as Dec
-open import Relation.Nullary.Product
-open import Relation.Nary using ()
-open import Relation.Unary as U using (Pred)
-
-open import RoutingLib.Function
-open import RoutingLib.Relation.Nullary
-open import RoutingLib.Data.Fin.Subset
-open import RoutingLib.Data.Fin.Subset.Properties
 
 open Setoid using (Carrier)
 

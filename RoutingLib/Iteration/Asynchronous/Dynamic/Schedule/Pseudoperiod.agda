@@ -28,7 +28,7 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Induction.WellFounded using (Acc; acc)
 open import Induction.Nat using (<-wellFounded)
 
-open import RoutingLib.Data.Table using (max)
+open import RoutingLib.Data.Vec.Functional using (max)
 
 open Schedule ψ
 

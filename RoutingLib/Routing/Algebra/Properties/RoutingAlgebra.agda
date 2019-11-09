@@ -11,13 +11,13 @@ module RoutingLib.Routing.Algebra.Properties.RoutingAlgebra
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
   where
 
-open import Algebra
-open import Algebra.Structures
-import Algebra.FunctionProperties as FunctionProperties
+import Algebra.Definitions as AlgebraDefinitions
+import Algebra.Structures as AlgebraStructures
 import Algebra.FunctionProperties.Consequences as Consequences
+open import Algebra.Bundles
 open import Algebra.FunctionProperties.Consequences.Propositional using (sel⇒idem)
 open import Data.Product using (proj₁; _,_)
-open import Data.Fin using (Fin; 0F; suc)
+open import Data.Fin using (Fin)
 open import Data.Nat using (zero; suc)
 open import Data.Sum using (inj₁; inj₂)
 open import Function using (_∘_)
@@ -39,7 +39,8 @@ open import RoutingLib.Relation.Binary
 
 open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
-open FunctionProperties _≈_
+open AlgebraDefinitions _≈_
+open AlgebraStructures _≈_
 
 ------------------------------------------------------------------------------
 -- _⊕_
@@ -55,19 +56,19 @@ open FunctionProperties _≈_
 ⊕-identity : Identity ∞# _⊕_
 ⊕-identity = ⊕-identityˡ , ⊕-identityʳ
 
-⊕-isSemigroup : IsSemigroup _≈_ _⊕_
+⊕-isSemigroup : IsSemigroup _⊕_
 ⊕-isSemigroup = record
   { isMagma = ⊕-isMagma
   ; assoc   = ⊕-assoc
   }
 
-⊕-isBand : IsBand _≈_ _⊕_
+⊕-isBand : IsBand _⊕_
 ⊕-isBand = record
   { isSemigroup = ⊕-isSemigroup
   ; idem        = ⊕-idem
   }
 
-⊕-isSemilattice : IsSemilattice _≈_ _⊕_
+⊕-isSemilattice : IsSemilattice _⊕_
 ⊕-isSemilattice = record
   { isBand = ⊕-isBand
   ; comm   = ⊕-comm
@@ -78,7 +79,7 @@ open FunctionProperties _≈_
   { isSemilattice = ⊕-isSemilattice
   }
 
-⊕-isMonoid : IsMonoid _≈_ _⊕_ ∞#
+⊕-isMonoid : IsMonoid _⊕_ ∞#
 ⊕-isMonoid = record
   { isSemigroup = ⊕-isSemigroup
   ; identity    = ⊕-identity

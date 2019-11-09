@@ -10,7 +10,8 @@ module RoutingLib.Routing.VectorBased.Asynchronous.Convergence.ExtensionRespecti
 open RawRoutingAlgebra alg
 
 open import Data.Nat as ℕ using (ℕ; zero; suc; _≤_; z≤n; s≤s)
-open import Data.Fin using (Fin; suc; inject₁; 0F; 1F)
+open import Data.Fin using (Fin; suc; inject₁)
+open import Data.Fin.Patterns
 open import Data.List hiding ([_])
 open import Data.List.Membership.Setoid S
 open import Data.Sum as Sum using (_⊎_; inj₁; inj₂)

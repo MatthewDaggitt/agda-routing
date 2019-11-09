@@ -20,10 +20,8 @@ open import Relation.Binary.Construct.Closure.Transitive
 open import Relation.Nullary using (¬_; Dec; yes; no)
 import Relation.Nullary.Decidable as Dec
 open import Relation.Nullary.Product
-open import Relation.Nary using ()
 open import Relation.Unary as U using (Pred)
 
-open import RoutingLib.Function
 open import RoutingLib.Data.Fin.Subset
 open import RoutingLib.Data.Fin.Subset.Properties
 

@@ -28,7 +28,6 @@ open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary.PropositionalEquality using (refl; _≡_)
 
-open import RoutingLib.Function
 open import RoutingLib.Function.Reasoning
 import RoutingLib.Relation.Nullary.Indexed.Replace as Replacement
 

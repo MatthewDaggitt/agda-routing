@@ -13,31 +13,6 @@ module RoutingLib.Relation.Binary.Construct.NonStrictToStrict
 
   open import Relation.Binary.Construct.NonStrictToStrict _≈_ _≤_
 
-  <⇒≉ : ∀ {x y} → x < y → ¬ (x ≈ y)
-  <⇒≉ = proj₂
-
-  ≤∧≉⇒< : ∀ {x y} → x ≤ y → ¬ (x ≈ y) → x < y
-  ≤∧≉⇒< = _,_
-
-  <⇒≱ : Antisymmetric _≈_ _≤_ → ∀ {x y} → x < y → ¬ (y ≤ x)
-  <⇒≱ antisym (x≤y , x≉y) y≤x = x≉y (antisym x≤y y≤x)
-
-  ≤⇒≯ : Antisymmetric _≈_ _≤_ → ∀ {x y} → x ≤ y → ¬ (y < x)
-  ≤⇒≯ antisym x≤y y<x = <⇒≱ antisym y<x x≤y
-
-  ≰⇒> : Symmetric _≈_ → _≈_ ⇒ _≤_ → Total _≤_ →
-        ∀ {x y} → ¬ (x ≤ y) → y < x
-  ≰⇒> sym refl total {x} {y} x≰y with total x y
-  ... | inj₁ x≤y = contradiction x≤y x≰y
-  ... | inj₂ y≤x = y≤x , x≰y ∘ refl ∘ sym
-
-  ≮⇒≥ : Symmetric _≈_ → Decidable _≈_ → _≈_ ⇒ _≤_ → Total _≤_ →
-        ∀ {x y} → ¬ (x < y) → y ≤ x
-  ≮⇒≥ sym _≟_ refl _≤?_ {x} {y} x≮y with x ≟ y | y ≤? x
-  ... | yes x≈y  | _        = refl (sym x≈y)
-  ... | _        | inj₁ y≤x = y≤x
-  ... | no  x≉y  | inj₂ x≤y = contradiction (x≤y , x≉y) x≮y
-
   <-min : ∀ {⊥} → Minimum _≤_ ⊥ → StrictMinimum _≈_ _<_ ⊥
   <-min min {x} ⊥≉x = min x , ⊥≉x
 

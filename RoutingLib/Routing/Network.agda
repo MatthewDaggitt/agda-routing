@@ -23,19 +23,9 @@ open import Level using (_⊔_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; sym; trans)
-open import Relation.Binary.Indexed.Homogeneous
-  using (IndexedSetoid; IndexedDecSetoid)
-import Relation.Binary.Construct.Closure.Transitive as TransitiveClosure
 import Relation.Binary.EqReasoning as EqReasoning
 open import Relation.Nullary using (Dec; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
-
-open import RoutingLib.Relation.Binary.Indexed.Homogeneous
-import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.Equality as SubsetEquality
-open import RoutingLib.Data.Matrix
-import RoutingLib.Data.Matrix.Relation.Binary.DecidableEquality as MatrixDecEquality
-import RoutingLib.Data.Table.Relation.Binary.DecidableEquality as TableDecEquality
-open import RoutingLib.Data.Table using (Table)
 
 open import RoutingLib.Routing algebra as Routing using (AdjacencyMatrix; CycleFree)
 

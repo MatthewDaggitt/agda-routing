@@ -15,7 +15,7 @@ open import RoutingLib.Data.Matrix.Relation.Binary.Pointwise
 
 open DecSetoid DS using (_≈_; _≟_) renaming (setoid to S; Carrier to A)
 open import RoutingLib.Data.Matrix.Relation.Binary.Equality S public
-open import RoutingLib.Data.Table.Relation.Binary.DecidableEquality DS
+open import RoutingLib.Data.Vec.Functional.Relation.Binary.DecidableEquality DS
 
 Dec𝕄ₛ : ℕ → ℕ → DecSetoid a ℓ
 Dec𝕄ₛ m n = pointwiseDecSetoid DS m n

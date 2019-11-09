@@ -18,5 +18,5 @@ module RoutingLib.Relation.Binary.Construct.NonStrictToStrict.TotalOrder
   open PO (TotalOrder.poset totalOrder) public
 
   ≰⇒> : ∀ {x y} → ¬ (x ≤ y) → y < x
-  ≰⇒> = NSTS′.≰⇒> _ _ Eq.sym reflexive total
+  ≰⇒> = NSTS.≰⇒> _ _ Eq.sym reflexive total
 

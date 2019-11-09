@@ -39,7 +39,6 @@ open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous
 open import RoutingLib.Relation.Unary.Properties
-open import RoutingLib.Function
 open import RoutingLib.Function.Reasoning
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Properties

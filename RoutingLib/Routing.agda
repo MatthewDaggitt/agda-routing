@@ -13,12 +13,13 @@ module RoutingLib.Routing
   {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) (n : ℕ)
   where
 
-open import Data.Fin using (Fin; 0F) renaming (_≟_ to _≟𝔽_)
+open import Data.Fin using (Fin) renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Subset using (Subset; _∉_)
 open import Data.Fin.Properties using (any?)
 open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (∃₂)
+open import Data.Vec.Functional using (Vector)
 open import Level using (_⊔_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
@@ -36,8 +37,7 @@ open import RoutingLib.Relation.Binary.Indexed.Homogeneous
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.Equality as SubsetEquality
 open import RoutingLib.Data.Matrix
 import RoutingLib.Data.Matrix.Relation.Binary.DecidableEquality as MatrixDecEquality
-import RoutingLib.Data.Table.Relation.Binary.DecidableEquality as TableDecEquality
-open import RoutingLib.Data.Table using (Table)
+import RoutingLib.Data.Vec.Functional.Relation.Binary.DecidableEquality as VectorDecEquality
 
 import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule as Schedule
 
@@ -53,10 +53,10 @@ AdjacencyMatrix = ∀ (i j : Fin n) → Step i j
 -- Routing tables store a node's routing decisions
 
 RoutingTable : Set a
-RoutingTable = Table Route n
+RoutingTable = Vector Route n
 
 -- Properties
-open TableDecEquality DS public
+open VectorDecEquality DS public
 
 ℝ𝕋ₛ : Setoid a ℓ
 ℝ𝕋ₛ = 𝕋ₛ n

@@ -31,12 +31,6 @@ module RoutingLib.Data.Nat.Properties where
 ℕᵈˢ : DecSetoid 0ℓ 0ℓ
 ℕᵈˢ = decSetoid _≟_
 
-abstract
-
-  n≢1+n : ∀ n → n ≢ suc n
-  n≢1+n zero    = λ()
-  n≢1+n (suc n) = n≢1+n n ∘ suc-injective
-
 ------------------------------------------------------------------------
 -- Ordering
 
@@ -47,37 +41,11 @@ n≤suc∘pred[n] : ∀ n → n ≤ suc (pred n)
 n≤suc∘pred[n] zero    = z≤n
 n≤suc∘pred[n] (suc n) = s≤s ≤-refl
 
-≤-isTotalPreorder : IsTotalPreorder _≡_ _≤_
-≤-isTotalPreorder = record
-  { isPreorder = ≤-isPreorder
-  ; total      = ≤-total
-  }
-
-≤-isDecTotalPreorder : IsDecTotalPreorder _≡_ _≤_
-≤-isDecTotalPreorder = record
-  { isTotalPreorder = ≤-isTotalPreorder
-  ; _≟_             = _≟_
-  ; _≤?_            = _≤?_
-  }
-
-≤-decTotalPreorder : DecTotalPreorder 0ℓ 0ℓ 0ℓ
-≤-decTotalPreorder = record { isDecTotalPreorder = ≤-isDecTotalPreorder }
-
 ≥-decTotalOrder : DecTotalOrder 0ℓ 0ℓ 0ℓ
 ≥-decTotalOrder = Flip.decTotalOrder ≤-decTotalOrder
 
 >⇒≰ : _>_ ⇒ _≰_
 >⇒≰ = <⇒≱
-
-∀x≤m:n≢x⇒m<n : ∀ m n → (∀ {x} → x ≤ m → n ≢ x) → m < n
-∀x≤m:n≢x⇒m<n _       zero    x≤m⇒n≢x = contradiction refl (x≤m⇒n≢x z≤n)
-∀x≤m:n≢x⇒m<n zero    (suc n) x≤0⇒n≢x = s≤s z≤n
-∀x≤m:n≢x⇒m<n (suc m) (suc n) x≤m+1⇒n≢x = s≤s (∀x≤m:n≢x⇒m<n m n (λ x≤m n≡x → x≤m+1⇒n≢x (s≤s x≤m) (cong suc n≡x)))
-
-∀x<m:n≢x⇒m≤n : ∀ m n → (∀ {x} → x < m → n ≢ x) → m ≤ n
-∀x<m:n≢x⇒m≤n zero    n       f = z≤n
-∀x<m:n≢x⇒m≤n (suc m) zero    f = contradiction refl (f (s≤s z≤n))
-∀x<m:n≢x⇒m≤n (suc m) (suc n) f = s≤s (∀x<m:n≢x⇒m≤n m n (λ x<m n≡x → f (s≤s x<m) (cong suc n≡x)))
 
 n≢0⇒0<n : ∀ {n} → n ≢ 0 → 0 < n
 n≢0⇒0<n {zero} 0≢0 = contradiction refl 0≢0
@@ -86,9 +54,6 @@ n≢0⇒0<n {suc n} n+1≢0 = s≤s z≤n
 
 
 -- Equality reasoning
-
-n<1+n : ∀ n → n < suc n
-n<1+n n = ≤-refl
 
 m<n⇒n≡1+o : ∀ {m n} → m < n → ∃ λ o → n ≡ suc o
 m<n⇒n≡1+o {_} {zero} ()
@@ -100,27 +65,6 @@ m<n⇒n≡1+o {_} {suc o} m<n = o , refl
 
 ------------------------------------------------------------------------
 -- Distance
-
-∣-∣-identityˡ : LeftIdentity 0 ∣_-_∣
-∣-∣-identityˡ x = refl
-
-∣-∣-identityʳ : RightIdentity 0 ∣_-_∣
-∣-∣-identityʳ zero    = refl
-∣-∣-identityʳ (suc x) = refl
-
-∣-∣-identity : Identity 0 ∣_-_∣
-∣-∣-identity = ∣-∣-identityˡ , ∣-∣-identityʳ
-
-m≤n+∣n-m∣ : ∀ m n → m ≤ n + ∣ n - m ∣
-m≤n+∣n-m∣ zero    n       = z≤n
-m≤n+∣n-m∣ (suc m) zero    = ≤-refl
-m≤n+∣n-m∣ (suc m) (suc n) = s≤s (m≤n+∣n-m∣ m n)
-
-m≤n+∣m-n∣ : ∀ m n → m ≤ n + ∣ m - n ∣
-m≤n+∣m-n∣ m n = subst (m ≤_) (cong (n +_) (∣-∣-comm n m)) (m≤n+∣n-m∣ m n)
-
-m≤∣m-n∣+n : ∀ m n → m ≤ ∣ m - n ∣ + n
-m≤∣m-n∣+n m n = subst (m ≤_) (+-comm n _) (m≤n+∣m-n∣ m n)
 
 ∣-∣-triangle : ∀ x y z → ∣ x - z ∣ ≤ ∣ x - y ∣ + ∣ y - z ∣
 ∣-∣-triangle zero    y       z       = m≤n+∣n-m∣ z y
@@ -310,7 +254,7 @@ m<n×m<o⇒m<n⊓o m<n m<o = subst (_< _) (⊓-idem _) (⊓-mono-< m<n m<o)
 
 m+[n∸o]≤[m+n]∸o : ∀ m n o → (m + n) ∸ o ≤ m + (n ∸ o)
 m+[n∸o]≤[m+n]∸o m n       zero    = ≤-refl
-m+[n∸o]≤[m+n]∸o m zero    (suc o) = n∸m≤n (suc o) (m + 0)
+m+[n∸o]≤[m+n]∸o m zero    (suc o) = m∸n≤m (m + 0) (suc o)
 m+[n∸o]≤[m+n]∸o m (suc n) (suc o) = begin
   (m + suc n) ∸ suc o ≡⟨ cong (_∸ suc o) (+-suc m n) ⟩
   (suc m + n) ∸ suc o ≡⟨⟩
@@ -318,39 +262,10 @@ m+[n∸o]≤[m+n]∸o m (suc n) (suc o) = begin
   m + (n ∸ o)         ∎
   where open ≤-Reasoning
 
-∸-monoʳ-< : ∀ {m n o} → o < n → n ≤ m → m ∸ n < m ∸ o
-∸-monoʳ-< {_} {suc n} {zero}  (s≤s o<n) (s≤s n<m) = s≤s (n∸m≤n n _)
-∸-monoʳ-< {_} {suc n} {suc o} (s≤s o<n) (s≤s n<m) = ∸-monoʳ-< o<n n<m
-
-m>n⇒m∸n≢0 : ∀ {m n} → m > n → m ∸ n ≢ 0
-m>n⇒m∸n≢0 {n = zero}  (s≤s m>n) = λ()
-m>n⇒m∸n≢0 {n = suc n} (s≤s m>n) = m>n⇒m∸n≢0 m>n
-
 n∸[1+m]<n : ∀ m {n} → 1 ≤ n → n ∸ suc m < n
-n∸[1+m]<n m (s≤s z≤n) = s≤s (n∸m≤n m _)
-
-m<n⇒0<n∸m : ∀ {m n} → m < n → 0 < n ∸ m
-m<n⇒0<n∸m {_}     {zero}  ()
-m<n⇒0<n∸m {zero}  {suc n} _         = s≤s z≤n
-m<n⇒0<n∸m {suc m} {suc n} (s≤s m<n) = m<n⇒0<n∸m m<n
+n∸[1+m]<n m (s≤s z≤n) = s≤s (m∸n≤m _ m)
 
 m<n⇒n∸m≡1+o : ∀ {m n} → m < n → ∃ λ o → n ∸ m ≡ suc o
 m<n⇒n∸m≡1+o {_}     {zero}  ()
 m<n⇒n∸m≡1+o {zero}  {suc n} (s≤s m<n) = n , refl
 m<n⇒n∸m≡1+o {suc m} {suc n} (s≤s m<n) = m<n⇒n∸m≡1+o m<n
-
-∸-cancelˡ-≡ :  ∀ {x y z} → y ≤ x → z ≤ x → x ∸ y ≡ x ∸ z → y ≡ z
-∸-cancelˡ-≡ {_} {_}     {_}     z≤n       z≤n       _       = refl
-∸-cancelˡ-≡ {_} {_}     {suc z} z≤n       (s≤s z≤x) 1+x≡x∸z = contradiction (sym 1+x≡x∸z) (<⇒≢ (s≤s (n∸m≤n z _)))
-∸-cancelˡ-≡ {_} {suc y} {_}     (s≤s y≤x) z≤n       x∸y≡1+x = contradiction x∸y≡1+x (<⇒≢ (s≤s (n∸m≤n y _)))
-∸-cancelˡ-≡ {_} {_}     {_}     (s≤s y≤x) (s≤s z≤x) x∸y≡x∸z = cong suc (∸-cancelˡ-≡ y≤x z≤x x∸y≡x∸z)
-
-∸-cancelʳ-≤ : ∀ {m n o} → m ≤ o → o ∸ n ≤ o ∸ m → m ≤ n
-∸-cancelʳ-≤ {zero}  {_}     {_}     _         _       = z≤n
-∸-cancelʳ-≤ {suc m} {zero}  {suc o} n≤o       o+1≤o∸m = contradiction (≤-trans o+1≤o∸m (n∸m≤n m o)) 1+n≰n
-∸-cancelʳ-≤ {_}     {suc n} {_}     (s≤s m≤o) o∸n≤o∸m = s≤s (∸-cancelʳ-≤ m≤o o∸n≤o∸m)
-
-∸-cancelʳ-< : ∀ {m n o} → o ∸ m < o ∸ n → n < m
-∸-cancelʳ-< {zero}  {n}     {o}     o<o∸n   = contradiction o<o∸n (m≮m∸n o n)
-∸-cancelʳ-< {suc m} {zero}  {_}     o∸n<o∸m = s≤s z≤n
-∸-cancelʳ-< {suc m} {suc n} {suc o} o∸n<o∸m = s≤s (∸-cancelʳ-< o∸n<o∸m)

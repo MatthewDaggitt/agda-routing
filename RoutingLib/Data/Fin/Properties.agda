@@ -15,16 +15,7 @@ open import RoutingLib.Relation.Nullary using (Finite)
 module RoutingLib.Data.Fin.Properties where
 
 𝔽ₛ : ℕ → Setoid _ _
-𝔽ₛ = setoid
-
-------------------------------------------------------------------------
--- toℕ
-
-toℕ-cancel-< : ∀ {n} {i j : Fin n} → toℕ i <ℕ toℕ j → i < j
-toℕ-cancel-< i<j = i<j
-
-toℕ-mono-< : ∀ {n} {i j : Fin n} → i < j → toℕ i <ℕ toℕ j
-toℕ-mono-< i<j = i<j
+𝔽ₛ = ≡-setoid
 
 ------------------------------------------------------------------------
 -- fromℕ
@@ -34,52 +25,52 @@ toℕ-mono-< i<j = i<j
 ≤fromℕ (suc k) (fsuc i) = s≤s (≤fromℕ k i)
 
 ------------------------------------------------------------------------
--- fromℕ≤
+-- fromℕ<
 
-fromℕ≤-cong : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
-               i ≡ j → fromℕ≤ i<n ≡ fromℕ≤ j<n
-fromℕ≤-cong i<n j<n refl = cong fromℕ≤ (ℕₚ.≤-irrelevant i<n j<n)
+fromℕ<-cong : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
+               i ≡ j → fromℕ< i<n ≡ fromℕ< j<n
+fromℕ<-cong i<n j<n refl = cong fromℕ< (ℕₚ.≤-irrelevant i<n j<n)
 
-fromℕ≤-injective : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
-                    fromℕ≤ i<n ≡ fromℕ≤ j<n → i ≡ j
-fromℕ≤-injective (s≤s z≤n)       (s≤s z≤n)       eq = refl
-fromℕ≤-injective (s≤s (s≤s i<n)) (s≤s (s≤s j<n)) eq =
-  cong suc (fromℕ≤-injective (s≤s i<n) (s≤s j<n) (suc-injective eq))
+fromℕ<-injective : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
+                    fromℕ< i<n ≡ fromℕ< j<n → i ≡ j
+fromℕ<-injective (s≤s z≤n)       (s≤s z≤n)       eq = refl
+fromℕ<-injective (s≤s (s≤s i<n)) (s≤s (s≤s j<n)) eq =
+  cong suc (fromℕ<-injective (s≤s i<n) (s≤s j<n) (suc-injective eq))
 
-fromℕ≤-mono-≤ : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
-                 i ≤ℕ j → fromℕ≤ i<n ≤ fromℕ≤ j<n
-fromℕ≤-mono-≤ (s≤s z≤n)       (s≤s _)         z≤n       = z≤n
-fromℕ≤-mono-≤ (s≤s (s≤s i<n)) (s≤s (s≤s j<n)) (s≤s i≤j) =
-  s≤s (fromℕ≤-mono-≤ (s≤s i<n) (s≤s j<n) i≤j)
+fromℕ<-mono-≤ : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
+                 i ≤ℕ j → fromℕ< i<n ≤ fromℕ< j<n
+fromℕ<-mono-≤ (s≤s z≤n)       (s≤s _)         z≤n       = z≤n
+fromℕ<-mono-≤ (s≤s (s≤s i<n)) (s≤s (s≤s j<n)) (s≤s i≤j) =
+  s≤s (fromℕ<-mono-≤ (s≤s i<n) (s≤s j<n) i≤j)
 
-fromℕ≤-cancel-< : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
-                  fromℕ≤ i<n < fromℕ≤ j<n → i <ℕ j
-fromℕ≤-cancel-< i<n j<n i<j = subst₂ _<ℕ_ (toℕ-fromℕ≤ i<n) (toℕ-fromℕ≤ j<n) i<j
+fromℕ<-cancel-< : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
+                  fromℕ< i<n < fromℕ< j<n → i <ℕ j
+fromℕ<-cancel-< i<n j<n i<j = subst₂ _<ℕ_ (toℕ-fromℕ< i<n) (toℕ-fromℕ< j<n) i<j
 
 ------------------------------------------------------------------------
--- fromℕ≤″
+-- fromℕ<″
 
-fromℕ≤″-cong : ∀ {n i j} (i<n : i ℕ.<″ n) (j<n : j ℕ.<″ n) →
-               i ≡ j → fromℕ≤″ i i<n ≡ fromℕ≤″ j j<n
-fromℕ≤″-cong i<n j<n eq =
+fromℕ<″-cong : ∀ {n i j} (i<n : i ℕ.<″ n) (j<n : j ℕ.<″ n) →
+               i ≡ j → fromℕ<″ i i<n ≡ fromℕ<″ j j<n
+fromℕ<″-cong i<n j<n eq =
   subst₂ _≡_
-    (fromℕ≤≡fromℕ≤″ (ℕₚ.≤″⇒≤ i<n) i<n)
-    (fromℕ≤≡fromℕ≤″ (ℕₚ.≤″⇒≤ j<n) j<n)
-    (fromℕ≤-cong (ℕₚ.≤″⇒≤ i<n) (ℕₚ.≤″⇒≤ j<n) eq)
+    (fromℕ<≡fromℕ<″ (ℕₚ.≤″⇒≤ i<n) i<n)
+    (fromℕ<≡fromℕ<″ (ℕₚ.≤″⇒≤ j<n) j<n)
+    (fromℕ<-cong (ℕₚ.≤″⇒≤ i<n) (ℕₚ.≤″⇒≤ j<n) eq)
 
-fromℕ≤″-toℕ : ∀ {n} {i : Fin n} (toℕ<n : toℕ i ℕ.<″ n) →
-                fromℕ≤″ (toℕ i) toℕ<n ≡ i
-fromℕ≤″-toℕ {n} {i} toℕ<n = begin
-  fromℕ≤″ (toℕ i) _  ≡⟨ sym (fromℕ≤≡fromℕ≤″ (ℕₚ.≤″⇒≤ toℕ<n) toℕ<n) ⟩
-  fromℕ≤ _           ≡⟨ fromℕ≤-toℕ i (ℕₚ.≤″⇒≤ toℕ<n) ⟩
+fromℕ<″-toℕ : ∀ {n} {i : Fin n} (toℕ<n : toℕ i ℕ.<″ n) →
+                fromℕ<″ (toℕ i) toℕ<n ≡ i
+fromℕ<″-toℕ {n} {i} toℕ<n = begin
+  fromℕ<″ (toℕ i) _  ≡⟨ sym (fromℕ<≡fromℕ<″ (ℕₚ.≤″⇒≤ toℕ<n) toℕ<n) ⟩
+  fromℕ< _           ≡⟨ fromℕ<-toℕ i (ℕₚ.≤″⇒≤ toℕ<n) ⟩
   i ∎
   where open ≡-Reasoning
 
-fromℕ≤″-injective : ∀ {n i j} (i<n : i ℕ.<″ n) (j<n : j ℕ.<″ n) →
-                    fromℕ≤″ i i<n ≡ fromℕ≤″ j j<n → i ≡ j
-fromℕ≤″-injective i<n j<n eq = fromℕ≤-injective (ℕₚ.≤″⇒≤ i<n) (ℕₚ.≤″⇒≤ j<n) (subst₂ _≡_
-    (sym (fromℕ≤≡fromℕ≤″ (ℕₚ.≤″⇒≤ i<n) i<n))
-    (sym (fromℕ≤≡fromℕ≤″ (ℕₚ.≤″⇒≤ j<n) j<n))
+fromℕ<″-injective : ∀ {n i j} (i<n : i ℕ.<″ n) (j<n : j ℕ.<″ n) →
+                    fromℕ<″ i i<n ≡ fromℕ<″ j j<n → i ≡ j
+fromℕ<″-injective i<n j<n eq = fromℕ<-injective (ℕₚ.≤″⇒≤ i<n) (ℕₚ.≤″⇒≤ j<n) (subst₂ _≡_
+    (sym (fromℕ<≡fromℕ<″ (ℕₚ.≤″⇒≤ i<n) i<n))
+    (sym (fromℕ<≡fromℕ<″ (ℕₚ.≤″⇒≤ j<n) j<n))
     eq)
 
 -----------

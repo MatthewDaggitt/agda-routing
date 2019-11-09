@@ -10,8 +10,6 @@
 module RoutingLib.Routing.Algebra where
 
 open import Algebra
-open import Algebra.Structures
-open import Algebra.FunctionProperties
 open import Data.Fin using (Fin; toℕ)
 open import Data.List using (List)
 import Data.List.Membership.Setoid as ListMembership
@@ -22,20 +20,11 @@ open import Level using (Lift; lift; _⊔_) renaming (suc to lsuc)
 open import Function using (_∘_)
 open import Relation.Nullary using (¬_)
 open import Relation.Binary
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
-import Relation.Binary.Construct.NonStrictToStrict as NonStrictToStrict
-import Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
-import Relation.Binary.Reasoning.Setoid as EqReasoning
+open import Relation.Binary.PropositionalEquality using (_≡_)
 
-open import RoutingLib.Algebra
-open import RoutingLib.Algebra.Structures
-open import RoutingLib.Data.Matrix using (SquareMatrix)
-open import RoutingLib.Data.Table using (Table)
 import RoutingLib.Data.Path.UncertifiedI as UncertifiedPaths
 import RoutingLib.Data.Path.CertifiedI as CertifiedPaths
 open import RoutingLib.Data.Path.UncertifiedI.Properties
-import RoutingLib.Data.Matrix.Relation.Binary.DecidableEquality as MatrixDecEquality
-import RoutingLib.Data.Table.Relation.Binary.DecidableEquality as TableDecEquality
 open import RoutingLib.Relation.Nullary
 
 --------------------------------------------------------------------------------

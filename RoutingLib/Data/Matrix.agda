@@ -7,7 +7,8 @@ open import Relation.Unary using (Pred)
 open import Algebra.FunctionProperties using (Op₂)
 open import Function using (_∘_)
 
-import RoutingLib.Data.Table as Table
+import Data.Vec.Functional as Vector
+import RoutingLib.Data.Vec.Functional as Vector
 
 module RoutingLib.Data.Matrix where
 
@@ -28,7 +29,7 @@ Any P M = ∃₂ λ i j → P (M i j)
 -- Operations
 
 toList : ∀ {a m n} {A : Set a} → Matrix A m n → List A
-toList M = concat (tabulate (λ i → Table.toList (M i)))
+toList M = concat (tabulate (λ i → Vector.toList (M i)))
 
 map : ∀ {a b} {A : Set a} {B : Set b} → (A → B) →
       ∀ {m n} → Matrix A m n → Matrix B m n
@@ -40,24 +41,14 @@ zipWith f M N i j = f (M i j) (N i j)
 
 fold : ∀ {a b} {A : Set a} {B : Set b} →
          (A → B → B) → B → ∀ {m n} → Matrix A m n → B
-fold f e M = Table.foldr (λ t e → Table.foldr f e t) e M
+fold f e M = Vector.foldr (λ t e → Vector.foldr f e t) e M
 
 fold⁺ : ∀ {a} {A : Set a} → Op₂ A → ∀ {m n} → Matrix A (suc m) (suc n) → A
-fold⁺ _•_ {zero}  M = Table.foldr⁺ _•_ (M zero)
-fold⁺ _•_ {suc m} M = Table.foldr⁺ _•_ (M zero) • fold⁺ _•_ (M ∘ suc)
+fold⁺ _•_ {zero}  M = Vector.foldr⁺ _•_ (M zero)
+fold⁺ _•_ {suc m} M = Vector.foldr⁺ _•_ (M zero) • fold⁺ _•_ (M ∘ suc)
 
 max⁺ : ∀ {m n} → Matrix ℕ (suc m) (suc n) → ℕ
 max⁺ M = fold⁺ _⊔_ M
 
 min⁺ : ∀ {m n} → Matrix ℕ (suc m) (suc n) → ℕ
 min⁺ M = fold⁺ _⊓_ M
-
-
-
-module _ {a} {A : Set a} where
-
-  strip : ∀ {m n} (p : Subset m) (q : Subset n) → Matrix A m n → Matrix A ∣ p ∣ ∣ q ∣
-  strip p q M = Table.strip p (Table.strip q ∘ M)
-
-  grow : ∀ {m n} (p : Subset m) (q : Subset n) → Matrix A m n → Matrix A ∣ p ∣ ∣ q ∣ → Matrix A m n
-  grow p q T M = Table.grow p T (λ i → Table.grow q (Table.strip p T i) (M i))

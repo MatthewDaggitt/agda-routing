@@ -11,8 +11,7 @@ module RoutingLib.Relation.Binary.Construct.NonStrictToStrict.PartialOrder
   {a ℓ₁ ℓ₂} (poset : Poset a ℓ₁ ℓ₂) where
 
   open Poset poset
-  open NonStrictToStrict _≈_ _≤_ using (_<_; <⇒≤) public
-  open NonStrictToStrict′ _≈_ _≤_ using (<⇒≉; ≤∧≉⇒<) public
+  open NonStrictToStrict _≈_ _≤_ using (_<_; <⇒≤; <⇒≉; ≤∧≉⇒<) public
 
   <-strictPartialOrder : StrictPartialOrder a ℓ₁ _
   <-strictPartialOrder = record
@@ -37,10 +36,10 @@ module RoutingLib.Relation.Binary.Construct.NonStrictToStrict.PartialOrder
   ≤-<-trans = NonStrictToStrict.≤-<-trans _ _≤_ trans antisym (proj₂ ≤-resp-≈)
 
   <⇒≱ : ∀ {x y} → x < y → ¬ (y ≤ x)
-  <⇒≱ = NonStrictToStrict′.<⇒≱ _ _≤_ antisym
+  <⇒≱ = NonStrictToStrict.<⇒≱ _ _≤_ antisym
 
   ≤⇒≯ : ∀ {x y} → x ≤ y → ¬ (y < x)
-  ≤⇒≯ = NonStrictToStrict′.≤⇒≯ _ _≤_ antisym
+  ≤⇒≯ = NonStrictToStrict.≤⇒≯ _ _≤_ antisym
 
   <-respˡ-≈ : _<_ Respectsˡ _≈_
   <-respˡ-≈ = NonStrictToStrict.<-respˡ-≈ _ _≤_ Eq.trans (proj₂ ≤-resp-≈)

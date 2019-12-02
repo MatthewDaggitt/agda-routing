@@ -11,6 +11,7 @@ open import Data.List.Relation.Pointwise
   using (Pointwise; []; _∷_)
 open import Data.List.Relation.Unary.AllPairs
   using (AllPairs; []; _∷_)
+open import Data.List.Relation.Unary.Unique.Setoid
 open import Data.Fin using (Fin; toℕ; zero; suc)
 open import Data.Maybe using (Maybe; just; nothing)
 open import Data.Maybe.Properties using (just-injective)

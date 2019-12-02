@@ -4,7 +4,7 @@ open import Relation.Binary
 
 open import RoutingLib.Algebra.Structures
 
-module RoutingLib.Algebra where
+module RoutingLib.Algebra.Bundles where
 
 record DecMagma c ℓ : Set (suc (c ⊔ ℓ)) where
   infixl 7 _∙_

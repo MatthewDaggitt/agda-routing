@@ -29,7 +29,8 @@ open import RoutingLib.Data.List.Relation.Binary.Sublist.Setoid S
 open import RoutingLib.Data.List.Relation.Binary.Sublist.Setoid.Properties
 import RoutingLib.Data.List.Relation.Binary.Equality.Setoid S as Eq
 open import RoutingLib.Data.Fin.Properties
-open import RoutingLib.Relation.Nullary
+open import RoutingLib.Relation.Nullary.Finite.Bijection.Setoid
+import RoutingLib.Relation.Nullary.Finite.Bijection.Setoid.Properties as FiniteProperties
 open import RoutingLib.Function.Reasoning
 
 ------------------------------------------------------------------------
@@ -54,7 +55,8 @@ module ExtensionRespecting⇒HeightFunction
   {ℓ₂} (extRespOrder : ExtensionRespectingOrder alg A ℓ₂) (finite : IsFinite alg) where
 
   open ExtensionRespectingOrder extRespOrder hiding (_≟_) renaming (_<_ to _<ʳ_; _<?_ to _<ʳ?_)
-  open Finiteₛ finite hiding (_≟_; cong)
+  open Finite finite hiding (cong)
+  open FiniteProperties finite hiding (_≟_)
   
   <-resp₂-≈ : ∀ {w x y z} → w ≈ x → y ≈ z → w <ʳ y → x <ʳ z
   <-resp₂-≈ w≈y y≈z = <-respʳ-≈ y≈z ∘ <-respˡ-≈ w≈y

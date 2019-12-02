@@ -30,7 +30,7 @@ open import Data.Maybe using (Maybe; nothing; just)
 open import Data.Nat using (suc)
 open import Data.Product using (Σ; _×_; _,_; proj₁)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
-open import Function using (_on_)
+open import Function
 open import Level using (_⊔_) renaming (zero to 0ℓ)
 open import Relation.Binary as B hiding (Decidable)
 open import Relation.Binary.PropositionalEquality using (inspect; [_]; _≡_; _≢_; refl; sym; trans)
@@ -41,6 +41,8 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Relation.Nullary.Decidable using (toSum)
+open import RoutingLib.Relation.Nullary.Finite.List.Setoid.Properties
+  using (Finite⇒Finiteₛ; via-dec-surjection)
 
 open import RoutingLib.Data.Path.CertifiedI
 open import RoutingLib.Data.Path.CertifiedI.Enumeration
@@ -293,6 +295,22 @@ isRoutingAlgebraᶜ = record
   }
 
 ------------------------------------------------------------------------------
+-- There's a surjection between paths and consistent routes
+
+fromPath : Path n → CRoute
+fromPath p = weight A p , weightᶜ p
+
+fromPath-surjective : Surjective (_≈ₚ_ {n = n}) _≈ᶜ_ fromPath
+fromPath-surjective (y , yᶜ) = path y , yᶜ
+
+fromPath-surjection : Surjection (ℙₛ n) Sᶜ
+fromPath-surjection = record
+  { f          = fromPath
+  ; cong       = weight-cong
+  ; surjective = fromPath-surjective
+  }
+
+------------------------------------------------------------------------------
 -- The consistent algebra preserves strict increasingness and is always
 -- guaranteed to be finite (as the set of simple paths in the network is
 -- finite).
@@ -306,24 +324,7 @@ isStrictlyIncreasingᶜ sIncr (valid (k , l) , _)     = sIncr (A k l)
 isStrictlyIncreasingᶜ sIncr (nothing       , _) r≉∞ = ≈-sym (⊕-identityˡ _) , r≉∞
 
 isFiniteᶜ : IsFinite algebraᶜ
-isFiniteᶜ = record
-  { n         = List.length allCRoutes
-  ; bijection = {!!}
-  }
-  where
-  open Membership Sᶜ using () renaming (_∈_ to _∈ₗ_)
-
-  pathToCRoute : Path n → CRoute
-  pathToCRoute p = weight A p , weightᶜ p
-
-  abstract
-
-    allCRoutes : List CRoute
-    allCRoutes = map pathToCRoute (allPaths n)
-
-    ∈-allCRoutes : ∀ r → r ∈ₗ allCRoutes
-    ∈-allCRoutes (r , rᶜ) = ∈-resp-≈ Sᶜ {x = pathToCRoute (path r)} {r , rᶜ}
-      rᶜ (∈-map⁺ (ℙₛ n) Sᶜ weight-cong (∈-allPaths (path r)))
+isFiniteᶜ = Finite⇒Finiteₛ (via-dec-surjection (finiteₗ n) DSᶜ fromPath-surjection)
 
 ------------------------------------------------------------------------------
 -- Finally the corresponding adjacency matrix for the consitent algebra may be

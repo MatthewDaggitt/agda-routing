@@ -29,7 +29,7 @@ import Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
 import Relation.Binary.EqReasoning as EqReasoning
 
 open import RoutingLib.Routing algebra
-open import RoutingLib.Algebra
+open import RoutingLib.Algebra.Bundles
 open import RoutingLib.Algebra.Structures
 import RoutingLib.Relation.Binary.Construct.NonStrictToStrict as NSTS
 import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.DecTotalOrder as NonStrictToStrict

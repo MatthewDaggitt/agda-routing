@@ -13,10 +13,10 @@ open import Data.Product using (∃₂; _,_)
 open import Data.Fin.Properties using (any?)
 open import Function using (flip)
 open import Relation.Binary
-open import Relation.Binary.Construct.Closure.Transitive using (Plus′)
+open import Relation.Binary.Construct.Closure.Transitive
+  using () renaming (Plus′ to TransitiveClosure)
 open import Relation.Binary.Construct.Closure.Transitive public using ([_]; _∷_)
 
-open import RoutingLib.Relation.Nullary using (Finite)
 open import RoutingLib.Relation.Binary.Construct.Closure.Transitive
 
 --------------------------------------------------------------------------------
@@ -28,7 +28,7 @@ x ↝ y = ∃₂ λ i j → A i j ▷ x ≈ y
 
 -- x can be extended to form y
 _↝*_ : Route → Route → Set _
-_↝*_ = Plus′ _↝_
+_↝*_ = TransitiveClosure _↝_
 
 --------------------------------------------------------------------------------
 -- Properties of _↝_

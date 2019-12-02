@@ -1,8 +1,8 @@
 open import Relation.Binary
-open import RoutingLib.Relation.Nullary
+open import RoutingLib.Relation.Nullary.Finite.Bijection.Setoid
 
 module RoutingLib.Relation.Binary.Construct.Closure.Transitive.Finite
-  {a ℓ r} {S : Setoid a ℓ} (finite : Finiteₛ S)
+  {a ℓ r} {S : Setoid a ℓ} (finite : Finite S)
   (let open Setoid S renaming (Carrier to A))
   {R : Rel _ r} (resp : R Respects₂ _≈_)
   where
@@ -24,9 +24,10 @@ open import Relation.Unary as U using (Pred)
 
 open import RoutingLib.Data.Fin.Subset
 open import RoutingLib.Data.Fin.Subset.Properties
+open import RoutingLib.Relation.Nullary.Finite.Bijection.Setoid.Properties finite
 
-open Finiteₛ finite
-    
+open Finite finite
+   
 R⁺ = (Plus′ R)
 respʳ = proj₁ resp
 respˡ = proj₂ resp
@@ -118,7 +119,7 @@ R⁺ᶠ? R? {P} (acc rec) x y with f x ∈? P
 ... | no fx∉p  = no λ {(nil fx∈p _) → fx∉p fx∈p; (cons fx∈p _ _) → fx∉p fx∈p}
 ... | yes fx∈p with R? x y
 ...   | yes Rxy = yes (nil fx∈p Rxy)
-...   | no ¬Rxy with any? finite (λ z → R? x z ×-dec R⁺ᶠ? R? (rec ∣ P - f x ∣ (∣p-i∣<∣p∣ fx∈p)) z y)
+...   | no ¬Rxy with any? (λ z → R? x z ×-dec R⁺ᶠ? R? (rec ∣ P - f x ∣ (∣p-i∣<∣p∣ fx∈p)) z y)
   (λ w≈z → Prod.map (respʳ w≈z) (R⁺ᶠ-respʳ-≈ w≈z))
 ...     | no not               = no λ {(nil _ Rxy) → ¬Rxy Rxy; (cons {y = z} _ Rxz R⁺zy) → not (z , Rxz , R⁺zy)}
 ...     | yes (z , Rxz , R⁺zy) = yes (cons fx∈p Rxz R⁺zy)

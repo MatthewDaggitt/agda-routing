@@ -30,6 +30,7 @@ open CertifiedProperties public
   ; ≈ₚ-refl     to ≈ₚᵛ-refl
   ; ≈ₚ-sym      to ≈ₚᵛ-sym
   ; ≈ₚ-trans    to ≈ₚᵛ-trans
+  ; _≟ₚ_        to _≟ₚᵛ_
   ; ℙₛ          to ℙᵛₛ
   ; length-cong to lengthᵛ-cong
   ; |p|<n       to |pᵛ|<n
@@ -86,15 +87,10 @@ module _ {n : ℕ} where
 
   ≈ₚ-trans : Transitive (_≈ₚ_ {n})
   ≈ₚ-trans = Pointwise.trans ≈ₚᵛ-trans
-{-
+
   _≟ₚ_ : Decidable (_≈ₚ_ {n})
-  invalid ≟ₚ invalid = yes invalid
-  invalid ≟ₚ valid q = no λ()
-  valid p ≟ₚ invalid  = no λ()
-  valid p ≟ₚ valid q with NEP._≟ₚ_ p q
-  ... | no  p≉q = no (λ{(valid p≈q) → p≉q p≈q})
-  ... | yes p≈q = yes (valid p≈q)
--}
+  _≟ₚ_ = Pointwise.dec _≟ₚᵛ_
+
 module _ (n : ℕ) where
 
   ≈ₚ-isEquivalence : IsEquivalence (_≈ₚ_ {n})
@@ -103,19 +99,23 @@ module _ (n : ℕ) where
     ; sym   = ≈ₚ-sym
     ; trans = ≈ₚ-trans
     }
-{-
+
   ≈ₚ-isDecEquivalence : IsDecEquivalence (_≈ₚ_ {n})
   ≈ₚ-isDecEquivalence = record
     { isEquivalence = ≈ₚ-isEquivalence
     ; _≟_           = _≟ₚ_
     }
--}
+
   ℙₛ : Setoid 0ℓ 0ℓ
-  ℙₛ = record { isEquivalence = ≈ₚ-isEquivalence }
-{-
+  ℙₛ = record
+    { isEquivalence = ≈ₚ-isEquivalence
+    }
+
   ℙₛ? : DecSetoid 0ℓ 0ℓ
-  ℙₛ? = record { isDecEquivalence = ≈ₚ-isDecEquivalence }
--}
+  ℙₛ? = record
+    { isDecEquivalence = ≈ₚ-isDecEquivalence
+    }
+
 
 ----------------------------------------------------------------------------
 -- Length

@@ -1,6 +1,8 @@
-open import Data.List using (lookup)
+open import Data.List using (List; lookup; length)
 open import Data.List.Any as Any using (Any; here; there; index)
+open import Data.Fin using (Fin)
 open import Relation.Unary using (Pred)
+open import Relation.Binary.PropositionalEquality
 
 module RoutingLib.Data.List.Relation.Unary.Any.Properties where
 

@@ -48,7 +48,7 @@ open import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra isRoutingAlgebr
 --------------------------------------------------------------------------------
 -- Proof for an individual adjacency matrix
 
-open HeightFunction heightFunction
+open HeightFunction heightFunction public
 open CoreVectorBasedRouting algebra A
 open CoreVectorBasedRoutingProperties isRoutingAlgebra A
 

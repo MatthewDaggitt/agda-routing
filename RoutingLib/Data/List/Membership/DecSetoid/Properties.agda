@@ -9,30 +9,28 @@ open import RoutingLib.Data.List
 import RoutingLib.Data.List.Membership.DecSetoid as DecMembership
 import RoutingLib.Data.List.Membership.Setoid.Properties as SetoidProperties
 
-module RoutingLib.Data.List.Membership.DecSetoid.Properties where
+module RoutingLib.Data.List.Membership.DecSetoid.Properties {c ℓ} (DS : DecSetoid c ℓ) where
 
-  open SetoidProperties public
+open SetoidProperties public
 
-  module _ {c ℓ} (DS : DecSetoid c ℓ) where
+open DecSetoid DS renaming (Carrier to A; refl to ≈-refl; setoid to S)
 
-    open DecSetoid DS renaming (Carrier to A; refl to ≈-refl; setoid to S)
+open Membership S using (_∈_)
+open DecMembership DS using (deduplicate)
 
-    open Membership S using (_∈_)
-    open DecMembership DS using (deduplicate)
+-- deduplicate
 
-    -- deduplicate
+∈-deduplicate⁺ : ∀ {x xs} → x ∈ xs → x ∈ deduplicate xs
+∈-deduplicate⁺ {y} {x ∷ xs} (here y≈x)   with any (x ≟_) xs
+... | yes x∈xs = ∈-deduplicate⁺ (∈-resp-≈ S (sym y≈x) x∈xs)
+... | no  _    = here y≈x
+∈-deduplicate⁺ {y} {x ∷ xs} (there y∈xs) with any (x ≟_) xs
+... | yes _ = ∈-deduplicate⁺ y∈xs
+... | no  _ = there (∈-deduplicate⁺ y∈xs)
 
-    ∈-deduplicate⁺ : ∀ {x xs} → x ∈ xs → x ∈ deduplicate xs
-    ∈-deduplicate⁺ {y} {x ∷ xs} (here y≈x)   with any (x ≟_) xs
-    ... | yes x∈xs = ∈-deduplicate⁺ (∈-resp-≈ S (sym y≈x) x∈xs)
-    ... | no  _    = here y≈x
-    ∈-deduplicate⁺ {y} {x ∷ xs} (there y∈xs) with any (x ≟_) xs
-    ... | yes _ = ∈-deduplicate⁺ y∈xs
-    ... | no  _ = there (∈-deduplicate⁺ y∈xs)
-
-    ∈-deduplicate⁻ : ∀ {x xs} → x ∈ deduplicate xs → x ∈ xs
-    ∈-deduplicate⁻ {y} {[]} ()
-    ∈-deduplicate⁻ {y} {x ∷ xs} x∈dedup with any (x ≟_) xs | x∈dedup
-    ... | yes _ | x∈dedup[xs]       = there (∈-deduplicate⁻ x∈dedup[xs])
-    ... | no  _ | here y≈x          = here y≈x
-    ... | no  _ | there y∈dedup[xs] = there (∈-deduplicate⁻ y∈dedup[xs])
+∈-deduplicate⁻ : ∀ {x xs} → x ∈ deduplicate xs → x ∈ xs
+∈-deduplicate⁻ {y} {[]} ()
+∈-deduplicate⁻ {y} {x ∷ xs} x∈dedup with any (x ≟_) xs | x∈dedup
+... | yes _ | x∈dedup[xs]       = there (∈-deduplicate⁻ x∈dedup[xs])
+... | no  _ | here y≈x          = here y≈x
+... | no  _ | there y∈dedup[xs] = there (∈-deduplicate⁻ y∈dedup[xs])

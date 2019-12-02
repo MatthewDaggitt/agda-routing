@@ -25,7 +25,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_)
 import RoutingLib.Data.Path.UncertifiedI as UncertifiedPaths
 import RoutingLib.Data.Path.CertifiedI as CertifiedPaths
 open import RoutingLib.Data.Path.UncertifiedI.Properties
-open import RoutingLib.Relation.Nullary
+open import RoutingLib.Relation.Nullary.Finite.Bijection.Setoid using (Finite)
 
 --------------------------------------------------------------------------------
 -- Raw routing algebras --
@@ -65,7 +65,7 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 
   -- Finite = there only exist a finite number of weights
   IsFinite : Set _
-  IsFinite = Finiteₛ S
+  IsFinite = Finite S
 
   Level_DistributiveIn[_,_] : ℕ → Route → Route → Set _
   Level 0       DistributiveIn[ ⊥ , ⊤ ] =

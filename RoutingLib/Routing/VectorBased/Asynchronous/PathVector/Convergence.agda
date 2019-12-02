@@ -21,16 +21,17 @@ module RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence
 
 open import RoutingLib.Routing.VectorBased.Asynchronous alg N
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence using (AMCO)
-open import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.RouteDistanceFunction isRoutingAlgebra
+open import RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.RouteDistanceFunction isRoutingAlgebra
 open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.AMCO alg isRoutingAlgebra N
 open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.HeightFunction alg
 open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.ExtensionRespectingOrder alg
 open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.RouteDistanceFunction isRoutingAlgebra
-
+{-
 F∥-AMCO : AMCO F∥
 F∥-AMCO = begin⟨ {!!} ⟩
-  ∴ {!!}                                           $⟨ (λ fin e p → <ᶠ-extensionRespectingOrder (Aₜ e p) isRoutingAlgebra fin (N-free e p)) ⟩
+  ∴ {!!}                                           $⟨ {!!} ⟩
   ∴ (∀ e p → ExtensionRespectingOrder (Aₜ e p) _)  $⟨ (λ ero e p → extRespOrder⇒heightFunction (Aₜ e p) (ero e p) {!!}) ⟩
   ∴ (∀ e p → HeightFunction (Aₜ e p))              $⟨ (λ hf e p → routeDistanceFunction (Aₜ e p) (hf e p)) ⟩
   ∴ (∀ e p → RouteDistanceFunction (Aₜ e p))       $⟨ amco ⟩
   ∴ AMCO F∥                                        ∎
+-}

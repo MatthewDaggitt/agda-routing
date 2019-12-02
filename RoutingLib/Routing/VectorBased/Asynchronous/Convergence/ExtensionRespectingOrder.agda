@@ -41,7 +41,7 @@ open import RoutingLib.Data.Fin using (_+ₘ_; _-ₘ_)
 open import RoutingLib.Data.List.Relation.Binary.Sublist.Setoid S
 open import RoutingLib.Data.List.Relation.Binary.Sublist.Setoid.Properties S
 open import RoutingLib.Data.FiniteSet renaming (FiniteSet to FiniteSet⁺)
-open import RoutingLib.Relation.Nullary using (Finiteₛ)
+open import RoutingLib.Relation.Nullary.Finite.Bijection.Setoid using (Finite)
 open import RoutingLib.Data.Maybe.Properties
 open import RoutingLib.Relation.Binary using (StrictMinimum)
 import RoutingLib.Relation.Binary.Construct.Union as Union
@@ -225,7 +225,7 @@ module _ (isRoutingAlgebra : IsRoutingAlgebra alg) where
   <ᶠ-resp-≈ : _<ᶠ_ Respects₂ _≈_
   <ᶠ-resp-≈ = <ᶠ-respʳ-≈ , <ᶠ-respˡ-≈
 
-  <ᶠ-dec : Finiteₛ S → Decidable _<ᶠ_
+  <ᶠ-dec : Finite S → Decidable _<ᶠ_
   <ᶠ-dec fin = TransClosure.R⁺? {S = S} fin (Union.resp₂ <₊-resp-≈ ↝-resp-≈) (Union.decidable _<₊?_ _↝?_)
 
   <ᶠ-min : StrictMinimum _≈_ _<ᶠ_ 0#

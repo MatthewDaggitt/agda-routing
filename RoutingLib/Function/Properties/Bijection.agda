@@ -7,8 +7,6 @@ import Relation.Binary.PropositionalEquality as P
 open import Data.Product
 open import Level
 
-open import RoutingLib.Function
-
 private
   variable
     a b ℓ ℓ₁ ℓ₂ : Level
@@ -26,7 +24,7 @@ sym : ∀ {A : Set a} {T : Setoid b ℓ} → Bijection T (P.setoid A) → Biject
 sym {T = T} bij = record
   { f         = g
   ; cong      = reflexive ∘ P.cong g
-  ; bijective = (λ {x} {y} x≈y → P.trans (proj₂ (surjective x)) (P.trans (cong x≈y) (P.sym (proj₂ (surjective y))))) , (λ x → f x , injective (proj₂ (surjective (f x))))
-  }
-  where open Bijection bij; g = proj₁ ∘ surjective; open Setoid T
+  ; bijective = (λ {x} {y} gx≈gy → P.trans (P.trans (P.sym (proj₂ (surjective x))) (cong gx≈gy)) (proj₂ (surjective y))) ,
+                (λ x → f x , injective (proj₂ (surjective (f x))))
+  } where open Bijection bij; g = proj₁ ∘ surjective; open Setoid T
 

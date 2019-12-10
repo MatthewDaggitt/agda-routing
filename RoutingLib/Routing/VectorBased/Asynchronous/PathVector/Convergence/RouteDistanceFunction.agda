@@ -16,7 +16,7 @@ open import Data.Fin.Subset using (Subset; _∈_)
 open import Data.Fin.Dec using (_∈?_)
 open import Data.Nat.Properties hiding (_≟_)
 open import Data.Bool using (if_then_else_)
-open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Data.Sum using (_⊎_; inj₁; inj₂; swap)
 open import Data.Product using (_,_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
@@ -367,14 +367,11 @@ rᶜ≤r {x} {y} x≉y xᶜ yᶜ with x ≟ y
 ... | no  _ with 𝑪? x | 𝑪? y
 ...   | no  xⁱ  | _      = contradiction xᶜ xⁱ
 ...   | yes _   | no  yⁱ = contradiction yᶜ yⁱ
-...   | yes xᶜ' | yes yᶜ' = {!!}
-{-
-begin
-  DV.h (toCRoute xᶜ) ⊔ DV.h (toCRoute yᶜ) ≡⟨ sym (DVP.r[x,y]≡hx⊔hy x≉y) ⟩
-  DV.r (toCRoute xᶜ)  (toCRoute yᶜ)       ≡⟨ DVP.r-cong ≈-refl ≈-refl ⟩
+...   | yes xᶜ' | yes yᶜ' = begin
+  DV.h (toCRoute xᶜ) ⊔ DV.h (toCRoute yᶜ) ≡⟨ sym (DV.r[x,y]≡hx⊔hy x≉y) ⟩
+  DV.r (toCRoute xᶜ)  (toCRoute yᶜ)       ≡⟨ DV.r-cong ≈-refl ≈-refl ⟩
   DV.r (toCRoute xᶜ') (toCRoute yᶜ')      ≤⟨ ≤-refl ⟩
-  rᶜ _ _                                 ∎
--}
+  rᶜ _ _                                  ∎
 
 rᶜ≡r : ∀ {p q} (pᶜ : 𝑪 p) (qᶜ : 𝑪 q) → x ≈ p → y ≈ q → x ≉ y → rᶜ pᶜ qᶜ ≡ r x y
 rᶜ≡r {x} {y} {p} {q} pᶜ qᶜ x≈p y≈q x≉y with x ≟ y | 𝑪? x | 𝑪? y
@@ -403,7 +400,154 @@ r-force-rⁱ X Y r≤Hᶜ+rⁱXₗYₗ {u} {v} Xᵤᵥ≉Yᵤᵥ Xᵤᵥⁱ⊎Y�
 -- r is strictly contracting
 ------------------------------------------------------------------------
 
+open import RoutingLib.Routing.VectorBased.Synchronous algebra A
+import RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Properties as PathVectorProperties
 
+open PathVectorProperties isRoutingAlgebra isPathAlgebra A
+
+rⁱ-strContrOrbits-FX : ∀ {X i j} → 𝑰 (F X i j) →
+                        ∀ {v} → (∀ k l → r (X k l) (F X k l) ≤ v) →
+                        Hᶜ + hⁱ (F X i j) < v
+rⁱ-strContrOrbits-FX {X} {i} {j} FXᵢⱼⁱ {v} r≤v with FXᵢⱼⁱ⇒Xₖⱼⁱ≉FXₖⱼ X i j FXᵢⱼⁱ
+... | (k , Xₖⱼ≉FXₖⱼ , Xₖⱼⁱ , |Xₖⱼ|<|FXᵢⱼ|) = begin-strict
+  Hᶜ + hⁱ (F X i j)                 <⟨ +-monoʳ-< Hᶜ (hⁱ-mono Xₖⱼⁱ FXᵢⱼⁱ |Xₖⱼ|<|FXᵢⱼ|) ⟩
+  Hᶜ + hⁱ (X k j)                   ≤⟨ +-monoʳ-≤ Hᶜ (m≤m⊔n _ _) ⟩
+  Hᶜ + (hⁱ (X k j) ⊔ hⁱ (F X k j))  ≡⟨ H+rⁱ≡r ≈-refl ≈-refl Xₖⱼ≉FXₖⱼ (inj₁ Xₖⱼⁱ) ⟩
+  r (X k j) (F X k j)               ≤⟨ r≤v k j ⟩
+  v                                 ∎
+
+rⁱ-strContrOrbits-F²X : ∀ {X i j} → 𝑰 (F (F X) i j) →
+                         ∀ {v} → (∀ k l → r (X k l) (F X k l) ≤ v) →
+                         Hᶜ + hⁱ (F (F X) i j) < v
+rⁱ-strContrOrbits-F²X {X} {i} {j} F²Xᵢⱼⁱ {v} r≤v with FXᵢⱼⁱ⇒Xₖⱼⁱ≉FXₖⱼ (F X) i j F²Xᵢⱼⁱ
+... | (l , _ , FXₗⱼⁱ , |FXₗⱼ|<|F²Xₗⱼ|) with FXᵢⱼⁱ⇒Xₖⱼⁱ≉FXₖⱼ X l j FXₗⱼⁱ
+...   | (k , Xₖⱼ≉FXₖⱼ , Xₖⱼⁱ , |Xₖⱼ|<|FXₖⱼ|) = begin-strict
+  Hᶜ + hⁱ (F (F X) i j)             <⟨ +-monoʳ-< Hᶜ (hⁱ-mono Xₖⱼⁱ F²Xᵢⱼⁱ (<-trans |Xₖⱼ|<|FXₖⱼ| |FXₗⱼ|<|F²Xₗⱼ|)) ⟩
+  Hᶜ + hⁱ (X k j)                   ≤⟨ +-monoʳ-≤ Hᶜ (m≤m⊔n _ _) ⟩
+  Hᶜ + (hⁱ (X k j) ⊔ hⁱ (F X k j))  ≡⟨ H+rⁱ≡r ≈-refl ≈-refl Xₖⱼ≉FXₖⱼ (inj₁ Xₖⱼⁱ) ⟩
+  r (X k j) (F X k j)               ≤⟨ r≤v k j ⟩
+  v                                 ∎
+
+rⁱ-strContrOn𝑪 : ∀ {X Y i j} → 𝑪ₘ X → 𝑰 (F Y i j) →
+                  ∀ {v} → (∀ k l → r (X k l) (Y k l) ≤ v) →
+                  Hᶜ + rⁱ (F X i j) (F Y i j) < v
+rⁱ-strContrOn𝑪 {X} {Y} {i} {j} Xᶜ FYᵢⱼⁱ {v} r≤v with FXᵢⱼⁱ≈Aᵢₖ▷Xₖⱼ Y i j FYᵢⱼⁱ
+... | (k , FYᵢⱼ≈AᵢₖYₖⱼ , Yₖⱼⁱ) = begin-strict
+  Hᶜ + rⁱ (F X i j) (F Y i j)  ≡⟨ cong (Hᶜ +_) (rⁱxᶜyⁱ≡hⁱyⁱ (F-pres-𝑪ₘ Xᶜ i j) FYᵢⱼⁱ) ⟩
+  Hᶜ + hⁱ (F Y i j)            ≡⟨ cong (Hᶜ +_) (hⁱ-cong FYᵢⱼ≈AᵢₖYₖⱼ) ⟩
+  Hᶜ + hⁱ (A i k ▷ Y k j)      <⟨ +-monoʳ-< Hᶜ (hⁱ-decr (𝑰-cong FYᵢⱼ≈AᵢₖYₖⱼ FYᵢⱼⁱ)) ⟩
+  Hᶜ + hⁱ (Y k j)              ≡⟨ cong (Hᶜ +_) (sym (rⁱxᶜyⁱ≡hⁱyⁱ (Xᶜ k j) Yₖⱼⁱ)) ⟩
+  Hᶜ + rⁱ (X k j) (Y k j)      ≡⟨ H+rⁱ≡r ≈-refl ≈-refl (𝑪𝑰⇒≉ (Xᶜ k j) Yₖⱼⁱ) (inj₂ Yₖⱼⁱ) ⟩
+  r (X k j) (Y k j)            ≤⟨ r≤v k j ⟩
+  v                            ∎
+  where open ≤-Reasoning
+
+rⁱ-strContrOrbits : ∀ {X i j} → 𝑰 (F X i j) ⊎ 𝑰 (F (F X) i j) →
+                     ∀ {v} → (∀ k l → r (X k l) (F X k l) ≤ v) →
+                     Hᶜ + rⁱ (F X i j) (F (F X) i j) < v
+rⁱ-strContrOrbits {X} {i} {j} FXᵢⱼⁱ⊎F²Xᵢⱼⁱ {v} r≤v with ≤-total (hⁱ (F X i j)) (hⁱ (F (F X) i j))
+... | inj₁ hⁱFXᵢⱼ≤hⁱF²Xᵢⱼ = subst (_< v) (sym (cong (Hᶜ +_) (m≤n⇒m⊔n≡n hⁱFXᵢⱼ≤hⁱF²Xᵢⱼ))) (rⁱ-strContrOrbits-F²X (hⁱ-force-𝑰 FXᵢⱼⁱ⊎F²Xᵢⱼⁱ hⁱFXᵢⱼ≤hⁱF²Xᵢⱼ) r≤v)
+... | inj₂ hⁱF²Xᵢⱼ≤hⁱFXᵢⱼ = subst (_< v) (sym (cong (Hᶜ +_) (m≤n⇒n⊔m≡n hⁱF²Xᵢⱼ≤hⁱFXᵢⱼ))) (rⁱ-strContrOrbits-FX {X} {i} {j} (hⁱ-force-𝑰 (swap FXᵢⱼⁱ⊎F²Xᵢⱼⁱ) hⁱF²Xᵢⱼ≤hⁱFXᵢⱼ) r≤v)
+
+
+------------------------------------------------------------------------
+-- rᶜ is contracting in the right way
+{-
+rᶜ-strContr-𝑪𝑪 : ∀ {X Y} → (Xᶜ : 𝑪ₘ X) (Yᶜ : 𝑪ₘ Y) →
+                 ∀ {i j} (FXᵢⱼᶜ : 𝑪 (F X i j)) (FYᵢⱼᶜ : 𝑪 (F Y i j)) →
+                 ∀ {v} → 0 < v → (∀ k l → r (X k l) (Y k l) ≤ v) →
+                 rᶜ FXᵢⱼᶜ FYᵢⱼᶜ < v
+rᶜ-strContr-𝑪𝑪 {X} {Y} Xᶜ Yᶜ {i} {j} FXᵢⱼᶜ FYᵢⱼᶜ {v} 0<v r≤v = begin-strict
+  rᶜ FXᵢⱼᶜ FYᵢⱼᶜ                           ≡⟨⟩
+  DV.r (toCRoute FXᵢⱼᶜ) (toCRoute FYᵢⱼᶜ)   ≡⟨ DV.r-cong ≈-refl ≈-refl ⟩
+  DV.r (cFX i j) (cFY i j)                 ≡⟨ DV.r-cong (F-toCMatrix-commute Xᶜ (F-pres-𝑪ₘ Xᶜ) i j) (F-toCMatrix-commute Yᶜ (F-pres-𝑪ₘ Yᶜ) i j) ⟩
+  DV.r (Fᶜ cX i j) (Fᶜ cY i j)             <⟨ DV.r[FXᵢⱼ,FYᵢⱼ]<v Aᶜ cX cY i j 0<v d≤v ⟩
+  v                                        ∎
+  where
+  cX  = toCMatrix Xᶜ
+  cFX = toCMatrix (F-pres-𝑪ₘ Xᶜ)
+  cY  = toCMatrix Yᶜ
+  cFY = toCMatrix (F-pres-𝑪ₘ Yᶜ)
+  d≤v : ∀ k → cX k j ≉ᶜ cY k j → DV.r (cX k j) (cY k j) ≤ v
+  d≤v k cXₖⱼ≉cYₖⱼ = begin
+    DV.r (cX k j) (cY k j) ≡⟨⟩
+    rᶜ  (Xᶜ k j) (Yᶜ k j) ≡⟨ rᶜ≡r (Xᶜ k j) (Yᶜ k j) ≈-refl ≈-refl cXₖⱼ≉cYₖⱼ ⟩
+    r   (X k j)  (Y k j)  ≤⟨ r≤v k j ⟩
+    v                      ∎
+    where open ≤-Reasoning
+
+rᶜ-strContr-𝑪𝑰 : ∀ {X Y i j} → (𝑰ₘ X × 𝑪ₘ Y) ⊎ (𝑪ₘ X × 𝑰ₘ Y) →
+                 (FXᵢⱼᶜ : 𝑪 (F X i j)) (FYᵢⱼᶜ : 𝑪 (F Y i j)) →
+                 ∀ {v} → (∀ k l → r (X k l) (Y k l) ≤ v) →
+                 rᶜ FXᵢⱼᶜ FYᵢⱼᶜ < v
+rᶜ-strContr-𝑪𝑰 {X} {Y} (inj₁ (Xⁱ , Yᶜ)) FXᵢⱼᶜ FYᵢⱼᶜ {v} r≤v with 𝑰ₘ-witness Xⁱ
+...   | (k , l , Xₖₗⁱ) = begin-strict
+  rᶜ FXᵢⱼᶜ  FYᵢⱼᶜ          <⟨ rᶜ<Hᶜ+x FXᵢⱼᶜ FYᵢⱼᶜ _ ⟩
+  Hᶜ + rⁱ (X k l) (Y k l)  ≡⟨ H+rⁱ≡r ≈-refl ≈-refl (𝑪𝑰⇒≉ (Yᶜ k l) Xₖₗⁱ ∘ ≈-sym) (inj₁ Xₖₗⁱ) ⟩
+  r (X k l) (Y k l)        ≤⟨ r≤v k l ⟩
+  v                        ∎
+  where open ≤-Reasoning
+rᶜ-strContr-𝑪𝑰 {X} {Y} (inj₂ (Xᶜ , Yⁱ)) FXᵢⱼᶜ FYᵢⱼᶜ {v} r≤v with 𝑰ₘ-witness Yⁱ
+... | (k , l , Yₖₗⁱ) = begin-strict
+  rᶜ FXᵢⱼᶜ  FYᵢⱼᶜ          <⟨ rᶜ<Hᶜ+x FXᵢⱼᶜ FYᵢⱼᶜ _ ⟩
+  Hᶜ + rⁱ (X k l) (Y k l)  ≡⟨ H+rⁱ≡r ≈-refl ≈-refl (𝑪𝑰⇒≉ (Xᶜ k l) Yₖₗⁱ) (inj₂ Yₖₗⁱ) ⟩
+  r (X k l) (Y k l)        ≤⟨ r≤v k l ⟩
+  v                        ∎
+  where open ≤-Reasoning
+
+rᶜ-strContrOrbits : ∀ {X i j} →
+                     (FXᵢⱼᶜ : 𝑪 (F X i j)) (F²Xᵢⱼᶜ : 𝑪 (F (F X) i j)) →
+                     ∀ {v} → 0 < v → (∀ k l → r (X k l) (F X k l) ≤ v) →
+                     rᶜ FXᵢⱼᶜ F²Xᵢⱼᶜ < v
+rᶜ-strContrOrbits {X} {i} {j} FXᵢⱼᶜ F²Xᵢⱼᶜ {v} 0<v r≤v with 𝑪ₘ? X | 𝑪ₘ? (F X)
+... | yes Xᶜ | yes FXᶜ = rᶜ-strContr-𝑪𝑪 Xᶜ FXᶜ FXᵢⱼᶜ F²Xᵢⱼᶜ 0<v r≤v
+... | yes Xᶜ | no  FXⁱ = contradiction (F-pres-𝑪ₘ Xᶜ) FXⁱ
+... | no  Xⁱ | yes FXᶜ = rᶜ-strContr-𝑪𝑰 (inj₁ (Xⁱ , FXᶜ)) FXᵢⱼᶜ F²Xᵢⱼᶜ r≤v
+... | no  Xⁱ | no  FXⁱ with 𝑰ₘ-witness FXⁱ
+...   | (m , n , FXₘₙⁱ) with FXᵢⱼⁱ⇒Xₖⱼⁱ≉FXₖⱼ X m n FXₘₙⁱ
+...     | (k , Xₖₙ≉FXₖₙ , Xₖₙⁱ , _) = begin-strict
+  rᶜ FXᵢⱼᶜ  F²Xᵢⱼᶜ          <⟨ rᶜ<Hᶜ+x FXᵢⱼᶜ F²Xᵢⱼᶜ _ ⟩
+  Hᶜ + rⁱ (X k n) (F X k n) ≡⟨ H+rⁱ≡r ≈-refl ≈-refl Xₖₙ≉FXₖₙ (inj₁ Xₖₙⁱ) ⟩
+  r (X k n) (F X k n)       ≤⟨ r≤v k n ⟩
+  v                         ∎
+  where open ≤-Reasoning
+
+rᶜ-strContrOn𝑪 : ∀ {X Y} → 𝑪ₘ X →
+                  ∀ {i j} → (FXᵢⱼᶜ : 𝑪 (F X i j)) (FYᵢⱼᶜ : 𝑪 (F Y i j)) →
+                  ∀ {v} → 0 < v → (∀ k l → r (X k l) (Y k l) ≤ v) →
+                  rᶜ FXᵢⱼᶜ FYᵢⱼᶜ < v
+rᶜ-strContrOn𝑪 {X} {Y} Xᶜ {i} {j} FXᵢⱼᶜ FYᵢⱼᶜ 0<v r≤v with 𝑪ₘ? Y
+... | yes Yᶜ = rᶜ-strContr-𝑪𝑪 Xᶜ Yᶜ FXᵢⱼᶜ FYᵢⱼᶜ 0<v r≤v
+... | no  Yⁱ = rᶜ-strContr-𝑪𝑰 (inj₂ (Xᶜ , Yⁱ)) FXᵢⱼᶜ FYᵢⱼᶜ r≤v
+-}
+
+------------------------------------------------------------------------
+-- r is contracting in the right way
+
+r-strContrOrbits : ∀ {X} →
+                   ∀ {v} → 0 < v → (∀ k l → r (X k l) (F X k l) ≤ v) →
+                   ∀ i j → r (F X i j) (F (F X) i j) < v
+r-strContrOrbits {X} 0<v r≤v i j
+  with F X i j ≟ F (F X) i j | 𝑪? (F X i j) | 𝑪? (F (F X) i j)
+... | yes FXᵢⱼ≈F²Xᵢⱼ | _         | _          = 0<v
+... | no  _          | yes FXᵢⱼᶜ | yes F²Xᵢⱼᶜ  = {!!} --rᶜ-strContrOrbits FXᵢⱼᶜ F²Xᵢⱼᶜ 0<v r≤v
+... | no  _          | no  FXᵢⱼⁱ | _          = rⁱ-strContrOrbits (inj₁ FXᵢⱼⁱ) r≤v
+... | no  _          | yes _     | no  F²Xᵢⱼⁱ = rⁱ-strContrOrbits (inj₂ F²Xᵢⱼⁱ) r≤v
+
+r-strContrOn𝑪 : ∀ {X Y} → 𝑪ₘ X →
+                 ∀ {v} → 0 < v → (∀ k l → r (X k l) (Y k l) ≤ v) →
+                 ∀ i j → r (F X i j) (F Y i j) < v
+r-strContrOn𝑪 {X} {Y} Xᶜ 0<v r≤v i j
+  with F X i j ≟ F Y i j | 𝑪? (F X i j) | 𝑪? (F Y i j)
+... | yes FXᵢⱼ≈FYᵢⱼ | _         | _         = 0<v
+... | no  FXᵢⱼ≉FYᵢⱼ | yes FXᵢⱼᶜ | yes FYᵢⱼᶜ = {!!} --rᶜ-strContrOn𝑪 Xᶜ FXᵢⱼᶜ FYᵢⱼᶜ 0<v r≤v
+... | no  FXᵢⱼ≉FYᵢⱼ | yes _     | no  FYᵢⱼⁱ = rⁱ-strContrOn𝑪 Xᶜ FYᵢⱼⁱ r≤v
+... | no  FXᵢⱼ≉FYᵢⱼ | no  FXᵢⱼⁱ | _         = contradiction (F-pres-𝑪ₘ Xᶜ i j) FXᵢⱼⁱ
+
+r-strContrOn𝑪 : ∀ {X*} → F X* ≈ₘ X* →
+                 ∀ {X v} → 0 < v → (∀ k l → r (X k l) (Y k l) ≤ v) →
+                 ∀ i j → r (F X i j) (F Y i j) < v
+r-strContrOn𝑪 FX*≈X* = ?
 
 ------------------------------------------------------------------------
 -- Route distance function
@@ -414,6 +558,6 @@ routeDistanceFunction = record
   { r                   = r
   ; r-isQuasiSemiMetric = r-isQuasiSemiMetric
   ; r-bounded           = r-bounded
-  ; r-strContrOrbits    = {!!}
+  ; r-strContrOrbits    = r-strContrOrbits
   ; r-strContrFP        = {!!}
   }

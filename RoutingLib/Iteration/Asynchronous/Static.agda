@@ -28,8 +28,6 @@ open import Induction.WellFounded using (Acc; acc)
 open import Induction.Nat using (<-wellFounded)
 
 open import RoutingLib.Data.Nat.Properties using (ℕₛ)
-open import RoutingLib.Data.Table using (Table)
-import RoutingLib.Data.Table.Relation.Binary.Equality as TableEquality
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset as FiniteSubset
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as FiniteSubsetEquality
 open import RoutingLib.Relation.Unary.Indexed using (IPred; _∈ᵢ_; Uᵢ; Universalᵢ)

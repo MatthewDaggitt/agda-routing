@@ -14,7 +14,7 @@ open import Relation.Binary using (Setoid; DecSetoid; Rel; Reflexive; Symmetric;
 open import Relation.Binary.PropositionalEquality as PropositionalEq using (_≡_; refl; cong)
 import Relation.Binary.EqReasoning as EqReasoning
 
-open import RoutingLib.lmv34.Function using (_^_)
+open import RoutingLib.Iteration.Synchronous using (_^_)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 open import RoutingLib.Routing as Routing using () renaming (AdjacencyMatrix to AdjacencyMatrix')
 import RoutingLib.lmv34.Gamma_zero as Gamma_zero
@@ -49,7 +49,6 @@ open Gamma_two isRAlg Imp Prot Exp
 open DecSetoid FinRoute-decSetoid using () renaming (_≈_ to _≈ᵣ_)
 
 import RoutingLib.Data.Matrix.Relation.Binary.Equality as MatrixEquality
---open MatrixEquality ↭-setoid using (_≈ₘ_)
 
 ------------------------------------
 ------------------------------------
@@ -74,11 +73,11 @@ open MatrixEquality ↭-setoid public using (𝕄ₛ) renaming
 
 f[]-cong : ∀ {f f' : Route → Route} → {X : RoutingSet} →
            f ≈ₐ f' → f [ X ] ↭ f' [ X ]
-f[]-cong {f} {f'} {X} f=f' = †-cong (lemma {xs = X} λ {(d , v) → (refl , f=f' v)})
-   where lemma : {f g : Fin n × Route → Fin n × Route} → {xs : RoutingSet} →
-                 (∀ r → f r ≈ᵣ g r) → map f xs ↭ map g xs
+f[]-cong {f} {f'} {X} f=f' = †-cong (lemma {xs = X} f=f')
+   where lemma : {f g : Route → Route} → {xs : RoutingSet} →
+                 (∀ r → f r ≈ g r) → map₂ f xs ↭ map₂ g xs
          lemma {f} {g} {[]} f=g = ↭-refl
-         lemma {f} {g} {x ∷ xs} f=g = prep (f=g x) (lemma {xs = xs} f=g)
+         lemma {f} {g} {(d , v) ∷ xs} f=g = prep (refl , f=g v) (lemma {xs = xs} f=g)
 
 A〚〛-cong : ∀ {F F' V} → (toRouteMapMatrix F) ≈ₐ,₂ (toRouteMapMatrix F') → F 〚 V 〛 ≈ᵥ  F' 〚 V 〛
 A〚〛-cong {F} {F'} {V} F=F' i = ⨁ₛ-cong (λ {q} → f[]-cong {X = V q} (F=F' i q))
@@ -87,16 +86,16 @@ A〚〛-cong {F} {F'} {V} F=F' i = ⨁ₛ-cong (λ {q} → f[]-cong {X = V q} (F
 ↓-cong I=I' i = ⨁ₛ-cong (λ {q} → I=I' i q)
 
 Øᵥ,₂↓=Øᵥ : Øᵥ,₂ ↓ ≈ᵥ Øᵥ
-Øᵥ,₂↓=Øᵥ i = lemma {n}
-  where lemma : ∀ {k} → ⨁ₛ (λ (q : Fin k) → []) ↭ []
-        lemma {zero} = ↭-refl
-        lemma {suc k} = ↭-trans ⊕ₛ-identityₗ (lemma {k})
+Øᵥ,₂↓=Øᵥ i = lemma n
+  where lemma : ∀ k → ⨁ₛ (λ (q : Fin k) → []) ↭ []
+        lemma zero = ↭-refl
+        lemma (suc k) = ↭-trans (⊕ₛ-identityₗ (⨁ₛ (λ (q : Fin k) → []))) (lemma k)
 
 Γ₂,ᵥØ=~M : Γ₂,ᵥ Øᵥ,₂ ≈ᵥ ~ M
 Γ₂,ᵥØ=~M = begin
          Γ₂,ᵥ Øᵥ,₂ ≈⟨ ≈ᵥ-refl ⟩
          Øᵥ,₂ ↓ ⊕ᵥ ~ M ≈⟨ ⊕ᵥ-cong {Øᵥ,₂ ↓} {Øᵥ} {~ M} {~ M} Øᵥ,₂↓=Øᵥ ≈ᵥ-refl ⟩
-         Øᵥ ⊕ᵥ ~ M ≈⟨ ⊕ᵥ-identityₗ ⟩
+         Øᵥ ⊕ᵥ ~ M ≈⟨ ⊕ᵥ-identityₗ (~ M) ⟩
          ~ M ∎
          where open EqReasoning 𝕍ₛ
 

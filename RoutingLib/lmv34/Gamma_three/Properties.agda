@@ -4,6 +4,7 @@ open import Data.Product using (_,_; _×_) renaming (proj₁ to π₁; proj₂ t
 open import Data.List using (List; filter; tabulate; []; _∷_; _++_; map)
 open import Data.List.Relation.Unary.Any using (here; there)
 import Data.List.Membership.DecSetoid as Membership
+import Data.List.Relation.Binary.Permutation.Setoid.Properties as PermutationProperties
 open import Data.Nat using (zero; suc; ℕ; _*_; _+_)
 open import Function using (_∘_)
 open import Level using (_⊔_)
@@ -14,7 +15,7 @@ open import Relation.Binary using (Setoid; DecSetoid; Rel; Reflexive; Symmetric;
 open import Relation.Binary.PropositionalEquality as PropositionalEq using (_≡_; refl; cong)
 import Relation.Binary.EqReasoning as EqReasoning
 
-open import RoutingLib.lmv34.Function using (_^_)
+open import RoutingLib.Iteration.Synchronous using (_^_)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 open import RoutingLib.Routing as Routing using () renaming (AdjacencyMatrix to AdjacencyMatrix')
 import RoutingLib.lmv34.Gamma_zero as Gamma_zero
@@ -53,6 +54,7 @@ open Gamma_three_Algebra isRAlg n
 
 open DecSetoid FinRoute-decSetoid using () renaming (_≈_ to _≈ᵣ_; refl to ≈ᵣ-refl; trans to ≈ᵣ-trans; sym to ≈ᵣ-sym; _≟_ to _≟ᵣ_)
 open Membership FinRoute-decSetoid using (_∈?_; _∈_; _∉_)
+open PermutationProperties FinRoute-setoid using (++⁺; ++-identityˡ; ++-identityʳ; ++-assoc)
 
 ------------------------------------
 -- Γ₃-State
@@ -84,23 +86,6 @@ _≈ₛ_ : Rel Γ₃-State (a ⊔ ℓ)
 
 ------------------------------------
 -- Operation properties
-++-cong : Congruent₂ _↭_ _++_
-++-cong {[]} {[]} A=A' B=B'         = B=B'
-++-cong {x ∷ A} {.x ∷ .A} refl B=B' = prep ≈ᵣ-refl (++-cong refl B=B') 
-++-cong (trans A=A' A'=A'') B=B'    = trans (++-cong A=A' refl) (++-cong A'=A'' B=B')
-++-cong (prep eq A=A') B=B'         = prep eq (++-cong A=A' B=B')
-++-cong (swap eq₁ eq₂ A=A') B=B'    = swap eq₁ eq₂ (++-cong A=A' B=B')
-
-++-identityₗ : LeftIdentity _↭_ Ø _++_
-++-identityₗ xs = ↭-refl
-
-++-identityᵣ : RightIdentity _↭_ Ø _++_
-++-identityᵣ [] = ↭-refl
-++-identityᵣ (x ∷ xs) = prep ≈ᵣ-refl (++-identityᵣ xs)
-
-++-assoc : Associative _↭_ _++_
-++-assoc [] ys zs = ↭-refl
-++-assoc (x ∷ xs) ys zs = prep ≈ᵣ-refl (++-assoc xs ys zs)
 
 -- lmv34: Couldn't find bi-implication in the stdlib
 infix 4 _⇔_
@@ -161,13 +146,13 @@ minus-identityᵣ [] = ↭-refl
 minus-identityᵣ (x ∷ xs) = prep ≈ᵣ-refl (minus-identityᵣ xs)
 
 ∪-cong : Congruent₂ _↭_ _∪_
-∪-cong A=A' B=B' = ++-cong A=A' (minus-cong B=B' A=A')
+∪-cong A=A' B=B' = ++⁺ A=A' (minus-cong B=B' A=A')
 
 ∪-identityₗ : LeftIdentity _↭_ Ø _∪_
 ∪-identityₗ xs = minus-identityᵣ xs
 
 ∪-identityᵣ : RightIdentity _↭_ Ø _∪_
-∪-identityᵣ xs = ++-identityᵣ xs
+∪-identityᵣ xs = ++-identityʳ xs
 
 ∪ᵥ-cong : Congruent₂ _≈ᵥ,₂_ _∪ᵥ_
 ∪ᵥ-cong U=U' V=V' i j = ∪-cong (U=U' i j) (V=V' i j)
@@ -224,7 +209,7 @@ postulate
     -- f only acts on the second projection of the elements in X and Y (leaving the first unchanged), and
     -- X and Y have unique destinations (no two (d, s) and (d, s') with s≠s').
 postulate
-  map-distrib : ∀ {f} {X} {Y} → map f (X - Y) ↭ (map f X) - (map f Y)
+  map-distrib : ∀ {f} {X} {Y} → map₂ f (X - Y) ↭ (map₂ f X) - (map₂ f Y)
 
 ∈-†-lemma₁ : ∀ {X d v} → (d , v) ∈ X → ¬(v ≈ ∞#) → (d , v) ∈ X †
 ∈-†-lemma₁ {(d' , v') ∷ X} (here (d=d' , v=v')) v≠∞ with v' ≟ ∞#
@@ -265,10 +250,10 @@ postulate
 -- Lemma A.6
 f-minus-distrib : ∀ f X Y  → f [ X - Y ] ↭ f [ X ] - f [ Y ] 
 f-minus-distrib f X Y = begin
-                 f [ X - Y ]                                                                    ↭⟨ ↭-refl ⟩
-                 (map (λ {(d , v) → (d , f v)}) (X - Y)) †                                      ↭⟨ †-cong (map-distrib {X = X}) ⟩
-                 ((map (λ {(d , v) → (d , f v)}) X) - (map (λ {(d , v) → (d , f v)}) Y)) †      ↭⟨ †-distrib {X = (map (λ {(d , v) → (d , f v)}) X)} ⟩
-                 ((map (λ {(d , v) → (d , f v)}) X) †) - ((map (λ {(d , v) → (d , f v)}) Y) †)  ↭⟨ ↭-refl ⟩
+                 f [ X - Y ]                     ≡⟨⟩
+                 (map₂ f (X - Y)) †              ↭⟨ †-cong (map-distrib {X = X}) ⟩
+                 ((map₂ f X) - (map₂ f Y)) †     ↭⟨ †-distrib {X = (map₂ f X)} ⟩
+                 ((map₂ f X) †) - ((map₂ f Y) †) ≡⟨⟩
                  f [ X ] - f [ Y ] 
                  ∎
                  where open PermutationReasoning

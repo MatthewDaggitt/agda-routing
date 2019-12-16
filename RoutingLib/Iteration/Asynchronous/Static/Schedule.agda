@@ -29,7 +29,7 @@ open import RoutingLib.Data.Range public
 -- Static schedules --
 --------------------------------------------------------------------------------
 -- A schedule dictating the flow of inforamtion within a computation
--- (ala Uresin & Dubois)
+-- (à la Uresin & Dubois)
 --
 -- Schedules are represented as ψ
 

@@ -17,7 +17,7 @@ import Algebra.FunctionProperties.Consequences as Consequences
 open import Algebra.Bundles
 open import Algebra.FunctionProperties.Consequences.Propositional using (sel⇒idem)
 open import Data.Product using (proj₁; _,_)
-open import Data.Fin using (Fin)
+open import Data.Fin using (Fin; zero; suc)
 open import Data.Nat using (zero; suc)
 open import Data.Sum using (inj₁; inj₂)
 open import Function using (_∘_)
@@ -146,67 +146,6 @@ open NonStrictToStrict ≤₊-decTotalOrder public
   ; <-strictPartialOrder to <₊-strictPartialOrder
   ; <-strictTotalOrder   to <₊-strictTotalOrder
   )
-
---------------------------------------------------------------------------------
--- If the algebra is strictly increasing it's also increasing
-
-strIncr⇒incr : IsStrictlyIncreasing algebra → IsIncreasing algebra
-strIncr⇒incr strIncr f x with x ≟ ∞#
-... | no  x≉∞ = proj₁ (strIncr f x≉∞)
-... | yes x≈∞ = ≈-sym (begin
-  (f ▷ x)  ⊕ x  ≈⟨ ⊕-cong (▷-cong f x≈∞) x≈∞ ⟩
-  (f ▷ ∞#) ⊕ ∞# ≈⟨ ⊕-congʳ (▷-fixedPoint f) ⟩
-  ∞#       ⊕ ∞# ≈⟨ ⊕-idem ∞# ⟩
-  ∞#            ≈⟨ ≈-sym x≈∞ ⟩
-  x             ∎)
-  where open EqReasoning S
-
--- If the algebra is strictly increasing then there is no cyclic set of routes
-postulate strIncr⇒∄cyclic : IsStrictlyIncreasing algebra →
-                  ∀ {n} (A : AdjacencyMatrix n) X → ¬ Cyclic _ A X
-{-
-strIncr⇒∄cyclic strInc A ⟦ zero  ∣ X ⟧ cyclic with cyclic 0F
-... | (k , j , AₖⱼX₀≤X₀) = ≤₊⇒≯₊ AₖⱼX₀≤X₀ (strInc (A k j) {!!})
-strIncr⇒∄cyclic strInc A ⟦ suc n ∣ X ⟧ cyclic =
-  strIncr⇒∄cyclic strInc A ⟦ n ∣ X ∘ suc ⟧ (λ i → {!!})
--}
-
--- If the algebra is strictly increasing then every topology is cycle-free
-strIncr⇒cycleFree : IsStrictlyIncreasing algebra →
-                    ∀ {n} (A : AdjacencyMatrix n) → CycleFree _ A
-strIncr⇒cycleFree strIncr A X cyclic = strIncr⇒∄cyclic strIncr A X cyclic
-
---------------------------------------------------------------------------------
--- kᵗʰ-level distributivity properties
-
-isLevelDistrib-shrink : ∀ k {w x y z} → w ≤₊ x → x ≤₊ z → z ≤₊ y →
-                        Level_DistributiveIn[_,_]Alt algebra k w y →
-                        Level_DistributiveIn[_,_]Alt algebra k x z
-isLevelDistrib-shrink zero    w≤x x≤z z≤y (lift w≈y) = lift (≤₊-antisym x≤z (≤₊-trans z≤y (≤₊-respˡ-≈ w≈y w≤x)))
-isLevelDistrib-shrink (suc k) {w} {x} {y} {z} w≤x _ z≤y distrib f x≤u u≤z x≤v v≤z =
-  (distrib f
-    (≤₊-trans w≤x x≤u)
-    (≤₊-trans u≤z z≤y)
-    (≤₊-trans w≤x x≤v)
-    (≤₊-trans v≤z z≤y))
-
-isLevelDistrib-equal : ∀ k {x y} → x ≈ y → Level_DistributiveIn[_,_]Alt algebra k x y 
-isLevelDistrib-equal zero    {_} {_} x≈y = lift x≈y
-isLevelDistrib-equal (suc k) {x} {y} x≈y f {u} {v} x≤u u≤y x≤v v≤y =
-  isLevelDistrib-equal k (begin
-    f ▷ (u ⊕ v)       ≈⟨ ▷-cong f (⊕-congˡ (≈-sym u≈v)) ⟩
-    f ▷ (u ⊕ u)       ≈⟨ ▷-cong f (⊕-idem u) ⟩
-    f ▷ u             ≈⟨ ≈-sym (⊕-idem (f ▷ u)) ⟩
-    (f ▷ u) ⊕ (f ▷ u) ≈⟨ ⊕-congˡ (▷-cong f u≈v) ⟩
-    (f ▷ u) ⊕ (f ▷ v) ∎)
-    where
-    open EqReasoning S
-    u≈v : u ≈ v
-    u≈v = begin
-      u  ≈⟨ ≤₊-antisym (≤₊-respʳ-≈ (≈-sym x≈y) u≤y) x≤u ⟩
-      x  ≈⟨ ≤₊-antisym x≤v (≤₊-respʳ-≈ (≈-sym x≈y) v≤y) ⟩
-      v  ∎
-
 
 ------------------------------------------------------------------------------
 -- Other

@@ -4,9 +4,9 @@ open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
 open import Data.Nat hiding (_≟_)
 
 module RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.RouteDistanceFunction
-  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
+  {n} (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
   (A : AdjacencyMatrix algebra n)
   (1≤n : 1 ≤ n)
   where
@@ -17,7 +17,8 @@ open import Data.Fin.Dec using (_∈?_)
 open import Data.Nat.Properties hiding (_≟_)
 open import Data.Bool using (if_then_else_)
 open import Data.Sum using (_⊎_; inj₁; inj₂; swap)
-open import Data.Product using (_,_)
+open import Data.Product using (_×_; _,_)
+open import Function.Base using (_∘_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary using (¬_; yes; no)
@@ -43,6 +44,8 @@ open Consistent isRoutingAlgebra isPathAlgebra A
 
 postulate heightFunctionᶜ : HeightFunction algebraᶜ Aᶜ
 
+
+open import RoutingLib.Routing.VectorBased.Synchronous algebraᶜ Aᶜ using () renaming (F to Fᶜ)
 import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.RouteDistanceFunction
   isRoutingAlgebraᶜ Aᶜ heightFunctionᶜ as DV
 
@@ -400,7 +403,7 @@ r-force-rⁱ X Y r≤Hᶜ+rⁱXₗYₗ {u} {v} Xᵤᵥ≉Yᵤᵥ Xᵤᵥⁱ⊎Y�
 -- r is strictly contracting
 ------------------------------------------------------------------------
 
-open import RoutingLib.Routing.VectorBased.Synchronous algebra A
+open import RoutingLib.Routing.VectorBased.Synchronous algebra A hiding (_≈ₘ_)
 import RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Properties as PathVectorProperties
 
 open PathVectorProperties isRoutingAlgebra isPathAlgebra A
@@ -452,7 +455,7 @@ rⁱ-strContrOrbits {X} {i} {j} FXᵢⱼⁱ⊎F²Xᵢⱼⁱ {v} r≤v with ≤-t
 
 ------------------------------------------------------------------------
 -- rᶜ is contracting in the right way
-{-
+
 rᶜ-strContr-𝑪𝑪 : ∀ {X Y} → (Xᶜ : 𝑪ₘ X) (Yᶜ : 𝑪ₘ Y) →
                  ∀ {i j} (FXᵢⱼᶜ : 𝑪 (F X i j)) (FYᵢⱼᶜ : 𝑪 (F Y i j)) →
                  ∀ {v} → 0 < v → (∀ k l → r (X k l) (Y k l) ≤ v) →
@@ -461,7 +464,7 @@ rᶜ-strContr-𝑪𝑪 {X} {Y} Xᶜ Yᶜ {i} {j} FXᵢⱼᶜ FYᵢⱼᶜ {v} 0<v
   rᶜ FXᵢⱼᶜ FYᵢⱼᶜ                           ≡⟨⟩
   DV.r (toCRoute FXᵢⱼᶜ) (toCRoute FYᵢⱼᶜ)   ≡⟨ DV.r-cong ≈-refl ≈-refl ⟩
   DV.r (cFX i j) (cFY i j)                 ≡⟨ DV.r-cong (F-toCMatrix-commute Xᶜ (F-pres-𝑪ₘ Xᶜ) i j) (F-toCMatrix-commute Yᶜ (F-pres-𝑪ₘ Yᶜ) i j) ⟩
-  DV.r (Fᶜ cX i j) (Fᶜ cY i j)             <⟨ DV.r[FXᵢⱼ,FYᵢⱼ]<v Aᶜ cX cY i j 0<v d≤v ⟩
+  DV.r (Fᶜ cX i j) (Fᶜ cY i j)             <⟨ DV.r[FXᵢⱼ,FYᵢⱼ]<v cX cY i j 0<v d≤v ⟩
   v                                        ∎
   where
   cX  = toCMatrix Xᶜ
@@ -519,7 +522,6 @@ rᶜ-strContrOn𝑪 : ∀ {X Y} → 𝑪ₘ X →
 rᶜ-strContrOn𝑪 {X} {Y} Xᶜ {i} {j} FXᵢⱼᶜ FYᵢⱼᶜ 0<v r≤v with 𝑪ₘ? Y
 ... | yes Yᶜ = rᶜ-strContr-𝑪𝑪 Xᶜ Yᶜ FXᵢⱼᶜ FYᵢⱼᶜ 0<v r≤v
 ... | no  Yⁱ = rᶜ-strContr-𝑪𝑰 (inj₂ (Xᶜ , Yⁱ)) FXᵢⱼᶜ FYᵢⱼᶜ r≤v
--}
 
 ------------------------------------------------------------------------
 -- r is contracting in the right way
@@ -530,7 +532,7 @@ r-strContrOrbits : ∀ {X} →
 r-strContrOrbits {X} 0<v r≤v i j
   with F X i j ≟ F (F X) i j | 𝑪? (F X i j) | 𝑪? (F (F X) i j)
 ... | yes FXᵢⱼ≈F²Xᵢⱼ | _         | _          = 0<v
-... | no  _          | yes FXᵢⱼᶜ | yes F²Xᵢⱼᶜ  = {!!} --rᶜ-strContrOrbits FXᵢⱼᶜ F²Xᵢⱼᶜ 0<v r≤v
+... | no  _          | yes FXᵢⱼᶜ | yes F²Xᵢⱼᶜ = rᶜ-strContrOrbits FXᵢⱼᶜ F²Xᵢⱼᶜ 0<v r≤v
 ... | no  _          | no  FXᵢⱼⁱ | _          = rⁱ-strContrOrbits (inj₁ FXᵢⱼⁱ) r≤v
 ... | no  _          | yes _     | no  F²Xᵢⱼⁱ = rⁱ-strContrOrbits (inj₂ F²Xᵢⱼⁱ) r≤v
 
@@ -540,14 +542,18 @@ r-strContrOn𝑪 : ∀ {X Y} → 𝑪ₘ X →
 r-strContrOn𝑪 {X} {Y} Xᶜ 0<v r≤v i j
   with F X i j ≟ F Y i j | 𝑪? (F X i j) | 𝑪? (F Y i j)
 ... | yes FXᵢⱼ≈FYᵢⱼ | _         | _         = 0<v
-... | no  FXᵢⱼ≉FYᵢⱼ | yes FXᵢⱼᶜ | yes FYᵢⱼᶜ = {!!} --rᶜ-strContrOn𝑪 Xᶜ FXᵢⱼᶜ FYᵢⱼᶜ 0<v r≤v
+... | no  FXᵢⱼ≉FYᵢⱼ | yes FXᵢⱼᶜ | yes FYᵢⱼᶜ = rᶜ-strContrOn𝑪 Xᶜ FXᵢⱼᶜ FYᵢⱼᶜ 0<v r≤v
 ... | no  FXᵢⱼ≉FYᵢⱼ | yes _     | no  FYᵢⱼⁱ = rⁱ-strContrOn𝑪 Xᶜ FYᵢⱼⁱ r≤v
 ... | no  FXᵢⱼ≉FYᵢⱼ | no  FXᵢⱼⁱ | _         = contradiction (F-pres-𝑪ₘ Xᶜ i j) FXᵢⱼⁱ
 
-r-strContrOn𝑪 : ∀ {X*} → F X* ≈ₘ X* →
-                 ∀ {X v} → 0 < v → (∀ k l → r (X k l) (Y k l) ≤ v) →
-                 ∀ i j → r (F X i j) (F Y i j) < v
-r-strContrOn𝑪 FX*≈X* = ?
+r-strContrOnFixedPoints : ∀ {X*} → F X* ≈ₘ X* →
+                          ∀ {X v} → 0 < v → (∀ k l → r (X* k l) (X k l) ≤ v) →
+                          ∀ i j → r (X* i j) (F X i j) < v
+r-strContrOnFixedPoints {X*} FX*≈X* {X} {v} 0<v r≤v i j = begin-strict
+  r (X* i j) (F X i j)   ≡⟨ r-cong (≈-sym (FX*≈X* i j)) ≈-refl ⟩
+  r (F X* i j) (F X i j) <⟨ r-strContrOn𝑪 (fixedPointᶜ FX*≈X*) 0<v r≤v i j ⟩
+  v                      ∎
+  where open ≤-Reasoning
 
 ------------------------------------------------------------------------
 -- Route distance function
@@ -559,5 +565,5 @@ routeDistanceFunction = record
   ; r-isQuasiSemiMetric = r-isQuasiSemiMetric
   ; r-bounded           = r-bounded
   ; r-strContrOrbits    = r-strContrOrbits
-  ; r-strContrFP        = {!!}
+  ; r-strContrFP        = r-strContrOnFixedPoints
   }

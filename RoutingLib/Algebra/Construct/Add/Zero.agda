@@ -10,7 +10,7 @@ open import Data.Sum using (inj₁; inj₂)
 open import Data.Maybe using (Maybe)
 open import Data.Product using (_,_)
 
-open import RoutingLib.Algebra.FunctionProperties
+open import RoutingLib.Algebra.Definitions
 
 module RoutingLib.Algebra.Construct.Add.Zero {a} {A : Set a} (_⊕_ : Op₂ A) where
 

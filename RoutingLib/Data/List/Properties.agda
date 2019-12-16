@@ -32,7 +32,7 @@ open import Relation.Unary.Properties using (U-Universal)
 
 open import RoutingLib.Data.List
 open import RoutingLib.Data.Nat.Properties
-open import RoutingLib.Algebra.FunctionProperties
+open import RoutingLib.Algebra.Definitions
 
 module RoutingLib.Data.List.Properties where
 

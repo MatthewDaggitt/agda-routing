@@ -70,7 +70,7 @@ import RoutingLib.Relation.Binary.Construct.Closure.Transitive as TransClosure
 record IsExtensionRespectingOrder {ℓ₂} (_<_ : Rel Route ℓ₂) : Set (a ⊔ ℓ ⊔ ℓ₂) where
   field
     isDecStrictPartialOrder : IsDecStrictPartialOrder _≈_ _<_
-    ↝⇒<                     : _↝_  ⇒ _<_
+    ↝ₛ⇒<                    : _↝ₛ_ ⇒ _<_
     <₊⇒<                    : _<₊_ ⇒ _<_
     <-min                   : StrictMinimum _≈_ _<_ 0#
 
@@ -108,8 +108,8 @@ module _ (isRoutingAlgebra : IsRoutingAlgebra alg) where
   ⊴-≤₊-trans (k , j , Aₖⱼ▷x≤y) y≤z = k , j , ≤₊-trans Aₖⱼ▷x≤y y≤z
 
   -- Extended by trivially implies domination.
-  ↝⇒⊴ : _↝_ ⇒ _⊴_
-  ↝⇒⊴ (i , j , Aᵢⱼ▷x≈y) = i , j , ≤₊-reflexive Aᵢⱼ▷x≈y
+  ↝ₛ⇒⊴ : _↝ₛ_ ⇒ _⊴_
+  ↝ₛ⇒⊴ ((i , j , Aᵢⱼ▷x≈y) , _) = i , j , ≤₊-reflexive Aᵢⱼ▷x≈y
 
   --------------------------------------------------------------------------------
   -- An ordering over routes
@@ -132,7 +132,7 @@ module _ (isRoutingAlgebra : IsRoutingAlgebra alg) where
   infix 4 _<ᶠ_
 
   _<ᶠ_ : Rel Route (a ⊔ ℓ)
-  _<ᶠ_ = TransitiveClosure (_<₊_ ∪ _↝_)
+  _<ᶠ_ = TransitiveClosure (_<₊_ ∪ _↝ₛ_)
 
   -- Given two related routes, i.e. path through this graph, we identify the set
   -- of routes that are extended. If extensions exist in the path we return
@@ -169,10 +169,10 @@ module _ (isRoutingAlgebra : IsRoutingAlgebra alg) where
   -- in the path (if it exists) must be dominated by `v`.
   y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v : ∀ {v x y} → y ≤₊ v → (x<ᶠy : x <ᶠ y) → All (λ w → last w ⊴ v) ⟦ x<ᶠy ⟧↝
   y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v y≤v [ inj₁ x<y ]      = nothing
-  y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v y≤v [ inj₂ x↝y ]      = just (⊴-≤₊-trans (↝⇒⊴ x↝y) y≤v)
+  y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v y≤v [ inj₂ x↝y ]      = just (⊴-≤₊-trans (↝ₛ⇒⊴ x↝y) y≤v)
   y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v y≤v (inj₁ x<z ∷ z<ᶠy) = y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v y≤v z<ᶠy
   y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v {v} y≤v (inj₂ x↝w ∷ w<ᶠy) with ⟦ w<ᶠy ⟧↝ | inspect ⟦_⟧↝ w<ᶠy
-  ... | nothing | [ eq ] = just (⊴-≤₊-trans (↝⇒⊴ x↝w) (≤₊-trans (proj₁ (¬⟦x<ᶠy⟧↝⇒x<y w<ᶠy (subst (λ v → ¬ Is-just v) (sym eq) λ()))) y≤v)) 
+  ... | nothing | [ eq ] = just (⊴-≤₊-trans (↝ₛ⇒⊴ x↝w) (≤₊-trans (proj₁ (¬⟦x<ᶠy⟧↝⇒x<y w<ᶠy (subst (λ v → ¬ Is-just v) (sym eq) λ()))) y≤v)) 
   ... | just q  | [ eq ] = just (subst (λ v → last v ⊴ _) (to-witness-subst eq) (All-witness test (y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v y≤v w<ᶠy)))
     where
     test : Is-just ⟦ w<ᶠy ⟧↝
@@ -187,7 +187,7 @@ module _ (isRoutingAlgebra : IsRoutingAlgebra alg) where
   ... | nothing | _      = just λ()
   ... | just v  | [ eq ] = just λ
     -- Please don't ask about this monstrosity. Horrible hacks around definitional equality of `to-witness`
-    { 0F      → ⊴-≤₊-trans (↝⇒⊴ x↝z) (subst (λ q → z ≤₊ FiniteSet⁺.x q 0F) (to-witness-subst eq) (All-witness test (v≤x⇒v≤⟦x<ᶠy⟧↝₀ ≤₊-refl z<ᶠy)))
+    { 0F      → ⊴-≤₊-trans (↝ₛ⇒⊴ x↝z) (subst (λ q → z ≤₊ FiniteSet⁺.x q 0F) (to-witness-subst eq) (All-witness test (v≤x⇒v≤⟦x<ᶠy⟧↝₀ ≤₊-refl z<ᶠy)))
     ; (suc i) → subst (λ v → ∀ i → iᵗʰ v (inject₁ i) ⊴ iᵗʰ v (suc i)) (to-witness-subst eq) (All-witness test (⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ z<ᶠy)) i
     }
     where
@@ -203,12 +203,13 @@ module _ (isRoutingAlgebra : IsRoutingAlgebra alg) where
   <ᶠ-irrefl : CycleFree A → Irreflexive _≈_ _<ᶠ_
   <ᶠ-irrefl cf x≈y x<ᶠy with IsJust? ⟦ x<ᶠy ⟧↝
   ... | no  ¬∣x<ᶠy∣↝ = <₊-irrefl x≈y (¬⟦x<ᶠy⟧↝⇒x<y x<ᶠy ¬∣x<ᶠy∣↝)
-  ... | yes ∣x<ᶠy∣↝  = cf (to-witness ∣x<ᶠy∣↝) ∣x<ᶠy∣↝-cyclic
+  ... | yes ∣x<ᶠy∣↝  = cf (to-witness ∣x<ᶠy∣↝) ⟦x↝y⟧↝≉∞ ∣x<ᶠy∣↝-cyclic
     where
-    ⟦x<ᶠy⟧₋₁⊴x        = All-witness ∣x<ᶠy∣↝ (y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v ≤₊-refl x<ᶠy)
-    x≤⟦x<ᶠy⟧₀         = All-witness ∣x<ᶠy∣↝ (v≤x⇒v≤⟦x<ᶠy⟧↝₀ (≤₊-reflexive (≈-sym x≈y)) x<ᶠy)
-    ⟦x<ᶠy⟧ᵢ⊴⟦x<ᶠy⟧ᵢ₊₁ = All-witness ∣x<ᶠy∣↝ (⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ x<ᶠy)
-
+    ⟦x<ᶠy⟧₋₁⊴x         = All-witness ∣x<ᶠy∣↝ (y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v ≤₊-refl x<ᶠy)
+    x≤⟦x<ᶠy⟧₀          = All-witness ∣x<ᶠy∣↝ (v≤x⇒v≤⟦x<ᶠy⟧↝₀ (≤₊-reflexive (≈-sym x≈y)) x<ᶠy)
+    ⟦x<ᶠy⟧ᵢ⊴⟦x<ᶠy⟧ᵢ₊₁  = All-witness ∣x<ᶠy∣↝ (⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ x<ᶠy)
+    postulate ⟦x↝y⟧↝≉∞ : _
+    
     ∣x<ᶠy∣↝-cyclic : Cyclic A (to-witness ∣x<ᶠy∣↝)
     ∣x<ᶠy∣↝-cyclic 0F      = ⊴-≤₊-trans ⟦x<ᶠy⟧₋₁⊴x x≤⟦x<ᶠy⟧₀
     ∣x<ᶠy∣↝-cyclic (suc i) = ⟦x<ᶠy⟧ᵢ⊴⟦x<ᶠy⟧ᵢ₊₁ i
@@ -217,16 +218,16 @@ module _ (isRoutingAlgebra : IsRoutingAlgebra alg) where
   <ᶠ-trans = TransClosure.trans
 
   <ᶠ-respʳ-≈ : _<ᶠ_ Respectsʳ _≈_
-  <ᶠ-respʳ-≈ = TransClosure.R⁺-respʳ-≈ (Union.respʳ _<₊_ _↝_ <₊-respʳ-≈ ↝-respʳ-≈)
+  <ᶠ-respʳ-≈ = TransClosure.R⁺-respʳ-≈ (Union.respʳ _<₊_ _↝ₛ_ <₊-respʳ-≈ ↝ₛ-respʳ-≈)
 
   <ᶠ-respˡ-≈ : _<ᶠ_ Respectsˡ _≈_
-  <ᶠ-respˡ-≈ = TransClosure.R⁺-respˡ-≈ (Union.respˡ _<₊_ _↝_ <₊-respˡ-≈ ↝-respˡ-≈)
+  <ᶠ-respˡ-≈ = TransClosure.R⁺-respˡ-≈ (Union.respˡ _<₊_ _↝ₛ_ <₊-respˡ-≈ ↝ₛ-respˡ-≈)
 
   <ᶠ-resp-≈ : _<ᶠ_ Respects₂ _≈_
   <ᶠ-resp-≈ = <ᶠ-respʳ-≈ , <ᶠ-respˡ-≈
 
   <ᶠ-dec : Finite S → Decidable _<ᶠ_
-  <ᶠ-dec fin = TransClosure.R⁺? {S = S} fin (Union.resp₂ <₊-resp-≈ ↝-resp-≈) (Union.decidable _<₊?_ _↝?_)
+  <ᶠ-dec fin = TransClosure.R⁺? {S = S} fin (Union.resp₂ <₊-resp-≈ ↝ₛ-resp-≈) (Union.decidable _<₊?_ _↝ₛ?_)
 
   <ᶠ-min : StrictMinimum _≈_ _<ᶠ_ 0#
   <ᶠ-min {x} 0≉x = [ inj₁ (≤₊-minimum x , 0≉x) ]
@@ -236,8 +237,8 @@ module _ (isRoutingAlgebra : IsRoutingAlgebra alg) where
 
   -- And importantly `x` is strictly less than `Aᵢⱼ(x)` even though the algebra
   -- is not necessarily strictly increasing.
-  ↝⇒<ᶠ : _↝_ ⇒ _<ᶠ_
-  ↝⇒<ᶠ x↝y = [ inj₂ x↝y ]
+  ↝ₛ⇒<ᶠ : _↝ₛ_ ⇒ _<ᶠ_
+  ↝ₛ⇒<ᶠ x↝y = [ inj₂ x↝y ]
 
 
   <ᶠ-isStrictPartialOrder : CycleFree A → IsStrictPartialOrder _≈_ _<ᶠ_
@@ -258,7 +259,7 @@ module _ (isRoutingAlgebra : IsRoutingAlgebra alg) where
   <ᶠ-isExtensionRespectingOrder : IsFinite alg → CycleFree A → IsExtensionRespectingOrder _<ᶠ_
   <ᶠ-isExtensionRespectingOrder fin cf = record
     { isDecStrictPartialOrder = <ᶠ-isDecStrictPartialOrder fin cf
-    ; ↝⇒<                     = ↝⇒<ᶠ
+    ; ↝ₛ⇒<                    = ↝ₛ⇒<ᶠ
     ; <₊⇒<                    = <₊⇒<ᶠ
     ; <-min                   = <ᶠ-min
     }

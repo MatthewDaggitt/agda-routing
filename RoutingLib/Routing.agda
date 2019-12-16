@@ -147,4 +147,4 @@ Cyclic A (⟦ _ ∣ X ⟧) = ∀ i → ∃₂ λ k j → A k j ▷ X (i -ₘ 1) 
 -- A topology/adjacency matrix, is cycle free if there exists no cyclic set
 -- of routes.
 CycleFree : AdjacencyMatrix → Set (a ⊔ ℓ)
-CycleFree A = ∀ X → ¬ Cyclic A X
+CycleFree A = ∀ X → (∀ i → FiniteSet⁺.x X i ≉ ∞#) → ¬ Cyclic A X

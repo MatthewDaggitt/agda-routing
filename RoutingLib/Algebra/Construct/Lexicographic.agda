@@ -3,7 +3,6 @@
 module RoutingLib.Algebra.Construct.Lexicographic where
 
 open import Algebra
-open import Algebra.FunctionProperties
 open import Data.Product
 open import Data.Product.Relation.Pointwise.NonDependent using (Pointwise)
 open import Data.Sum using (_⊎_; inj₁; inj₂; [_,_])

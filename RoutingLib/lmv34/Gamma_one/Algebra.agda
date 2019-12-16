@@ -1,13 +1,14 @@
 open import Data.Nat using (ℕ)
 open import Data.Fin using (Fin)
-open import Data.Fin.Properties using (_≤?_; <-cmp) renaming (_≟_ to _≟₁_; ≤-decTotalOrder to fin-decTotalOrder; decSetoid to Fin-decSetoid)
+open import Data.Fin.Properties as Finₚ
+  using (_≤?_; <-cmp)
 open import Data.List using ([]; _∷_; List; foldr; filter; map; tabulate)
 import Data.List.Relation.Binary.Permutation.Setoid as PermutationEq
 open import Data.Product.Relation.Lex.NonStrict using (×-decTotalOrder)
 open import Data.Product.Relation.Pointwise.NonDependent using (×-decSetoid)
 open import Relation.Binary using (Rel; DecTotalOrder; Setoid; DecSetoid)
 import Relation.Binary.EqReasoning as EqReasoning
-open import Relation.Binary.Core using (tri<; tri≈; tri>)
+open import Relation.Binary using (tri<; tri≈; tri>)
 open import Relation.Nullary using (Dec; yes; no; ¬_)
 open import Relation.Nullary.Negation using (¬?)
 open import Relation.Unary using (Pred; Decidable)
@@ -17,8 +18,8 @@ open import Data.Product using (_×_; _,_)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 import RoutingLib.Routing as Routing
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebra
-open import RoutingLib.Data.Table using (Table)
-import RoutingLib.Data.Table.Relation.Binary.Equality as TableEquality
+open import Data.Vec.Functional using (Vector)
+import RoutingLib.Data.Vec.Functional.Relation.Binary.Equality as TableEquality
 import RoutingLib.Data.List.Sorting.InsertionSort as InsertionSort
 
 module RoutingLib.lmv34.Gamma_one.Algebra
@@ -39,13 +40,13 @@ RoutingSet = List (Fin n × Route)
 Ø = []
 
 RoutingVector : Set a
-RoutingVector = Table RoutingSet n
+RoutingVector = Vector RoutingSet n
 
 Øᵥ : RoutingVector
 Øᵥ i = Ø
 
 -- RoutingVector setoid
-FinRoute-decSetoid = ×-decSetoid (Fin-decSetoid n) DS
+FinRoute-decSetoid = ×-decSetoid (Finₚ.≡-decSetoid n) DS
 open DecSetoid FinRoute-decSetoid public using () renaming (setoid to FinRoute-setoid)
 open PermutationEq FinRoute-setoid public
 open TableEquality ↭-setoid public using (𝕋ₛ) renaming
@@ -66,7 +67,7 @@ _† : RoutingSet → RoutingSet
 xs † = filter (λ {(d , v) → ¬? (v ≟ ∞#)}) xs
 
 decTotalOrder : DecTotalOrder a ℓ ℓ
-decTotalOrder = ×-decTotalOrder (fin-decTotalOrder n) ≤₊-decTotalOrder
+decTotalOrder = ×-decTotalOrder (Finₚ.≤-decTotalOrder n) ≤₊-decTotalOrder
 
 mergeSorted : Op₂ RoutingSet
 mergeSorted [] ys = ys

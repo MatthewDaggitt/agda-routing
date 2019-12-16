@@ -13,10 +13,10 @@ open import Relation.Binary.PropositionalEquality
   using (_≡_; refl; subst; sym; cong; _≢_; setoid; isEquivalence)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Algebra.FunctionProperties
+open import RoutingLib.Algebra.Definitions
 open import RoutingLib.Data.NatInf
 
-open import Algebra.FunctionProperties {A = ℕ∞} _≡_
+open import Algebra.Definitions {A = ℕ∞} _≡_
 open import Algebra.FunctionProperties.Consequences.Propositional using (sel⇒idem)
 
 ------------------------------------------------------------------------

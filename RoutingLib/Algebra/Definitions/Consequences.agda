@@ -1,7 +1,7 @@
 open import Relation.Binary using (Setoid)
 open import Data.Product using (_,_)
 
-module RoutingLib.Algebra.FunctionProperties.Consequences {a ℓ} (S : Setoid a ℓ) where
+module RoutingLib.Algebra.Definitions.Consequences {a ℓ} (S : Setoid a ℓ) where
 
 open Setoid S renaming (Carrier to A)
 open import Algebra.FunctionProperties _≈_

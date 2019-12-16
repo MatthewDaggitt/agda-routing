@@ -1,6 +1,6 @@
 
 
-module RoutingLib.Algebra.FunctionProperties {a} {A : Set a} where
+module RoutingLib.Algebra.Definitions {a} {A : Set a} where
 
 open import Algebra.FunctionProperties using (Op₂)
 open import Data.Product using (_×_; proj₁; proj₂)

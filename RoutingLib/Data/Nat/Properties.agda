@@ -16,7 +16,7 @@ open import Algebra.FunctionProperties
   using  (LeftCancellative; RightCancellative; Cancellative)
 import Algebra.FunctionProperties.Consequences.Propositional as Consequences
 
-open import RoutingLib.Algebra.FunctionProperties
+open import RoutingLib.Algebra.Definitions
 open import RoutingLib.Relation.Binary
 open import RoutingLib.Function.Metric.Nat
 

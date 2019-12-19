@@ -9,13 +9,13 @@ open import Data.Product using (_,_; _×_)
 open import Data.Sum using (inj₁; inj₂)
 open import Function using (_∘_; id)
 open import Level
-open import Relation.Binary using (Rel; Total)
-open import Relation.Unary using (Decidable)
+open import Relation.Binary hiding (Decidable)
+open import Relation.Unary using (Pred; Decidable)
 open import Relation.Nullary using (yes; no)
 
 private
   variable
-    a b c ℓ : Level
+    a b c p ℓ ℓ₁ ℓ₂ : Level
     A : Set a
     B : Set b
     C : Set c
@@ -39,6 +39,17 @@ module _ {_≤_ : Rel A ℓ} (total : Total _≤_) where
   ... | inj₁ x≤y = x ∷ merge xs (y ∷ ys)
   ... | inj₂ y≤x = y ∷ merge (x ∷ xs) ys
 
+module _ {_≈_ : Rel A ℓ₁} {_<_ : Rel A ℓ₂}
+         (cmp : Trichotomous _≈_ _<_) (_⊕_ : Op₂ A) where
+
+  strictMerge : List A → List A → List A
+  strictMerge []       ys       = ys
+  strictMerge (x ∷ xs) []       = x ∷ xs
+  strictMerge (x ∷ xs) (y ∷ ys) with cmp x y
+  ... | tri< _ _ _ = x ∷ strictMerge xs (y ∷ ys)
+  ... | tri> _ _ _ = y ∷ strictMerge (x ∷ xs) ys
+  ... | tri≈ _ _ _ = (x ⊕ y) ∷ strictMerge xs ys
+
 combine : (A → B → C) → List A → List B → List C
 combine f []       _  = []
 combine f (x ∷ xs) ys = map (f x) ys ++ combine f xs ys
@@ -48,3 +59,6 @@ allPairs = combine _,_
 
 allFinPairs : ∀ n → List (Fin n × Fin n)
 allFinPairs n = allPairs (allFin n) (allFin n)
+
+count : {P : Pred A p} → Decidable P → List A → ℕ
+count P? = length ∘ filter P?

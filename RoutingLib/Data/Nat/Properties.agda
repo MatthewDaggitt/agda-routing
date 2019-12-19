@@ -51,7 +51,8 @@ n≢0⇒0<n : ∀ {n} → n ≢ 0 → 0 < n
 n≢0⇒0<n {zero} 0≢0 = contradiction refl 0≢0
 n≢0⇒0<n {suc n} n+1≢0 = s≤s z≤n
 
-
+m<n+m : ∀ m {n} → n > 0 → m < n + m
+m<n+m m {n} n>0 rewrite +-comm n m = m<m+n m n>0
 
 -- Equality reasoning
 

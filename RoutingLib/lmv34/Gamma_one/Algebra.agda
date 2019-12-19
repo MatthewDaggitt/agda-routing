@@ -9,6 +9,8 @@ open import Data.Product.Relation.Lex.NonStrict using (×-decTotalOrder)
 open import Data.Product.Relation.Pointwise.NonDependent using (×-decSetoid)
 open import Data.Vec.Functional using (Vector)
 open import Data.Vec.Functional.Relation.Binary.Pointwise.Properties using () renaming (setoid to Vec-setoid)
+open import Function using (_∘_)
+open import Level using (_⊔_)
 open import Relation.Binary using (Rel; DecTotalOrder; Setoid; DecSetoid)
 import Relation.Binary.EqReasoning as EqReasoning
 open import Relation.Binary using (tri<; tri≈; tri>)
@@ -33,8 +35,8 @@ open Routing algebra n using (𝕋ₛ; RoutingMatrix; AdjacencyMatrix)
 open RawRoutingAlgebra algebra
 open RoutingAlgebra isRoutingAlgebra using (≤₊-decTotalOrder)
 
---------------------------------
--- Data
+--------------------------------------------------------------------------------
+-- Routing sets
 
 RoutingSet : Set a
 RoutingSet = List (Fin n × Route)
@@ -42,16 +44,21 @@ RoutingSet = List (Fin n × Route)
 Ø : RoutingSet
 Ø = []
 
+-- RoutingVector setoid
+FinRoute-decSetoid = ×-decSetoid (Finₚ.≡-decSetoid n) DS
+open DecSetoid FinRoute-decSetoid public using () renaming (setoid to FinRoute-setoid)
+open PermutationEq FinRoute-setoid public
+
+--------------------------------------------------------------------------------
+-- Routing vector
+
 RoutingVector : Set a
 RoutingVector = Vector RoutingSet n
 
 Øᵥ : RoutingVector
 Øᵥ i = Ø
 
--- RoutingVector setoid
-FinRoute-decSetoid = ×-decSetoid (Finₚ.≡-decSetoid n) DS
-open DecSetoid FinRoute-decSetoid public using () renaming (setoid to FinRoute-setoid)
-open PermutationEq FinRoute-setoid public
+𝕍ₛ : Setoid a (a ⊔ ℓ)
 𝕍ₛ = Vec-setoid ↭-setoid n
 
 open Setoid 𝕍ₛ public using ()
@@ -64,19 +71,19 @@ open Setoid 𝕍ₛ public using ()
   ; isEquivalence to ≈ᵥ-isEquivalence
   )
 
---------------------------------
+--------------------------------------------------------------------------------
 -- Auxilaries
 
--- MATTHEW: by convention predicates are usually capitalised, i.e. IsValid
-isValid : Pred (Fin n × Route) _
-isValid (d , v) = ¬ (v ≈ ∞#)
+-- MATTHEW: These definitions should really be the opposite way around to
+-- avoid the double negative
+IsValid : Pred (Fin n × Route) _
+IsValid (d , v) = ¬ (v ≈ ∞#)
 
-isValid? : Decidable isValid
-isValid? (d , v) = ¬? (v ≟ ∞#)
+IsInvalid : Pred (Fin n × Route) _
+IsInvalid p = ¬ (IsValid p)
 
-infix 11 _†
-_† : RoutingSet → RoutingSet
-xs † = filter isValid? xs
+IsValid? : Decidable IsValid
+IsValid? (d , v) = ¬? (v ≟ ∞#)
 
 decTotalOrder : DecTotalOrder a ℓ ℓ
 decTotalOrder = ×-decTotalOrder (Finₚ.≤-decTotalOrder n) ≤₊-decTotalOrder
@@ -92,8 +99,13 @@ mergeSorted ((d₁ , v₁) ∷ xs) ((d₂ , v₂) ∷ ys) with <-cmp d₁ d₂
 ... | tri> _ _ _ = (d₂ , v₂) ∷ (mergeSorted ((d₁ , v₁) ∷ xs) ys)
 ... | tri≈ _ _ _ = (d₁ , v₁ ⊕ v₂) ∷ (mergeSorted xs ys)
 
---------------------------------
+--------------------------------------------------------------------------------
 -- Definitions
+
+-- Remove invalid routes
+infix 11 _†
+_† : RoutingSet → RoutingSet
+xs † = filter IsValid? xs
 
 -- Set addition
 infixl 10 _⊕ₛ_

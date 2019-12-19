@@ -86,7 +86,7 @@ _●ₘ_ : Op₂ RouteMapMatrix
 
 -- need to coerce A to a RouteMapMatrix! 
 toRouteMapMatrix : AdjacencyMatrix → RouteMapMatrix
-toRouteMapMatrix A i j = toRouteMap (A i j)
+toRouteMapMatrix A i j = A i j ▷_
 
 IsComposition : AdjacencyMatrix → RouteMapMatrix → RouteMapMatrix → RouteMapMatrix → Set (a ⊔ ℓ)
 IsComposition A Imp Prot Exp = (toRouteMapMatrix A) ≈ₐ,₂ ((Imp ●ₘ Prot) ●ₘ (Exp ᵀ))

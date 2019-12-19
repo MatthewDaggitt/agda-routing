@@ -18,6 +18,7 @@ import Relation.Binary.EqReasoning as EqReasoning
 open import RoutingLib.Iteration.Synchronous using (_^_)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 open import RoutingLib.Routing as Routing using () renaming (AdjacencyMatrix to AdjacencyMatrix')
+import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties as Perm
 import RoutingLib.lmv34.Gamma_zero as Gamma_zero
 import RoutingLib.lmv34.Gamma_zero.Algebra as Gamma_zero_Algebra
 import RoutingLib.lmv34.Gamma_one as Gamma_one
@@ -126,7 +127,7 @@ minus-congₗ : LeftCongruent _↭_ _-_
 minus-congₗ {A} B=B' = filter-lemma A (λ x → (contraposition (∈-congᵣ (↭-sym B=B'))) , (contraposition (∈-congᵣ B=B')))
 
 minus-congᵣ : RightCongruent _↭_ _-_
-minus-congᵣ A=A' = filter-cong minus-respects-≈ᵣ A=A'
+minus-congᵣ A=A' = Perm.filter⁺ FinRoute-setoid (λ x → ¬? (x ∈? _)) minus-respects-≈ᵣ A=A'
 
 minus-cong : Congruent₂ _↭_ _-_
 minus-cong {A} {A'} {B} {B'} A=A' B=B' = begin

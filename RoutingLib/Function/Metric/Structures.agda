@@ -4,7 +4,7 @@ module RoutingLib.Function.Metric.Structures
   {a i ℓ₁ ℓ₂ ℓ₃} {A : Set a} {I : Set i}
   (_≈ₐ_ : Rel A ℓ₁) (_≈ᵢ_ : Rel I ℓ₂) (_≤_ : Rel I ℓ₃) (0# : I) where
 
-open import Algebra.FunctionProperties using (Op₁; Op₂)
+open import Algebra.Core using (Op₁; Op₂)
 open import Data.Nat.Properties using (≤⇒≤′)
 open import Data.Product using (∃; _,_)
 open import RoutingLib.Function.Metric.Core
@@ -33,7 +33,7 @@ record IsProtoMetric (d : Distance A I) : Set (a ⊔ i ⊔ ℓ₁ ⊔ ℓ₂ ⊔
 record IsPreMetric (d : Distance A I) : Set (a ⊔ i ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃) where
   field
     isProtoMetric : IsProtoMetric d
-    eq⇒0          : PositiveDefinite _≈ₐ_ _≈ᵢ_ d 0#
+    eq⇒0          : Definite _≈ₐ_ _≈ᵢ_ d 0#
 
   open IsProtoMetric isProtoMetric public
 

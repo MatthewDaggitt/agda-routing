@@ -21,9 +21,10 @@ module RoutingLib.Routing.Algebra.Construct.Consistent
   (A : AdjacencyMatrix algebra n)
   where
 
-open import Algebra.FunctionProperties as AlgebraicProperties using (Op₂)
+open import Algebra.Core  using (Op₂)
+import Algebra.Definitions as AlgebraicDefinitions
 open import Data.Fin as Fin using (Fin)
-open import Data.List as List using (List; map; lookup)
+open import Data.List as List using (List; lookup)
 import Data.List.Membership.Setoid as Membership
 open import Data.List.Membership.Setoid.Properties using (∈-resp-≈; ∈-map⁺)
 open import Data.Maybe using (Maybe; nothing; just)
@@ -35,18 +36,20 @@ open import Level using (_⊔_) renaming (zero to 0ℓ)
 open import Relation.Binary as B hiding (Decidable)
 open import Relation.Binary.PropositionalEquality using (inspect; [_]; _≡_; _≢_; refl; sym; trans)
 import Relation.Binary.Construct.On as On
-import Relation.Binary.EqReasoning as EqReasoning
+import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import Relation.Unary as U hiding (Decidable; U)
-open import Relation.Nullary using (¬_; yes; no)
+open import Relation.Nullary using (¬_; yes; no; recompute)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Relation.Nullary.Decidable using (toSum)
 open import RoutingLib.Relation.Nullary.Finite.List.Setoid.Properties
   using (Finite⇒Finiteₛ; via-dec-surjection)
+open import RoutingLib.Data.FiniteSet using (map) renaming (FiniteSet to FiniteSet⁺)
 
 open import RoutingLib.Data.Path.CertifiedI
 open import RoutingLib.Data.Path.CertifiedI.Enumeration
 open import RoutingLib.Data.Path.CertifiedI.Properties
+open import RoutingLib.Routing.AdjacencyMatrix.Definitions using (Cyclic; CycleFree)
 import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra
   as PathAlgebraProperties
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra
@@ -117,9 +120,9 @@ open RoutingAlgebraProperties isRoutingAlgebra
 weightᶜ : ∀ p → 𝑪 (weight A p)
 weightᶜ invalid                            = ∞ᶜ
 weightᶜ (valid [])                         = 0ᶜ
-weightᶜ (valid ((i , j) ∷ p ∣ e⇿p ∣ e∉p)) with A i j ▷ weight A (valid p) ≟ ∞#
-... | yes Aᵢⱼ▷wₚ≈∞ = 𝑪-cong (≈-sym Aᵢⱼ▷wₚ≈∞) ∞ᶜ
-... | no  Aᵢⱼ▷wₚ≉∞ with path (weight A (valid p)) | inspect path (weight A (valid p))
+weightᶜ (valid ((i , j) ∷ p ∣ e⇿p ∣ e∉p)) with A i j ▷ weight A (valid p) ≟ ∞# | weightᶜ (valid p)
+... | yes Aᵢⱼ▷wₚ≈∞ | _     = 𝑪-cong (≈-sym Aᵢⱼ▷wₚ≈∞) ∞ᶜ
+... | no  Aᵢⱼ▷wₚ≉∞ | w[p]ᶜ with path (weight A (valid p)) | inspect path (weight A (valid p))
 ...   | invalid | [ p[wₚ]≡∅ ] = 𝑪-cong (≈-sym (p[r]≡∅⇒f▷r≈∞ (A i j) p[wₚ]≡∅)) ∞ᶜ
 ...   | valid q | [ p[wₚ]≡q ] with ≈ₚ-reflexive p[wₚ]≡q | (i , j) ⇿ᵥ? q | i ∉ᵥₚ? q
 ...     | p[wₚ]≈q | no ¬ij⇿q | _       = 𝑪-cong (≈-sym (path-reject (A i j) p[wₚ]≈q (inj₁ ¬ij⇿q))) ∞ᶜ
@@ -127,8 +130,7 @@ weightᶜ (valid ((i , j) ∷ p ∣ e⇿p ∣ e∉p)) with A i j ▷ weight A (v
 ...     | p[wₚ]≈q | yes ij⇿q | yes i∉q = begin
   weight A (path (A i j ▷ weight A (valid p)))  ≈⟨ weight-cong (path-accept (A i j) p[wₚ]≈q Aᵢⱼ▷wₚ≉∞ ij⇿q i∉q) ⟩
   weight A (valid ((i , j) ∷ q ∣ ij⇿q ∣ i∉q))   ≡⟨⟩
-  A i j ▷ weight A (valid q)                    ≈⟨ ▷-cong (A i j) (weight-cong (≈ₚ-sym p[wₚ]≈q)) ⟩
-  A i j ▷ weight A (path (weight A (valid p)))  ≈⟨ ▷-cong (A i j) (weightᶜ (valid p)) ⟩
+  A i j ▷ weight A (valid q)                    ≈⟨ ▷-cong (A i j) w[p]ᶜ ⟩
   A i j ▷ weight A (valid p)                    ∎
   where open EqReasoning S
 
@@ -145,6 +147,9 @@ sizeⁱ-incr {i} {j} {r} {f} f▷rⁱ with f ▷ r ≟ ∞#
 sizeⁱ-incr′ : ∀ {i j : Fin n} {r s} {f : Step i j} → 𝑰 s → s ≈ f ▷ r → suc (size r) ≡ size s
 sizeⁱ-incr′ sⁱ s≈f▷r = trans (sizeⁱ-incr (𝑰-cong s≈f▷r sⁱ)) (size-cong (≈-sym s≈f▷r))
 
+recomputeᶜ : ∀ {x} → .(𝑪 x) → 𝑪 x
+recomputeᶜ {x} = recompute (weight A (path x) ≟ x)
+
 --------------------------------------------------------------------------------
 -- The consistent routing algebra
 --------------------------------------------------------------------------------
@@ -154,8 +159,16 @@ sizeⁱ-incr′ sⁱ s≈f▷r = trans (sizeⁱ-incr (𝑰-cong s≈f▷r sⁱ))
 -- A consistent route is simply a route paired with a proof that it is
 -- consistent.
 
-CRoute : Set _
-CRoute = Σ Route 𝑪
+record CRoute : Set (a ⊔ ℓ) where
+  constructor _,_
+  field
+    route       : Route
+    .consistent : 𝑪 route
+
+projᵣ : CRoute → Route
+projᵣ (x , _) = x
+
+-- CRoute = Σ Route 𝑪
 
 toCRoute : ∀ {r} → 𝑪 r → CRoute
 toCRoute {r} rᶜ = r , rᶜ
@@ -192,7 +205,7 @@ C∞# = ∞# , ∞ᶜ
 infix 4 _≈ᶜ_ _≉ᶜ_ _≟ᶜ_
 
 _≈ᶜ_ : Rel CRoute _
-_≈ᶜ_ = _≈_ on proj₁
+_≈ᶜ_ = _≈_ on projᵣ
 
 _≉ᶜ_ : Rel CRoute _
 r ≉ᶜ s = ¬ (r ≈ᶜ s)
@@ -220,19 +233,19 @@ f∞ᶜ i j = nothing , toSum (i Fin.≟ j)
 
 -- As expected, equality obeys all the required properties
 
-open AlgebraicProperties _≈ᶜ_
+open AlgebraicDefinitions _≈ᶜ_
 
 _≟ᶜ_ : B.Decidable _≈ᶜ_
 _ ≟ᶜ _ = _ ≟ _
 
 ≈ᶜ-isDecEquivalence : IsDecEquivalence _≈ᶜ_
-≈ᶜ-isDecEquivalence = On.isDecEquivalence proj₁ ≈-isDecEquivalence
+≈ᶜ-isDecEquivalence = On.isDecEquivalence projᵣ ≈-isDecEquivalence
 
 Sᶜ : Setoid _ _
-Sᶜ = On.setoid {B = CRoute} S proj₁
+Sᶜ = On.setoid {B = CRoute} S projᵣ
 
 DSᶜ : DecSetoid _ _
-DSᶜ = On.decSetoid {B = CRoute} DS proj₁
+DSᶜ = On.decSetoid {B = CRoute} DS projᵣ
 
 ⊕ᶜ-cong : Congruent₂ _⊕ᶜ_
 ⊕ᶜ-cong = ⊕-cong
@@ -301,7 +314,7 @@ fromPath : Path n → CRoute
 fromPath p = weight A p , weightᶜ p
 
 fromPath-surjective : Surjective (_≈ₚ_ {n = n}) _≈ᶜ_ fromPath
-fromPath-surjective (y , yᶜ) = path y , yᶜ
+fromPath-surjective (y , yᶜ) = path y , recomputeᶜ yᶜ
 
 fromPath-surjection : Surjection (ℙₛ n) Sᶜ
 fromPath-surjection = record
@@ -332,3 +345,10 @@ isFiniteᶜ = Finite⇒Finiteₛ (via-dec-surjection (finiteₗ n) DSᶜ fromPat
 
 Aᶜ : AdjacencyMatrix algebraᶜ n
 Aᶜ i j = just (i , j) , toSum (i Fin.≟ j)
+
+cyclicᶜ : ∀ X → Cyclic algebraᶜ Aᶜ X → Cyclic algebra A (map fromCRoute X)
+cyclicᶜ X cyclic i with cyclic i
+... | (z , Xᵢ↝z , z≤y) = fromCRoute z , Xᵢ↝z , z≤y
+
+cycleFreeᶜ : CycleFree algebra A → CycleFree algebraᶜ Aᶜ
+cycleFreeᶜ cf X X-cyclic = cf (map fromCRoute X) (cyclicᶜ X X-cyclic)

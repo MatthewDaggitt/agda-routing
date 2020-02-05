@@ -5,7 +5,7 @@ module RoutingLib.Data.Vec.Functional.Relation.Binary.DecidableEquality
 
 open import Data.Nat using (ℕ)
 open import Data.Product using (∃)
-open import Data.Fin.Dec using (all?; ¬∀⟶∃¬)
+open import Data.Fin.Properties using (all?; ¬∀⟶∃¬)
 open import Data.Vec.Functional
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)

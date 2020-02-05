@@ -2,7 +2,7 @@
 
 module RoutingLib.Function.Metric.Core where
 
-open import Algebra.FunctionProperties
+open import Algebra
 open import Data.Product
 open import Level using (Level; _⊔_)
 open import Relation.Binary hiding (Symmetric)
@@ -28,11 +28,11 @@ Distance A I = A → A → I
 
 -- Basic
 
-Indiscernability : Rel A ℓ₁ → Rel I ℓ₂ → Distance A I → I → Set _
-Indiscernability _≈ₐ_ _≈ᵢ_ d 0# = ∀ {x y} → d x y ≈ᵢ 0# → x ≈ₐ y
+Indiscernable : Rel A ℓ₁ → Rel I ℓ₂ → Distance A I → I → Set _
+Indiscernable _≈ₐ_ _≈ᵢ_ d 0# = ∀ {x y} → d x y ≈ᵢ 0# → x ≈ₐ y
 
-PositiveDefinite : Rel A ℓ₁ → Rel I ℓ₂ →  Distance A I → I → Set _
-PositiveDefinite _≈ₐ_ _≈ᵢ_ d 0# = ∀ {x y} → x ≈ₐ y → d x y ≈ᵢ 0#
+Definite : Rel A ℓ₁ → Rel I ℓ₂ →  Distance A I → I → Set _
+Definite _≈ₐ_ _≈ᵢ_ d 0# = ∀ {x y} → x ≈ₐ y → d x y ≈ᵢ 0#
 
 Symmetric : Rel I ℓ → Distance A I → Set _
 Symmetric _≈_ d = ∀ x y → d x y ≈ d y x

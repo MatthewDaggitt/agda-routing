@@ -11,6 +11,10 @@ open Setoid using (Carrier)
 private
   variable
     a r ℓ : Level
+    A : Set a
+    
+refl : {R : Rel A r} → Reflexive R → Reflexive (Plus′ R)
+refl ref = [ ref ]
 
 trans : ∀ {A : Set a} {R : Rel A r} → Transitive (Plus′ R)
 trans [ x∼y ]     Ryz = x∼y ∷ Ryz

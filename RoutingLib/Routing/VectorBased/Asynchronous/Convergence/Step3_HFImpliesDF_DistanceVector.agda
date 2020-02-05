@@ -8,14 +8,13 @@
 
 open import RoutingLib.Routing using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.HeightFunction
+open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.InternalDefinitions
 
-module RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.RouteDistanceFunction
-  {a b ℓ}
-  {algebra              : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra     : IsRoutingAlgebra algebra)
-  {n} (A                : AdjacencyMatrix algebra n)
-  (heightFunction       : HeightFunction algebra A)
+module RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Step3_HFImpliesDF_DistanceVector
+  {a b ℓ} {algebra   : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  {n} (A            : AdjacencyMatrix algebra n)
+  (heightFunction   : HeightFunction algebra A)
   where
 
 open import Data.Fin.Subset using (Subset; _∈_)
@@ -24,6 +23,7 @@ open import Data.Nat hiding (_≟_)
 open import Data.Nat.Properties hiding (_≟_)
 open import Data.Product using (_,_; proj₁; proj₂)
 open import Data.Sum using (inj₁; inj₂)
+open import Data.Vec.Functional
 open import Function using (_∘_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
@@ -37,7 +37,6 @@ open import RoutingLib.Function.Metric.Nat
 import RoutingLib.Function.Metric.Construct.Condition as Condition
 open import RoutingLib.Relation.Nullary.Decidable using ([_,_])
 
-open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.RouteDistanceFunction isRoutingAlgebra A
 import RoutingLib.Routing.VectorBased.Synchronous                            as CoreVectorBasedRouting
 import RoutingLib.Routing.VectorBased.Synchronous.DistanceVector.Properties  as CoreVectorBasedRoutingProperties
 
@@ -123,24 +122,21 @@ r-isQuasiSemiMetric = record
   }
 
 h[FXᵢⱼ]⊔h[FYᵢⱼ]<v : ∀ X Y {i j v} → F X i j <₊ F Y i j →
-                  (∀ k → X k j ≉ Y k j → r (X k j) (Y k j) ≤ v) →
-                  h (F X i j) ⊔ h (F Y i j) < v
+                    (∀ k → r (X k j) (Y k j) ≤ v) →
+                    h (F X i j) ⊔ h (F Y i j) < v
 h[FXᵢⱼ]⊔h[FYᵢⱼ]<v X Y {i} {j} {v} FXᵢⱼ<FYᵢⱼ@(FXᵢⱼ≤FYᵢⱼ , FXᵢⱼ≉FYᵢⱼ) d≤v with FXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
-...   | inj₂ FXᵢⱼ≈Iᵢⱼ = contradiction FXᵢⱼ≈Iᵢⱼ (FXᵢⱼ<FYᵢⱼ⇒FXᵢⱼ≉Iᵢⱼ X Y FXᵢⱼ<FYᵢⱼ)
-...   | inj₁ (k , FXᵢⱼ≈AᵢₖXₖⱼ) = begin-strict
-  h (F X i j) ⊔ h (F Y i j) ≡⟨ m≤n⇒n⊔m≡n (<⇒≤ (h-resp-< FXᵢⱼ<FYᵢⱼ)) ⟩
-  -- Note see if the line above can be relaxed
-  h (F X i j)               ≡⟨ h-cong FXᵢⱼ≈AᵢₖXₖⱼ ⟩
-  h (A i k ▷ X k j)         <⟨ h-resp-▷ (X k j) i k ⟩
+... | inj₂ FXᵢⱼ≈Iᵢⱼ = contradiction FXᵢⱼ≈Iᵢⱼ (FXᵢⱼ<FYᵢⱼ⇒FXᵢⱼ≉Iᵢⱼ X Y FXᵢⱼ<FYᵢⱼ)
+... | inj₁ (k , FXᵢⱼ≈AᵢₖXₖⱼ) = begin-strict
+  h (F X i j) ⊔ h (F Y i j) ≡⟨ m≤n⇒n⊔m≡n (h-resp-≤ FXᵢⱼ<FYᵢⱼ) ⟩
+  h (F X i j)               <⟨ h-resp-↝ (Xₖⱼ≉∞ , i , k , ≈-sym FXᵢⱼ≈AᵢₖXₖⱼ) ⟩
   h (X k j)                 ≤⟨ m≤m⊔n (h (X k j)) (h (Y k j)) ⟩
   h (X k j) ⊔ h (Y k j)     ≡⟨ sym (r[x,y]≡hx⊔hy Xₖⱼ≉Yₖⱼ) ⟩
-  r (X k j) (Y k j)         ≤⟨ d≤v k Xₖⱼ≉Yₖⱼ ⟩
+  r (X k j) (Y k j)         ≤⟨ d≤v k ⟩
   v                         ∎
   where    
 
   FYᵢⱼ≰AᵢₖXₖⱼ : F Y i j ≰₊ A i k ▷ X k j
-  FYᵢⱼ≰AᵢₖXₖⱼ FYᵢⱼ≤AᵢₖXₖⱼ = FXᵢⱼ≉FYᵢⱼ (≤₊-antisym FXᵢⱼ≤FYᵢⱼ
-    (begin 
+  FYᵢⱼ≰AᵢₖXₖⱼ FYᵢⱼ≤AᵢₖXₖⱼ = FXᵢⱼ≉FYᵢⱼ (≤₊-antisym FXᵢⱼ≤FYᵢⱼ (begin 
     F Y i j       ≤⟨ FYᵢⱼ≤AᵢₖXₖⱼ ⟩
     A i k ▷ X k j ≈⟨ ≈-sym FXᵢⱼ≈AᵢₖXₖⱼ ⟩
     F X i j       ∎))
@@ -164,7 +160,7 @@ h[FXᵢⱼ]⊔h[FYᵢⱼ]<v X Y {i} {j} {v} FXᵢⱼ<FYᵢⱼ@(FXᵢⱼ≤FYᵢ�
   open ≤-Reasoning
 
 r[FXᵢⱼ,FYᵢⱼ]<v : ∀ X Y i j → ∀ {v} → 0 < v →
-                 (∀ k → X k j ≉ Y k j → r (X k j) (Y k j) ≤ v) →
+                 (∀ k → r (X k j) (Y k j) ≤ v) →
                  r (F X i j) (F Y i j) < v
 r[FXᵢⱼ,FYᵢⱼ]<v X Y i j {v} 0<v r≤v with F X i j ≟ F Y i j
 ... | yes FXᵢⱼ≈FYᵢⱼ = 0<v
@@ -172,25 +168,25 @@ r[FXᵢⱼ,FYᵢⱼ]<v X Y i j {v} 0<v r≤v with F X i j ≟ F Y i j
 ...   | inj₁ FXᵢⱼ≤FYᵢⱼ = h[FXᵢⱼ]⊔h[FYᵢⱼ]<v X Y (FXᵢⱼ≤FYᵢⱼ , FXᵢⱼ≉FYᵢⱼ) r≤v
 ...   | inj₂ FYᵢⱼ≤FXᵢⱼ = begin-strict
   h (F X i j) ⊔ h (F Y i j) ≡⟨ ⊔-comm (h (F X i j)) (h (F Y i j)) ⟩
-  h (F Y i j) ⊔ h (F X i j) <⟨ h[FXᵢⱼ]⊔h[FYᵢⱼ]<v Y X (FYᵢⱼ≤FXᵢⱼ , FXᵢⱼ≉FYᵢⱼ ∘ ≈-sym) (λ k Yₖⱼ≉Xₖⱼ → subst (_≤ v) (r-sym (X k j) (Y k j)) (r≤v k (Yₖⱼ≉Xₖⱼ ∘ ≈-sym))) ⟩
+  h (F Y i j) ⊔ h (F X i j) <⟨ h[FXᵢⱼ]⊔h[FYᵢⱼ]<v Y X (FYᵢⱼ≤FXᵢⱼ , FXᵢⱼ≉FYᵢⱼ ∘ ≈-sym) (λ k → subst (_≤ v) (r-sym (X k j) (Y k j)) (r≤v k)) ⟩
   v                         ∎
   where open ≤-Reasoning
 
 r-strContrOrbits : ∀ {X v} → 0 < v →
                    (∀ k l → r (X k l) (F X k l) ≤ v) →
                    ∀ i j → r (F X i j) (F (F X) i j) < v
-r-strContrOrbits {X} 0<v leq i j = r[FXᵢⱼ,FYᵢⱼ]<v X (F X) i j 0<v (λ k _ → leq k j)
+r-strContrOrbits {X} 0<v leq i j = r[FXᵢⱼ,FYᵢⱼ]<v X (F X) i j 0<v (λ k → leq k j)
 
 r-strContrFP : ∀ {X*} → F X* ≈ₘ X* → ∀ {X v} → 0 < v →
                (∀ k l → r (X* k l) (X k l) ≤ v) →
                ∀ i j → r (X* i j) (F X i j) < v
 r-strContrFP {X*} FX*≈X* {X} {v} 0<v leq i j = begin-strict
   r (X* i j) (F X i j)   ≡⟨ r-cong (≈-sym (FX*≈X* i j)) ≈-refl ⟩
-  r (F X* i j) (F X i j) <⟨ r[FXᵢⱼ,FYᵢⱼ]<v X* X i j 0<v (λ k _ → leq k j) ⟩
+  r (F X* i j) (F X i j) <⟨ r[FXᵢⱼ,FYᵢⱼ]<v X* X i j 0<v (λ k → leq k j) ⟩
   v                      ∎
   where open ≤-Reasoning
 
-routeDistanceFunction : RouteDistanceFunction
+routeDistanceFunction : RouteDistanceFunction algebra A
 routeDistanceFunction = record
   { r                   = r
   ; r-isQuasiSemiMetric = r-isQuasiSemiMetric

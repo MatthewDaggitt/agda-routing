@@ -1,4 +1,4 @@
-open import Algebra.FunctionProperties using (Op₂)
+open import Algebra.Core using (Op₂)
 open import Data.Nat using (ℕ; zero; suc; _<_; _≤_; _⊓_; _⊔_; z≤n; s≤s)
 open import Data.Nat.Properties using (≤-refl; ≤-trans; ⊔-sel; ⊓-sel; ⊓-mono-<; module ≤-Reasoning; +-mono-≤; +-mono-<-≤; +-mono-≤-<; m≤m⊔n; n≤m⊔n; ⊔-mono-≤; ⊔-monoʳ-≤)
 open import Data.Fin using (Fin; inject₁; inject≤) renaming (zero to fzero; suc to fsuc)

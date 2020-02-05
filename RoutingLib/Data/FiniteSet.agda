@@ -4,8 +4,8 @@ module RoutingLib.Data.FiniteSet where
 open import Data.Fin
 open import Data.Fin.Patterns
 open import Data.Nat
-open import Data.Product
-open import Data.Vec.Functional
+open import Data.Product hiding (map)
+open import Data.Vec.Functional hiding (map)
 open import Function
 open import Level using (Level)
 
@@ -13,8 +13,9 @@ open import RoutingLib.Data.Vec.Functional hiding (⟦_⟧)
 
 private
   variable
-    a : Level
+    a b : Level
     A : Set a
+    B : Set b
 
 --------------------------------------------------------------------------------
 -- FiniteSet
@@ -49,3 +50,6 @@ last ⟦ n ∣ x ⟧ = x (fromℕ n)
 
 iᵗʰ : (X : FiniteSet A) → Fin ∣ X ∣ → A
 iᵗʰ ⟦ _ ∣ x ⟧ i = x i 
+
+map : (A → B) → FiniteSet A → FiniteSet B
+map f ⟦ n ∣ x ⟧ = ⟦ n ∣ f ∘ x ⟧ 

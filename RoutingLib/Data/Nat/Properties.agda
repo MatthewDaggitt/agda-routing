@@ -10,11 +10,11 @@ open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Nullary using (yes; no)
 open import Function using (_∘_)
 
-open import Algebra.FunctionProperties {A = ℕ} _≡_
+open import Algebra.Definitions {A = ℕ} _≡_
   hiding (LeftCancellative; RightCancellative; Cancellative)
-open import Algebra.FunctionProperties
+open import Algebra.Definitions
   using  (LeftCancellative; RightCancellative; Cancellative)
-import Algebra.FunctionProperties.Consequences.Propositional as Consequences
+import Algebra.Consequences.Propositional as Consequences
 
 open import RoutingLib.Algebra.Definitions
 open import RoutingLib.Relation.Binary
@@ -50,9 +50,6 @@ n≤suc∘pred[n] (suc n) = s≤s ≤-refl
 n≢0⇒0<n : ∀ {n} → n ≢ 0 → 0 < n
 n≢0⇒0<n {zero} 0≢0 = contradiction refl 0≢0
 n≢0⇒0<n {suc n} n+1≢0 = s≤s z≤n
-
-m<n+m : ∀ m {n} → n > 0 → m < n + m
-m<n+m m {n} n>0 rewrite +-comm n m = m<m+n m n>0
 
 -- Equality reasoning
 

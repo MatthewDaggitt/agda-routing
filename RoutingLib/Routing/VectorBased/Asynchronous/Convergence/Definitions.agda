@@ -1,23 +1,29 @@
+open import RoutingLib.Routing.Algebra
 
-
-module RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Definitions where
+module RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Definitions
+  {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)
+  where
 
 open import Level
 
-open import RoutingLib.Routing
-open import RoutingLib.Routing.Network
-open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.VectorBased.Asynchronous
-
+open import RoutingLib.Routing algebra
+open import RoutingLib.Routing.VectorBased.Asynchronous algebra
 import RoutingLib.Iteration.Asynchronous.Dynamic as Iteration
+
+private
+  variable
+    p : Level
+  
+------------------------------------------------------------------------
+-- Convergence definitions
 
 -- A routing algebra is partially convergent over some predicate P if the
 -- iteration converges over all networks satisfying predicate P.
 
-PartiallyConvergent : ∀ {a b ℓ p} (A : RawRoutingAlgebra a b ℓ) → (∀ {n} → Network A n → Set p) → Set _
-PartiallyConvergent A P = ∀ {n} (N : Network A n) → P N → Iteration.Convergent (F∥ A N)
+PartiallyConvergent : (∀ {n} → Network n → Set p) → Set _
+PartiallyConvergent P = ∀ {n} {N : Network n} → P N → Iteration.Convergent (F∥ N)
 
 -- A routing algebra is convergent if the iteration converges for all networks.
 
-Convergent : ∀ {a b ℓ} → RawRoutingAlgebra a b ℓ → Set _
-Convergent A = ∀ {n} (N : Network A n) → Iteration.Convergent (F∥ A N)
+Convergent : Set _
+Convergent = ∀ {n} (N : Network n) → Iteration.Convergent (F∥ N)

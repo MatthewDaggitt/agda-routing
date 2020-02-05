@@ -26,7 +26,7 @@ module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions where
 
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (Subset; _∉_; ⊤) renaming (_∈_ to _∈ₛ_)
-open import Data.Fin.Dec using (_∈?_)
+open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Nat using (ℕ; suc; _<_; _≤_)
 open import Data.Product using (∃; ∃₂; _×_; _,_; proj₁)
 open import Data.List using (List)

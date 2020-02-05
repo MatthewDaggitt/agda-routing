@@ -3,7 +3,7 @@ open import Data.Fin.Properties using () renaming (_≟_ to _≟F_)
 open import Data.Nat using (ℕ; zero; suc; _≤_; _<_)
 open import Data.Nat.Properties using (<⇒≢; <⇒≤; ≤-reflexive)
 open import Data.List using (List; []; _∷_; map; filter; concat; allFin; applyUpTo)
-open import Data.List.Any using (here; there)
+open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.List.Membership.Propositional using (_∈_)
 import Data.List.Membership.Setoid as Membership
 open import Data.List.Membership.Setoid.Properties using (∈-map⁺; ∈-concat⁺′; ∈-applyUpTo⁺)

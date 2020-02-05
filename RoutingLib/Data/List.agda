@@ -1,7 +1,7 @@
 
 module RoutingLib.Data.List where
 
-open import Algebra.FunctionProperties using (Op₂; Selective)
+open import Algebra using (Op₂; Selective)
 open import Data.List hiding (downFrom)
 open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _⊓_; _⊔_; _≤_; _<_)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
@@ -35,13 +35,13 @@ module _ {_≤_ : Rel A ℓ} (total : Total _≤_) where
   merge : List A → List A → List A
   merge []       ys       = ys
   merge xs       []       = xs
-  merge (x ∷ xs) (y ∷ ys) with total x y
-  ... | inj₁ x≤y = x ∷ merge xs (y ∷ ys)
-  ... | inj₂ y≤x = y ∷ merge (x ∷ xs) ys
+  merge (x ∷ xs) (y ∷ ys) with total x y | merge xs (y ∷ ys) | merge (x ∷ xs) ys
+  ... | inj₁ x≤y | vs | _  = x ∷ vs
+  ... | inj₂ y≤x | _  | us = y ∷ us
 
 module _ {_≈_ : Rel A ℓ₁} {_<_ : Rel A ℓ₂}
          (cmp : Trichotomous _≈_ _<_) (_⊕_ : Op₂ A) where
-
+{-
   strictMerge : List A → List A → List A
   strictMerge []       ys       = ys
   strictMerge (x ∷ xs) []       = x ∷ xs
@@ -49,7 +49,7 @@ module _ {_≈_ : Rel A ℓ₁} {_<_ : Rel A ℓ₂}
   ... | tri< _ _ _ = x ∷ strictMerge xs (y ∷ ys)
   ... | tri> _ _ _ = y ∷ strictMerge (x ∷ xs) ys
   ... | tri≈ _ _ _ = (x ⊕ y) ∷ strictMerge xs ys
-
+-}
 combine : (A → B → C) → List A → List B → List C
 combine f []       _  = []
 combine f (x ∷ xs) ys = map (f x) ys ++ combine f xs ys

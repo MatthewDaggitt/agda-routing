@@ -1,7 +1,6 @@
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing as Routing using ()
-open import RoutingLib.Routing.Network as Network using (Network)
+open import RoutingLib.Routing as Routing using (Network)
 
 module RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Properties
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
@@ -9,12 +8,15 @@ module RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Properties
   {n} (N : Network algebra n)
   where
 
+open RawRoutingAlgebra algebra
+open IsRoutingAlgebra isRoutingAlgebra
+
 open import Data.List using (tabulate)
-open import Data.List.Relation.Pointwise using (tabulate⁺)
-import Data.List.All.Properties as All
+open import Data.List.Relation.Binary.Pointwise using (tabulate⁺)
+import Data.List.Relation.Unary.All.Properties as All
 open import Data.Fin using () renaming (_≟_ to _≟𝔽_)
-open import Data.Fin.Dec using (_∈?_)
 open import Data.Fin.Subset using (Subset; _∉_)
+open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
@@ -22,34 +24,30 @@ open import Relation.Nullary.Negation using (contradiction)
 open import RoutingLib.Data.List.Relation.Binary.Pointwise using (foldr⁺)
 open import RoutingLib.Data.List.Properties
 
-import RoutingLib.Routing.VectorBased.Asynchronous as VectorBased
-import RoutingLib.Routing.VectorBased.Synchronous.DistanceVector.Properties as CoreProperties
-import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
-
-open RawRoutingAlgebra algebra
-open IsRoutingAlgebra isRoutingAlgebra
-open RoutingAlgebraProperties isRoutingAlgebra
-
-open VectorBased algebra N
+open import RoutingLib.Routing.VectorBased.Asynchronous algebra N
+ as CoreProperties
+open import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra isRoutingAlgebra
+open import RoutingLib.Routing.Network.Properties algebra N
 
 ------------------------------------------------------------------------
 -- Publicly re-export core properties
 
-open CoreProperties isRoutingAlgebra public
+open import RoutingLib.Routing.VectorBased.Synchronous.DistanceVector.Properties
+  isRoutingAlgebra public
 
 ------------------------------------------------------------------------
 -- Properties of F′
 
 F′-cong' : ∀ e p {X Y} → X ≈ₘ[ p ] Y → F′ e p X ≈ₘ F′ e p Y
-F′-cong' e p X≈Y _ j = foldr⁺ _≈_ ⊕-cong ≈-refl (tabulate⁺ (Aₜ-cong N e p X≈Y))
+F′-cong' e p X≈Y _ j = foldr⁺ _≈_ ⊕-cong ≈-refl (tabulate⁺ (Aₜ-cong e p X≈Y))
 
 F′-cong-∉ : ∀ e p {X Y} {i} → i ∉ p → F′ e p X i ≈ₜ F′ e p Y i
-F′-cong-∉ e p {X} {Y} i∉p j = foldr⁺ _≈_ ⊕-cong ≈-refl (tabulate⁺ (λ k → Aₜ-reject-eq N e _ k i∉p (X k j) (Y k j)))
+F′-cong-∉ e p {X} {Y} i∉p j = foldr⁺ _≈_ ⊕-cong ≈-refl (tabulate⁺ (λ k → Aₜ-reject-eq e _ k i∉p (X k j) (Y k j)))
 
 F′-inactive : ∀ e p X → WellFormed p (F′ e p X)
 F′-inactive e p X {i} i∉p j with j ≟𝔽 i
 ... | yes j≡i = foldr-zeroʳ    ⊕-magma ⊕-zeroʳ (tabulate λ k → Aₜ e p i k ▷ X k j)
-... | no  j≢i = foldr-constant ⊕-magma (⊕-idem ∞#) (All.tabulate⁺ (λ k → Aₜ-reject N e i k (inj₁ i∉p) (X k j)))
+... | no  j≢i = foldr-constant ⊕-magma (⊕-idem ∞#) (All.tabulate⁺ (λ k → Aₜ-reject e i k (inj₁ i∉p) (X k j)))
 
 ------------------------------------------------------------------------
 -- States in which the inactive nodes are actually inactive

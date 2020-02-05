@@ -27,12 +27,10 @@ open import Relation.Binary.PropositionalEquality
 open import Relation.Binary.Indexed.Homogeneous
   using (IndexedSetoid; IndexedDecSetoid)
 import Relation.Binary.Construct.Closure.Transitive as TransitiveClosure
-import Relation.Binary.EqReasoning as EqReasoning
+import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Data.Fin using (_+ₘ_; _-ₘ_)
-open import RoutingLib.Data.FiniteSet using (⟦_∣_⟧) renaming (FiniteSet to FiniteSet⁺)
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.Equality as SubsetEquality
 open import RoutingLib.Data.Matrix
@@ -48,6 +46,17 @@ open RawRoutingAlgebra algebra
 
 AdjacencyMatrix : Set b
 AdjacencyMatrix = ∀ (i j : Fin n) → Step i j
+
+--------------------------------------------------------------------------------
+-- A network is a epoch indexed family of adjacency matrices
+
+open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule public
+  using (Epoch)
+
+-- TODO make Network a record and hide the size
+
+Network : Set b
+Network = Epoch → AdjacencyMatrix
 
 --------------------------------------------------------------------------------
 -- Routing tables store a node's routing decisions
@@ -135,16 +144,3 @@ WellFormed p X = ∀ {i} → i ∉ p → X i ≈ₜ I i
 WellFormed-cong : ∀ {X Y p} → WellFormed p X → WellFormed p Y →
                   ∀ {i} → i ∉ p → X i ≈ₜ Y i
 WellFormed-cong wfX wfY i∉p = ≈ₜ-trans (wfX i∉p) (≈ₜ-sym (wfY i∉p))
-
---------------------------------------------------------------------------------
--- Types of adjacency matrices
-
--- A non-empty finite set of routes X is cyclic if every route
--- in the set can be extended and still be preferred to the previous route.
-Cyclic : AdjacencyMatrix → FiniteSet⁺ Route → Set ℓ
-Cyclic A (⟦ _ ∣ X ⟧) = ∀ i → ∃₂ λ k j → A k j ▷ X (i -ₘ 1) ≤₊ X i
-
--- A topology/adjacency matrix, is cycle free if there exists no cyclic set
--- of routes.
-CycleFree : AdjacencyMatrix → Set (a ⊔ ℓ)
-CycleFree A = ∀ X → (∀ i → FiniteSet⁺.x X i ≉ ∞#) → ¬ Cyclic A X

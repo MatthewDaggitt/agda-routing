@@ -41,9 +41,13 @@ fromℕ<-mono-≤ (s≤s z≤n)       (s≤s _)         z≤n       = z≤n
 fromℕ<-mono-≤ (s≤s (s≤s i<n)) (s≤s (s≤s j<n)) (s≤s i≤j) =
   s≤s (fromℕ<-mono-≤ (s≤s i<n) (s≤s j<n) i≤j)
 
+fromℕ<-cancel-≤ : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
+                  fromℕ< i<n ≤ fromℕ< j<n → i ≤ℕ j
+fromℕ<-cancel-≤ i<n j<n = subst₂ _≤ℕ_ (toℕ-fromℕ< i<n) (toℕ-fromℕ< j<n)
+
 fromℕ<-cancel-< : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
                   fromℕ< i<n < fromℕ< j<n → i <ℕ j
-fromℕ<-cancel-< i<n j<n i<j = subst₂ _<ℕ_ (toℕ-fromℕ< i<n) (toℕ-fromℕ< j<n) i<j
+fromℕ<-cancel-< i<n j<n = subst₂ _<ℕ_ (toℕ-fromℕ< i<n) (toℕ-fromℕ< j<n)
 
 ------------------------------------------------------------------------
 -- fromℕ<″

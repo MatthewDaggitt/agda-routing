@@ -2,17 +2,21 @@ open import Relation.Binary using (DecTotalOrder)
 
 module RoutingLib.Data.List.Sorting.Properties {a ℓ₁ ℓ₂} (order : DecTotalOrder a ℓ₁ ℓ₂) where
 
+open DecTotalOrder order renaming (Carrier to A)
+open Eq using () renaming (setoid to S; trans to ≈-trans; sym to ≈-sym)
+
 open import Data.Nat using (ℕ; z≤n; s≤s; suc; ≤-pred) renaming (_<_ to _<ℕ_; _≤_ to _≤ℕ_)
 open import Data.Nat.Properties using (≤+≢⇒<; ≤⇒≯; <⇒≢; module ≤-Reasoning)
 open import Data.Fin as Fin using (zero; suc; cast; toℕ) renaming (_≤_ to _≤𝔽_; _<_ to _<𝔽_)
 open import Data.Fin.Properties using (toℕ-cast)
 open import Data.List
-open import Data.List.All as All using (All; []; _∷_)
-open import Data.List.Any as Any using (Any; here; there; index)
+open import Data.List.Relation.Unary.All as All using (All; []; _∷_)
+open import Data.List.Relation.Unary.Any as Any using (Any; here; there; index)
 open import Data.List.Membership.Setoid.Properties using (∈-lookup)
 open import Data.List.Relation.Unary.AllPairs using ([]; _∷_)
+import Data.List.Relation.Binary.Permutation.Setoid.Properties S as Permₚ
 open import Data.List.Properties
-open import Data.List.Relation.Unary.All.Properties using (Any¬→¬All)
+open import Data.List.Relation.Unary.All.Properties using (Any¬⇒¬All)
 open import Data.Product using (_,_; proj₁; proj₂; uncurry′)
 open import Data.Sum using (inj₁; inj₂)
 open import Relation.Binary hiding (Decidable)
@@ -27,13 +31,11 @@ open import RoutingLib.Data.List using (insert; count)
 open import RoutingLib.Data.List.Relation.Unary.All.Properties as Allₚ
 open import RoutingLib.Data.List.Relation.Binary.Pointwise
 
-open DecTotalOrder order renaming (Carrier to A)
-open Eq using () renaming (setoid to S; trans to ≈-trans; sym to ≈-sym)
-
 open import RoutingLib.Data.List.Sorting _≤_
 open import Data.List.Membership.Setoid S using (_∈_)
 open import Data.List.Relation.Binary.Permutation.Setoid S as Perm using (_↭_)
-open import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties S as Permₚ using (match; match-lookup; xs↭ys⇒|xs|≡|ys|)
+open import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties S
+  using (xs↭ys⇒|xs|≡|ys|)
 open import Data.List.Relation.Binary.Equality.Setoid S
 open import RoutingLib.Data.List.Relation.Binary.Sublist.Setoid.Properties S using (length-mono-<; filter-⊂)
 
@@ -77,7 +79,7 @@ count-lookup2 {x ∷ xs} (x≤xs ∷ xs↗) (suc i) with x ≤? lookup xs i
   
 count-lookup : ∀ {xs} → Sorted xs → ∀ {v i} → toℕ i <ℕ count (_≤? v) xs → lookup xs i ≤ v
 count-lookup {x ∷ xs} (x≤xs ∷ xs↗) {v} {i} i≤v with x ≤? v
-... | no  x≰v = contradiction x≤xs (Any¬→¬All (Any.map (λ c≤v x≤c → x≰v (trans x≤c c≤v)) xsᵢ≤v))
+... | no  x≰v = contradiction x≤xs (Any¬⇒¬All (Any.map (λ c≤v x≤c → x≰v (trans x≤c c≤v)) xsᵢ≤v))
   where
   xsᵢ≤v : Any (_≤ v) xs
   xsᵢ≤v = lemma′ (_≤? v) i≤v

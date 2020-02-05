@@ -2,7 +2,7 @@ open import Level using () renaming (zero to 0ℓ)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; ≤-pred) renaming (_≟_ to _≟ℕ_; _≤?_ to _≤ℕ?_; _≤_ to _≤ℕ_; _<_ to _<ℕ_)
-open import Data.Nat.Properties using (<-trans; ≰⇒>; <⇒≢; <⇒≯; ≤-refl; ≤-trans; 1+n≰n; _<?_; ≰⇒≥)
+open import Data.Nat.Properties using (<-trans; ≰⇒>; <⇒≢; <⇒≯; ≤-refl; ≤-trans; 1+n≰n; _<?_; ≰⇒≥; <⇒≤)
 open import Data.Fin using (Fin; _<_; _≤?_) renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties using (<-cmp; ≤-antisym; ≤-total; pigeonhole) renaming (_≟_ to _≟𝔽_)
 open import Data.Sum using (inj₁; inj₂)
@@ -309,6 +309,6 @@ length-cong (_ ∷ p≈ₚq) = cong suc (length-cong p≈ₚq)
 ... | no  |q|≮n with pigeonhole (≰⇒> |q|≮n) (lookupᵥ q)
 ...   | i , j , i≢j , pᵢ≡pⱼ = contradiction pᵢ≡pⱼ (lookup! q i j i≢j)
 
-|p|≤1+n : ∀ {n} (p : Path n) → length p ≤ℕ suc n
-|p|≤1+n []                  = z≤n
-|p|≤1+n (e ∷ p ∣ e⇿p ∣ e∉p) = <⇒≤suc (|p|<n (nonEmpty _ _ e⇿p e∉p))
+|p|≤n : ∀ {n} (p : Path n) → length p ≤ℕ n
+|p|≤n []                  = z≤n
+|p|≤n (e ∷ p ∣ e⇿p ∣ e∉p) = <⇒≤ (|p|<n (nonEmpty _ _ e⇿p e∉p))

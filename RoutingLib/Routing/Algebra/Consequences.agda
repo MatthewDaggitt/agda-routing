@@ -33,6 +33,11 @@ strIncr⇒incr strIncr f x with x ≟ ∞#
 --------------------------------------------------------------------------------
 -- If the algebra is strictly increasing all networks are cycle-free
 
+-- If the algebra is strictly increasing then every topology is cycle-free
+strIncr⇒cycleFree : IsStrictlyIncreasing algebra →
+                    ∀ {n} (A : AdjacencyMatrix n) → CycleFree n A
+strIncr⇒cycleFree strIncr A X _ cycle = {!!} --strIncr⇒∄cyclic strIncr A {!!} cyclic
+
 {-
 strIncr⇒∄cyclic : IsStrictlyIncreasing algebra →
                   ∀ {n} (A : AdjacencyMatrix n) X → (∀ i → FiniteSet⁺.x X i ≉ ∞#) → ¬ Cyclic _ A X
@@ -44,11 +49,6 @@ strIncr⇒∄cyclic strInc A ⟦ suc n ∣ X ⟧ Xᵢ≉∞ cyclic =
     ; (suc i) → {!!}
     })
 
-
--- If the algebra is strictly increasing then every topology is cycle-free
-strIncr⇒cycleFree : IsStrictlyIncreasing algebra →
-                    ∀ {n} (A : AdjacencyMatrix n) → CycleFree _ A
-strIncr⇒cycleFree strIncr A {X} Xᵢ≉∞ cyclic = strIncr⇒∄cyclic strIncr A {!!} cyclic
 -}
 --------------------------------------------------------------------------------
 -- kᵗʰ-level distributivity properties

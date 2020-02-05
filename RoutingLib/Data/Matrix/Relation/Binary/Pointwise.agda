@@ -1,8 +1,9 @@
 
 module RoutingLib.Data.Matrix.Relation.Binary.Pointwise where
 
+open import Algebra.Core using (Op₂)
 open import Data.Fin using () renaming (zero to fzero; suc to fsuc)
-open import Data.Fin.Dec using (all?)
+open import Data.Fin.Properties using (all?)
 open import Data.Fin.Subset using (Subset; _∉_; ∣_∣)
 open import Data.Nat using (ℕ; zero; suc)
 open import Relation.Binary
@@ -10,7 +11,6 @@ open import Relation.Binary.PropositionalEquality
   using (_≡_)
   renaming (refl to ≡-refl)
 open import Function using (_∘_)
-open import Algebra.FunctionProperties using (Op₂)
 
 import RoutingLib.Data.Vec.Functional as Vector
 open import RoutingLib.Data.Matrix

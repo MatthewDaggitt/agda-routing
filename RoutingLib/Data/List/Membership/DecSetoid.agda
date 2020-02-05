@@ -1,5 +1,5 @@
 open import Data.List using (List; []; _∷_)
-open import Data.List.Any using (any)
+open import Data.List.Relation.Unary.Any using (any)
 open import Relation.Binary using (DecSetoid; Decidable)
 open import Relation.Nullary using (yes; no)
 

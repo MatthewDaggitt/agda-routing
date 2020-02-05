@@ -13,7 +13,7 @@ open import Relation.Unary using (Pred)
 open import Relation.Binary using (Rel; REL; Total; Setoid; _Respects_; DecSetoid)
 open import Relation.Binary.PropositionalEquality using (_≡_; inspect; [_]; subst; subst₂) renaming (refl to ≡-refl; sym to ≡-sym; trans to ≡-trans)
 open import Function using (_∘_; id)
-open import Algebra.FunctionProperties using (Op₂; Congruent₂)
+open import Algebra using (Op₂; Congruent₂)
 open import Relation.Unary using () renaming (_⊆_ to _⋐_)
 
 open import RoutingLib.Data.List

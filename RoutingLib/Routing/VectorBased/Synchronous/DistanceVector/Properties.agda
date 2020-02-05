@@ -15,7 +15,7 @@ module RoutingLib.Routing.VectorBased.Synchronous.DistanceVector.Properties
   {n} (A : AdjacencyMatrix algebra n)
   where
 
-import Algebra.FunctionProperties as FunctionProperties
+import Algebra.Definitions as AlgebraDefinitions
 open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
 open import Data.List using (tabulate)
 open import Data.List.Membership.Setoid.Properties
@@ -39,7 +39,7 @@ open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
 open RoutingAlgebraProperties isRoutingAlgebra
 
-open FunctionProperties _≈_
+open AlgebraDefinitions _≈_
 open POR ≤₊-poset
 
 ------------------------------------------------------------------------------

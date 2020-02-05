@@ -1,32 +1,31 @@
-open import Algebra.FunctionProperties using (Op₂; RightIdentity; Selective)
-open import Relation.Binary
-  using (Setoid; Rel; Symmetric; _Respects_; _Preserves_⟶_; _Preserves₂_⟶_⟶_)
-open import Relation.Binary.PropositionalEquality
-  using (refl; _≡_; _≢_; cong; subst; subst₂; inspect; [_])
-open import Data.List.Relation.Binary.Pointwise as Pointwise using ([]; _∷_)
-open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Nullary using (¬_; yes; no)
-open import Function using (_∘_; id)
-open import Data.List.All using (All; _∷_; [])
-open import Data.List.All.Properties using (All¬⇒¬Any)
-open import Data.List.Any using (index)
-import Data.List.Membership.Setoid as Membership
-open import Data.List.Membership.Setoid.Properties
+open import Algebra using (Op₂; RightIdentity; Selective)
 open import Data.Nat using (_≤_; _<_; zero; suc; s≤s; z≤n)
 open import Data.Fin using (Fin; zero; suc)
 open import Data.Fin.Properties using (suc-injective)
 open import Data.List hiding (any)
-open import Data.List.Any using (here; there; any) renaming (map to mapₐ)
+open import Data.List.Relation.Unary.All using (All; _∷_; [])
+open import Data.List.Relation.Unary.All.Properties using (All¬⇒¬Any)
+open import Data.List.Relation.Unary.Unique.Setoid using (Unique; _∷_)
+open import Data.List.Relation.Unary.AllPairs using ([]; _∷_)
+import Data.List.Membership.Setoid as Membership
+open import Data.List.Membership.Setoid.Properties
+open import Data.List.Relation.Binary.Pointwise as Pointwise using ([]; _∷_)
+open import Data.List.Relation.Unary.Any using (here; there; any; index) renaming (map to mapₐ)
 open import Data.Product using (∃; ∃₂; _×_; _,_; swap; proj₁; proj₂)
 open import Data.Product.Relation.Binary.Pointwise.NonDependent
 open import Data.Sum as Sum using (_⊎_; inj₁; inj₂)
+open import Function using (_∘_; id)
 open import Level using (Level)
 open import Relation.Unary using (Decidable; _⇒_) renaming (_⊆_ to _⋐_)
+open import Relation.Nullary.Negation using (contradiction)
+open import Relation.Nullary using (¬_; yes; no)
+open import Relation.Binary
+  using (Setoid; Rel; Symmetric; _Respects_; _Preserves_⟶_; _Preserves₂_⟶_⟶_)
+open import Relation.Binary.PropositionalEquality
+  using (refl; _≡_; _≢_; cong; subst; subst₂; inspect; [_])
 
 open import RoutingLib.Data.List
 open import RoutingLib.Data.List.Relation.Unary.Any.Properties
-open import Data.List.Relation.Unary.Unique.Setoid using (Unique; _∷_)
-open import Data.List.Relation.Unary.AllPairs using ([]; _∷_)
 
 
 module RoutingLib.Data.List.Membership.Setoid.Properties where

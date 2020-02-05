@@ -4,7 +4,7 @@ open import Relation.Binary
 
 module RoutingLib.Algebra.Structures {a ℓ} {A : Set a} (_≈_ : Rel A ℓ) where
 
-open import Algebra.FunctionProperties _≈_
+open import Algebra.Core using (Op₂)
 open import Algebra.Structures _≈_
 
 record IsDecMagma (∙ : Op₂ A) : Set (a ⊔ ℓ) where

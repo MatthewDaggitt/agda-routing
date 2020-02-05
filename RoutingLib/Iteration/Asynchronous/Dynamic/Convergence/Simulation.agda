@@ -15,13 +15,12 @@ module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Simulation
 
 open import Data.Nat using (zero; suc; _<_; _+_)
 open import Data.Nat.Properties using (≤-refl)
+open import Data.Nat.Induction using (Acc; acc; <-wellFounded)
 open import Data.Fin.Subset using (Subset)
 open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Product using (∃; _,_)
 open import Data.Unit using (tt)
-open import Induction.WellFounded using (Acc; acc)
-open import Induction.Nat using (<-wellFounded)
-import Relation.Binary.EqReasoning as EqReasoning
+import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import Relation.Nullary using (yes; no)
 open import Relation.Unary
 

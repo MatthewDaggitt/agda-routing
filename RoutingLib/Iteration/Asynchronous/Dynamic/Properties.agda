@@ -8,9 +8,8 @@ module RoutingLib.Iteration.Asynchronous.Dynamic.Properties where
 
 open import Level using (_⊔_) renaming (zero to lzero; suc to lsuc)
 open import Data.Fin using (Fin)
-open import Data.Fin.Dec using (_∈?_)
 open import Data.Fin.Subset using (Subset; _∉_; ⊤)
-open import Data.Fin.Subset.Properties using (∈⊤)
+open import Data.Fin.Subset.Properties using (∈⊤; _∈?_)
 open import Data.Nat using (ℕ; _≤_; _+_; s≤s; _<_; zero; suc)
 open import Data.Nat.Properties using (≤-refl)
 open import Data.Product using (∃; _×_; _,_)
@@ -20,8 +19,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Pred; Universal; _∈_; _⊆_)
-open import Induction.WellFounded using (Acc; acc)
-open import Induction.Nat using (<-wellFounded)
+open import Data.Nat.Induction using (Acc; acc; <-wellFounded)
 
 open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 import RoutingLib.Data.Vec.Functional.Relation.Binary.Equality as VectorEquality

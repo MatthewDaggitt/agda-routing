@@ -1,7 +1,7 @@
 open import Relation.Binary using (DecSetoid; Setoid)
 open import Relation.Nullary using (yes; no)
 open import Data.List hiding (any)
-open import Data.List.Any using (here; there; any)
+open import Data.List.Relation.Unary.Any using (here; there; any)
 import Data.List.Membership.Setoid as Membership
 open import Data.List.Membership.Setoid.Properties
 

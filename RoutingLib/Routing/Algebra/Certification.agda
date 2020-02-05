@@ -27,7 +27,7 @@ open import Function using (_∘_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
   using (_≡_; refl; sym; trans; cong; inspect; [_]; subst)
-import Relation.Binary.EqReasoning as EqReasoning
+import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 

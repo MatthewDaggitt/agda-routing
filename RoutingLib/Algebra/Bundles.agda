@@ -1,4 +1,4 @@
-open import Algebra.FunctionProperties
+open import Algebra.Core
 open import Level using (_⊔_; suc)
 open import Relation.Binary
 

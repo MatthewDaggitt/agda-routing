@@ -2,7 +2,7 @@
 
 module RoutingLib.Data.Path.Uncertified.Properties where
 
-open import Data.List.Any using (any; there; here)
+open import Data.List.Relation.Unary.Any using (any; there; here)
 open import Data.Maybe using (just; nothing)
 open import Data.Maybe.Properties using (just-injective)
 open import Data.Nat
@@ -288,7 +288,7 @@ inflate-inflate ((i , j) ∷ p) (suc m) n       = begin
 
 p≡[]⇒deflate[p]≡[] : ∀ {p} → p ≡ [] → deflate p ≡ []
 p≡[]⇒deflate[p]≡[] refl = refl
-
+{-
 deflate-source : ∀ p → source (deflate p) ≡ source p
 deflate-source []                      = refl
 deflate-source ((i , j) ∷ [])          = refl
@@ -341,16 +341,16 @@ deflate-inflate ((i , j) ∷ q@((k , l) ∷ p)) (suc n) with i ≟ j | j ≟ k
 deflate-idem : ∀ p → deflate (deflate p) ≡ deflate p
 deflate-idem []            = refl
 deflate-idem ((i , j) ∷ []) = refl
-deflate-idem ((i , j) ∷ q@((k , l) ∷ p)) with i ≟ j | j ≟ k
-... | no  i≢j | _       = begin
+deflate-idem ((i , j) ∷ q@((k , l) ∷ p)) with i ≟ j | j ≟ k | deflate-idem q
+... | no  i≢j | _       | rec = begin
   deflate ((i , j) ∷ deflate q) ≡⟨ deflate-skip (deflate q) (inj₁ i≢j) ⟩
-  (i , j) ∷ deflate (deflate q) ≡⟨ cong (_ ∷_) (deflate-idem q) ⟩
+  (i , j) ∷ deflate (deflate q) ≡⟨ cong (_ ∷_) rec ⟩
   (i , j) ∷ deflate q           ∎
-... | yes _   | no  j≢k = begin
+... | yes _   | no  j≢k | rec = begin
   deflate ((i , j) ∷ deflate q) ≡⟨ deflate-skip (deflate q) (inj₂ (j≢k ∘ just-injective ∘ flip trans (deflate-source q))) ⟩
-  (i , j) ∷ deflate (deflate q) ≡⟨ cong (_ ∷_) (deflate-idem q) ⟩
+  (i , j) ∷ deflate (deflate q) ≡⟨ cong (_ ∷_) rec ⟩
   (i , j) ∷ deflate q           ∎
-... | yes _   | yes _   = deflate-idem ((k , l) ∷ p)
+... | yes _   | yes _   | rec = deflate-idem ((k , l) ∷ p)
 
 ∈-deflate⁻ : ∀ {v p} → v ∈ₚ deflate p → v ∈ₚ p
 ∈-deflate⁻ {v} {[]}                    ()
@@ -369,3 +369,4 @@ deflate-idem ((i , j) ∷ q@((k , l) ∷ p)) with i ≟ j | j ≟ k
 ... | no  _    | _        = ⇿-resp-p₀ refl e⇿p
 ... | yes _    | no  _    = ⇿-resp-p₀ refl e⇿p
 ... | yes refl | yes refl = ⇿-deflate⁺ {e} {(k , l) ∷ p} (⇿-resp-p₀ refl e⇿p)
+-}

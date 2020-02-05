@@ -16,7 +16,7 @@ module RoutingLib.Routing.VectorBased.Synchronous
 
 open import Data.Nat using (ℕ)
 open import Data.List using (foldr; tabulate)
-open import Data.List.Relation.Pointwise using (tabulate⁺)
+open import Data.List.Relation.Binary.Pointwise using (tabulate⁺)
 
 open import RoutingLib.Data.List.Relation.Binary.Pointwise using (foldr⁺)
 open import RoutingLib.Iteration.Synchronous

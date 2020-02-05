@@ -3,7 +3,7 @@ open import Level using (Level; suc; _⊔_)
 
 module RoutingLib.Function.Metric.Packages (a i ℓ₁ ℓ₂ ℓ₃ : Level) where
 
-open import Algebra.FunctionProperties using (Op₂)
+open import Algebra.Core using (Op₂)
 open import Data.Nat.Properties using (≤⇒≤′)
 open import Relation.Binary hiding (Symmetric)
 open import Relation.Binary.PropositionalEquality using (_≡_) renaming (sym to ≡-sym)

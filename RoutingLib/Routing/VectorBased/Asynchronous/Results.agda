@@ -10,18 +10,14 @@ module RoutingLib.Routing.VectorBased.Asynchronous.Results where
 open import Data.Nat using (zero; suc; s≤s; z≤n)
 open import Level using (Level)
 
-open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence
-  using (AMCO; AMCO⇒convergent; |0|-convergent)
-
-open import RoutingLib.Routing.Network using (Network; IsFree)
+open import RoutingLib.Routing using (Network)
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Algebra.Properties.PathAlgebra
-open import RoutingLib.Routing.Algebra.Certification
 open import RoutingLib.Routing.Algebra.Simulation using (_Simulates_)
-open import RoutingLib.Routing.VectorBased.Asynchronous using (F∥)
+open import RoutingLib.Routing.Network.Definitions using (Free)
+open import RoutingLib.Routing.Network.Properties using (strIncr⇒free)
 import RoutingLib.Routing.VectorBased.Asynchronous.Simulation as Simulation
-import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence as DV
-open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Definitions
+import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Proof as Convergence
 
 private
   variable
@@ -30,53 +26,60 @@ private
     B : RawRoutingAlgebra c d ℓ₂
 
 --------------------------------------------------------------------------------
--- Finite strictly increasing distance vector protocols
---
--- The asynchronous state function δ is always guaranteed to converge
--- asynchronously over any finite, strictly increasing routing algebra. This
--- therefore applies to distance vector protocols.
+-- Re-export convergence definitions
+
+open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Definitions public
+
+--------------------------------------------------------------------------------
+-- Bisimilarity
+
+-- If an algebra is always convergent then any algebra simulated by it is also
+-- convergent
+
+simulate : A Simulates B → Convergent A → Convergent B
+simulate A⇉B conv = Simulation.simulate A⇉B conv
+
+--------------------------------------------------------------------------------
+-- Distance vector protocols
+
+-- If the routing algebra is finite then the asynchronous iteration δ is
+-- guaranteed to converge over any free network.
 
 finite⇒convergentOverFreeNetworks : IsRoutingAlgebra A →
                                     IsFinite A →
-                                    PartiallyConvergent A (IsFree A)
-finite⇒convergentOverFreeNetworks routingAlg finite N isFree =
-  AMCO⇒convergent (DV.F∥-AMCO routingAlg finite N isFree)
+                                    PartiallyConvergent A (Free A)
+finite⇒convergentOverFreeNetworks routingAlg =
+  Convergence.finite⇒convergentOverFreeNetworks routingAlg
+
+-- If the routing algebra if finite and strictly increasing then the asynchronous
+-- iteration δ is guaranteed to converge over any network.
 
 finite+strictlyIncr⇒convergent : IsRoutingAlgebra A →
                                  IsFinite A →
                                  IsStrictlyIncreasing A →
                                  Convergent A
 finite+strictlyIncr⇒convergent routingAlg finite strIncr N =
-  finite⇒convergentOverFreeNetworks routingAlg finite N {!!}
+  finite⇒convergentOverFreeNetworks routingAlg finite (strIncr⇒free _ N routingAlg strIncr)
 
 --------------------------------------------------------------------------------
--- Strictly increasing path vector protocols
---
--- The asynchronous state function δ is always guaranteed to converge over any
--- strictly increasing path algebra. This therefore applies to path vector
--- algebras.
+-- Path vector protocols
 
-{-
+-- For any path algebra the asynchronous iteration δ is always guaranteed
+-- to converge over any free network.
+
+paths⇒convergentOverFreeNetworks : IsRoutingAlgebra A →
+                                   IsPathAlgebra A →  
+                                   PartiallyConvergent A (Free A)
+paths⇒convergentOverFreeNetworks = Convergence.paths⇒convergentOverFreeNetworks
+
+-- If the path algebra is increasing (or equivalently strictly increasing) then
+-- the asynchronous iteration δ is guaranteed to converge over any network.
+
 incrPaths⇒convergent : IsRoutingAlgebra A →
                        IsPathAlgebra A →
                        IsIncreasing A →
-                       AlwaysConvergent A
-incrPaths⇒convergent _          _       _    {zero}  N = |0|-convergent (F∥ _ N)
-incrPaths⇒convergent routingAlg pathAlg incr {suc n} N = AMCO⇒convergent
-  (PVResults.F∥-isAMCO
-    routingAlg
-    (certifiedPathAlgebra pathAlg (suc n))
-    (incr⇒strIncr routingAlg pathAlg incr)
-    N (s≤s z≤n))
-
---------------------------------------------------------------------------------
--- Bisimilarity
---
--- If an algebra is always convergent then any algebra simulated by it is also
--- convergent
-
-simulate : A Simulates B →
-           AlwaysConvergent A →
-           AlwaysConvergent B
-simulate A⇉B conv = Simulation.simulate A⇉B conv
--}
+                       Convergent A
+incrPaths⇒convergent routingAlg pathAlg incr N =
+  paths⇒convergentOverFreeNetworks routingAlg pathAlg
+    (strIncr⇒free _ N routingAlg
+      (incr⇒strIncr routingAlg pathAlg incr))

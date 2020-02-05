@@ -22,14 +22,13 @@ module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.ACOImpliesConvergen
   where
 
 open import Data.Fin using (Fin)
-open import Data.Fin.Dec using (_∈?_)
+open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Maybe using (just; nothing)
 open import Data.Nat renaming (_≟_ to _≟ℕ_)
 open import Data.Nat.Properties hiding (_≟_)
+open import Data.Nat.Induction using (Acc; acc; <-wellFounded)
 open import Data.Product as Prod using (∃; proj₂; proj₁; _,_; _×_; map)
 open import Function using (id; _∘_; _$_)
-open import Induction.WellFounded using (Acc; acc)
-open import Induction.Nat using (<-wellFounded)
 open import Level using ()
 open import Relation.Binary using (tri<; tri≈; tri>)
 open import Relation.Binary.PropositionalEquality

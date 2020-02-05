@@ -1,6 +1,6 @@
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (Subset; ⁅_⁆; ∣_∣; _∪_; _∈_; _∉_)
-open import Data.Fin.Subset.Properties using (x∈⁅x⁆; x∈p∪q⁺; x∈p∪q⁻; x∈⁅y⁆⇒x≡y; ∈⊤; ∣⁅x⁆∣≡1)
+open import Data.Fin.Subset.Properties using (x∈⁅x⁆; x∈p∪q⁺; x∈p∪q⁻; x∈⁅y⁆⇒x≡y; ∈⊤; ∣⁅x⁆∣≡1; ∣p∣≡n⇒p≡⊤)
 open import Data.Nat as ℕ using (ℕ; zero; suc; z≤n; s≤s; _+_; _^_; _*_; _<_; _≤_)
 open import Data.Nat.Properties
 open import Data.Sum using (inj₁; inj₂)
@@ -14,7 +14,7 @@ open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.Fin.Subset using (Nonfull)
 open import RoutingLib.Data.Fin.Subset.Properties
-  using (∣p∣<n⇒Nonfull; ∣p∪⁅i⁆∣≡1+∣p∣; i∉⁅j⁆; Nonfull⁅i⁆′; x∉p∪q⁺; ∣p∣≡n⇒p≡⊤)
+  using (∣p∣<n⇒Nonfull; ∣p∪⁅i⁆∣≡1+∣p∣; i∉⁅j⁆; Nonfull⁅i⁆′; x∉p∪q⁺)
 
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing using (AdjacencyMatrix)
@@ -70,7 +70,7 @@ module _ (X : RoutingMatrix) (j : Fin n) where
           iᵗʰ∈Cₖ k k<n i ((≤⇒pred≤ 1+i<n)) k≤i))
 
     C : ∀ i → i < n → Subset n
-    C zero    0<n = ⁅ iᵗʰ zero 0<n ⁆
+    C zero    0<n   = ⁅ iᵗʰ zero 0<n ⁆
     C (suc i) 1+i<n = (C i (≤⇒pred≤ 1+i<n)) ∪ ⁅ iᵗʰ (suc i) 1+i<n ⁆
 
     j∈C : ∀ i → (i<n : i < n) → j ∈ C i i<n
@@ -79,9 +79,10 @@ module _ (X : RoutingMatrix) (j : Fin n) where
 
     C-converged : ∀ i {k} → (i<n : i < n) → k ∈ C i i<n → k ∈ᵤ 𝓒 (suc (i * n))
     C-converged zero    {k} _     k∈C₁  = subst (_∈ᵤ 𝓒 1) (sym (x∈⁅y⁆⇒x≡y j k∈C₁)) j∈𝓒₁
-    C-converged (suc i) {k} 1+i<n k∈C₁₊ᵢ with x∈p∪q⁻ (C i _) ⁅ iᵗʰ (suc i) _ ⁆ k∈C₁₊ᵢ
-    ... | inj₂ k∈⁅1+iᵗʰ⁆ rewrite x∈⁅y⁆⇒x≡y _ k∈⁅1+iᵗʰ⁆ = iᵗʰ∈𝓒 (suc i) 1+i<n
-    ... | inj₁ k∈Cᵢ      = test3
+    C-converged (suc i) {k} 1+i<n k∈C₁₊ᵢ
+      with x∈p∪q⁻ (C i _) ⁅ iᵗʰ (suc i) _ ⁆ k∈C₁₊ᵢ | iᵗʰ∈𝓒 (suc i) 1+i<n
+    ... | inj₂ k∈⁅1+iᵗʰ⁆ | i+1ᵗʰ∈𝓒 rewrite x∈⁅y⁆⇒x≡y _ k∈⁅1+iᵗʰ⁆ = i+1ᵗʰ∈𝓒
+    ... | inj₁ k∈Cᵢ      | i+1ᵗʰ∈𝓒 = test3
       where
 
       test : k ∈ᵤ 𝓒 (suc (i * n))
@@ -94,12 +95,12 @@ module _ (X : RoutingMatrix) (j : Fin n) where
       test3 = 𝓒-cong test2 (+-suc n (i * n))
 
     iᵗʰ∈Cₖ : ∀ i (i<n : i < n) k (k<n : k < n) → i ≤ k → iᵗʰ i i<n ∈ C k k<n
-    iᵗʰ∈Cₖ zero   i<n zero     k<n z≤n = x∈⁅x⁆ j
-    iᵗʰ∈Cₖ i      i<n (suc k)  k<n z≤n = j∈C (suc k) k<n
-    iᵗʰ∈Cₖ (suc i) i<n (suc k) k<n (s≤s i≤k) with i ℕ.≟ k
-    ... | no  i≢k = x∈p∪q⁺ (inj₁ (iᵗʰ∈Cₖ (suc i) i<n k (≤⇒pred≤ k<n) (≤∧≢⇒< i≤k i≢k)))
-    ... | yes refl with ≤-irrelevant k<n i<n
-    ...   | refl = x∈p∪q⁺ (inj₂ (x∈⁅x⁆ (iᵗʰ (suc i) i<n)))
+    iᵗʰ∈Cₖ zero    i<n zero    k<n z≤n = x∈⁅x⁆ j
+    iᵗʰ∈Cₖ i       i<n (suc k) k<n z≤n = j∈C (suc k) k<n
+    iᵗʰ∈Cₖ (suc i) i<n (suc k) k<n (s≤s i≤k) with i ℕ.≟ k | iᵗʰ∈Cₖ (suc i) i<n k | x∈⁅x⁆ (iᵗʰ (suc i) i<n)
+    ... | no  i≢k  | rec₁ | rec₂ = x∈p∪q⁺ (inj₁ (rec₁ (≤⇒pred≤ k<n) (≤∧≢⇒< i≤k i≢k)))
+    ... | yes refl | rec₁ | rec₂ with ≤-irrelevant k<n i<n
+    ...   | refl = x∈p∪q⁺ (inj₂ rec₂)
 
     iᵗʰ∉Cₖ : ∀ i (i<n : i < n) k (k<n : k < n) → k < i → iᵗʰ i i<n ∉ C k k<n
     iᵗʰ∉Cₖ (suc i) 1+i<n zero    k<n   k<i = i∉⁅j⁆ (iᵗʰ≢kᵗʰ (suc i) 0 1+i<n k<n k<i)

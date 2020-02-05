@@ -1,6 +1,6 @@
 open import Data.List hiding (any)
-open import Data.List.Any using (here; there; any)
-open import Data.List.All.Properties using (gmap; ¬Any⇒All¬; All¬⇒¬Any; tabulate⁺)
+open import Data.List.Relation.Unary.Any using (here; there; any)
+open import Data.List.Relation.Unary.All.Properties using (gmap; ¬Any⇒All¬; All¬⇒¬Any; tabulate⁺)
 open import Data.List.Relation.Unary.Unique.Setoid.Properties
 open import Data.List.Membership.Setoid.Properties
 open import Data.List.Relation.Unary.Unique.Setoid as Uniqueness using (Unique)

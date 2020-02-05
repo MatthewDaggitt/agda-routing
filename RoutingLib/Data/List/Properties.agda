@@ -4,10 +4,10 @@ open import Data.Nat using (ℕ; zero; suc; _+_; _∸_)
 open import Data.Nat.Properties using (+-suc)
 open import Data.List
 open import Data.List.Properties
-open import Data.List.All using (All; []; _∷_; universal)
-open import Data.List.Any using (Any; here; there)
+open import Data.List.Relation.Unary.All using (All; []; _∷_; universal)
+open import Data.List.Relation.Unary.Any using (Any; here; there)
 open import Data.List.Membership.Propositional using (_∈_)
-open import Data.List.Relation.Pointwise
+open import Data.List.Relation.Binary.Pointwise
   using (Pointwise; []; _∷_)
 open import Data.List.Relation.Unary.AllPairs
   using (AllPairs; []; _∷_)
@@ -79,7 +79,7 @@ module _ (f : A → Maybe B) where
 module _ (M : Magma a ℓ) where
 
   open Magma M
-  open import Relation.Binary.EqReasoning setoid
+  open import Relation.Binary.Reasoning.Setoid setoid
 
   foldr-zeroʳ  : ∀ {e} → RightZero _≈_ e _∙_ → ∀ xs → foldr _∙_ e xs ≈ e
   foldr-zeroʳ {e} zeroʳ []       = Magma.refl M

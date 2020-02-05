@@ -16,13 +16,13 @@ module RoutingLib.Routing.VectorBased.Synchronous.PathVector.Properties
   (A : AdjacencyMatrix algebra n)
   where
 
-open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
-open import Data.Fin.Dec using (¬∀⟶∃¬; all?)
+open import Data.Fin.Properties using (¬∀⟶∃¬; all?) renaming (_≟_ to _≟𝔽_)
 open import Data.List using (List; foldr)
-import Data.List.All.Properties as All
+import Data.List.Relation.Unary.All.Properties as All
 open import Data.List.Properties
-open import Data.List.Relation.Pointwise as Pointwise using (Pointwise; []; _∷_)
+open import Data.List.Relation.Binary.Pointwise as Pointwise using (Pointwise; []; _∷_)
 open import Data.Nat using (_<_)
+open import Data.Nat.Induction using (Acc; acc; <-wellFounded)
 open import Data.Nat.Properties
   using (≤-reflexive; <-trans; module ≤-Reasoning)
 open import Data.Product using (∃; ∃₂; _×_; _,_; proj₁)
@@ -33,8 +33,6 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Decidable)
 import Relation.Binary.Reasoning.Setoid as EqReasoning
-open import Induction.WellFounded using (Acc; acc)
-open import Induction.Nat using (<-wellFounded)
 
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.Path.CertifiedI
@@ -213,15 +211,15 @@ I≈toCI i j with j ≟𝔽 i
 ... | no  _ = ≈-refl
 
 foldrᶜ-lemma : ∀ {e xs} {ys : List CRoute} → 𝑪 e →
-                 Pointwise (λ x y → x ≈ proj₁ y) xs ys →
+                 Pointwise (λ x y → x ≈ projᵣ y) xs ys →
                  𝑪 (foldr _⊕_ e xs)
 foldrᶜ-lemma eᶜ []            = eᶜ
 foldrᶜ-lemma eᶜ (_∷_ {y = y , yᶜ} x≈y xs≈ys) =
-  ⊕-pres-𝑪 (𝑪-cong (≈-sym x≈y) yᶜ) (foldrᶜ-lemma eᶜ xs≈ys)
+  ⊕-pres-𝑪 (𝑪-cong (≈-sym x≈y) (recomputeᶜ yᶜ)) (foldrᶜ-lemma eᶜ xs≈ys)
 
 foldr-toCRoute-commute : ∀ {e f} (eᶜ : 𝑪 e) → toCRoute eᶜ ≈ᶜ f →
                       ∀ {xs ys} (foldrᶜ : 𝑪 (foldr _⊕_ e xs)) →
-                      Pointwise (λ x y → x ≈ proj₁ y) xs ys →
+                      Pointwise (λ x y → x ≈ projᵣ y) xs ys →
                       toCRoute foldrᶜ ≈ᶜ foldr _⊕ᶜ_ f ys
 foldr-toCRoute-commute eᶜ e≈f foldrᶜ []            = e≈f
 foldr-toCRoute-commute eᶜ e≈f foldrᶜ (x≈y ∷ xs≈ys) =
@@ -232,3 +230,6 @@ F-toCMatrix-commute : ∀ {X} (Xᶜ : 𝑪ₘ X) (FXᶜ : 𝑪ₘ (F X)) →
 F-toCMatrix-commute {X} Xᶜ FXᶜ i j =
   foldr-toCRoute-commute (Iᶜ i j) (I≈toCI i j) (FXᶜ i j)
     (Pointwise.tabulate⁺ {g = λ k → A i k ▷ X k j , ▷-pres-𝑪 i k (Xᶜ k j)} (λ k → ≈-refl))
+
+F-toCMatrix-commute′ : ∀ {X} (Xᶜ : 𝑪ₘ X) → toCMatrix (F-pres-𝑪ₘ Xᶜ) ≈ᶜₘ Fᶜ (toCMatrix Xᶜ)
+F-toCMatrix-commute′ Xᶜ = F-toCMatrix-commute Xᶜ (F-pres-𝑪ₘ Xᶜ)

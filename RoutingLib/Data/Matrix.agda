@@ -4,7 +4,7 @@ open import Data.Nat
 open import Data.List using (List; concat; tabulate)
 open import Data.Product using (∃₂; _×_; _,_)
 open import Relation.Unary using (Pred)
-open import Algebra.FunctionProperties using (Op₂)
+open import Algebra.Core using (Op₂)
 open import Function using (_∘_)
 
 import Data.Vec.Functional as Vector

@@ -12,7 +12,7 @@ open import Data.Vec as Vec using (Vec; []; _∷_)
 open import Data.Fin.Subset using (Subset; ∣_∣; inside; outside; _∉_)
 open import Level using (Level)
 open import Function.Base using (_∘_)
-open import Algebra.FunctionProperties using (Op₂)
+open import Algebra.Core using (Op₂)
 
 open import RoutingLib.Data.NatInf using (ℕ∞) renaming (_⊓_ to _⊓∞_)
 

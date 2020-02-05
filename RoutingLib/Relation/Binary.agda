@@ -16,7 +16,7 @@ private
 -- Minimums for strict orders
 
 StrictMinimum : Rel A ℓ₁ → Rel A ℓ₂ → A → Set _
-StrictMinimum _≈_ _<_ ⊥ = ∀ {x} → ¬ (⊥ ≈ x) → ⊥ < x 
+StrictMinimum _≈_ _<_ ⊥ = ∀ {x} → ¬ (x ≈ ⊥) → ⊥ < x 
 
 StrictMaximum : Rel A ℓ₁ → Rel A ℓ₂ → A → Set _
-StrictMaximum _≈_ _<_ ⊤ = ∀ {x} → ¬ (⊤ ≈ x) → x < ⊤
+StrictMaximum _≈_ _<_ ⊤ = ∀ {x} → ¬ (x ≈ ⊤) → x < ⊤

@@ -13,8 +13,8 @@ module RoutingLib.Relation.Binary.Construct.NonStrictToStrict
 
   open import Relation.Binary.Construct.NonStrictToStrict _≈_ _≤_
 
-  <-min : ∀ {⊥} → Minimum _≤_ ⊥ → StrictMinimum _≈_ _<_ ⊥
-  <-min min {x} ⊥≉x = min x , ⊥≉x
+  <-min : Symmetric _≈_ → ∀ {⊥} → Minimum _≤_ ⊥ → StrictMinimum _≈_ _<_ ⊥
+  <-min sym min {x} x≉⊥ = min x , x≉⊥ ∘ sym
 
-  <-max : Symmetric _≈_ → ∀ {⊤} → Maximum _≤_ ⊤ → StrictMaximum _≈_ _<_ ⊤
-  <-max sym max {x} ⊤≉x = max x , ⊤≉x ∘ sym
+  <-max : ∀ {⊤} → Maximum _≤_ ⊤ → StrictMaximum _≈_ _<_ ⊤
+  <-max max {x} x≉⊤ = max x , x≉⊤

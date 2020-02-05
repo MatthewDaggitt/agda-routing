@@ -18,7 +18,9 @@ module RoutingLib.Routing.Algebra.Comparable
   {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)
   where
 
-import Algebra.FunctionProperties as FunctionProperties
+open RawRoutingAlgebra algebra
+
+open import Algebra.Definitions _≈_
 open import Data.Nat using (ℕ) renaming (_≟_ to _≟ℕ_)
 open import Data.Fin using (Fin)
 open import Data.Maybe using (Maybe)
@@ -29,11 +31,8 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; sym; subs
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Algebra.FunctionProperties using (_Preservesᵇ_)
+open import RoutingLib.Algebra.Definitions using (_Preservesᵇ_)
 open import RoutingLib.Data.Path.UncertifiedI
-
-open RawRoutingAlgebra algebra
-open FunctionProperties _≈_
 
 private
   variable

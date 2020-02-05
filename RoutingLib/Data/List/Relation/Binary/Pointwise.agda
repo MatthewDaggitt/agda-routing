@@ -1,7 +1,7 @@
-open import Algebra.FunctionProperties using (Op₂)
+open import Algebra.Core using (Op₂)
 open import Data.List
 import Data.List.Properties as ListProperties
-open import Data.List.Relation.Pointwise as PW using (Pointwise; []; _∷_)
+open import Data.List.Relation.Binary.Pointwise as PW using (Pointwise; []; _∷_)
 open import Data.Nat.Properties using (suc-injective)
 open import Data.Fin using (Fin; zero; suc; cast)
 open import Function using (_∘_)

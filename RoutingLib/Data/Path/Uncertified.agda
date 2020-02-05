@@ -2,13 +2,12 @@
 
 module RoutingLib.Data.Path.Uncertified where
 
-open import Algebra.FunctionProperties
 open import Data.Fin using (Fin; _≤_) renaming (zero to fzero; suc to fsuc)
 open import Data.Maybe using (Maybe; just; nothing)
 open import Data.Nat using (ℕ; _<_; zero; suc; _≟_)
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
 open import Data.List using (List; []; _∷_; map)
-open import Data.List.Any using (Any)
+open import Data.List.Relation.Unary.Any using (Any)
 open import Level using (0ℓ)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Binary using (Rel)
@@ -100,7 +99,7 @@ inflate q@((i , j) ∷ p) (suc n) = (i , i) ∷ inflate q n
 deflate : Path → Path
 deflate [] = []
 deflate ((i , j) ∷ []) = (i , j) ∷ []
-deflate ((i , j) ∷ (k , l) ∷ p) with i ≟ j | j ≟ k
-... | no  _ | _     = (i , j) ∷ deflate ((k , l) ∷ p)
-... | yes _ | no  _ = (i , j) ∷ deflate ((k , l) ∷ p)
-... | yes _ | yes _ = deflate ((k , l) ∷ p)
+deflate ((i , j) ∷ (k , l) ∷ p) with i ≟ j | j ≟ k | deflate ((k , l) ∷ p)
+... | no  _ | _     | rec = (i , j) ∷ rec
+... | yes _ | no  _ | rec = (i , j) ∷ rec
+... | yes _ | yes _ | rec = rec

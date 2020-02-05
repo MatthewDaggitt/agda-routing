@@ -14,8 +14,8 @@ open import Relation.Nullary
 open import Relation.Unary using (Pred; Decidable)
 import Relation.Nullary.Decidable as Dec
 open import Relation.Binary.PropositionalEquality using (setoid)
-open import Data.Product.Relation.Pointwise.NonDependent using (_×ₛ_)
-open import Data.Sum.Relation.Pointwise using (_⊎ₛ_)
+open import Data.Product.Relation.Binary.Pointwise.NonDependent using (_×ₛ_)
+open import Data.Sum.Relation.Binary.Pointwise using (_⊎ₛ_)
 
 open Setoid using (Carrier)
 

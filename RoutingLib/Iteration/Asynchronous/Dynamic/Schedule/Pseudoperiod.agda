@@ -18,6 +18,7 @@ open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (_∈_; _∉_)
 open import Data.Nat using (ℕ; zero; suc; s≤s; _<_; _≤_; _∸_; _≟_; _⊔_; _+_)
 open import Data.Nat.Properties
+open import Data.Nat.Induction using (Acc; acc; <-wellFounded)
 open import Data.List using (foldr; tabulate; applyUpTo)
 import Data.List.Extrema.Nat as List
 open import Data.Product using (∃; _×_; _,_; proj₁; proj₂)
@@ -25,8 +26,6 @@ open import Function using (_∘_)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; refl; trans; subst)
 open import Relation.Nullary using (¬_; yes; no)
-open import Induction.WellFounded using (Acc; acc)
-open import Induction.Nat using (<-wellFounded)
 
 open import RoutingLib.Data.Vec.Functional using (max)
 

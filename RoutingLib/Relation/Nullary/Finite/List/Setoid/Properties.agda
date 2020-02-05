@@ -21,8 +21,8 @@ open import Level
 open import Relation.Nullary
 import Relation.Nullary.Decidable as Dec
 open import Relation.Binary.PropositionalEquality using (_≡_; setoid; cong)
-open import Data.Product.Relation.Pointwise.NonDependent using (_×ₛ_)
-open import Data.Sum.Relation.Pointwise using (_⊎ₛ_; inj₁; inj₂)
+open import Data.Product.Relation.Binary.Pointwise.NonDependent using (_×ₛ_)
+open import Data.Sum.Relation.Binary.Pointwise using (_⊎ₛ_; inj₁; inj₂)
 
 open import RoutingLib.Data.List
 open import RoutingLib.Data.List.Properties

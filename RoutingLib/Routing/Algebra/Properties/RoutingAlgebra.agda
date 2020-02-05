@@ -13,9 +13,9 @@ module RoutingLib.Routing.Algebra.Properties.RoutingAlgebra
 
 import Algebra.Definitions as AlgebraDefinitions
 import Algebra.Structures as AlgebraStructures
-import Algebra.FunctionProperties.Consequences as Consequences
+import Algebra.Consequences.Setoid as Consequences
 open import Algebra.Bundles
-open import Algebra.FunctionProperties.Consequences.Propositional using (sel⇒idem)
+open import Algebra.Consequences.Propositional using (sel⇒idem)
 open import Data.Product using (proj₁; _,_)
 open import Data.Fin using (Fin; zero; suc)
 open import Data.Nat using (zero; suc)
@@ -26,7 +26,7 @@ open import Relation.Nullary using (yes; no; ¬_)
 open import Relation.Binary using (DecTotalOrder; StrictTotalOrder; Maximum; Minimum)
 import Relation.Binary.Construct.Converse as Converse
 import Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
-import Relation.Binary.EqReasoning as EqReasoning
+import Relation.Binary.Reasoning.Setoid as EqReasoning
 
 open import RoutingLib.Routing algebra
 open import RoutingLib.Algebra.Bundles
@@ -34,7 +34,6 @@ open import RoutingLib.Algebra.Structures
 import RoutingLib.Relation.Binary.Construct.NonStrictToStrict as NSTS
 import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.DecTotalOrder as NonStrictToStrict
 
-open import RoutingLib.Data.FiniteSet using (⟦_∣_⟧) renaming (FiniteSet to FiniteSet⁺)
 open import RoutingLib.Relation.Binary
 
 open RawRoutingAlgebra algebra
@@ -108,10 +107,10 @@ open AlgebraStructures _≈_
 ≤₊-maximum x = ≈-sym (⊕-identityˡ x)
 
 <₊-minimum : StrictMinimum _≈_ _<₊_ 0#
-<₊-minimum = NSTS.<-min _≈_ _≤₊_ ≤₊-minimum
+<₊-minimum = NSTS.<-min _≈_ _≤₊_ ≈-sym ≤₊-minimum
 
 <₊-maximum : StrictMaximum _≈_ _<₊_ ∞#
-<₊-maximum = NSTS.<-max _≈_ _≤₊_ ≈-sym ≤₊-maximum
+<₊-maximum = NSTS.<-max _≈_ _≤₊_ ≤₊-maximum
 
 open DecTotalOrder ≤₊-decTotalOrder public
   using ()
@@ -133,6 +132,7 @@ open NonStrictToStrict ≤₊-decTotalOrder public
   ( <-≤-trans to <-≤₊-trans
   ; ≤-<-trans to ≤-<₊-trans
   ; <⇒≉       to <₊⇒≉
+  ; <⇒≤       to <₊⇒≤₊
   ; <⇒≱       to <₊⇒≱₊
   ; ≤⇒≯       to ≤₊⇒≯₊
   ; ≰⇒>       to ≰₊⇒>₊

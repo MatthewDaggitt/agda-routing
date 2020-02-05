@@ -3,7 +3,7 @@ open import Data.Nat.Properties using (+-assoc; m+[n∸m]≡n)
 open import Function using (_∘_)
 open import Relation.Binary using (Setoid)
 open import Relation.Binary.PropositionalEquality using (cong₂) renaming (sym to ≡-sym; refl to ≡-refl)
-import Relation.Binary.EqReasoning as EqReasoning
+import Relation.Binary.Reasoning.Setoid as EqReasoning
 
 open import RoutingLib.Iteration.Synchronous
 import RoutingLib.Iteration.Synchronous.Properties as SyncProperties

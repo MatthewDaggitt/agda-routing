@@ -1,14 +1,14 @@
 open import Data.Fin using (Fin)
-open import Data.Fin.Dec using (_∈?_)
 open import Data.Fin.Subset using (Subset; _∈_; _∉_; _∪_; Nonempty)
+open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Nat using (ℕ; zero; suc; _+_)
 open import Data.Nat.Properties using (+-comm)
 open import Data.Product using (_,_; proj₁; proj₂)
 open import Data.List using (List)
-open import Data.List.All using (lookup)
+open import Data.List.Relation.Unary.All using (lookup)
 import Data.List.Extrema as Extrema
 open import Relation.Unary using () renaming (_∈_ to _∈ᵤ_)
-import Relation.Binary.PartialOrderReasoning as POR
+import Relation.Binary.Reasoning.PartialOrder as POR
 open import Relation.Binary.PropositionalEquality
   using (refl; _≢_; subst)
 open import Relation.Nullary using (yes; no)
@@ -28,9 +28,9 @@ import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.S
 
 module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step2_ConvergedSubtree
   {a b ℓ n-1} {algebra : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  (isPathAlgebra : IsCertifiedPathAlgebra algebra (suc n-1))
-  (isIncreasing : IsIncreasing algebra)
+  (isRoutingAlgebra    : IsRoutingAlgebra algebra)
+  (isPathAlgebra       : IsCertifiedPathAlgebra algebra (suc n-1))
+  (isIncreasing        : IsIncreasing algebra)
   (A : AdjacencyMatrix algebra (suc n-1))
   (X : RoutingMatrix   algebra (suc n-1))
   (j : Fin (suc n-1))
@@ -38,12 +38,12 @@ module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.S
   {C : Subset (suc n-1)}
   (j∈C : j ∈ C)
   (C-nonFull : Nonfull C)
-  (C⊆𝓒ₜ : ∀ {i} → i ∈ C → i ∈ᵤ Step1_NodeSets.𝓒 isRoutingAlgebra isPathAlgebra A X j (suc t-1))
+  (open Step1_NodeSets isRoutingAlgebra isPathAlgebra A X j)
+  (C⊆𝓒ₜ : ∀ {i} → i ∈ C → i ∈ᵤ 𝓒 (suc t-1))
   where
 
 open Prelude isRoutingAlgebra isPathAlgebra A
 open Notation X j
-open Step1_NodeSets isRoutingAlgebra isPathAlgebra A X j
 
 open Extrema ≤₊-totalOrder
 open POR ≤₊-poset
@@ -144,15 +144,15 @@ abstract
   with p[FXᵢⱼ]≈[]⇒i≡j (σ (t-1 + s) X) k j p[σᵗ⁺ˢXₖⱼ]≈[]
 ... | refl = contradiction j∈C k∉C
 
-∈𝓡 : ∀ s i {k} → k ∈ᵤ 𝓡 (t + s) → k ∉ C →
-        ∀ {p} → path (σ (t + s) X k j) ≈ₚ p →
-        eₘᵢₙ ≤[ t + s ] (i , k)
-∈𝓡 s i _      _   {invalid}  p[σᵗ⁺ˢXₖⱼ]≈∅  = ∈𝓡-invalid s p[σᵗ⁺ˢXₖⱼ]≈∅
-∈𝓡 s i k∈Rₛ₊ₜ k∉C {valid []} p[σᵗ⁺ˢXₖⱼ]≈[] = ∈𝓡-trivial s k∉C p[σᵗ⁺ˢXₖⱼ]≈[]
-∈𝓡 s i k∈Rₛ₊ₜ k∉C {valid ((_ , l) ∷ p ∣ _ ∣ _)} p[σᵗ⁺ˢXₖⱼ]≈kl∷p
-  with 𝓡-path {t-1 + s} p[σᵗ⁺ˢXₖⱼ]≈kl∷p k∈Rₛ₊ₜ
-... | valid ([ _ , l∈Rₛ₊ₜ ]∷ _)
+∈𝓡 : ∀ s i {k p} → path (σ (t + s) X k j) ≈ₚ p →
+     k ∈ᵤ 𝓡 (t + s) → k ∉ C → 
+     eₘᵢₙ ≤[ t + s ] (i , k)
+∈𝓡 s i {_} {invalid}  p[σᵗ⁺ˢXₖⱼ]≈∅  _      _   = ∈𝓡-invalid s p[σᵗ⁺ˢXₖⱼ]≈∅
+∈𝓡 s i {_} {valid []} p[σᵗ⁺ˢXₖⱼ]≈[] k∈Rₛ₊ₜ k∉C = ∈𝓡-trivial s k∉C p[σᵗ⁺ˢXₖⱼ]≈[]
+∈𝓡 s i {_} {valid ((m , l) ∷ p ∣ _ ∣ _)} p[σᵗ⁺ˢXₖⱼ]≈kl∷p k∈Rₛ₊ₜ k∉C 
+  with ∈𝓡 s m {_} {valid p} | 𝓡-path {t-1 + s} p[σᵗ⁺ˢXₖⱼ]≈kl∷p k∈Rₛ₊ₜ
+... | rec | valid ([ _ , l∈Rₛ₊ₜ ]∷ _)
     with 𝓡-alignment (t-1 + s) k∈Rₛ₊ₜ p[σᵗ⁺ˢXₖⱼ]≈kl∷p
 ...   | refl , σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ , p[σᵗ⁺ˢXₗⱼ]≈p with l ∈? C
-...     | no  l∉C = safe-extension σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ (∈𝓡 s _ l∈Rₛ₊ₜ l∉C p[σᵗ⁺ˢXₗⱼ]≈p)
+...     | no  l∉C = safe-extension σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ (rec p[σᵗ⁺ˢXₗⱼ]≈p l∈Rₛ₊ₜ l∉C )
 ...     | yes l∈C = safe-extension σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ (eₘᵢₙ-isMinₜ₊ₛ (k∉C , l∈C) s)

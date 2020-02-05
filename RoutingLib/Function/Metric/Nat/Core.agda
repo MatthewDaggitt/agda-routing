@@ -1,7 +1,7 @@
 
 module RoutingLib.Function.Metric.Nat.Core where
 
-open import Algebra.FunctionProperties using (Op₂)
+open import Algebra.Core using (Op₂)
 open import Data.Nat
 open import Level using (Level)
 open import Relation.Binary hiding (Symmetric)

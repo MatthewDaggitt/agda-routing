@@ -1,6 +1,7 @@
 open import Data.Fin using (Fin)
-open import Data.Fin.Dec using (all?; _∈?_)
+open import Data.Fin.Properties using (all?)
 open import Data.Fin.Subset using (Subset; _∈_; ∁)
+open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Product using (∃; _,_; proj₁; proj₂)
 open import Data.Product.Properties using (,-injectiveˡ)
 open import Function.Equality using (_⟨$⟩_)
@@ -12,7 +13,6 @@ open import Relation.Binary.PropositionalEquality using (_≡_; subst)
 open import Relation.Nullary using (Dec; yes; no)
 open import Relation.Nullary.Implication using (_→-dec_)
 
-open import RoutingLib.Data.Fin.Subset.Properties using (x∉p⇒x∈∁p)
 open import RoutingLib.Relation.Unary using (Finite)
 
 module RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset

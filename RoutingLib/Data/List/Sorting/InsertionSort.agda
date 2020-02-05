@@ -7,8 +7,7 @@ open DecTotalOrder decTotalOrder renaming (Carrier to A)
 
 open import Data.List using (List; []; _∷_)
 open import Data.List.Relation.Unary.All using ([]; _∷_; map)
-open import Data.List.Relation.Binary.Permutation.Setoid Eq.setoid using (_↭_; ↭-sym; module PermutationReasoning)
-  renaming (refl to ↭-refl; trans to ↭-trans)
+open import Data.List.Relation.Binary.Permutation.Setoid Eq.setoid
 open import Data.List.Relation.Binary.Permutation.Setoid.Properties Eq.setoid using (Unique-resp-↭; ∈-resp-↭)
 open import Data.List.Relation.Binary.Equality.Setoid Eq.setoid using (_≋_)
 open import Data.List.Relation.Unary.AllPairs using ([]; _∷_)

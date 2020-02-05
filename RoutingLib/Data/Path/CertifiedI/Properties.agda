@@ -34,7 +34,7 @@ open CertifiedProperties public
   ; ℙₛ          to ℙᵛₛ
   ; length-cong to lengthᵛ-cong
   ; |p|<n       to |pᵛ|<n
-  ; |p|≤1+n     to |pᵛ|≤1+n
+  ; |p|≤n       to |pᵛ|≤n
   )
 
 ----------------------------------------------------------------------------
@@ -125,9 +125,9 @@ module _ (n : ℕ) where
 |p|<n (valid [])                  = s≤s z≤n
 |p|<n (valid (e ∷ p ∣ e⇿p ∣ e∉p)) = |pᵛ|<n (nonEmpty e p e⇿p e∉p)
 
-|p|≤1+n : ∀ {n} (p : Path n) → length p ≤ℕ suc n
-|p|≤1+n invalid   = z≤n
-|p|≤1+n (valid p) = |pᵛ|≤1+n p
+|p|≤n : ∀ {n} (p : Path n) → length p ≤ℕ n
+|p|≤n invalid   = z≤n
+|p|≤n (valid p) = |pᵛ|≤n p
 
 length-cong : ∀ {n} {p q : Path n} → p ≈ₚ q → length p ≡ length q
 length-cong invalid     = refl

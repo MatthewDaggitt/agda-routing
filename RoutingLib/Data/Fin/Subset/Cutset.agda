@@ -1,17 +1,16 @@
 module RoutingLib.Data.Fin.Subset.Cutset {n} where
 
 open import Data.Fin using (Fin)
-open import Data.Fin.Dec using (_∈?_)
 open import Data.Fin.Subset
-open import Data.Fin.Subset.Properties using (∈⊤; ∉⊥)
+open import Data.Fin.Subset.Properties using (∈⊤; ∉⊥; _∈?_)
 open import Data.Nat using (_≤_)
 open import Data.List using (List; []; filter; length)
 open import Data.List.Properties using (filter-none; filter-some)
 open import Data.List.Membership.Propositional
   using (lose) renaming (_∈_ to _∈ₘ_)
 open import Data.List.Membership.Propositional.Properties using (∈-filter⁺)
-open import Data.List.All using (All)
-open import Data.List.All.Properties using (all-filter)
+open import Data.List.Relation.Unary.All using (All)
+open import Data.List.Relation.Unary.All.Properties using (all-filter)
 open import Data.Product using (_×_; _,_)
 open import Relation.Binary.PropositionalEquality using (_≡_)
 open import Relation.Unary using (Decidable)

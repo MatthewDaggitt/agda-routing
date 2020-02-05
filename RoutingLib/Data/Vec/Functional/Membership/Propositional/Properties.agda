@@ -1,4 +1,4 @@
-open import Algebra.FunctionProperties using (Op₂; Selective)
+open import Algebra using (Op₂; Selective)
 open import Data.Nat using (ℕ; zero; suc)
 open import Data.Nat.Properties using (⊓-sel; ⊔-sel)
 open import Data.Fin using () renaming (zero to fzero; suc to fsuc)

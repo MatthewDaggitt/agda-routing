@@ -1,16 +1,16 @@
 open import Data.Fin.Subset using (Subset; _∈_)
 
-open import RoutingLib.Routing.Network using (Network)
+open import RoutingLib.Routing using (Network)
 open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.VectorBased.Asynchronous as AsyncVectorBasedRouting
-open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.RouteDistanceFunction
+open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.InternalDefinitions
 
-module RoutingLib.Routing.VectorBased.Asynchronous.Convergence.AMCO
-  {a b ℓ} (alg : RawRoutingAlgebra a b ℓ)
+module RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Step4_DFImpliesAMCO
+  {a b ℓ} {alg : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra alg)
   {n} (N : Network alg n)
-  (let open AsyncVectorBasedRouting alg N hiding (F))
-  (N-d : ∀ (e : Epoch) (p : Subset n) → RouteDistanceFunction isRoutingAlgebra (Aₜ e p))
+  (open AsyncVectorBasedRouting alg N hiding (F))
+  (N-d : ∀ (e : Epoch) (p : Subset n) → RouteDistanceFunction alg (Aₜ e p))
   where
 
 open RawRoutingAlgebra alg
@@ -19,7 +19,7 @@ open import Data.Bool using (if_then_else_)
 open import Data.Nat hiding (_⊔_)
 open import Data.Nat.Properties hiding (_≟_)
 open import Data.Fin using (Fin)
-open import Data.Fin.Dec using (_∈?_)
+open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Product using (∃; proj₁; proj₂; _,_)
 open import Data.Sum using (_⊎_; inj₁; inj₂; map₂)
 open import Data.Vec.Functional using (zipWith)

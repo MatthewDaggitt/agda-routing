@@ -2,7 +2,7 @@
 module RoutingLib.Data.Vec.Functional.Relation.Binary.Pointwise where
 
 open import Data.Fin using (Fin; zero; suc)
-open import Data.Fin.Dec using (all?)
+open import Data.Fin.Properties using (all?)
 open import Data.Vec.Functional
 open import Data.Nat using (ℕ; zero; suc)
 open import Relation.Binary as B
@@ -11,7 +11,7 @@ open import Relation.Binary.Indexed.Homogeneous hiding (REL; Rel)
 open import Relation.Binary.PropositionalEquality
   using (_≡_) renaming (refl to ≡-refl)
 open import Function using (_∘_)
-open import Algebra.FunctionProperties using (Op₂)
+open import Algebra.Core using (Op₂)
 
 open import RoutingLib.Data.Vec.Functional
 open import RoutingLib.Data.Fin.Subset.Properties using (∉-contract)

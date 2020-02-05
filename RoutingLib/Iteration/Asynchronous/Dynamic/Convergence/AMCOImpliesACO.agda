@@ -15,14 +15,13 @@ module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.AMCOImpliesACO
   {q} {Q : Pred (Subset n) q}
   (amco : PartialAMCO I∥ Q) where
 
-open import Data.Fin.Dec using (_∈?_)
+open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Nat using (ℕ; _≤_; _<_; z≤n; s≤s; zero; suc; _+_; _∸_; ≤-pred)
 open import Data.Nat.Properties hiding (_≟_)
+open import Data.Nat.Induction using (Acc; acc; <-wellFounded)
 open import Data.Product using (∃; ∃₂; _×_; _,_; proj₁; proj₂)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Unit using (⊤; tt)
-open import Induction.WellFounded using (Acc; acc)
-open import Induction.Nat using (<-wellFounded)
 open import Level using (Lift; lift; lower) renaming (zero to 0ℓ)
 open import Relation.Binary using (Rel; Decidable; _Respects_; _Preserves₂_⟶_⟶_; _Preserves_⟶_)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; subst; cong; sym; trans)

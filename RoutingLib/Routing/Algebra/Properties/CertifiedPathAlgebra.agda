@@ -18,7 +18,7 @@ open import Data.Sum using (inj₁; inj₂)
 open import Data.Fin using (Fin)
 open import Function using (_∘_)
 open import Relation.Nullary using (yes; no)
-import Relation.Binary.EqReasoning as EqReasoning
+import Relation.Binary.Reasoning.Setoid as SetoidReasoning
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; inspect; [_]; refl; sym)
 open import Relation.Unary using (Decidable)
@@ -45,7 +45,7 @@ p[r]≡∅⇒f▷r≈∞ f {r} pᵣ≡∅ = begin
   f ▷ r  ≈⟨ ▷-cong f (path[r]≈∅⇒r≈∞ (≈ₚ-reflexive pᵣ≡∅)) ⟩
   f ▷ ∞# ≈⟨ ▷-fixedPoint f ⟩
   ∞#     ∎
-  where open EqReasoning S
+  where open SetoidReasoning S
 
 --------------------------------------------------------------------------------
 -- Size properties
@@ -53,8 +53,8 @@ p[r]≡∅⇒f▷r≈∞ f {r} pᵣ≡∅ = begin
 size<n : 1 ≤ n → ∀ r → size r < n
 size<n (s≤s _) r = |p|<n (path _)
 
-size≤n+1 : ∀ r → size r ≤ suc n
-size≤n+1 r = |p|≤1+n (path r)
+size≤n : ∀ r → size r ≤ n
+size≤n r = |p|≤n (path r)
 
 size-cong : ∀ {r s} → r ≈ s → size r ≡ size s
 size-cong {r} {s} r≈s = length-cong (path-cong r≈s)

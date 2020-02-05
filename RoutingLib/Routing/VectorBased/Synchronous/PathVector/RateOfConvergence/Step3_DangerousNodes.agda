@@ -44,12 +44,12 @@ module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.S
   {C : Subset (suc n-1)}
   (j∈C : j ∈ C)
   (C-nonFull : Nonfull C)
-  (C⊆𝓒ₜ : ∀ {i} → i ∈ C → i ∈ᵤ Step1_NodeSets.𝓒 isRoutingAlgebra isPathAlgebra A X j (suc t-1))
+  (open Step1_NodeSets isRoutingAlgebra isPathAlgebra A X j)
+  (C⊆𝓒ₜ : ∀ {i} → i ∈ C → i ∈ᵤ 𝓒 (suc t-1))
   where
 
 open Prelude isRoutingAlgebra isPathAlgebra A
 open Notation X j
-open Step1_NodeSets isRoutingAlgebra isPathAlgebra A X j
 
 ----------------------------------------------------------------------------
 -- Inductive proof
@@ -106,7 +106,7 @@ module _ where
                             σ (t + suc s) X k j ≈ A k l ▷ (σ (t + s) X l j) →
                             (i , k) ∈ᵤ Dangerous (suc s) → l ∉ᵤ 𝓡 (t + s)
     Dangerous-predNot𝓡 {i} {k} {l} {s} k∉C σᵗ⁺¹⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ ik∈D₁₊ₛ l∈Rₜ₊ₛ with l ∈? C
-    ... | no  l∉C = <₊⇒≱₊ ik∈D₁₊ₛ (safe-extension σᵗ⁺¹⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ (∈𝓡 s k l∈Rₜ₊ₛ l∉C ≈ₚ-refl ))
+    ... | no  l∉C = <₊⇒≱₊ ik∈D₁₊ₛ (safe-extension σᵗ⁺¹⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ (∈𝓡 s k ≈ₚ-refl l∈Rₜ₊ₛ l∉C))
     ... | yes l∈C = <₊⇒≱₊ ik∈D₁₊ₛ (safe-extension σᵗ⁺¹⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ (eₘᵢₙ-isMinₜ₊ₛ (k∉C , l∈C) s))
 
 -------------------------------------------------------------------------

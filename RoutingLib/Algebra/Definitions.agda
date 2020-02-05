@@ -2,7 +2,7 @@
 
 module RoutingLib.Algebra.Definitions {a} {A : Set a} where
 
-open import Algebra.FunctionProperties using (Op₂)
+open import Algebra.Core using (Op₂)
 open import Data.Product using (_×_; proj₁; proj₂)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Level using (_⊔_)

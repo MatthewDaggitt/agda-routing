@@ -5,8 +5,11 @@ open import Data.Nat using (zero; suc)
 import Data.List.Relation.Binary.Permutation.Setoid as PermutationEq
 open import Function using (const; id)
 open import Level using (_⊔_)
+open import Relation.Binary using (Decidable; DecSetoid)
+open import Relation.Binary.Indexed.Homogeneous using (IsIndexedEquivalence; IsIndexedDecEquivalence)
 open import Relation.Nullary using (yes; no)
 
+import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties as PermutationProperties
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
 import RoutingLib.lmv34.Gamma_one as Gamma_one
@@ -24,12 +27,23 @@ module RoutingLib.lmv34.Omega_one
 
 open Routing algebra n
 open Gamma_one isRoutingAlgebra A using (Γ₁)
-open Gamma_one_Algebra isRoutingAlgebra n using (RoutingSet; RoutingVector; _≈ᵥ_; ~_; FinRoute-setoid)
+open Gamma_one_Algebra isRoutingAlgebra n using (RoutingSet; RoutingVector; _≈ᵥ_; ~_; FinRoute-setoid; FinRoute-decSetoid)
 open Gamma_one_Properties isRoutingAlgebra A using (Γ₁-cong)
 open Omega_zero algebra A using (Ω₀)
 open PermutationEq FinRoute-setoid
+open PermutationProperties FinRoute-setoid using (_↭?_)
+open DecSetoid FinRoute-decSetoid using () renaming (_≟_ to _≟ᵣ_)
 
--- use ℝ𝕋ₛⁱ
+≈ᵥ-isEquivalenceᵢ : IsIndexedEquivalence (const RoutingSet) _↭_
+≈ᵥ-isEquivalenceᵢ = record
+  { reflᵢ  = ↭-refl
+  ; symᵢ   = ↭-sym
+  ; transᵢ = ↭-trans }
+
+≈ᵥ-isDecEquivalenceᵢ : IsIndexedDecEquivalence (const RoutingSet) _↭_
+≈ᵥ-isDecEquivalenceᵢ = record
+  { _≟ᵢ_           = _↭?_ _≟ᵣ_
+  ; isEquivalenceᵢ = ≈ᵥ-isEquivalenceᵢ }
 
 Γ₁∥ : AsyncIterable a (a ⊔ ℓ) n
 Γ₁∥ = record {
@@ -37,7 +51,7 @@ open PermutationEq FinRoute-setoid
   _≈ᵢ_ = _↭_;
   F    = Γ₁;
   isAsyncIterable = record {
-    isDecEquivalenceᵢ = {!Decℝ𝕋ₛⁱ!};
+    isDecEquivalenceᵢ = ≈ᵥ-isDecEquivalenceᵢ;
     F-cong = Γ₁-cong
     }
   }

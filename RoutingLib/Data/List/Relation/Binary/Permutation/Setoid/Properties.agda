@@ -1,3 +1,5 @@
+{-# OPTIONS --allow-unsolved-metas #-}
+
 open import Data.List hiding (head; tail)
 open import Data.List.Relation.Unary.Any using (Any; here; there)
 open import Data.List.Relation.Unary.All using (All; []; _∷_; here; there)
@@ -10,7 +12,7 @@ open import Data.Nat.Properties
 open import Data.Nat.Induction
 open import Data.Product using (_×_; ∃; ∃₂; _,_)
 open import Data.Sum using (inj₁; inj₂)
-open import Function using (_∘_; flip)
+open import Function using (_∘_; flip; Injective)
 open import Level using (_⊔_)
 open import Relation.Unary using (Pred) renaming (Decidable to Decidable₁)
 open import Relation.Binary
@@ -39,7 +41,7 @@ open Sublist S
 open Membership S hiding (_─_)
 open Unique S hiding (head; tail)
 open Equality S using (_≋_; []; _∷_; ≋-refl; ≋-sym; ≋-trans; ++⁺)
-open module Eq = Setoid S using (_≈_) renaming (Carrier to A; refl to ≈-refl; sym to ≈-sym; isEquivalence to ≈-isEquivalence)
+open module Eq = Setoid S using (_≈_) renaming (Carrier to A; refl to ≈-refl; sym to ≈-sym; trans to ≈-trans; isEquivalence to ≈-isEquivalence)
 
 len : ∀ {xs ys} → xs ↭ ys → ℕ
 len refl                 = 1
@@ -303,6 +305,12 @@ split-∈ {x} {z ∷ zs} (there x∈zs) =
   let (ys , y , ws , x=y , zs=ys++y++ws) = split-∈ x∈zs in
   z ∷ ys , y , ws , x=y , ≈-refl ∷ zs=ys++y++ws
 
+∷-injective-↭ : ∀ {z z' xs ys} → z ≈ z' → z ∷ xs ↭ z' ∷ ys → xs ↭ ys
+∷-injective-↭ z=z' refl = refl
+∷-injective-↭ z=z' (prep _ xs↭ys) = xs↭ys
+∷-injective-↭ z=z' (swap z=y x=z' xs↭ys) = prep (≈-trans x=z' (≈-trans (≈-sym z=z') z=y)) xs↭ys
+∷-injective-↭ z=z' (trans z∷xs↭ws ws↭z'∷ys) = {!!}
+
 module _ (_≟_ : Decidable _≈_) where
 
   ≈-isDecEquivalence : IsDecEquivalence _≈_
@@ -319,16 +327,29 @@ module _ (_≟_ : Decidable _≈_) where
     }
 
   open DecMembership DS using (_∈?_)
+  open PermutationReasoning
+
+  infix 3 _↭?_
 
   _↭?_ : Decidable _↭_
   [] ↭? []       = yes refl
   [] ↭? (y ∷ ys) = no (↭-nil-cons y ys)
   (x ∷ xs) ↭? ys with x ∈? ys
   ... | no x∉ys  = no ((contraposition ↭⇒cons-∈) x∉ys)
-  ... | yes x∈ys = let (zs , y , ws , x=y , ys=zs++y++ws) = split-∈ x∈ys in prf
+  ... | yes x∈ys = prf (split-∈ x∈ys)
     where
-    prf : ?
-    prf with xs ↭? zs ++ ws
-    ... | no _ = ?
-    ... | yes _ = ?
--- LEX: Get the let-variables to be in scope of the where-clause.
+    prf : ∃₃ (λ zs y ws → (x ≈ y) × (ys ≋ zs ++ [ y ] ++ ws)) → Dec ((x ∷ xs) ↭ ys)
+    prf (zs , y , ws , x=y , ys=zs++y++ws) with xs ↭? zs ++ ws
+    ... | yes xs↭zs++ws = yes (begin
+              x ∷ xs            <⟨ xs↭zs++ws ⟩
+              x ∷ (zs ++ ws)    ↭⟨ ↭-sym (shift (≈-sym x=y) zs ws) ⟩
+              zs ++ [ y ] ++ ws ↭⟨ ↭-sym (≋⇒↭ ys=zs++y++ws) ⟩
+              ys                ∎)
+    ... | no xs¬↭zs++ws = no λ x∷xs↭ys → contradiction (∷-injective-↭ ≈-refl (x∷xs↭x∷zs++ws x∷xs↭ys)) xs¬↭zs++ws
+      where
+      x∷xs↭x∷zs++ws : x ∷ xs ↭ ys → x ∷ xs ↭ x ∷ zs ++ ws
+      x∷xs↭x∷zs++ws x∷xs↭ys = begin
+        x ∷ xs            ↭⟨ x∷xs↭ys ⟩
+        ys                ↭⟨ ≋⇒↭ ys=zs++y++ws ⟩
+        zs ++ [ y ] ++ ws ↭⟨ shift (≈-sym x=y) zs ws ⟩
+        x ∷ zs ++ ws ∎

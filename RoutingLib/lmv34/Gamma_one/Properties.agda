@@ -17,17 +17,18 @@ import Data.List.Relation.Binary.Equality.Setoid as Equality
 open import Data.List.Relation.Unary.All as All using (All) renaming ([] to []ₐ; _∷_ to _∷ₐ_)
 open import Data.List.Relation.Unary.AllPairs using (AllPairs)
 open import Data.Sum using (inj₁; inj₂)
-open import Level using (Level)
+open import Level using (Level; 0ℓ; _⊔_)
 open import Relation.Nullary using (¬_; yes; no; does; proof; _because_; ofʸ; ofⁿ)
 open import Relation.Nullary.Negation using (¬?; contradiction; contraposition)
 open import Relation.Unary using (Pred; Decidable; ∁)
 open import Function using (_∘_)
-open import Relation.Binary using (IsEquivalence; Setoid; DecSetoid; DecTotalOrder; Rel; _Respects_; _⇒_; tri<; tri≈; tri>)
+open import Relation.Binary using (IsEquivalence; Setoid; DecSetoid; DecTotalOrder; Rel; Reflexive; _Respects_; _⇒_; tri<; tri≈; tri>)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym)
 import Relation.Binary.EqReasoning as EqReasoning
 
 open import RoutingLib.Iteration.Synchronous using (_^_; IsFixedPoint)
 open import RoutingLib.Data.List using (insert)
+open import RoutingLib.Data.List.Properties using (strictMerge-identityʳ; strictMerge-idempotent; strictMerge-cong)
 import RoutingLib.Data.List.Sorting as Sorting
 import RoutingLib.Data.List.Sorting.Properties as SortedProperties
 import RoutingLib.Data.List.Sorting.InsertionSort as InsertionSort
@@ -38,6 +39,7 @@ open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 import RoutingLib.lmv34.Gamma_zero as Gamma_zero
 import RoutingLib.lmv34.Gamma_zero.Algebra as Gamma_zero_Algebra
+import RoutingLib.lmv34.Gamma_zero.Properties as Gamma_zero_Properties
 import RoutingLib.lmv34.Gamma_one as Gamma_one
 import RoutingLib.lmv34.Gamma_one.Algebra as Gamma_one_Algebra
 
@@ -52,6 +54,7 @@ open IsRoutingAlgebra isRoutingAlgebra
 open Routing algebra n renaming (I to M)
 open Gamma_zero algebra A
 open Gamma_zero_Algebra algebra n
+open Gamma_zero_Properties algebra A using (IsFixedPoint-Γ₀)
 open Gamma_one isRoutingAlgebra A
 open Gamma_one_Algebra isRoutingAlgebra n
 
@@ -105,34 +108,21 @@ map₂-tabulate g f = ≡ₗ-trans (map₂-map (tabulate g) f) (map-tabulate g (
   where open import Relation.Binary.PropositionalEquality using () renaming (trans to ≡ₗ-trans)
 
 --------------------------------------------------------------------------------
+-- Properties of `_⊕_`
+
+⊕-idempotent : Idempotent _≈_ _⊕_
+⊕-idempotent v with ⊕-sel v v
+... | inj₁ v⊕v=v = v⊕v=v
+... | inj₂ v⊕v=v = v⊕v=v
+
+--------------------------------------------------------------------------------
 -- Properties of `mergeSorted`
-
-mergeSorted-identityₗ : LeftIdentity _↭_ Ø mergeSorted
-mergeSorted-identityₗ A = ↭-refl
-
-mergeSorted-identityᵣ : RightIdentity _↭_ Ø mergeSorted
-mergeSorted-identityᵣ [] = ↭-refl
-mergeSorted-identityᵣ (x ∷ A) = ↭-refl
-
-mergeSorted-cons : ∀ x xs ys →
-                   mergeSorted (x ∷ xs) ys ↭ x ∷ (mergeSorted xs ys)
-mergeSorted-cons = {!!}
-
-mergeSorted-cong : ∀ {A A' B B'} → A ≋ A' → B ≋ B' →
-                   mergeSorted A B ≋ mergeSorted A' B'
-mergeSorted-cong []            B=B' = B=B'
-mergeSorted-cong (x∼y ∷ A=A') [] = x∼y ∷ A=A'
-mergeSorted-cong {(d₁ , v₁) ∷ A} {(d₁ , v₁') ∷ A'} {(d₂ , v₂) ∷ B} {(d₂ , v₂') ∷ B'}
-                 ((refl , v₁=v₁') ∷ A=A') ((refl , v₂=v₂') ∷ B=B') with <-cmp d₁ d₂
-... | tri< _ _ _ = (refl , v₁=v₁') ∷ (mergeSorted-cong A=A' ((refl , v₂=v₂') ∷ B=B'))
-... | tri≈ _ _ _ = (refl , ⊕-cong v₁=v₁' v₂=v₂') ∷ mergeSorted-cong A=A' B=B'
-... | tri> _ _ _ = (refl , v₂=v₂') ∷ mergeSorted-cong ((refl , v₁=v₁') ∷ A=A') B=B'
 
 --------------------------------------------------------------------------------
 -- Properties of _⊕ₛ_
 
 ⊕ₛ-cong : Congruent₂ _↭_ _⊕ₛ_
-⊕ₛ-cong {A} {A'} {B} {B'} A↭A' B↭B' = ≋⇒↭ (mergeSorted-cong
+⊕ₛ-cong {A} {A'} {B} {B'} A↭A' B↭B' = ≋⇒↭ ({!strictMerge-cong ? ? ?!}
   (↗↭↗⇒≋ (sort-pres-↭ A↭A') (sort↗ A) (sort↗ A'))
   (↗↭↗⇒≋ (sort-pres-↭ B↭B') (sort↗ B) (sort↗ B')))
   
@@ -140,13 +130,29 @@ mergeSorted-cong {(d₁ , v₁) ∷ A} {(d₁ , v₁') ∷ A'} {(d₂ , v₂) �
 ⊕ₛ-identityₗ A = sort↭ A
 
 ⊕ₛ-identityᵣ : RightIdentity _↭_ Ø _⊕ₛ_
-⊕ₛ-identityᵣ A = ↭-trans (mergeSorted-identityᵣ (sort A)) (sort↭ A)
+⊕ₛ-identityᵣ A = ↭-trans (↭-reflexive (strictMerge-identityʳ (sort A))) (sort↭ A)
 
+⊕ₛ-identity : Identity _↭_ Ø _⊕ₛ_
+⊕ₛ-identity = (⊕ₛ-identityₗ , ⊕ₛ-identityᵣ)
+
+⊕ₛ-idempotent : Idempotent _↭_ _⊕ₛ_
+⊕ₛ-idempotent xs = begin
+  xs ⊕ₛ xs                        ≡⟨⟩
+  mergeSorted (sort xs) (sort xs) ↭⟨ ≋⇒↭ (strictMerge-idempotent ≈₁-refl ⊕₂-idem (sort xs)) ⟩
+  sort xs                         ↭⟨ sort↭ xs ⟩
+  xs                              ∎
+  where open PermutationReasoning
+        ≈₁-refl : Reflexive _≈₁_
+        ≈₁-refl = refl
+        ⊕₂-idem : Idempotent _≈ᵣ_ _⊕₂_
+        ⊕₂-idem (d , v) = (refl , ⊕-idempotent v)
+
+-- LEX: this is false. Counterexample: xs=[], ys=[x]. (x∷xs)⊕ₛys = [x]⊕ₛ[x] = [x] ¬↭ x∷x = x ∷ ([] ⊕ₛ [x])
 ⊕ₛ-cons : ∀ x xs ys → (x ∷ xs) ⊕ₛ ys ↭ x ∷ (xs ⊕ₛ ys)
 ⊕ₛ-cons x xs ys = begin
   (x ∷ xs) ⊕ₛ ys                        ≡⟨⟩
   mergeSorted (sort (x ∷ xs)) (sort ys) ↭⟨ {!!} ⟩
-  mergeSorted (x ∷ (sort xs)) (sort ys) ↭⟨ mergeSorted-cons x (sort xs) (sort ys) ⟩
+  mergeSorted (x ∷ (sort xs)) (sort ys) ↭⟨ {!!} ⟩
   x ∷ (mergeSorted (sort xs) (sort ys)) ≡⟨⟩
   x ∷ (xs ⊕ₛ ys)                        ∎
   where open PermutationReasoning
@@ -161,10 +167,18 @@ isValid-f : ∀ {d v} {f : Route → Route} → IsValid (d , f v) → IsValid (d
 isValid-f {d} {v} {f} = contraposition (x=∞⇒fx=∞ {v} {f})
 
 isInvalid-f : ∀ {d v} {f : Route → Route} → IsInvalid (d , v) → IsInvalid (d , f v)
-isInvalid-f {d} {v} {f} = contraposition (isValid-f {d} {v} {f})
+isInvalid-f {d} {v} {f} v=∞ = x=∞⇒fx=∞ {v} {f} v=∞
+
+invalid-valid : ∀ {p} → IsInvalid p → ¬ (IsValid p)
+invalid-valid p=∞ = λ p≠∞ → contradiction p=∞ p≠∞
+
+valid-invalid : ∀ {p} → ¬ (IsValid p) → IsInvalid p
+valid-invalid {d , v} ¬valid with v ≟ ∞#
+... | yes v=∞ = v=∞
+... | no v≠∞  = contradiction v≠∞ ¬valid
 
 invalid-pair : ∀ d → IsInvalid (d , ∞#)
-invalid-pair d = λ (p : IsValid (d , ∞#)) → p ≈-refl
+invalid-pair d = ≈-refl
 
 --------------------------------------------------------------------------------
 -- Properties of _⨁ₛ_
@@ -186,6 +200,9 @@ invalid-pair d = λ (p : IsValid (d , ∞#)) → p ≈-refl
 ⊕ᵥ-identityᵣ : RightIdentity _≈ᵥ_ Øᵥ _⊕ᵥ_
 ⊕ᵥ-identityᵣ A i = ⊕ₛ-identityᵣ (A i)
 
+⊕̬ᵥ-identity : Identity _≈ᵥ_ Øᵥ _⊕ᵥ_
+⊕̬ᵥ-identity = (⊕ᵥ-identityₗ , ⊕ᵥ-identityᵣ)
+
 --------------------------------------------------------------------------------
 -- Properties of †_
 
@@ -198,11 +215,21 @@ invalid-pair d = λ (p : IsValid (d , ∞#)) → p ≈-refl
 †-identity : Ø † ↭ Ø
 †-identity = refl
 
+†-idempotent : IdempotentFun _↭_ _†
+†-idempotent [] = ↭-refl
+†-idempotent (x ∷ xs) with IsValid? x
+... | yes x≠∞   = prf
+  where prf : (x ∷ xs †) † ↭ x ∷ xs †
+        prf with IsValid? x
+        ... | yes _  = prep ≈ᵣ-refl (†-idempotent xs)
+        ... | no x=∞ = contradiction x≠∞ x=∞
+... | no _      = †-idempotent xs
+
 †-cons-valid : ∀ x xs → IsValid x → (x ∷ xs) † ≡ x ∷ (xs †)
 †-cons-valid x xs valid = filter-accept IsValid? valid
 
 †-cons-invalid : ∀ x xs → IsInvalid x → (x ∷ xs) † ≡ xs †
-†-cons-invalid x xs invalid = filter-reject IsValid? invalid
+†-cons-invalid x xs invalid = filter-reject IsValid? (invalid-valid {x} invalid)
 
 map-†-lemma : ∀ {xs f} → (map₂ f xs) † ↭ (map₂ f (xs †)) †
 map-†-lemma {[]} {f} = ↭-refl
@@ -211,33 +238,25 @@ map-†-lemma {(d , v) ∷ xs} {f} with IsValid? (d , v)
   where p : ((d , f v) ∷ (map₂ f xs)) † ↭ (map₂ f (xs †)) †
         p with IsValid? (d , f v)
         ... | no  _ = map-†-lemma {xs}
-        ... | yes valid = contradiction valid (isInvalid-f {d} {v} {f} invalid)
+        ... | yes valid = contradiction (x=∞⇒fx=∞ {v} {f} (valid-invalid {d , v} invalid)) valid
 ... | yes _ with IsValid? (d , f v)
 ...   | no  _ = map-†-lemma {xs}
 ...   | yes _ = prep ≈ᵣ-refl (map-†-lemma {xs})
 
 †-⊕ₛ-distributive : ∀ {xs ys} → (xs †) ⊕ₛ (ys †) ↭ (xs ⊕ₛ ys) †
 †-⊕ₛ-distributive {[]} {ys} = begin
-  (Ø †) ⊕ₛ (ys †) ≡⟨⟩
+  (Ø †) ⊕ₛ (ys †)  ≡⟨⟩
   Ø ⊕ₛ (ys †)      ↭⟨ ⊕ₛ-identityₗ (ys †) ⟩
   ys †             ↭⟨ †-cong (↭-sym (⊕ₛ-identityₗ ys)) ⟩
   (Ø ⊕ₛ ys) †      ∎
   where open PermutationReasoning
-  -- (x ∷ xs) † ⊕ₛ ys † ↭ ((x ∷ xs) ⊕ₛ ys) †
-†-⊕ₛ-distributive {x ∷ xs} {ys} with IsValid? x
-... | yes valid   = begin
-  (x ∷ xs †) ⊕ₛ (ys †)   ↭⟨ ⊕ₛ-cons x (xs †) (ys †) ⟩
-  x ∷ ((xs †) ⊕ₛ (ys †)) <⟨ †-⊕ₛ-distributive {xs} {ys} ⟩
-  x ∷ ((xs ⊕ₛ ys) †)     ↭⟨ ↭-sym (↭-reflexive (†-cons-valid x (xs ⊕ₛ ys) valid)) ⟩
-  (x ∷ (xs ⊕ₛ ys)) †     ↭⟨ †-cong (↭-sym (⊕ₛ-cons x xs ys)) ⟩
-  ((x ∷ xs) ⊕ₛ ys) †     ∎
+†-⊕ₛ-distributive {x ∷ xs} {[]} = begin
+  ((x ∷ xs) †) ⊕ₛ (Ø †) ≡⟨⟩
+  ((x ∷ xs) †) ⊕ₛ Ø     ↭⟨ ⊕ₛ-identityᵣ ((x ∷ xs) †) ⟩
+  (x ∷ xs) †            ↭⟨ †-cong (↭-sym (⊕ₛ-identityᵣ (x ∷ xs))) ⟩
+  ((x ∷ xs) ⊕ₛ Ø) †     ∎
   where open PermutationReasoning
-... | no  invalid = begin
-  (xs †) ⊕ₛ (ys †)       ↭⟨ †-⊕ₛ-distributive {xs} {ys} ⟩
-  (xs ⊕ₛ ys) †           ↭⟨ ↭-sym (↭-reflexive (†-cons-invalid x (xs ⊕ₛ ys) invalid)) ⟩
-  (x ∷ (xs ⊕ₛ ys)) †     ↭⟨ †-cong (↭-sym (⊕ₛ-cons x xs ys)) ⟩
-  ((x ∷ xs) ⊕ₛ ys) †     ∎
-  where open PermutationReasoning
+†-⊕ₛ-distributive {x ∷ xs} {y ∷ ys} = {!!}
 
 --------------------------------------------------------------------------------
 -- Properties of _[_]
@@ -272,6 +291,9 @@ map-†-lemma {(d , v) ∷ xs} {f} with IsValid? (d , v)
 Γ₁-iter-cong zero    V=V' = V=V'
 Γ₁-iter-cong (suc k) V=V' = Γ₁-cong (Γ₁-iter-cong k V=V')
 
+IsFixedPoint-Γ₁ : Pred RoutingVector (a ⊔ ℓ)
+IsFixedPoint-Γ₁ V = Γ₁ V ≈ᵥ V
+
 ------------------------------------
 -- Theorems 
 
@@ -289,24 +311,13 @@ LemmaA₂ f g = begin
   (tabulate λ d → (d , f d ⊕ g d)) †                               ∎
   where open PermutationReasoning
 
-{-
-((tabulate λ d → (d , f d)) †) ⊕ₛ ((tabulate λ d → (d , g d)) †) ↭ by distrib † over ⊕ₛ
-((tabulate λ d → (d , f d)) ⊕ₛ (tabulate λ d → (d , g d)) )† ↭ by lemma (and †-cong)
-(tabulate λ d → (d , f d ⊕ g d)) †
-
-make lemma:
-∀ {k} (f g : Fin k → Route)
-(tabulate λ d → (d , f d)) ⊕ₛ (tabulate λ d → (d , g d)) ↭ by induction on k
-tabulate λ d → (d , f d ⊕ g d)
--}
-
 tabulate-none : ∀ {k} {a b} {A : Set a} {P : Pred A b} {f : Fin k → A} →
                 ((d : Fin k) → ¬ (P (f d))) → All (∁ P) (tabulate f)
 tabulate-none {zero} ¬p = []ₐ
 tabulate-none {suc k} ¬p = (¬p 0F) ∷ₐ tabulate-none λ d → ¬p (fsuc d)
 
 tabulate-∞ : (tabulate (_, ∞#)) † ≡ []
-tabulate-∞ = filter-none IsValid? (tabulate-none invalid-pair)
+tabulate-∞ = filter-none IsValid? (tabulate-none λ d → invalid-valid {d , ∞#} (invalid-pair d))
 
 LemmaA₂-iter : ∀ {k} (f : Fin k → Fin n → Route) →
                ⨁ₛ (λ q → ((tabulate λ d → (d , f q d)) †)) ↭ (tabulate λ d → (d , (⨁ λ q → f q d))) †
@@ -331,8 +342,8 @@ LemmaA₂-iter {suc k} f = begin
 ~-lemma : ∀ {i q Y} → map₂ (λ v → (A i q) ▷ v) ((~ Y) q) † ↭  (tabulate λ d → (d , (A i q) ▷ (Y q d))) †
 ~-lemma {i} {q} {Y} = begin
   map₂ (λ v → (A i q) ▷ v) ((~ Y) q) †                                   ≡⟨⟩
-  (map₂ ((A i q) ▷_) ((tabulate (λ d → (d , Y q d))) †)) †        ↭⟨ ↭-sym (map-†-lemma {(tabulate (λ d → (d , Y q d)))}) ⟩
-  (map₂ ((A i q) ▷_) (tabulate (λ d → (d , Y q d))))     †        ↭⟨ †-cong (↭-reflexive (map₂-tabulate ((λ d → (d , Y q d))) ((A i q) ▷_))) ⟩
+  (map₂ ((A i q) ▷_) ((tabulate (λ d → (d , Y q d))) †)) †               ↭⟨ ↭-sym (map-†-lemma {(tabulate (λ d → (d , Y q d)))}) ⟩
+  (map₂ ((A i q) ▷_) (tabulate (λ d → (d , Y q d))))     †               ↭⟨ †-cong (↭-reflexive (map₂-tabulate ((λ d → (d , Y q d))) ((A i q) ▷_))) ⟩
   (tabulate ((λ {(d , v) → (d , (A i q) ▷ v)}) ∘ (λ d → (d , Y q d)))) † ≡⟨⟩
   (tabulate λ d → (d , (A i q) ▷ (Y q d))) † ∎
   where open PermutationReasoning
@@ -341,7 +352,7 @@ LemmaA₂-iter {suc k} f = begin
 Lemma-Γ₀=Γ₁ : ∀ {Y} → A 〚 ~ Y 〛 ≈ᵥ ~ (A 〔 Y 〕)
 Lemma-Γ₀=Γ₁ {Y} i = begin
   (A 〚 ~ Y 〛) i                                        ≡⟨⟩
-  ⨁ₛ (λ q → (A i q ▷_) [ (~ Y) q ])                    ≡⟨⟩
+  ⨁ₛ (λ q → (A i q ▷_) [ (~ Y) q ])                     ≡⟨⟩
   ⨁ₛ (λ q → (λ s → (A i q) ▷ s) [ (~ Y) q ])            ≡⟨⟩  
   ⨁ₛ (λ q → (map₂ (λ v → (A i q) ▷ v) ((~ Y) q)) †)     ↭⟨ ⨁ₛ-cong (λ {q} → ~-lemma {i} {q} {Y}) ⟩
   ⨁ₛ (λ q → (tabulate λ d → (d , (A i q) ▷ (Y q d))) †) ↭⟨ LemmaA₂-iter (λ q d → (A i q) ▷ (Y q d)) ⟩
@@ -361,14 +372,6 @@ Lemma-Γ₀=Γ₁ {Y} i = begin
   ~ (Γ₀ Y)                 ∎
   where open EqReasoning 𝕍ₛ
 
--- Theorem 2
-FixedPoint-Γ₁ : ∀ {X} → IsFixedPoint _≈ₘ_ Γ₀ X → IsFixedPoint _≈ᵥ_ Γ₁ (~ X)
-FixedPoint-Γ₁ {X} FP-Γ₀ = begin
-  Γ₁ (~ X)           ≈⟨ Γ₀=Γ₁ ⟩
-  ~ (Γ₀ X)           ≈⟨ ≈ₘ⇒≈ᵥ FP-Γ₀ ⟩
-  ~ X                ∎
-  where open EqReasoning 𝕍ₛ
-
 -- Theorem 4
 Γ₀=Γ₁-iter : ∀ {k Y} → (Γ₁ ^ k) (~ Y) ≈ᵥ ~ ((Γ₀ ^ k) Y) 
 Γ₀=Γ₁-iter {zero} {Y}  = ≈ᵥ-refl
@@ -378,4 +381,12 @@ FixedPoint-Γ₁ {X} FP-Γ₀ = begin
   Γ₁ (~ ((Γ₀ ^ k) Y))  ≈⟨ Γ₀=Γ₁ ⟩
   ~ (Γ₀ ((Γ₀ ^ k) Y))  ≡⟨⟩
   ~ (Γ₀ ^ suc k) Y     ∎
+  where open EqReasoning 𝕍ₛ
+
+-- Theorem 2
+FixedPoint-Γ₀-Γ₁ : ∀ {X} → IsFixedPoint-Γ₀ X → IsFixedPoint-Γ₁ (~ X)
+FixedPoint-Γ₀-Γ₁ {X} FP-Γ₀ = begin
+  Γ₁ (~ X)           ≈⟨ Γ₀=Γ₁ ⟩
+  ~ (Γ₀ X)           ≈⟨ ≈ₘ⇒≈ᵥ FP-Γ₀ ⟩
+  ~ X                ∎
   where open EqReasoning 𝕍ₛ

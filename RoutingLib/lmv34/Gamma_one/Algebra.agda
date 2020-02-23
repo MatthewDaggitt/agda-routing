@@ -1,6 +1,6 @@
 open import Data.Bool.Base using (true; false; not)
 open import Data.Nat using (ℕ)
-open import Data.Fin using (Fin)
+open import Data.Fin using (Fin; _<_)
 open import Data.Fin.Properties as Finₚ
   using (_≤?_; <-cmp)
 open import Data.List using ([]; _∷_; List; foldr; filter; map; tabulate)
@@ -10,13 +10,14 @@ open import Data.Product.Relation.Pointwise.NonDependent using (×-decSetoid)
 open import Data.Vec.Functional using (Vector)
 open import Data.Vec.Functional.Relation.Binary.Pointwise.Properties using () renaming (setoid to Vec-setoid)
 open import Function using (_∘_)
-open import Level using (_⊔_)
+open import Level using (_⊔_; 0ℓ; lift) renaming (suc to lsuc)
 open import Relation.Binary using (Rel; DecTotalOrder; Setoid; DecSetoid)
 import Relation.Binary.EqReasoning as EqReasoning
-open import Relation.Binary using (tri<; tri≈; tri>)
+open import Relation.Binary using (Trichotomous; tri<; tri≈; tri>)
+open import Relation.Binary.PropositionalEquality using (_≡_)
 open import Relation.Nullary using (Dec; yes; no; ¬_; does; proof)
 open import Relation.Nullary.Negation using (¬?; ¬-reflects)
-open import Relation.Unary using (Pred; Decidable)
+open import Relation.Unary using (Pred; Decidable; ∁)
 open import Algebra.FunctionProperties.Core
 open import Data.Product as Prod using (_×_; _,_)
 
@@ -24,6 +25,7 @@ open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebr
 import RoutingLib.Routing as Routing
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebra
 import RoutingLib.Data.Vec.Functional.Relation.Binary.Equality as TableEquality
+open import RoutingLib.Data.List using (strictMerge)
 import RoutingLib.Data.List.Sorting.InsertionSort as InsertionSort
 
 module RoutingLib.lmv34.Gamma_one.Algebra
@@ -74,16 +76,17 @@ open Setoid 𝕍ₛ public using ()
 --------------------------------------------------------------------------------
 -- Auxilaries
 
--- MATTHEW: These definitions should really be the opposite way around to
--- avoid the double negative
-IsValid : Pred (Fin n × Route) _
-IsValid (d , v) = ¬ (v ≈ ∞#)
-
 IsInvalid : Pred (Fin n × Route) _
-IsInvalid p = ¬ (IsValid p)
+IsInvalid (d , v) = v ≈ ∞#
+
+IsInvalid? : Decidable IsInvalid
+IsInvalid? (d , v) = v ≟ ∞#
+
+IsValid : Pred (Fin n × Route) _
+IsValid = ∁ IsInvalid
 
 IsValid? : Decidable IsValid
-IsValid? (d , v) = ¬? (v ≟ ∞#)
+IsValid? p = ¬? (IsInvalid? p)
 
 decTotalOrder : DecTotalOrder a ℓ ℓ
 decTotalOrder = ×-decTotalOrder (Finₚ.≤-decTotalOrder n) ≤₊-decTotalOrder
@@ -91,13 +94,40 @@ decTotalOrder = ×-decTotalOrder (Finₚ.≤-decTotalOrder n) ≤₊-decTotalOrd
 -- MATTHEW: If I were you I'd create a general version of this function
 -- called `strictMerge` in `RoutingList.Data.List` and prove the properties
 -- about it in general. You'll find it much easier going.
+
+_<₁_ : Rel (Fin n × Route) _
+_<₁_ (d₁ , v₁) (d₂ , v₂) = d₁ < d₂
+
+_≈₁_ : Rel (Fin n × Route) _
+(d₁ , v₁) ≈₁ (d₂ , v₂) = d₁ ≡ d₂
+
+<₁-cmp : Trichotomous _≈₁_ _<₁_
+<₁-cmp (d₁ , v₁) (d₂ , v₂) = <-cmp d₁ d₂
+
+_⊕₂_ : Op₂ (Fin n × Route)
+(d₁ , v₁) ⊕₂ (d₂ , v₂) = (d₁ , v₁ ⊕ v₂)
+
 mergeSorted : Op₂ RoutingSet
-mergeSorted [] ys = ys
-mergeSorted (x ∷ xs) [] = x ∷ xs
-mergeSorted ((d₁ , v₁) ∷ xs) ((d₂ , v₂) ∷ ys) with <-cmp d₁ d₂
-... | tri< _ _ _ = (d₁ , v₁) ∷ (mergeSorted xs ((d₂ , v₂) ∷ ys))
-... | tri> _ _ _ = (d₂ , v₂) ∷ (mergeSorted ((d₁ , v₁) ∷ xs) ys)
-... | tri≈ _ _ _ = (d₁ , v₁ ⊕ v₂) ∷ (mergeSorted xs ys)
+mergeSorted = strictMerge <₁-cmp _⊕₂_
+
+-- LEX: the below is to convince myself the new definition is correct.
+mergeSorted-old : Op₂ RoutingSet
+mergeSorted-old [] ys = ys
+mergeSorted-old (x ∷ xs) [] = x ∷ xs
+mergeSorted-old ((d₁ , v₁) ∷ xs) ((d₂ , v₂) ∷ ys) with <-cmp d₁ d₂
+... | tri< _ _ _ = (d₁ , v₁) ∷ (mergeSorted-old xs ((d₂ , v₂) ∷ ys))
+... | tri> _ _ _ = (d₂ , v₂) ∷ (mergeSorted-old ((d₁ , v₁) ∷ xs) ys)
+... | tri≈ _ _ _ = (d₁ , v₁ ⊕ v₂) ∷ (mergeSorted-old xs ys)
+
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; cong)
+
+correct : ∀ xs ys → mergeSorted xs ys ≡ mergeSorted-old xs ys
+correct [] ys = refl
+correct (x ∷ xs) [] = refl
+correct ((d₁ , v₁) ∷ xs) ((d₂ , v₂) ∷ ys) with <-cmp d₁ d₂
+... | tri< _ _ _ = cong ((d₁ , v₁) ∷_) (correct xs ((d₂ , v₂) ∷ ys))
+... | tri> _ _ _ = cong ((d₂ , v₂) ∷_) (correct ((d₁ , v₁) ∷ xs) ys)
+... | tri≈ _ _ _ = cong ((d₁ , v₁ ⊕ v₂) ∷_) (correct xs ys)
 
 --------------------------------------------------------------------------------
 -- Definitions

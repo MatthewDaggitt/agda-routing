@@ -8,19 +8,21 @@ open import Data.Fin using (Fin; zero; suc)
 open import Data.Nat using (ℕ; zero; suc; _+_; _<_; s≤s; z≤n)
 open import Data.Nat.Properties
 open import Data.Nat.Induction
-open import Data.Product using (∃₂; _,_)
+open import Data.Product using (_×_; ∃; ∃₂; _,_)
 open import Data.Sum using (inj₁; inj₂)
 open import Function using (_∘_; flip)
-open import Relation.Unary using (Decidable; Pred)
-open import Relation.Binary hiding (Decidable)
-open import Relation.Nullary using (¬_; yes; no)
-open import Relation.Nullary.Negation using (contradiction)
+open import Level using (_⊔_)
+open import Relation.Unary using (Pred) renaming (Decidable to Decidable₁)
+open import Relation.Binary
+open import Relation.Nullary using (Dec; ¬_; yes; no)
+open import Relation.Nullary.Negation using (contradiction; contraposition)
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
 
 open import RoutingLib.Data.List
 open import RoutingLib.Data.Nat.Properties
 
 import Data.List.Membership.Setoid as Membership
+import Data.List.Membership.DecSetoid as DecMembership
 import Data.List.Membership.Setoid.Properties as Membershipₚ
 import Data.List.Relation.Binary.Equality.Setoid as Equality
 import Data.List.Relation.Binary.Permutation.Setoid as PermutationSetoid
@@ -37,7 +39,7 @@ open Sublist S
 open Membership S hiding (_─_)
 open Unique S hiding (head; tail)
 open Equality S using (_≋_; []; _∷_; ≋-refl; ≋-sym; ≋-trans; ++⁺)
-open module Eq = Setoid S using (_≈_; sym) renaming (Carrier to A)
+open module Eq = Setoid S using (_≈_) renaming (Carrier to A; refl to ≈-refl; sym to ≈-sym; isEquivalence to ≈-isEquivalence)
 
 len : ∀ {xs ys} → xs ↭ ys → ℕ
 len refl                 = 1
@@ -55,13 +57,13 @@ split : ∀ (v : A) as bs {xs} → (p : as ++ [ v ] ++ bs ↭ xs) → Acc _<_ (l
 split v []           bs {x ∷ bs}     refl         _ = []       , bs , ≋-refl
 split v (a ∷ [])     bs {x ∷ y ∷ bs} refl         _ = (a ∷ []) , bs , ≋-refl
 split v (a ∷ b ∷ as) bs {a ∷ b ∷ _}  refl         _ = a ∷ b ∷ as , bs , ≋-refl
-split v []           bs {x ∷ xs}     (prep v≈x _) _ = [] , xs , sym v≈x ∷ ≋-refl
+split v []           bs {x ∷ xs}     (prep v≈x _) _ = [] , xs , ≈-sym v≈x ∷ ≋-refl
 split v (a ∷ as)     bs {x ∷ xs}     (prep eq as↭xs)  (acc rec) with split v as bs as↭xs (rec _ ≤-refl)
 ... | (ps , qs , eq₂) = a ∷ ps , qs , Eq.sym eq ∷ eq₂
-split v [] (b ∷ bs) {x ∷ y ∷ xs}     (swap y≈v b≈x _) _ = [ b ] , xs , sym b≈x ∷ sym y≈v ∷ ≋-refl
-split v (a ∷ [])     bs {x ∷ y ∷ xs} (swap a≈y v≈x ↭) _ = [] , a ∷ xs , sym v≈x ∷ sym a≈y ∷ ≋-refl
+split v [] (b ∷ bs) {x ∷ y ∷ xs}     (swap y≈v b≈x _) _ = [ b ] , xs , ≈-sym b≈x ∷ ≈-sym y≈v ∷ ≋-refl
+split v (a ∷ [])     bs {x ∷ y ∷ xs} (swap a≈y v≈x ↭) _ = [] , a ∷ xs , ≈-sym v≈x ∷ ≈-sym a≈y ∷ ≋-refl
 split v (a ∷ b ∷ as) bs {x ∷ y ∷ xs} (swap a≈y b≈x as↭xs) (acc rec) with split v as bs as↭xs (rec _ ≤-refl)
-... | (ps , qs , eq) = b ∷ a ∷ ps , qs , sym b≈x ∷ sym a≈y ∷ eq
+... | (ps , qs , eq) = b ∷ a ∷ ps , qs , ≈-sym b≈x ∷ ≈-sym a≈y ∷ eq
 split v as           bs {xs}         (trans ↭₁ ↭₂) (acc rec) with split v as bs ↭₁ (rec _ (m<m+n (len ↭₁) (0<len ↭₂)))
 ... | (ps , qs , eq) = split v ps qs (↭-respˡ-≋ eq ↭₂) (rec _ (begin-strict
   len (↭-respˡ-≋ eq ↭₂) ≡⟨ lemma eq ↭₂ ⟩
@@ -215,9 +217,10 @@ xs↭ys⇒|xs|≡|ys| (prep eq xs↭ys)      = P.cong suc (xs↭ys⇒|xs|≡|ys|
 xs↭ys⇒|xs|≡|ys| (swap eq₁ eq₂ xs↭ys) = P.cong (λ x → suc (suc x)) (xs↭ys⇒|xs|≡|ys| xs↭ys)
 xs↭ys⇒|xs|≡|ys| (trans xs↭ys xs↭ys₁) = P.trans (xs↭ys⇒|xs|≡|ys| xs↭ys) (xs↭ys⇒|xs|≡|ys| xs↭ys₁)
 
+|xs|≠|ys|⇒¬xs↭ys : ∀ {xs} {ys} → ¬(length xs ≡ length ys) → ¬(xs ↭ ys)
+|xs|≠|ys|⇒¬xs↭ys = contraposition xs↭ys⇒|xs|≡|ys|
 
-
-module _ {p} {P : Pred A p} (P? : Decidable P) (P≈ : P Respects _≈_) where
+module _ {p} {P : Pred A p} (P? : Decidable₁ P) (P≈ : P Respects _≈_) where
 
   filter⁺ : ∀ {xs ys : List A} → xs ↭ ys → filter P? xs ↭ filter P? ys
   filter⁺ refl = refl
@@ -225,7 +228,7 @@ module _ {p} {P : Pred A p} (P? : Decidable P) (P≈ : P Respects _≈_) where
   filter⁺ {x ∷ xs} {y ∷ ys} (prep x=x' A=A') with P? x | P? y
   ... | yes Px | yes Px' = prep x=x' (filter⁺ A=A')
   ... | yes Px | no ¬Px' = contradiction (P≈ x=x' Px) ¬Px'
-  ... | no ¬Px | yes Px' = contradiction (P≈ (sym x=x') Px') ¬Px
+  ... | no ¬Px | yes Px' = contradiction (P≈ (≈-sym x=x') Px') ¬Px
   ... | no ¬Px | no ¬Px' = filter⁺ A=A'
   filter⁺ {x ∷ y ∷ A} {y' ∷ x' ∷ A'} (swap x=x' y=y' A=A') with P? x | P? y'
   ... | no ¬Px | no ¬Py' = prf
@@ -234,15 +237,15 @@ module _ {p} {P : Pred A p} (P? : Decidable P) (P≈ : P Respects _≈_) where
     prf with P? x' | P? y
     ... | no ¬Px' | no ¬Py = filter⁺ A=A'
     ... | no ¬Px' | yes Py = contradiction (P≈ y=y' Py) ¬Py'
-    ... | yes Px' | _      = contradiction (P≈ (sym x=x') Px') ¬Px
+    ... | yes Px' | _      = contradiction (P≈ (≈-sym x=x') Px') ¬Px
   ... | no ¬Px | yes Py' = prf
     where
     prf : filter P? (y ∷ A) ↭ y' ∷ filter P? (x' ∷ A')
     prf with
           P? x'   | P? y
-    ... | no ¬Px' | no ¬Py = contradiction (P≈ (sym y=y') Py') ¬Py
+    ... | no ¬Px' | no ¬Py = contradiction (P≈ (≈-sym y=y') Py') ¬Py
     ... | no ¬Px' | yes Py = prep y=y' (filter⁺ A=A')
-    ... | yes Px' | _      = contradiction (P≈ (sym x=x') Px') ¬Px
+    ... | yes Px' | _      = contradiction (P≈ (≈-sym x=x') Px') ¬Px
   ... | yes Px | no ¬Py' = prf
     where
     prf : x ∷ filter P? (y ∷ A) ↭ filter P? (x' ∷ A')
@@ -255,16 +258,13 @@ module _ {p} {P : Pred A p} (P? : Decidable P) (P≈ : P Respects _≈_) where
     prf : x ∷ filter P? (y ∷ A) ↭ y' ∷ filter P? (x' ∷ A')
     prf with P? x' | P? y
     ... | no ¬Px' | _      = contradiction (P≈ x=x' Px) ¬Px'
-    ... | yes Px' | no ¬Py = contradiction (P≈ (sym y=y') Py') ¬Py
+    ... | yes Px' | no ¬Py = contradiction (P≈ (≈-sym y=y') Py') ¬Py
     ... | yes Px' | yes Py = swap x=x' y=y' (filter⁺ A=A')
 
 tabulate⁺ : ∀ {n} {f g : Fin n → A} →
             (∀ {i} → f i ≈ g i) → tabulate f ↭ tabulate g
 tabulate⁺ {zero}  {f} {g} f=g = refl
 tabulate⁺ {suc k} {f} {g} f=g = prep f=g (tabulate⁺ {k} f=g)
-
-
-
 
 module _ {ℓ} {_≤_ : Rel A ℓ} (total : Total _≤_) where
 
@@ -280,3 +280,55 @@ module _ {ℓ} {_≤_ : Rel A ℓ} (total : Total _≤_) where
     x ∷ ps ++ [ y ] ++ qs ↭⟨ prep Eq.refl (≋⇒↭ (≋-sym eq)) ⟩
     x ∷ ys                ∎
     where open PermutationReasoning
+
+↭-nil-cons : ∀ x xs → ¬([] ↭ x ∷ xs)
+↭-nil-cons x xs = |xs|≠|ys|⇒¬xs↭ys λ ()
+
+↭-cons-nil : ∀ x xs → ¬(x ∷ xs ↭ [])
+↭-cons-nil x xs = |xs|≠|ys|⇒¬xs↭ys λ ()
+
+↭⇒cons-∈ : ∀ {x xs ys} → x ∷ xs ↭ ys → x ∈ ys
+↭⇒cons-∈ refl = here ≈-refl
+↭⇒cons-∈ (prep x≈y x∷xs↭y∷ys) = here x≈y
+↭⇒cons-∈ (swap x₁≈y₂ x₂≈y₁ x₁∷x₂∷xs↭y₁∷y₂∷ys) = there (here x₁≈y₂)
+↭⇒cons-∈ (trans x∷xs↭zs zs↭ys) = ∈-resp-↭ zs↭ys (↭⇒cons-∈ x∷xs↭zs)
+
+∃₃ : ∀ {a b c d} {A : Set a} {B : A → Set b} {C : ∀ {x} → A → B x → Set c}
+     (D : (x : A) → (y : B x) → C x y → Set d) → Set (a ⊔ b ⊔ c ⊔ d)
+∃₃ D = ∃ λ a → ∃ λ b → ∃ λ c → D a b c
+
+split-∈ : ∀ {x zs} → x ∈ zs → ∃₃ (λ ys y ws → (x ≈ y) × (zs ≋ ys ++ [ y ] ++ ws))
+split-∈ {x} {z ∷ zs} (here x≈z)   = [] , z , zs , x≈z , ≋-refl
+split-∈ {x} {z ∷ zs} (there x∈zs) =
+  let (ys , y , ws , x=y , zs=ys++y++ws) = split-∈ x∈zs in
+  z ∷ ys , y , ws , x=y , ≈-refl ∷ zs=ys++y++ws
+
+module _ (_≟_ : Decidable _≈_) where
+
+  ≈-isDecEquivalence : IsDecEquivalence _≈_
+  ≈-isDecEquivalence = record
+    { isEquivalence = ≈-isEquivalence
+    ; _≟_           = _≟_
+    }
+
+  DS : DecSetoid a ℓ
+  DS = record
+    { Carrier          = A
+    ; _≈_              = _≈_
+    ; isDecEquivalence = ≈-isDecEquivalence
+    }
+
+  open DecMembership DS using (_∈?_)
+
+  _↭?_ : Decidable _↭_
+  [] ↭? []       = yes refl
+  [] ↭? (y ∷ ys) = no (↭-nil-cons y ys)
+  (x ∷ xs) ↭? ys with x ∈? ys
+  ... | no x∉ys  = no ((contraposition ↭⇒cons-∈) x∉ys)
+  ... | yes x∈ys = let (zs , y , ws , x=y , ys=zs++y++ws) = split-∈ x∈ys in prf
+    where
+    prf : ?
+    prf with xs ↭? zs ++ ws
+    ... | no _ = ?
+    ... | yes _ = ?
+-- LEX: Get the let-variables to be in scope of the where-clause.

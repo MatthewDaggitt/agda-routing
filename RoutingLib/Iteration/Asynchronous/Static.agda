@@ -100,7 +100,7 @@ record AsyncIterable a ℓ n : Set (lsuc a ⊔ lsuc ℓ) where
   open IsAsyncIterable isAsyncIterable public
 
 -------------------------------------------------------------------------
--- Dynamic asynchronous state function
+-- Static asynchronous state function
 --
 -- Given an iterable and a schedule and an initial state, returns the
 -- state at time t.
@@ -110,13 +110,10 @@ module _ {a ℓ n} (I∥ : AsyncIterable a ℓ n) (ψ : Schedule n) where
   open AsyncIterable I∥
   open Schedule ψ
 
-  -- The six cases (in-order)
-  -- 1. Initially: not participating
-  -- 2. Initially: participating
-  -- 3. Currently: not participating
-  -- 4. Currently: just started participating
-  -- 5. Currently: participating but inactive
-  -- 6. Currently: participating and active
+  -- The three cases (in-order)
+  -- 1. Initial state
+  -- 2. Current state, not active
+  -- 3. Current state, active
   asyncIter' : S → ∀ {t} → Acc _<_ t → S
   asyncIter' x₀ {zero} _ i = x₀ i
   asyncIter' x₀ {suc t} (acc rec) i with i ∈? α (suc t)

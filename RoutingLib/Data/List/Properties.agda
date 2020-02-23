@@ -17,20 +17,21 @@ open import Data.Maybe using (Maybe; just; nothing)
 open import Data.Maybe.Properties using (just-injective)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_,_)
-open import Level using (Level)
-open import Relation.Binary using (Rel; Setoid)
+open import Level using (Level; _⊔_)
+open import Relation.Binary using (Rel; Setoid; Trichotomous; tri<; tri≈; tri>; Reflexive)
 open import Relation.Unary using (Decidable; Pred; ∁)
 open import Relation.Unary.Properties using (∁?)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; cong; cong₂; trans)
+open import Relation.Binary.Structures using (IsPreorder; IsEquivalence)
 open import Function using (id; _∘_)
 import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import Relation.Nullary using (¬_)
 open import Relation.Unary using (∁; U; Pred)
 open import Relation.Unary.Properties using (U-Universal)
 
-open import RoutingLib.Data.List
+open import RoutingLib.Data.List renaming (strictMerge to strictMerge')
 open import RoutingLib.Data.Nat.Properties
 open import RoutingLib.Algebra.Definitions
 
@@ -38,7 +39,7 @@ module RoutingLib.Data.List.Properties where
 
 private
   variable
-    a b p q ℓ : Level
+    a b p q ℓ ℓ₁ ℓ₂ : Level
     A : Set a
     B : Set b
 
@@ -190,3 +191,54 @@ module _ (S : Setoid a ℓ)  where
                       (∀ x y → f x •ᵃ f y ≈ f (x •ᵇ y)) →
                       ∀ d xs → foldr _•ᵃ_ (f d) (map f xs) ≈  f (foldr _•ᵇ_ d xs)
   foldr-map-commute cong pres d xs = foldr-map-commute-gen₁ cong (λ _ _ → _) (λ _ _ → pres _ _) (U-Universal d) (universal U-Universal xs)
+
+------------------------------------------------------------------------
+-- Properties of strictMerge
+
+module _ {_≈_ : Rel A ℓ₁} {_<_ : Rel A ℓ₂}
+         {cmp : Trichotomous _≈_ _<_} {_⊕_ : Op₂ A} where
+
+  strictMerge : List A → List A → List A
+  strictMerge = strictMerge' cmp _⊕_
+
+  _≋_ : Rel (List A) _
+  _≋_ = Pointwise _≈_
+
+  strictMerge-identityˡ : LeftIdentity _≡_ [] strictMerge
+  strictMerge-identityˡ xs = refl
+
+  strictMerge-identityʳ : RightIdentity _≡_ [] strictMerge
+  strictMerge-identityʳ [] = refl
+  strictMerge-identityʳ (x ∷ xs) = refl
+
+  strictMerge-identity : Identity _≡_ [] strictMerge
+  strictMerge-identity = (strictMerge-identityˡ , strictMerge-identityʳ)
+
+  module _ (≈-refl : Reflexive _≈_) {_≈'_ : Rel A ℓ} (⊕-idem : Idempotent _≈'_ _⊕_) where
+  
+    strictMerge-idempotent : Idempotent (Pointwise _≈'_) strictMerge
+    strictMerge-idempotent [] = []
+    strictMerge-idempotent (x ∷ xs) with cmp x x
+    ... | tri< _ x≠x _ = contradiction ≈-refl x≠x
+    ... | tri≈ _ x=x _ = (⊕-idem x) ∷ (strictMerge-idempotent xs)
+    ... | tri> _ x≠x _ = contradiction ≈-refl x≠x
+
+  module _ (≈-isEquivalence : IsEquivalence _≈_) (<-isPreorder : IsPreorder _≈_ _<_) (⊕-cong : Congruent₂ _≈_ _⊕_) where
+
+    open IsEquivalence ≈-isEquivalence renaming (refl to ≈-refl; sym to ≈-sym; trans to ≈-trans)
+    open IsPreorder <-isPreorder renaming (∼-respˡ-≈ to <-respˡ-≈; ∼-respʳ-≈ to <-respʳ-≈)
+
+    strictMerge-cong : ∀ {xs xs' ys ys'} → xs ≋ xs' → ys ≋ ys' →
+                       strictMerge xs ys ≋ strictMerge xs' ys'
+    strictMerge-cong [] ys=ys' = ys=ys'
+    strictMerge-cong (x=x' ∷ xs=xs') [] = x=x' ∷ xs=xs'
+    strictMerge-cong {x ∷ xs} {x' ∷ xs'} {y ∷ ys} {y' ∷ ys'} (x=x' ∷ xs=xs') (y=y' ∷ ys=ys') with cmp x y | cmp x' y'
+    ... | tri< _    _   _ | tri< _      _     _ = x=x' ∷ (strictMerge-cong xs=xs' (y=y' ∷ ys=ys'))
+    ... | tri< _    x≠y _ | tri≈ _      x'=y' _ = contradiction (≈-trans (≈-trans x=x' x'=y') (≈-sym y=y')) x≠y
+    ... | tri< x<y  _   _ | tri> ¬x'<y' _     _ = contradiction (<-respˡ-≈ x=x' (<-respʳ-≈ y=y' x<y)) ¬x'<y'
+    ... | tri≈ _    x=y _ | tri< _      x'≠y' _ = contradiction (≈-trans (≈-trans (≈-sym x=x') x=y) y=y') x'≠y'
+    ... | tri≈ _    _   _ | tri≈ _      _     _ = (⊕-cong x=x' y=y') ∷ (strictMerge-cong xs=xs' ys=ys')
+    ... | tri≈ _    x=y _ | tri> _      x'≠y' _ = contradiction (≈-trans (≈-trans (≈-sym x=x') x=y) y=y') x'≠y'
+    ... | tri> ¬x<y _   _ | tri< x'<y'  _     _ = contradiction (<-respˡ-≈ (≈-sym x=x') (<-respʳ-≈ (≈-sym y=y') x'<y')) ¬x<y
+    ... | tri> _    x≠y _ | tri≈ _      x'=y' _ = contradiction (≈-trans (≈-trans x=x' x'=y') (≈-sym y=y')) x≠y
+    ... | tri> _    _   _ | tri> _      _     _ = y=y' ∷ (strictMerge-cong (x=x' ∷ xs=xs') ys=ys')

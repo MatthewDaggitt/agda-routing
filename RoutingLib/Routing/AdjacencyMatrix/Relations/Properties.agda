@@ -1,7 +1,7 @@
 open import RoutingLib.Routing
 open import RoutingLib.Routing.Algebra
 
-module RoutingLib.Routing.AdjacencyMatrix.Properties
+module RoutingLib.Routing.AdjacencyMatrix.Relations.Properties
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
   {n} (A : AdjacencyMatrix algebra n)
@@ -10,7 +10,7 @@ module RoutingLib.Routing.AdjacencyMatrix.Properties
 open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
 open import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra isRoutingAlgebra
-open import RoutingLib.Routing.AdjacencyMatrix.Definitions algebra A
+open import RoutingLib.Routing.AdjacencyMatrix.Relations algebra A
 
 open import Data.Product using (∃₂; _,_)
 open import Data.Fin.Base using (zero; suc; inject₁; toℕ)
@@ -99,24 +99,3 @@ _↝ₛ?_ = NSTS.<-decidable _≟_ _↝?_
 strIncr∧⊴⇒<₊ : IsStrictlyIncreasing algebra → _⊴_ ⇒ _<₊_
 strIncr∧⊴⇒<₊ strIncr (z , x↝z , z≤y) = <-≤₊-trans (strIncr∧↝⇒<₊ strIncr x↝z) z≤y
 
---------------------------------------------------------------------------------
--- Cycles
-
--- If the algebra is strictly increasing then all adjacency matrices are
--- guaranteed to be cycle free
-
-strIncr⇒cycleFree : IsStrictlyIncreasing algebra → CycleFree
-strIncr⇒cycleFree strIncr X cyclic = <₊-irrefl ≈-refl x₀<x₀
-  where
-  x₋₁<x₀ : last X <₊ first X 
-  x₋₁<x₀ = strIncr∧⊴⇒<₊ strIncr (cyclic 0F)
-
-  v≤x₀⇒v≤xᵢ : ∀ {v} → v ≤₊ first X → ∀ {i} → Acc _<_ (toℕ i) → v ≤₊ iᵗʰ X i
-  v≤x₀⇒v≤xᵢ {v} v≤X₀ {zero}  _         = v≤X₀
-  v≤x₀⇒v≤xᵢ {v} v≤X₀ {suc i} (acc rec) = begin
-    v                 ≤⟨ v≤x₀⇒v≤xᵢ v≤X₀ (rec (toℕ (inject₁ i)) (s≤s (≤-reflexive (toℕ-inject₁ i)))) ⟩
-    iᵗʰ X (inject₁ i) <⟨ strIncr∧⊴⇒<₊ strIncr (cyclic (suc i)) ⟩
-    iᵗʰ X (suc i)     ∎
-
-  x₀<x₀ : first X <₊ first X
-  x₀<x₀ = ≤-<₊-trans (v≤x₀⇒v≤xᵢ ≤₊-refl (<-wellFounded _)) x₋₁<x₀

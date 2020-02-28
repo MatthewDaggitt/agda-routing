@@ -47,7 +47,7 @@ simulate A⇉B conv = Simulation.simulate A⇉B conv
 
 finite⇒convergentOverFreeNetworks : IsRoutingAlgebra A →
                                     IsFinite A →
-                                    PartiallyConvergent A (Free A)
+                                    PartiallyConvergent A (λ N → Free A N)
 finite⇒convergentOverFreeNetworks routingAlg =
   Convergence.finite⇒convergentOverFreeNetworks routingAlg
 
@@ -69,7 +69,7 @@ finite+strictlyIncr⇒convergent routingAlg finite strIncr N =
 
 paths⇒convergentOverFreeNetworks : IsRoutingAlgebra A →
                                    IsPathAlgebra A →  
-                                   PartiallyConvergent A (Free A)
+                                   PartiallyConvergent A (λ N → Free A N)
 paths⇒convergentOverFreeNetworks = Convergence.paths⇒convergentOverFreeNetworks
 
 -- If the path algebra is increasing (or equivalently strictly increasing) then

@@ -22,7 +22,7 @@ open import Relation.Nullary using (¬_)
 open import RoutingLib.Relation.Binary
 open import RoutingLib.Function.Metric.Nat
 
-open import RoutingLib.Routing.AdjacencyMatrix.Definitions algebra A
+open import RoutingLib.Routing.AdjacencyMatrix.Relations algebra A
 open import RoutingLib.Routing.VectorBased.Synchronous algebra A
 
 ------------------------------------------------------------------------

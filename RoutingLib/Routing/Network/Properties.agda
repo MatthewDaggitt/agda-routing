@@ -34,7 +34,7 @@ open import RoutingLib.Data.FiniteSet using (⟦_∣_⟧) renaming (FiniteSet to
 open RawRoutingAlgebra algebra
 
 open import RoutingLib.Routing.Network.Definitions algebra N
-import RoutingLib.Routing.AdjacencyMatrix.Properties as AMProperties
+import RoutingLib.Routing.AdjacencyMatrix.Cycles as Cycles
 
 ------------------------------------------------------------------------
 -- The adjacency matrix in each epoch, adjusted for participants
@@ -68,4 +68,4 @@ Aₜ-cong e p {X} {Y} X≈Y {i} {j} k with i ∈? p | k ∈? p
 
 -- If the algebra is strictly increasing, then every network is free
 strIncr⇒free : IsRoutingAlgebra algebra → IsStrictlyIncreasing algebra → Free
-strIncr⇒free isRoutingAlg strIncr N p = AMProperties.strIncr⇒cycleFree isRoutingAlg (Aₜ N p) strIncr
+strIncr⇒free isRoutingAlg strIncr N p = Cycles.strIncr⇒allCycleFree _ isRoutingAlg strIncr (Aₜ N p)

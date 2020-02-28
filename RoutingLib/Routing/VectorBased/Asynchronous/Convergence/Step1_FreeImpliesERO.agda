@@ -39,8 +39,9 @@ open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Nullary.Decidable using (False; fromWitnessFalse)
 
 open import RoutingLib.Routing algebra n
-open import RoutingLib.Routing.AdjacencyMatrix.Definitions algebra A
-open import RoutingLib.Routing.AdjacencyMatrix.Properties isRoutingAlgebra A
+open import RoutingLib.Routing.AdjacencyMatrix.Cycles algebra
+open import RoutingLib.Routing.AdjacencyMatrix.Relations algebra A
+open import RoutingLib.Routing.AdjacencyMatrix.Relations.Properties isRoutingAlgebra A
 open import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra isRoutingAlgebra
 
 open import RoutingLib.Data.Fin using (_+ₘ_; _-ₘ_)
@@ -53,7 +54,7 @@ open import RoutingLib.Relation.Binary using (StrictMinimum)
 import RoutingLib.Relation.Binary.Construct.Closure.Transitive.Finite as TransClosure
 import RoutingLib.Relation.Binary.Construct.Closure.Transitive as TransClosure
 
-open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.InternalDefinitions algebra A
+open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.InternalDefinitions algebra
 
 open import Relation.Binary.Reasoning.PartialOrder ≤₊-poset
 
@@ -146,13 +147,13 @@ y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v {v} y≤v (inj₂ x↝w ∷ w<ᶠy) with ⟦ w
   test : Is-just ⟦ z<ᶠy ⟧↝
   test = subst Is-just (sym eq) (just {x = v} tt)
 
--- When the network is cycle free then irreflexivity can now be proved. This follows
+-- When the topology is cycle free then irreflexivity can now be proved. This follows
 -- as if the start point of the path is equal to the end point then:
 --   ∙ if the path contains no extensions then x ≈ y and x <₊ y which is contradiction
 --     by the irreflexivity of _<₊_
 --   ∙ if the path does contain extensions then the set of extended routes must form
 --     a cycle thanks to x ≈ y and the previous lemmas.
-<ᶠ-irrefl : CycleFree → Irreflexive _≈_ _<ᶠ_
+<ᶠ-irrefl : CycleFree A → Irreflexive _≈_ _<ᶠ_
 <ᶠ-irrefl cf x≈y x<ᶠy with IsJust? ⟦ x<ᶠy ⟧↝
 ... | no  ¬∣x<ᶠy∣↝ = <₊-irrefl x≈y (¬⟦x<ᶠy⟧↝⇒x<y x<ᶠy ¬∣x<ᶠy∣↝)
 ... | yes ∣x<ᶠy∣↝  = cf (to-witness ∣x<ᶠy∣↝) ∣x<ᶠy∣↝-cyclic
@@ -161,7 +162,7 @@ y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v {v} y≤v (inj₂ x↝w ∷ w<ᶠy) with ⟦ w
   x≤⟦x<ᶠy⟧₀          = All-witness ∣x<ᶠy∣↝ (v≤x⇒v≤⟦x<ᶠy⟧↝₀ (≤₊-reflexive (≈-sym x≈y)) x<ᶠy)
   ⟦x<ᶠy⟧ᵢ⊴⟦x<ᶠy⟧ᵢ₊₁  = All-witness ∣x<ᶠy∣↝ (⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ x<ᶠy)
  
-  ∣x<ᶠy∣↝-cyclic : Cyclic (to-witness ∣x<ᶠy∣↝)
+  ∣x<ᶠy∣↝-cyclic : Cyclic A (to-witness ∣x<ᶠy∣↝)
   ∣x<ᶠy∣↝-cyclic 0F      = ⊴-≤₊-trans ⟦x<ᶠy⟧₋₁⊴x x≤⟦x<ᶠy⟧₀
   ∣x<ᶠy∣↝-cyclic (suc i) = ⟦x<ᶠy⟧ᵢ⊴⟦x<ᶠy⟧ᵢ₊₁ i
 
@@ -191,7 +192,7 @@ y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v {v} y≤v (inj₂ x↝w ∷ w<ᶠy) with ⟦ w
 <₊∧<ᶠ⇒<ᶠ : Trans _<₊_ _<ᶠ_ _<ᶠ_
 <₊∧<ᶠ⇒<ᶠ x<₊y y<ᶠz = inj₁ x<₊y ∷ y<ᶠz
 
-<ᶠ-isStrictPartialOrder : CycleFree → IsStrictPartialOrder _≈_ _<ᶠ_
+<ᶠ-isStrictPartialOrder : CycleFree A → IsStrictPartialOrder _≈_ _<ᶠ_
 <ᶠ-isStrictPartialOrder cf = record
   { isEquivalence = ≈-isEquivalence
   ; irrefl        = <ᶠ-irrefl cf
@@ -199,14 +200,14 @@ y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v {v} y≤v (inj₂ x↝w ∷ w<ᶠy) with ⟦ w
   ; <-resp-≈      = <ᶠ-resp-≈
   }
 
-<ᶠ-isDecStrictPartialOrder : IsFinite algebra → CycleFree → IsDecStrictPartialOrder _≈_ _<ᶠ_
+<ᶠ-isDecStrictPartialOrder : IsFinite algebra → CycleFree A → IsDecStrictPartialOrder _≈_ _<ᶠ_
 <ᶠ-isDecStrictPartialOrder fin cf = record
   { isStrictPartialOrder = <ᶠ-isStrictPartialOrder cf
   ; _≟_                  = _≟_
   ; _<?_                 = <ᶠ-dec fin
   }
 
-<ᶠ-isExtensionRespectingOrder : IsFinite algebra → CycleFree → IsExtensionRespectingOrder _<ᶠ_
+<ᶠ-isExtensionRespectingOrder : IsFinite algebra → CycleFree A → IsExtensionRespectingOrder A _<ᶠ_
 <ᶠ-isExtensionRespectingOrder fin cf = record
   { isDecStrictPartialOrder = <ᶠ-isDecStrictPartialOrder fin cf
   ; ↝⇒<ᵣ                    = ↝⇒<ᶠ
@@ -214,7 +215,7 @@ y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v {v} y≤v (inj₂ x↝w ∷ w<ᶠy) with ⟦ w
   ; <ᵣ-min                  = <ᶠ-min
   }
 
-<ᶠ-extensionRespectingOrder : IsFinite algebra → CycleFree → ExtensionRespectingOrder _
+<ᶠ-extensionRespectingOrder : IsFinite algebra → CycleFree A → ExtensionRespectingOrder A _
 <ᶠ-extensionRespectingOrder fin cf = record
   { _<ᵣ_                       = _<ᶠ_
   ; isExtensionRespectingOrder = <ᶠ-isExtensionRespectingOrder fin cf

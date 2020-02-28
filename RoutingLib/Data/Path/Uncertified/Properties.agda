@@ -288,14 +288,14 @@ inflate-inflate ((i , j) ∷ p) (suc m) n       = begin
 
 p≡[]⇒deflate[p]≡[] : ∀ {p} → p ≡ [] → deflate p ≡ []
 p≡[]⇒deflate[p]≡[] refl = refl
-{-
+
 deflate-source : ∀ p → source (deflate p) ≡ source p
 deflate-source []                      = refl
 deflate-source ((i , j) ∷ [])          = refl
-deflate-source ((i , j) ∷ (k , l) ∷ p) with i ≟ j | j ≟ k
-... | no  _    | _        = refl
-... | yes _    | no  _    = refl
-... | yes refl | yes refl = deflate-source ((i , l) ∷ p)
+deflate-source ((i , j) ∷ (k , l) ∷ p) with deflate-source ((i , l) ∷ p) | i ≟ j | j ≟ k
+... | _   | no  _    | _        = refl
+... | _   | yes _    | no  _    = refl
+... | rec | yes refl | yes refl = rec 
 
 deflate-remove : ∀ p {i j} → i ≡ j → just j ≡ source p → deflate ((i , j) ∷ p) ≡ deflate p
 deflate-remove []            refl ()
@@ -350,7 +350,7 @@ deflate-idem ((i , j) ∷ q@((k , l) ∷ p)) with i ≟ j | j ≟ k | deflate-id
   deflate ((i , j) ∷ deflate q) ≡⟨ deflate-skip (deflate q) (inj₂ (j≢k ∘ just-injective ∘ flip trans (deflate-source q))) ⟩
   (i , j) ∷ deflate (deflate q) ≡⟨ cong (_ ∷_) rec ⟩
   (i , j) ∷ deflate q           ∎
-... | yes _   | yes _   | rec = deflate-idem ((k , l) ∷ p)
+... | yes _   | yes _   | rec = rec
 
 ∈-deflate⁻ : ∀ {v p} → v ∈ₚ deflate p → v ∈ₚ p
 ∈-deflate⁻ {v} {[]}                    ()
@@ -365,8 +365,8 @@ deflate-idem ((i , j) ∷ q@((k , l) ∷ p)) with i ≟ j | j ≟ k | deflate-id
 ⇿-deflate⁺ : ∀ {e p} → e ⇿ p → e ⇿ deflate p
 ⇿-deflate⁺ {e} {[]}                    e⇿p = e⇿p
 ⇿-deflate⁺ {e} {(i , j) ∷ []}          e⇿p = e⇿p
-⇿-deflate⁺ {e} {(i , j) ∷ (k , l) ∷ p} e⇿p with i ≟ j | j ≟ k
-... | no  _    | _        = ⇿-resp-p₀ refl e⇿p
-... | yes _    | no  _    = ⇿-resp-p₀ refl e⇿p
-... | yes refl | yes refl = ⇿-deflate⁺ {e} {(k , l) ∷ p} (⇿-resp-p₀ refl e⇿p)
--}
+⇿-deflate⁺ {e} {(i , j) ∷ (k , l) ∷ p} e⇿p
+  with i ≟ j | j ≟ k | ⇿-deflate⁺ {e} {(k , l) ∷ p}
+... | no  _    | _        | rec = ⇿-resp-p₀ refl e⇿p
+... | yes _    | no  _    | rec = ⇿-resp-p₀ refl e⇿p
+... | yes refl | yes refl | rec = rec (⇿-resp-p₀ refl e⇿p)

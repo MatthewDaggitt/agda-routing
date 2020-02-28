@@ -49,7 +49,7 @@ open import RoutingLib.Data.FiniteSet using (map) renaming (FiniteSet to FiniteS
 open import RoutingLib.Data.Path.CertifiedI
 open import RoutingLib.Data.Path.CertifiedI.Enumeration
 open import RoutingLib.Data.Path.CertifiedI.Properties
-open import RoutingLib.Routing.AdjacencyMatrix.Definitions using (Cyclic; CycleFree)
+open import RoutingLib.Routing.AdjacencyMatrix.Cycles using (Cyclic; CycleFree)
 import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra
   as PathAlgebraProperties
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra

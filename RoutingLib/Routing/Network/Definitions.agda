@@ -31,7 +31,7 @@ import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Routing.AdjacencyMatrix.Definitions algebra
+open import RoutingLib.Routing.AdjacencyMatrix.Cycles algebra
 
 ------------------------------------------------------------------------
 -- The adjacency matrix in each epoch, adjusted for participants

@@ -39,7 +39,7 @@ open import RoutingLib.Function.Reasoning
 open ExtensionRespectingOrder extRespOrder hiding (_≟_)
 open Finite finite hiding (cong)
 open FiniteProperties finite hiding (_≟_)
-open import RoutingLib.Routing.AdjacencyMatrix.Definitions algebra A
+open import RoutingLib.Routing.AdjacencyMatrix.Relations algebra A
 
 ------------------------------------------------------------------------
 -- Properties

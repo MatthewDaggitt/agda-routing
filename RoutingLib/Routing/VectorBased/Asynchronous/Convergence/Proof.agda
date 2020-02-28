@@ -10,7 +10,7 @@ open import RoutingLib.Function.Reasoning
 open import RoutingLib.Routing using (Network; AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra.Certification
 open import RoutingLib.Routing.Network.Definitions
-open import RoutingLib.Routing.AdjacencyMatrix.Definitions
+open import RoutingLib.Routing.AdjacencyMatrix.Cycles
 open import RoutingLib.Routing.VectorBased.Asynchronous hiding (AdjacencyMatrix; Aₜ)
 open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Definitions
 open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.InternalDefinitions

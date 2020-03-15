@@ -1,6 +1,7 @@
 open import Data.List hiding (any)
+open import Data.List.Properties using (filter-all)
 open import Data.List.Relation.Unary.Any using (here; there; any)
-open import Data.List.Relation.Unary.All.Properties using (gmap; ¬Any⇒All¬; All¬⇒¬Any; tabulate⁺)
+open import Data.List.Relation.Unary.All.Properties using (all-filter; gmap; ¬Any⇒All¬; All¬⇒¬Any; tabulate⁺)
 open import Data.List.Relation.Unary.Unique.Setoid.Properties
 open import Data.List.Membership.Setoid.Properties
 open import Data.List.Relation.Unary.Unique.Setoid as Uniqueness using (Unique)
@@ -33,15 +34,10 @@ private
 module _ (DS : DecSetoid c ℓ) where
 
   open DecSetoid DS renaming (setoid to S)
-  open import RoutingLib.Data.List.Membership.DecSetoid DS using (deduplicate)
-  open import RoutingLib.Data.List.Membership.DecSetoid.Properties using (∈-deduplicate⁻)
 
-  deduplicate⁺ : ∀ xs → Unique S (deduplicate xs)
-  deduplicate⁺ [] = []
-  deduplicate⁺ (x ∷ xs) with any (x ≟_) xs
-  ... | yes _    = deduplicate⁺ xs
-  ... | no  x∉xs = ¬Any⇒All¬ _ (x∉xs ∘ (∈-deduplicate⁻ DS)) ∷ deduplicate⁺ xs
-
+  deduplicate⁺ : ∀ xs → Unique S (deduplicate _≟_ xs)
+  deduplicate⁺ []       = []
+  deduplicate⁺ (x ∷ xs) = all-filter _ (deduplicate _ xs) ∷ (filter⁺ S _ (deduplicate⁺ xs))
 
 module _ (S : Setoid a ℓ₁) (T : Setoid b ℓ₂) (U : Setoid c ℓ₃) where
 

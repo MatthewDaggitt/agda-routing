@@ -4,18 +4,17 @@ module RoutingLib.Algebra.Construct.Lexicographic where
 
 open import Algebra
 open import Data.Product
-open import Data.Product.Relation.Pointwise.NonDependent using (Pointwise)
+open import Data.Product.Relation.Binary.Pointwise.NonDependent using (Pointwise)
 open import Data.Sum using (_⊎_; inj₁; inj₂; [_,_])
 open import Function using (_∘_)
-open import Level using (_⊔_)
+open import Level using (Level; _⊔_)
 open import Relation.Binary
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 import Relation.Binary.Reasoning.Setoid as EqReasoning
 
-open import RoutingLib.Algebra
-open import RoutingLib.Algebra.FunctionProperties
-open import RoutingLib.Function
+open import RoutingLib.Algebra.Bundles
+-- open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Relation.Nullary.Negation
 
 ------------------------------------------------------------------------

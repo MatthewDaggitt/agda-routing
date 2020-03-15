@@ -25,9 +25,7 @@ open import Function using (flip)
 open import Relation.Binary using (Decidable)
 
 open import RoutingLib.Data.List.Sorting (flip _≤₊_) using (Sorted)
-open import RoutingLib.Data.List.Membership.DecSetoid DS using (deduplicate)
 open import RoutingLib.Data.List.Relation.Unary.Unique.Setoid.Properties using (deduplicate⁺)
-open import RoutingLib.Data.List.Membership.DecSetoid.Properties using (∈-deduplicate⁺)
 import RoutingLib.Data.List.Sorting.InsertionSort as InsertionSort
 
 open import RoutingLib.Routing

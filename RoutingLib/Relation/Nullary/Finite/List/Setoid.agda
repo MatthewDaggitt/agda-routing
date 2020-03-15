@@ -17,7 +17,6 @@ import Relation.Nullary.Decidable as Dec
 open import Relation.Binary
 
 open import RoutingLib.Data.List
-open import RoutingLib.Data.List.Membership.DecSetoid
 open import RoutingLib.Data.List.Membership.Setoid.Properties
 open import RoutingLib.Data.List.Relation.Unary.Complete.Setoid
 import RoutingLib.Data.List.Relation.Unary.Unique.Setoid.Properties as Unique
@@ -48,7 +47,7 @@ module _ (S? : DecSetoid a ℓ) where
   
   complete? : ∀ {xs} → Complete S xs → Finite S
   complete? {xs} complete = record
-    { xs       = deduplicate S? xs
+    { xs       = deduplicate _≟_ xs
     ; complete = Complete.deduplicate⁺ S? complete
     ; unique   = Unique.deduplicate⁺   S? xs
     }

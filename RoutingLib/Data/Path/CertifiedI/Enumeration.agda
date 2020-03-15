@@ -11,7 +11,6 @@ open import RoutingLib.Relation.Nullary.Finite.List.Setoid
 open import RoutingLib.Relation.Nullary.Finite.List.Setoid.Properties
 open import RoutingLib.Relation.Nullary.Finite.Bijection.Setoid
   using (Finite)
-open import RoutingLib.Data.List.Membership.DecSetoid
 
 open import RoutingLib.Data.Path.CertifiedI
 open import RoutingLib.Data.Path.CertifiedI.Properties

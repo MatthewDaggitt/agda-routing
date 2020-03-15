@@ -292,7 +292,7 @@ p≡[]⇒deflate[p]≡[] refl = refl
 deflate-source : ∀ p → source (deflate p) ≡ source p
 deflate-source []                      = refl
 deflate-source ((i , j) ∷ [])          = refl
-deflate-source ((i , j) ∷ (k , l) ∷ p) with deflate-source ((i , l) ∷ p) | i ≟ j | j ≟ k
+deflate-source ((i , j) ∷ (k , l) ∷ p) with deflate-source ((k , l) ∷ p) | i ≟ j | j ≟ k
 ... | _   | no  _    | _        = refl
 ... | _   | yes _    | no  _    = refl
 ... | rec | yes refl | yes refl = rec 
@@ -353,14 +353,13 @@ deflate-idem ((i , j) ∷ q@((k , l) ∷ p)) with i ≟ j | j ≟ k | deflate-id
 ... | yes _   | yes _   | rec = rec
 
 ∈-deflate⁻ : ∀ {v p} → v ∈ₚ deflate p → v ∈ₚ p
-∈-deflate⁻ {v} {[]}                    ()
 ∈-deflate⁻ {v} {(i , j) ∷ []}          v∈ij = v∈ij
-∈-deflate⁻ {v} {(i , j) ∷ (k , l) ∷ p} v∈p with i ≟ j | j ≟ k | v∈p
-... | no  _ | _     | here  v∈ij   = here v∈ij
-... | no  _ | _     | there v∈kl∷p = there (∈-deflate⁻ v∈kl∷p)
-... | yes _ | no  _ | here  v∈ij   = here v∈ij
-... | yes _ | no  _ | there v∈kl∷p = there (∈-deflate⁻ v∈kl∷p)
-... | yes _ | yes _ | v∈p'         = there (∈-deflate⁻ v∈p')
+∈-deflate⁻ {v} {(i , j) ∷ (k , l) ∷ p} v∈p with i ≟ j | j ≟ k | v∈p | ∈-deflate⁻ {v} {(k , l) ∷ p}
+... | no  _    | _        | here  v∈ij   | _   = here v∈ij
+... | no  _    | _        | there v∈kl∷p | rec = there (rec v∈kl∷p)
+... | yes _    | no  _    | here  v∈ij   | _   = here v∈ij
+... | yes _    | no  _    | there v∈kl∷p | rec = there (rec v∈kl∷p)
+... | yes refl | yes refl | v∈p'         | rec = there (rec v∈p')
 
 ⇿-deflate⁺ : ∀ {e p} → e ⇿ p → e ⇿ deflate p
 ⇿-deflate⁺ {e} {[]}                    e⇿p = e⇿p

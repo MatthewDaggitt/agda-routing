@@ -1,7 +1,7 @@
 
 module RoutingLib.Data.List.Relation.Unary.Complete.Setoid.Properties where
 
-open import Data.Fin
+open import Data.Fin hiding (_≟_)
 open import Data.List
 open import Data.List.Membership.Setoid
 open import Data.List.Membership.Setoid.Properties
@@ -16,8 +16,6 @@ open import Relation.Binary.PropositionalEquality using (_≡_)
 
 open import RoutingLib.Data.List
 open import RoutingLib.Data.List.Relation.Unary.Any.Properties
-open import RoutingLib.Data.List.Membership.DecSetoid
-open import RoutingLib.Data.List.Membership.DecSetoid.Properties
 open import RoutingLib.Data.List.Membership.Setoid.Properties
 open import RoutingLib.Data.List.Relation.Unary.Complete.Setoid
 
@@ -42,11 +40,10 @@ module _ (S : Setoid a ℓ₁) (T : Setoid b ℓ₂) where
 module _ (S? : DecSetoid a ℓ₁) where
   open DecSetoid S? renaming (setoid to S)
   
-  deduplicate⁺ : ∀ {xs} → Complete S xs → Complete S (deduplicate S? xs)
-  deduplicate⁺ complete = ∈-deduplicate⁺ S? ∘ complete
+  deduplicate⁺ : ∀ {xs} → Complete S xs → Complete S (deduplicate _≟_ xs)
+  deduplicate⁺ complete = ∈-deduplicate⁺ S _≟_ (λ y≈z x≈z → trans x≈z (sym y≈z)) ∘ complete
   
 module _ (S : Setoid a ℓ₁) where
-
   open Setoid S
   
   lookup-surjective : ∀ {xs} → Complete S xs → Surjective {A = Fin (length xs)} _≡_ _≈_ (lookup xs)

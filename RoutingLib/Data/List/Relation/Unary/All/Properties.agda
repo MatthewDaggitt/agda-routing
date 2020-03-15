@@ -50,20 +50,7 @@ module _ {a ℓ} {A : Set a} {_≤_ : Rel A ℓ} (total : Total _≤_)
   ... | inj₂ _ | px ∷ pvxs       = Prod.map id (px ∷_) (insert⁻ v xs pvxs)
 
 ------------------------------------------------------------------------
--- deduplicate
-
-module _ {a ℓ} (DS : DecSetoid a ℓ) where
-
-  open DecSetoid DS renaming (Carrier to A)
-  open import RoutingLib.Data.List.Membership.DecSetoid DS using (deduplicate)
-  open import Data.List.Membership.DecSetoid DS using (_∈?_)
-
-  deduplicate⁺ : ∀ {p} {P : A → Set p} {xs} → All P xs → All P (deduplicate xs)
-  deduplicate⁺ {xs = _}      [] = []
-  deduplicate⁺ {xs = x ∷ xs} (px ∷ pxs) with x ∈? xs
-  ... | yes _ = deduplicate⁺ pxs
-  ... | no  _ = px ∷ deduplicate⁺ pxs
-
+-- other
 
 module _ {a ℓ} (S : Setoid a ℓ) where
 

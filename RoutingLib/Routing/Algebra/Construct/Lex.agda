@@ -19,12 +19,12 @@ module RoutingLib.Routing.Algebra.Construct.Lex
   (algebraB : RawRoutingAlgebra a₂ b₂ ℓ₂)
   where
 
-open import Algebra.FunctionProperties
-open import Algebra.FunctionProperties.Consequences
+open import Algebra
+open import Algebra.Consequences.Setoid
 open import Data.Nat
 open import Data.Fin
 open import Data.Product
-open import Data.Product.Relation.Pointwise.NonDependent
+open import Data.Product.Relation.Binary.Pointwise.NonDependent
   as Pointwise using (Pointwise)
 open import Data.Sum as Sum using ()
 open import Level using (lift)
@@ -37,8 +37,6 @@ open import RoutingLib.Algebra.Construct.Lexicographic
 open import RoutingLib.Algebra.Construct.Lexicographic.Magma
   as OpLexProperties′
 import RoutingLib.Routing.Algebra.Properties.RawRoutingAlgebra
-
-open import RoutingLib.Function
 
 private
   module A = RawRoutingAlgebra algebraA

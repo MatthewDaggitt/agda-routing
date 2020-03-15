@@ -1,14 +1,13 @@
 open import Algebra
-open import RoutingLib.Algebra
+open import RoutingLib.Algebra.Bundles
 
 module RoutingLib.Algebra.Construct.Lexicographic.Magma
   {a b ℓ₁ ℓ₂} (DM₁ : DecMagma a ℓ₁) (M₂ : Magma b ℓ₂)
   where
 
 open import Algebra.Structures
-open import Algebra.FunctionProperties
 open import Data.Product
-open import Data.Product.Relation.Pointwise.NonDependent
+open import Data.Product.Relation.Binary.Pointwise.NonDependent
 open import Data.Sum
 open import Level using (_⊔_)
 open import Relation.Binary
@@ -16,8 +15,6 @@ open import Relation.Nullary using (yes; no; ¬_)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Algebra.Construct.Lexicographic as Lex using (Lex)
-open import RoutingLib.Function
-open import RoutingLib.Algebra.FunctionProperties
 
 ------------------------------------------------------------------------
 -- Prelude

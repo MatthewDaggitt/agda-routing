@@ -8,14 +8,15 @@
 
 module RoutingLib.Iteration.Asynchronous.Static where
 
-open import Algebra.FunctionProperties using (Congruent₁)
+open import Algebra.Definitions using (Congruent₁)
 open import Level using (_⊔_; 0ℓ) renaming (suc to lsuc)
 open import Data.Fin using (Fin)
-open import Data.Fin.Dec using (_∈?_; all?)
 open import Data.Fin.Subset using (Subset) renaming (_∉_ to _∉ₛ_)
-open import Data.Fin.Properties using () renaming (setoid to 𝔽ₛ)
+open import Data.Fin.Subset.Properties using (_∈?_)
+open import Data.Fin.Properties using (all?) renaming (setoid to 𝔽ₛ)
 open import Data.Nat using (ℕ; _≤_; _+_; s≤s; _<_; zero; suc)
 open import Data.Nat.Properties using (≤-refl)
+open import Data.Nat.Induction using (Acc; acc; <-wellFounded)
 open import Data.Product using (∃; _×_; _,_)
 open import Data.Unit using (tt)
 open import Relation.Binary as B using (Setoid; Rel; _Preserves_⟶_; Reflexive)
@@ -24,8 +25,6 @@ open import Relation.Binary.Indexed.Homogeneous hiding (Rel)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Pred; _∈_; U)
-open import Induction.WellFounded using (Acc; acc)
-open import Induction.Nat using (<-wellFounded)
 
 open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset as FiniteSubset
@@ -100,7 +99,7 @@ record AsyncIterable a ℓ n : Set (lsuc a ⊔ lsuc ℓ) where
   open IsAsyncIterable isAsyncIterable public
 
 -------------------------------------------------------------------------
--- Dynamic asynchronous state function
+-- Static asynchronous state function
 --
 -- Given an iterable and a schedule and an initial state, returns the
 -- state at time t.
@@ -110,13 +109,10 @@ module _ {a ℓ n} (I∥ : AsyncIterable a ℓ n) (ψ : Schedule n) where
   open AsyncIterable I∥
   open Schedule ψ
 
-  -- The six cases (in-order)
-  -- 1. Initially: not participating
-  -- 2. Initially: participating
-  -- 3. Currently: not participating
-  -- 4. Currently: just started participating
-  -- 5. Currently: participating but inactive
-  -- 6. Currently: participating and active
+  -- The three cases (in-order)
+  -- 1. Initial state
+  -- 2. Current state, not active
+  -- 3. Current state, active
   asyncIter' : S → ∀ {t} → Acc _<_ t → S
   asyncIter' x₀ {zero} _ i = x₀ i
   asyncIter' x₀ {suc t} (acc rec) i with i ∈? α (suc t)

@@ -1,4 +1,4 @@
-open import Algebra.FunctionProperties.Core using (Op₂)
+open import Algebra.Core using (Op₂)
 open import Data.Fin using (Fin)
 open import Data.Nat using (ℕ)
 

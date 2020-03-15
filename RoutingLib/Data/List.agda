@@ -41,15 +41,15 @@ module _ {_≤_ : Rel A ℓ} (total : Total _≤_) where
 
 module _ {_≈_ : Rel A ℓ₁} {_<_ : Rel A ℓ₂}
          (cmp : Trichotomous _≈_ _<_) (_⊕_ : Op₂ A) where
-{-
+
   strictMerge : List A → List A → List A
   strictMerge []       ys       = ys
   strictMerge (x ∷ xs) []       = x ∷ xs
-  strictMerge (x ∷ xs) (y ∷ ys) with cmp x y
-  ... | tri< _ _ _ = x ∷ strictMerge xs (y ∷ ys)
-  ... | tri> _ _ _ = y ∷ strictMerge (x ∷ xs) ys
-  ... | tri≈ _ _ _ = (x ⊕ y) ∷ strictMerge xs ys
--}
+  strictMerge (x ∷ xs) (y ∷ ys) with cmp x y | strictMerge xs (y ∷ ys) | strictMerge (x ∷ xs) ys | strictMerge xs ys
+  ... | tri< _ _ _ | rec₁ | _    | _    = x ∷ rec₁ 
+  ... | tri> _ _ _ | _    | rec₂ | _    = y ∷ rec₂
+  ... | tri≈ _ _ _ | _    | _    | rec₃ = (x ⊕ y) ∷ rec₃
+
 combine : (A → B → C) → List A → List B → List C
 combine f []       _  = []
 combine f (x ∷ xs) ys = map (f x) ys ++ combine f xs ys

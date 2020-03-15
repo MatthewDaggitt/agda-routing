@@ -1,4 +1,4 @@
-open import Algebra.FunctionProperties
+open import Algebra.Definitions
 open import Data.Fin using (Fin)
 open import Data.Product using (_,_; _×_) renaming (proj₁ to π₁; proj₂ to π₂)
 open import Data.List using (List; filter; tabulate; []; _∷_; _++_; map)
@@ -13,7 +13,7 @@ open import Relation.Nullary.Negation using (contradiction; contraposition; ¬?)
 open import Relation.Unary using (Pred; Decidable; _⇒_)
 open import Relation.Binary using (Setoid; DecSetoid; Rel; Reflexive; Symmetric; Transitive; _Respects_)
 open import Relation.Binary.PropositionalEquality as PropositionalEq using (_≡_; refl; cong)
-import Relation.Binary.EqReasoning as EqReasoning
+import Relation.Binary.Reasoning.Setoid as EqReasoning
 
 open import RoutingLib.Iteration.Synchronous using (_^_)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)

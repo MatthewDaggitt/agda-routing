@@ -1,4 +1,4 @@
-open import Algebra.FunctionProperties.Core using (Op₂)
+open import Algebra.Core using (Op₂)
 open import Data.Bool using (Bool; true; false)
 open import Data.Empty using (⊥)
 open import Data.Fin using (Fin; suc; zero)

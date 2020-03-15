@@ -76,6 +76,9 @@ Decℝ𝕋ₛ = Dec𝕋ₛ n
 ℝ𝕋ₛⁱ : IndexedSetoid (Fin n) _ _
 ℝ𝕋ₛⁱ = triviallyIndexSetoid (Fin n) S
 
+Decℝ𝕋ₛⁱ : IndexedDecSetoid (Fin n) _ _
+Decℝ𝕋ₛⁱ = triviallyIndexDecSetoid (Fin n) DS
+
 --------------------------------------------------------------------------------
 -- Routing matrices store the routing decisions of the entire network
 

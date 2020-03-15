@@ -1,7 +1,7 @@
-open import Algebra.FunctionProperties.Core using (Op₂)
+open import Algebra.Core using (Op₂)
 open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.Product using (_,_; _×_)
-open import Data.Product.Relation.Pointwise.NonDependent using (_×ₛ_)
+open import Data.Product.Relation.Binary.Pointwise.NonDependent using (_×ₛ_)
 open import Function using (_∘_)
 open import Level using (_⊔_)
 open import Data.List using (List; filter; tabulate; []; _∷_; map)
@@ -12,7 +12,7 @@ open import Relation.Unary using (Pred; Decidable)
 open import Relation.Nullary.Negation using (¬?; contradiction)
 open import Relation.Binary using (Setoid; DecSetoid; Rel; Reflexive; Symmetric; Transitive; _⇒_)
 open import Relation.Binary.PropositionalEquality as PropositionalEq using (_≡_; refl; cong)
-import Relation.Binary.EqReasoning as EqReasoning
+import Relation.Binary.Reasoning.Setoid as EqReasoning
 
 open import RoutingLib.Iteration.Synchronous using (_^_)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
@@ -207,7 +207,7 @@ LemmaA₄ F G V i = begin
         ((Imp ●ₘ Prot) ●ₘ (Exp ᵀ)) || V || ⊕ᵥ ~ M     ≈⟨ ⊕ᵥ-cong (≈ᵥ-sym (LemmaA₄ (Imp ●ₘ Prot) Exp V)) (≈ₘ⇒≈ᵥ ≈ₘ-refl)   ⟩ 
         ((Imp ●ₘ Prot) 〖 Exp 【 V 】 〗) ↓ ⊕ᵥ ~ M    ≈⟨ ≈ᵥ-refl ⟩
         (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) V                        ∎
-        where open EqReasoning 𝕍ₛ using (begin_; _∎; _≈⟨_⟩_)
+        where open EqReasoning 𝕍ₛ using (begin_; _∎; step-≈)
 
 -- Theorem 6
 FixedPoint-Γ₀-Γ₂ : ∀ {X : RoutingMatrix} →

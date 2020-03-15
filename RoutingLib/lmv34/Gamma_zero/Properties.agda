@@ -2,9 +2,10 @@ open import Data.Fin using (Fin)
 open import Data.Nat using (zero; suc)
 open import Algebra.Bundles using (Magma)
 open import Algebra.Structures using (IsMagma)
-open import Algebra.FunctionProperties
+open import Algebra.Definitions
 open import Relation.Binary using (DecSetoid)
-import Relation.Binary.EqReasoning as EqReasoning
+import Relation.Binary.Reasoning.Setoid as EqReasoning
+open import Relation.Unary using (Pred)
 
 open import RoutingLib.Algebra.Bundles using (DecMagma)
 open import RoutingLib.Algebra.Structures using (IsDecMagma)
@@ -63,10 +64,13 @@ open Gamma_zero_Algebra algebra n
 Γ₀-cong : Congruent₁ _≈ₘ_ Γ₀
 Γ₀-cong X=X' = ⊕ₘ-cong (〔〕-cong X=X') ≈ₘ-refl
 
+IsFixedPoint-Γ₀ : Pred RoutingMatrix ℓ
+IsFixedPoint-Γ₀ Y = Γ₀ Y ≈ₘ Y
+
 ------------------------------------
 -- Theorems
 
 -- Theorem 1
 FixedPoint-Γ₀ : ∀ {k Y} → (Γ₀ ^ suc k) Y ≈ₘ (Γ₀ ^ k) Y →
-                 IsFixedPoint _≈ₘ_ Γ₀ ((Γ₀ ^ k) Y)
+                 IsFixedPoint-Γ₀ ((Γ₀ ^ k) Y)
 FixedPoint-Γ₀ FP = FP

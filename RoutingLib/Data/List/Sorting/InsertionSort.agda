@@ -18,11 +18,13 @@ import Data.List.Membership.Setoid as Membership
 open import RoutingLib.Data.List using (insert)
 open import RoutingLib.Data.List.Relation.Unary.All.Properties as All hiding (insert⁺)
 open import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties Eq.setoid
-import RoutingLib.Data.List.Sorting as Sorting
-import RoutingLib.Data.List.Sorting.Properties as Sortingₚ
 
-open Sorting _≤_
-open Sortingₚ decTotalOrder
+open import RoutingLib.Data.List.Sorting.Core totalOrder using (SortingAlgorithm)
+import RoutingLib.Data.List.Relation.Unary.Sorted as Sorted
+import RoutingLib.Data.List.Relation.Unary.Sorted.Properties as Sortedₚ
+
+open Sorted totalOrder
+open Sortedₚ decTotalOrder
 open Uniqueness Eq.setoid using (Unique)
 open Membership Eq.setoid using (_∈_)
 
@@ -37,6 +39,13 @@ sort↗ (x ∷ xs) = insert↗⁺ x (sort↗ xs)
 sort↭ : ∀ xs → sort xs ↭ xs
 sort↭ []       = ↭-refl
 sort↭ (x ∷ xs) = insert⁺ total x (sort↭ xs)
+
+algorithm : SortingAlgorithm
+algorithm = record
+  { sort   = sort
+  ; sort-↭ = sort↭
+  ; sort-↗ = sort↗
+  }
 
 sort!⁺ : ∀ {xs} → Unique xs → Unique (sort xs)
 sort!⁺ {xs} xs! = Unique-resp-↭ (↭-sym (sort↭ xs)) xs!

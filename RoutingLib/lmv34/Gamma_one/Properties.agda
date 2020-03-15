@@ -31,12 +31,13 @@ import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import RoutingLib.Iteration.Synchronous using (_^_; IsFixedPoint)
 open import RoutingLib.Data.List using (insert)
 open import RoutingLib.Data.List.Properties using (strictMerge-identityʳ; strictMerge-idempotent; strictMerge-cong)
-import RoutingLib.Data.List.Sorting as Sorting
-import RoutingLib.Data.List.Sorting.Properties as SortedProperties
+import RoutingLib.Data.List.Relation.Unary.Sorted as Sorting
+import RoutingLib.Data.List.Relation.Unary.Sorted.Properties as SortedProperties
 import RoutingLib.Data.List.Sorting.InsertionSort as InsertionSort
 import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties as Perm
 
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
+import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 import RoutingLib.lmv34.Gamma_zero as Gamma_zero
@@ -53,6 +54,7 @@ module RoutingLib.lmv34.Gamma_one.Properties
 
 open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
+open RoutingAlgebraProperties isRoutingAlgebra
 open Routing algebra n renaming (I to M)
 open Gamma_zero algebra A
 open Gamma_zero_Algebra algebra n
@@ -66,7 +68,7 @@ open DecSetoid FinRoute-decSetoid
   renaming (_≈_ to _≈ᵣ_; refl to ≈ᵣ-refl; trans to ≈ᵣ-trans; sym to ≈ᵣ-sym)
 open DecTotalOrder decTotalOrder using (≤-respˡ-≈; ≤-respʳ-≈; total; _≤_) renaming (antisym to ≤-antisym; refl to ≤-refl; trans to ≤-trans)
 open InsertionSort decTotalOrder using (sort; sort↗; sort↭; sort-pres-↭)
-open Sorting _≤_ using (Sorted)
+open Sorting ≤₊-totalOrder using (Sorted)
 open Equality FinRoute-setoid using (_≋_; ≋-refl; ≋-sym; ≋-trans)
 open PermProperties FinRoute-setoid using (≋⇒↭)
 open SortedProperties decTotalOrder using (↗↭↗⇒≋)

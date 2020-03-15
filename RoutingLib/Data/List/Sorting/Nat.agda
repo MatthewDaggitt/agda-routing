@@ -13,7 +13,7 @@ open import Relation.Binary.PropositionalEquality using () renaming (setoid to â
 open import Function using (id)
 open import Relation.Nullary.Negation using (contradiction)
 
-import RoutingLib.Data.List.Sorting as Sorting
+import RoutingLib.Data.List.Relation.Unary.Sorted as Sorted
 open import RoutingLib.Data.List
 open import RoutingLib.Data.List.Relation.Unary.Uniqueness.Propositional using (Unique)
 open import RoutingLib.Data.List.Relation.Unary.AllPairs using (AllPairs; []; _âˆ·_; map; zip)

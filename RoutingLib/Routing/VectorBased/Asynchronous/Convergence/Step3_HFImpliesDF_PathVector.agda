@@ -33,7 +33,6 @@ open import RoutingLib.Function.Metric.Nat
 open ≤-Reasoning
 
 import RoutingLib.Routing.Algebra.Construct.Consistent as Consistent
-import RoutingLib.Routing.Algebra.Properties.FiniteRoutingAlgebra as FiniteRoutingAlgebraProperties
 open import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra isRoutingAlgebra isPathAlgebra
 
 
@@ -43,8 +42,8 @@ open IsCertifiedPathAlgebra isPathAlgebra
 
 module DV = RouteDistanceFunction distanceFunctionᶜ
 
-open import RoutingLib.Routing.VectorBased.Synchronous algebraᶜ Aᶜ using ()
-  renaming (F to Fᶜ; F-cong to Fᶜ-cong)
+open import RoutingLib.Routing.VectorBased.Synchronous algebraᶜ Aᶜ
+  using () renaming (F to Fᶜ; F-cong to Fᶜ-cong)
 
 private
   variable

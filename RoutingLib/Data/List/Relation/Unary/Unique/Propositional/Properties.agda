@@ -11,7 +11,6 @@ open import Relation.Binary.PropositionalEquality using (setoid; decSetoid; _≡
 open import Function using (_∘_; id)
 
 open import RoutingLib.Data.List
-open import RoutingLib.Data.List.Membership.DecPropositional using (deduplicate)
 import RoutingLib.Data.List.Relation.Unary.Unique.Setoid.Properties as SP
 
 private

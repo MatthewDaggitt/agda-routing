@@ -4,12 +4,12 @@
 -- This module (doesn't currently compile) contains some code for proving that
 -- if the schedule is such that all nodes continue to activate and all links
 -- continue to function then the schedule contains an infinite number of
--- pseudoperiods.
+-- pseudocycles.
 --------------------------------------------------------------------------------
 
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule
 
-module RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod.Properties
+module RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudocycle.Properties
   {n} (ψ : Schedule n) where
 
 open import Data.Fin using (Fin; toℕ; fromℕ; inject≤; inject₁) renaming (zero to fzero)
@@ -42,10 +42,10 @@ open import RoutingLib.Data.Nat.Properties using (m≤n⊎m≤o⇒m≤n⊔o; ∀
 open import RoutingLib.Data.Vec.Functional using (max)
 open import RoutingLib.Data.Vec.Functional.Properties using (t≤max[t]; x≤max[t]; max[s]≤max[t]; ⊥≤max[t])
 
-import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod as Pseudoperiod
+import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudocycle as Pseudocycle
 
 open Schedule ψ
-open Pseudoperiod ψ
+open Pseudocycle ψ
 
 open ≤-Reasoning
 

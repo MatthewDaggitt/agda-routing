@@ -35,7 +35,7 @@ open import RoutingLib.Relation.Unary.Indexed using (IPred; _∈ᵢ_; Uᵢ; Univ
 open import RoutingLib.Relation.Unary.Indexed.Properties using (Uᵢ-universal)
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule as Schedules
-open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudoperiod
+open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudocycle
 
 --------------------------------------------------------------------------------
 -- Publicly re-export the notions of epochs and times so that they may
@@ -173,7 +173,7 @@ module _ {a ℓ n} (I : AsyncIterable a ℓ n) where
       -- The fixed points are truly fixed points
       x*-fixed   : ∀ e p → F e p (x* e p) ≈ x* e p
       -- For every schedule S , starting point x₀ and point in time tₛ,
-      -- then if the schedule is k*-pseudoperiodic between t₁ and t₂
+      -- then if the schedule has k*-pseudocycles between t₁ and t₂
       -- then for every time t₃ after t₂ that is within the same epoch
       -- the iteration will be at the fixed point x*.
       x*-reached : ∀ (x₀ : S) (S : Schedule n) →
@@ -182,9 +182,9 @@ module _ {a ℓ n} (I : AsyncIterable a ℓ n) where
                    ∀ {tₑ : 𝕋} → SubEpoch S [ tₘ , tₑ ] →
                    asyncIter I S x₀ tₑ ≈ x* (η S tₛ) (ρ S tₛ)
 
-  -- This is a specialised definition that only guarantees the iteration
-  -- is convergent when the initial state is in the set X₀ and the set of
-  -- participants is always in the set Q.
+  -- This is a specialised instance of the definition above that only
+  -- guarantees the iteration is convergent when the initial state is in
+  -- the set X₀ and the set of participants is always in the set Q.
   record PartiallyConvergent {ℓ₁ ℓ₂} (X₀ : IPred Sᵢ ℓ₁) (Q : Pred (Subset n) ℓ₂)
                              : Set (# 1 ⊔ a ⊔ ℓ ⊔ ℓ₁ ⊔ ℓ₂) where
     field

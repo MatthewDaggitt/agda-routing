@@ -27,7 +27,7 @@ open import Relation.Unary
 open import RoutingLib.Relation.Unary.Indexed using (IPred; _∈ᵢ_; Uᵢ)
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
-open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudoperiod
+open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudocycle
 
 open _Simulates_ I∥⇉J∥
 

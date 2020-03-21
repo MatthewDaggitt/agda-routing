@@ -49,7 +49,7 @@ import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions as Dynam
 import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule as Dynamic
 import RoutingLib.Iteration.Asynchronous.Static.Schedule as Static
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule.Construct.Synchronous
-import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod as Static
+import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudocycle as Static
 import RoutingLib.Iteration.Asynchronous.Static.Convergence.Conditions as Static
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
   using (Epoch; 𝕋) renaming ([_,_] to [_,_]ₜ)

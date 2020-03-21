@@ -16,8 +16,8 @@ open import Data.Nat.Properties
 open import Function using (const)
 
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule
-import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod
-  as Pseudoperiod
+import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudocycle
+  as Pseudocycle
 
 --------------------------------------------------------------------------------
 -- Definition
@@ -41,7 +41,7 @@ import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod
 --------------------------------------------------------------------------------
 -- Properties
 
-open Pseudoperiod ψˢʸⁿᶜ
+open Pseudocycle ψˢʸⁿᶜ
 
 βˢʸⁿᶜ-expiry : ∀ {t₁ t₂} i j → t₁ < t₂ → t₁ ≤ βˢʸⁿᶜ t₂ i j
 βˢʸⁿᶜ-expiry i j (s≤s t₁≤t₂) = t₁≤t₂

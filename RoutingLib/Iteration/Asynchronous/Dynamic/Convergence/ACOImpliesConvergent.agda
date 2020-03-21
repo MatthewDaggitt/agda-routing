@@ -44,8 +44,8 @@ open import RoutingLib.Iteration.Asynchronous.Dynamic.Properties
 import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Properties.ACO
   as ACOProperties
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
-import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudoperiod
-  as Pseudoperiod
+import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudocycle
+  as Pseudocycles
 
 open AsyncIterable I∥
 open PartialACO  aco
@@ -54,12 +54,14 @@ open ACOProperties I∥ aco
 ------------------------------------------------------------------------
 -- Notation
 
-module _ {x : S} (x∈B₀ : x ∈ᵢ B₀)
-         {ψ : Schedule n} (ρ∈Q : ψ satisfies Q)
+module _ {x : S}               -- Initial state
+         (x∈B₀ : x ∈ᵢ B₀)      -- Initial state is in initial box
+         {ψ : Schedule n}      
+         (ρ∈Q : ψ satisfies Q)
          where
 
   open Schedule ψ
-  open Pseudoperiod ψ
+  open Pseudocycles ψ
 
   -- Some shorthand notation where the epoch and participant indices are
   -- replaced with a time index.
@@ -79,12 +81,12 @@ module _ {x : S} (x∈B₀ : x ∈ᵢ B₀)
   -- Membership substitution for equal times
 
   δ'∈-resp-Bₜᵢ : ∀ t {s e k} {rec : Acc _<_ t} → η s ≡ η e →
-                    ∀ {i} → δ' x rec i ∈ Bₜ s k i → δ' x rec i ∈ Bₜ e k i
+                 ∀ {i} → δ' x rec i ∈ Bₜ s k i → δ' x rec i ∈ Bₜ e k i
   δ'∈-resp-Bₜᵢ t {s} {e} {k} {rec} ηₛ≡ηₑ {i} =
     subst (λ v → δ' x rec i ∈ v k i) (B-subst ηₛ≡ηₑ (cong π ηₛ≡ηₑ) (ρ∈Q s) (ρ∈Q e))
 
   δ'∈-resp-Bₜ : ∀ t {b s e} {rec : Acc _<_ t} → η s ≡ η e →
-                   δ' x rec ∈ᵢ Bₜ s b → δ' x rec ∈ᵢ Bₜ e b
+                δ' x rec ∈ᵢ Bₜ s b → δ' x rec ∈ᵢ Bₜ e b
   δ'∈-resp-Bₜ t ηₛ≡ηₑ ∈b i = δ'∈-resp-Bₜᵢ t ηₛ≡ηₑ (∈b i)
 
   -- The concept of being locally safe
@@ -206,7 +208,7 @@ module _ {x : S} (x∈B₀ : x ∈ᵢ B₀)
     δ'∈-resp-Bₜᵢ (β _ _ _) ηₛ≡ηₑ (m∈b (<-transʳ s≤e e<t) (η[s,e] ++ₛₑ η[e,t]))
 
 --------------------------------------------------------------------------
--- Step: after one pseudoperiod the node is guaranteed to have
+-- Step: after one pseudocycle the node is guaranteed to have
 -- advanced at least one box
 
   advance-state : ∀ {s e i k} →

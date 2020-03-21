@@ -50,8 +50,8 @@ open import RoutingLib.Relation.Unary.Properties
 open import RoutingLib.Function.Reasoning
 
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule
-import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod
-  as Pseudoperiods
+import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudocycle
+  as Pseudocycles
 import RoutingLib.Iteration.Asynchronous.Static.Convergence.Properties.ACO
   as ACOProperties
 
@@ -65,7 +65,7 @@ open ACOProperties I∥ aco
 module _ {x : S} (x∈X₀ : x ∈ᵢ X₀) (ψ : Schedule n) where
 
   open Schedule ψ
-  open Pseudoperiods ψ
+  open Pseudocycles ψ
 
   -- Some shorthand notation where the epoch and participant indices are
   -- replaced with a time index.
@@ -141,7 +141,7 @@ module _ {x : S} (x∈X₀ : x ∈ᵢ X₀) (ψ : Schedule n) where
     message-stability s≤e (proj₁ (c∈Bₖ i)) , state-stability s≤e (c∈Bₖ i)
 
 --------------------------------------------------------------------------
--- Step: after one pseudoperiod the node is guaranteed to have
+-- Step: after one pseudocycle the node is guaranteed to have
 -- advanced at least one box
 
   advance-state : ∀ {s e i k} →

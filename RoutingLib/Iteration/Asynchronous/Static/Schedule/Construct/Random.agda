@@ -22,7 +22,7 @@ open ≡-Reasoning
 β t i j = t ∸ 1 ∸ toℕ (random t i j)
 
 causality : ∀ t i j → β (suc t) i j ≤ t
-causality t i j = n∸m≤n (toℕ (random (suc t) i j)) t
+causality t i j = m∸n≤m t (toℕ (random (suc t) i j))
 
 +-∸-assoc-fin : ∀ x y (i : Fin y) → x + y ∸ (toℕ i) ≡ x + (y ∸ (toℕ i))
 +-∸-assoc-fin x y i = begin

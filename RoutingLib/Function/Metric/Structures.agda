@@ -17,12 +17,12 @@ open import Relation.Unary using (Pred)
 
 record IsProtoMetric (d : Distance A I) : Set (a ⊔ i ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃) where
   field
-    isTotalOrder     : IsTotalOrder _≈ᵢ_ _≤_
+    isPartialOrder   : IsPartialOrder _≈ᵢ_ _≤_
     ≈-isEquivalence  : IsEquivalence _≈ₐ_
     cong             : d Preserves₂ _≈ₐ_ ⟶ _≈ₐ_ ⟶ _≈ᵢ_
     0#-minimum       : ∀ {x y} → 0# ≤ d x y
 
-  open IsTotalOrder isTotalOrder public
+  open IsPartialOrder isPartialOrder public
     renaming (module Eq to ImageEq)
 
   module CarrierEq = IsEquivalence ≈-isEquivalence

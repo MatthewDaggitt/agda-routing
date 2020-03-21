@@ -1,6 +1,6 @@
 open import Data.Fin using (Fin)
 open import Data.Nat using (ℕ; _≤_; z≤n; suc; _⊔_)
-open import Data.Nat.Properties using (≤-antisym; ⊔-mono-≤; ≤-refl; ≤-isTotalOrder; module ≤-Reasoning)
+open import Data.Nat.Properties using (≤-antisym; ⊔-mono-≤; ≤-refl; ≤-isPartialOrder; module ≤-Reasoning)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (∃; _,_; proj₁; proj₂)
 open import Relation.Binary using (_Preserves₂_⟶_⟶_)
@@ -66,7 +66,7 @@ bounded dᵢ-bounded =
 
 isProtoMetric : (∀ {i} → IsProtoMetric _≈ᵢ_ (dᵢ i)) → IsProtoMetric _≈_ d
 isProtoMetric pm = record
-  { isTotalOrder    = ≤-isTotalOrder
+  { isPartialOrder  = ≤-isPartialOrder
   ; 0#-minimum      = z≤n
   ; ≈-isEquivalence = ≈-isEquivalence
   ; cong            = cong (IsProtoMetric.cong pm)

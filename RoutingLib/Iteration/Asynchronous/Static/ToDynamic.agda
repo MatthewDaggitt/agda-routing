@@ -18,21 +18,20 @@ open import Data.Fin.Properties using (all?)
 open import Data.Fin.Subset using (Subset; _∉_) renaming (⊤ to ⊤ₛ; _∈_ to _∈ₛ_)
 open import Data.Fin.Subset.Properties using (_∈?_; ∈⊤)
 open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _<_; _≤_)
+open import Data.Nat.Induction using (Acc; acc; <-wellFounded)
 open import Data.Nat.Properties using (≤-refl)
 open import Data.Maybe using (Maybe; just; nothing; to-witness; Is-just)
 open import Data.Unit using (⊤; tt)
 open import Data.Product using (∃; ∃₂; _,_; _×_; proj₁; proj₂)
 open import Function using (_∘_)
-open import Induction.WellFounded using (Acc; acc)
-open import Induction.Nat using (<-wellFounded)
 open import Level using (lift; _⊔_)
 open import Relation.Binary using (Rel; _Respects_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 open import Relation.Binary.Indexed.Homogeneous hiding (Rel; Lift)
-open import Relation.Nullary using (Dec; yes; no)
+open import Relation.Nullary using (Dec; yes; no; recompute)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Pred; U; _∈_)
-import Relation.Binary.EqReasoning as EqReasoning
+import Relation.Binary.Reasoning.Setoid as EqReasoning
 
 open import RoutingLib.Data.Fin.Subset using (Full)
 open import RoutingLib.Data.Fin.Subset.Properties using (⊤-full)
@@ -218,7 +217,7 @@ module StaticToDynamicACO {ℓ} {B₀ : IPred Sᵢ ℓ} (aco : Static.PartialACO
   B∙₀-cong : ∀ {x y} → x ≈∙ y → x ∈ᵢ B∙₀ → y ∈ᵢ B∙₀
   B∙₀-cong = Lift∙-cong Bᵢ-cong
 
-  F∙-resp-B∙₀ : ∀ {e p} (p∈F : p ∈ Full) → ∀ {x} → x ∈ᵢ B∙₀ → F∙ e p x ∈ᵢ B∙₀
+  F∙-resp-B∙₀ : ∀ {e p} .(p∈F : p ∈ Full) → ∀ {x} → x ∈ᵢ B∙₀ → F∙ e p x ∈ᵢ B∙₀
   F∙-resp-B∙₀ {e} {p} p∈F {x} x∈B∙₀ i with all? (IsJust? ∘ x)
   ... | no ¬xᵥ = contradiction (∈-isValue x∈B∙₀) ¬xᵥ
   ... | yes xᵥ = F-resp-B₀ (∈-extractValue xᵥ x∈B∙₀) i
@@ -237,7 +236,7 @@ module StaticToDynamicACO {ℓ} {B₀ : IPred Sᵢ ℓ} (aco : Static.PartialACO
   B∙₀-eqᵢ : ∀ {e p} .(p∈F : p ∈ Full) → B∙₀ ≋ᵢ B∙ e p∈F 0
   B∙₀-eqᵢ {e} p∈F = (λ {i xᵢ} → B∙₀⊆B∙₀ₑ e p∈F {i} {xᵢ}) , (λ {i xᵢ} → B∙₀ₑ⊆B∙₀ e p∈F {i} {xᵢ})
 
-  B∙ᵢ-cong  : ∀ {e : Epoch} {p : Subset n} → (p∈Q : p ∈ Full) →
+  B∙ᵢ-cong  : ∀ {e : Epoch} {p : Subset n} → .(p∈Q : p ∈ Full) →
               ∀ {k i} {x y : Pointedᵢ Sᵢ i} →
               x ≈∙ᵢ y → x ∈ Lift∙ (B k) i → y ∈ Lift∙ (B k) i
   B∙ᵢ-cong p∈F = Lift∙-congᵢ Bᵢ-cong
@@ -262,8 +261,8 @@ module StaticToDynamicACO {ℓ} {B₀ : IPred Sᵢ ℓ} (aco : Static.PartialACO
       xᵥ : IsValue x
       xᵥ = ∈-isValue x∈B∙ₑₚₖ
 
-  B∙-null : ∀ {e p} (p∈F : p ∈ Full) → ∀ {k i} → i ∉ p → ∙ᵢ ∈ B∙ e p∈F k i
-  B∙-null _∈p {i = i} i∉p = contradiction (i ∈p) i∉p
+  B∙-null : ∀ {e p} .(p∈F : p ∈ Full) → ∀ {k i} → i ∉ p → ∙ᵢ ∈ B∙ e p∈F k i
+  B∙-null {_} {p} _∈p {i = i} i∉p = contradiction (recompute (i ∈? p) (i ∈p)) i∉p
 
   F∙-mono-B∙ : ∀ {e p} .(p∈F : p ∈ Full) {k x} → x ∈ Accordant I∙∥ p →
                x ∈ᵢ B∙ e p∈F k → F∙ e p x ∈ᵢ B∙ e p∈F (suc k)
@@ -284,6 +283,3 @@ module StaticToDynamicACO {ℓ} {B₀ : IPred Sᵢ ℓ} (aco : Static.PartialACO
     }
 
 open StaticToDynamicACO public using (staticToDynamicACO; B∙₀)
-
-------------------------------------------------------------------------
--- Translation from static AMCO to a dynamic AMCO

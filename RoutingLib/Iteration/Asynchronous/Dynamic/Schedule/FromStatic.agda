@@ -63,7 +63,7 @@ module _ {n} (ψˢ : StaticSchedule n) where
     ; η[s,e]     = convert-subEpoch start≤end
     ; start≤midᵢ = start≤midᵢ
     ; midᵢ≤end   = midᵢ≤end
-    ; β[s,m]     = convert-expiryPeriod ∘ β[s,m]
+    ; β[s,m]     = λ {i} i∈ρ → convert-expiryPeriod (β[s,m] i)
     ; α[m,e]     = λ {i} i∈ρₛ → convert-isActiveIn (α[m,e] i)
     } where open Static.Pseudocycle pp
 

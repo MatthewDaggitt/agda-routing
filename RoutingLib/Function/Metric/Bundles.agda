@@ -1,7 +1,7 @@
 
 open import Level using (Level; suc; _⊔_)
 
-module RoutingLib.Function.Metric.Packages (a i ℓ₁ ℓ₂ ℓ₃ : Level) where
+module RoutingLib.Function.Metric.Bundles (a i ℓ₁ ℓ₂ ℓ₃ : Level) where
 
 open import Algebra.Core using (Op₂)
 open import Data.Nat.Properties using (≤⇒≤′)

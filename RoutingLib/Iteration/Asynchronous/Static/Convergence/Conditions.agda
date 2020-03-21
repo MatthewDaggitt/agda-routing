@@ -15,7 +15,7 @@ module RoutingLib.Iteration.Asynchronous.Static.Convergence.Conditions
 
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (Subset; _∉_; ⊤)
-open import Data.Fin.Dec using (_∈?_)
+open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Nat using (ℕ; suc; _<_; _≤_)
 open import Data.Product using (∃; ∃₂; _×_; _,_; proj₁; proj₂)
 open import Data.Bool using (if_then_else_)
@@ -28,7 +28,7 @@ open import Relation.Binary.Indexed.Homogeneous
   using (IRel; Lift; Decidable; IsIndexedPartialOrder)
 open import Relation.Unary using (_∈_)
 
-open import RoutingLib.Data.Table using (max)
+open import RoutingLib.Data.Vec.Functional using (max)
 open import RoutingLib.Function.Metric.Nat
 open import RoutingLib.Relation.Unary.Indexed
 open import RoutingLib.Relation.Unary.Indexed.Properties

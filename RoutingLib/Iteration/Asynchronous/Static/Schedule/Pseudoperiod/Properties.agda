@@ -12,19 +12,20 @@ open import RoutingLib.Iteration.Asynchronous.Static.Schedule
 module RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod.Properties
   {n} (ψ : Schedule n) where
 
-open import Data.Nat using (ℕ; zero; suc; _≤_; _<_; _⊔_; _∸_; _+_; z≤n; s≤s; _≟_; _≤?_; ≤-pred; less-than-or-equal)
-open import Data.Nat.Properties using (m≤m⊔n; n≤1+n; ⊔-sel; module ≤-Reasoning; <-cmp; ≤+≢⇒<; <⇒≱; ≤-refl; <⇒≤; ⊔-identityʳ; <-irrefl; ≤-trans; ≤-reflexive; ≮⇒≥; n≤m⊔n; ⊔-mono-≤; m≤m+n; m+n∸m≡n; <⇒≢; ≤⇒≤″; +-suc; +-comm)
 open import Data.Fin using (Fin; toℕ; fromℕ; inject≤; inject₁) renaming (zero to fzero)
 open import Data.Fin.Properties using (inject≤-lemma; to-from; inject₁-lemma)
 open import Data.Fin.Subset using (_∈_)
 open import Data.Fin.Subset.Properties using (∈⊤)
 open import Data.Fin.Dec using (_∈?_)
+open import Data.Nat using (ℕ; zero; suc; _≤_; _<_; _⊔_; _∸_; _+_; z≤n; s≤s; _≟_; _≤?_; ≤-pred; less-than-or-equal)
+open import Data.Nat.Properties using (m≤m⊔n; n≤1+n; ⊔-sel; module ≤-Reasoning; <-cmp; ≤+≢⇒<; <⇒≱; ≤-refl; <⇒≤; ⊔-identityʳ; <-irrefl; ≤-trans; ≤-reflexive; ≮⇒≥; n≤m⊔n; ⊔-mono-≤; m≤m+n; m+n∸m≡n; <⇒≢; ≤⇒≤″; +-suc; +-comm)
 open import Data.Product using (∃; _,_; _×_; proj₁; proj₂)
 open import Data.Sum using (inj₁; inj₂; _⊎_)
 open import Data.List using (List; []; _∷_; foldr; map; allFin; applyUpTo; tabulate)
 open import Data.List.Any using (Any) renaming (map to anyMap)
 open import Data.List.Any.Properties using (map⁺)
 open import Data.List.Membership.Propositional.Properties using (∈-map⁺; ∈-applyUpTo⁺)
+import Data.List.Extrema.Nat as List
 import Data.List.Relation.Sublist.Propositional.Properties as Sublist
 import Data.List.All as All
 import Data.List.All.Properties as All
@@ -38,9 +39,8 @@ open import Relation.Binary using (tri<; tri≈; tri>)
 open import Relation.Binary.PropositionalEquality using (refl; sym; trans; cong; subst; _≢_; _≡_)
 
 open import RoutingLib.Data.Nat.Properties using (m≤n⊎m≤o⇒m≤n⊔o; ∀x<m:n≢x⇒m≤n; n⊔m≡m⇒n≤m)
-open import RoutingLib.Data.Table using (max)
-open import RoutingLib.Data.Table.Properties using (t≤max[t]; x≤max[t]; max[s]≤max[t]; ⊥≤max[t])
-import RoutingLib.Data.List.Extrema.Nat as List
+open import RoutingLib.Data.Vec.Functional using (max)
+open import RoutingLib.Data.Vec.Functional.Properties using (t≤max[t]; x≤max[t]; max[s]≤max[t]; ⊥≤max[t])
 
 import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod as Pseudoperiod
 

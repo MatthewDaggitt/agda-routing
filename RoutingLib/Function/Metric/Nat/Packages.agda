@@ -10,7 +10,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; isEquivalence)
 
 open import RoutingLib.Function.Metric.Nat.Core
 open import RoutingLib.Function.Metric.Nat.Structures
-open import RoutingLib.Function.Metric.Packages as Base
+open import RoutingLib.Function.Metric.Bundles as Base
   using (GeneralMetric)
 
 ------------------------------------------------------------------------

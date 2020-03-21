@@ -172,10 +172,10 @@ B e {p} p∈Q (suc k) i xᵢ with i ∈? p
 ... | yes i∈p = Lift ℓ (dᵢ e p∈Q (x* e p∈Q i) xᵢ ≤ r[_] e p∈Q (suc k))
 ... | no  i∉p = xᵢ ≈ᵢ ⊥ i
 
-B₀-eqᵢ : ∀ {e p} (p∈Q : p ∈ Q) → B₀ ≋ᵢ B e p∈Q 0
+B₀-eqᵢ : ∀ {e p} .(p∈Q : p ∈ Q) → B₀ ≋ᵢ B e p∈Q 0
 B₀-eqᵢ p∈Q = (λ _ → lift tt) , (λ _ → tt)
 
-B-cong : ∀ {e p} (p∈Q : p ∈ Q) → ∀ {k i} → (_∈ B e p∈Q k i) Respects _≈ᵢ_
+B-cong : ∀ {e p} .(p∈Q : p ∈ Q) → ∀ {k i} → (_∈ B e p∈Q k i) Respects _≈ᵢ_
 B-cong {e} {p} p∈Q {zero}  {i} _   _ = lift tt
 B-cong {e} {p} p∈Q {suc k} {i} {x} {y} x≈y x∈B with i ∈? p
 ... | no  i∉p = ≈ᵢ-trans (≈ᵢ-sym x≈y) x∈B
@@ -184,13 +184,13 @@ B-cong {e} {p} p∈Q {suc k} {i} {x} {y} x≈y x∈B with i ∈? p
   dᵢ e p∈Q (x* e p∈Q i) x ≤⟨ lower x∈B ⟩
   r[_] e p∈Q (suc k)     ∎)
 
-B-null : ∀ {e p} (p∈Q : p ∈ Q) → ∀ {k i} → i ∉ₛ p → ⊥ i ∈ B e p∈Q k i
+B-null : ∀ {e p} .(p∈Q : p ∈ Q) → ∀ {k i} → i ∉ₛ p → ⊥ i ∈ B e p∈Q k i
 B-null {e} {p} _   {zero}  {i} _ = lift tt
 B-null {e} {p} p∈Q {suc k} {i} i∉p with i ∈? p
 ... | yes i∈p = contradiction i∈p i∉p
 ... | no  _   = ≈ᵢ-refl
 
-B-finish : ∀ e {p} (p∈Q : p ∈ Q) → ∃₂ λ k* x* → ∀ {k} → k* ≤ k →
+B-finish : ∀ e {p} .(p∈Q : p ∈ Q) → ∃₂ λ k* x* → ∀ {k} → k* ≤ k →
              (x* ∈ᵢ B e p∈Q k × (∀ {x} → x ∈ᵢ B e p∈Q k → x ≈ x*))
 B-finish e {p} p∈Q = k* e p∈Q , x* e p∈Q , λ k*≤k → x*∈B[k] k*≤k , x∈B[k]⇒x*≈x k*≤k
   where
@@ -201,8 +201,8 @@ B-finish e {p} p∈Q = k* e p∈Q , x* e p∈Q , λ k*≤k → x*∈B[k] k*≤k 
   ...   | no i∉p = ≈ᵢ-trans xᵢ∈B (≈ᵢ-sym (x*-wellFormed e p∈Q i∉p))
   ...   | yes _  = ≈ᵢ-sym (dᵢ≡0⇒x≈y e p∈Q (n≤0⇒n≡0 (begin
     dᵢ e p∈Q (x* e p∈Q i) (x i) ≤⟨ lower xᵢ∈B ⟩
-    r[_] e p∈Q (suc k)       ≡⟨ k*≤k⇒r[k]≡0 e p∈Q k*≤1+k ⟩
-    0                        ∎)))
+    r[_] e p∈Q (suc k)          ≡⟨ k*≤k⇒r[k]≡0 e p∈Q k*≤1+k ⟩
+    0                           ∎)))
 
   x*∈B[k] : ∀ {k} → k* e p∈Q ≤ k → x* e p∈Q ∈ᵢ B e p∈Q k
   x*∈B[k] {zero}  k*≤k i = lift tt
@@ -211,16 +211,16 @@ B-finish e {p} p∈Q = k* e p∈Q , x* e p∈Q , λ k*≤k → x*∈B[k] k*≤k 
   ... | no  i∉p = x*-wellFormed e p∈Q i∉p
 
 
-∈Bᵢ⇒dᵢ≤r : ∀ {e p b i xᵢ} (p∈Q : p ∈ Q) → xᵢ ∈ B e p∈Q (suc b) i → dₛᵢ e p∈Q (x* e p∈Q i) xᵢ ≤ r[_] e p∈Q (suc b)
+∈Bᵢ⇒dᵢ≤r : ∀ {e p b i xᵢ} .(p∈Q : p ∈ Q) → xᵢ ∈ B e p∈Q (suc b) i → dₛᵢ e p∈Q (x* e p∈Q i) xᵢ ≤ r[_] e p∈Q (suc b)
 ∈Bᵢ⇒dᵢ≤r {e} {p} {b} {i} {xᵢ} p∈Q xᵢ∈B with i ∈? p
 ... | yes _ = lower xᵢ∈B
 ... | no  _ = z≤n
 
-∈B⇒d≤r : ∀ {e p b x} (p∈Q : p ∈ Q) → x ∈ᵢ B e p∈Q b → d e p∈Q (x* e p∈Q) x ≤ r[_] e p∈Q b
+∈B⇒d≤r : ∀ {e p b x} .(p∈Q : p ∈ Q) → x ∈ᵢ B e p∈Q b → d e p∈Q (x* e p∈Q) x ≤ r[_] e p∈Q b
 ∈B⇒d≤r {e} {p} {zero}  {x} p∈Q x∈B = d≤r[0] e p∈Q (x* e p∈Q) x
 ∈B⇒d≤r {e} {p} {suc b} {x} p∈Q x∈B = max[t]≤x z≤n (λ i → ∈Bᵢ⇒dᵢ≤r p∈Q (x∈B i))
 
-F-mono-B  : ∀ {e p} (p∈Q : p ∈ Q) → ∀ {k x} → x ∈ Accordant p → x ∈ᵢ B e p∈Q k → F e p x ∈ᵢ B e p∈Q (suc k)
+F-mono-B  : ∀ {e p} .(p∈Q : p ∈ Q) → ∀ {k x} → x ∈ Accordant p → x ∈ᵢ B e p∈Q k → F e p x ∈ᵢ B e p∈Q (suc k)
 F-mono-B {e} {p} p∈Q {k} {x} x∈Aₚ x∈B i with i ∈? p
 ... | no  i∉p = F-inactive e p∈Q x i∉p
 ... | yes i∈p with x ≟[ p ] x* e p∈Q

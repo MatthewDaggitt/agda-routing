@@ -25,16 +25,15 @@ module RoutingLib.Iteration.Asynchronous.Static.Convergence.AMCOImpliesACO
   {p} {X₀ : IPred _ p}
   (amco : PartialAMCO I∥ X₀) where
 
-open import Data.Fin.Dec using (_∈?_)
 open import Data.Fin.Subset using (Subset) renaming (_∈_ to _∈ₛ_; _∉_ to _∉ₛ_; ⊤ to ⊤ₛ)
+open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Nat using (ℕ; _≤_; _<_; z≤n; s≤s; zero; suc; _+_; _∸_; ≤-pred)
 open import Data.Nat.Properties hiding (_≟_)
+open import Data.Nat.Induction using (Acc; acc; <-wellFounded)
 open import Data.Product using (∃; ∃₂; _×_; _,_; proj₁; proj₂)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Unit using (⊤; tt)
 open import Function using (_∘_)
-open import Induction.WellFounded using (Acc; acc)
-open import Induction.Nat using (<-wellFounded)
 open import Level using (Lift; lift; lower) renaming (zero to 0ℓ)
 open import Relation.Binary using (Rel; Decidable; _Respects_; _Preserves₂_⟶_⟶_; _Preserves_⟶_)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; subst; cong; sym; trans)
@@ -42,12 +41,11 @@ open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Pred; _∈_)
 
-open import RoutingLib.Data.Table using (max)
-open import RoutingLib.Data.Table.Properties using (max[t]≤x; x≤max[t]; max-cong)
-open import RoutingLib.Data.Table.Membership.Propositional.Properties using (max[t]∈t)
 open import RoutingLib.Data.Nat.Properties using (m+[n∸o]≤[m+n]∸o)
+open import RoutingLib.Data.Vec.Functional using (max)
+open import RoutingLib.Data.Vec.Functional.Properties using (max[t]≤x; x≤max[t]; max-cong)
+open import RoutingLib.Data.Vec.Functional.Membership.Propositional.Properties using (max[t]∈t)
 import RoutingLib.Function.Metric.Construct.Condition as Condition
-open import RoutingLib.Relation.Binary.PropositionalEquality using (inspect′)
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as SubsetEquality
 import RoutingLib.Function.Reasoning as FunctionReasoning
 

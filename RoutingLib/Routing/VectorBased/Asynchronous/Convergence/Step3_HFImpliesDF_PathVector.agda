@@ -246,7 +246,7 @@ r-bounded = Hᶜ + Hⁱ , r≤Hᶜ+Hⁱ
 
 r-isProtoMetric : IsProtoMetric _≈_ r
 r-isProtoMetric = record
-  { isTotalOrder    = ≤-isTotalOrder
+  { isPartialOrder  = ≤-isPartialOrder
   ; 0#-minimum      = z≤n
   ; ≈-isEquivalence = ≈-isEquivalence
   ; cong            = r-cong

@@ -82,7 +82,7 @@ m<n⇒n≡1+o {_} {suc o} m<n = o , refl
 
 ∣-∣-isProtoMetric : IsProtoMetric _≡_ ∣_-_∣
 ∣-∣-isProtoMetric = record
-  { isTotalOrder    = ≤-isTotalOrder
+  { isPartialOrder  = ≤-isPartialOrder
   ; ≈-isEquivalence = isEquivalence
   ; cong            = cong₂ ∣_-_∣
   ; 0#-minimum      = z≤n

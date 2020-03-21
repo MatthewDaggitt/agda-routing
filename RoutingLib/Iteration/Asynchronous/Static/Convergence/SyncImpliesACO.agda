@@ -31,12 +31,11 @@ open import Data.Nat.Properties as ℕₚ
 open import Function using (_∘_)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; refl; sym; trans; cong; subst)
-import Relation.Binary.EqReasoning as EqReasoning
+import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (_∈_)
 
-open import RoutingLib.Data.Table using (Table)
 open import RoutingLib.Data.Nat.Properties using (m≤n⇒o+m≡n)
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous
 

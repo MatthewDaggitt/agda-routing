@@ -16,7 +16,6 @@ open import Relation.Binary.Indexed.Homogeneous
 open import Relation.Unary using (U)
 open import Relation.Unary.Properties using (U-Universal)
 
-open import RoutingLib.Data.Table using (Table)
 open import RoutingLib.Relation.Unary.Indexed
 
 open import RoutingLib.Iteration.Synchronous

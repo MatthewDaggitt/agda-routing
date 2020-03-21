@@ -8,28 +8,28 @@ This is the frozen version of the library accompanying the paper _Dynamic Asynch
 
 All the definitions and proofs for dynamic asynchronous iterations in the paper are found in the `RoutingLib.Iteration.Asynchronous.Dynamic` directory. The equivalent definitions and proofs for the static asynchronous iterations can be found by replacing `Dynamic` with `Static` in the module name.
 
-* Definition of a schedule (Definition 9) is found in:
+* Definition 9 for a schedule is found in:
   [RoutingLib.Iteration.Asynchronous.Dynamic.Schedule](https://github.com/MatthewDaggitt/agda-routing/blob/jpdc2020/RoutingLib/Iteration/Asynchronous/Dynamic/Schedule.agda)
 
-* Definition of the asynchronous iteration (Definition 10) is in:
+* Definition 10 for the asynchronous state function is in:
   [RoutingLib.Iteration.Asynchronous.Dynamic](https://github.com/MatthewDaggitt/agda-routing/blob/jpdc2020/RoutingLib/Iteration/Asynchronous/Dynamic.agda)
 
-* Definitions for activation periods (Definition 11), expiry periods (Definition 12) and pseudocycles (Definition 13) are found in:
+* Definitions 11, 12 & 13 for activation periods, expiry periods and pseudocycles are in:
   [RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudocycle](https://github.com/MatthewDaggitt/agda-routing/blob/jpdc2020/RoutingLib/Iteration/Asynchronous/Dynamic/Schedule/Pseudocycle.agda)
 
-* Definitions of correctness (Definition 14) and accordant (Definition 15) are in:
+* Definitions 14 & 15 of correctness and accordant are in:
   [RoutingLib.Iteration.Asynchronous.Dynamic](https://github.com/MatthewDaggitt/agda-routing/blob/jpdc2020/RoutingLib/Iteration/Asynchronous/Dynamic.agda)
 
-* Definition of a dynamic ACO (Definition 16) is found in:
+* Definition 16 for the dynamic ACO conditions is found in:
   [RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions](https://github.com/MatthewDaggitt/agda-routing/blob/jpdc2020/RoutingLib/Iteration/Asynchronous/Dynamic/Convergence/Conditions.agda)
 
-* The proof that any iteration that satisfies the dynamic ACO conditions is convergent (Theorem 3, Lemmas 1-8, Definitions 17-21) is found in:
+* Theorem 3 (including Lemmas 1-8 and Definitions 17-21) that any iteration that satisfies the dynamic ACO conditions is convergent is found in:
   [RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.ACOImpliesConvergent](https://github.com/MatthewDaggitt/agda-routing/blob/jpdc2020/RoutingLib/Iteration/Asynchronous/Dynamic/Convergence/ACOImpliesConvergent.agda)
 
-* Definition of a dynamic AMCO (Definition 22) is found in:
+* Definition 22 for the dynamic AMCO conditions is found in:
   [RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions](https://github.com/MatthewDaggitt/agda-routing/blob/jpdc2020/RoutingLib/Iteration/Asynchronous/Dynamic/Convergence/Conditions.agda)
 
-* The proof that any iteration that satisfies the dynamic ACMO conditions also satisfies the dynamic ACO conditions (Theorem 4) is in: 
+* Theorem 4 that any iteration that satisfies the dynamic ACMO conditions also satisfies the dynamic ACO conditions is in: 
   [RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.AMCOImpliesACO](https://github.com/MatthewDaggitt/agda-routing/blob/jpdc2020/RoutingLib/Iteration/Asynchronous/Dynamic/Convergence/AMCOImpliesACO.agda)
 
 * A public facing interface re-exporting all the conditions and results is found in:
@@ -37,7 +37,7 @@ All the definitions and proofs for dynamic asynchronous iterations in the paper 
 
 ## Requirements
 
-Requires Agda v2.6.1 and Standard Library v1.3
+Requires Agda v2.6.1 and Standard Library v1.3.
 
 ## Related work
 

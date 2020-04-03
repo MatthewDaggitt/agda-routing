@@ -30,14 +30,13 @@ module RoutingLib.Iteration.Asynchronous.Static.Convergence.ACOImpliesConverges
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (Subset; ⊤)
   renaming (_∈_ to _∈ₛ_; _∉_ to _∉ₛ_)
-open import Data.Fin.Dec using (_∈?_)
+open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Maybe using (just; nothing)
 open import Data.Nat renaming (_≟_ to _≟ℕ_) hiding (_⊔_)
 open import Data.Nat.Properties hiding (_≟_)
+open import Data.Nat.Induction using (Acc; acc; <-wellFounded)
 open import Data.Product using (∃; proj₂; proj₁; _,_; _×_; map)
 open import Function using (id; _∘_; _$_)
-open import Induction.WellFounded using (Acc; acc)
-open import Induction.Nat using (<-wellFounded)
 open import Level using (_⊔_)
 open import Relation.Binary using (tri<; tri≈; tri>)
 open import Relation.Binary.PropositionalEquality
@@ -48,12 +47,11 @@ open import Relation.Unary using (Pred; _⊆_; _∈_)
 
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous
 open import RoutingLib.Relation.Unary.Properties
-open import RoutingLib.Function
 open import RoutingLib.Function.Reasoning
 
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule
-import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod
-  as Pseudoperiods
+import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudocycle
+  as Pseudocycles
 import RoutingLib.Iteration.Asynchronous.Static.Convergence.Properties.ACO
   as ACOProperties
 
@@ -67,7 +65,7 @@ open ACOProperties I∥ aco
 module _ {x : S} (x∈X₀ : x ∈ᵢ X₀) (ψ : Schedule n) where
 
   open Schedule ψ
-  open Pseudoperiods ψ
+  open Pseudocycles ψ
 
   -- Some shorthand notation where the epoch and participant indices are
   -- replaced with a time index.
@@ -143,7 +141,7 @@ module _ {x : S} (x∈X₀ : x ∈ᵢ X₀) (ψ : Schedule n) where
     message-stability s≤e (proj₁ (c∈Bₖ i)) , state-stability s≤e (c∈Bₖ i)
 
 --------------------------------------------------------------------------
--- Step: after one pseudoperiod the node is guaranteed to have
+-- Step: after one pseudocycle the node is guaranteed to have
 -- advanced at least one box
 
   advance-state : ∀ {s e i k} →

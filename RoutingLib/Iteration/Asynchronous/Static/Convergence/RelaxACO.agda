@@ -31,7 +31,6 @@ open import Data.Nat.Properties
 open import Function using (_∘_)
 open import Relation.Binary.PropositionalEquality
 
-open import RoutingLib.Function
 open import RoutingLib.Function.Reasoning
 
 open import RoutingLib.Iteration.Synchronous

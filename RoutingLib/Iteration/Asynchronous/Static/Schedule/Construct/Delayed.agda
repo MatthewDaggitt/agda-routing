@@ -3,7 +3,7 @@ open import Data.Nat using (ℕ; zero; suc; _∸_; _≤_; _+_; s≤s)
 module RoutingLib.Iteration.Asynchronous.Static.Schedule.Construct.Delayed (l : ℕ) where
 
 open import Data.Fin using (Fin)
-open import Data.Nat.Properties using (n∸m≤n; <⇒≢; m+n∸n≡m; +-suc; m≤m+n; +-comm; +-assoc)
+open import Data.Nat.Properties using (m∸n≤m; <⇒≢; m+n∸n≡m; +-suc; m≤m+n; +-comm; +-assoc)
 open import Data.Product using (∃; _,_)
 open import Relation.Binary.PropositionalEquality
   using (_≢_; _≡_; subst; cong; cong₂; refl; sym; trans; module ≡-Reasoning)
@@ -21,7 +21,7 @@ open import RoutingLib.Iteration.Asynchronous.Static.Schedule.Construct.Synchron
 β t i j = t ∸ 1 ∸ l
 
 causality : ∀ {n} → ∀ t (i j : Fin n) → β (suc t) i j ≤ t
-causality t i j = n∸m≤n l t
+causality t i j = m∸n≤m t l
 
 finite : ∀ {n} → ∀ t (i j : Fin n) → ∃ λ k → ∀ k' → β (k + k') i j ≢ t
 finite t i j = t + suc (suc l) , λ k → subst (_≢ t)

@@ -7,4 +7,4 @@ module RoutingLib.Function.Metric where
 
 open import RoutingLib.Function.Metric.Core public
 open import RoutingLib.Function.Metric.Structures public
-open import RoutingLib.Function.Metric.Packages public
+open import RoutingLib.Function.Metric.Bundles public

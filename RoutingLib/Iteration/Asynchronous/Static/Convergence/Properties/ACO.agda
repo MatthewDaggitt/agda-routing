@@ -21,7 +21,6 @@ open import Data.Nat hiding (_^_)
 open import Data.Nat.Properties
 open import Data.Product
 
-open import RoutingLib.Function
 open import RoutingLib.Function.Reasoning
 open import RoutingLib.Relation.Unary.Indexed
 

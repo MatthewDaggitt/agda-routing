@@ -32,7 +32,7 @@ import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.Dec
 open import RoutingLib.Relation.Unary.Indexed using (IPred; _∈ᵢ_; Uᵢ; Universalᵢ)
 
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule as Schedules
-open import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod
+open import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudocycle
 
 ------------------------------------------------------------------------
 -- Parallelisable functions

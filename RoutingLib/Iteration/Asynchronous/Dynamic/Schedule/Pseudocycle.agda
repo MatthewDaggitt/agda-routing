@@ -1,16 +1,16 @@
 --------------------------------------------------------------------------------
 -- Agda routing library
---
--- This module defines what it means for a period of time to be a pseudoperiod
+-- 
+-- This module defines what it means for a period of time to be a pseudocycle
 -- with respect to some schedule. As is shown by the proofs in the module
 -- `RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.ACOImpliesConvergent`
--- during a pseudoperiod the asynchronous iteration will make at least as much
+-- during a pseudocycle the asynchronous iteration will make at least as much
 -- progress towards the fixed point as a single synchronous iteration.
 --------------------------------------------------------------------------------
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
 
-module RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudoperiod
+module RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudocycle
   {n} (ψ : Schedule n) where
 
 open import Level using () renaming (zero to lzero)

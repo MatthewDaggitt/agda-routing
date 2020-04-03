@@ -74,14 +74,14 @@ module _ {a ℓ n} (𝓘 : AsyncIterable a ℓ n) where
     field
       B         : Epoch → {p : Subset n} → .(p ∈ Q) → ℕ → IPred Sᵢ ℓ₃
       B₀-cong   : (_∈ᵢ B₀) Respects _≈_
-      B₀-eqᵢ     : ∀ {e p} (p∈Q : p ∈ Q) → B₀ ≋ᵢ B e p∈Q 0
-      Bᵢ-cong    : ∀ {e p} (p∈Q : p ∈ Q) → ∀ {k i} → (_∈ B e p∈Q k i) Respects _≈ᵢ_
-      B-finish   : ∀ e {p} (p∈Q : p ∈ Q) → ∃₂ λ k* x* → ∀ {k} → k* ≤ k →
+      B₀-eqᵢ     : ∀ {e p} .(p∈Q : p ∈ Q) → B₀ ≋ᵢ B e p∈Q 0
+      Bᵢ-cong    : ∀ {e p} .(p∈Q : p ∈ Q) → ∀ {k i} → (_∈ B e p∈Q k i) Respects _≈ᵢ_
+      B-finish   : ∀ e {p} .(p∈Q : p ∈ Q) → ∃₂ λ k* x* → ∀ {k} → k* ≤ k →
                      (x* ∈ᵢ B e p∈Q k × (∀ {x} → x ∈ᵢ B e p∈Q k → x ≈ x*))
-      B-null     : ∀ {e p} (p∈Q : p ∈ Q) → ∀ {k i} → i ∉ p → ⊥ i ∈ B e p∈Q k i
-      F-mono-B   : ∀ {e p} (p∈Q : p ∈ Q) → ∀ {k x} → x ∈ Accordant p →
+      B-null     : ∀ {e p} .(p∈Q : p ∈ Q) → ∀ {k i} → i ∉ p → ⊥ i ∈ B e p∈Q k i
+      F-mono-B   : ∀ {e p} .(p∈Q : p ∈ Q) → ∀ {k x} → x ∈ Accordant p →
                    x ∈ᵢ B e p∈Q k → F e p x ∈ᵢ B e p∈Q (suc k)
-      F-resp-B₀  : ∀ {e p} → p ∈ Q → ∀ {x} → x ∈ᵢ B₀ → F e p x ∈ᵢ B₀
+      F-resp-B₀  : ∀ {e p} → .(p ∈ Q) → ∀ {x} → x ∈ᵢ B₀ → F e p x ∈ᵢ B₀
 
   -- Converting between partial and non-partial forms
 

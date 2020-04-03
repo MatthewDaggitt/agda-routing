@@ -23,8 +23,8 @@ open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Iteration.Asynchronous.Static
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule
-import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod
-  as Pseudoperiod
+import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudocycle
+  as Pseudocycle
 open import RoutingLib.Iteration.Synchronous using (_^_)
 
 --------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ open import RoutingLib.Iteration.Synchronous using (_^_)
 --------------------------------------------------------------------------------
 -- Properties
 
-open Pseudoperiod ψˢʸⁿᶜ
+open Pseudocycle ψˢʸⁿᶜ
 
 βˢʸⁿᶜ-expiry : ∀ {t₁ t₂} i j → t₁ < t₂ → t₁ ≤ βˢʸⁿᶜ t₂ i j
 βˢʸⁿᶜ-expiry i j (s≤s t₁≤t₂) = t₁≤t₂

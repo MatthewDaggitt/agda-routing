@@ -38,7 +38,7 @@ import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties as Per
 
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
-open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
+open import RoutingLib.Routing as Routing using () renaming (AdjacencyMatrix to AdjacencyMatrix₁)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 import RoutingLib.lmv34.Gamma_zero as Gamma_zero
 import RoutingLib.lmv34.Gamma_zero.Algebra as Gamma_zero_Algebra
@@ -49,7 +49,7 @@ import RoutingLib.lmv34.Gamma_one.Algebra as Gamma_one_Algebra
 module RoutingLib.lmv34.Gamma_one.Properties
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  {n} (A : AdjacencyMatrix algebra n)
+  {n} (A : AdjacencyMatrix₁ algebra n)
   where
 
 open RawRoutingAlgebra algebra
@@ -274,7 +274,7 @@ with IsValid? (d , v)
 --------------------------------------------------------------------------------
 -- Properties of _⟦_⟧
 
-〚〛-cong : ∀ {V V'} → V ≈ᵥ V' → A 〚 V 〛 ≈ᵥ A 〚 V' 〛
+〚〛-cong : ∀ {A} {V V'} → V ≈ᵥ V' → A 〚 V 〛 ≈ᵥ A 〚 V' 〛
 〚〛-cong V=V' i = ⨁ₛ-cong (λ {q} → []-cong (V=V' q))
 
 ≈ₘ⇒≈ᵥ : ∀ {M M' : RoutingMatrix} → M ≈ₘ M' → ~ M ≈ᵥ ~ M'
@@ -333,8 +333,9 @@ LemmaA₂-iter {suc k} f = begin
   (~ A) i ⊕ₛ (~ B) i ∎
   where open PermutationReasoning
 
-~-lemma : ∀ {i q Y} → map₂ (λ v → (A i q) ▷ v) ((~ Y) q) † ↭  (tabulate λ d → (d , (A i q) ▷ (Y q d))) †
-~-lemma {i} {q} {Y} = begin
+~-lemma : ∀ {i q Y} → {A : AdjacencyMatrix} →
+          map₂ (λ v → (A i q) ▷ v) ((~ Y) q) † ↭  (tabulate λ d → (d , (A i q) ▷ (Y q d))) †
+~-lemma {i} {q} {Y} {A} = begin
   map₂ (λ v → (A i q) ▷ v) ((~ Y) q) †                                   ≡⟨⟩
   (map₂ ((A i q) ▷_) ((tabulate (λ d → (d , Y q d))) †)) †               ↭⟨ ↭-sym (map-†-lemma {(tabulate (λ d → (d , Y q d)))}) ⟩
   (map₂ ((A i q) ▷_) (tabulate (λ d → (d , Y q d))))     †               ↭⟨ †-cong (↭-reflexive (map₂-tabulate ((λ d → (d , Y q d))) ((A i q) ▷_))) ⟩
@@ -343,12 +344,12 @@ LemmaA₂-iter {suc k} f = begin
   where open PermutationReasoning
 
 -- Lemma 3.1
-Lemma-Γ₀=Γ₁ : ∀ {Y} → A 〚 ~ Y 〛 ≈ᵥ ~ (A 〔 Y 〕)
-Lemma-Γ₀=Γ₁ {Y} i = begin
+Lemma-Γ₀=Γ₁ : ∀ {A Y} → A 〚 ~ Y 〛 ≈ᵥ ~ (A 〔 Y 〕)
+Lemma-Γ₀=Γ₁ {A} {Y} i = begin
   (A 〚 ~ Y 〛) i                                        ≡⟨⟩
   ⨁ₛ (λ q → (A i q ▷_) [ (~ Y) q ])                     ≡⟨⟩
   ⨁ₛ (λ q → (λ s → (A i q) ▷ s) [ (~ Y) q ])            ≡⟨⟩  
-  ⨁ₛ (λ q → (map₂ (λ v → (A i q) ▷ v) ((~ Y) q)) †)     ↭⟨ ⨁ₛ-cong (λ {q} → ~-lemma {i} {q} {Y}) ⟩
+  ⨁ₛ (λ q → (map₂ (λ v → (A i q) ▷ v) ((~ Y) q)) †)     ↭⟨ ⨁ₛ-cong (λ {q} → ~-lemma {i} {q} {Y} {A}) ⟩
   ⨁ₛ (λ q → (tabulate λ d → (d , (A i q) ▷ (Y q d))) †) ↭⟨ LemmaA₂-iter (λ q d → (A i q) ▷ (Y q d)) ⟩
   (tabulate λ q → (q , ⨁ (λ k → (A i k) ▷ (Y k q)))) †  ≡⟨⟩
   (tabulate λ q → (q , (A 〔 Y 〕) i q)) †               ≡⟨⟩

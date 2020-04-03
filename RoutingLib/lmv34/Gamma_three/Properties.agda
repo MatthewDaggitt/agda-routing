@@ -5,6 +5,7 @@ open import Data.List using (List; filter; tabulate; []; _∷_; _++_; map)
 open import Data.List.Relation.Unary.Any using (here; there)
 import Data.List.Membership.DecSetoid as Membership
 import Data.List.Relation.Binary.Permutation.Setoid.Properties as PermutationProperties
+open import Data.List.Relation.Binary.Pointwise using (Pointwise; []; _∷_)
 open import Data.Nat using (zero; suc; ℕ; _*_; _+_)
 open import Function using (_∘_)
 open import Level using (_⊔_)
@@ -55,7 +56,7 @@ open Gamma_three_Algebra isRAlg n
 
 open DecSetoid FinRoute-decSetoid using () renaming (_≈_ to _≈ᵣ_; refl to ≈ᵣ-refl; trans to ≈ᵣ-trans; sym to ≈ᵣ-sym; _≟_ to _≟ᵣ_)
 open Membership FinRoute-decSetoid using (_∈?_; _∈_; _∉_)
-open PermutationProperties FinRoute-setoid using (++⁺; ++-identityˡ; ++-identityʳ; ++-assoc)
+open PermutationProperties FinRoute-setoid using (filter⁺; ++⁺; ++-identityˡ; ++-identityʳ; ++-assoc)
 
 ------------------------------------
 -- Γ₃-State
@@ -107,14 +108,15 @@ filter-lemma {P? = P?} {P?' = P?'} (x ∷ xs) P=P' with P? x | P?' x
 ∈-congₗ {x' ∷ xs} x=y (here px) = here (≈ᵣ-trans (≈ᵣ-sym x=y) px)
 ∈-congₗ {x' ∷ xs} x=y (there x∈xs) = there (∈-congₗ x=y x∈xs)
 
-∈-congᵣ : ∀ {x xs ys} → xs ↭ ys → x ∈ xs → x ∈ ys
-∈-congᵣ refl x∈xs = x∈xs
-∈-congᵣ (prep x₁=y₁ xs=ys) (here x=x₁) = here (≈ᵣ-trans x=x₁ x₁=y₁)
-∈-congᵣ (prep x₁=y₁ xs=ys) (there x∈xs) = there (∈-congᵣ xs=ys x∈xs)
-∈-congᵣ (swap x₁=y₂ x₂=y₁ xs=ys) (here x=x₁) = there (here (≈ᵣ-trans x=x₁ x₁=y₂))
-∈-congᵣ (swap x₁=y₂ x₂=y₁ xs=ys) (there (here x=x₂)) = here (≈ᵣ-trans x=x₂ x₂=y₁)
-∈-congᵣ (swap x₁=y₂ x₂=y₁ xs=ys) (there (there x∈xs)) = there (there (∈-congᵣ xs=ys x∈xs))
-∈-congᵣ (trans xs=ys ys=zs) x∈xs = ∈-congᵣ ys=zs (∈-congᵣ xs=ys x∈xs)
+∈-congᵣ : ∀ {z xs ys} → xs ↭ ys → z ∈ xs → z ∈ ys
+∈-congᵣ (refl (x∼y ∷ xs≋ys)) (here z∼x) = here (≈ᵣ-trans z∼x x∼y)
+∈-congᵣ (refl (x∼y ∷ xs≋ys)) (there z∈xs) = there (∈-congᵣ (refl xs≋ys) z∈xs)
+∈-congᵣ (prep x=y xs=ys) (here z=x) = here (≈ᵣ-trans z=x x=y)
+∈-congᵣ (prep x=y xs=ys) (there z∈xs) = there (∈-congᵣ xs=ys z∈xs)
+∈-congᵣ (swap x₁=y₂ x₂=y₁ xs=ys) (here z=x₁) = there (here (≈ᵣ-trans z=x₁ x₁=y₂))
+∈-congᵣ (swap x₁=y₂ x₂=y₁ xs=ys) (there (here z=x₂)) = here (≈ᵣ-trans z=x₂ x₂=y₁)
+∈-congᵣ (swap x₁=y₂ x₂=y₁ xs=ys) (there (there z∈xs)) = there (there (∈-congᵣ xs=ys z∈xs))
+∈-congᵣ (trans xs=ys ys=zs) z∈xs = ∈-congᵣ ys=zs (∈-congᵣ xs=ys z∈xs)
 
 minus-respects-≈ᵣ : ∀ {xs} → (λ x → ¬ (x ∈ xs)) Respects _≈ᵣ_
 minus-respects-≈ᵣ {[]} {y} {y'} y=y' Py = λ ()
@@ -127,7 +129,7 @@ minus-congₗ : LeftCongruent _↭_ _-_
 minus-congₗ {A} B=B' = filter-lemma A (λ x → (contraposition (∈-congᵣ (↭-sym B=B'))) , (contraposition (∈-congᵣ B=B')))
 
 minus-congᵣ : RightCongruent _↭_ _-_
-minus-congᵣ A=A' = Perm.filter⁺ FinRoute-setoid (λ x → ¬? (x ∈? _)) minus-respects-≈ᵣ A=A'
+minus-congᵣ A=A' = filter⁺ (λ x → ¬? (x ∈? _)) minus-respects-≈ᵣ A=A'
 
 minus-cong : Congruent₂ _↭_ _-_
 minus-cong {A} {A'} {B} {B'} A=A' B=B' = begin
@@ -260,25 +262,10 @@ f-minus-distrib f X Y = begin
                  where open PermutationReasoning
 
 F-minus-distrib : ∀ F O O'  → (F 〖 O -ᵥ O' 〗) ≈ᵥ,₂ ((F 〖 O  〗) -ᵥ (F 〖 O' 〗))
-F-minus-distrib F O O' i j = begin
-                     (F 〖 O -ᵥ O' 〗) i j                      ↭⟨ ↭-refl ⟩
-                     (F i j) [ (O -ᵥ O') j i ]                  ↭⟨ ↭-refl ⟩
-                     (F i j) [ (O j i) - (O' j i) ]             ↭⟨ f-minus-distrib (F i j) (O j i) (O' j i) ⟩
-                     ((F i j) [ O j i ]) - ((F i j) [ O' j i ]) ↭⟨ ↭-refl ⟩
-                     ((F 〖 O 〗) i j) - ((F 〖 O' 〗) i j)     ↭⟨ ↭-refl ⟩
-                     ((F 〖 O 〗) -ᵥ (F 〖 O' 〗)) i j 
-                     ∎
-                     where open PermutationReasoning
+F-minus-distrib F O O' i j = f-minus-distrib (F i j) (O j i) (O' j i)
 
 Γ₂,ᵢ-distrib : ∀ O O' → Γ₂,ᵢ (O -ᵥ O') ≈ᵥ,₂ (Γ₂,ᵢ (O) -ᵥ Γ₂,ᵢ (O'))
-Γ₂,ᵢ-distrib O O' i j = begin
-                       (Γ₂,ᵢ (O -ᵥ O')) i j                                               ↭⟨ ↭-refl ⟩
-                       ((Imp ●ₘ Prot) 〖 O -ᵥ O' 〗) i j                                 ↭⟨ F-minus-distrib (Imp ●ₘ Prot) O O' i j ⟩
-                       (((Imp ●ₘ Prot) 〖 O  〗) i j) - (((Imp ●ₘ Prot) 〖 O' 〗) i j)  ↭⟨ ↭-refl ⟩                       
-                       ((Γ₂,ᵢ (O)) i j) - ((Γ₂,ᵢ (O')) i j)                               ↭⟨ ↭-refl ⟩
-                       (Γ₂,ᵢ (O) -ᵥ Γ₂,ᵢ (O')) i j 
-                       ∎
-                       where open PermutationReasoning
+Γ₂,ᵢ-distrib O O' i j = F-minus-distrib (Imp ●ₘ Prot) O O' i j
 
 -- To show relationship of Γ₃ and Γ₂ 
 -- we simply need an invariant, so that we can equate each step of Γ₃ with a step of Γ₂.
@@ -288,24 +275,18 @@ F-minus-distrib F O O' i j = begin
 Γ₃-invariant : Γ₃-State → Set (a ⊔ ℓ)
 Γ₃-invariant (S₃ V I O (∇ , Δ)) = Γ₂,ᵢ O ≈ᵥ,₂ Γ₃,ᵢ I  (∇ , Δ)
 
-lemma1 : ∀ X Y → ((X -ᵥ (X -ᵥ Y)) ∪ᵥ (Y -ᵥ X)) ≈ᵥ,₂ Y 
-lemma1 X Y i j = begin
-                 ((X -ᵥ (X -ᵥ Y)) ∪ᵥ (Y -ᵥ X)) i j                       ↭⟨ ↭-refl ⟩                                        
-                 ((X -ᵥ (X -ᵥ Y)) i j) ∪ ((Y -ᵥ X) i j)                  ↭⟨ ↭-refl ⟩                                        
-                 ((X i j) - ((X i j) - (Y i j))) ∪ ((Y i j) - (X i j))  ↭⟨ diff-lemma (X i j) (Y i j) ⟩                                
-                 Y i j 
-                 ∎
-                 where open PermutationReasoning
-
+diffᵥ-lemma : ∀ X Y → let (∇ , Δ) = diffᵥ X Y in
+              ((X -ᵥ ∇) ∪ᵥ Δ) ≈ᵥ,₂ Y
+diffᵥ-lemma X Y i j = diff-lemma (X i j) (Y i j)
 
 Γ₃-invariant-maintained : ∀ (S : Γ₃-State) → Γ₃-invariant S → Γ₃-invariant (Γ₃ S) 
 Γ₃-invariant-maintained (S₃ V I O (∇ , Δ)) inv = prf
    where
      prf : Γ₂,ᵢ (Γ₂,ₒ V) ≈ᵥ,₂ Γ₃,ᵢ (Γ₃,ᵢ I  (∇ , Δ))  (diffᵥ O (Γ₃,ₒ V))
      prf = begin
-             Γ₂,ᵢ (Γ₂,ₒ V)                                                       ≈⟨ ≈ᵥ,₂-sym (lemma1 ((Γ₂,ᵢ O)) ((Γ₂,ᵢ (Γ₂,ₒ V)))) ⟩
+             Γ₂,ᵢ (Γ₂,ₒ V)                                                       ≈⟨ ≈ᵥ,₂-sym (diffᵥ-lemma ((Γ₂,ᵢ O)) ((Γ₂,ᵢ (Γ₂,ₒ V)))) ⟩
              ((Γ₂,ᵢ O) -ᵥ (Γ₂,ᵢ (O) -ᵥ Γ₂,ᵢ (Γ₂,ₒ V))) ∪ᵥ (Γ₂,ᵢ (Γ₂,ₒ V) -ᵥ (Γ₂,ᵢ O)) ≈⟨ ≈ᵥ,₂-refl  ⟩                    
-             ((Γ₂,ᵢ O) -ᵥ (Γ₂,ᵢ (O) -ᵥ Γ₂,ᵢ (Γ₃,ₒ V))) ∪ᵥ (Γ₂,ᵢ (Γ₃,ₒ V) -ᵥ (Γ₂,ᵢ O)) ≈⟨ ∪ᵥ-cong {x = ((Γ₂,ᵢ O) -ᵥ (Γ₂,ᵢ (O) -ᵥ Γ₂,ᵢ (Γ₃,ₒ V)))}  {u = (Γ₂,ᵢ (Γ₃,ₒ V) -ᵥ (Γ₂,ᵢ O))} ((minusᵥ-cong {Γ₂,ᵢ O}  ≈ᵥ,₂-refl (≈ᵥ,₂-sym (Γ₂,ᵢ-distrib O (Γ₃,ₒ V))))) ≈ᵥ,₂-refl  ⟩   
+             ((Γ₂,ᵢ O) -ᵥ (Γ₂,ᵢ (O) -ᵥ Γ₂,ᵢ (Γ₃,ₒ V))) ∪ᵥ (Γ₂,ᵢ (Γ₃,ₒ V) -ᵥ (Γ₂,ᵢ O)) ≈⟨ ∪ᵥ-cong {u = (Γ₂,ᵢ (Γ₃,ₒ V) -ᵥ (Γ₂,ᵢ O))} ((minusᵥ-cong {Γ₂,ᵢ O}  ≈ᵥ,₂-refl (≈ᵥ,₂-sym (Γ₂,ᵢ-distrib O (Γ₃,ₒ V))))) ≈ᵥ,₂-refl  ⟩   
              ((Γ₂,ᵢ O) -ᵥ (Γ₂,ᵢ (O -ᵥ (Γ₃,ₒ V)))) ∪ᵥ (Γ₂,ᵢ (Γ₃,ₒ V) -ᵥ (Γ₂,ᵢ O))     ≈⟨ ∪ᵥ-cong ≈ᵥ,₂-refl ((≈ᵥ,₂-sym ((Γ₂,ᵢ-distrib (Γ₃,ₒ V) O))))  ⟩
              ((Γ₂,ᵢ O) -ᵥ (Γ₂,ᵢ (O -ᵥ (Γ₃,ₒ V)))) ∪ᵥ (Γ₂,ᵢ ((Γ₃,ₒ V) -ᵥ O)) ≈⟨ ≈ᵥ,₂-refl  ⟩                                       
              Γ₃,ᵢ (Γ₂,ᵢ O)  (O -ᵥ (Γ₃,ₒ V) , (Γ₃,ₒ V) -ᵥ O)               ≈⟨ ≈ᵥ,₂-refl ⟩                          
@@ -324,7 +305,7 @@ S₃≈S₂ : Γ₃-State → Γ₂-State → Set (a ⊔ ℓ)
 S₃≈S₂ (S₃ V I O (∇ , Δ)) (S₂ V' I' O') = (S₂ V I O) ≈ₛ,₂ (S₂ V' I' O')
 
 S₃≈S₂-maintained : ∀ (S3 : Γ₃-State) (S2 : Γ₂-State) → S₃≈S₂ S3 S2 → Γ₃-invariant S3 → S₃≈S₂ (Γ₃ S3) (Γ₂ S2)
-S₃≈S₂-maintained  (S₃ V I O (∇ , Δ)) (S₂ V' I' O') ( V≈V' , (I≈I' , O≈O') ) inv = prfV , (prfI , prfO)
+S₃≈S₂-maintained  (S₃ V I O (∇ , Δ)) (S₂ V' I' O') ( V≈V' , (I≈I' , O≈O') ) inv = prfV , prfI , prfO
   where
     prfV : (Γ₃,ᵥ I) ≈ᵥ (Γ₂,ᵥ I')
     prfV = Γ₂,ᵥ-cong I≈I'

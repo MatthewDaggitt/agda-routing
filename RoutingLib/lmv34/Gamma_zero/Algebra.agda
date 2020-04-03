@@ -31,13 +31,13 @@ infix 5 ⨁
 
 open import Data.Fin.Subset using (Subset)
 open import Data.Fin.Subset.Properties using (_∈?_)
-open import Data.Vec.Functional using (Vector)
 open import Relation.Nullary using (yes; no)
 
-open import RoutingLib.Iteration.Asynchronous.Static using (AsyncIterable; asyncIter)
-open import RoutingLib.Iteration.Asynchronous.Static.Schedule using (Schedule; 𝕋)
+Vectorᵢ : ∀ {a n} → (Fin n → Set a) → Set a
+Vectorᵢ {a} {n} Aᵢ = (i : Fin n) → Aᵢ i
 
-[_,_]_ : ∀ {a} {A : Set a} {n} → Vector A n → Vector A n → Subset n → Vector A n
+infix 5 [_,_]_
+[_,_]_ : ∀ {a} {n} {A : Fin n → Set a} → Vectorᵢ A → Vectorᵢ A → Subset n → Vectorᵢ A
 ([ X , Y ] S) i with (i ∈? S)
 ... | yes _ = X i
 ... | no _  = Y i

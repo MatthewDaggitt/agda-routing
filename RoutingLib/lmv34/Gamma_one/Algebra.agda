@@ -2,8 +2,7 @@ open import Algebra.Core
 open import Data.Bool.Base using (true; false; not)
 open import Data.Nat using (ℕ)
 open import Data.Fin using (Fin; _<_)
-open import Data.Fin.Properties as Finₚ
-  using (_≤?_; <-cmp)
+open import Data.Fin.Properties as Finₚ using (_≤?_; <-cmp) renaming (_≟_ to _≟F_)
 open import Data.List using ([]; _∷_; List; foldr; filter; map; tabulate)
 import Data.List.Relation.Binary.Permutation.Setoid as PermutationEq
 open import Data.Product.Relation.Binary.Lex.NonStrict using (×-decTotalOrder)
@@ -154,3 +153,18 @@ f [ X ] = (map₂ f X) †
 infix 10 _〚_〛
 _〚_〛 : AdjacencyMatrix → RoutingVector → RoutingVector
 (A 〚 V 〛) i = ⨁ₛ (λ q → (A i q ▷_) [ V q ])
+
+--------------------------------------
+-- Asynchronous
+
+-- Lookup of destinations
+lookup-d : RoutingSet → Fin n → Route
+lookup-d []            j = ∞#
+lookup-d ((d , s) ∷ S) j with d ≟F j
+... | yes _ = s
+... | no _  = lookup-d S j
+
+-- Vector-of-sets to matrix transformation (Gamma_1 to Gamma_0)
+infix 12 ─_
+─_ : RoutingVector → RoutingMatrix
+(─ V) i j = lookup-d (V i) j

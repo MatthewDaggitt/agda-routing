@@ -28,7 +28,7 @@ RoutingVector₂ : Set a
 RoutingVector₂ = SquareMatrix (List (Fin n × Route)) n
 
 Øᵥ,₂ : RoutingVector₂
-Øᵥ,₂ i j = []
+Øᵥ,₂ i j = Ø
 
 -- AdjacencyMatrixᵀ : Set b
 -- AdjacencyMatrixᵀ = ∀ (i j : Fin n) → Step j i

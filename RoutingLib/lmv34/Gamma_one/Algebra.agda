@@ -8,7 +8,7 @@ import Data.List.Relation.Binary.Permutation.Setoid as PermutationEq
 open import Data.Product.Relation.Binary.Lex.NonStrict using (×-decTotalOrder)
 open import Data.Product.Relation.Binary.Pointwise.NonDependent using (×-decSetoid)
 open import Data.Vec.Functional using (Vector)
-open import Data.Vec.Functional.Relation.Binary.Pointwise.Properties using () renaming (setoid to Vec-setoid)
+open import Data.Vec.Functional.Relation.Binary.Pointwise.Properties using () renaming (decSetoid to decSetoidᵥ)
 open import Function using (_∘_)
 open import Level using (_⊔_; 0ℓ; lift) renaming (suc to lsuc)
 open import Relation.Binary using (Rel; DecTotalOrder; Setoid; DecSetoid)
@@ -26,6 +26,7 @@ import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebra
 import RoutingLib.Data.Vec.Functional.Relation.Binary.Equality as TableEquality
 open import RoutingLib.Data.List using (strictMerge)
 import RoutingLib.Data.List.Sorting.InsertionSort as InsertionSort
+import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties as PermutationProperties
 
 module RoutingLib.lmv34.Gamma_one.Algebra
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
@@ -47,8 +48,9 @@ RoutingSet = List (Fin n × Route)
 
 -- RoutingVector setoid
 FinRoute-decSetoid = ×-decSetoid (Finₚ.≡-decSetoid n) DS
-open DecSetoid FinRoute-decSetoid public using () renaming (setoid to FinRoute-setoid)
+open DecSetoid FinRoute-decSetoid public using () renaming (_≟_ to _≟ᵣ_; setoid to FinRoute-setoid)
 open PermutationEq FinRoute-setoid public
+open PermutationProperties FinRoute-setoid using (↭-decSetoid)
 
 --------------------------------------------------------------------------------
 -- Routing vector
@@ -59,10 +61,10 @@ RoutingVector = Vector RoutingSet n
 Øᵥ : RoutingVector
 Øᵥ i = Ø
 
-𝕍ₛ : Setoid a (a ⊔ ℓ)
-𝕍ₛ = Vec-setoid ↭-setoid n
+≈ᵥ-decSetoid : DecSetoid _ _
+≈ᵥ-decSetoid = decSetoidᵥ (↭-decSetoid _≟ᵣ_) n
 
-open Setoid 𝕍ₛ public using ()
+open DecSetoid ≈ᵥ-decSetoid public using ()
   renaming
   ( _≈_           to _≈ᵥ_
   ; reflexive     to ≈ᵥ-reflexive
@@ -70,6 +72,7 @@ open Setoid 𝕍ₛ public using ()
   ; sym           to ≈ᵥ-sym
   ; trans         to ≈ᵥ-trans
   ; isEquivalence to ≈ᵥ-isEquivalence
+  ; setoid        to 𝕍ₛ
   )
 
 --------------------------------------------------------------------------------
@@ -92,10 +95,6 @@ decTotalOrder = ×-decTotalOrder (Finₚ.≤-decTotalOrder n) ≤₊-decTotalOrd
 
 open DecTotalOrder decTotalOrder public
   using () renaming (isPreorder to ≤₂-isPreorder)
-
--- MATTHEW: If I were you I'd create a general version of this function
--- called `strictMerge` in `RoutingList.Data.List` and prove the properties
--- about it in general. You'll find it much easier going.
 
 _<₁_ : Rel (Fin n × Route) _
 _<₁_ (d₁ , v₁) (d₂ , v₂) = d₁ < d₂

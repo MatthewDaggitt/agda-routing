@@ -1,5 +1,3 @@
-{-# OPTIONS --allow-unsolved-metas #-}
-
 open import Data.List hiding (head; tail)
 open import Data.List.Relation.Unary.Any using (Any; here; there)
 open import Data.List.Relation.Unary.All using (All; []; _∷_; here; there)
@@ -138,3 +136,12 @@ module _ (_≟_ : Decidable _≈_) where
         ys                ↭⟨ ≋⇒↭ ys=zs++y++ws ⟩
         zs ++ [ y ] ++ ws ↭⟨ shift (≈-sym x=y) zs ws ⟩
         x ∷ zs ++ ws ∎
+
+  ↭-isDecEquivalence : IsDecEquivalence _↭_
+  ↭-isDecEquivalence = record
+    { isEquivalence = ↭-isEquivalence
+    ; _≟_ = _↭?_
+    }
+
+  ↭-decSetoid : DecSetoid _ _
+  ↭-decSetoid = record { isDecEquivalence = ↭-isDecEquivalence }

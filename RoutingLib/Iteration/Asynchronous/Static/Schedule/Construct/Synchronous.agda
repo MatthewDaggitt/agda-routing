@@ -2,8 +2,6 @@
 -- This module constructs the static schedule that corresponds to the fully
 -- synchronous computation
 --------------------------------------------------------------------------------
-{-# OPTIONS --allow-unsolved-metas #-}
-
 open import Data.Nat using (ℕ; zero; suc; _∸_)
 
 module RoutingLib.Iteration.Asynchronous.Static.Schedule.Construct.Synchronous
@@ -13,6 +11,7 @@ open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (Subset; ⊤)
 open import Data.Fin.Subset.Properties using (_∈?_; ∈⊤)
 open import Data.Nat using (z≤n; s≤s; _≤_; _<_; _+_)
+open import Data.Nat.Induction using (Acc; acc; <-wellFounded)
 open import Data.Nat.Properties
 open import Function using (const)
 open import Relation.Binary using (Setoid)
@@ -75,30 +74,14 @@ open Pseudocycle ψˢʸⁿᶜ
 ψˢʸⁿᶜ-multiPseudocycle t (suc k) rewrite +-suc t k     =
   next (suc t) (ψˢʸⁿᶜ-pseudocycle t) (ψˢʸⁿᶜ-multiPseudocycle (suc t) k)
 
--- TODO: Show that the synchronous schedule is indeed turns an asynchronous
--- iteration into its underlying synchronous function.
 module _ {a ℓ} (I∥ : AsyncIterable a ℓ n) where
   open AsyncIterable I∥
 
-  ψˢʸⁿᶜ-isSynchronous : ∀ x₀ t → asyncIter I∥ ψˢʸⁿᶜ x₀ t ≈ (F ^ t) x₀
-  ψˢʸⁿᶜ-isSynchronous x₀ zero    i = ≈ᵢ-refl
-  ψˢʸⁿᶜ-isSynchronous x₀ (suc t) i with i ∈? αˢʸⁿᶜ (suc t)
+  ψˢʸⁿᶜ-isSynchronous' : ∀ x₀ {t} (accₜ : Acc _<_ t) → asyncIter' I∥ ψˢʸⁿᶜ x₀ accₜ ≈ (F ^ t) x₀
+  ψˢʸⁿᶜ-isSynchronous' x₀ {zero}  _         i = ≈ᵢ-refl
+  ψˢʸⁿᶜ-isSynchronous' x₀ {suc t} (acc rec) i with i ∈? αˢʸⁿᶜ (suc t)
   ... | no i∉α  = contradiction ∈⊤ i∉α
-  ... | yes i∈α = {!!}
-    where ≈ᵢ-Setoidᵢ : Setoid a ℓ
-          ≈ᵢ-Setoidᵢ = record
-                { Carrier = Sᵢ i
-                ; _≈_ = _≈ᵢ_ {i}
-                ; isEquivalence = record
-                { refl  = ≈ᵢ-refl {i}
-                ; sym   = ≈ᵢ-sym {i}
-                ; trans = ≈ᵢ-trans {i}
-                }
-                } 
-          open EqReasoning ≈ᵢ-Setoidᵢ
-          prf : asyncIter I∥ ψˢʸⁿᶜ x₀ (suc t) i ≈ᵢ (F ^ (suc t)) x₀ i
-          prf = begin
-                {!asyncIter I∥ ψˢʸⁿᶜ x₀ (suc t) i!} ≈⟨ {!!} ⟩
-                {!!} ≈⟨ {!!} ⟩
-                {!(F ((F ^ t) x₀)) i!} ≈⟨ {!!} ⟩
-                {!(F ^ suc t) x₀ i!} ∎
+  ... | yes i∈α = F-cong (λ j → ψˢʸⁿᶜ-isSynchronous' x₀ (rec t ≤-refl) j) i
+
+  ψˢʸⁿᶜ-isSynchronous : ∀ x₀ t → asyncIter I∥ ψˢʸⁿᶜ x₀ t ≈ (F ^ t) x₀
+  ψˢʸⁿᶜ-isSynchronous x₀ t = ψˢʸⁿᶜ-isSynchronous' x₀ (<-wellFounded t)

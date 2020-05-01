@@ -1,6 +1,7 @@
 open import Algebra.Core using (Op₂)
 open import Data.Fin using (Fin)
 open import Data.Nat using (ℕ)
+open import Data.Product using (_×_; _,_)
 
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
@@ -22,12 +23,8 @@ open Gamma_two_Algebra isRoutingAlgebra n
 ------------------------------------
 -- State model
 
-record Γ₂-State : Set a where
-  constructor S₂
-  field
-    V : RoutingVector
-    I : RoutingVector₂
-    O : RoutingVector₂
+Γ₂-State : Set a
+Γ₂-State = RoutingVector × RoutingVector₂ × RoutingVector₂
 
 ------------------------------------
 -- Computation Model
@@ -42,4 +39,4 @@ record Γ₂-State : Set a where
 Γ₂,ₒ V = Exp 【 V 】
 
 Γ₂ : Γ₂-State → Γ₂-State
-Γ₂ (S₂ V I O) = S₂ (Γ₂,ᵥ I) (Γ₂,ᵢ O) (Γ₂,ₒ V)
+Γ₂ (V , I , O) = (Γ₂,ᵥ I) , (Γ₂,ᵢ O) , (Γ₂,ₒ V)

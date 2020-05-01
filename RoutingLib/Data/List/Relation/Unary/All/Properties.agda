@@ -65,6 +65,7 @@ module _ {a ℓ} (S : Setoid a ℓ) where
   All-∈ resp (px ∷ pxs) (here v≈x)   = resp (sym v≈x) px
   All-∈ resp (px ∷ pxs) (there v∈xs) = All-∈ resp pxs v∈xs
 
+  -- map+ and All.tabulate
   map-all : ∀ {b p} {B : Set b} {P : B → Set p} f {xs : List A} →
             (∀ {x} → x ∈ xs → P (f x)) → All P (map f xs)
   map-all f {[]}     pres = []

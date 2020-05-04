@@ -51,7 +51,7 @@ open RawRoutingAlgebra algebra using (≈-refl) renaming (S to 𝕊)
 open Gamma_zero_Algebra algebra n using (_⊕ₘ_; _〔_〕)
 open Gamma_one isRoutingAlgebra A using (Γ₁)
 open Gamma_one_Algebra isRoutingAlgebra n using (RoutingSet; RoutingVector; Øᵥ; _≈ᵥ_; ≈ᵥ-refl; ≈ᵥ-sym; ≈ᵥ-trans; _⊕ᵥ_; ⨁ₛ; ~_; ─_; _[_]; _〚_〛; FinRoute-setoid; FinRoute-decSetoid; 𝕍ₛ)
-open Gamma_one_Properties isRoutingAlgebra A using (Γ₁-cong; ⊕-distributive; ⊕ᵥ-cong; Lemma-Γ₀=Γ₁; 〚〛-cong; ⨁ₛ-cong; ≈ₘ⇒≈ᵥ)
+open Gamma_one_Properties isRoutingAlgebra A using (Γ₁-cong; ⊕-distributive; ⊕ᵥ-cong; Lemma-Γ₀=Γ₁; 〚〛-cong; ⨁ₛ-cong; ⊕ₛ-cong; ≈ₘ⇒≈ᵥ)
 open Gamma_two isRoutingAlgebra Imp Prot Exp using (Γ₂; Γ₂,ᵥ; Γ₂,ᵢ; Γ₂,ₒ)
 open Gamma_two_Algebra isRoutingAlgebra n using (RoutingVector₂; RouteMapMatrix; toRouteMapMatrix; Øᵥ,₂; _≈ₐ,₂_; _〖_〗; _↓; _●_; _●ₘ_; _ᵀ)
 open Gamma_two_Properties isRoutingAlgebra A Imp Prot Exp A=Imp∘Prot∘Exp using (Γ₁=Γ₂-comp; Γ₂-State-decSetoid; Γ₂,ᵥ-cong; Γ₂,ᵢ-cong; Γ₂,ₒ-cong; ≈ᵥ,₂-decSetoid; LemmaA₃; f[]-cong)
@@ -63,6 +63,10 @@ open DecSetoid FinRoute-decSetoid using () renaming (_≟_ to _≟ᵣ_; refl to 
 open DecSetoid Γ₂-State-decSetoid using () renaming ( _≈_  to _≈ₛ_ ; refl to ≈ₛ-refl)
 open DecSetoid ≈ᵥ,₂-decSetoid using () renaming (_≈_ to _≈ᵥ,₂_; refl to ≈ᵥ,₂-refl; setoid to 𝕍₂ₛ)
 
+-- THIS PROOF IS WORK-IN-PROGRESS
+
+--------------------------------------------------------------------------------
+-- Various proofs and statements
 -- TODO: reorganise the lmv34 folder, split into Algebra/Properties files.
 
 -- State = (V , I , O)
@@ -88,9 +92,6 @@ _||_||' : RouteMapMatrix → (Fin n → RoutingVector) → RoutingVector
 A||V||-cong' : ∀ {F F' V} → F ≈ₐ,₂ F' → F || V ||' ≈ᵥ  F' || V ||'
 A||V||-cong' {F} {F'} {V} F=F' i = ⨁ₛ-cong (λ {q} → f[]-cong {X = V i q} (F=F' i q))
 
---Γ₁-cong : Congruent₁ _≈ᵥ_ Γ₁
---Γ₁-cong V=V' = ⊕ᵥ-cong (〚〛-cong V=V') (≈ₘ⇒≈ᵥ ≈ₘ-refl)
-
 LemmaA₄' : ∀ F G V → (F 〖 (G 【 V 】') 〗) ↓ ≈ᵥ (F ●ₘ (G ᵀ)) || V ||'
 LemmaA₄' F G V i = begin
    ((F 〖 G 【 V 】' 〗) ↓) i ↭⟨ ↭-refl ⟩
@@ -110,6 +111,12 @@ LemmaA₄' F G V i = begin
   (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ') V                        ∎
   where open EqReasoning 𝕍ₛ
 
+[_,_]-cong : ∀ {X X' Y Y' : RoutingVector} (S : Subset n) →
+             X ≈ᵥ X' → Y ≈ᵥ Y' → [ X , Y ] S ≈ᵥ [ X' , Y' ] S
+[_,_]-cong S X=X' Y=Y' i with i ∈? S
+... | yes _ = X=X' i
+... | no  _ = Y=Y' i
+
 getV : Γ₂-State → RoutingVector
 getV (V , I , O) = V
 
@@ -127,6 +134,9 @@ getI=I' (V=V' , I=I' , O=O') = I=I'
 
 getO=O' : ∀ {S S'} → S ≈ₛ S' → getO S ≈ᵥ,₂ getO S'
 getO=O' (V=V' , I=I' , O=O') = O=O'
+
+--------------------------------------------------------------------------------
+-- Implementation of Ω₂
 
 -- A triple schedule, one for each component V, I, O
 Schedule₃ : ℕ → Set
@@ -159,24 +169,12 @@ module _ ((ψᵥ , ψᵢ , ψₒ) : Schedule₃ n) where
           Oᵗ = getO (Ω₂' S (rec t ≤-refl))
           Oᵇ⁽ᵗ⁺¹⁾ : RoutingVector₂
           Oᵇ⁽ᵗ⁺¹⁾ i j = (getO (Ω₂' S (rec (βᵢ (suc t) j i) (s≤s (βᵢ-causality t j i))))) i j
-          
-  {- OLD IMPLEMENTATION, WITH ONLY ASYNCHRONY BETWEEN I AND O
-    ( Γ₂,ᵥ Iᵗ
-    , [ Γ₂,ᵢ Oᵇ⁽ᵗ⁺¹⁾ , Iᵗ ] α (suc t)
-    , Γ₂,ₒ Vᵗ
-    )
-    where Vᵗ : RoutingVector
-          Vᵗ = getV (Ω₂' S (rec t ≤-refl))
-          Iᵗ : RoutingVector₂
-          Iᵗ = getI (Ω₂' S (rec t ≤-refl))
-          Oᵇ⁽ᵗ⁺¹⁾ : RoutingVector₂
-          Oᵇ⁽ᵗ⁺¹⁾ i j = getO (Ω₂' S (rec (β (suc t) j i) (s≤s (β-causality t j i)))) i j
-          Oᵗ : RoutingVector₂
-          Oᵗ = getO (Ω₂' S (rec t ≤-refl))
-  -}
 
 Ω₂ : Schedule₃ n → Γ₂-State → 𝕋 → Γ₂-State
 Ω₂ ψ S t = Ω₂' ψ S (<-wellFounded t)
+
+--------------------------------------------------------------------------------
+-- Proof that synchronous Ω₂ is indeed Γ₂
 
 Ω₂'ˢʸⁿᶜ=Γ₂ : ∀ S {t} (accₜ : Acc _<_ t) → Ω₂' ψ₃ˢʸⁿᶜ S accₜ ≈ₛ (Γ₂ ^ t) S
 Ω₂'ˢʸⁿᶜ=Γ₂ S {zero}  accₜ      = ≈ₛ-refl
@@ -235,6 +233,9 @@ module _ ((ψᵥ , ψᵢ , ψₒ) : Schedule₃ n) where
 
 Ω₂ˢʸⁿᶜ=Γ₂ : ∀ S t → Ω₂ ψ₃ˢʸⁿᶜ S t ≈ₛ (Γ₂ ^ t) S
 Ω₂ˢʸⁿᶜ=Γ₂ S t = Ω₂'ˢʸⁿᶜ=Γ₂ S (<-wellFounded t)
+
+--------------------------------------------------------------------------------
+-- Reduction/transformation Ω₂ → Ω₁
 
 -- The function ϕ find the timestamp of the most recent data from node j
 -- that is being used at node i.
@@ -318,8 +319,7 @@ r₂ : ∀ {n} → Schedule₃ n → Schedule n
 r₂ {n} (ψᵥ , ψᵢ , ψₒ) = record { α = α' ; β = β' ; β-causality = β'-causality}
   where open Schedule ψᵥ using () renaming (α to αᵥ)
         α' : 𝕋 → Subset n
-        --α' = αᵥ <- this is the correct one
-        α' = const ⊤
+        α' = αᵥ
         β' : 𝕋 → Fin n → Fin n → 𝕋
         β' = follow-cycle (ψᵥ , ψᵢ , ψₒ)
         β'-causality : ∀ t i j → β' (suc t) i j ≤ t
@@ -330,79 +330,132 @@ r₂ {n} (ψᵥ , ψᵢ , ψₒ) = record { α = α' ; β = β' ; β-causality =
 Τ₂ (V , I , O) = V
 
 --------------------------------------------------------------------------------
--- Properties
+-- Proof of Ω₂=Ω₁
 
 S₀ : Γ₂-State
 S₀ = (Øᵥ , Øᵥ,₂ , Øᵥ,₂)
 
--- Lemmas
-lem₁ : ∀ ψ t → let V[t]  = getV (Ω₂ ψ S₀ t)
-                   I[tᵢ] = λ i q → getI (Ω₂ ψ S₀ (tᵢ ψ t i)) i q in
-       V[t] ≈ᵥ Γ₂,ᵥ I[tᵢ]
-lem₁ ψ zero i = {!!} -- V[0] = Ø ≠ Øᵥ,₂↓ ⊕ᵥ ~ M = Γ₂,ᵥ(Ø̬ᵥ,₂)
-lem₁ ψ (suc t) i = {!!}
-
-lem₂ : ∀ ψ t → let I[tᵢ] = λ i q → getI (Ω₂ ψ S₀ (tᵢ ψ t i)) i q
-                   O[tₒ] = λ i q → getO (Ω₂ ψ S₀ (tₒ ψ t q i)) i q in
-       I[tᵢ] ≈ᵥ,₂ Γ₂,ᵢ O[tₒ]
-lem₂ = {!!}
-
-lem₃ : ∀ ψ t → let O[tₒ] = λ i q → getO (Ω₂ ψ S₀ (tₒ ψ t q i)) i q
-                   V[tᵥ] = λ i q → getV (Ω₂ ψ S₀ (tᵥ ψ t i q)) q in
-       O[tₒ] ≈ᵥ,₂ Γ₂,ₒ' V[tᵥ]
-lem₃ = {!!}
-
-lem₄ : ∀ ψ t → let V[t]  = getV (Ω₂' ψ S₀ (<-wellFounded t))
-                   V[tᵥ] = λ i q → getV (Ω₂' ψ S₀ (<-wellFounded (tᵥ ψ t i q))) q in
-       V[t] ≈ᵥ Γ₁' V[tᵥ]
-lem₄ ψ t = begin
-  V[t]                               ≈⟨ lem₁ ψ t ⟩
-  Γ₂,ᵥ I[tᵢ]                          ≈⟨ Γ₂,ᵥ-cong (lem₂ ψ t) ⟩
-  Γ₂,ᵥ (Γ₂,ᵢ O[tₒ])                   ≈⟨ Γ₂,ᵥ-cong (Γ₂,ᵢ-cong (lem₃ ψ t)) ⟩
-  Γ₂,ᵥ (Γ₂,ᵢ (Γ₂,ₒ' V[tᵥ]))            ≈⟨ ≈ᵥ-sym (Γ₁=Γ₂-comp' V[tᵥ]) ⟩
-  Γ₁' V[tᵥ]                            ∎
-  where open EqReasoning 𝕍ₛ
-        V[t] : RoutingVector
-        V[t] = getV (Ω₂ ψ S₀ t)
-        I[tᵢ] : RoutingVector₂
-        I[tᵢ] = λ i q → getI (Ω₂ ψ S₀ (tᵢ ψ t i)) i q
-        O[tₒ] : RoutingVector₂
-        O[tₒ] = λ i q → getO (Ω₂ ψ S₀ (tₒ ψ t q i)) i q
-        V[tᵥ] : Fin n → RoutingVector
-        V[tᵥ] = λ i q → getV (Ω₂ ψ S₀ (tᵥ ψ t i q)) q
-
-module _ (ψ : Schedule n) where
-  open Schedule ψ
-  
-  Ω₁-active : ∀ V t → (∀ {i} → i ∈ α (suc t)) →
-                     Ω₁' ψ V (<-wellFounded (suc t)) ≈ᵥ Γ₁' λ i q → Ω₁' ψ V (<-wellFounded (β (suc t) i q)) q
-  Ω₁-active V t i∈α i with i ∈? α (suc t)
-  ... | yes _  = {!!}
-  ... | no i∉α = contradiction i∈α i∉α
-
--- Main theorem
-module _ ((ψᵥ , ψᵢ , ψₒ) : Schedule₃ n) where
+module _ ((ψᵥ , ψᵢ , ψₒ) : Schedule₃ n)  where
   ψ : Schedule₃ n
   ψ = (ψᵥ , ψᵢ , ψₒ)
   
   open Schedule ψᵥ using () renaming (α to αᵥ; β to βᵥ; β-causality to βᵥ-causality)
-  open Schedule (r₂ (ψᵥ , ψᵢ , ψₒ)) using () renaming (α to α'; β to β'; β-causality to β'-causality)
+  open Schedule ψᵢ using () renaming (α to αᵢ; β to βᵢ; β-causality to βᵢ-causality)
+  open Schedule (r₂ ψ) using () renaming (α to α'; β to β'; β-causality to β'-causality)
 
-  -- change this to as an acc argument, otherwise agda is not convinced of non-termination.
-  Ω₂'=Ω₁' : ∀ t → Τ₂ (Ω₂' ψ S₀ (<-wellFounded t)) ≈ᵥ Ω₁' (r₂ ψ) (Τ₂ S₀) (<-wellFounded t)
-  Ω₂'=Ω₁' zero    = ≈ᵥ-refl
-  Ω₂'=Ω₁' (suc t) = begin
-    Τ₂ (Ω₂' ψ S₀ (<-wellFounded (suc t)))     ≡⟨⟩
-    getV (Ω₂' ψ S₀ (<-wellFounded (suc t)))   ≈⟨ lem₄ ψ (suc t) ⟩
-    Γ₁' V[tᵥ]                                 ≡⟨⟩
-    (Γ₁' λ i q → getV (Ω₂' ψ S₀ (<-wellFounded (tᵥ ψ (suc t) i q))) q) ≈⟨ Γ₁-cong' (λ i q → Ω₂'=Ω₁' (tᵥ ψ (suc t) i q) q) ⟩
-    (Γ₁' λ i q → Ω₁' (r₂ ψ) Øᵥ (<-wellFounded (tᵥ ψ (suc t) i q)) q) ≈⟨ ≈ᵥ-sym (Ω₁-active ((r₂ ψ)) Øᵥ t ∈⊤) ⟩
-    Ω₁' (r₂ ψ) Øᵥ (<-wellFounded (suc t))     ≡⟨⟩
-    Ω₁' (r₂ ψ) (Τ₂ S₀) (<-wellFounded (suc t)) ∎
+  -- Lemmas
+  pred : ∀ {t} → Acc _<_ (suc t) → Acc _<_ t
+  pred {t} (acc rec) = rec t ≤-refl
+
+  acc[tᵢ] : ∀ {t} {i} → Acc _<_ (suc t) → Acc _<_ (tᵢ ψ (suc t) i)
+  acc[tᵢ] {t} {i} (acc rec) = rec (tᵢ ψ (suc t) i) (s≤s (tᵢ≤t ψ t i))
+
+  acc[tₒ] : ∀ {t} {q} {i} → Acc _<_ (suc t) → Acc _<_ (tₒ ψ (suc t) q i)
+  acc[tₒ] {t} {q} {i} (acc rec) = rec (tₒ ψ (suc t) q i) (s≤s (tₒ≤t ψ t q i))
+
+  acc[tᵥ] : ∀ {t} {i} {q} → Acc _<_ (suc t) → Acc _<_ (tᵥ ψ (suc t) i q)
+  acc[tᵥ] {t} {i} {q} (acc rec) = rec (tᵥ ψ (suc t) i q) (s≤s (tᵥ≤t ψ t i q))
+
+  acc[βᵥ] : ∀ {t} {i} → Acc _<_ (suc t) → Acc _<_ (βᵥ (suc t) i i)
+  acc[βᵥ] {t} {i} (acc rec) = rec (βᵥ (suc t) i i) (s≤s (βᵥ-causality t i i))
+
+  acc[β'] : ∀ {t} {i} {q} → Acc _<_ (suc t) → Acc _<_ (β' (suc t) i q)
+  acc[β'] {t} {i} {q} (acc rec) = rec (β' (suc t) i q) (s≤s (β'-causality t i q))
+
+  lem : ∀ {t} {i} → i ∈ αᵥ (suc t) → βᵥ (suc t) i i ≡ tᵢ ψ (suc t) i
+  lem {t} {i} i∈α with i ∈? αᵥ (suc t)
+  ... | yes _ = refl
+  ... | no i∉α = contradiction i∈α i∉α
+
+  Ω₂'-cong : ∀ {t t'} {accₜ : Acc _<_ t} {accₜ' : Acc _<_ t'} →
+             ∀ i → t ≡ t' → getI (Ω₂' ψ S₀ accₜ) i ≈ᵥ getI (Ω₂' ψ S₀ accₜ') i
+  Ω₂'-cong = {!!}
+
+  lem₁ : ∀ {t} (acc[t+1] : Acc _<_ (suc t)) →
+         let V[t+1] = getV (Ω₂' ψ S₀ acc[t+1])
+             V[t] = getV (Ω₂' ψ S₀ (pred acc[t+1]))
+             I[tᵢ] = λ i q → getI (Ω₂' ψ S₀ (acc[tᵢ] {t} {i} acc[t+1])) i q in
+         V[t+1] ≈ᵥ [ Γ₂,ᵥ I[tᵢ] , V[t] ] αᵥ (suc t)
+  lem₁ {t} (acc rec) i with i ∈? αᵥ (suc t)
+  ... | yes i∈α = ⊕ₛ-cong (⨁ₛ-cong λ {q} → prf q) (≈ₘ⇒≈ᵥ ≈ₘ-refl i)
+    where V[t+1] : RoutingVector
+          V[t+1] = getV (Ω₂' ψ S₀ (acc rec))
+          I[tᵢ] : RoutingVector₂
+          I[tᵢ] i q = getI (Ω₂' ψ S₀ (acc[tᵢ] {t} {i} (acc rec))) i q
+          Iᵇ⁽ᵗ⁺¹⁾ : RoutingVector₂
+          Iᵇ⁽ᵗ⁺¹⁾ i j = (getI (Ω₂' ψ S₀ (acc[βᵥ] {t} {i} (acc rec)))) i j
+          prf : Iᵇ⁽ᵗ⁺¹⁾ i ≈ᵥ I[tᵢ] i
+          prf = Ω₂'-cong i (lem {t} {i} i∈α)
+  ... | no  _ = ↭-refl
+
+  lem₂ : ∀ {t} (acc[t+1] : Acc _<_ (suc t)) →
+         let I[tᵢ] = λ i q → getI (Ω₂' ψ S₀ (acc[tᵢ] {t} {i} acc[t+1])) i q
+             O[tₒ] = λ i q → getO (Ω₂' ψ S₀ (acc[tₒ] {t} {q} {i} acc[t+1])) i q in
+         I[tᵢ] ≈ᵥ,₂ Γ₂,ᵢ O[tₒ]
+  lem₂ {t} (acc rec) i q = {!!}
+
+  lem₃ : ∀ {t} (acc[t+1] : Acc _<_ (suc t)) →
+         let O[tₒ] = λ i q → getO (Ω₂' ψ S₀ (acc[tₒ] {t} {q} {i} acc[t+1])) i q
+             V[tᵥ] = λ i q → getV (Ω₂' ψ S₀ (acc[tᵥ] {t} {i} {q} acc[t+1])) q in
+         O[tₒ] ≈ᵥ,₂ Γ₂,ₒ' V[tᵥ]
+  lem₃ {t} (acc rec) i q = {!!}
+
+  lem₄ : ∀ {t} (acc[t+1] : Acc _<_ (suc t)) →
+         let V[t+1]  = getV (Ω₂' ψ S₀ acc[t+1])
+             V[t]    = getV (Ω₂' ψ S₀ (pred acc[t+1]))
+             V[tᵥ] = λ i q → getV (Ω₂' ψ S₀ (acc[tᵥ] {t} {i} {q} acc[t+1])) q in
+         V[t+1] ≈ᵥ [ Γ₁' V[tᵥ] ,  V[t] ] αᵥ (suc t)
+  lem₄ {t} acc[t+1] = begin
+    V[t+1]                                         ≈⟨ lem₁ acc[t+1] ⟩
+    [ Γ₂,ᵥ I[tᵢ] , V[t] ] αᵥ (suc t)                ≈⟨ [_,_]-cong (αᵥ (suc t)) (Γ₂,ᵥ-cong (lem₂ acc[t+1])) ≈ᵥ-refl ⟩
+    [ Γ₂,ᵥ (Γ₂,ᵢ O[tₒ]) , V[t] ] αᵥ (suc t)         ≈⟨ [_,_]-cong (αᵥ (suc t)) (Γ₂,ᵥ-cong (Γ₂,ᵢ-cong (lem₃ acc[t+1]))) ≈ᵥ-refl ⟩
+    [ Γ₂,ᵥ (Γ₂,ᵢ (Γ₂,ₒ' V[tᵥ])) , V[t] ] αᵥ (suc t) ≈⟨ [_,_]-cong (αᵥ (suc t)) (≈ᵥ-sym (Γ₁=Γ₂-comp' V[tᵥ])) ≈ᵥ-refl ⟩
+    [ Γ₁' V[tᵥ] , V[t] ] αᵥ (suc t)       ∎
+    where open EqReasoning 𝕍ₛ
+          V[t+1] : RoutingVector
+          V[t+1] = getV (Ω₂' ψ S₀ acc[t+1])
+          V[t] : RoutingVector
+          V[t] = getV (Ω₂' ψ S₀ (pred acc[t+1]))
+          I[tᵢ] : RoutingVector₂
+          I[tᵢ] i q = getI (Ω₂' ψ S₀ (acc[tᵢ] {t} {i} acc[t+1])) i q
+          O[tₒ] : RoutingVector₂
+          O[tₒ] i q = getO (Ω₂' ψ S₀ (acc[tₒ] {t} {q} {i} acc[t+1])) i q
+          V[tᵥ] : Fin n → RoutingVector
+          V[tᵥ] i q = getV (Ω₂' ψ S₀ (acc[tᵥ] {t} {i} {q} acc[t+1])) q
+
+  Ω₂'=Ω₁' : ∀ {t} (acc[t] : Acc _<_ t) → Τ₂ (Ω₂' ψ S₀ acc[t]) ≈ᵥ Ω₁' (r₂ ψ) (Τ₂ S₀) acc[t]
+  Ω₂'=Ω₁' {zero} _    = ≈ᵥ-refl
+  Ω₂'=Ω₁' {suc t} (acc rec) = begin
+    Τ₂ (Ω₂' ψ S₀ (acc rec))     ≡⟨⟩
+    V₂[t+1]                    ≈⟨ lem₄ (acc rec) ⟩
+    [ Γ₁' V₂[tᵥ] , V₂[t] ] αᵥ (suc t) ≈⟨ [_,_]-cong (αᵥ (suc t)) (Γ₁-cong' V₂[tᵥ]=V₁[tᵥ]) V₂[t]=V₁[t] ⟩
+    [ Γ₁' V₁[tᵥ] , V₁[t] ] αᵥ (suc t) ≈⟨ [_,_]-cong (αᵥ (suc t)) (Γ₁-cong' V₁[tᵥ]=V₁[β']) ≈ᵥ-refl ⟩
+    [ Γ₁' V₁[β'] , V₁[t] ] α' (suc t) ≈⟨ {!!} ⟩ -- re-implement Ω₁ to use the choice operator
+    Ω₁' (r₂ ψ) (Τ₂ S₀) (acc rec) ∎
       where open EqReasoning 𝕍ₛ
-            V[tᵥ] : Fin n → RoutingVector
-            V[tᵥ] = λ i q → getV (Ω₂' ψ S₀ (<-wellFounded (tᵥ ψ (suc t) i q))) q
+            V₂[t+1] : RoutingVector
+            V₂[t+1] = getV (Ω₂' ψ S₀ (acc rec))
+            V₂[t] : RoutingVector
+            V₂[t] = getV (Ω₂' ψ S₀ (pred (acc rec)))
+            V₂[tᵥ] : Fin n → RoutingVector
+            V₂[tᵥ] i q = getV (Ω₂' ψ S₀ (acc[tᵥ] {t} {i} {q} (acc rec))) q
+            V₁[t+1] : RoutingVector
+            V₁[t+1] = Ω₁' (r₂ ψ) (Τ₂ S₀) (acc rec)
+            V₁[t] : RoutingVector
+            V₁[t] = Ω₁' (r₂ ψ) (Τ₂ S₀) (pred (acc rec))
+            V₁[tᵥ] : Fin n → RoutingVector
+            V₁[tᵥ] i q = Ω₁' (r₂ ψ) (Τ₂ S₀) (acc[tᵥ] {t} {i} {q} (acc rec)) q
+            V₁[β'] : Fin n → RoutingVector
+            V₁[β'] i q = Ω₁' (r₂ ψ) (Τ₂ S₀) (acc[β'] {t} {i} {q} (acc rec)) q
+
+            V₂[tᵥ]=V₁[tᵥ] : V₂[tᵥ] ≈ᵥ,₂ V₁[tᵥ]
+            V₂[tᵥ]=V₁[tᵥ] i q = Ω₂'=Ω₁' (rec (tᵥ ψ (suc t) i q) (s≤s (tᵥ≤t ψ t i q))) q
+
+            V₂[t]=V₁[t] : V₂[t] ≈ᵥ V₁[t]
+            V₂[t]=V₁[t] = Ω₂'=Ω₁' (rec t ≤-refl)
+
+            V₁[tᵥ]=V₁[β'] : V₁[tᵥ] ≈ᵥ,₂ V₁[β']
+            V₁[tᵥ]=V₁[β'] = ≈ᵥ,₂-refl
 
 Ω₂=Ω₁ : ∀ ψ t → Τ₂ (Ω₂ ψ S₀ t) ≈ᵥ Ω₁ (r₂ ψ) (Τ₂ S₀) t
-Ω₂=Ω₁ ψ t = Ω₂'=Ω₁' ψ t
-
+Ω₂=Ω₁ ψ t = Ω₂'=Ω₁' ψ (<-wellFounded t)

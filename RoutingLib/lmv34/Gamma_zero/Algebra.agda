@@ -26,18 +26,6 @@ infix 5 ⨁
 ⨁ : ∀ {k} → (Fin k → Route) → Route
 ⨁ iter = foldr _⊕_ ∞# (tabulate iter)
 
---------------------------------------
--- Asynchronous
-
--- Generalised adjancency matrix application
-_❪_❫ : AdjacencyMatrix → (Fin n → Fin n → Fin n → Route) → RoutingMatrix
-(A ❪ f ❫) i j = ⨁ (λ k → (A i k) ▷ (f i k j))
-
-{--- Matrix application
-infix 11 _〔_〕
-_〔_〕 : AdjacencyMatrix → RoutingMatrix → RoutingMatrix
-A 〔 X 〕 = A ❪ (λ i k j → X k j) ❫-}
-
 -- Matrix application
 infix 11 _〔_〕
 _〔_〕 : AdjacencyMatrix → RoutingMatrix → RoutingMatrix

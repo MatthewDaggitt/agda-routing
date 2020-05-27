@@ -170,16 +170,16 @@ module _ (ψ : Schedule n) where
 --------------------------------------------------------------------------------
 -- Reduction/transformation Ω₁ → Ω₀
 
--- Schedule reduction Ω₁ → Ω₀
-r₁ : ∀ {n} → Schedule n → Schedule n
-r₁ = id
-
 -- Transformation Ω₁ → Ω₀
 Τ₁ : RoutingVector → RoutingMatrix
 Τ₁ V = ─ V
 
 Τ₁-cong : ∀ {V V'} → V ≈ᵥ V' → Τ₁ V ≈ₘ Τ₁ V'
 Τ₁-cong = ─-cong
+
+-- Schedule reduction Ω₁ → Ω₀
+r₁ : ∀ {n} → Schedule n → Schedule n
+r₁ = id
 
 --------------------------------------------------------------------------------
 -- Proof of Ω₁ = Ω₀: the Ω₁ model is simulated by Ω₀.

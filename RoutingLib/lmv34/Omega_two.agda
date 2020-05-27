@@ -63,7 +63,8 @@ open DecSetoid FinRoute-decSetoid using () renaming (_≟_ to _≟ᵣ_; refl to 
 open DecSetoid Γ₂-State-decSetoid using () renaming (Carrier to Γ₂-State; _≈_  to _≈ₛ_ ; refl to ≈ₛ-refl; trans to ≈ₛ-trans; reflexive to ≈ₛ-reflexive; setoid to 𝕊ₛ)
 open DecSetoid ≈ᵥ,₂-decSetoid using () renaming (_≈_ to _≈ᵥ,₂_; refl to ≈ᵥ,₂-refl; reflexive to ≈ᵥ,₂-reflexive; setoid to 𝕍₂ₛ)
 
--- TODO: reorganise the lmv34 folder, split into Algebra/Properties files.
+-- TODO: Reorganise the lmv34 folder, split into Algebra/Properties files.
+--       Clean-up the code files, includes organising imports conform standards.
 
 --------------------------------------------------------------------------------
 -- Algebra
@@ -232,6 +233,13 @@ module _ ((ψᵥ , ψᵢ , ψₒ) : Schedule₃ n) where
 --------------------------------------------------------------------------------
 -- Reduction/transformation Ω₂ → Ω₁
 
+-- Transformation Ω₂ → Ω₁
+Τ₂ : Γ₂-State → RoutingVector
+Τ₂ (V , I , O) = V
+
+Τ₂-cong : ∀ {S S'} → S ≈ₛ S' → Τ₂ S ≈ᵥ Τ₂ S'
+Τ₂-cong (V=V' , I=I' , O=O') = V=V'
+
 -- The function ϕ find the timestamp of the most recent data from node j
 -- that is being used at node i.
 module _ {n} (ψ : Schedule n) where
@@ -330,13 +338,6 @@ r₂ {n} (ψᵥ , ψᵢ , ψₒ) = record { α = α' ; β = β' ; β-causality =
         β'-causality : ∀ t i j → β' (suc t) i j ≤ t
         β'-causality = follow-cycle-causality (ψᵥ , ψᵢ , ψₒ)
 
--- Transformation Ω₂ → Ω₁
-Τ₂ : Γ₂-State → RoutingVector
-Τ₂ (V , I , O) = V
-
-Τ₂-cong : ∀ {S S'} → S ≈ₛ S' → Τ₂ S ≈ᵥ Τ₂ S'
-Τ₂-cong (V=V' , I=I' , O=O') = V=V'
-
 --------------------------------------------------------------------------------
 -- Proof of Ω₂ = Ω₁: the Ω₂ model is simulated by Ω₁.
 
@@ -381,9 +382,9 @@ module _ ((ψᵥ , ψᵢ , ψₒ) : Schedule₃ n)  where
   acc[ϕ] {zero} i q ψ (acc rec) = acc rec
   acc[ϕ] {suc t} i q ψ (acc rec) = rec (ϕ ψ (suc t) i q) (s≤s (ϕ-causality ψ t i q))
 
-  Ω₂'-iter-cong : ∀ {t t'} {accₜ : Acc _<_ t} {accₜ' : Acc _<_ t'} →
-                  t ≡ t' → Ω₂' ψ S₀ accₜ ≈ₛ Ω₂' ψ S₀ accₜ'
-  Ω₂'-iter-cong {t} {t'} {acc rec} {acc rec'} t=t' = {!!}
+  postulate
+    Ω₂'-iter-cong : ∀ {t t'} {accₜ : Acc _<_ t} {accₜ' : Acc _<_ t'} →
+                    t ≡ t' → Ω₂' ψ S₀ accₜ ≈ₛ Ω₂' ψ S₀ accₜ'
 
   V[t+1]-step : ∀ {t} (acc[t+1] : Acc _<_ (suc t)) →
                 let V[t+1] = getV (Ω₂' ψ S₀ acc[t+1])

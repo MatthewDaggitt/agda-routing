@@ -1,6 +1,7 @@
 open import Algebra.Definitions
 open import Data.Fin using (Fin)
 open import Data.Product using (_,_; _×_) renaming (proj₁ to π₁; proj₂ to π₂)
+open import Data.Product.Relation.Binary.Pointwise.NonDependent using (×-decSetoid)
 open import Data.List using (List; filter; tabulate; []; _∷_; _++_; map)
 open import Data.List.Relation.Unary.Any using (here; there)
 import Data.List.Membership.DecSetoid as Membership
@@ -49,8 +50,6 @@ open Gamma_one_Properties isRAlg A
 open Gamma_two isRAlg Imp Prot Exp
 open Gamma_two_Algebra isRAlg n 
 open Gamma_two_Properties isRAlg A Imp Prot Exp A=Imp∘Prot∘Exp
-  hiding (≈ₛ-refl; ≈ₛ-sym; ≈ₛ-trans; 𝕊ₛ)
-  renaming (_≈ₛ_ to _≈ₛ,₂_)
 open Gamma_three isRAlg Imp Prot Exp
 open Gamma_three_Algebra isRAlg n
 
@@ -60,31 +59,31 @@ open PermutationProperties FinRoute-setoid using (filter⁺; ++⁺; ++-identity�
 
 ------------------------------------
 -- Γ₃-State
-infix 2 _≈ₛ_
 
-_≈ₛ_ : Rel Γ₃-State (a ⊔ ℓ)
-(S₃ V O I ∇,Δ) ≈ₛ (S₃ V' O' I' ∇,Δ') =
-  V ≈ᵥ V'   ×
-  O ≈ᵥ,₂ O' ×
-  I ≈ᵥ,₂ I' ×
-  π₁ ∇,Δ ≈ᵥ,₂ π₁ ∇,Δ' ×
-  π₂ ∇,Δ ≈ᵥ,₂ π₂ ∇,Δ'
+open DecSetoid ≈ᵥ,₂-decSetoid using () renaming
+  ( _≈_           to _≈ᵥ,₂_
+  ; refl          to ≈ᵥ,₂-refl
+  ; sym           to ≈ᵥ,₂-sym
+  ; trans         to ≈̌ᵥ,₂-trans
+  ; setoid        to 𝕍₂ₛ
+  )
 
-≈ₛ-refl : Reflexive _≈ₛ_
-≈ₛ-refl = (≈ᵥ-refl , ≈ᵥ,₂-refl , ≈ᵥ,₂-refl , ≈ᵥ,₂-refl , ≈ᵥ,₂-refl)
-≈ₛ-sym : Symmetric _≈ₛ_
-≈ₛ-sym (V=V' , I=I' , O=O' , ∇=∇' , Δ=Δ') =
-  (≈ᵥ-sym V=V' , ≈ᵥ,₂-sym I=I' , ≈ᵥ,₂-sym O=O' , ≈ᵥ,₂-sym ∇=∇' , ≈ᵥ,₂-sym Δ=Δ')
-≈ₛ-trans : Transitive _≈ₛ_
-≈ₛ-trans (V=V' , I=I' , O=O' , ∇=∇' , Δ=Δ') (V'=V'' , I'=I'' , O'=O'' , ∇'=∇'' , Δ'=Δ'') =
-  (≈ᵥ-trans V=V' V'=V'' , ≈ᵥ,₂-trans I=I' I'=I'' , ≈ᵥ,₂-trans O=O' O'=O'' , ≈ᵥ,₂-trans ∇=∇' ∇'=∇'' , ≈ᵥ,₂-trans Δ=Δ' Δ'=Δ'')
-  
-𝕊ₛ : Setoid a (a ⊔ ℓ)
-𝕊ₛ = record {Carrier = Γ₃-State;
-             _≈_ = _≈ₛ_;
-             isEquivalence =
-               record {refl = ≈ₛ-refl; sym = ≈ₛ-sym; trans = ≈ₛ-trans}}
+infixr 4 _×ₛ_
+_×ₛ_ : ∀ {ℓ₁ ℓ₂ ℓ₃ ℓ₄} → DecSetoid ℓ₁ ℓ₂ → DecSetoid ℓ₃ ℓ₄ → DecSetoid _ _
+_×ₛ_ = ×-decSetoid
 
+-- Γ₃-State setoid
+Γ₃-State-decSetoid : DecSetoid _ _
+Γ₃-State-decSetoid = ≈ᵥ-decSetoid ×ₛ ≈ᵥ,₂-decSetoid ×ₛ ≈ᵥ,₂-decSetoid ×ₛ ≈ᵥ,₂-decSetoid ×ₛ ≈ᵥ,₂-decSetoid
+
+open DecSetoid Γ₃-State-decSetoid using () renaming
+  ( _≈_    to _≈ₛ_
+  ; refl   to ≈ₛ-refl
+  ; setoid to 𝕊ₛ
+  )
+
+open DecSetoid Γ₂-State-decSetoid using () renaming
+  ( _≈_ to _≈ₛ,₂_)
 
 ------------------------------------
 -- Operation properties
@@ -273,14 +272,14 @@ F-minus-distrib F O O' i j = f-minus-distrib (F i j) (O j i) (O' j i)
 -- Then the V, I, and O components will be the same at each step.
 
 Γ₃-invariant : Γ₃-State → Set (a ⊔ ℓ)
-Γ₃-invariant (S₃ V I O (∇ , Δ)) = Γ₂,ᵢ O ≈ᵥ,₂ Γ₃,ᵢ I  (∇ , Δ)
+Γ₃-invariant (V , I , O , (∇ , Δ)) = Γ₂,ᵢ O ≈ᵥ,₂ Γ₃,ᵢ I  (∇ , Δ)
 
 diffᵥ-lemma : ∀ X Y → let (∇ , Δ) = diffᵥ X Y in
               ((X -ᵥ ∇) ∪ᵥ Δ) ≈ᵥ,₂ Y
 diffᵥ-lemma X Y i j = diff-lemma (X i j) (Y i j)
 
 Γ₃-invariant-maintained : ∀ (S : Γ₃-State) → Γ₃-invariant S → Γ₃-invariant (Γ₃ S) 
-Γ₃-invariant-maintained (S₃ V I O (∇ , Δ)) inv = prf
+Γ₃-invariant-maintained (V , I , O , (∇ , Δ)) inv = prf
    where
      prf : Γ₂,ᵢ (Γ₂,ₒ V) ≈ᵥ,₂ Γ₃,ᵢ (Γ₃,ᵢ I  (∇ , Δ))  (diffᵥ O (Γ₃,ₒ V))
      prf = begin
@@ -302,10 +301,10 @@ diffᵥ-lemma X Y i j = diff-lemma (X i j) (Y i j)
 
 
 S₃≈S₂ : Γ₃-State → Γ₂-State → Set (a ⊔ ℓ)
-S₃≈S₂ (S₃ V I O (∇ , Δ)) (S₂ V' I' O') = (S₂ V I O) ≈ₛ,₂ (S₂ V' I' O')
+S₃≈S₂ (V , I , O , (∇ , Δ)) (V' , I' , O') = (V , I , O) ≈ₛ,₂ (V' , I' , O')
 
 S₃≈S₂-maintained : ∀ (S3 : Γ₃-State) (S2 : Γ₂-State) → S₃≈S₂ S3 S2 → Γ₃-invariant S3 → S₃≈S₂ (Γ₃ S3) (Γ₂ S2)
-S₃≈S₂-maintained  (S₃ V I O (∇ , Δ)) (S₂ V' I' O') ( V≈V' , (I≈I' , O≈O') ) inv = prfV , prfI , prfO
+S₃≈S₂-maintained  (V , I , O , (∇ , Δ)) (V' , I' , O') ( V≈V' , (I≈I' , O≈O') ) inv = prfV , prfI , prfO
   where
     prfV : (Γ₃,ᵥ I) ≈ᵥ (Γ₂,ᵥ I')
     prfV = Γ₂,ᵥ-cong I≈I'
@@ -327,7 +326,7 @@ S₃≈S₂-maintained-iter S3 S2 zero eq inv = eq
 S₃≈S₂-maintained-iter S3 S2 (suc k) eq inv =
    S₃≈S₂-maintained ((Γ₃ ^ k) S3) ((Γ₂ ^ k) S2) (S₃≈S₂-maintained-iter S3 S2 k eq inv)  (Γ₃-invariant-maintained-iter S3 k inv) 
 
-S₃≈S₂-init : S₃≈S₂ (S₃ (~ M) Øᵥ,₂ Øᵥ,₂ (Øᵥ,₂ , Øᵥ,₂)) (S₂ (~ M) Øᵥ,₂ Øᵥ,₂)
+S₃≈S₂-init : S₃≈S₂ ((~ M) , Øᵥ,₂ , Øᵥ,₂ , (Øᵥ,₂ , Øᵥ,₂)) ((~ M) , Øᵥ,₂ , Øᵥ,₂)
 S₃≈S₂-init = ≈ᵥ-refl , ( ≈ᵥ,₂-refl , ≈ᵥ,₂-refl )
 
 Γ₂,ᵢØ≈Ø : Γ₂,ᵢ Øᵥ,₂ ≈ᵥ,₂ Øᵥ,₂
@@ -339,13 +338,11 @@ S₃≈S₂-init = ≈ᵥ-refl , ( ≈ᵥ,₂-refl , ≈ᵥ,₂-refl )
 Ø-Ø≈Ø : (Øᵥ,₂ -ᵥ Øᵥ,₂) ≈ᵥ,₂ Øᵥ,₂
 Ø-Ø≈Ø i j = ↭-refl 
 
-init-invariant : Γ₃-invariant (S₃ (~ M) Øᵥ,₂ Øᵥ,₂ (Øᵥ,₂ , Øᵥ,₂))
+init-invariant : Γ₃-invariant ((~ M) , Øᵥ,₂ , Øᵥ,₂ , (Øᵥ,₂ , Øᵥ,₂))
 init-invariant  = prf
   where
     prf : Γ₂,ᵢ Øᵥ,₂ ≈ᵥ,₂ Γ₃,ᵢ Øᵥ,₂  (Øᵥ,₂ , Øᵥ,₂)
     prf = ≈ᵥ,₂-refl
          
-S₃≈S₂-maintained-init : ∀ k → S₃≈S₂ ((Γ₃ ^ k) (S₃ (~ M) Øᵥ,₂ Øᵥ,₂ (Øᵥ,₂ , Øᵥ,₂))) ((Γ₂ ^ k) (S₂ (~ M) Øᵥ,₂ Øᵥ,₂))
-S₃≈S₂-maintained-init  k = S₃≈S₂-maintained-iter (S₃ (~ M) Øᵥ,₂ Øᵥ,₂ (Øᵥ,₂ , Øᵥ,₂)) (S₂ (~ M) Øᵥ,₂ Øᵥ,₂) k S₃≈S₂-init init-invariant
-
--- now, related gamma-3 to gamma-1 and gamma-0 ... 
+S₃≈S₂-maintained-init : ∀ k → S₃≈S₂ ((Γ₃ ^ k) ((~ M) , Øᵥ,₂ , Øᵥ,₂ , (Øᵥ,₂ , Øᵥ,₂))) ((Γ₂ ^ k) ((~ M) , Øᵥ,₂ , Øᵥ,₂))
+S₃≈S₂-maintained-init  k = S₃≈S₂-maintained-iter ((~ M) , Øᵥ,₂ , Øᵥ,₂ , (Øᵥ,₂ , Øᵥ,₂)) ((~ M) , Øᵥ,₂ , Øᵥ,₂) k S₃≈S₂-init init-invariant

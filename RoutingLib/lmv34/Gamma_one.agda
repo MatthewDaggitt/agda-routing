@@ -15,16 +15,11 @@ open Gamma_one_Algebra isRoutingAlgebra n
 ------------------------------------
 -- State model
 
-record Γ₁-State : Set a where
-  constructor S₁
-  field
-    V : RoutingVector
+Γ₁-State : Set a
+Γ₁-State = RoutingVector
 
 ------------------------------------
 -- Computation model
 
-Γ₁ : RoutingVector → RoutingVector
+Γ₁ : Γ₁-State → Γ₁-State
 Γ₁ V = A 〚 V 〛 ⊕ᵥ ~ M
-
-Γ₁-Model : Γ₁-State → Γ₁-State
-Γ₁-Model (S₁ V) = S₁ (Γ₁ V)

@@ -13,16 +13,11 @@ open Gamma_zero_Algebra algebra n
 ------------------------------------
 -- State model
 
-record Γ₀-State : Set a where
-  constructor S₀
-  field
-    Y : RoutingMatrix
+Γ₀-State : Set a
+Γ₀-State = RoutingMatrix
 
 ------------------------------------
 -- Computation model
 
-Γ₀ : RoutingMatrix → RoutingMatrix
+Γ₀ : Γ₀-State → Γ₀-State
 Γ₀ Y = A 〔 Y 〕 ⊕ₘ M
-
-Γ₀-Model : Γ₀-State → Γ₀-State
-Γ₀-Model (S₀ Y) = S₀ (Γ₀ Y)

@@ -17,23 +17,19 @@ module RoutingLib.lmv34.Gamma_three
 
 open Gamma_one_Algebra isRoutingAlgebra n
 open Gamma_two_Algebra isRoutingAlgebra n 
-open Gamma_three_Algebra isRoutingAlgebra n 
+open Gamma_three_Algebra isRoutingAlgebra n
 open Gamma_two isRoutingAlgebra Imp Prot Exp using (Γ₂,ᵥ; Γ₂,ᵢ; Γ₂,ₒ)
+
 ------------------------------------
 -- State model
 
-record Γ₃-State : Set a where
-  constructor S₃
-  field
-    V : RoutingVector
-    I : RoutingVector₂
-    O : RoutingVector₂
-    ∇,Δ : RoutingVector₂ × RoutingVector₂
+Γ₃-State : Set a
+Γ₃-State = RoutingVector × RoutingVector₂ × RoutingVector₂ × (RoutingVector₂ × RoutingVector₂)
 
 ------------------------------------
 -- Computation Model
 
-Γ₃,ᵥ : RoutingVector₂ →  RoutingVector
+Γ₃,ᵥ : RoutingVector₂ → RoutingVector
 Γ₃,ᵥ = Γ₂,ᵥ 
 
 Γ₃,ᵢ : RoutingVector₂ → (RoutingVector₂ × RoutingVector₂) → RoutingVector₂
@@ -46,4 +42,4 @@ record Γ₃-State : Set a where
 Γ₃,ₓ V O = diffᵥ O (Γ₃,ₒ V)
 
 Γ₃ : Γ₃-State → Γ₃-State
-Γ₃ (S₃ V I O (∇ , Δ)) = S₃ (Γ₃,ᵥ I) (Γ₃,ᵢ I (∇ , Δ)) (Γ₃,ₒ V) (Γ₃,ₓ V O)
+Γ₃ (V , I , O , (∇ , Δ)) = (Γ₃,ᵥ I) , (Γ₃,ᵢ I (∇ , Δ)) , (Γ₃,ₒ V) , (Γ₃,ₓ V O)

@@ -1,77 +1,37 @@
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra)
 open import RoutingLib.Routing as Routing using () renaming (AdjacencyMatrix to AdjacencyMatrix')
 
-module RoutingLib.lmv34.Omega_zero
+module RoutingLib.lmv34.Asynchronous.Omega_zero.Properties
   {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)
   {n} (A : AdjacencyMatrix' algebra n)
   where
 
 open import Data.Fin using (Fin)
-open import Data.Fin.Subset using (Subset; ⊤; ⊥)
+open import Data.Fin.Subset using (⊤; ⊥)
 open import Data.Fin.Subset.Properties using (_∈?_; ∈⊤; ∉⊥)
-open import Data.Nat using (zero; suc; s≤s; _<_)
-open import Data.Nat.Induction using (Acc; acc; <-wellFounded)
+open import Data.Nat using (zero; suc; _<_; s≤s)
+open import Data.Nat.Induction using (<-wellFounded)
 open import Data.Nat.Properties using (≤-refl)
 open import Function using (const)
-open import Relation.Nullary using (yes; no)
-open import Relation.Nullary.Negation using (contradiction)
+open import Induction.WellFounded using (Acc; acc)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 open import Relation.Binary.Indexed.Homogeneous using (IndexedDecSetoid)
 import Relation.Binary.Reasoning.Setoid as EqReasoning
-open import Relation.Binary.PropositionalEquality using (_≡_; refl)
+open import Relation.Nullary using (yes; no)
+open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.lmv34.Gamma_zero algebra A using (Γ₀)
-open import RoutingLib.lmv34.Gamma_zero.Algebra algebra n using (_⊕ₘ_; ⨁)
-open import RoutingLib.lmv34.Gamma_zero.Properties algebra A using (Γ₀-cong; ⨁-cong; ⊕ₘ-cong)
-open import RoutingLib.Iteration.Asynchronous.Static using (AsyncIterable; asyncIter; asyncIter')
-open import RoutingLib.Iteration.Asynchronous.Static.Schedule using (Schedule; 𝕋)
-open import RoutingLib.Iteration.Asynchronous.Static.Schedule.Construct.Synchronous using (ψˢʸⁿᶜ; αˢʸⁿᶜ; βˢʸⁿᶜ; βˢʸⁿᶜ-causality)
+open import RoutingLib.Iteration.Asynchronous.Static using (AsyncIterable; asyncIter'; asyncIter)
+open import RoutingLib.Iteration.Asynchronous.Static.Schedule using (Schedule)
+open import RoutingLib.Iteration.Asynchronous.Static.Schedule.Construct.Synchronous using (ψˢʸⁿᶜ; αˢʸⁿᶜ)
 open import RoutingLib.Iteration.Synchronous using (_^_)
+open import RoutingLib.lmv34.Asynchronous.Omega_zero algebra A
+open import RoutingLib.lmv34.Asynchronous.Omega_zero.Algebra algebra A
+open import RoutingLib.lmv34.Synchronous.Gamma_zero algebra A using (Γ₀)
+open import RoutingLib.lmv34.Synchronous.Gamma_zero.Properties algebra A using (Γ₀-cong; ⨁-cong; ⊕ₘ-cong)
 
-open RawRoutingAlgebra algebra using (Route; _▷_; ▷-cong)
-open Routing algebra n using (RoutingTable; RoutingMatrix; AdjacencyMatrix; ℝ𝕄ₛ; Decℝ𝕄ₛⁱ; ≈ₘ-refl; _≈ₜ_; I) renaming (_≈ₘ_ to infix 4 _≈ₘ_)
+open RawRoutingAlgebra algebra using (▷-cong)
+open Routing algebra n using (RoutingMatrix; RoutingTable; ≈ₘ-refl; _≈ₜ_; ℝ𝕄ₛ; Decℝ𝕄ₛⁱ) renaming (_≈ₘ_ to infix 4 _≈ₘ_)
 open IndexedDecSetoid Decℝ𝕄ₛⁱ using () renaming (isDecEquivalenceᵢ to ℝ𝕄-isDecEquivalenceᵢ)
-
---------------------------------------------------------------------------------
--- Algebra
-
--- Generalised Vector (maybe already implemented?)
-Vectorᵢ : (Fin n → Set a) → Set a
-Vectorᵢ Aᵢ = (i : Fin n) → Aᵢ i
-
--- Choice operator
-infix 5 [_,_]_
-[_,_]_ : ∀ {A : Fin n → Set a} → Vectorᵢ A → Vectorᵢ A → Subset n → Vectorᵢ A
-([ X , Y ] S) i with (i ∈? S)
-... | yes _ = X i
-... | no  _ = Y i
-
--- Asynchronous (generalised) adjancency matrix application
-_❪_❫ : AdjacencyMatrix → (Fin n → Fin n → Fin n → Route) → RoutingMatrix
-(A ❪ f ❫) i j = ⨁ (λ k → (A i k) ▷ (f i k j))
-
--- Asynchronous (generalised) version of the Γ₀ operator
-Γ₀' : (Fin n → RoutingMatrix) → RoutingMatrix
-Γ₀' X = A ❪ X ❫ ⊕ₘ I
-
---------------------------------------------------------------------------------
--- Implementation of Ω₀
-
--- We first define Ω₀ with an explicit accessible argument.
--- This is required to prove guaranteed termination.
-
-module _ (ψ : Schedule n) where
-  open Schedule ψ
-
-  Ω₀' : RoutingMatrix → {t : 𝕋} → Acc _<_ t → RoutingMatrix
-  Ω₀' X {zero}  _         = X
-  Ω₀' X {suc t} (acc rec) = [ Γ₀' X[β[t+1]] , X[t] ] α (suc t)
-    where X[t] : RoutingMatrix
-          X[t] = Ω₀' X (rec t ≤-refl)
-          X[β[t+1]] : Fin n → RoutingMatrix
-          X[β[t+1]] i q j = Ω₀' X (rec (β (suc t) i q) (s≤s (β-causality t i q))) q j
-
-Ω₀ : Schedule n → RoutingMatrix → 𝕋 → RoutingMatrix
-Ω₀ ψ X t = Ω₀' ψ X (<-wellFounded t)
 
 --------------------------------------------------------------------------------
 -- Operation properties

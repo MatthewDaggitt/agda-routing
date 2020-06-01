@@ -21,18 +21,18 @@ open import RoutingLib.Iteration.Synchronous using (_^_)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 open import RoutingLib.Routing as Routing using () renaming (AdjacencyMatrix to AdjacencyMatrix')
 import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties as Perm
-import RoutingLib.lmv34.Gamma_zero as Gamma_zero
-import RoutingLib.lmv34.Gamma_zero.Algebra as Gamma_zero_Algebra
-import RoutingLib.lmv34.Gamma_one as Gamma_one
-import RoutingLib.lmv34.Gamma_one.Algebra as Gamma_one_Algebra
-import RoutingLib.lmv34.Gamma_one.Properties as Gamma_one_Properties
-import RoutingLib.lmv34.Gamma_two as Gamma_two
-open import RoutingLib.lmv34.Gamma_two.Algebra as Gamma_two_Algebra using (IsComposition; RouteMapMatrix)
-import RoutingLib.lmv34.Gamma_two.Properties as Gamma_two_Properties
-import RoutingLib.lmv34.Gamma_three as Gamma_three
-import RoutingLib.lmv34.Gamma_three.Algebra as Gamma_three_Algebra
+import RoutingLib.lmv34.Synchronous.Gamma_zero as Gamma_zero
+import RoutingLib.lmv34.Synchronous.Gamma_zero.Algebra as Gamma_zero_Algebra
+import RoutingLib.lmv34.Synchronous.Gamma_one as Gamma_one
+import RoutingLib.lmv34.Synchronous.Gamma_one.Algebra as Gamma_one_Algebra
+import RoutingLib.lmv34.Synchronous.Gamma_one.Properties as Gamma_one_Properties
+import RoutingLib.lmv34.Synchronous.Gamma_two as Gamma_two
+open import RoutingLib.lmv34.Synchronous.Gamma_two.Algebra as Gamma_two_Algebra using (IsComposition; RouteMapMatrix)
+import RoutingLib.lmv34.Synchronous.Gamma_two.Properties as Gamma_two_Properties
+import RoutingLib.lmv34.Synchronous.Gamma_three as Gamma_three
+import RoutingLib.lmv34.Synchronous.Gamma_three.Algebra as Gamma_three_Algebra
 
-module RoutingLib.lmv34.Gamma_three.Properties
+module RoutingLib.lmv34.Synchronous.Gamma_three.Properties
   {a b ℓ} {alg : RawRoutingAlgebra a b ℓ}
   (isRAlg : IsRoutingAlgebra alg) {n}
   (A    : AdjacencyMatrix' alg n)
@@ -59,14 +59,6 @@ open PermutationProperties FinRoute-setoid using (filter⁺; ++⁺; ++-identity�
 
 ------------------------------------
 -- Γ₃-State
-
-open DecSetoid ≈ᵥ,₂-decSetoid using () renaming
-  ( _≈_           to _≈ᵥ,₂_
-  ; refl          to ≈ᵥ,₂-refl
-  ; sym           to ≈ᵥ,₂-sym
-  ; trans         to ≈̌ᵥ,₂-trans
-  ; setoid        to 𝕍₂ₛ
-  )
 
 infixr 4 _×ₛ_
 _×ₛ_ : ∀ {ℓ₁ ℓ₂ ℓ₃ ℓ₄} → DecSetoid ℓ₁ ℓ₂ → DecSetoid ℓ₃ ℓ₄ → DecSetoid _ _

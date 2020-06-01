@@ -28,7 +28,7 @@ open import RoutingLib.Data.List using (strictMerge)
 import RoutingLib.Data.List.Sorting.InsertionSort as InsertionSort
 import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties as PermutationProperties
 
-module RoutingLib.lmv34.Gamma_one.Algebra
+module RoutingLib.lmv34.Synchronous.Gamma_one.Algebra
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (n : ℕ) where

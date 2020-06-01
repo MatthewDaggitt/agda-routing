@@ -10,9 +10,9 @@ import RoutingLib.Routing as Routing
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 
-import RoutingLib.lmv34.Gamma_one.Algebra as Gamma_one_Algebra
+import RoutingLib.lmv34.Synchronous.Gamma_one.Algebra as Gamma_one_Algebra
 
-module RoutingLib.lmv34.Gamma_two.Algebra
+module RoutingLib.lmv34.Synchronous.Gamma_two.Algebra
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (n : ℕ) where

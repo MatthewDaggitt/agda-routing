@@ -5,10 +5,10 @@ open import Data.Product using (_×_; _,_)
 
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
-import RoutingLib.lmv34.Gamma_one.Algebra as Gamma_one_Algebra
-open import RoutingLib.lmv34.Gamma_two.Algebra as Gamma_two_Algebra using (RouteMapMatrix; IsComposition)
+import RoutingLib.lmv34.Synchronous.Gamma_one.Algebra as Gamma_one_Algebra
+open import RoutingLib.lmv34.Synchronous.Gamma_two.Algebra as Gamma_two_Algebra using (RouteMapMatrix; IsComposition)
 
-module RoutingLib.lmv34.Gamma_two
+module RoutingLib.lmv34.Synchronous.Gamma_two
   {a b ℓ} {n : ℕ}
   {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)

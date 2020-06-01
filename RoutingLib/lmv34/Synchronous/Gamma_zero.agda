@@ -1,8 +1,8 @@
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra)
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
-import RoutingLib.lmv34.Gamma_zero.Algebra as Gamma_zero_Algebra
+import RoutingLib.lmv34.Synchronous.Gamma_zero.Algebra as Gamma_zero_Algebra
 
-module RoutingLib.lmv34.Gamma_zero
+module RoutingLib.lmv34.Synchronous.Gamma_zero
   {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)
   {n} (A : AdjacencyMatrix algebra n)
   where

@@ -12,10 +12,10 @@ open import RoutingLib.Algebra.Structures using (IsDecMagma)
 open import RoutingLib.Iteration.Synchronous using (_^_; IsFixedPoint)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra)
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
-import RoutingLib.lmv34.Gamma_zero as Gamma_zero
-import RoutingLib.lmv34.Gamma_zero.Algebra as Gamma_zero_Algebra
+import RoutingLib.lmv34.Synchronous.Gamma_zero as Gamma_zero
+import RoutingLib.lmv34.Synchronous.Gamma_zero.Algebra as Gamma_zero_Algebra
 
-module RoutingLib.lmv34.Gamma_zero.Properties
+module RoutingLib.lmv34.Synchronous.Gamma_zero.Properties
   {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)
   {n} (A : AdjacencyMatrix algebra n)
   where

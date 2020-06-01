@@ -4,12 +4,12 @@ open import Data.Product using (_×_; _,_)
 
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
-import RoutingLib.lmv34.Gamma_one.Algebra as Gamma_one_Algebra
-import RoutingLib.lmv34.Gamma_two as Gamma_two using (Γ₂,ᵥ; Γ₂,ᵢ; Γ₂,ₒ)
-open import RoutingLib.lmv34.Gamma_two.Algebra as Gamma_two_Algebra using (RouteMapMatrix)
-import RoutingLib.lmv34.Gamma_three.Algebra as Gamma_three_Algebra
+import RoutingLib.lmv34.Synchronous.Gamma_one.Algebra as Gamma_one_Algebra
+import RoutingLib.lmv34.Synchronous.Gamma_two as Gamma_two using (Γ₂,ᵥ; Γ₂,ᵢ; Γ₂,ₒ)
+open import RoutingLib.lmv34.Synchronous.Gamma_two.Algebra as Gamma_two_Algebra using (RouteMapMatrix)
+import RoutingLib.lmv34.Synchronous.Gamma_three.Algebra as Gamma_three_Algebra
 
-module RoutingLib.lmv34.Gamma_three
+module RoutingLib.lmv34.Synchronous.Gamma_three
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra) {n}
   (Imp Prot Exp : RouteMapMatrix isRoutingAlgebra n )

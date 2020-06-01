@@ -40,13 +40,13 @@ open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebr
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
 open import RoutingLib.Routing as Routing using () renaming (AdjacencyMatrix to AdjacencyMatrix₁)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
-import RoutingLib.lmv34.Gamma_zero as Gamma_zero
-import RoutingLib.lmv34.Gamma_zero.Algebra as Gamma_zero_Algebra
-import RoutingLib.lmv34.Gamma_zero.Properties as Gamma_zero_Properties
-import RoutingLib.lmv34.Gamma_one as Gamma_one
-import RoutingLib.lmv34.Gamma_one.Algebra as Gamma_one_Algebra
+import RoutingLib.lmv34.Synchronous.Gamma_zero as Gamma_zero
+import RoutingLib.lmv34.Synchronous.Gamma_zero.Algebra as Gamma_zero_Algebra
+import RoutingLib.lmv34.Synchronous.Gamma_zero.Properties as Gamma_zero_Properties
+import RoutingLib.lmv34.Synchronous.Gamma_one as Gamma_one
+import RoutingLib.lmv34.Synchronous.Gamma_one.Algebra as Gamma_one_Algebra
 
-module RoutingLib.lmv34.Gamma_one.Properties
+module RoutingLib.lmv34.Synchronous.Gamma_one.Properties
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
   {n} (A : AdjacencyMatrix₁ algebra n)
@@ -325,8 +325,8 @@ LemmaA₂-iter {suc k} f = begin
   where open PermutationReasoning
 
 -- Lemma A.1
-⊕-distributive : ∀ A B → ~(A ⊕ₘ B) ≈ᵥ (~ A) ⊕ᵥ (~ B)
-⊕-distributive A B i = begin
+⊕ᵥ-distributive : ∀ A B → ~(A ⊕ₘ B) ≈ᵥ (~ A) ⊕ᵥ (~ B)
+⊕ᵥ-distributive A B i = begin
   (~(A ⊕ₘ B)) i                                                        ≡⟨⟩
   (tabulate λ j → (j , (A i j) ⊕ (B i j))) †                           ↭⟨ ↭-sym (LemmaA₂ (λ j → A i j) (λ j → B i j)) ⟩
   ((tabulate (λ d → d , A i d)) †) ⊕ₛ ((tabulate (λ d → d , B i d)) †) ≡⟨⟩
@@ -362,7 +362,7 @@ Lemma-Γ₀=Γ₁ {A} {Y} i = begin
 Γ₀=Γ₁ {Y} = begin
   Γ₁ (~ Y)                ≡⟨⟩
   (A 〚 ~ Y 〛) ⊕ᵥ ~ M     ≈⟨ ⊕ᵥ-cong Lemma-Γ₀=Γ₁ (≈ₘ⇒≈ᵥ ≈ₘ-refl) ⟩
-  (~ (A 〔 Y 〕)) ⊕ᵥ ~ M   ≈⟨ ≈ᵥ-sym (⊕-distributive (A 〔 Y 〕) M) ⟩
+  (~ (A 〔 Y 〕)) ⊕ᵥ ~ M   ≈⟨ ≈ᵥ-sym (⊕ᵥ-distributive (A 〔 Y 〕) M) ⟩
   ~ (A 〔 Y 〕 ⊕ₘ M)       ≡⟨⟩
   ~ (Γ₀ Y)                 ∎
   where open EqReasoning 𝕍ₛ

@@ -12,10 +12,10 @@ open import Relation.Nullary.Negation using (¬?)
 open import Relation.Unary using (Decidable; Pred; ∁)
 
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
-import RoutingLib.lmv34.Gamma_one.Algebra as Gamma_one_Algebra
-import RoutingLib.lmv34.Gamma_two.Algebra as Gamma_two_Algebra
+import RoutingLib.lmv34.Synchronous.Gamma_one.Algebra as Gamma_one_Algebra
+import RoutingLib.lmv34.Synchronous.Gamma_two.Algebra as Gamma_two_Algebra
 
-module RoutingLib.lmv34.Gamma_three.Algebra
+module RoutingLib.lmv34.Synchronous.Gamma_three.Algebra
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (n : ℕ)

@@ -1,77 +1,45 @@
-open import Algebra.Definitions
-open import Data.Fin using (zero; suc; Fin)
-open import Data.Fin.Subset using (Subset; ⊤; ⊥)
-open import Data.Fin.Subset.Properties using (_∈?_)
-open import Data.List using (tabulate)
-import Data.List.Relation.Binary.Permutation.Setoid as PermutationEq
-open import Data.Nat using (zero; suc; z≤n; s≤s; _≤_; _<_; _∸_)
-open import Data.Nat.Induction using (Acc; acc; <-wellFounded)
-open import Data.Nat.Properties as ℕₚ using (n≤1+n; m∸n≤m; ≤-refl)
-open import Data.Product using (_,_)
-open import Data.Vec.Functional.Relation.Binary.Pointwise.Properties using () renaming (decSetoid to decSetoidᵥ)
-open import Function using (const; id)
-open import Level using (0ℓ; _⊔_)
-open import Relation.Binary using (Decidable; DecSetoid)
-open import Relation.Binary.Indexed.Homogeneous using (IsIndexedEquivalence; IsIndexedDecEquivalence; IndexedDecSetoid)
-import Relation.Binary.Reasoning.Setoid as EqReasoning
-open import Relation.Nullary using (yes; no)
-
-import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties as PermutationProperties
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 open import RoutingLib.Routing as Routing using () renaming (AdjacencyMatrix to AdjacencyMatrix')
-import RoutingLib.lmv34.Gamma_zero as Gamma_zero
-import RoutingLib.lmv34.Gamma_zero.Algebra as Gamma_zero_Algebra
-import RoutingLib.lmv34.Gamma_zero.Properties as Gamma_zero_Properties
-import RoutingLib.lmv34.Gamma_one as Gamma_one
-import RoutingLib.lmv34.Gamma_one.Algebra as Gamma_one_Algebra
-import RoutingLib.lmv34.Gamma_one.Properties as Gamma_one_Properties
-import RoutingLib.lmv34.Omega_zero as Omega_zero
-open import RoutingLib.Iteration.Synchronous using (_^_)
-open import RoutingLib.Iteration.Asynchronous.Static using (AsyncIterable; asyncIter; asyncIter')
-open import RoutingLib.Iteration.Asynchronous.Static.Schedule using (Schedule; 𝕋)
-open import RoutingLib.Iteration.Asynchronous.Static.Schedule.Construct.Synchronous using (ψˢʸⁿᶜ; ψˢʸⁿᶜ-isSynchronous; αˢʸⁿᶜ)
-open import RoutingLib.Relation.Binary.Indexed.Homogeneous
 
-module RoutingLib.lmv34.Omega_one
+module RoutingLib.lmv34.Asynchronous.Omega_one.Properties
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
   {n} (A : AdjacencyMatrix' algebra n)
   where
 
-open Routing algebra n renaming (_≈ₘ_ to infix 3 _≈ₘ_)
-open RawRoutingAlgebra algebra using (_▷_; ≈-refl) renaming (S to 𝕊)
-open Gamma_zero algebra A using (Γ₀)
-open Gamma_zero_Algebra algebra n using (_⊕ₘ_; ⨁; _〔_〕)
-open Gamma_zero_Properties algebra A using (Γ₀-cong; ⊕ₘ-cong)
-open Gamma_one isRoutingAlgebra A using (Γ₁)
-open Gamma_one_Algebra isRoutingAlgebra n using (RoutingSet; RoutingVector; _≈ᵥ_; ≈ᵥ-refl; ≈ᵥ-sym; 𝕍ₛ; ≈ᵥ-trans; ⨁ₛ; map₂; _⊕ᵥ_; _†; ~_; ─_; lookup-d; _[_]; _〚_〛; FinRoute-setoid; FinRoute-decSetoid)
-open Gamma_one_Properties isRoutingAlgebra A using (Γ₁-cong; ⊕-distributive; ⨁ₛ-cong; []-cong; ⊕ᵥ-cong; Lemma-Γ₀=Γ₁; 〚〛-cong; LemmaA₂-iter; ~-lemma)
-open Omega_zero algebra A using (Ω₀'; Ω₀; [_,_]_; _❪_❫; Γ₀'; Γ₀'-cong; [,]-⊤; [,]-⊥)
-open PermutationEq FinRoute-setoid
-open PermutationProperties FinRoute-setoid using (_↭?_; ↭-decSetoid)
-open DecSetoid FinRoute-decSetoid using () renaming (_≟_ to _≟ᵣ_; refl to ≈ᵣ-refl)
+open import Data.Fin using (Fin)
+open import Data.Fin.Subset using (Subset)
+open import Data.Fin.Subset.Properties using (_∈?_)
+open import Data.List using (tabulate)
+open import Data.Nat using (zero; suc; _<_; s≤s)
+open import Data.Nat.Induction using (<-wellFounded)
+open import Data.Nat.Properties using (≤-refl)
+open import Data.Product using (_,_)
+open import Induction.WellFounded using (Acc; acc)
+import Relation.Binary.Reasoning.Setoid as EqReasoning
+open import Relation.Nullary using (yes; no)
 
---------------------------------------------------------------------------------
--- Algebra
+open import RoutingLib.Iteration.Synchronous using (_^_)
+open import RoutingLib.Iteration.Asynchronous.Static.Schedule.Construct.Synchronous using (ψˢʸⁿᶜ; αˢʸⁿᶜ)
+open import RoutingLib.Iteration.Asynchronous.Static.Schedule using (Schedule)
+open import RoutingLib.lmv34.Asynchronous.Omega_zero algebra A
+open import RoutingLib.lmv34.Asynchronous.Omega_zero.Algebra algebra A using ([_,_]_; _❪_❫; Γ₀')
+open import RoutingLib.lmv34.Asynchronous.Omega_zero.Properties algebra A using ([,]-⊤; Γ₀'-cong)
+open import RoutingLib.lmv34.Asynchronous.Omega_one isRoutingAlgebra A
+open import RoutingLib.lmv34.Asynchronous.Omega_one.Algebra isRoutingAlgebra A
+open import RoutingLib.lmv34.Synchronous.Gamma_zero.Algebra algebra n using (_⊕ₘ_; ⨁)
+open import RoutingLib.lmv34.Synchronous.Gamma_zero.Properties algebra A using (⊕ₘ-cong)
+open import RoutingLib.lmv34.Synchronous.Gamma_one isRoutingAlgebra A using (Γ₁)
+open import RoutingLib.lmv34.Synchronous.Gamma_one.Algebra isRoutingAlgebra n
+open import RoutingLib.lmv34.Synchronous.Gamma_one.Properties isRoutingAlgebra A
 
--- Generalised (asynchronous) matrix multiplication
-_⟦_⟧' : AdjacencyMatrix → (Fin n → Fin n → RoutingSet) → RoutingVector
-(A ⟦ f ⟧') i = ⨁ₛ (λ q → (A i q ▷_) [ f i q ])
-
--- Generalised (asynchronous) operator
-Γ₁' : (Fin n → Fin n → RoutingSet) → RoutingVector
-Γ₁' f = A ⟦ f ⟧' ⊕ᵥ ~ I
-
-─' : (Fin n → RoutingVector) → (Fin n → RoutingMatrix)
-─' V i = (─ V i)
-
-~' : (Fin n → RoutingMatrix) → (Fin n → RoutingVector)
-~' X i = (~ X i)
+open RawRoutingAlgebra algebra using (≈-refl; _▷_)
+open Routing algebra n using (RoutingMatrix; I; ℝ𝕄ₛ; ≈ₘ-refl) renaming (_≈ₘ_ to infix 4 _≈ₘ_)
 
 --------------------------------------------------------------------------------
 -- Operation properties
 
--- TODO: Maybe try to merely have a unique destination postulate for
+-- TODO: Try to merely have a unique destination postulate for
 -- RoutingVectors.
 postulate
   ~-─-inverse : ∀ V → ~(─ V) ≈ᵥ V -- requires uniqueness of destination
@@ -84,10 +52,13 @@ postulate
 Γ₁'-cong : ∀ {V V'} → (∀ i → V i ≈ᵥ V' i) → Γ₁' V ≈ᵥ Γ₁' V'
 Γ₁'-cong V=V' = ⊕ᵥ-cong (⟦_⟧-cong' V=V') (≈ᵥ-refl {~ I})
 
+Τ₁-cong : ∀ {V V'} → V ≈ᵥ V' → Τ₁ V ≈ₘ Τ₁ V'
+Τ₁-cong = ─-cong
+
 ─-⊕-distributive : ∀ U V → ─ (U ⊕ᵥ V) ≈ₘ (─ U) ⊕ₘ (─ V)
 ─-⊕-distributive U V = begin
   ─ (U ⊕ᵥ V)               ≈⟨ ─-cong (⊕ᵥ-cong (≈ᵥ-sym (~-─-inverse U)) (≈ᵥ-sym (~-─-inverse V))) ⟩
-  ─ ((~(─ U)) ⊕ᵥ (~(─ V))) ≈⟨ ─-cong (≈ᵥ-sym (⊕-distributive (─ U) (─ V))) ⟩
+  ─ ((~(─ U)) ⊕ᵥ (~(─ V))) ≈⟨ ─-cong (≈ᵥ-sym (⊕ᵥ-distributive (─ U) (─ V))) ⟩
   ─ (~ ((─ U) ⊕ₘ (─ V)))   ≈⟨ ─-~-inverse ((─ U) ⊕ₘ (─ V)) ⟩
   (─ U) ⊕ₘ (─ V)           ∎
   where open EqReasoning ℝ𝕄ₛ
@@ -134,23 +105,6 @@ Lemma-Γ₀'=Γ₁' {A} {Y} i = begin
 ... | no _  = ≈-refl
 
 --------------------------------------------------------------------------------
--- Implementation of Ω₁
-
-module _ (ψ : Schedule n) where
-  open Schedule ψ
-  
-  Ω₁' : RoutingVector → {t : 𝕋} → Acc _<_ t → RoutingVector
-  Ω₁' V {zero}  _         = V
-  Ω₁' V {suc t} (acc rec) = [ Γ₁' V[β[t+1]] , V[t] ] α (suc t)
-    where V[t] : RoutingVector
-          V[t] = Ω₁' V (rec t ≤-refl)
-          V[β[t+1]] : Fin n → RoutingVector
-          V[β[t+1]] i q = Ω₁' V (rec (β (suc t) i q) (s≤s (β-causality t i q))) q
-
-Ω₁ : Schedule n → RoutingVector → 𝕋 → RoutingVector
-Ω₁ ψ V t = Ω₁' ψ V (<-wellFounded t)
-
---------------------------------------------------------------------------------
 -- Proof that synchronous Ω₁ is indeed Γ₁
 
 Ω₁'ˢʸⁿᶜ=Γ₁ : ∀ V {t} (acc[t] : Acc _<_ t) → Ω₁' ψˢʸⁿᶜ V acc[t] ≈ᵥ (Γ₁ ^ t) V
@@ -166,20 +120,6 @@ module _ (ψ : Schedule n) where
 
 Ω₁ˢʸⁿᶜ=Γ₁ : ∀ V t → Ω₁ ψˢʸⁿᶜ V t ≈ᵥ (Γ₁ ^ t) V
 Ω₁ˢʸⁿᶜ=Γ₁ V t = Ω₁'ˢʸⁿᶜ=Γ₁ V (<-wellFounded t)
-
---------------------------------------------------------------------------------
--- Reduction/transformation Ω₁ → Ω₀
-
--- Transformation Ω₁ → Ω₀
-Τ₁ : RoutingVector → RoutingMatrix
-Τ₁ V = ─ V
-
-Τ₁-cong : ∀ {V V'} → V ≈ᵥ V' → Τ₁ V ≈ₘ Τ₁ V'
-Τ₁-cong = ─-cong
-
--- Schedule reduction Ω₁ → Ω₀
-r₁ : ∀ {n} → Schedule n → Schedule n
-r₁ = id
 
 --------------------------------------------------------------------------------
 -- Proof of Ω₁ = Ω₀: the Ω₁ model is simulated by Ω₀.

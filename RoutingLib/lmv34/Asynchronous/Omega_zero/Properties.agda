@@ -29,16 +29,22 @@ open import RoutingLib.lmv34.Asynchronous.Omega_zero.Algebra algebra A
 open import RoutingLib.lmv34.Synchronous.Gamma_zero algebra A using (Γ₀)
 open import RoutingLib.lmv34.Synchronous.Gamma_zero.Properties algebra A using (Γ₀-cong; ⨁-cong; ⊕ₘ-cong)
 
-open RawRoutingAlgebra algebra using (▷-cong)
+open RawRoutingAlgebra algebra using (▷-cong; ≈-refl)
 open Routing algebra n using (RoutingMatrix; RoutingTable; ≈ₘ-refl; _≈ₜ_; ℝ𝕄ₛ; Decℝ𝕄ₛⁱ) renaming (_≈ₘ_ to infix 4 _≈ₘ_)
 open IndexedDecSetoid Decℝ𝕄ₛⁱ using () renaming (isDecEquivalenceᵢ to ℝ𝕄-isDecEquivalenceᵢ)
 
 --------------------------------------------------------------------------------
 -- Operation properties
 
-postulate
-  [,]-⊤ : ∀ {A : Fin n → Set a} → ∀ {X Y : Vectorᵢ A} → [ X , Y ] ⊤ ≡ X
-  [,]-⊥ : ∀ {A : Fin n → Set a} → ∀ {X Y : Vectorᵢ A} → [ X , Y ] ⊥ ≡ Y
+[,]-⊤ : ∀ {X Y : RoutingMatrix} → [ X , Y ] ⊤ ≈ₘ X
+[,]-⊤ {X} {Y} i j with i ∈? ⊤
+... | no  i∉⊤ = contradiction ∈⊤ i∉⊤
+... | yes _   = ≈-refl
+
+[,]-⊥ : ∀ {X Y : RoutingMatrix} → [ X , Y ] ⊥ ≈ₘ Y
+[,]-⊥ {X} {Y} i j with i ∈? ⊥
+... | no  _   = ≈-refl
+... | yes i∈⊥ = contradiction i∈⊥ ∉⊥
 
 [,]-⊤ᵢ : ∀ {A : Fin n → Set a} → ∀ {X Y : Vectorᵢ A} → ∀ i → ([ X , Y ] ⊤) i ≡ X i
 [,]-⊤ᵢ {A} {X} {Y} i with i ∈? ⊤
@@ -89,7 +95,8 @@ module _ (ψ : Schedule n) where
 Ω₀ˢʸⁿᶜ=Γ₀' X {zero}  _         = ≈ₘ-refl
 Ω₀ˢʸⁿᶜ=Γ₀' X {suc t} (acc rec) = begin
   Ω₀' ψˢʸⁿᶜ X (acc rec)            ≡⟨⟩
-  [ Γ₀ X[t] , X[t] ] αˢʸⁿᶜ (suc t) ≡⟨ [,]-⊤ ⟩
+  [ Γ₀ X[t] , X[t] ] αˢʸⁿᶜ (suc t) ≡⟨⟩
+  [ Γ₀ X[t] , X[t] ] ⊤             ≈⟨ [,]-⊤ ⟩
   Γ₀ X[t]                          ≈⟨ Γ₀-cong (Ω₀ˢʸⁿᶜ=Γ₀' X (rec t ≤-refl)) ⟩
   (Γ₀ ^ (suc t)) X                 ∎
   where open EqReasoning ℝ𝕄ₛ

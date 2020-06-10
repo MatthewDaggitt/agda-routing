@@ -11,7 +11,7 @@ open import Data.Vec.Functional using (Vector)
 open import Data.Vec.Functional.Relation.Binary.Pointwise.Properties using () renaming (decSetoid to decSetoidᵥ)
 open import Function using (_∘_)
 open import Level using (_⊔_; 0ℓ; lift) renaming (suc to lsuc)
-open import Relation.Binary using (Rel; DecTotalOrder; Setoid; DecSetoid)
+open import Relation.Binary as B using (Rel; DecTotalOrder; Setoid; DecSetoid)
 import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import Relation.Binary using (Trichotomous; tri<; tri≈; tri>)
 open import Relation.Binary.PropositionalEquality using (_≡_)
@@ -24,7 +24,7 @@ open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebr
 import RoutingLib.Routing as Routing
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebra
 import RoutingLib.Data.Vec.Functional.Relation.Binary.Equality as TableEquality
-open import RoutingLib.Data.List using (strictMerge)
+open import RoutingLib.Data.List using (partialMerge)
 import RoutingLib.Data.List.Sorting.InsertionSort as InsertionSort
 import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties as PermutationProperties
 
@@ -48,7 +48,8 @@ RoutingSet = List (Fin n × Route)
 
 -- RoutingVector setoid
 FinRoute-decSetoid = ×-decSetoid (Finₚ.≡-decSetoid n) DS
-open DecSetoid FinRoute-decSetoid public using () renaming (_≟_ to _≟ᵣ_; setoid to FinRoute-setoid)
+open DecSetoid FinRoute-decSetoid public
+  using () renaming (_≈_ to _≈ᵣ_; _≟_ to _≟ᵣ_; setoid to FinRoute-setoid)
 open PermutationEq FinRoute-setoid public
 open PermutationProperties FinRoute-setoid using (↭-decSetoid)
 
@@ -96,20 +97,20 @@ decTotalOrder = ×-decTotalOrder (Finₚ.≤-decTotalOrder n) ≤₊-decTotalOrd
 open DecTotalOrder decTotalOrder public
   using () renaming (isPreorder to ≤₂-isPreorder)
 
-_<₁_ : Rel (Fin n × Route) _
+_<₁_ : Rel (Fin n × Route) 0ℓ
 _<₁_ (d₁ , v₁) (d₂ , v₂) = d₁ < d₂
 
-_≈₁_ : Rel (Fin n × Route) _
+_≈₁_ : Rel (Fin n × Route) 0ℓ
 (d₁ , v₁) ≈₁ (d₂ , v₂) = d₁ ≡ d₂
 
-<₁-cmp : Trichotomous _≈₁_ _<₁_
-<₁-cmp (d₁ , v₁) (d₂ , v₂) = <-cmp d₁ d₂
+_<₁?_ : B.Decidable _<₁_
+(d₁ , v₁) <₁? (d₂ , v₂) = d₁ Finₚ.<? d₂
 
 _⊕₂_ : Op₂ (Fin n × Route)
 (d₁ , v₁) ⊕₂ (d₂ , v₂) = (d₁ , v₁ ⊕ v₂)
 
 mergeSorted : Op₂ RoutingSet
-mergeSorted = strictMerge <₁-cmp _⊕₂_
+mergeSorted = partialMerge _<₁?_ _⊕₂_
 
 --------------------------------------------------------------------------------
 -- Definitions

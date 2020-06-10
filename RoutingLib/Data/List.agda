@@ -9,7 +9,7 @@ open import Data.Product using (_,_; _×_)
 open import Data.Sum using (inj₁; inj₂)
 open import Function using (_∘_; id)
 open import Level
-open import Relation.Binary hiding (Decidable)
+open import Relation.Binary as B hiding (Decidable)
 open import Relation.Unary using (Pred; Decidable)
 open import Relation.Nullary using (yes; no)
 
@@ -39,16 +39,18 @@ module _ {_≤_ : Rel A ℓ} (total : Total _≤_) where
   ... | inj₁ x≤y | vs | _  = x ∷ vs
   ... | inj₂ y≤x | _  | us = y ∷ us
 
-module _ {_≈_ : Rel A ℓ₁} {_<_ : Rel A ℓ₂}
-         (cmp : Trichotomous _≈_ _<_) (_⊕_ : Op₂ A) where
+module _ {_<_ : Rel A ℓ₂} (_<?_ : B.Decidable _<_) (_⊕_ : Op₂ A) where
 
-  strictMerge : List A → List A → List A
-  strictMerge []       ys       = ys
-  strictMerge (x ∷ xs) []       = x ∷ xs
-  strictMerge (x ∷ xs) (y ∷ ys) with cmp x y | strictMerge xs (y ∷ ys) | strictMerge (x ∷ xs) ys | strictMerge xs ys
-  ... | tri< _ _ _ | rec₁ | _    | _    = x ∷ rec₁ 
-  ... | tri> _ _ _ | _    | rec₂ | _    = y ∷ rec₂
-  ... | tri≈ _ _ _ | _    | _    | rec₃ = (x ⊕ y) ∷ rec₃
+  partialMerge : List A → List A → List A
+  partialMerge []       ys       = ys
+  partialMerge (x ∷ xs) []       = x ∷ xs
+  partialMerge (x ∷ xs) (y ∷ ys) with x <? y | y <? x
+    | partialMerge xs (y ∷ ys)
+    | partialMerge (x ∷ xs) ys
+    | partialMerge xs ys
+  ... | yes x<y | _       | rec₁ | _    | _    = x ∷ rec₁ 
+  ... | no  _   | yes y<x | _    | rec₂ | _    = y ∷ rec₂
+  ... | no  _   | no   _  | _    | _    | rec₃ = (x ⊕ y) ∷ rec₃
 
 combine : (A → B → C) → List A → List B → List C
 combine f []       _  = []

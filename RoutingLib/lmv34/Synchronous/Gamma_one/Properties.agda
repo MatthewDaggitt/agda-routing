@@ -3,7 +3,7 @@ open import Algebra.Core
 open import Algebra.Definitions
 open import Data.Bool.Base using (true; false)
 open import Data.Fin renaming (zero to fzero; suc to fsuc) hiding (_≤_; _≟_)
-open import Data.Fin.Properties using (<-cmp; <-respˡ-≡; <-respʳ-≡; <-asym) renaming (≡-setoid to Fin-setoid)
+open import Data.Fin.Properties as Fin using (<-cmp; <-respˡ-≡; <-respʳ-≡; <-asym) renaming (≡-setoid to Fin-setoid)
 open import Data.Fin.Patterns
 open import Data.Nat using (ℕ; zero; suc)
 open import Data.Product using (_,_; _×_; proj₁; proj₂)
@@ -19,18 +19,19 @@ open import Data.List.Relation.Unary.All as All using (All) renaming ([] to []�
 import Data.List.Relation.Unary.All.Properties as All
 open import Data.List.Relation.Unary.AllPairs using (AllPairs)
 open import Data.Sum using (inj₁; inj₂)
+open import Function.Base using (id)
 open import Level using (Level; 0ℓ; _⊔_)
 open import Relation.Nullary using (¬_; yes; no; does; proof; _because_; ofʸ; ofⁿ)
 open import Relation.Nullary.Negation using (¬?; contradiction; contraposition)
 open import Relation.Unary using (Pred; Decidable; ∁)
 open import Function using (_∘_)
-open import Relation.Binary using (IsEquivalence; Setoid; DecSetoid; DecTotalOrder; Rel; Reflexive; _Respects_; _⇒_; tri<; tri≈; tri>)
+open import Relation.Binary as B using (IsEquivalence; Setoid; DecSetoid; DecTotalOrder; Rel; Reflexive; _Respects_; _⇒_; tri<; tri≈; tri>)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym)
 import Relation.Binary.Reasoning.Setoid as EqReasoning
 
 open import RoutingLib.Iteration.Synchronous using (_^_; IsFixedPoint)
 open import RoutingLib.Data.List using (insert)
-open import RoutingLib.Data.List.Properties using (strictMerge-identityʳ; strictMerge-idempotent; strictMerge-cong)
+open import RoutingLib.Data.List.Properties using (partialMerge-identityʳ; partialMerge-idempotent; partialMerge-cong)
 import RoutingLib.Data.List.Relation.Unary.Sorted as Sorting
 import RoutingLib.Data.List.Relation.Unary.Sorted.Properties as SortedProperties
 import RoutingLib.Data.List.Sorting.InsertionSort as InsertionSort
@@ -65,8 +66,10 @@ open Gamma_one_Algebra isRoutingAlgebra n
 open Setoid (Fin-setoid n) using () renaming (refl to Fin-refl; sym to Fin-sym)
 open DecSetoid FinRoute-decSetoid
   using (isEquivalence)
-  renaming (_≈_ to _≈ᵣ_; refl to ≈ᵣ-refl; trans to ≈ᵣ-trans; sym to ≈ᵣ-sym)
-open DecTotalOrder decTotalOrder using (≤-respˡ-≈; ≤-respʳ-≈; total; _≤_) renaming (antisym to ≤-antisym; refl to ≤-refl; trans to ≤-trans)
+  renaming (refl to ≈ᵣ-refl; trans to ≈ᵣ-trans; sym to ≈ᵣ-sym)
+open DecTotalOrder decTotalOrder
+  using (≤-respˡ-≈; ≤-respʳ-≈; total; _≤_)
+  renaming (antisym to ≤-antisym; refl to ≤-refl; trans to ≤-trans)
 open InsertionSort decTotalOrder using (sort; sort↗; sort↭; sort-pres-↭)
 open Sorting ≤₊-totalOrder using (Sorted)
 open Equality FinRoute-setoid using (_≋_; ≋-refl; ≋-sym; ≋-trans)
@@ -90,6 +93,7 @@ insert-min {x} {y ∷ xs} (x≤y¹ All.∷ x≤xs) with total x y
   where
     x=y : x ≈ᵣ y
     x=y = ≤-antisym x≤y¹ y≤x
+
 {-
 All-≤-preserves-≈ᵣ : ∀ {x x' xs} → x ≈ᵣ x' → All (x ≤_) xs → All (x' ≤_) xs
 All-≤-preserves-≈ᵣ x≈x' = All.map (≤-respˡ-≈ x≈x')
@@ -120,7 +124,25 @@ map₂-tabulate g f = ≡ₗ-trans (map₂-map (tabulate g) f) (map-tabulate g (
 ... | inj₂ v⊕v=v = v⊕v=v
 
 --------------------------------------------------------------------------------
+-- Properties of _<₁_
+
+<₁-irrefl : B.Irreflexive _≈ᵣ_ _<₁_
+<₁-irrefl (refl , _) = Fin.<-irrefl refl
+
+<₁-respʳ-≈ᵣ : _<₁_ B.Respectsʳ _≈ᵣ_
+<₁-respʳ-≈ᵣ (refl , _) = id
+
+<₁-respˡ-≈ᵣ : _<₁_ B.Respectsˡ _≈ᵣ_
+<₁-respˡ-≈ᵣ (refl , _) = id
+
+<₁-resp-≈ᵣ : _<₁_ B.Respects₂ _≈ᵣ_
+<₁-resp-≈ᵣ = <₁-respʳ-≈ᵣ , <₁-respˡ-≈ᵣ
+
+--------------------------------------------------------------------------------
 -- Properties of `_⊕₂_`
+
+⊕₂-cong : Congruent₂ _≈ᵣ_ _⊕₂_
+⊕₂-cong (refl , x≈y) (refl , w≈z) = refl , ⊕-cong x≈y w≈z
 
 ⊕₂-idem : Idempotent _≈ᵣ_ _⊕₂_
 ⊕₂-idem (d , v) = (refl , ⊕-idempotent v)
@@ -130,19 +152,15 @@ map₂-tabulate g f = ≡ₗ-trans (map₂-map (tabulate g) f) (map-tabulate g (
 
 ⊕ₛ-cong : Congruent₂ _↭_  _⊕ₛ_
 ⊕ₛ-cong {A} {A'} {B} {B'} A↭A' B↭B' =
-  ≋⇒↭ (strictMerge-cong isEquivalence ≤₂-isPreorder {!⊕₂-cong!}
-    {!!}
+  ≋⇒↭ (partialMerge-cong isEquivalence <₁-resp-≈ᵣ ⊕₂-cong
+    (↗↭↗⇒≋ (sort-pres-↭ A↭A') (sort↗ A) (sort↗ A'))
     (↗↭↗⇒≋ (sort-pres-↭ B↭B') (sort↗ B) (sort↗ B')))
-{-
-  (↗↭↗⇒≋ (sort-pres-↭ A↭A') (sort↗ A) (sort↗ A'))
-  (↗↭↗⇒≋ (sort-pres-↭ B↭B') (sort↗ B) (sort↗ B')))
--}
 
 ⊕ₛ-identityₗ : LeftIdentity _↭_ Ø _⊕ₛ_
 ⊕ₛ-identityₗ A = sort↭ A
 
 ⊕ₛ-identityᵣ : RightIdentity _↭_ Ø _⊕ₛ_
-⊕ₛ-identityᵣ A = ↭-trans (↭-reflexive (strictMerge-identityʳ (sort A))) (sort↭ A)
+⊕ₛ-identityᵣ A = ↭-trans (↭-reflexive (partialMerge-identityʳ (sort A))) (sort↭ A)
 
 ⊕ₛ-identity : Identity _↭_ Ø _⊕ₛ_
 ⊕ₛ-identity = (⊕ₛ-identityₗ , ⊕ₛ-identityᵣ)
@@ -150,7 +168,7 @@ map₂-tabulate g f = ≡ₗ-trans (map₂-map (tabulate g) f) (map-tabulate g (
 ⊕ₛ-idempotent : Idempotent _↭_ _⊕ₛ_
 ⊕ₛ-idempotent xs = begin
   xs ⊕ₛ xs                        ≡⟨⟩
-  mergeSorted (sort xs) (sort xs) ↭⟨ ≋⇒↭ (strictMerge-idempotent refl ⊕₂-idem (sort xs)) ⟩
+  mergeSorted (sort xs) (sort xs) ≋⟨ partialMerge-idempotent {_≈_ = _≈ᵣ_} ≈ᵣ-refl <₁-irrefl ⊕₂-idem (sort xs) ⟩
   sort xs                         ↭⟨ sort↭ xs ⟩
   xs                              ∎
   where open PermutationReasoning

@@ -24,7 +24,7 @@ open import RoutingLib.Iteration.Asynchronous.Static.Schedule.Construct.Synchron
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule using (Schedule)
 open import RoutingLib.lmv34.Asynchronous.Omega_zero algebra A
 open import RoutingLib.lmv34.Asynchronous.Omega_zero.Algebra algebra A using ([_,_]_; _❪_❫; Γ₀')
-open import RoutingLib.lmv34.Asynchronous.Omega_zero.Properties algebra A using ([,]-⊤; Γ₀'-cong)
+open import RoutingLib.lmv34.Asynchronous.Omega_zero.Properties algebra A using (Γ₀'-cong)
 open import RoutingLib.lmv34.Asynchronous.Omega_one isRoutingAlgebra A
 open import RoutingLib.lmv34.Asynchronous.Omega_one.Algebra isRoutingAlgebra A
 open import RoutingLib.lmv34.Synchronous.Gamma_zero.Algebra algebra n using (_⊕ₘ_; ⨁)
@@ -111,7 +111,7 @@ Lemma-Γ₀'=Γ₁' {A} {Y} i = begin
 Ω₁'ˢʸⁿᶜ=Γ₁ V {zero}  _         = ≈ᵥ-refl
 Ω₁'ˢʸⁿᶜ=Γ₁ V {suc t} (acc rec) = begin
   Ω₁' ψˢʸⁿᶜ V (acc rec)            ≡⟨⟩
-  [ Γ₁ V[t] , V[t] ] αˢʸⁿᶜ (suc t) ≡⟨ [,]-⊤ ⟩
+  [ Γ₁ V[t] , V[t] ] αˢʸⁿᶜ (suc t) ≈⟨ {!!} ⟩
   Γ₁ V[t]                          ≈⟨ Γ₁-cong (Ω₁'ˢʸⁿᶜ=Γ₁ V (rec t ≤-refl)) ⟩
   (Γ₁ ^ (suc t)) V                 ∎
   where open EqReasoning 𝕍ₛ

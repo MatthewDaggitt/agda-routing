@@ -12,13 +12,14 @@ open import Data.List.Relation.Binary.Pointwise
 open import Data.List.Relation.Unary.AllPairs
   using (AllPairs; []; _∷_)
 open import Data.List.Relation.Unary.Unique.Setoid
+import Data.List.Relation.Binary.Equality.Setoid as SetoidEquality
 open import Data.Fin using (Fin; toℕ; zero; suc)
 open import Data.Maybe using (Maybe; just; nothing)
 open import Data.Maybe.Properties using (just-injective)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
-open import Data.Product using (_,_)
+open import Data.Product using (_,_; proj₁; proj₂)
 open import Level using (Level; _⊔_)
-open import Relation.Binary using (Rel; Setoid; Trichotomous; tri<; tri≈; tri>; Reflexive)
+open import Relation.Binary as B using (Rel; Setoid; Trichotomous; tri<; tri≈; tri>; Reflexive; Irreflexive)
 open import Relation.Unary using (Decidable; Pred; ∁)
 open import Relation.Unary.Properties using (∁?)
 open import Relation.Nullary using (yes; no)
@@ -31,7 +32,7 @@ open import Relation.Nullary using (¬_)
 open import Relation.Unary using (∁; U; Pred)
 open import Relation.Unary.Properties using (U-Universal)
 
-open import RoutingLib.Data.List renaming (strictMerge to strictMerge')
+open import RoutingLib.Data.List renaming (partialMerge to partialMerge')
 open import RoutingLib.Data.Nat.Properties
 open import RoutingLib.Algebra.Definitions
 
@@ -193,56 +194,54 @@ module _ (S : Setoid a ℓ)  where
   foldr-map-commute cong pres d xs = foldr-map-commute-gen₁ cong (λ _ _ → _) (λ _ _ → pres _ _) (U-Universal d) (universal U-Universal xs)
 
 ------------------------------------------------------------------------
--- Properties of strictMerge
+-- Properties of partialMerge
 
-module _ {_≈_ : Rel A ℓ₁} {_<_ : Rel A ℓ₂}
-         {cmp : Trichotomous _≈_ _<_} {_⊕_ : Op₂ A} where
+module _ {_<_ : Rel A ℓ₂} {_<?_ : B.Decidable _<_} {_⊕_ : Op₂ A} where
 
-  strictMerge : List A → List A → List A
-  strictMerge = strictMerge' cmp _⊕_
+  partialMerge : List A → List A → List A
+  partialMerge = partialMerge' _<?_ _⊕_
 
-  _≋_ : Rel (List A) _
-  _≋_ = Pointwise _≈_
+  partialMerge-identityˡ : LeftIdentity _≡_ [] partialMerge
+  partialMerge-identityˡ xs = refl
 
-  strictMerge-identityˡ : LeftIdentity _≡_ [] strictMerge
-  strictMerge-identityˡ xs = refl
+  partialMerge-identityʳ : RightIdentity _≡_ [] partialMerge
+  partialMerge-identityʳ [] = refl
+  partialMerge-identityʳ (x ∷ xs) = refl
 
-  strictMerge-identityʳ : RightIdentity _≡_ [] strictMerge
-  strictMerge-identityʳ [] = refl
-  strictMerge-identityʳ (x ∷ xs) = refl
+  partialMerge-identity : Identity _≡_ [] partialMerge
+  partialMerge-identity = (partialMerge-identityˡ , partialMerge-identityʳ)
 
-  strictMerge-identity : Identity _≡_ [] strictMerge
-  strictMerge-identity = (strictMerge-identityˡ , strictMerge-identityʳ)
-
-  module _ (≈-refl : Reflexive _≈_) {_≈'_ : Rel A ℓ} (⊕-idem : Idempotent _≈'_ _⊕_) where
+  module _ {_≈_ : Rel A ℓ₁} (≈-refl : Reflexive _≈_) (<-irrefl : Irreflexive _≈_ _<_)
+           {_≈'_ : Rel A ℓ} (⊕-idem : Idempotent _≈'_ _⊕_) where
   
-    strictMerge-idempotent : Idempotent (Pointwise _≈'_) strictMerge
-    strictMerge-idempotent [] = []
-    strictMerge-idempotent (x ∷ xs) with cmp x x
-    ... | tri< _ x≠x _ = contradiction ≈-refl x≠x
-    ... | tri≈ _ x=x _ = (⊕-idem x) ∷ (strictMerge-idempotent xs)
-    ... | tri> _ x≠x _ = contradiction ≈-refl x≠x
+    partialMerge-idempotent : Idempotent (Pointwise _≈'_) partialMerge
+    partialMerge-idempotent [] = []
+    partialMerge-idempotent (x ∷ xs) with x <? x
+    ... | yes x<x = contradiction x<x (<-irrefl ≈-refl)
+    ... | no  _   = ⊕-idem x ∷ partialMerge-idempotent xs
 
-  module _ (≈-isEquivalence : IsEquivalence _≈_) (<-isPreorder : IsPreorder _≈_ _<_) (⊕-cong : Congruent₂ _≈_ _⊕_) where
+  module _ {_≈_ : Rel A ℓ₁} (≈-isEquivalence : IsEquivalence _≈_)
+           (<-resp-≈ : _<_ B.Respects₂ _≈_) (⊕-cong : Congruent₂ _≈_ _⊕_) where
 
     open IsEquivalence ≈-isEquivalence renaming (refl to ≈-refl; sym to ≈-sym; trans to ≈-trans)
-    open IsPreorder <-isPreorder renaming (∼-respˡ-≈ to <-respˡ-≈; ∼-respʳ-≈ to <-respʳ-≈)
+    open SetoidEquality (record {isEquivalence = ≈-isEquivalence}) using (_≋_)
 
-    strictMerge-cong : ∀ {xs xs' ys ys'} → xs ≋ xs' → ys ≋ ys' →
-                       strictMerge xs ys ≋ strictMerge xs' ys'
-    strictMerge-cong [] ys=ys' = ys=ys'
-    strictMerge-cong (x=x' ∷ xs=xs') [] = x=x' ∷ xs=xs'
-    strictMerge-cong {x ∷ xs} {x' ∷ xs'} {y ∷ ys} {y' ∷ ys'} (x=x' ∷ xs=xs') (y=y' ∷ ys=ys')
-      with cmp x y | cmp x' y'
-        | strictMerge-cong xs=xs' (y=y' ∷ ys=ys')
-        | strictMerge-cong xs=xs' ys=ys'
-        | strictMerge-cong (x=x' ∷ xs=xs') ys=ys'
-    ... | tri< _ _   _ | tri< _ _     _ | rec₁ | _    | _    = x=x' ∷ rec₁
-    ... | tri< _ x≠y _ | tri≈ _ x'=y' _ | _    | _    | _    = contradiction (≈-trans (≈-trans x=x' x'=y') (≈-sym y=y')) x≠y
-    ... | tri< x<y _ _ | tri> x'≮y' _ _ | _    | _    | _    = contradiction (<-respˡ-≈ x=x' (<-respʳ-≈ y=y' x<y)) x'≮y'
-    ... | tri≈ _ x=y _ | tri< _ x'≠y' _ | _    | _    | _    = contradiction (≈-trans (≈-trans (≈-sym x=x') x=y) y=y') x'≠y'
-    ... | tri≈ _ _   _ | tri≈ _ _     _ | _    | rec₂ | _    = (⊕-cong x=x' y=y') ∷ rec₂
-    ... | tri≈ _ x=y _ | tri> _ x'≠y' _ | _    | _    | _    = contradiction (≈-trans (≈-trans (≈-sym x=x') x=y) y=y') x'≠y'
-    ... | tri> x≮y _ _ | tri< x'<y' _ _ | _    | _    | _    = contradiction (<-respˡ-≈ (≈-sym x=x') (<-respʳ-≈ (≈-sym y=y') x'<y')) x≮y
-    ... | tri> _ x≠y _ | tri≈ _ x'=y' _ | _    | _    | _    = contradiction (≈-trans (≈-trans x=x' x'=y') (≈-sym y=y')) x≠y
-    ... | tri> _ _   _ | tri> _ _     _ | _    | _    | rec₃ = y=y' ∷ rec₃
+    <-resp₂-≈ : ∀ {w x y z} → w ≈ y → x ≈ z → w < x → y < z
+    <-resp₂-≈ w≈y x≈z w<x = proj₂ <-resp-≈ w≈y (proj₁ <-resp-≈ x≈z w<x)
+    
+    partialMerge-cong : ∀ {xs xs' ys ys'} → xs ≋ xs' → ys ≋ ys' →
+                       partialMerge xs ys ≋ partialMerge xs' ys'
+    partialMerge-cong [] ys=ys' = ys=ys'
+    partialMerge-cong (x=x' ∷ xs=xs') [] = x=x' ∷ xs=xs'
+    partialMerge-cong {x ∷ xs} {x' ∷ xs'} {y ∷ ys} {y' ∷ ys'} (x=x' ∷ xs=xs') (y=y' ∷ ys=ys')
+      with x <? y | y <? x | x' <? y' | y' <? x'
+        | partialMerge-cong xs=xs' (y=y' ∷ ys=ys')
+        | partialMerge-cong xs=xs' ys=ys'
+        | partialMerge-cong (x=x' ∷ xs=xs') ys=ys'
+    ... | yes _   | _       | yes _     | _         | rec₁ | _    | _    = x=x' ∷ rec₁
+    ... | no  x≮y | _       | yes x'<y' | _         | _    | _    | _    = contradiction (<-resp₂-≈ (≈-sym x=x') (≈-sym y=y') x'<y') x≮y
+    ... | yes x<y | _       | no  x'≮y' | _         | _    | _    | _    = contradiction (<-resp₂-≈ x=x' y=y' x<y) x'≮y'
+    ... | no  _   | yes _   | no  _     | yes _     | _    | _    | rec₃ = y=y' ∷ rec₃
+    ... | no  _   | no  y≮x | no  _     | yes y'<x' | _    | _    | _    = contradiction (<-resp₂-≈ (≈-sym y=y') (≈-sym x=x') y'<x') y≮x
+    ... | no  _   | yes y<x | no  _     | no  y'≮x' | _    | _    | _    = contradiction (<-resp₂-≈ y=y' x=x' y<x) y'≮x'
+    ... | no  _   | no  _   | no  _     | no _      | _    | rec₂ | _    = ⊕-cong x=x' y=y' ∷ rec₂

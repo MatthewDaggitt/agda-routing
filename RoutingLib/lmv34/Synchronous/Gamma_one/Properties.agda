@@ -1,4 +1,5 @@
 {-# OPTIONS --allow-unsolved-metas #-}
+
 open import Algebra.Core
 open import Algebra.Definitions
 open import Data.Bool.Base using (true; false)

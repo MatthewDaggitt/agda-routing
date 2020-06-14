@@ -5,7 +5,7 @@ open import Relation.Unary as U using (Decidable)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
-module RoutingLib.Data.List.Relation.Subset.Setoid.Properties where
+module RoutingLib.Data.List.Relation.Binary.Subset.Setoid.Properties where
 
   module _ {c ℓ} (S : Setoid c ℓ) where
 

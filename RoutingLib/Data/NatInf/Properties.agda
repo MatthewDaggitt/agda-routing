@@ -1,16 +1,17 @@
-
-
 module RoutingLib.Data.NatInf.Properties where
 
-open import Data.Nat using (zero; suc) renaming (_+_ to _+ℕ_; _≤_ to _≤ℕ_; z≤n to z≤ℕn; s≤s to s≤ℕs; _≤′_ to _≤'ℕ_; ≤′-refl to ≤'ℕ-refl; ≤′-step to ≤'ℕ-step)
-open import Data.Nat.Properties using (+-suc; n≤1+n; <⇒≢) renaming (+-identityʳ to +-idʳℕ; +-comm to +-commℕ; +-mono-≤ to +ℕ-mono-≤ℕ) renaming (⊓-sel to ⊓ℕ-sel; m⊓n≤n to m⊓n≤ℕn; m⊓n≤m to m⊓n≤ℕm)
+open import Data.Nat using (zero; suc) renaming (_+_ to _+ℕ_; _≤_ to _≤ℕ_; z≤n to z≤ℕn; s≤s to s≤ℕs; _≤′_ to _≤'ℕ_; ≤′-refl to ≤'ℕ-refl; ≤′-step to ≤'ℕ-step; _⊓_ to _⊓ℕ_)
+open import Data.Nat.Properties using (+-suc; n≤1+n; <⇒≢)
+  renaming (+-identityʳ to +-idʳℕ; +-comm to +-commℕ; +-mono-≤ to +ℕ-mono-≤ℕ)
+  renaming (⊓-sel to ⊓ℕ-sel; m⊓n≤n to m⊓n≤ℕn; m⊓n≤m to m⊓n≤ℕm; ⊓-assoc to ⊓ℕ-assoc; ⊓-comm to ⊓ℕ-comm; ⊓-zeroʳ to ⊓ℕ-zeroʳ; +-distribˡ-⊓ to +ℕ-distribˡ-⊓ℕ)
+  renaming (⊔-sel to ⊔ℕ-sel; ⊔-assoc to ⊔ℕ-assoc; ⊔-comm to ⊔ℕ-comm; ⊔-identityʳ to ⊔ℕ-identityʳ; ⊓-distribˡ-⊔ to ⊓ℕ-distribˡ-⊔ℕ; ⊔-abs-⊓ to ⊔ℕ-abs-⊓ℕ; ⊓-abs-⊔ to ⊓ℕ-abs-⊔ℕ)
 open import Data.Product using (∃; _,_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Function using (_∘_)
 open import Level using () renaming (zero to lzero)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
-  using (_≡_; refl; subst; sym; cong; _≢_; setoid; isEquivalence)
+  using (_≡_; refl; subst; sym; trans; cong; _≢_; setoid; isEquivalence)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Algebra.Definitions
@@ -143,6 +144,7 @@ n≤0⇒n≡0 n n≤0 = ≤-antisym n≤0 z≤n
 <-trans {N x} {N (suc y)} {N (suc z)} (s≤s x<y) (s≤s y<z) = ≤-trans (s≤s x<y)
            (≤-trans y<z (≤ℕ⇒≤ (n≤1+n z )))
 
+------------------------------------------------------------------------
 -- Properties of ≤'
 ≤'₀ : ∀ {n} → N 0 ≤' n
 ≤'₀ {∞} = ≤'-∞
@@ -189,6 +191,7 @@ n≤0⇒n≡0 n n≤0 = ≤-antisym n≤0 z≤n
 ≤'⇒≤'ℕ ≤'-refl = ≤'ℕ-refl
 ≤'⇒≤'ℕ (≤'-step m≤'n) = ≤'ℕ-step (≤'⇒≤'ℕ m≤'n)
 
+------------------------------------------------------------------------
 -- Properties of +
 n≤m+n : ∀ m n → n ≤ m + n
 n≤m+n ∞ _ = n≤∞
@@ -199,13 +202,15 @@ n≤m+n (N m) (N (suc n)) = subst (N (suc n) ≤_) (sym (cong N (+-suc m n)))
 
 +-identityˡ : ∀ n → (N 0) + n ≡ n
 +-identityˡ ∞ = refl
-+-identityˡ (N x) = refl
++-identityˡ (N n) = refl
 
 +-identityʳ : ∀ n → n + (N 0) ≡ n
 +-identityʳ ∞ = refl
 +-identityʳ (N n) = cong N (+-idʳℕ n)
 
-postulate +-zeroʳ : RightZero ∞ _+_
++-zeroʳ : RightZero ∞ _+_
++-zeroʳ ∞ = refl
++-zeroʳ (N n) = refl
 
 +-comm : ∀ m n → m + n ≡ n + m
 +-comm ∞ ∞ = refl
@@ -248,30 +253,37 @@ m<o×n<o⇒m+n<o+o {N m} {N n} {(suc o)} (s≤s m<o) (s≤s n<o) = ≤ℕ⇒≤ 
 ⊓-idem : Idempotent _⊓_
 ⊓-idem = sel⇒idem ⊓-sel
 
-postulate ⊓-assoc : Associative _⊓_
+⊓-assoc : Associative _⊓_
+⊓-assoc ∞     ∞     ∞     = refl
+⊓-assoc ∞     ∞     (N o) = refl
+⊓-assoc ∞     (N n) ∞     = refl
+⊓-assoc ∞     (N n) (N o) = refl
+⊓-assoc (N m) ∞     ∞     = refl
+⊓-assoc (N m) ∞     (N o) = refl
+⊓-assoc (N m) (N n) ∞     = refl
+⊓-assoc (N m) (N n) (N o) = cong N (⊓ℕ-assoc m n o)
 
-postulate ⊓-comm : Commutative _⊓_
+⊓-comm : Commutative _⊓_
+⊓-comm ∞     ∞     = refl
+⊓-comm ∞     (N n) = refl
+⊓-comm (N m) ∞     = refl
+⊓-comm (N m) (N n) = cong N (⊓ℕ-comm m n)
 
-postulate ⊓-identityˡ : LeftIdentity ∞ _⊓_
+⊓-identityˡ : LeftIdentity ∞ _⊓_
+⊓-identityˡ ∞     = refl
+⊓-identityˡ (N n) = refl
 
-postulate ⊓-identityʳ : RightIdentity ∞ _⊓_
+⊓-identityʳ : RightIdentity ∞ _⊓_
+⊓-identityʳ ∞     = refl
+⊓-identityʳ (N m) = refl
 
-postulate ⊓-zeroʳ : RightZero (N 0) _⊓_
+⊓-zeroˡ : LeftZero (N 0) _⊓_
+⊓-zeroˡ ∞     = refl
+⊓-zeroˡ (N n) = refl
 
-postulate ⊓-zeroˡ : LeftZero (N 0) _⊓_
-
-
-postulate ⊔-sel : Selective _⊔_
-
-postulate ⊔-assoc : Associative _⊔_
-
-postulate ⊔-comm : Commutative _⊔_
-
-postulate ⊔-identityʳ : RightIdentity (N 0) _⊔_
-
-postulate ⊔-zeroʳ : RightZero ∞ _⊔_
-
-postulate ⊔-zeroˡ : LeftZero ∞ _⊔_
+⊓-zeroʳ : RightZero (N 0) _⊓_
+⊓-zeroʳ ∞     = refl
+⊓-zeroʳ (N m) = cong N (⊓ℕ-zeroʳ m)
 
 m⊓n≤n : ∀ m n → m ⊓ n ≤ n
 m⊓n≤n ∞     ∞     = ≤-refl
@@ -303,7 +315,69 @@ n≤m⊎o≤m⇒n⊓o≤m n o (inj₂ o≤m) = o≤m⇒n⊓o≤m n o≤m
 m≤n×m≤o⇒m≤n⊓o : ∀ {m} → _⊓_ Preservesᵇ (m ≤_)
 m≤n×m≤o⇒m≤n⊓o m≤n m≤o = subst (_≤ _) (⊓-idem _) (⊓-mono-≤ m≤n m≤o)
 
++-distribˡ-⊓ : _+_ DistributesOverˡ _⊓_
++-distribˡ-⊓ ∞     ∞     ∞     = refl
++-distribˡ-⊓ ∞     ∞     (N o) = refl
++-distribˡ-⊓ ∞     (N n) ∞     = refl
++-distribˡ-⊓ ∞     (N n) (N o) = refl
++-distribˡ-⊓ (N m) ∞     ∞     = refl
++-distribˡ-⊓ (N m) ∞     (N o) = refl
++-distribˡ-⊓ (N m) (N n) ∞     = refl
++-distribˡ-⊓ (N m) (N n) (N o) = cong N (+ℕ-distribˡ-⊓ℕ m n o)
 
-postulate +-distribˡ-⊓ : _+_ DistributesOverˡ _⊓_
+------------------------------------------------------------------------
+-- Properties of ⊔
 
-postulate ⊓-distribˡ-⊔ : _⊓_ DistributesOverˡ _⊔_
+⊔-sel : Selective _⊔_
+⊔-sel ∞     ∞     = inj₁ refl
+⊔-sel ∞     (N n) = inj₁ refl
+⊔-sel (N m) ∞     = inj₂ refl
+⊔-sel (N m) (N n) with ⊔ℕ-sel m n
+... | inj₁ m⊔n≡m = inj₁ (cong N m⊔n≡m)
+... | inj₂ m⊔n≡n = inj₂ (cong N m⊔n≡n)
+
+⊔-idem : Idempotent _⊔_
+⊔-idem = sel⇒idem ⊔-sel
+
+⊔-assoc : Associative _⊔_
+⊔-assoc ∞     ∞     ∞     = refl
+⊔-assoc ∞     ∞     (N o) = refl
+⊔-assoc ∞     (N n) ∞     = refl
+⊔-assoc ∞     (N n) (N o) = refl
+⊔-assoc (N m) ∞     ∞     = refl
+⊔-assoc (N m) ∞     (N o) = refl
+⊔-assoc (N m) (N n) ∞     = refl
+⊔-assoc (N m) (N n) (N o) = cong N (⊔ℕ-assoc m n o)
+
+⊔-comm : Commutative _⊔_
+⊔-comm ∞     ∞     = refl
+⊔-comm ∞     (N n) = refl
+⊔-comm (N m) ∞     = refl
+⊔-comm (N m) (N n) = cong N (⊔ℕ-comm m n)
+
+⊔-identityˡ : LeftIdentity (N 0) _⊔_
+⊔-identityˡ ∞     = refl
+⊔-identityˡ (N n) = refl
+
+⊔-identityʳ : RightIdentity (N 0) _⊔_
+⊔-identityʳ ∞     = refl
+⊔-identityʳ (N m) = cong N (⊔ℕ-identityʳ m)
+
+⊔-zeroˡ : LeftZero ∞ _⊔_
+⊔-zeroˡ ∞     = refl
+⊔-zeroˡ (N n) = refl
+
+⊔-zeroʳ : RightZero ∞ _⊔_
+⊔-zeroʳ ∞     = refl
+⊔-zeroʳ (N m) = refl
+
+⊓-distribˡ-⊔ : _⊓_ DistributesOverˡ _⊔_
+⊓-distribˡ-⊔ ∞     ∞     ∞     = refl
+⊓-distribˡ-⊔ ∞     ∞     (N o) = refl
+⊓-distribˡ-⊔ ∞     (N n) ∞     = refl
+⊓-distribˡ-⊔ ∞     (N n) (N o) = refl
+⊓-distribˡ-⊔ (N m) ∞     ∞     = sym (⊔-idem (N m))
+⊓-distribˡ-⊔ (N m) ∞     (N o) = cong N (sym (⊔ℕ-abs-⊓ℕ m o))
+⊓-distribˡ-⊔ (N m) (N n) ∞     = cong N (trans (sym (⊔ℕ-abs-⊓ℕ m n))
+                                               (⊔ℕ-comm m (m ⊓ℕ n)))
+⊓-distribˡ-⊔ (N m) (N n) (N o) = cong N (⊓ℕ-distribˡ-⊔ℕ m n o)

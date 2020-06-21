@@ -19,7 +19,7 @@ open import Data.Maybe.Properties using (just-injective)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_,_; proj₁; proj₂)
 open import Level using (Level; _⊔_)
-open import Relation.Binary as B using (Rel; Setoid; Trichotomous; tri<; tri≈; tri>; Reflexive; Irreflexive)
+open import Relation.Binary as B using (Rel; Setoid; Trichotomous; tri<; tri≈; tri>; Reflexive; Irreflexive; Asymmetric)
 open import Relation.Unary using (Decidable; Pred; ∁)
 open import Relation.Unary.Properties using (∁?)
 open import Relation.Nullary using (yes; no)
@@ -210,7 +210,29 @@ module _ {_<_ : Rel A ℓ₂} {_<?_ : B.Decidable _<_} {_⊕_ : Op₂ A} where
 
   partialMerge-identity : Identity _≡_ [] partialMerge
   partialMerge-identity = (partialMerge-identityˡ , partialMerge-identityʳ)
+  
+  partialMerge-∷-eq : ∀ {x xs y ys} → ¬ (x < y) → ¬ (y < x) → partialMerge (x ∷ xs) (y ∷ ys) ≡ (x ⊕ y) ∷ partialMerge xs ys
+  partialMerge-∷-eq {x} {xs} {y} {ys} ¬x<y ¬y<x with x <? y | y <? x
+  ... | yes x<y  | _       = contradiction x<y ¬x<y
+  ... | no  _    | yes y<x = contradiction y<x ¬y<x
+  ... | no  _    | no  _   = refl
 
+  module _ (<-asym : Asymmetric _<_) where
+    partialMerge-∷ˡ-min : ∀ {x xs ys} → All (x <_) ys → partialMerge (x ∷ xs) ys ≡ x ∷ (partialMerge xs ys)
+    partialMerge-∷ˡ-min {x} {[]}    {[]}     []           = refl
+    partialMerge-∷ˡ-min {x} {_ ∷ _} {[]}     []           = refl
+    partialMerge-∷ˡ-min {x} {xs}    {y ∷ ys} (x<y ∷ x<ys) with x <? y | y <? x
+    ... | yes _   | yes y<x = contradiction y<x (<-asym x<y)
+    ... | yes _   | no  _   = refl
+    ... | no ¬x<y | _       = contradiction x<y ¬x<y
+  
+    partialMerge-∷ʳ-min : ∀ {xs y ys} → All (y <_) xs → partialMerge xs (y ∷ ys) ≡ y ∷ (partialMerge xs ys)
+    partialMerge-∷ʳ-min {[]}     {y} {ys} []           = refl
+    partialMerge-∷ʳ-min {x ∷ xs} {y} {ys} (y<x ∷ y<xs) with x <? y | y <? x
+    ... | yes x<y  | _       = contradiction y<x (<-asym x<y)
+    ... | no  ¬x<y | yes _   = refl
+    ... | no  ¬x<y | no ¬y<x = contradiction y<x ¬y<x
+  
   module _ {_≈_ : Rel A ℓ₁} (≈-refl : Reflexive _≈_) (<-irrefl : Irreflexive _≈_ _<_)
            {_≈'_ : Rel A ℓ} (⊕-idem : Idempotent _≈'_ _⊕_) where
   

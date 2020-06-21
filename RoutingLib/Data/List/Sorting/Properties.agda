@@ -46,4 +46,4 @@ sort-pres-↭ {xs} {ys} xs↭ys = begin
   where open PermutationReasoning
 
 ↭⇒sort-≋ : ∀ {xs ys} → xs ↭ ys → sort xs ≋ sort ys
-↭⇒sort-≋ {xs} {ys} xs↭ys = ↗↭↗⇒≋ (sort-pres-↭ xs↭ys) (sort↗ xs) (sort↗ ys)
+↭⇒sort-≋ {xs} {ys} xs↭ys = ↗↭↗⇒≋ (sort-pres-↭ xs↭ys) (sort-↗ xs) (sort-↗ ys)

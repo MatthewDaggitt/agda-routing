@@ -4,21 +4,19 @@ open import Algebra.Core
 open import Algebra.Definitions
 open import Data.Bool.Base using (true; false)
 open import Data.Fin renaming (zero to fzero; suc to fsuc) hiding (_≤_; _≟_)
-open import Data.Fin.Properties as Fin using (<-cmp; <-respˡ-≡; <-respʳ-≡; <-asym) renaming (≡-setoid to Fin-setoid)
+open import Data.Fin.Properties as Fin using (≤-trans; <-trans; <-cmp; <-respˡ-≡; <-respʳ-≡; <-asym; <⇒≢; ≤∧≢⇒<) renaming (≡-setoid to Fin-setoid)
 open import Data.Fin.Patterns
 open import Data.Nat using (ℕ; zero; suc)
+open import Data.Nat.Properties using (<⇒≤)
 open import Data.Product using (_,_; _×_; proj₁; proj₂)
 open import Data.List using (List; []; _∷_; filter; tabulate; map; foldr)
 open import Data.List.Properties
-open import Data.List.Relation.Binary.Permutation.Propositional
-  using ()
-  renaming (_↭_ to _≡-↭_; refl to ≡-refl; prep to ≡-prep; trans to ≡-trans; swap to ≡-swap)
 import Data.List.Relation.Binary.Permutation.Setoid.Properties as PermProperties
 open import Data.List.Relation.Binary.Pointwise using (Pointwise; []; _∷_)
 import Data.List.Relation.Binary.Equality.Setoid as Equality
-open import Data.List.Relation.Unary.All as All using (All) renaming ([] to []ₐ; _∷_ to _∷ₐ_)
+open import Data.List.Relation.Unary.All as All using (All; []; _∷_)
 import Data.List.Relation.Unary.All.Properties as All
-open import Data.List.Relation.Unary.AllPairs using (AllPairs)
+open import Data.List.Relation.Unary.AllPairs using (AllPairs; []; _∷_)
 open import Data.Sum using (inj₁; inj₂)
 open import Function.Base using (id)
 open import Level using (Level; 0ℓ; _⊔_)
@@ -26,13 +24,14 @@ open import Relation.Nullary using (¬_; yes; no; does; proof; _because_; ofʸ; 
 open import Relation.Nullary.Negation using (¬?; contradiction; contraposition)
 open import Relation.Unary using (Pred; Decidable; ∁)
 open import Function using (_∘_)
-open import Relation.Binary as B using (IsEquivalence; Setoid; DecSetoid; DecTotalOrder; Rel; Reflexive; _Respects_; _⇒_; tri<; tri≈; tri>)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym)
+open import Relation.Binary as B using (IsEquivalence; Setoid; DecSetoid; DecTotalOrder; StrictTotalOrder; Rel; Reflexive; Trans; _Respects_; _Respects₂_; _⇒_; Trichotomous; tri<; tri≈; tri>)
+open import Relation.Binary.Construct.NonStrictToStrict using (<-≤-trans)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym) renaming (trans to ≡-trans)
 import Relation.Binary.Reasoning.Setoid as EqReasoning
 
 open import RoutingLib.Iteration.Synchronous using (_^_; IsFixedPoint)
-open import RoutingLib.Data.List using (insert)
-open import RoutingLib.Data.List.Properties using (partialMerge-identityʳ; partialMerge-idempotent; partialMerge-cong)
+open import RoutingLib.Data.List using (insert) renaming (partialMerge to partialMerge')
+open import RoutingLib.Data.List.Properties using (partialMerge-identityʳ; partialMerge-∷ˡ-min; partialMerge-∷ʳ-min; partialMerge-∷-eq; partialMerge-idempotent; partialMerge-cong)
 import RoutingLib.Data.List.Relation.Unary.Sorted as Sorting
 import RoutingLib.Data.List.Relation.Unary.Sorted.Properties as SortedProperties
 import RoutingLib.Data.List.Sorting.InsertionSort as InsertionSort
@@ -68,92 +67,131 @@ open Setoid (Fin-setoid n) using () renaming (refl to Fin-refl; sym to Fin-sym)
 open DecSetoid FinRoute-decSetoid
   using (isEquivalence)
   renaming (refl to ≈ᵣ-refl; trans to ≈ᵣ-trans; sym to ≈ᵣ-sym)
-open DecTotalOrder decTotalOrder
-  using (≤-respˡ-≈; ≤-respʳ-≈; total; _≤_)
-  renaming (antisym to ≤-antisym; refl to ≤-refl; trans to ≤-trans)
-open InsertionSort decTotalOrder using (sort; sort↗; sort↭; sort-pres-↭)
-open Sorting ≤₊-totalOrder using (Sorted)
-open Equality FinRoute-setoid using (_≋_; ≋-refl; ≋-sym; ≋-trans)
+open DecTotalOrder ≤₂-decTotalOrder
+  using () renaming
+    ( antisym   to ≤₂-antisym
+    ; ≤-respˡ-≈ to ≤₂-respˡ-≈ᵣ
+    ; ≤-respʳ-≈ to ≤₂-respʳ-≈ᵣ
+    ; trans     to ≤₂-trans
+    ; total     to ≤₂-total
+    ; refl      to ≤₂-refl
+    )
+open StrictTotalOrder <₂-strictTotalOrder
+  using () renaming
+    ( <-resp-≈  to <₂-resp-≈ᵣ
+    ; irrefl    to <₂-irrefl
+    ; compare   to <₂-compare
+    ; asym      to <₂-asym
+    )
+open InsertionSort ≤₂-decTotalOrder using (sort; sort↗; sort↭; sort-pres-↭)
+open Sorting ≤₂-totalOrder using (Sorted)
+open Equality FinRoute-setoid using (_≋_; ≋-refl; ≋-sym; ≋-trans; ≋-reflexive)
 open PermProperties FinRoute-setoid using (≋⇒↭)
-open SortedProperties decTotalOrder using (↗↭↗⇒≋)
+open SortedProperties ≤₂-decTotalOrder using (↗↭↗⇒≋)
 
 --------------------------------------------------------------------------------
 -- Operation properties
 
 -- MATTHEW : Neither of these are provable...
 -- Only provable for the application operator _▷_
+-- LEX: iirc, these were put here because the adjacency matrix A was a matrix
+-- of Steps, but the decomposed matrices Exp, Prot, Imp (Gamma_2) had to be
+-- matrices of the more general type "Route → Route". Tim mentioned this at some
+-- point. Probably worth checking out if this is still necessary, or whether we
+-- could have Exp, Prot, Imp be of type AdjacencyMatrix as well.
 postulate
   f-cong : ∀ (f : Route → Route) {s s' : Route} → s ≈ s' → f s ≈ f s' -- need this to prove []-cong
   f-fix : ∀ (f : Route → Route) → f ∞# ≈ ∞# -- need this to prove ~-lemma
 
-insert-min : ∀ {x xs} → All (x ≤_) xs → insert total x xs ≋ (x ∷ xs)
-insert-min {x} {[]} x≤xs = ≋-refl
-insert-min {x} {y ∷ xs} (x≤y¹ All.∷ x≤xs) with total x y
-... | inj₁ x≤y² = ≋-refl
-... | inj₂ y≤x  = (≈ᵣ-sym x=y) ∷ (≋-trans (insert-min x≤xs) (x=y ∷ ≋-refl))
-  where
-    x=y : x ≈ᵣ y
-    x=y = ≤-antisym x≤y¹ y≤x
-
-{-
-All-≤-preserves-≈ᵣ : ∀ {x x' xs} → x ≈ᵣ x' → All (x ≤_) xs → All (x' ≤_) xs
-All-≤-preserves-≈ᵣ x≈x' = All.map (≤-respˡ-≈ x≈x')
-
-All-≤-trans : ∀ {xs x y} → x ≤ y → All (y ≤_) xs → All (x ≤_) xs
-All-≤-trans x≤y = All.map (≤-trans x≤y)
--}
 --------------------------------------------------------------------------------
 -- Properties of `map₂`
 
 map₂-map : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c} →
-           (xs : List (C × A)) (f : A → B) → map₂ f xs ≡ map (λ {(d , v) → (d , f v)}) xs
+           (xs : List (C × A)) (f : A → B) →
+           map₂ f xs ≡ map (λ {(d , v) → (d , f v)}) xs
 map₂-map [] f = refl
 map₂-map ((d , v) ∷ xs) f = cong ((d , f v) ∷_) (map₂-map xs f)
 
 map₂-tabulate : ∀ {a b c} {n} {A : Set a} {B : Set b} {C : Set c}
                (g : Fin n → C × A) (f : A → B) →
                map₂ f (tabulate g) ≡ tabulate ((λ {(d , v) → (d , f v)}) ∘ g)
-map₂-tabulate g f = ≡ₗ-trans (map₂-map (tabulate g) f) (map-tabulate g (λ {(d , v) → (d , f v)}))
-  where open import Relation.Binary.PropositionalEquality using () renaming (trans to ≡ₗ-trans)
+map₂-tabulate g f = ≡-trans (map₂-map (tabulate g) f) (map-tabulate g (λ {(d , v) → (d , f v)}))
 
 --------------------------------------------------------------------------------
--- Properties of `_⊕_`
+-- Properties of _<₂_ / _≤₂_
 
-⊕-idempotent : Idempotent _≈_ _⊕_
-⊕-idempotent v with ⊕-sel v v
-... | inj₁ v⊕v=v = v⊕v=v
-... | inj₂ v⊕v=v = v⊕v=v
+<₂-≤₂-trans : Trans _<₂_ _≤₂_ _<₂_
+<₂-≤₂-trans = <-≤-trans _≈ᵣ_ _≤₂_ ≈ᵣ-sym ≤₂-trans ≤₂-antisym ≤₂-respʳ-≈ᵣ
 
---------------------------------------------------------------------------------
--- Properties of _<₁_
+Tri-≈ : ∀ {x y} → ¬ (x <₂ y) → ¬ (y <₂ x) → x ≈ᵣ y
+Tri-≈ {x} {y} ¬x<y ¬y<x with <₂-compare x y
+... | tri< x<y _   _   = contradiction x<y ¬x<y
+... | tri≈ _   x≈y _   = x≈y
+... | tri> _   _   y<x = contradiction y<x ¬y<x
 
-<₁-irrefl : B.Irreflexive _≈ᵣ_ _<₁_
-<₁-irrefl (refl , _) = Fin.<-irrefl refl
+All-<-trans : ∀ {x y zs} → x <₂ y → All (y ≤₂_) zs → All (x <₂_) zs
+All-<-trans {x} {y} {[]}     x<y _            = []
+All-<-trans {x} {y} {z ∷ zs} x<y (y<z ∷ y<zs) = (<₂-≤₂-trans x<y y<z) ∷ (All-<-trans x<y y<zs)
 
-<₁-respʳ-≈ᵣ : _<₁_ B.Respectsʳ _≈ᵣ_
-<₁-respʳ-≈ᵣ (refl , _) = id
-
-<₁-respˡ-≈ᵣ : _<₁_ B.Respectsˡ _≈ᵣ_
-<₁-respˡ-≈ᵣ (refl , _) = id
-
-<₁-resp-≈ᵣ : _<₁_ B.Respects₂ _≈ᵣ_
-<₁-resp-≈ᵣ = <₁-respʳ-≈ᵣ , <₁-respˡ-≈ᵣ
+All-≤-trans : ∀ {x y zs} → x ≤₂ y → All (y ≤₂_) zs → All (x ≤₂_) zs
+All-≤-trans {x} {y} {[]}     x≤y []           = []
+All-≤-trans {x} {y} {z ∷ zs} x≤y (y≤z ∷ y≤zs) = (≤₂-trans x≤y y≤z) ∷ (All-≤-trans x≤y y≤zs)
 
 --------------------------------------------------------------------------------
--- Properties of `_⊕₂_`
+-- Properties of insert
+
+insert-min : ∀ {x xs} → All (x ≤₂_) xs → insert ≤₂-total x xs ≋ (x ∷ xs)
+insert-min {x} {[]} x≤xs = ≋-refl
+insert-min {x} {y ∷ xs} (x≤y¹ All.∷ x≤xs) with ≤₂-total x y
+... | inj₁ x≤y² = ≋-refl
+... | inj₂ y≤x  = (≈ᵣ-sym x=y) ∷ (≋-trans (insert-min x≤xs) (x=y ∷ ≋-refl))
+  where
+    x=y : x ≈ᵣ y
+    x=y = ≤₂-antisym x≤y¹ y≤x
+
+insert-cong : ∀ {x ys zs} → Sorted ys → Sorted zs → ys ≋ zs → insert ≤₂-total x ys ≋ insert ≤₂-total x zs
+insert-cong {x} {[]}     {[]}     _          _          _             = ≋-refl
+insert-cong {x} {y ∷ ys} {z ∷ zs} (Sy ∷ Sys) (Sz ∷ Szs) (y=z ∷ ys=zs) with ≤₂-total x y | ≤₂-total x z
+... | inj₁ x≤y | inj₁ x≤z = ≈ᵣ-refl ∷ y=z ∷ ys=zs
+... | inj₁ x≤y | inj₂ z≤x = ≋-trans (x=z ∷ y=x ∷ ys=zs) (≈ᵣ-refl ∷ ≋-sym (insert-min x≤zs))
+  where x=z : x ≈ᵣ z
+        x=z = ≤₂-antisym (≤₂-respʳ-≈ᵣ y=z x≤y) z≤x
+        y=x : y ≈ᵣ x
+        y=x = ≈ᵣ-sym (≈ᵣ-trans x=z (≈ᵣ-sym y=z))
+        x≤zs : All (x ≤₂_) zs
+        x≤zs = All-≤-trans (≤₂-respʳ-≈ᵣ x=z ≤₂-refl) Sz
+... | inj₂ y≤x | inj₁ x≤z = ≋-trans (≈ᵣ-refl ∷ insert-min x≤ys) (y=x ∷ x=z ∷ ys=zs)
+  where y=x : y ≈ᵣ x
+        y=x = ≤₂-antisym y≤x (≤₂-respʳ-≈ᵣ (≈ᵣ-sym y=z) x≤z)
+        x=z : x ≈ᵣ z
+        x=z = ≈ᵣ-sym (≈ᵣ-trans (≈ᵣ-sym y=z) y=x)
+        x≤ys : All (x ≤₂_) ys
+        x≤ys = All-≤-trans (≤₂-respʳ-≈ᵣ (≈ᵣ-sym y=x) ≤₂-refl) Sy
+... | inj₂ y≤x | inj₂ z≤x = y=z ∷ (insert-cong Sys Szs ys=zs)
+
+--------------------------------------------------------------------------------
+-- Properties of _⊕₂_
 
 ⊕₂-cong : Congruent₂ _≈ᵣ_ _⊕₂_
 ⊕₂-cong (refl , x≈y) (refl , w≈z) = refl , ⊕-cong x≈y w≈z
 
 ⊕₂-idem : Idempotent _≈ᵣ_ _⊕₂_
-⊕₂-idem (d , v) = (refl , ⊕-idempotent v)
+⊕₂-idem (d , v) = (refl , ⊕-idem v)
+
+⊕₂-invalid : ∀ {x y} → IsInvalid x → IsInvalid y → IsInvalid (x ⊕₂ y)
+⊕₂-invalid x=∞ y=∞ = ≈-trans (⊕-cong x=∞ y=∞) (⊕-idem ∞#)
+
+⊕₂-valid : ∀ {x y} → IsValid x → IsValid y → IsValid (x ⊕₂ y)
+⊕₂-valid {d₁ , v₁} {d₂ , v₂} v₁≠∞ v₂≠∞ with ⊕-sel v₁ v₂
+... | inj₁ v₁⊕v₂=v₁ = λ v₁⊕v₂=∞ → contradiction (≈-trans (≈-sym v₁⊕v₂=v₁) v₁⊕v₂=∞) v₁≠∞
+... | inj₂ v₁⊕v₂=v₂ = λ v₁⊕v₂=∞ → contradiction (≈-trans (≈-sym v₁⊕v₂=v₂) v₁⊕v₂=∞) v₂≠∞
 
 --------------------------------------------------------------------------------
 -- Properties of _⊕ₛ_
 
 ⊕ₛ-cong : Congruent₂ _↭_  _⊕ₛ_
 ⊕ₛ-cong {A} {A'} {B} {B'} A↭A' B↭B' =
-  ≋⇒↭ (partialMerge-cong isEquivalence <₁-resp-≈ᵣ ⊕₂-cong
+  ≋⇒↭ (partialMerge-cong isEquivalence <₂-resp-≈ᵣ ⊕₂-cong
     (↗↭↗⇒≋ (sort-pres-↭ A↭A') (sort↗ A) (sort↗ A'))
     (↗↭↗⇒≋ (sort-pres-↭ B↭B') (sort↗ B) (sort↗ B')))
 
@@ -166,26 +204,16 @@ map₂-tabulate g f = ≡ₗ-trans (map₂-map (tabulate g) f) (map-tabulate g (
 ⊕ₛ-identity : Identity _↭_ Ø _⊕ₛ_
 ⊕ₛ-identity = (⊕ₛ-identityₗ , ⊕ₛ-identityᵣ)
 
-⊕ₛ-idempotent : Idempotent _↭_ _⊕ₛ_
-⊕ₛ-idempotent xs = begin
+⊕ₛ-idem : Idempotent _↭_ _⊕ₛ_
+⊕ₛ-idem xs = begin
   xs ⊕ₛ xs                        ≡⟨⟩
-  mergeSorted (sort xs) (sort xs) ≋⟨ partialMerge-idempotent {_≈_ = _≈ᵣ_} ≈ᵣ-refl <₁-irrefl ⊕₂-idem (sort xs) ⟩
+  mergeSorted (sort xs) (sort xs) ≋⟨ partialMerge-idempotent ≈ᵣ-refl <₂-irrefl ⊕₂-idem (sort xs) ⟩
   sort xs                         ↭⟨ sort↭ xs ⟩
   xs                              ∎
   where open PermutationReasoning
-
--- LEX: this is false. Counterexample: xs=[], ys=[x]. (x∷xs)⊕ₛys = [x]⊕ₛ[x] = [x] ¬↭ x∷x = x ∷ ([] ⊕ₛ [x])
-⊕ₛ-cons : ∀ x xs ys → (x ∷ xs) ⊕ₛ ys ↭ x ∷ (xs ⊕ₛ ys)
-⊕ₛ-cons x xs ys = begin
-  (x ∷ xs) ⊕ₛ ys                        ≡⟨⟩
-  mergeSorted (sort (x ∷ xs)) (sort ys) ↭⟨ {!!} ⟩
-  mergeSorted (x ∷ (sort xs)) (sort ys) ↭⟨ {!!} ⟩
-  x ∷ (mergeSorted (sort xs) (sort ys)) ≡⟨⟩
-  x ∷ (xs ⊕ₛ ys)                        ∎
-  where open PermutationReasoning
   
 --------------------------------------------------------------------------------
--- Properties of IsValid
+-- Properties of IsValid / IsInvalid
 
 x=∞⇒fx=∞ : ∀ {v} {f : Route → Route} → v ≈ ∞# → f v ≈ ∞#
 x=∞⇒fx=∞ {v} {f} v=∞ = ≈-trans (f-cong f v=∞) (f-fix f)
@@ -203,6 +231,12 @@ valid-invalid : ∀ {p} → ¬ (IsValid p) → IsInvalid p
 valid-invalid {d , v} ¬valid with v ≟ ∞#
 ... | yes v=∞ = v=∞
 ... | no v≠∞  = contradiction v≠∞ ¬valid
+
+invalid-cong : ∀ {x y} → x ≈ᵣ y → IsInvalid x → IsInvalid y
+invalid-cong (x₁=y₁ , x₂=y₂) x-invalid = ≈-trans (≈-sym x₂=y₂) x-invalid
+
+valid-cong : ∀ {x y} → x ≈ᵣ y → IsValid x → IsValid y
+valid-cong x=y = contraposition (invalid-cong (≈ᵣ-sym x=y))
 
 invalid-pair : ∀ d → IsInvalid (d , ∞#)
 invalid-pair d = ≈-refl
@@ -230,6 +264,9 @@ invalid-pair d = ≈-refl
 ⊕̬ᵥ-identity : Identity _≈ᵥ_ Øᵥ _⊕ᵥ_
 ⊕̬ᵥ-identity = (⊕ᵥ-identityₗ , ⊕ᵥ-identityᵣ)
 
+⊕ᵥ-idem : Idempotent _≈ᵥ_ _⊕ᵥ_
+⊕ᵥ-idem V i = ⊕ₛ-idem (V i)
+
 --------------------------------------------------------------------------------
 -- Properties of †_
 
@@ -242,8 +279,8 @@ invalid-pair d = ≈-refl
 †-identity : Ø † ↭ Ø
 †-identity = ↭-refl
 
-†-idempotent : IdempotentFun _↭_ _†
-†-idempotent xs = ↭-reflexive (filter-idem IsValid? xs)
+†-idem : IdempotentFun _↭_ _†
+†-idem xs = ↭-reflexive (filter-idem IsValid? xs)
 
 †-cons-valid : ∀ x xs → IsValid x → (x ∷ xs) † ≡ x ∷ (xs †)
 †-cons-valid x xs valid = filter-accept IsValid? valid
@@ -251,44 +288,134 @@ invalid-pair d = ≈-refl
 †-cons-invalid : ∀ x xs → IsInvalid x → (x ∷ xs) † ≡ xs †
 †-cons-invalid x xs invalid = filter-reject IsValid? (invalid-valid {x} invalid)
 
-map-†-lemma : ∀ {xs f} → (map₂ f xs) † ↭ (map₂ f (xs †)) †
-map-†-lemma {xs} {f} = ≋⇒↭ {!!}
-{-
-with IsValid? (d , v)
-... | no invalid  = p
-  where p : ((d , f v) ∷ (map₂ f xs)) † ↭ (map₂ f (xs †)) †
-        p with IsValid? (d , f v)
-        ... | no  _ = map-†-lemma {xs}
-        ... | yes valid = contradiction (x=∞⇒fx=∞ {v} {f} (valid-invalid {d , v} invalid)) valid
-... | yes _ with IsValid? (d , f v)
-...   | no  _ = map-†-lemma {xs}
-...   | yes _ = prep ≈ᵣ-refl (map-†-lemma {xs})
--}
+map-†-lemma : ∀ f xs → (map₂ f xs) † ≡ (map₂ f (xs †)) †
+map-†-lemma f []             = refl
+map-†-lemma f ((d , v) ∷ xs) with IsInvalid? (d , v)
+... | yes invalid = ≡-trans (†-cons-invalid (d , f v) (map₂ f xs) (isInvalid-f {d} {v} {f} invalid)) (map-†-lemma f xs)
+... | no  _       = prf
+  where prf : ((d , f v) ∷ map₂ f xs) † ≡ ((d , f v) ∷ map₂ f (xs †)) †
+        prf with IsInvalid? (d , f v)
+        ... | no  _ = cong ((d , f v) ∷_) (map-†-lemma f xs)
+        ... | yes _ = map-†-lemma f xs
+
+All-≤-distrib-† : ∀ {y zs} → All (y ≤₂_) zs → All (y ≤₂_) (zs †)
+All-≤-distrib-† {y} {[]}     []           = []
+All-≤-distrib-† {y} {z ∷ zs} (y≤z ∷ y≤zs) with IsInvalid? z
+... | yes z-invalid = All-≤-distrib-† y≤zs
+... | no  z-valid   = y≤z ∷ All-≤-distrib-† y≤zs
+
+All-<-distrib-† : ∀ {x ys} → All (x <₂_) ys → All (x <₂_) (ys †)
+All-<-distrib-† {x} {[]}     _            = []
+All-<-distrib-† {x} {y ∷ ys} (x<y ∷ x<ys) with IsInvalid? y
+... | yes y-invalid = All-<-distrib-† x<ys
+... | no  y-valid   = x<y ∷ All-<-distrib-† x<ys
+
+insert-†-invalid : ∀ {x} ys → IsInvalid x → (insert ≤₂-total x ys) † ≋ ys †
+insert-†-invalid {x} []       x-invalid = ≋-reflexive (†-cons-invalid x [] x-invalid)
+insert-†-invalid {x} (y ∷ ys) x-invalid with ≤₂-total x y
+... | inj₁ x≤y = ≋-reflexive (†-cons-invalid x (y ∷ ys) x-invalid)
+... | inj₂ y≤x = prf
+  where prf : (y ∷ (insert ≤₂-total x ys)) † ≋ (y ∷ ys) †
+        prf with IsInvalid? y
+        ... | yes y-invalid = insert-†-invalid ys x-invalid
+        ... | no  y-valid   = ≈ᵣ-refl ∷ (insert-†-invalid ys x-invalid)
+
+insert-†-valid : ∀ {x ys} → Sorted ys → IsValid x → insert ≤₂-total x (ys †) ≋ (insert ≤₂-total x ys) †
+insert-†-valid {x} {[]}       _          x-valid = ≋-reflexive (sym (†-cons-valid x [] x-valid))
+insert-†-valid {x} {(y ∷ ys)} (Sy ∷ Sys) x-valid with IsInvalid? y
+... | yes y-invalid = prf
+  where prf : insert ≤₂-total x (ys †) ≋ (insert ≤₂-total x (y ∷ ys)) †
+        prf with ≤₂-total x y
+        ... | inj₁ x≤y = ≋-trans
+          (insert-min x≤ys†)
+          (≋-trans (≈ᵣ-refl ∷ ≋-reflexive (sym (†-cons-invalid y ys y-invalid)))
+                   (≋-reflexive (sym (†-cons-valid x (y ∷ ys) x-valid))))
+          where x≤ys† : All (x ≤₂_) (ys †)
+                x≤ys† = All-≤-distrib-† (All-≤-trans x≤y Sy)
+        ... | inj₂ y≤x = ≋-trans
+          (insert-†-valid Sys x-valid)
+          (≋-reflexive (sym (†-cons-invalid y (insert ≤₂-total x ys) y-invalid))) 
+... | no  y-valid   = prf
+  where prf : insert ≤₂-total x (y ∷ (ys †)) ≋ (insert ≤₂-total x (y ∷ ys)) †
+        prf with ≤₂-total x y
+        ... | inj₁ x≤y = ≋-trans (≈ᵣ-refl ∷ ≋-reflexive (sym (†-cons-valid y ys y-valid))) (≋-reflexive (sym (†-cons-valid x (y ∷ ys) x-valid)))
+        ... | inj₂ y≤x = ≋-trans (≈ᵣ-refl ∷ insert-†-valid Sys x-valid) (≋-reflexive (sym (†-cons-valid y (insert ≤₂-total x ys) y-valid)))
+
+†-sorted : ∀ {xs} → Sorted xs → Sorted (xs †)
+†-sorted {[]} [] = []
+†-sorted {x ∷ xs} (Sx ∷ Sxs) with IsInvalid? x
+... | yes x-invalid = †-sorted Sxs
+... | no  x-valid   = All-≤-distrib-† Sx ∷ †-sorted Sxs
+
+†-distrib-sort : ∀ xs → sort (xs †) ≋ (sort xs) †
+†-distrib-sort []       = ≋-refl
+†-distrib-sort (x ∷ xs) with IsInvalid? x
+... | yes x-invalid = ≋-trans (†-distrib-sort xs) (≋-sym (insert-†-invalid (sort xs) x-invalid))
+... | no  x-valid   = ≋-trans (insert-cong (sort↗ (xs †)) (†-sorted (sort↗ xs)) (†-distrib-sort xs)) (insert-†-valid (sort↗ xs) x-valid)
+
+†-distrib-mergeSorted : ∀ {xs ys} → Sorted xs → Sorted ys → mergeSorted (xs †) (ys †) ↭ (mergeSorted xs ys) †
+†-distrib-mergeSorted {[]}     {ys}     _          _          = ↭-refl
+†-distrib-mergeSorted {x ∷ xs} {[]}     _          _          = ↭-reflexive (partialMerge-identityʳ ((x ∷ xs) †))
+†-distrib-mergeSorted {x ∷ xs} {y ∷ ys} (Sx ∷ Sxs) (Sy ∷ Sys) with x <₂? y | y <₂? x
+  | †-distrib-mergeSorted (Sx ∷ Sxs) Sys
+  | †-distrib-mergeSorted Sxs        (Sy ∷ Sys)
+  | †-distrib-mergeSorted Sxs        Sys
+... | yes x<y | _       | rec₁ | rec₂ | rec₃ = prf
+  where prf : mergeSorted ((x ∷ xs) †) ((y ∷ ys) †) ↭ (x ∷ (mergeSorted xs (y ∷ ys))) †
+        prf with IsInvalid? x
+        ... | yes x-invalid = rec₂
+        ... | no  x-valid   = ↭-trans (↭-reflexive (partialMerge-∷ˡ-min <₂-asym All-<-ys)) (prep ≈ᵣ-refl rec₂)
+          where All-<-ys : All (x <₂_) ((y ∷ ys) †)
+                All-<-ys = All-<-distrib-† (x<y ∷ All-<-trans x<y Sy)
+... | no  _   | yes y<x | rec₁ | rec₂ | rec₃ = prf
+  where prf : mergeSorted ((x ∷ xs) †) ((y ∷ ys) †) ↭ (y ∷ (mergeSorted (x ∷ xs) ys)) †
+        prf with IsInvalid? y
+        ... | yes y-invalid = rec₁
+        ... | no  y-valid   = ↭-trans (↭-reflexive (partialMerge-∷ʳ-min <₂-asym All-<-xs)) (prep ≈ᵣ-refl rec₁)
+          where All-<-xs : All (y <₂_) ((x ∷ xs) †)
+                All-<-xs = All-<-distrib-† (y<x ∷ All-<-trans y<x Sx)
+... | no ¬x<y | no ¬y<x | rec₁ | rec₂ | rec₃ = prf
+  where prf : mergeSorted ((x ∷ xs) †) ((y ∷ ys) †) ↭ ((x ⊕₂ y) ∷ (mergeSorted xs ys)) †
+        prf with IsInvalid? x | IsInvalid? y
+        ... | yes x-invalid | yes y-invalid = ↭-trans
+          rec₃
+          (↭-sym (↭-reflexive (†-cons-invalid (x ⊕₂ y) (mergeSorted xs ys) x⊕y-invalid)))
+          where x⊕y-invalid : IsInvalid (x ⊕₂ y)
+                x⊕y-invalid = ⊕₂-invalid {x} {y} x-invalid y-invalid
+        ... | yes x-invalid | no  y-valid   = contradiction y-invalid y-valid
+          where y-invalid : IsInvalid y
+                y-invalid = invalid-cong (Tri-≈ ¬x<y ¬y<x) x-invalid
+        ... | no  x-valid   | yes y-invalid = contradiction y-invalid y-valid
+          where y-valid : IsValid y
+                y-valid = valid-cong (Tri-≈ ¬x<y ¬y<x) x-valid
+        ... | no  x-valid   | no  y-valid   = ↭-trans
+          (↭-reflexive (partialMerge-∷-eq {xs = xs †} {ys = ys †} ¬x<y ¬y<x))
+          (↭-trans (prep ≈ᵣ-refl rec₃)
+                   (↭-sym (↭-reflexive (†-cons-valid (x ⊕₂ y) (mergeSorted xs ys) x⊕y-valid))))
+          where x⊕y-valid : IsValid (x ⊕₂ y)
+                x⊕y-valid = ⊕₂-valid {x} {y} x-valid y-valid
 
 †-⊕ₛ-distributive : ∀ {xs ys} → (xs †) ⊕ₛ (ys †) ↭ (xs ⊕ₛ ys) †
-†-⊕ₛ-distributive {[]} {ys} = begin
-  (Ø †) ⊕ₛ (ys †)  ≡⟨⟩
-  Ø ⊕ₛ (ys †)      ↭⟨ ⊕ₛ-identityₗ (ys †) ⟩
-  ys †             ↭⟨ †-cong (↭-sym (⊕ₛ-identityₗ ys)) ⟩
-  (Ø ⊕ₛ ys) †      ∎
+†-⊕ₛ-distributive {xs} {ys} = begin
+  (xs †) ⊕ₛ (ys †)                        ≡⟨⟩
+  mergeSorted (sort (xs †)) (sort (ys †)) ↭⟨ ≋⇒↭ (partialMerge-cong isEquivalence <₂-resp-≈ᵣ ⊕₂-cong
+                                                                   (†-distrib-sort xs)
+                                                                   (†-distrib-sort ys)) ⟩
+  mergeSorted ((sort xs) †) ((sort ys) †) ↭⟨ †-distrib-mergeSorted (sort↗ xs) (sort↗ ys) ⟩
+  (xs ⊕ₛ ys) †                            ∎
   where open PermutationReasoning
-†-⊕ₛ-distributive {x ∷ xs} {[]} = begin
-  ((x ∷ xs) †) ⊕ₛ (Ø †) ≡⟨⟩
-  ((x ∷ xs) †) ⊕ₛ Ø     ↭⟨ ⊕ₛ-identityᵣ ((x ∷ xs) †) ⟩
-  (x ∷ xs) †            ↭⟨ †-cong (↭-sym (⊕ₛ-identityᵣ (x ∷ xs))) ⟩
-  ((x ∷ xs) ⊕ₛ Ø) †     ∎
-  where open PermutationReasoning
-†-⊕ₛ-distributive {x ∷ xs} {y ∷ ys} = {!!}
 
 --------------------------------------------------------------------------------
 -- Properties of _[_]
 
 []-cong : ∀ {f : Route → Route} {A A'} →
             A ↭ A' → f [ A ] ↭ f [ A' ]
-[]-cong A=A' = †-cong (lemma A=A')
-   where lemma : {A A' : RoutingSet} → {f : Route → Route} →
+[]-cong {f} A=A' = †-cong (lemma A=A')
+   where f-cong₂ : ∀ {d d' : Fin n} {v v' : Route} → (d , v) ≈ᵣ (d' , v') → (d , f v) ≈ᵣ (d' , f v')
+         f-cong₂ {d} {d'} {v} {v'} (d=d' , v=v') = (d=d' , f-cong f v=v')
+         lemma : {A A' : RoutingSet} →
                  A ↭ A' → map₂ f A ↭ map₂ f A'
-         lemma = PermProperties.map⁺ {!S!} {!!} {!!}
+         lemma = PermProperties.map⁺ FinRoute-setoid FinRoute-setoid f-cong₂
 
 --------------------------------------------------------------------------------
 -- Properties of _⟦_⟧
@@ -356,7 +483,7 @@ LemmaA₂-iter {suc k} f = begin
           map₂ (λ v → (A i q) ▷ v) ((~ Y) q) † ↭  (tabulate λ d → (d , (A i q) ▷ (Y q d))) †
 ~-lemma {i} {q} {Y} {A} = begin
   map₂ (λ v → (A i q) ▷ v) ((~ Y) q) †                                   ≡⟨⟩
-  (map₂ ((A i q) ▷_) ((tabulate (λ d → (d , Y q d))) †)) †               ↭⟨ ↭-sym (map-†-lemma {(tabulate (λ d → (d , Y q d)))}) ⟩
+  (map₂ ((A i q) ▷_) ((tabulate (λ d → (d , Y q d))) †)) †               ≡⟨ sym (map-†-lemma ((A i q) ▷_) (tabulate (λ d → (d , Y q d)))) ⟩
   (map₂ ((A i q) ▷_) (tabulate (λ d → (d , Y q d))))     †               ↭⟨ †-cong (↭-reflexive (map₂-tabulate ((λ d → (d , Y q d))) ((A i q) ▷_))) ⟩
   (tabulate ((λ {(d , v) → (d , (A i q) ▷ v)}) ∘ (λ d → (d , Y q d)))) † ≡⟨⟩
   (tabulate λ d → (d , (A i q) ▷ (Y q d))) † ∎

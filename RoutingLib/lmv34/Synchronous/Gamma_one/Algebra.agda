@@ -11,9 +11,10 @@ open import Data.Vec.Functional using (Vector)
 open import Data.Vec.Functional.Relation.Binary.Pointwise.Properties using () renaming (decSetoid to decSetoidᵥ)
 open import Function using (_∘_)
 open import Level using (_⊔_; 0ℓ; lift) renaming (suc to lsuc)
-open import Relation.Binary as B using (Rel; DecTotalOrder; Setoid; DecSetoid)
+open import Relation.Binary as B using (Rel; DecTotalOrder; Setoid; DecSetoid; StrictTotalOrder; IsStrictTotalOrder)
 import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import Relation.Binary using (Trichotomous; tri<; tri≈; tri>)
+open import Relation.Binary.Construct.NonStrictToStrict using (<-isStrictTotalOrder₂) renaming (_<_ to _<ₗₑₓ_)
 open import Relation.Binary.PropositionalEquality using (_≡_)
 open import Relation.Nullary using (Dec; yes; no; ¬_; does; proof)
 open import Relation.Nullary.Negation using (¬?; ¬-reflects)
@@ -49,7 +50,7 @@ RoutingSet = List (Fin n × Route)
 -- RoutingVector setoid
 FinRoute-decSetoid = ×-decSetoid (Finₚ.≡-decSetoid n) DS
 open DecSetoid FinRoute-decSetoid public
-  using () renaming (_≈_ to _≈ᵣ_; _≟_ to _≟ᵣ_; setoid to FinRoute-setoid)
+  using () renaming (_≈_ to _≈ᵣ_; _≉_ to _≉ᵣ_;_≟_ to _≟ᵣ_; setoid to FinRoute-setoid)
 open PermutationEq FinRoute-setoid public
 open PermutationProperties FinRoute-setoid using (↭-decSetoid)
 
@@ -91,26 +92,42 @@ IsValid = ∁ IsInvalid
 IsValid? : Decidable IsValid
 IsValid? p = ¬? (IsInvalid? p)
 
-decTotalOrder : DecTotalOrder a ℓ ℓ
-decTotalOrder = ×-decTotalOrder (Finₚ.≤-decTotalOrder n) ≤₊-decTotalOrder
+≤₂-decTotalOrder : DecTotalOrder a ℓ ℓ
+≤₂-decTotalOrder = ×-decTotalOrder (Finₚ.≤-decTotalOrder n) ≤₊-decTotalOrder
 
-open DecTotalOrder decTotalOrder public
-  using () renaming (isPreorder to ≤₂-isPreorder)
+open DecTotalOrder ≤₂-decTotalOrder public
+  using () renaming
+  ( _≤_             to _≤₂_
+  ; _≤?_            to _≤₂?_
+  ; isPreorder      to ≤₂-isPreorder
+  ; totalOrder      to ≤₂-totalOrder
+  ; isDecTotalOrder to ≤₂-isDecTotalOrder)
 
-_<₁_ : Rel (Fin n × Route) 0ℓ
-_<₁_ (d₁ , v₁) (d₂ , v₂) = d₁ < d₂
+_<₂_ : Rel (Fin n × Route) _
+_<₂_ = _<ₗₑₓ_ _≈ᵣ_ _≤₂_
 
-_≈₁_ : Rel (Fin n × Route) 0ℓ
-(d₁ , v₁) ≈₁ (d₂ , v₂) = d₁ ≡ d₂
+<₂-isStrictTotalOrder : IsStrictTotalOrder _≈ᵣ_ _<₂_
+<₂-isStrictTotalOrder = <-isStrictTotalOrder₂ _≈ᵣ_ _≤₂_ ≤₂-isDecTotalOrder
 
-_<₁?_ : B.Decidable _<₁_
-(d₁ , v₁) <₁? (d₂ , v₂) = d₁ Finₚ.<? d₂
+<₂-strictTotalOrder : StrictTotalOrder a ℓ ℓ
+<₂-strictTotalOrder = record
+  { Carrier            = Fin n × Route
+  ; _≈_                = _≈ᵣ_
+  ; _<_                = _<₂_
+  ; isStrictTotalOrder = <₂-isStrictTotalOrder
+  }
+ 
+open StrictTotalOrder <₂-strictTotalOrder public
+  using () renaming (_<?_ to _<₂?_)
+
+--_≈₁_ : Rel (Fin n × Route) 0ℓ
+--(d₁ , v₁) ≈₁ (d₂ , v₂) = d₁ ≡ d₂
 
 _⊕₂_ : Op₂ (Fin n × Route)
 (d₁ , v₁) ⊕₂ (d₂ , v₂) = (d₁ , v₁ ⊕ v₂)
 
 mergeSorted : Op₂ RoutingSet
-mergeSorted = partialMerge _<₁?_ _⊕₂_
+mergeSorted = partialMerge _<₂?_ _⊕₂_
 
 --------------------------------------------------------------------------------
 -- Definitions
@@ -124,7 +141,7 @@ xs † = filter IsValid? xs
 infixl 10 _⊕ₛ_
 _⊕ₛ_ : Op₂ RoutingSet
 S₁ ⊕ₛ S₂ = mergeSorted (sort S₁) (sort S₂)
-  where open InsertionSort decTotalOrder using (sort)
+  where open InsertionSort ≤₂-decTotalOrder using (sort)
 
 -- Vector addition
 infixl 9 _⊕ᵥ_

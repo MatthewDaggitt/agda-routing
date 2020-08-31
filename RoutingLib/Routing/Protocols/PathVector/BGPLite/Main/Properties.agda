@@ -15,5 +15,5 @@ open import RoutingLib.Routing.VectorBased.Asynchronous.Results
 -- The algebra always converges (proved via a simulation with an equivalent but
 -- better behaved routing algebra).
 
-δ-alwaysConvergent : AlwaysConvergent A
-δ-alwaysConvergent = simulate Aₐₗₜ-simulates-A Aₐₗₜ-alwaysConvergent
+δ-alwaysConvergent : Convergent A
+δ-alwaysConvergent = simulate Aₐₗₜ-simulates-A Aₐₗₜ-convergent

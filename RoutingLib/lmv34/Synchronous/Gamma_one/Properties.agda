@@ -1,5 +1,3 @@
-{-# OPTIONS --allow-unsolved-metas #-}
-
 open import Algebra.Core
 open import Algebra.Definitions
 open import Data.Bool.Base using (true; false)
@@ -9,14 +7,17 @@ open import Data.Fin.Patterns
 open import Data.Nat using (ℕ; zero; suc)
 open import Data.Nat.Properties using (<⇒≤)
 open import Data.Product using (_,_; _×_; proj₁; proj₂)
-open import Data.List using (List; []; _∷_; filter; tabulate; map; foldr)
+open import Data.List using (List; []; _∷_; filter; tabulate; map; foldr; head)
 open import Data.List.Properties
+open import Data.Maybe.Base using (just; nothing)
 import Data.List.Relation.Binary.Permutation.Setoid.Properties as PermProperties
 open import Data.List.Relation.Binary.Pointwise using (Pointwise; []; _∷_)
 import Data.List.Relation.Binary.Equality.Setoid as Equality
 open import Data.List.Relation.Unary.All as All using (All; []; _∷_)
 import Data.List.Relation.Unary.All.Properties as All
 open import Data.List.Relation.Unary.AllPairs using (AllPairs; []; _∷_)
+import Data.List.Relation.Unary.Sorted.TotalOrder as Sorting
+import Data.List.Relation.Unary.Sorted.TotalOrder.Properties as SortedProperties
 open import Data.Sum using (inj₁; inj₂)
 open import Function.Base using (id)
 open import Level using (Level; 0ℓ; _⊔_)
@@ -31,11 +32,12 @@ import Relation.Binary.Reasoning.Setoid as EqReasoning
 
 open import RoutingLib.Iteration.Synchronous using (_^_; IsFixedPoint)
 open import RoutingLib.Data.List using (insert) renaming (partialMerge to partialMerge')
-open import RoutingLib.Data.List.Properties using (partialMerge-identityʳ; partialMerge-∷ˡ-min; partialMerge-∷ʳ-min; partialMerge-∷-eq; partialMerge-idempotent; partialMerge-cong)
-import RoutingLib.Data.List.Relation.Unary.Sorted as Sorting
-import RoutingLib.Data.List.Relation.Unary.Sorted.Properties as SortedProperties
-import RoutingLib.Data.List.Sorting.InsertionSort as InsertionSort
+open import RoutingLib.Data.List.Properties
+  using (partialMerge-identityʳ; partialMerge-∷ˡ-min; partialMerge-∷ʳ-min; partialMerge-∷-eq; partialMerge-idempotent; partialMerge-cong)
+import RoutingLib.Data.List.Sort as Sort
+import RoutingLib.Data.List.Relation.Unary.Sorted.Properties as SortedProperties2
 import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties as Perm
+open import RoutingLib.Data.Maybe.Relation.Binary.Connected.Left as Connectedˡ using (Connectedˡ; just; nothing)
 
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
@@ -64,9 +66,6 @@ open Gamma_one isRoutingAlgebra A
 open Gamma_one_Algebra isRoutingAlgebra n
 
 open Setoid (Fin-setoid n) using () renaming (refl to Fin-refl; sym to Fin-sym)
-open DecSetoid FinRoute-decSetoid
-  using (isEquivalence)
-  renaming (refl to ≈ᵣ-refl; trans to ≈ᵣ-trans; sym to ≈ᵣ-sym)
 open DecTotalOrder ≤₂-decTotalOrder
   using () renaming
     ( antisym   to ≤₂-antisym
@@ -75,6 +74,7 @@ open DecTotalOrder ≤₂-decTotalOrder
     ; trans     to ≤₂-trans
     ; total     to ≤₂-total
     ; refl      to ≤₂-refl
+    ; reflexive to ≤₂-reflexive
     )
 open StrictTotalOrder <₂-strictTotalOrder
   using () renaming
@@ -83,11 +83,11 @@ open StrictTotalOrder <₂-strictTotalOrder
     ; compare   to <₂-compare
     ; asym      to <₂-asym
     )
-open InsertionSort ≤₂-decTotalOrder using (sort; sort↗; sort↭; sort-pres-↭)
-open Sorting ≤₂-totalOrder using (Sorted)
+open Sort ≤₂-decTotalOrder
+open module Sorted = Sorting ≤₂-totalOrder using (Sorted)
 open Equality FinRoute-setoid using (_≋_; ≋-refl; ≋-sym; ≋-trans; ≋-reflexive)
 open PermProperties FinRoute-setoid using (≋⇒↭)
-open SortedProperties ≤₂-decTotalOrder using (↗↭↗⇒≋)
+open SortedProperties2 ≤₂-totalOrder using (head↗; tail↗; ↗↭↗⇒≋; _∷↗_)
 
 --------------------------------------------------------------------------------
 -- Operation properties
@@ -129,46 +129,6 @@ Tri-≈ {x} {y} ¬x<y ¬y<x with <₂-compare x y
 ... | tri≈ _   x≈y _   = x≈y
 ... | tri> _   _   y<x = contradiction y<x ¬y<x
 
-All-<-trans : ∀ {x y zs} → x <₂ y → All (y ≤₂_) zs → All (x <₂_) zs
-All-<-trans {x} {y} {[]}     x<y _            = []
-All-<-trans {x} {y} {z ∷ zs} x<y (y<z ∷ y<zs) = (<₂-≤₂-trans x<y y<z) ∷ (All-<-trans x<y y<zs)
-
-All-≤-trans : ∀ {x y zs} → x ≤₂ y → All (y ≤₂_) zs → All (x ≤₂_) zs
-All-≤-trans {x} {y} {[]}     x≤y []           = []
-All-≤-trans {x} {y} {z ∷ zs} x≤y (y≤z ∷ y≤zs) = (≤₂-trans x≤y y≤z) ∷ (All-≤-trans x≤y y≤zs)
-
---------------------------------------------------------------------------------
--- Properties of insert
-
-insert-min : ∀ {x xs} → All (x ≤₂_) xs → insert ≤₂-total x xs ≋ (x ∷ xs)
-insert-min {x} {[]} x≤xs = ≋-refl
-insert-min {x} {y ∷ xs} (x≤y¹ All.∷ x≤xs) with ≤₂-total x y
-... | inj₁ x≤y² = ≋-refl
-... | inj₂ y≤x  = (≈ᵣ-sym x=y) ∷ (≋-trans (insert-min x≤xs) (x=y ∷ ≋-refl))
-  where
-    x=y : x ≈ᵣ y
-    x=y = ≤₂-antisym x≤y¹ y≤x
-
-insert-cong : ∀ {x ys zs} → Sorted ys → Sorted zs → ys ≋ zs → insert ≤₂-total x ys ≋ insert ≤₂-total x zs
-insert-cong {x} {[]}     {[]}     _          _          _             = ≋-refl
-insert-cong {x} {y ∷ ys} {z ∷ zs} (Sy ∷ Sys) (Sz ∷ Szs) (y=z ∷ ys=zs) with ≤₂-total x y | ≤₂-total x z
-... | inj₁ x≤y | inj₁ x≤z = ≈ᵣ-refl ∷ y=z ∷ ys=zs
-... | inj₁ x≤y | inj₂ z≤x = ≋-trans (x=z ∷ y=x ∷ ys=zs) (≈ᵣ-refl ∷ ≋-sym (insert-min x≤zs))
-  where x=z : x ≈ᵣ z
-        x=z = ≤₂-antisym (≤₂-respʳ-≈ᵣ y=z x≤y) z≤x
-        y=x : y ≈ᵣ x
-        y=x = ≈ᵣ-sym (≈ᵣ-trans x=z (≈ᵣ-sym y=z))
-        x≤zs : All (x ≤₂_) zs
-        x≤zs = All-≤-trans (≤₂-respʳ-≈ᵣ x=z ≤₂-refl) Sz
-... | inj₂ y≤x | inj₁ x≤z = ≋-trans (≈ᵣ-refl ∷ insert-min x≤ys) (y=x ∷ x=z ∷ ys=zs)
-  where y=x : y ≈ᵣ x
-        y=x = ≤₂-antisym y≤x (≤₂-respʳ-≈ᵣ (≈ᵣ-sym y=z) x≤z)
-        x=z : x ≈ᵣ z
-        x=z = ≈ᵣ-sym (≈ᵣ-trans (≈ᵣ-sym y=z) y=x)
-        x≤ys : All (x ≤₂_) ys
-        x≤ys = All-≤-trans (≤₂-respʳ-≈ᵣ (≈ᵣ-sym y=x) ≤₂-refl) Sy
-... | inj₂ y≤x | inj₂ z≤x = y=z ∷ (insert-cong Sys Szs ys=zs)
-
 --------------------------------------------------------------------------------
 -- Properties of _⊕₂_
 
@@ -176,42 +136,50 @@ insert-cong {x} {y ∷ ys} {z ∷ zs} (Sy ∷ Sys) (Sz ∷ Szs) (y=z ∷ ys=zs) 
 ⊕₂-cong (refl , x≈y) (refl , w≈z) = refl , ⊕-cong x≈y w≈z
 
 ⊕₂-idem : Idempotent _≈ᵣ_ _⊕₂_
-⊕₂-idem (d , v) = (refl , ⊕-idem v)
+⊕₂-idem (d , v) = refl , ⊕-idem v
 
-⊕₂-invalid : ∀ {x y} → IsInvalid x → IsInvalid y → IsInvalid (x ⊕₂ y)
-⊕₂-invalid x=∞ y=∞ = ≈-trans (⊕-cong x=∞ y=∞) (⊕-idem ∞#)
+⊕₂-invalid : ∀ x y → IsInvalid x → IsInvalid y → IsInvalid (x ⊕₂ y)
+⊕₂-invalid x y x=∞ y=∞ = ≈-trans (⊕-cong x=∞ y=∞) (⊕-idem ∞#)
 
-⊕₂-valid : ∀ {x y} → IsValid x → IsValid y → IsValid (x ⊕₂ y)
-⊕₂-valid {d₁ , v₁} {d₂ , v₂} v₁≠∞ v₂≠∞ with ⊕-sel v₁ v₂
-... | inj₁ v₁⊕v₂=v₁ = λ v₁⊕v₂=∞ → contradiction (≈-trans (≈-sym v₁⊕v₂=v₁) v₁⊕v₂=∞) v₁≠∞
-... | inj₂ v₁⊕v₂=v₂ = λ v₁⊕v₂=∞ → contradiction (≈-trans (≈-sym v₁⊕v₂=v₂) v₁⊕v₂=∞) v₂≠∞
+⊕₂-valid : ∀ x y → IsValid x → IsValid y → IsValid (x ⊕₂ y)
+⊕₂-valid (_ , v₁) (_ , v₂) v₁≠∞ v₂≠∞ v₁⊕v₂=∞ with ⊕-sel v₁ v₂
+... | inj₁ v₁⊕v₂=v₁ = contradiction (≈-trans (≈-sym v₁⊕v₂=v₁) v₁⊕v₂=∞) v₁≠∞
+... | inj₂ v₁⊕v₂=v₂ = contradiction (≈-trans (≈-sym v₁⊕v₂=v₂) v₁⊕v₂=∞) v₂≠∞
+
+--------------------------------------------------------------------------------
+-- Properties of mergeSorted
+
+mergeSorted-cong : ∀ {xs xs' ys ys'} → xs ≋ xs' → ys ≋ ys' → mergeSorted xs ys ≋ mergeSorted xs' ys' 
+mergeSorted-cong = partialMerge-cong ≈ᵣ-isEquivalence <₂-resp-≈ᵣ ⊕₂-cong
+
+mergeSorted-idem : Idempotent _↭_ mergeSorted
+mergeSorted-idem xs = ≋⇒↭ (partialMerge-idempotent ≈ᵣ-refl <₂-irrefl ⊕₂-idem xs)
+
+mergeSorted-identityʳ : RightIdentity _↭_ [] mergeSorted
+mergeSorted-identityʳ xs = ↭-reflexive (partialMerge-identityʳ xs)
 
 --------------------------------------------------------------------------------
 -- Properties of _⊕ₛ_
 
 ⊕ₛ-cong : Congruent₂ _↭_  _⊕ₛ_
-⊕ₛ-cong {A} {A'} {B} {B'} A↭A' B↭B' =
-  ≋⇒↭ (partialMerge-cong isEquivalence <₂-resp-≈ᵣ ⊕₂-cong
-    (↗↭↗⇒≋ (sort-pres-↭ A↭A') (sort↗ A) (sort↗ A'))
-    (↗↭↗⇒≋ (sort-pres-↭ B↭B') (sort↗ B) (sort↗ B')))
+⊕ₛ-cong A↭A' B↭B' = ≋⇒↭ (mergeSorted-cong (↭⇒sort-≋ A↭A') (↭⇒sort-≋ B↭B'))
 
 ⊕ₛ-identityₗ : LeftIdentity _↭_ Ø _⊕ₛ_
-⊕ₛ-identityₗ A = sort↭ A
+⊕ₛ-identityₗ A rewrite sort-[] = sort-↭ₛ A
 
 ⊕ₛ-identityᵣ : RightIdentity _↭_ Ø _⊕ₛ_
-⊕ₛ-identityᵣ A = ↭-trans (↭-reflexive (partialMerge-identityʳ (sort A))) (sort↭ A)
+⊕ₛ-identityᵣ A rewrite sort-[] = ↭-trans (mergeSorted-identityʳ (sort A)) (sort-↭ₛ A)
 
 ⊕ₛ-identity : Identity _↭_ Ø _⊕ₛ_
-⊕ₛ-identity = (⊕ₛ-identityₗ , ⊕ₛ-identityᵣ)
+⊕ₛ-identity = ⊕ₛ-identityₗ , ⊕ₛ-identityᵣ
 
 ⊕ₛ-idem : Idempotent _↭_ _⊕ₛ_
 ⊕ₛ-idem xs = begin
-  xs ⊕ₛ xs                        ≡⟨⟩
-  mergeSorted (sort xs) (sort xs) ≋⟨ partialMerge-idempotent ≈ᵣ-refl <₂-irrefl ⊕₂-idem (sort xs) ⟩
-  sort xs                         ↭⟨ sort↭ xs ⟩
+  mergeSorted (sort xs) (sort xs) ↭⟨ mergeSorted-idem (sort xs) ⟩
+  sort xs                         ↭⟨ sort-↭ₛ xs ⟩
   xs                              ∎
   where open PermutationReasoning
-  
+
 --------------------------------------------------------------------------------
 -- Properties of IsValid / IsInvalid
 
@@ -261,8 +229,8 @@ invalid-pair d = ≈-refl
 ⊕ᵥ-identityᵣ : RightIdentity _≈ᵥ_ Øᵥ _⊕ᵥ_
 ⊕ᵥ-identityᵣ A i = ⊕ₛ-identityᵣ (A i)
 
-⊕̬ᵥ-identity : Identity _≈ᵥ_ Øᵥ _⊕ᵥ_
-⊕̬ᵥ-identity = (⊕ᵥ-identityₗ , ⊕ᵥ-identityᵣ)
+⊕ᵥ-identity : Identity _≈ᵥ_ Øᵥ _⊕ᵥ_
+⊕ᵥ-identity = ⊕ᵥ-identityₗ , ⊕ᵥ-identityᵣ
 
 ⊕ᵥ-idem : Idempotent _≈ᵥ_ _⊕ᵥ_
 ⊕ᵥ-idem V i = ⊕ₛ-idem (V i)
@@ -292,116 +260,76 @@ map-†-lemma : ∀ f xs → (map₂ f xs) † ≡ (map₂ f (xs †)) †
 map-†-lemma f []             = refl
 map-†-lemma f ((d , v) ∷ xs) with IsInvalid? (d , v)
 ... | yes invalid = ≡-trans (†-cons-invalid (d , f v) (map₂ f xs) (isInvalid-f {d} {v} {f} invalid)) (map-†-lemma f xs)
-... | no  _       = prf
-  where prf : ((d , f v) ∷ map₂ f xs) † ≡ ((d , f v) ∷ map₂ f (xs †)) †
-        prf with IsInvalid? (d , f v)
-        ... | no  _ = cong ((d , f v) ∷_) (map-†-lemma f xs)
-        ... | yes _ = map-†-lemma f xs
-
+... | no  _       with IsInvalid? (d , f v)
+...   | no  _ = cong ((d , f v) ∷_) (map-†-lemma f xs)
+...   | yes _ = map-†-lemma f xs
+{-
 All-≤-distrib-† : ∀ {y zs} → All (y ≤₂_) zs → All (y ≤₂_) (zs †)
 All-≤-distrib-† {y} {[]}     []           = []
 All-≤-distrib-† {y} {z ∷ zs} (y≤z ∷ y≤zs) with IsInvalid? z
 ... | yes z-invalid = All-≤-distrib-† y≤zs
 ... | no  z-valid   = y≤z ∷ All-≤-distrib-† y≤zs
+-}
+con-<-transʳ : ∀ {v x xs} → v <₂ x → Connectedˡ _≤₂_ x (head xs) → Connectedˡ _<₂_ v (head xs)
+con-<-transʳ {xs = []}     v<x nothing    = nothing
+con-<-transʳ {xs = y ∷ xs} v<x (just x≤y) = just (<₂-≤₂-trans v<x x≤y)
 
-All-<-distrib-† : ∀ {x ys} → All (x <₂_) ys → All (x <₂_) (ys †)
-All-<-distrib-† {x} {[]}     _            = []
-All-<-distrib-† {x} {y ∷ ys} (x<y ∷ x<ys) with IsInvalid? y
-... | yes y-invalid = All-<-distrib-† x<ys
-... | no  y-valid   = x<y ∷ All-<-distrib-† x<ys
-
-insert-†-invalid : ∀ {x} ys → IsInvalid x → (insert ≤₂-total x ys) † ≋ ys †
-insert-†-invalid {x} []       x-invalid = ≋-reflexive (†-cons-invalid x [] x-invalid)
-insert-†-invalid {x} (y ∷ ys) x-invalid with ≤₂-total x y
-... | inj₁ x≤y = ≋-reflexive (†-cons-invalid x (y ∷ ys) x-invalid)
-... | inj₂ y≤x = prf
-  where prf : (y ∷ (insert ≤₂-total x ys)) † ≋ (y ∷ ys) †
-        prf with IsInvalid? y
-        ... | yes y-invalid = insert-†-invalid ys x-invalid
-        ... | no  y-valid   = ≈ᵣ-refl ∷ (insert-†-invalid ys x-invalid)
-
-insert-†-valid : ∀ {x ys} → Sorted ys → IsValid x → insert ≤₂-total x (ys †) ≋ (insert ≤₂-total x ys) †
-insert-†-valid {x} {[]}       _          x-valid = ≋-reflexive (sym (†-cons-valid x [] x-valid))
-insert-†-valid {x} {(y ∷ ys)} (Sy ∷ Sys) x-valid with IsInvalid? y
-... | yes y-invalid = prf
-  where prf : insert ≤₂-total x (ys †) ≋ (insert ≤₂-total x (y ∷ ys)) †
-        prf with ≤₂-total x y
-        ... | inj₁ x≤y = ≋-trans
-          (insert-min x≤ys†)
-          (≋-trans (≈ᵣ-refl ∷ ≋-reflexive (sym (†-cons-invalid y ys y-invalid)))
-                   (≋-reflexive (sym (†-cons-valid x (y ∷ ys) x-valid))))
-          where x≤ys† : All (x ≤₂_) (ys †)
-                x≤ys† = All-≤-distrib-† (All-≤-trans x≤y Sy)
-        ... | inj₂ y≤x = ≋-trans
-          (insert-†-valid Sys x-valid)
-          (≋-reflexive (sym (†-cons-invalid y (insert ≤₂-total x ys) y-invalid))) 
-... | no  y-valid   = prf
-  where prf : insert ≤₂-total x (y ∷ (ys †)) ≋ (insert ≤₂-total x (y ∷ ys)) †
-        prf with ≤₂-total x y
-        ... | inj₁ x≤y = ≋-trans (≈ᵣ-refl ∷ ≋-reflexive (sym (†-cons-valid y ys y-valid))) (≋-reflexive (sym (†-cons-valid x (y ∷ ys) x-valid)))
-        ... | inj₂ y≤x = ≋-trans (≈ᵣ-refl ∷ insert-†-valid Sys x-valid) (≋-reflexive (sym (†-cons-valid y (insert ≤₂-total x ys) y-valid)))
-
-†-sorted : ∀ {xs} → Sorted xs → Sorted (xs †)
-†-sorted {[]} [] = []
-†-sorted {x ∷ xs} (Sx ∷ Sxs) with IsInvalid? x
-... | yes x-invalid = †-sorted Sxs
-... | no  x-valid   = All-≤-distrib-† Sx ∷ †-sorted Sxs
+con-<-† : ∀ {v xs} → Sorted xs → Connectedˡ _<₂_ v (head xs) → Connectedˡ _<₂_ v (head (xs †))
+con-<-† {v} {[]}     _   _          = nothing
+con-<-† {v} {x ∷ xs} xs↗ (just v<x) with IsInvalid? x
+... | yes _ = con-<-† (tail↗ xs↗) (con-<-transʳ v<x (head↗ xs↗))
+... | no  _ = just v<x
 
 †-distrib-sort : ∀ xs → sort (xs †) ≋ (sort xs) †
-†-distrib-sort []       = ≋-refl
-†-distrib-sort (x ∷ xs) with IsInvalid? x
-... | yes x-invalid = ≋-trans (†-distrib-sort xs) (≋-sym (insert-†-invalid (sort xs) x-invalid))
-... | no  x-valid   = ≋-trans (insert-cong (sort↗ (xs †)) (†-sorted (sort↗ xs)) (†-distrib-sort xs)) (insert-†-valid (sort↗ xs) x-valid)
+†-distrib-sort xs = sort-filter-≋ IsValid? valid-cong xs
 
-†-distrib-mergeSorted : ∀ {xs ys} → Sorted xs → Sorted ys → mergeSorted (xs †) (ys †) ↭ (mergeSorted xs ys) †
-†-distrib-mergeSorted {[]}     {ys}     _          _          = ↭-refl
-†-distrib-mergeSorted {x ∷ xs} {[]}     _          _          = ↭-reflexive (partialMerge-identityʳ ((x ∷ xs) †))
-†-distrib-mergeSorted {x ∷ xs} {y ∷ ys} (Sx ∷ Sxs) (Sy ∷ Sys) with x <₂? y | y <₂? x
-  | †-distrib-mergeSorted (Sx ∷ Sxs) Sys
-  | †-distrib-mergeSorted Sxs        (Sy ∷ Sys)
-  | †-distrib-mergeSorted Sxs        Sys
-... | yes x<y | _       | rec₁ | rec₂ | rec₃ = prf
+†-distrib-mergeSorted-⊕ : ∀ {x y xs ys} → x ≈ᵣ y →
+                          mergeSorted (xs †) (ys †) ↭ (mergeSorted xs ys) † →
+                          mergeSorted ((x ∷ xs) †) ((y ∷ ys) †) ↭ (x ⊕₂ y ∷ mergeSorted xs ys) †
+†-distrib-mergeSorted-⊕ {x} {y} {xs} {ys} x≈y rec with IsInvalid? x | IsInvalid? y
+... | yes xⁱ | no  yᵛ = contradiction (invalid-cong x≈y xⁱ) yᵛ
+... | no  xᵛ | yes yⁱ = contradiction yⁱ (valid-cong x≈y xᵛ)
+... | yes xⁱ | yes yⁱ = begin
+  mergeSorted (xs †) (ys †)      ↭⟨ rec ⟩
+  (mergeSorted xs ys) †          ≡˘⟨ †-cons-invalid (x ⊕₂ y) (mergeSorted xs ys) (⊕₂-invalid x y xⁱ yⁱ) ⟩
+  (x ⊕₂ y ∷ mergeSorted xs ys) † ∎
+  where open PermutationReasoning
+... | no  xᵛ   | no  yᵛ   = begin
+  mergeSorted (x ∷ (xs †)) (y ∷ (ys †)) ≡⟨  partialMerge-∷-eq ≈ᵣ-sym <₂-irrefl {xs = xs †} {ys = ys †} x≈y ⟩
+  x ⊕₂ y ∷ mergeSorted (xs †) (ys †)    ↭⟨  ↭-prep (x ⊕₂ y) rec ⟩
+  x ⊕₂ y ∷ (mergeSorted xs ys) †        ≡˘⟨ †-cons-valid (x ⊕₂ y) (mergeSorted xs ys) (⊕₂-valid x y xᵛ yᵛ) ⟩
+  (x ⊕₂ y ∷ mergeSorted xs ys) †        ∎
+  where open PermutationReasoning
+  
+†-distrib-mergeSorted : ∀ {xs ys} → Sorted xs → Sorted ys →
+                        mergeSorted (xs †) (ys †) ↭ (mergeSorted xs ys) †
+†-distrib-mergeSorted {[]}     {ys}     _   _   = ↭-refl
+†-distrib-mergeSorted {x ∷ xs} {[]}     _   _   = mergeSorted-identityʳ ((x ∷ xs) †)
+†-distrib-mergeSorted {x ∷ xs} {y ∷ ys} xs↗ ys↗ with <₂-cmp x y
+  | †-distrib-mergeSorted xs↗         (tail↗ ys↗)
+  | †-distrib-mergeSorted (tail↗ xs↗) ys↗
+  | †-distrib-mergeSorted (tail↗ xs↗) (tail↗ ys↗)
+... | tri≈ _ x≈y _ | _ | _ | rec₃ = †-distrib-mergeSorted-⊕ x≈y rec₃
+... | tri< x<y _ _ | _ | rec₂ | _ = prf
   where prf : mergeSorted ((x ∷ xs) †) ((y ∷ ys) †) ↭ (x ∷ (mergeSorted xs (y ∷ ys))) †
         prf with IsInvalid? x
         ... | yes x-invalid = rec₂
         ... | no  x-valid   = ↭-trans (↭-reflexive (partialMerge-∷ˡ-min <₂-asym All-<-ys)) (prep ≈ᵣ-refl rec₂)
-          where All-<-ys : All (x <₂_) ((y ∷ ys) †)
-                All-<-ys = All-<-distrib-† (x<y ∷ All-<-trans x<y Sy)
-... | no  _   | yes y<x | rec₁ | rec₂ | rec₃ = prf
+          where All-<-ys : Connectedˡ _<₂_ x (head ((y ∷ ys) †))
+                All-<-ys = con-<-† ys↗ (just x<y)
+... | tri> _ _ y<x | rec₁ | _ | _ = prf
   where prf : mergeSorted ((x ∷ xs) †) ((y ∷ ys) †) ↭ (y ∷ (mergeSorted (x ∷ xs) ys)) †
         prf with IsInvalid? y
         ... | yes y-invalid = rec₁
         ... | no  y-valid   = ↭-trans (↭-reflexive (partialMerge-∷ʳ-min <₂-asym All-<-xs)) (prep ≈ᵣ-refl rec₁)
-          where All-<-xs : All (y <₂_) ((x ∷ xs) †)
-                All-<-xs = All-<-distrib-† (y<x ∷ All-<-trans y<x Sx)
-... | no ¬x<y | no ¬y<x | rec₁ | rec₂ | rec₃ = prf
-  where prf : mergeSorted ((x ∷ xs) †) ((y ∷ ys) †) ↭ ((x ⊕₂ y) ∷ (mergeSorted xs ys)) †
-        prf with IsInvalid? x | IsInvalid? y
-        ... | yes x-invalid | yes y-invalid = ↭-trans
-          rec₃
-          (↭-sym (↭-reflexive (†-cons-invalid (x ⊕₂ y) (mergeSorted xs ys) x⊕y-invalid)))
-          where x⊕y-invalid : IsInvalid (x ⊕₂ y)
-                x⊕y-invalid = ⊕₂-invalid {x} {y} x-invalid y-invalid
-        ... | yes x-invalid | no  y-valid   = contradiction y-invalid y-valid
-          where y-invalid : IsInvalid y
-                y-invalid = invalid-cong (Tri-≈ ¬x<y ¬y<x) x-invalid
-        ... | no  x-valid   | yes y-invalid = contradiction y-invalid y-valid
-          where y-valid : IsValid y
-                y-valid = valid-cong (Tri-≈ ¬x<y ¬y<x) x-valid
-        ... | no  x-valid   | no  y-valid   = ↭-trans
-          (↭-reflexive (partialMerge-∷-eq {xs = xs †} {ys = ys †} ¬x<y ¬y<x))
-          (↭-trans (prep ≈ᵣ-refl rec₃)
-                   (↭-sym (↭-reflexive (†-cons-valid (x ⊕₂ y) (mergeSorted xs ys) x⊕y-valid))))
-          where x⊕y-valid : IsValid (x ⊕₂ y)
-                x⊕y-valid = ⊕₂-valid {x} {y} x-valid y-valid
+          where All-<-xs : Connectedˡ _<₂_ y (head ((x ∷ xs) †))
+                All-<-xs = con-<-† xs↗ (just y<x)
 
 †-⊕ₛ-distributive : ∀ {xs ys} → (xs †) ⊕ₛ (ys †) ↭ (xs ⊕ₛ ys) †
 †-⊕ₛ-distributive {xs} {ys} = begin
   (xs †) ⊕ₛ (ys †)                        ≡⟨⟩
-  mergeSorted (sort (xs †)) (sort (ys †)) ↭⟨ ≋⇒↭ (partialMerge-cong isEquivalence <₂-resp-≈ᵣ ⊕₂-cong
-                                                                   (†-distrib-sort xs)
-                                                                   (†-distrib-sort ys)) ⟩
-  mergeSorted ((sort xs) †) ((sort ys) †) ↭⟨ †-distrib-mergeSorted (sort↗ xs) (sort↗ ys) ⟩
+  mergeSorted (sort (xs †)) (sort (ys †)) ≋⟨ mergeSorted-cong (†-distrib-sort xs) (†-distrib-sort ys) ⟩
+  mergeSorted ((sort xs) †) ((sort ys) †) ↭⟨ †-distrib-mergeSorted (sort-↗ xs) (sort-↗ ys) ⟩
   (xs ⊕ₛ ys) †                            ∎
   where open PermutationReasoning
 
@@ -411,8 +339,9 @@ insert-†-valid {x} {(y ∷ ys)} (Sy ∷ Sys) x-valid with IsInvalid? y
 []-cong : ∀ {f : Route → Route} {A A'} →
             A ↭ A' → f [ A ] ↭ f [ A' ]
 []-cong {f} A=A' = †-cong (lemma A=A')
-   where f-cong₂ : ∀ {d d' : Fin n} {v v' : Route} → (d , v) ≈ᵣ (d' , v') → (d , f v) ≈ᵣ (d' , f v')
-         f-cong₂ {d} {d'} {v} {v'} (d=d' , v=v') = (d=d' , f-cong f v=v')
+   where f-cong₂ : ∀ {d d' : Fin n} {v v' : Route} → 
+                   (d , v) ≈ᵣ (d' , v') → (d , f v) ≈ᵣ (d' , f v')
+         f-cong₂ (d=d' , v=v') = d=d' , f-cong f v=v'
          lemma : {A A' : RoutingSet} →
                  A ↭ A' → map₂ f A ↭ map₂ f A'
          lemma = PermProperties.map⁺ FinRoute-setoid FinRoute-setoid f-cong₂

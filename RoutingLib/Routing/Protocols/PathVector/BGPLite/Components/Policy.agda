@@ -23,7 +23,6 @@ open import Relation.Nullary.Negation using (contradiction)
 open import RoutingLib.Data.Path.Uncertified as Path
   using (Path; []; _∷_; length; deflate)
 open import RoutingLib.Data.Path.Uncertified.Properties
-open import RoutingLib.Data.Nat.Properties using (n≢1+n)
 
 open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Route
 open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Communities

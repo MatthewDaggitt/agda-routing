@@ -18,6 +18,7 @@ open import Data.Product using (_×_; _,_)
 open import Induction.WellFounded using (Acc; acc)
 open import Relation.Binary using (DecSetoid)
 import Relation.Binary.Reasoning.Setoid as EqReasoning
+open import Function.Base using (_∘_; _∘₂_)
 
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule using (Schedule)
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule.Construct.Synchronous
@@ -25,6 +26,7 @@ open import RoutingLib.Iteration.Synchronous using (_^_)
 open import RoutingLib.lmv34.Asynchronous.Omega_zero.Algebra algebra A
 open import RoutingLib.lmv34.Asynchronous.Omega_zero.Properties algebra A
 open import RoutingLib.lmv34.Asynchronous.Omega_one.Algebra isRoutingAlgebra A
+open import RoutingLib.lmv34.Asynchronous.Omega_two.Properties isRoutingAlgebra A Imp Prot Exp A=Imp∘Prot∘Exp using ([,]-⊤ᵢⱼ)
 open import RoutingLib.lmv34.Asynchronous.Omega_three isRoutingAlgebra A Imp Prot Exp A=Imp∘Prot∘Exp
 open import RoutingLib.lmv34.Asynchronous.Omega_three.Algebra isRoutingAlgebra A Imp Prot Exp A=Imp∘Prot∘Exp
 open import RoutingLib.lmv34.Synchronous.Gamma_one.Algebra isRoutingAlgebra n
@@ -50,7 +52,7 @@ open DecSetoid Γ₃-State-decSetoid using () renaming
   ([ Γ₃,ᵢ I[t] (∇[t] , Δ[t]) , I[t] ] αˢʸⁿᶜ (suc t)) ,
   ([ Γ₃,ₒ V[t]               , O[t] ] αˢʸⁿᶜ (suc t)) ,
   ([ (π₁ (Γ₃,ₓ V[t] O[t]))   , ∇[t] ] αˢʸⁿᶜ (suc t)) ,
-  ([ (π₂ (Γ₃,ₓ V[t] O[t]))   , Δ[t] ] αˢʸⁿᶜ (suc t))    ≈⟨ ≈ᵥ-reflexive [,]-⊤ , ≈ᵥ,₂-reflexive [,]-⊤ , ≈ᵥ,₂-reflexive [,]-⊤ , ≈ᵥ,₂-reflexive [,]-⊤ , ≈ᵥ,₂-reflexive [,]-⊤ ⟩
+  ([ (π₂ (Γ₃,ₓ V[t] O[t]))   , Δ[t] ] αˢʸⁿᶜ (suc t))    ≈⟨ ↭-reflexive ∘ [,]-⊤ᵢ , ↭-reflexive ∘₂ [,]-⊤ᵢⱼ , ↭-reflexive ∘₂ [,]-⊤ᵢⱼ , ↭-reflexive ∘₂ [,]-⊤ᵢⱼ , ↭-reflexive ∘₂ [,]-⊤ᵢⱼ ⟩
   (Γ₃,ᵥ I[t]) ,
   (Γ₃,ᵢ I[t] (∇[t] , Δ[t])) ,
   (Γ₃,ₒ V[t]) ,

@@ -13,7 +13,7 @@
 module RoutingLib.Routing.Protocols.PathVector.BGPLite.Main where
 
 import Algebra.Construct.NaturalChoice.Min as NaturalChoice
-open import Algebra.FunctionProperties
+open import Algebra
 open import Data.Nat using (ℕ; _≟_)
 open import Data.Nat.Properties using () renaming (<-cmp to compare)
 open import Data.Product using (_,_; _×_; proj₁; proj₂)

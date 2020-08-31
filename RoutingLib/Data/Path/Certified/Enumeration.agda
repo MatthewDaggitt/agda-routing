@@ -20,7 +20,7 @@ open import Relation.Nullary.Negation using (contradiction)
 open import Function using (_∘_)
 
 open import RoutingLib.Data.List using (allFinPairs)
-open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-allFin⁺; ∈-combine⁺; ∈-allFinPairs⁺)
+open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-allFinPairs⁺)
 
 open import RoutingLib.Data.Path.Certified
 open import RoutingLib.Data.Path.Certified.Properties

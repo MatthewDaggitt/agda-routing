@@ -1,7 +1,7 @@
 open import Data.Nat using (ℕ; _≤_; z≤n; s≤s)
 open import Data.List using (applyUpTo)
-open import Data.List.Any using (here; there)
-open import Data.List.Relation.Subset.Propositional
+open import Data.List.Relation.Unary.Any using (here; there)
+open import Data.List.Relation.Binary.Subset.Propositional
 
 module RoutingLib.Data.List.Relation.Binary.Subset.Propositional.Properties where
 

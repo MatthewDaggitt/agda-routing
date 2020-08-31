@@ -25,6 +25,7 @@ open import Data.Product using (_,_; proj₁; proj₂)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Vec.Functional
 open import Function using (_∘_)
+open import Function.Metric.Nat
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; sym; trans; subst; cong; cong₂)
@@ -33,7 +34,6 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.Nat.Properties
-open import RoutingLib.Function.Metric.Nat
 import RoutingLib.Function.Metric.Construct.Condition as Condition
 open import RoutingLib.Relation.Nullary.Decidable using ([_,_])
 
@@ -104,7 +104,7 @@ r[x,y]≡hx⊔hy {x} {y} x≉y with x ≟ y
 r-isProtoMetric : IsProtoMetric _≈_ r
 r-isProtoMetric = record
   { isPartialOrder  = ≤-isPartialOrder
-  ; 0#-minimum      = z≤n
+  ; nonNegative     = z≤n
   ; ≈-isEquivalence = ≈-isEquivalence
   ; cong            = r-cong
   }
@@ -112,13 +112,13 @@ r-isProtoMetric = record
 r-isPreMetric : IsPreMetric _≈_ r
 r-isPreMetric = record
   { isProtoMetric = r-isProtoMetric
-  ; eq⇒0          = x≈y⇒r≡0
+  ; ≈⇒0           = x≈y⇒r≡0
   }
 
 r-isQuasiSemiMetric : IsQuasiSemiMetric _≈_ r
 r-isQuasiSemiMetric = record
   { isPreMetric = r-isPreMetric
-  ; 0⇒eq        = r≡0⇒x≈y
+  ; 0⇒≈         = r≡0⇒x≈y
   }
 
 h[FXᵢⱼ]⊔h[FYᵢⱼ]<v : ∀ X Y {i j v} → F X i j <₊ F Y i j →

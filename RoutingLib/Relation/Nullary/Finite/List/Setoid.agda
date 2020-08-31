@@ -59,9 +59,9 @@ module _ {S : Setoid a ℓ₁} {T : Setoid b ℓ₂} where
 
   _×ᶠ_ : Finite S → Finite T → Finite (S ×ₛ T)
   fin₁ ×ᶠ fin₂ = record
-    { xs       = allPairs SF.xs TF.xs
-    ; complete = Complete.allPairs⁺ S T SF.complete TF.complete
-    ; unique   = Unique.allPairs⁺   S T SF.unique   TF.unique
+    { xs       = cartesianProduct SF.xs TF.xs
+    ; complete = Complete.cartesianProduct⁺ S T SF.complete TF.complete
+    ; unique   = Unique.cartesianProduct⁺   S T SF.unique   TF.unique
     } where module SF = Finite fin₁; module TF = Finite fin₂
 {-
   _⊎ᶠ_ : Finite S → Finite T → Finite (S ⊎ₛ T)

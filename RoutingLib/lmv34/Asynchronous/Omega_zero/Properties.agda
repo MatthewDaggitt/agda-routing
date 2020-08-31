@@ -66,13 +66,13 @@ open IndexedDecSetoid Decℝ𝕄ₛⁱ using () renaming (isDecEquivalenceᵢ to
 -- Proof that Ω₀ is equivalent to a definition using asyncIter
 
 Γ₀∥ : AsyncIterable a ℓ n
-Γ₀∥ = record {
-  Sᵢ   = const RoutingTable;
-  _≈ᵢ_ = _≈ₜ_;
-  F    = Γ₀;
-  isAsyncIterable = record {
-    isDecEquivalenceᵢ = ℝ𝕄-isDecEquivalenceᵢ;
-    F-cong = Γ₀-cong
+Γ₀∥ = record
+  { Sᵢ   = const RoutingTable
+  ; _≈ᵢ_ = _≈ₜ_
+  ; F    = Γ₀
+  ; isAsyncIterable = record
+    { isDecEquivalenceᵢ = ℝ𝕄-isDecEquivalenceᵢ
+    ; F-cong = Γ₀-cong
     }
   }
 

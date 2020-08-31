@@ -26,7 +26,7 @@ import RoutingLib.Routing as Routing
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebra
 import RoutingLib.Data.Vec.Functional.Relation.Binary.Equality as TableEquality
 open import RoutingLib.Data.List using (partialMerge)
-import RoutingLib.Data.List.Sorting.InsertionSort as InsertionSort
+import RoutingLib.Data.List.Sort as Sort
 import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties as PermutationProperties
 
 module RoutingLib.lmv34.Synchronous.Gamma_one.Algebra
@@ -50,7 +50,16 @@ RoutingSet = List (Fin n × Route)
 -- RoutingVector setoid
 FinRoute-decSetoid = ×-decSetoid (Finₚ.≡-decSetoid n) DS
 open DecSetoid FinRoute-decSetoid public
-  using () renaming (_≈_ to _≈ᵣ_; _≉_ to _≉ᵣ_;_≟_ to _≟ᵣ_; setoid to FinRoute-setoid)
+  using () renaming
+  ( _≈_           to _≈ᵣ_
+  ; _≉_           to _≉ᵣ_
+  ; refl          to ≈ᵣ-refl
+  ; trans         to ≈ᵣ-trans
+  ; sym           to ≈ᵣ-sym
+  ; _≟_           to _≟ᵣ_
+  ; isEquivalence to ≈ᵣ-isEquivalence
+  ; setoid        to FinRoute-setoid
+  )
 open PermutationEq FinRoute-setoid public
 open PermutationProperties FinRoute-setoid using (↭-decSetoid)
 
@@ -76,7 +85,10 @@ open DecSetoid ≈ᵥ-decSetoid public using ()
   ; isEquivalence to ≈ᵥ-isEquivalence
   ; setoid        to 𝕍ₛ
   )
-
+{-
+≈ᵥ-reflexiveₛ : {!!} B.⇒ _≈ᵥ_
+≈ᵥ-reflexiveₛ = ?
+-}
 --------------------------------------------------------------------------------
 -- Auxilaries
 
@@ -118,7 +130,7 @@ _<₂_ = _<ₗₑₓ_ _≈ᵣ_ _≤₂_
   }
  
 open StrictTotalOrder <₂-strictTotalOrder public
-  using () renaming (_<?_ to _<₂?_)
+  using () renaming (compare to <₂-cmp)
 
 --_≈₁_ : Rel (Fin n × Route) 0ℓ
 --(d₁ , v₁) ≈₁ (d₂ , v₂) = d₁ ≡ d₂
@@ -127,7 +139,7 @@ _⊕₂_ : Op₂ (Fin n × Route)
 (d₁ , v₁) ⊕₂ (d₂ , v₂) = (d₁ , v₁ ⊕ v₂)
 
 mergeSorted : Op₂ RoutingSet
-mergeSorted = partialMerge _<₂?_ _⊕₂_
+mergeSorted = partialMerge <₂-cmp _⊕₂_
 
 --------------------------------------------------------------------------------
 -- Definitions
@@ -141,7 +153,7 @@ xs † = filter IsValid? xs
 infixl 10 _⊕ₛ_
 _⊕ₛ_ : Op₂ RoutingSet
 S₁ ⊕ₛ S₂ = mergeSorted (sort S₁) (sort S₂)
-  where open InsertionSort ≤₂-decTotalOrder using (sort)
+  where open Sort ≤₂-decTotalOrder using (sort)
 
 -- Vector addition
 infixl 9 _⊕ᵥ_

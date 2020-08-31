@@ -225,5 +225,5 @@ Aₐₗₜ-simulates-A = record
 
 open import RoutingLib.Routing.VectorBased.Asynchronous.Results
 
-Aₐₗₜ-alwaysConvergent : AlwaysConvergent Aₐₗₜ
-Aₐₗₜ-alwaysConvergent = incrPaths⇒convergent isRoutingAlgebra isPathAlgebra isIncreasing
+Aₐₗₜ-convergent : Convergent Aₐₗₜ
+Aₐₗₜ-convergent = incrPaths⇒convergent isRoutingAlgebra isPathAlgebra isIncreasing

@@ -34,6 +34,7 @@ open import Data.Maybe using (Maybe)
 open import Data.Bool using (if_then_else_)
 open import Data.Unit using (tt)
 open import Data.Vec.Functional.Relation.Binary.Pointwise using (Pointwise)
+open import Function.Metric.Nat
 open import Level using (Level; _⊔_) renaming (suc to lsuc)
 open import Level.Literals using (#_)
 open import Relation.Binary as B using (DecSetoid; _Respects_; Total; _Preserves_⟶_; _Preserves₂_⟶_⟶_)
@@ -43,7 +44,6 @@ open import Relation.Unary.Properties using (U-Universal)
 open import Relation.Nullary.Decidable using (⌊_⌋)
 
 open import RoutingLib.Data.Vec.Functional using (max)
-open import RoutingLib.Function.Metric.Nat
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (Setoid_at_)
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as SubsetEq
 open import RoutingLib.Relation.Unary.Indexed
@@ -142,8 +142,8 @@ module _ {a ℓ n} (𝓘 : AsyncIterable a ℓ n) where
         using ()
         renaming
         ( cong to dᵢ-cong
-        ; eq⇒0 to x≈y⇒dᵢ≡0
-        ; 0⇒eq to dᵢ≡0⇒x≈y
+        ; ≈⇒0  to x≈y⇒dᵢ≡0
+        ; 0⇒≈  to dᵢ≡0⇒x≈y
         )
 
 
@@ -169,8 +169,8 @@ module _ {a ℓ n} (𝓘 : AsyncIterable a ℓ n) where
         using ()
         renaming
         ( cong to dᵢ-cong
-        ; eq⇒0 to x≈y⇒dᵢ≡0
-        ; 0⇒eq to dᵢ≡0⇒x≈y
+        ; ≈⇒0  to x≈y⇒dᵢ≡0
+        ; 0⇒≈  to dᵢ≡0⇒x≈y
         )
 
   AMCO⇒partialAMCO : AMCO → PartialAMCO U

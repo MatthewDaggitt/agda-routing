@@ -1,11 +1,11 @@
 module RoutingLib.Data.List.Relation.Binary.Permutation.Propositional.Properties where
 
 open import Data.List
-open import Data.List.All
-open import Data.List.Any
+open import Data.List.Relation.Unary.All
+open import Data.List.Relation.Unary.Any
 import Data.List.Membership.Setoid as Membership
-open import Data.List.Relation.Binary.Permutation.Inductive
-open import Data.List.Relation.Binary.Permutation.Inductive.Properties
+open import Data.List.Relation.Binary.Permutation.Propositional
+open import Data.List.Relation.Binary.Permutation.Propositional.Properties
 open import Data.List.Relation.Unary.AllPairs using (AllPairs; _∷_)
 import Data.List.Relation.Unary.Unique.Setoid as Unique
 open import Data.Sum using (inj₁; inj₂)
@@ -20,6 +20,16 @@ open import RoutingLib.Data.List using (insert)
 
 open PermutationReasoning
 
+module _ {a ℓ} (S : Setoid a ℓ) where
+
+  import Data.List.Relation.Binary.Permutation.Setoid S as SP
+  
+  toSetoid : ∀ {xs ys} → xs ↭ ys → xs SP.↭ ys
+  toSetoid refl                = SP.↭-refl
+  toSetoid (prep x xs↭ys)      = SP.↭-prep x (toSetoid xs↭ys)
+  toSetoid (swap x y xs↭ys)    = SP.↭-swap x y (toSetoid xs↭ys)
+  toSetoid (trans xs↭ys ys↭zs) = SP.↭-trans (toSetoid xs↭ys) (toSetoid ys↭zs)
+  
 module _ {a} {A : Set a} where
 
   split : ∀ (x : A) as bs {xs} → as ++ [ x ] ++ bs ↭ xs → ∃₂ λ ps qs → xs ≡ ps ++ [ x ] ++ qs

@@ -15,7 +15,7 @@ open import Relation.Nullary using (yes; no)
 open import Relation.Unary using () renaming (Decidable to Decidableᵤ)
 open import Function using (_∘_; id)
 
-open import RoutingLib.Data.List using (combine; allFinPairs)
+open import RoutingLib.Data.List using (allFinPairs)
 open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 import RoutingLib.Data.List.Membership.Setoid as SetoidMembership
 
@@ -30,10 +30,6 @@ private
     A : Set a
     B : Set b
     C : Set c
-
-∈-combine⁺ : ∀ {u v xs ys} (f : A → B → C) → u ∈ xs → v ∈ ys →
-             f u v ∈ combine f xs ys
-∈-combine⁺ f = GM.∈-combine⁺ (setoid _) (setoid _) (setoid _) (cong₂ f)
 
 ∈-upTo⁺ : ∀ {n i} → i < n → i ∈ upTo n
 ∈-upTo⁺ = GM.∈-applyUpTo⁺ id
@@ -50,4 +46,4 @@ private
 ∈-allFin⁺ = GM.∈-tabulate⁺
 
 ∈-allFinPairs⁺ : ∀ {n} i j → (i , j) ∈ allFinPairs n
-∈-allFinPairs⁺ i j = ∈-combine⁺ _,_ (∈-allFin⁺ i) (∈-allFin⁺ j)
+∈-allFinPairs⁺ i j = GM.∈-cartesianProduct⁺ (∈-allFin⁺ i) (∈-allFin⁺ j)

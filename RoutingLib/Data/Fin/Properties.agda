@@ -15,25 +15,23 @@ module RoutingLib.Data.Fin.Properties where
 𝔽ₛ : ℕ → Setoid _ _
 𝔽ₛ = ≡-setoid
 
-------------------------------------------------------------------------
--- fromℕ
 
-≤fromℕ : ∀ k → (i : Fin (suc k)) → i ≤ fromℕ k
-≤fromℕ _       fzero    = z≤n
-≤fromℕ (suc k) (fsuc i) = s≤s (≤fromℕ k i)
+private
+  variable
+    m n : ℕ
+
+lower : ∀ {m n} (i : Fin m) → .(toℕ i <ℕ n) → Fin n
+lower {suc _} {suc n} fzero    leq = fzero
+lower {suc _} {suc n} (fsuc i) leq = fsuc (lower i (ℕₚ.≤-pred leq))
+
+lower-injective : ∀ {m n} (i j : Fin m) (i<n : toℕ i <ℕ n) (j<n : toℕ j <ℕ n)  →
+                  lower i i<n ≡ lower j j<n → i ≡ j
+lower-injective {suc _} {suc n} fzero    fzero    i<n       j<n       eq = refl
+lower-injective {suc _} {suc n} (fsuc i) (fsuc j) (s≤s i<n) (s≤s j<n) eq =
+  cong fsuc (lower-injective i j i<n j<n (suc-injective eq))
 
 ------------------------------------------------------------------------
 -- fromℕ<
-
-fromℕ<-cong : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
-               i ≡ j → fromℕ< i<n ≡ fromℕ< j<n
-fromℕ<-cong i<n j<n refl = cong fromℕ< (ℕₚ.≤-irrelevant i<n j<n)
-
-fromℕ<-injective : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
-                    fromℕ< i<n ≡ fromℕ< j<n → i ≡ j
-fromℕ<-injective (s≤s z≤n)       (s≤s z≤n)       eq = refl
-fromℕ<-injective (s≤s (s≤s i<n)) (s≤s (s≤s j<n)) eq =
-  cong suc (fromℕ<-injective (s≤s i<n) (s≤s j<n) (suc-injective eq))
 
 fromℕ<-mono-≤ : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
                  i ≤ℕ j → fromℕ< i<n ≤ fromℕ< j<n
@@ -49,6 +47,10 @@ fromℕ<-cancel-< : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
                   fromℕ< i<n < fromℕ< j<n → i <ℕ j
 fromℕ<-cancel-< i<n j<n = subst₂ _<ℕ_ (toℕ-fromℕ< i<n) (toℕ-fromℕ< j<n)
 
+fromℕ<-irrelevant : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
+                    i ≡ j → fromℕ< i<n ≡ fromℕ< j<n
+fromℕ<-irrelevant i<n j<n refl = cong fromℕ< (ℕₚ.<-irrelevant i<n j<n)
+
 ------------------------------------------------------------------------
 -- fromℕ<″
 
@@ -58,7 +60,7 @@ fromℕ<″-cong i<n j<n eq =
   subst₂ _≡_
     (fromℕ<≡fromℕ<″ (ℕₚ.≤″⇒≤ i<n) i<n)
     (fromℕ<≡fromℕ<″ (ℕₚ.≤″⇒≤ j<n) j<n)
-    (fromℕ<-cong (ℕₚ.≤″⇒≤ i<n) (ℕₚ.≤″⇒≤ j<n) eq)
+    (fromℕ<-irrelevant (ℕₚ.≤″⇒≤ i<n) (ℕₚ.≤″⇒≤ j<n) eq)
 
 fromℕ<″-toℕ : ∀ {n} {i : Fin n} (toℕ<n : toℕ i ℕ.<″ n) →
                 fromℕ<″ (toℕ i) toℕ<n ≡ i
@@ -70,7 +72,7 @@ fromℕ<″-toℕ {n} {i} toℕ<n = begin
 
 fromℕ<″-injective : ∀ {n i j} (i<n : i ℕ.<″ n) (j<n : j ℕ.<″ n) →
                     fromℕ<″ i i<n ≡ fromℕ<″ j j<n → i ≡ j
-fromℕ<″-injective i<n j<n eq = fromℕ<-injective (ℕₚ.≤″⇒≤ i<n) (ℕₚ.≤″⇒≤ j<n) (subst₂ _≡_
+fromℕ<″-injective i<n j<n eq = fromℕ<-injective _ _ (ℕₚ.≤″⇒≤ i<n) (ℕₚ.≤″⇒≤ j<n) (subst₂ _≡_
     (sym (fromℕ<≡fromℕ<″ (ℕₚ.≤″⇒≤ i<n) i<n))
     (sym (fromℕ<≡fromℕ<″ (ℕₚ.≤″⇒≤ j<n) j<n))
     eq)
@@ -85,3 +87,24 @@ suc≢zero ()
 ≰⇒≢ : ∀ {n₁} {m n : Fin n₁} → ¬ (m ≤ n) → m ≢ n
 ≰⇒≢ m≰n refl = m≰n ≤-refl
 
+≰⇒> : ∀ {n} {i j : Fin n} → ¬ (i ≤ j) → j < i
+≰⇒> = ℕₚ.≰⇒>
+
+i<j⇒j≢0 : ∀ {n} {i j : Fin (suc n)} → i < j → j ≢ fzero
+i<j⇒j≢0 {j = fsuc j} i<j ()
+
+i≰j⇒i≢0 : ∀ {n} {i j : Fin (suc n)} → ¬ (i ≤ j) → i ≢ fzero
+i≰j⇒i≢0 i≰j = i<j⇒j≢0 (≰⇒> i≰j)
+
+≤-pred : ∀ {n} (i : Fin n) → pred i ≤ i
+≤-pred fzero    = z≤n
+≤-pred (fsuc i) = ℕₚ.≤-step (ℕₚ.≤-reflexive (toℕ-inject₁ i))
+
+cast-injective : ∀ {m n} (m≡n : m ≡ n) {i j : Fin m} → cast m≡n i ≡ cast m≡n j → i ≡ j
+cast-injective {suc m} {suc n} m≡n {fzero}  {fzero} eq  = refl
+cast-injective {suc m} {suc n} m≡n {fsuc i} {fsuc j} eq =
+  cong fsuc (cast-injective (ℕₚ.suc-injective m≡n) (suc-injective eq))
+
+suc-pred : ∀ {i : Fin (suc n)} → i ≢ fzero → toℕ (fsuc (pred i)) ≡ toℕ i
+suc-pred {i = fzero}  i≢0 = contradiction refl i≢0
+suc-pred {i = fsuc i} i≢0 = cong suc (toℕ-inject₁ i)

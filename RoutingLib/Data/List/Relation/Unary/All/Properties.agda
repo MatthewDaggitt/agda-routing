@@ -72,22 +72,6 @@ module _ {a ℓ} (S : Setoid a ℓ) where
   map-all f {x ∷ xs} pres = pres (here refl) ∷ map-all f (pres ∘ there)
 
 
-module _ {a₁ ℓ₁} (S₁ : Setoid a₁ ℓ₁)
-         {a₂ ℓ₂} (S₂ : Setoid a₂ ℓ₂) where
-
-  open Setoid S₁ renaming (Carrier to A₁; refl to refl₁)
-  open Setoid S₂ renaming (Carrier to A₂)
-
-  open import Data.List.Membership.Setoid S₁ using () renaming (_∈_ to _∈₁_)
-  open import Data.List.Membership.Setoid S₂ using () renaming (_∈_ to _∈₂_)
-
-  combine⁺ : ∀ {b p} {B : Set b} {P : B → Set p} _•_ (xs : List A₁) (ys : List A₂) →
-             (∀ {x y} → x ∈₁ xs → y ∈₂ ys → P (x • y)) → All P (combine _•_ xs ys)
-  combine⁺ _•_ []       ys pres = []
-  combine⁺ _•_ (x ∷ xs) ys pres =
-    ++⁺ (map-all S₂ (x •_) (pres (here refl₁))) (combine⁺ _•_ xs ys (pres ∘ there))
-
-
 allFinPairs⁺ : ∀ {n p} {P : Pred (Fin n × Fin n) p} →
                (∀ e → P e) → All P (allFinPairs n)
-allFinPairs⁺ {n} P = combine⁺ (𝔽ₛ n) (𝔽ₛ n) _,_ (allFin n) (allFin n) (λ _ _ → P _)
+allFinPairs⁺ {n} P = cartesianProduct⁺ (𝔽ₛ n) (𝔽ₛ n) (allFin n) (allFin n) (λ _ _ → P _)

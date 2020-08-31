@@ -25,6 +25,7 @@ open import Data.Sum using (_⊎_; inj₁; inj₂; map₂)
 open import Data.Vec.Functional using (zipWith)
 open import Level using (_⊔_)
 open import Function using (_∘_)
+open import Function.Metric.Nat 
 open import Relation.Binary.PropositionalEquality using (_≡_; sym; subst)
 open import Relation.Nullary
 open import Relation.Nullary.Decidable using (⌊_⌋)
@@ -34,7 +35,6 @@ open import RoutingLib.Data.Vec.Functional using (max)
 open import RoutingLib.Data.Vec.Functional.Properties using (max[t]<x; x≤max[t])
 import RoutingLib.Function.Metric.Construct.Condition as Condition
 import RoutingLib.Function.Metric.Construct.MaxLift as MaxLift
-open import RoutingLib.Function.Metric.Nat 
 import RoutingLib.Relation.Nullary.Decidable as Dec
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence
@@ -78,9 +78,9 @@ module _ (e : Epoch) (p : Subset n) where
 
   open IsQuasiSemiMetric d-isQuasiSemiMetric public
     using () renaming
-    ( cong              to d-cong
-    ; eq⇒0              to x≈y⇒d≡0
-    ; 0⇒eq              to d≡0⇒x≈y
+    ( cong to d-cong
+    ; ≈⇒0  to x≈y⇒d≡0
+    ; 0⇒≈  to d≡0⇒x≈y
     )
   
   d-bounded : ∃ λ dₘₐₓ → ∀ x y → d x y ≤ dₘₐₓ

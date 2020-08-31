@@ -2,12 +2,13 @@ open import Algebra.Core using (Op₂)
 open import Data.List
 import Data.List.Properties as ListProperties
 open import Data.List.Relation.Binary.Pointwise as PW using (Pointwise; []; _∷_)
+open import Data.Nat using (suc)
 open import Data.Nat.Properties using (suc-injective)
-open import Data.Fin using (Fin; zero; suc; cast)
+open import Data.Fin using (Fin; zero; suc; cast; toℕ)
 open import Function using (_∘_)
 open import Level using (Level)
 open import Relation.Binary using (REL; Rel; Reflexive; _⇒_)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong)
 open import Relation.Binary.HeterogeneousEquality using (_≅_; refl)
 
 module RoutingLib.Data.List.Relation.Binary.Pointwise where
@@ -38,7 +39,11 @@ map-tabulate ref f g = reflexive-≡ _ ref (ListProperties.map-tabulate g f)
 module _ {_∼_ : REL A B ℓ} where
 
   lookup⁻ : ∀ {xs ys} (|xs|≡|ys| : length xs ≡ length ys) →
-            (∀ i → lookup xs i ∼ lookup ys (cast |xs|≡|ys| i)) →
+            (∀ {i j} → toℕ i ≡ toℕ j → lookup xs i ∼ lookup ys j) →
             Pointwise _∼_ xs ys
   lookup⁻ {[]}     {[]}     _             _  = []
-  lookup⁻ {x ∷ xs} {y ∷ ys} |x∷xs|≡|y∷ys| eq = eq zero ∷ lookup⁻ (suc-injective |x∷xs|≡|y∷ys|) (eq ∘ suc)
+  lookup⁻ {x ∷ xs} {y ∷ ys} |x∷xs|≡|y∷ys| eq = eq {zero} refl ∷ lookup⁻ (suc-injective |x∷xs|≡|y∷ys|) (eq ∘ cong suc)
+
+  lookup⁺ : ∀ {xs ys} (xs∼ys : Pointwise _∼_ xs ys) → ∀ i → lookup xs i ∼ lookup ys (cast (PW.Pointwise-length xs∼ys) i)
+  lookup⁺ (x∼y ∷ xs∼ys) zero    = x∼y
+  lookup⁺ (x∼y ∷ xs∼ys) (suc i) = lookup⁺ xs∼ys i

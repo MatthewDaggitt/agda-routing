@@ -18,7 +18,6 @@ import Algebra.Consequences.Propositional as Consequences
 
 open import RoutingLib.Algebra.Definitions
 open import RoutingLib.Relation.Binary
-open import RoutingLib.Function.Metric.Nat
 
 module RoutingLib.Data.Nat.Properties where
 
@@ -60,77 +59,6 @@ m<n⇒n≡1+o {_} {suc o} m<n = o , refl
 <⇒≤suc : ∀ {x y} → x < y → x ≤ suc y
 <⇒≤suc (s≤s z≤n)       = z≤n
 <⇒≤suc (s≤s (s≤s x<y)) = s≤s (<⇒≤suc (s≤s x<y))
-
-------------------------------------------------------------------------
--- Distance
-
-∣-∣-triangle : ∀ x y z → ∣ x - z ∣ ≤ ∣ x - y ∣ + ∣ y - z ∣
-∣-∣-triangle zero    y       z       = m≤n+∣n-m∣ z y
-∣-∣-triangle x       zero    z       = begin
-  ∣ x - z ∣     ≤⟨ ∣m-n∣≤m⊔n x z ⟩
-  x ⊔ z         ≤⟨ m⊔n≤m+n x z ⟩
-  x + z         ≡⟨ cong₂ _+_ (sym (∣-∣-identityʳ x)) refl ⟩
-  ∣ x - 0 ∣ + z ∎
-  where open ≤-Reasoning
-∣-∣-triangle x       y       zero    = begin
-  ∣ x - 0 ∣             ≡⟨ ∣-∣-identityʳ x ⟩
-  x                     ≤⟨ m≤∣m-n∣+n x y ⟩
-  ∣ x - y ∣ + y         ≡⟨ cong₂ _+_ refl (sym (∣-∣-identityʳ y)) ⟩
-  ∣ x - y ∣ + ∣ y - 0 ∣ ∎
-  where open ≤-Reasoning
-∣-∣-triangle (suc x) (suc y) (suc z) = ∣-∣-triangle x y z
-
-∣-∣-isProtoMetric : IsProtoMetric _≡_ ∣_-_∣
-∣-∣-isProtoMetric = record
-  { isPartialOrder  = ≤-isPartialOrder
-  ; ≈-isEquivalence = isEquivalence
-  ; cong            = cong₂ ∣_-_∣
-  ; 0#-minimum      = z≤n
-  }
-
-∣-∣-isPreMetric : IsPreMetric _≡_ ∣_-_∣
-∣-∣-isPreMetric = record
-  { isProtoMetric = ∣-∣-isProtoMetric
-  ; eq⇒0          = m≡n⇒∣m-n∣≡0
-  }
-
-∣-∣-isQuasiSemiMetric : IsQuasiSemiMetric _≡_ ∣_-_∣
-∣-∣-isQuasiSemiMetric = record
-  { isPreMetric = ∣-∣-isPreMetric
-  ; 0⇒eq        = ∣m-n∣≡0⇒m≡n
-  }
-
-∣-∣-isSemiMetric : IsSemiMetric _≡_ ∣_-_∣
-∣-∣-isSemiMetric = record
-  { isQuasiSemiMetric = ∣-∣-isQuasiSemiMetric
-  ; sym               = ∣-∣-comm
-  }
-
-∣-∣-isMetric : IsMetric _≡_ ∣_-_∣
-∣-∣-isMetric = record
-  { isSemiMetric = ∣-∣-isSemiMetric
-  ; triangle     = ∣-∣-triangle
-  }
-
-∣-∣-quasiSemiMetric : QuasiSemiMetric 0ℓ 0ℓ 0ℓ 0ℓ 0ℓ
-∣-∣-quasiSemiMetric = record
-  { isQuasiSemiMetric = ∣-∣-isQuasiSemiMetric
-  }
-
-∣-∣-semiMetric : SemiMetric 0ℓ 0ℓ 0ℓ 0ℓ 0ℓ
-∣-∣-semiMetric = record
-  { isSemiMetric = ∣-∣-isSemiMetric
-  }
-
-∣-∣-preMetric : PreMetric 0ℓ 0ℓ 0ℓ 0ℓ 0ℓ
-∣-∣-preMetric = record
-  { isPreMetric = ∣-∣-isPreMetric
-  }
-
-∣-∣-metric : Metric 0ℓ 0ℓ
-∣-∣-metric = record
-  { isMetric = ∣-∣-isMetric
-  }
 
 ------------------------------------------------------------------------
 -- Addition and multiplication

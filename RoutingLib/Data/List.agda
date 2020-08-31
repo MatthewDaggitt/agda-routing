@@ -15,7 +15,7 @@ open import Relation.Nullary using (yes; no)
 
 private
   variable
-    a b c p ℓ ℓ₁ ℓ₂ : Level
+    a b c p ℓ ℓ₁ ℓ₂ ℓ₃ : Level
     A : Set a
     B : Set b
     C : Set c
@@ -39,28 +39,21 @@ module _ {_≤_ : Rel A ℓ} (total : Total _≤_) where
   ... | inj₁ x≤y | vs | _  = x ∷ vs
   ... | inj₂ y≤x | _  | us = y ∷ us
 
-module _ {_<_ : Rel A ℓ₂} (_<?_ : B.Decidable _<_) (_⊕_ : Op₂ A) where
+module _ {_<_ : Rel A ℓ₂} {_≈_ : Rel A ℓ₃} (<-cmp : Trichotomous _≈_ _<_) (_⊕_ : Op₂ A) where
 
   partialMerge : List A → List A → List A
   partialMerge []       ys       = ys
   partialMerge (x ∷ xs) []       = x ∷ xs
-  partialMerge (x ∷ xs) (y ∷ ys) with x <? y | y <? x
+  partialMerge (x ∷ xs) (y ∷ ys) with <-cmp x y
     | partialMerge xs (y ∷ ys)
     | partialMerge (x ∷ xs) ys
     | partialMerge xs ys
-  ... | yes x<y | _       | rec₁ | _    | _    = x ∷ rec₁ 
-  ... | no  _   | yes y<x | _    | rec₂ | _    = y ∷ rec₂
-  ... | no  _   | no   _  | _    | _    | rec₃ = (x ⊕ y) ∷ rec₃
-
-combine : (A → B → C) → List A → List B → List C
-combine f []       _  = []
-combine f (x ∷ xs) ys = map (f x) ys ++ combine f xs ys
-
-allPairs : List A → List B → List (A × B)
-allPairs = combine _,_
+  ... | tri< _ _ _ | rec₁ | _    | _    = x ∷ rec₁
+  ... | tri> _ _ _ | _    | rec₂ | _    = y ∷ rec₂
+  ... | tri≈ _ _ _ | _    | _    | rec₃ = (x ⊕ y) ∷ rec₃
 
 allFinPairs : ∀ n → List (Fin n × Fin n)
-allFinPairs n = allPairs (allFin n) (allFin n)
+allFinPairs n = cartesianProduct (allFin n) (allFin n)
 
 count : {P : Pred A p} → Decidable P → List A → ℕ
 count P? = length ∘ filter P?

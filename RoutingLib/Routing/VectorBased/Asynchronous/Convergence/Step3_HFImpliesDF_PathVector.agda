@@ -21,6 +21,7 @@ open import Data.Nat.Properties hiding (_≟_)
 open import Data.Sum using (_⊎_; inj₁; inj₂; swap)
 open import Data.Product using (_×_; _,_)
 open import Function.Base using (_∘_)
+open import Function.Metric.Nat
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary using (¬_; yes; no)
@@ -28,7 +29,6 @@ open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Nullary.Decidable using (⌊_⌋)
 
 open import RoutingLib.Data.Nat.Properties
-open import RoutingLib.Function.Metric.Nat
 
 open ≤-Reasoning
 
@@ -184,10 +184,10 @@ rᶜ-cong wᶜ xᶜ yᶜ zᶜ w≈y x≈z = DV.cong
   {u = toCRoute xᶜ} {v = toCRoute zᶜ} w≈y x≈z
 
 x≈y⇒rᶜ≡0 : ∀ (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → x ≈ y → rᶜ xᶜ yᶜ ≡ 0
-x≈y⇒rᶜ≡0 xᶜ yᶜ x≈y = DV.eq⇒0 {toCRoute xᶜ} {toCRoute yᶜ} x≈y
+x≈y⇒rᶜ≡0 xᶜ yᶜ x≈y = DV.≈⇒0 {toCRoute xᶜ} {toCRoute yᶜ} x≈y
 
 rᶜ≡0⇒x≈y : ∀ (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → rᶜ xᶜ yᶜ ≡ 0 → x ≈ y
-rᶜ≡0⇒x≈y xᶜ yᶜ d≡0 = DV.0⇒eq {toCRoute xᶜ} {toCRoute yᶜ} d≡0
+rᶜ≡0⇒x≈y xᶜ yᶜ d≡0 = DV.0⇒≈ {toCRoute xᶜ} {toCRoute yᶜ} d≡0
 
 rᶜ<Hᶜ : ∀ (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → rᶜ xᶜ yᶜ < Hᶜ
 rᶜ<Hᶜ xᶜ yᶜ = s≤s (DV.r≤rₘₐₓ (toCRoute xᶜ) (toCRoute yᶜ))
@@ -247,7 +247,7 @@ r-bounded = Hᶜ + Hⁱ , r≤Hᶜ+Hⁱ
 r-isProtoMetric : IsProtoMetric _≈_ r
 r-isProtoMetric = record
   { isPartialOrder  = ≤-isPartialOrder
-  ; 0#-minimum      = z≤n
+  ; nonNegative     = z≤n
   ; ≈-isEquivalence = ≈-isEquivalence
   ; cong            = r-cong
   }
@@ -255,13 +255,13 @@ r-isProtoMetric = record
 r-isPreMetric : IsPreMetric _≈_ r
 r-isPreMetric = record
   { isProtoMetric = r-isProtoMetric
-  ; eq⇒0          = x≈y⇒r≡0
+  ; ≈⇒0           = x≈y⇒r≡0
   }
 
 r-isQuasiSemiMetric : IsQuasiSemiMetric _≈_ r
 r-isQuasiSemiMetric = record
   { isPreMetric = r-isPreMetric
-  ; 0⇒eq        = r≡0⇒x≈y
+  ; 0⇒≈         = r≡0⇒x≈y
   }
 
 H<r : x ≉ y → 𝑰 x ⊎ 𝑰 y → Hᶜ < r x y
@@ -286,7 +286,7 @@ rᶜ≤r {x} {y} x≉y xᶜ yᶜ with x ≟ y
 
 rᶜ≡r : ∀ {p q} (pᶜ : 𝑪 p) (qᶜ : 𝑪 q) → x ≈ p → y ≈ q → rᶜ pᶜ qᶜ ≡ r x y
 rᶜ≡r {x} {y} {p} {q} pᶜ qᶜ x≈p y≈q with x ≟ y | 𝑪? x | 𝑪? y
-... | yes x≈y | _      | _      = DV.eq⇒0 (≈-trans (≈-trans (≈-sym x≈p) x≈y) y≈q)
+... | yes x≈y | _      | _      = DV.≈⇒0 (≈-trans (≈-trans (≈-sym x≈p) x≈y) y≈q)
 ... | _       | no  xⁱ | _      = contradiction (𝑪-cong (≈-sym x≈p) pᶜ) xⁱ
 ... | _       | _      | no  yⁱ = contradiction (𝑪-cong (≈-sym y≈q) qᶜ) yⁱ
 ... | no _    | yes xᶜ | yes yᶜ = rᶜ-cong pᶜ qᶜ xᶜ yᶜ (≈-sym x≈p) (≈-sym y≈q)

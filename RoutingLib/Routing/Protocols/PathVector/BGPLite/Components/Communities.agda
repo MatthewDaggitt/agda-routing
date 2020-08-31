@@ -11,9 +11,9 @@ open import Data.Bool
 open import Data.Bool.Properties
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (Subset; ⊥)
-open import Data.Fin.Dec using () renaming (_∈?_ to _∈ₛ?_)
+open import Data.Fin.Subset.Properties using () renaming (_∈?_ to _∈ₛ?_)
 open import Data.Vec using (_[_]≔_; toList)
-open import Data.List.Relation.Lex.Strict using (Lex-≤)
+open import Data.List.Relation.Binary.Lex.Strict using (Lex-≤)
 open import Function using (_on_)
 open import Relation.Binary
 open import Relation.Binary.Lattice using (Minimum)

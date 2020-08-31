@@ -2,7 +2,7 @@
 
 module RoutingLib.Data.Path.Uncertified.Properties where
 
-open import Data.List.Relation.Unary.Any using (any; there; here)
+open import Data.List.Relation.Unary.Any using (any?; there; here)
 open import Data.Maybe using (just; nothing)
 open import Data.Maybe.Properties using (just-injective)
 open import Data.Nat
@@ -85,7 +85,7 @@ k ∈ₑ? (i , j) with k ≟ i | k ≟ j
   }
 
 _∈ₚ?_ : Decidable _∈ₚ_
-k ∈ₚ? p = any (k ∈ₑ?_) p
+k ∈ₚ? p = any? (k ∈ₑ?_) p
 
 ∉ₚ-resp-≈ₚ : ∀ {k} → (k ∉ₚ_) Respects _≡_
 ∉ₚ-resp-≈ₚ refl k∉p = k∉p

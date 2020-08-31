@@ -1,5 +1,4 @@
 open import Algebra
--- open import Algebra.FunctionProperties
 open import Data.Nat using (ℕ; zero; suc; _+_; _∸_)
 open import Data.Nat.Properties using (+-suc)
 open import Data.List
@@ -11,7 +10,7 @@ open import Data.List.Relation.Binary.Pointwise
   using (Pointwise; []; _∷_)
 open import Data.List.Relation.Unary.AllPairs
   using (AllPairs; []; _∷_)
-open import Data.List.Relation.Unary.Unique.Setoid
+open import Data.List.Relation.Unary.Unique.Setoid hiding (head)
 import Data.List.Relation.Binary.Equality.Setoid as SetoidEquality
 open import Data.Fin using (Fin; toℕ; zero; suc)
 open import Data.Maybe using (Maybe; just; nothing)
@@ -19,7 +18,7 @@ open import Data.Maybe.Properties using (just-injective)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_,_; proj₁; proj₂)
 open import Level using (Level; _⊔_)
-open import Relation.Binary as B using (Rel; Setoid; Trichotomous; tri<; tri≈; tri>; Reflexive; Irreflexive; Asymmetric)
+open import Relation.Binary as B using (Rel; Setoid; Trichotomous; Symmetric; tri<; tri≈; tri>; Reflexive; Irreflexive; Asymmetric)
 open import Relation.Unary using (Decidable; Pred; ∁)
 open import Relation.Unary.Properties using (∁?)
 open import Relation.Nullary using (yes; no)
@@ -35,6 +34,7 @@ open import Relation.Unary.Properties using (U-Universal)
 open import RoutingLib.Data.List renaming (partialMerge to partialMerge')
 open import RoutingLib.Data.Nat.Properties
 open import RoutingLib.Algebra.Definitions
+open import RoutingLib.Data.Maybe.Relation.Binary.Connected.Left
 
 module RoutingLib.Data.List.Properties where
 
@@ -196,10 +196,10 @@ module _ (S : Setoid a ℓ)  where
 ------------------------------------------------------------------------
 -- Properties of partialMerge
 
-module _ {_<_ : Rel A ℓ₂} {_<?_ : B.Decidable _<_} {_⊕_ : Op₂ A} where
+module _ {_≈_ : Rel A ℓ₁} {_<_ : Rel A ℓ₂} {<-cmp : Trichotomous _≈_ _<_} {_⊕_ : Op₂ A} where
 
   partialMerge : List A → List A → List A
-  partialMerge = partialMerge' _<?_ _⊕_
+  partialMerge = partialMerge' <-cmp _⊕_
 
   partialMerge-identityˡ : LeftIdentity _≡_ [] partialMerge
   partialMerge-identityˡ xs = refl
@@ -209,61 +209,65 @@ module _ {_<_ : Rel A ℓ₂} {_<?_ : B.Decidable _<_} {_⊕_ : Op₂ A} where
   partialMerge-identityʳ (x ∷ xs) = refl
 
   partialMerge-identity : Identity _≡_ [] partialMerge
-  partialMerge-identity = (partialMerge-identityˡ , partialMerge-identityʳ)
+  partialMerge-identity = partialMerge-identityˡ , partialMerge-identityʳ
   
-  partialMerge-∷-eq : ∀ {x xs y ys} → ¬ (x < y) → ¬ (y < x) → partialMerge (x ∷ xs) (y ∷ ys) ≡ (x ⊕ y) ∷ partialMerge xs ys
-  partialMerge-∷-eq {x} {xs} {y} {ys} ¬x<y ¬y<x with x <? y | y <? x
-  ... | yes x<y  | _       = contradiction x<y ¬x<y
-  ... | no  _    | yes y<x = contradiction y<x ¬y<x
-  ... | no  _    | no  _   = refl
+  partialMerge-∷-eq : Symmetric _≈_ → Irreflexive _≈_ _<_ →
+                      ∀ {x y xs ys} → x ≈ y → partialMerge (x ∷ xs) (y ∷ ys) ≡ (x ⊕ y) ∷ partialMerge xs ys
+  partialMerge-∷-eq sym irrefl {x} {y} x≈y with <-cmp x y
+  ... | tri< x<y _ _ = contradiction x<y (irrefl x≈y)
+  ... | tri> _ _ y<x = contradiction y<x (irrefl (sym x≈y))
+  ... | tri≈ _ _ _   = refl
 
-  module _ (<-asym : Asymmetric _<_) where
-    partialMerge-∷ˡ-min : ∀ {x xs ys} → All (x <_) ys → partialMerge (x ∷ xs) ys ≡ x ∷ (partialMerge xs ys)
-    partialMerge-∷ˡ-min {x} {[]}    {[]}     []           = refl
-    partialMerge-∷ˡ-min {x} {_ ∷ _} {[]}     []           = refl
-    partialMerge-∷ˡ-min {x} {xs}    {y ∷ ys} (x<y ∷ x<ys) with x <? y | y <? x
-    ... | yes _   | yes y<x = contradiction y<x (<-asym x<y)
-    ... | yes _   | no  _   = refl
-    ... | no ¬x<y | _       = contradiction x<y ¬x<y
-  
-    partialMerge-∷ʳ-min : ∀ {xs y ys} → All (y <_) xs → partialMerge xs (y ∷ ys) ≡ y ∷ (partialMerge xs ys)
-    partialMerge-∷ʳ-min {[]}     {y} {ys} []           = refl
-    partialMerge-∷ʳ-min {x ∷ xs} {y} {ys} (y<x ∷ y<xs) with x <? y | y <? x
-    ... | yes x<y  | _       = contradiction y<x (<-asym x<y)
-    ... | no  ¬x<y | yes _   = refl
-    ... | no  ¬x<y | no ¬y<x = contradiction y<x ¬y<x
-  
-  module _ {_≈_ : Rel A ℓ₁} (≈-refl : Reflexive _≈_) (<-irrefl : Irreflexive _≈_ _<_)
+  partialMerge-∷ˡ-min : Asymmetric _<_ → ∀ {x xs ys} → Connectedˡ _<_ x (head ys) →
+                        partialMerge (x ∷ xs) ys ≡ x ∷ partialMerge xs ys
+  partialMerge-∷ˡ-min <-asym {x} {[]}    {[]}    nothing    = refl
+  partialMerge-∷ˡ-min <-asym {x} {_ ∷ _} {[]}    nothing    = refl
+  partialMerge-∷ˡ-min <-asym {x} {xs}    {y ∷ _} (just x<y) with <-cmp x y
+  ... | tri> _ _ y<x = contradiction y<x (<-asym x<y)
+  ... | tri≈ x≮y _ _ = contradiction x<y x≮y
+  ... | tri< _ _ _   = refl
+
+  partialMerge-∷ʳ-min : Asymmetric _<_ → ∀ {xs y ys} → Connectedˡ _<_ y (head xs) →
+                        partialMerge xs (y ∷ ys) ≡ y ∷ partialMerge xs ys
+  partialMerge-∷ʳ-min <-asym {[]}    {y} nothing    = refl
+  partialMerge-∷ʳ-min <-asym {x ∷ _} {y} (just y<x) with <-cmp x y
+  ... | tri< x<y _ _  = contradiction y<x (<-asym x<y)
+  ... | tri> _ _ _    = refl
+  ... | tri≈ _ _ y≮x  = contradiction y<x y≮x
+
+  module _ (≈-refl : Reflexive _≈_) (<-irrefl : Irreflexive _≈_ _<_)
            {_≈'_ : Rel A ℓ} (⊕-idem : Idempotent _≈'_ _⊕_) where
   
     partialMerge-idempotent : Idempotent (Pointwise _≈'_) partialMerge
-    partialMerge-idempotent [] = []
-    partialMerge-idempotent (x ∷ xs) with x <? x
-    ... | yes x<x = contradiction x<x (<-irrefl ≈-refl)
-    ... | no  _   = ⊕-idem x ∷ partialMerge-idempotent xs
+    partialMerge-idempotent []       = []
+    partialMerge-idempotent (x ∷ xs) with <-cmp x x
+    ... | tri< x<x _ _ = contradiction x<x (<-irrefl ≈-refl)
+    ... | tri> _ _ x<x = contradiction x<x (<-irrefl ≈-refl)
+    ... | tri≈ _ _ _   = ⊕-idem x ∷ partialMerge-idempotent xs
 
-  module _ {_≈_ : Rel A ℓ₁} (≈-isEquivalence : IsEquivalence _≈_)
+  module _ (≈-isEquivalence : IsEquivalence _≈_)
            (<-resp-≈ : _<_ B.Respects₂ _≈_) (⊕-cong : Congruent₂ _≈_ _⊕_) where
 
-    open IsEquivalence ≈-isEquivalence renaming (refl to ≈-refl; sym to ≈-sym; trans to ≈-trans)
+    open IsEquivalence ≈-isEquivalence renaming (sym to ≈-sym)
     open SetoidEquality (record {isEquivalence = ≈-isEquivalence}) using (_≋_)
 
     <-resp₂-≈ : ∀ {w x y z} → w ≈ y → x ≈ z → w < x → y < z
     <-resp₂-≈ w≈y x≈z w<x = proj₂ <-resp-≈ w≈y (proj₁ <-resp-≈ x≈z w<x)
     
-    partialMerge-cong : ∀ {xs xs' ys ys'} → xs ≋ xs' → ys ≋ ys' →
-                       partialMerge xs ys ≋ partialMerge xs' ys'
-    partialMerge-cong [] ys=ys' = ys=ys'
-    partialMerge-cong (x=x' ∷ xs=xs') [] = x=x' ∷ xs=xs'
-    partialMerge-cong {x ∷ xs} {x' ∷ xs'} {y ∷ ys} {y' ∷ ys'} (x=x' ∷ xs=xs') (y=y' ∷ ys=ys')
-      with x <? y | y <? x | x' <? y' | y' <? x'
+    partialMerge-cong : Congruent₂ _≋_ partialMerge
+    partialMerge-cong []              ys=ys' = ys=ys'
+    partialMerge-cong (x=x' ∷ xs=xs') []     = x=x' ∷ xs=xs'
+    partialMerge-cong {x ∷ _} {x' ∷ _} {y ∷ _} {y' ∷ _} (x=x' ∷ xs=xs') (y=y' ∷ ys=ys')
+      with <-cmp x y | <-cmp x' y'
         | partialMerge-cong xs=xs' (y=y' ∷ ys=ys')
         | partialMerge-cong xs=xs' ys=ys'
         | partialMerge-cong (x=x' ∷ xs=xs') ys=ys'
-    ... | yes _   | _       | yes _     | _         | rec₁ | _    | _    = x=x' ∷ rec₁
-    ... | no  x≮y | _       | yes x'<y' | _         | _    | _    | _    = contradiction (<-resp₂-≈ (≈-sym x=x') (≈-sym y=y') x'<y') x≮y
-    ... | yes x<y | _       | no  x'≮y' | _         | _    | _    | _    = contradiction (<-resp₂-≈ x=x' y=y' x<y) x'≮y'
-    ... | no  _   | yes _   | no  _     | yes _     | _    | _    | rec₃ = y=y' ∷ rec₃
-    ... | no  _   | no  y≮x | no  _     | yes y'<x' | _    | _    | _    = contradiction (<-resp₂-≈ (≈-sym y=y') (≈-sym x=x') y'<x') y≮x
-    ... | no  _   | yes y<x | no  _     | no  y'≮x' | _    | _    | _    = contradiction (<-resp₂-≈ y=y' x=x' y<x) y'≮x'
-    ... | no  _   | no  _   | no  _     | no _      | _    | rec₂ | _    = ⊕-cong x=x' y=y' ∷ rec₂
+    ... | tri< _ _ _   | tri< _ _ _     | rec₁ | _    | _    = x=x' ∷ rec₁
+    ... | tri< x<y _ _ | tri≈ x'≮y' _ _ | _    | _    | _    = contradiction (<-resp₂-≈ x=x' y=y' x<y) x'≮y'
+    ... | tri< x<y _ _ | tri> x'≮y' _ _ | _    | _    | _    = contradiction (<-resp₂-≈ x=x' y=y' x<y) x'≮y'
+    ... | tri≈ x≮y _ _ | tri< x'<y' _ _ | _    | _    | _    = contradiction (<-resp₂-≈ (≈-sym x=x') (≈-sym y=y') x'<y') x≮y
+    ... | tri≈ _ _ _   | tri≈ _ _ _     | _    | rec₂ | _    = ⊕-cong x=x' y=y' ∷ rec₂
+    ... | tri≈ _ _ y≮x | tri> _ _ y'<x' | _    | _    | _    = contradiction (<-resp₂-≈ (≈-sym y=y') (≈-sym x=x') y'<x') y≮x
+    ... | tri> x≮y _ _ | tri< x'<y' _ _ | _    | _    | _    = contradiction (<-resp₂-≈ (≈-sym x=x') (≈-sym y=y') x'<y') x≮y
+    ... | tri> _ _ y<x | tri≈ _ _ y'≮x' | _    | _    | _    = contradiction (<-resp₂-≈ y=y' x=x' y<x) y'≮x'
+    ... | tri> _ _ _   | tri> _ _ _     | _    | _    | rec₃ = y=y' ∷ rec₃

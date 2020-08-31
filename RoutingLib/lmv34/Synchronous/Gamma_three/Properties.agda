@@ -5,6 +5,7 @@ open import Data.Product.Relation.Binary.Pointwise.NonDependent using (×-decSet
 open import Data.List using (List; filter; tabulate; []; _∷_; _++_; map)
 open import Data.List.Relation.Unary.Any using (here; there)
 import Data.List.Membership.DecSetoid as Membership
+open import Data.List.Membership.Setoid.Properties using (∈-resp-≈)
 import Data.List.Relation.Binary.Permutation.Setoid.Properties as PermutationProperties
 open import Data.List.Relation.Binary.Pointwise using (Pointwise; []; _∷_)
 open import Data.Nat using (zero; suc; ℕ; _*_; _+_)
@@ -16,6 +17,8 @@ open import Relation.Unary using (Pred; Decidable; _⇒_)
 open import Relation.Binary using (Setoid; DecSetoid; Rel; Reflexive; Symmetric; Transitive; _Respects_)
 open import Relation.Binary.PropositionalEquality as PropositionalEq using (_≡_; refl; cong)
 import Relation.Binary.Reasoning.Setoid as EqReasoning
+
+import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties as PermutationProperties′
 
 open import RoutingLib.Iteration.Synchronous using (_^_)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
@@ -53,9 +56,9 @@ open Gamma_two_Properties isRAlg A Imp Prot Exp A=Imp∘Prot∘Exp
 open Gamma_three isRAlg Imp Prot Exp
 open Gamma_three_Algebra isRAlg n
 
-open DecSetoid FinRoute-decSetoid using () renaming (_≈_ to _≈ᵣ_; refl to ≈ᵣ-refl; trans to ≈ᵣ-trans; sym to ≈ᵣ-sym; _≟_ to _≟ᵣ_)
 open Membership FinRoute-decSetoid using (_∈?_; _∈_; _∉_)
 open PermutationProperties FinRoute-setoid using (filter⁺; ++⁺; ++-identityˡ; ++-identityʳ; ++-assoc)
+open PermutationProperties′ FinRoute-setoid using (∉-resp-↭)
 
 ------------------------------------
 -- Γ₃-State
@@ -93,12 +96,7 @@ filter-lemma {P? = P?} {P?' = P?'} (x ∷ xs) P=P' with P? x | P?' x
 ... | yes Px | no ¬P'x  = contradiction ((π₁ (P=P' x)) Px) ¬P'x
 ... | no ¬Px | yes P'x  = contradiction ((π₂ (P=P' x)) P'x) ¬Px
 ... | no _   | no _     = filter-lemma xs P=P'
-
-∈-congₗ : ∀ {xs x y} → x ≈ᵣ y → x ∈ xs → y ∈ xs
-∈-congₗ {[]} _ ()
-∈-congₗ {x' ∷ xs} x=y (here px) = here (≈ᵣ-trans (≈ᵣ-sym x=y) px)
-∈-congₗ {x' ∷ xs} x=y (there x∈xs) = there (∈-congₗ x=y x∈xs)
-
+{-
 ∈-congᵣ : ∀ {z xs ys} → xs ↭ ys → z ∈ xs → z ∈ ys
 ∈-congᵣ (refl (x∼y ∷ xs≋ys)) (here z∼x) = here (≈ᵣ-trans z∼x x∼y)
 ∈-congᵣ (refl (x∼y ∷ xs≋ys)) (there z∈xs) = there (∈-congᵣ (refl xs≋ys) z∈xs)
@@ -108,16 +106,15 @@ filter-lemma {P? = P?} {P?' = P?'} (x ∷ xs) P=P' with P? x | P?' x
 ∈-congᵣ (swap x₁=y₂ x₂=y₁ xs=ys) (there (here z=x₂)) = here (≈ᵣ-trans z=x₂ x₂=y₁)
 ∈-congᵣ (swap x₁=y₂ x₂=y₁ xs=ys) (there (there z∈xs)) = there (there (∈-congᵣ xs=ys z∈xs))
 ∈-congᵣ (trans xs=ys ys=zs) z∈xs = ∈-congᵣ ys=zs (∈-congᵣ xs=ys z∈xs)
-
-minus-respects-≈ᵣ : ∀ {xs} → (λ x → ¬ (x ∈ xs)) Respects _≈ᵣ_
-minus-respects-≈ᵣ {[]} {y} {y'} y=y' Py = λ ()
+-}
+minus-respects-≈ᵣ : ∀ {xs} → (_∉ xs) Respects _≈ᵣ_
 minus-respects-≈ᵣ {(x ∷ xs)} {y} {y'} y=y' Py with y' ∈? (x ∷ xs)
 ... | yes (here y'=x) = contradiction (here (≈ᵣ-trans y=y' y'=x)) Py
-... | yes (there Py') = contradiction (there (∈-congₗ (≈ᵣ-sym y=y') Py')) Py
+... | yes (there Py') = contradiction (there (∈-resp-≈ FinRoute-setoid (≈ᵣ-sym y=y') Py')) Py
 ... | no ¬Py' = ¬Py'
 
 minus-congₗ : LeftCongruent _↭_ _-_
-minus-congₗ {A} B=B' = filter-lemma A (λ x → (contraposition (∈-congᵣ (↭-sym B=B'))) , (contraposition (∈-congᵣ B=B')))
+minus-congₗ {A} B=B' = filter-lemma A (λ x → ∉-resp-↭ B=B' , ∉-resp-↭ (↭-sym B=B'))
 
 minus-congᵣ : RightCongruent _↭_ _-_
 minus-congᵣ A=A' = filter⁺ (λ x → ¬? (x ∈? _)) minus-respects-≈ᵣ A=A'
@@ -130,14 +127,14 @@ minus-cong {A} {A'} {B} {B'} A=A' B=B' = begin
   where open PermutationReasoning
 
 minusᵥ-cong : Congruent₂ _≈ᵥ,₂_ _-ᵥ_
-minusᵥ-cong {U} {U'} {V} {V'} U=U' V=V' i j = minus-cong (U=U' i j) (V=V' i j)
+minusᵥ-cong U=U' V=V' i j = minus-cong (U=U' i j) (V=V' i j)
 
 minus-zeroₗ : LeftZero _↭_ Ø _-_
 minus-zeroₗ xs = ↭-refl
 
 minus-identityᵣ : RightIdentity _↭_ Ø _-_
-minus-identityᵣ [] = ↭-refl
-minus-identityᵣ (x ∷ xs) = prep ≈ᵣ-refl (minus-identityᵣ xs)
+minus-identityᵣ []       = ↭-refl
+minus-identityᵣ (x ∷ xs) = ↭-prep x (minus-identityᵣ xs)
 
 ∪-cong : Congruent₂ _↭_ _∪_
 ∪-cong A=A' B=B' = ++⁺ A=A' (minus-cong B=B' A=A')

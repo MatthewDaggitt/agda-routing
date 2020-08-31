@@ -30,8 +30,8 @@ module _ (S : Setoid a ℓ₁) (T : Setoid b ℓ₂) where
   open Setoid S using () renaming (_≈_ to _≈₁_)
   open Setoid T using () renaming (_≈_ to _≈₂_)
   
-  allPairs⁺ : ∀ {xs ys} → Complete S xs → Complete T ys → Complete (S ×ₛ T) (allPairs xs ys)
-  allPairs⁺ _∈xs _∈ys x = ∈-allPairs⁺ S T ((proj₁ x) ∈xs) ((proj₂ x) ∈ys)
+  cartesianProduct⁺ : ∀ {xs ys} → Complete S xs → Complete T ys → Complete (S ×ₛ T) (cartesianProduct xs ys)
+  cartesianProduct⁺ _∈xs _∈ys x = ∈-cartesianProduct⁺ S T ((proj₁ x) ∈xs) ((proj₂ x) ∈ys)
 
   map⁺ : ∀ {f xs} → Complete S xs → IsSurjection _≈₁_ _≈₂_ f → Complete T (map f xs)
   map⁺ _∈xs surj y with IsSurjection.surjective surj y

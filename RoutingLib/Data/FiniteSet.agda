@@ -5,7 +5,7 @@ open import Data.Fin
 open import Data.Fin.Patterns
 open import Data.Nat
 open import Data.Product hiding (map)
-open import Data.Vec.Functional hiding (map)
+open import Data.Vec.Functional hiding (map; last)
 open import Function
 open import Level using (Level)
 

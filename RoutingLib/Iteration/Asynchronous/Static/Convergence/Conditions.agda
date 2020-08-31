@@ -20,6 +20,7 @@ open import Data.Nat using (ℕ; suc; _<_; _≤_)
 open import Data.Product using (∃; ∃₂; _×_; _,_; proj₁; proj₂)
 open import Data.Bool using (if_then_else_)
 open import Data.Unit using (tt)
+open import Function.Metric.Nat
 open import Level using (_⊔_) renaming (suc to lsuc)
 open import Relation.Binary as B
   using (Rel; DecSetoid; _Respects_; Total; _Preserves_⟶_; _Preserves₂_⟶_⟶_)
@@ -29,7 +30,6 @@ open import Relation.Binary.Indexed.Homogeneous
 open import Relation.Unary using (_∈_)
 
 open import RoutingLib.Data.Vec.Functional using (max)
-open import RoutingLib.Function.Metric.Nat
 open import RoutingLib.Relation.Unary.Indexed
 open import RoutingLib.Relation.Unary.Indexed.Properties
 
@@ -129,8 +129,8 @@ record AMCO : Set (a ⊔ ℓ) where
       using ()
       renaming
       ( cong to dᵢ-cong
-      ; eq⇒0 to x≈y⇒dᵢ≡0
-      ; 0⇒eq to dᵢ≡0⇒x≈y
+      ; ≈⇒0  to x≈y⇒dᵢ≡0
+      ; 0⇒≈  to dᵢ≡0⇒x≈y
       )
 
 record PartialAMCO {p} (X₀ : IPred Sᵢ p) : Set (a ⊔ ℓ ⊔ p) where
@@ -155,8 +155,8 @@ record PartialAMCO {p} (X₀ : IPred Sᵢ p) : Set (a ⊔ ℓ ⊔ p) where
       using ()
       renaming
       ( cong to dᵢ-cong
-      ; eq⇒0 to x≈y⇒dᵢ≡0
-      ; 0⇒eq to dᵢ≡0⇒x≈y
+      ; ≈⇒0  to x≈y⇒dᵢ≡0
+      ; 0⇒≈  to dᵢ≡0⇒x≈y
       )
 
 AMCO⇒partialAMCO : AMCO → PartialAMCO Uᵢ

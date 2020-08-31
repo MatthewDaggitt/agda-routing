@@ -3,6 +3,7 @@ open import Data.Nat using (ℕ; _≤_; z≤n; suc; _⊔_)
 open import Data.Nat.Properties using (≤-antisym; ⊔-mono-≤; ≤-refl; ≤-isPartialOrder; module ≤-Reasoning)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (∃; _,_; proj₁; proj₂)
+open import Function.Metric.Nat
 open import Relation.Binary using (_Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality as P using (_≡_; refl; subst)
 open import Relation.Binary.Indexed.Homogeneous using (IndexedSetoid)
@@ -11,7 +12,6 @@ open import RoutingLib.Data.Vec.Functional using (max)
 open import RoutingLib.Data.Vec.Functional.Properties using (max-cong; t≤max[t]; max-constant; max[s]≤max[t]₂)
 open import RoutingLib.Data.Vec.Functional.Membership.Propositional.Properties using (max[t]∈t)
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous using (Setoid_at_)
-open import RoutingLib.Function.Metric.Nat
 
 module RoutingLib.Function.Metric.Construct.MaxLift
   {a ℓ n} (𝕊 : IndexedSetoid (Fin n) a ℓ)
@@ -67,7 +67,7 @@ bounded dᵢ-bounded =
 isProtoMetric : (∀ {i} → IsProtoMetric _≈ᵢ_ (dᵢ i)) → IsProtoMetric _≈_ d
 isProtoMetric pm = record
   { isPartialOrder  = ≤-isPartialOrder
-  ; 0#-minimum      = z≤n
+  ; nonNegative     = z≤n
   ; ≈-isEquivalence = ≈-isEquivalence
   ; cong            = cong (IsProtoMetric.cong pm)
   }
@@ -75,13 +75,13 @@ isProtoMetric pm = record
 isPreMetric : (∀ {i} → IsPreMetric _≈ᵢ_ (dᵢ i)) → IsPreMetric _≈_ d
 isPreMetric pm = record
   { isProtoMetric = isProtoMetric (IsPreMetric.isProtoMetric pm)
-  ; eq⇒0          = x≈y⇒d≡0 (IsPreMetric.eq⇒0 pm)
+  ; ≈⇒0           = x≈y⇒d≡0 (IsPreMetric.≈⇒0 pm)
   }
 
 isQuasiSemiMetric : (∀ {i} → IsQuasiSemiMetric _≈ᵢ_ (dᵢ i)) → IsQuasiSemiMetric _≈_ d
 isQuasiSemiMetric qsm = record
   { isPreMetric = isPreMetric (IsQuasiSemiMetric.isPreMetric qsm)
-  ; 0⇒eq        = d≡0⇒x≈y (IsQuasiSemiMetric.0⇒eq qsm)
+  ; 0⇒≈         = d≡0⇒x≈y (IsQuasiSemiMetric.0⇒≈ qsm)
   }
 
 isSemiMetric : (∀ {i} → IsSemiMetric _≈ᵢ_ (dᵢ i)) → IsSemiMetric _≈_ d

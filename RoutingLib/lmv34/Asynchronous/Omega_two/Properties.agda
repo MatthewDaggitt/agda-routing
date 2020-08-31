@@ -12,13 +12,13 @@ module RoutingLib.lmv34.Asynchronous.Omega_two.Properties
   where
 
 open import Data.Fin using (Fin)
-open import Data.Fin.Subset using (Subset; _∈_; _∉_)
+open import Data.Fin.Subset using (Subset; _∈_; _∉_; ⊤)
 open import Data.Fin.Subset.Properties using (_∈?_; ∈⊤; ∉⊥)
 open import Data.Nat using (zero; suc; s≤s; _<_; _≤_; _∸_)
 open import Data.Nat.Induction using (<-wellFounded)
 open import Data.Nat.Properties using (≤-refl; ≤-trans; ≤-step)
 open import Data.Product using (_,_)
-open import Function using (_∘_)
+open import Function.Base using (_∘_; _∘₂_)
 open import Induction.WellFounded using (Acc; acc)
 open import Relation.Binary using (DecSetoid)
 import Relation.Binary.Reasoning.Setoid as EqReasoning
@@ -87,6 +87,9 @@ LemmaA₄' F G V i = begin
   (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ') V                        ∎
   where open EqReasoning 𝕍ₛ
 
+[,]-⊤ᵢⱼ : ∀ {X Y : RoutingVector₂} → ∀ i j → ([ X , Y ] ⊤) i j ≡ X i j
+[,]-⊤ᵢⱼ {X} {Y} i j rewrite [,]-⊤ᵢ {_} {X} {Y} i = refl
+
 [_,_]-cong : ∀ {X X' Y Y' : RoutingVector} {S : Subset n} →
              X ≈ᵥ X' → Y ≈ᵥ Y' → [ X , Y ] S ≈ᵥ [ X' , Y' ] S
 [_,_]-cong {X} {X'} {Y} {Y'} {S} X=X' Y=Y' i with i ∈? S
@@ -131,7 +134,7 @@ LemmaA₄' F G V i = begin
   Ω₂' ψ₃ˢʸⁿᶜ S (acc rec)                 ≡⟨⟩
   ([ Γ₂,ᵥ I[t] , V[t] ] αˢʸⁿᶜ (suc t)) ,
   ([ Γ₂,ᵢ O[t] , I[t] ] αˢʸⁿᶜ (suc t)) ,
-  ([ Γ₂,ₒ V[t] , O[t] ] αˢʸⁿᶜ (suc t))   ≈⟨ ≈ᵥ-reflexive [,]-⊤ , ≈ᵥ,₂-reflexive [,]-⊤ , ≈ᵥ,₂-reflexive [,]-⊤ ⟩
+  ([ Γ₂,ₒ V[t] , O[t] ] αˢʸⁿᶜ (suc t))   ≈⟨ ↭-reflexive ∘ [,]-⊤ᵢ , ↭-reflexive ∘₂ [,]-⊤ᵢⱼ  , ↭-reflexive ∘₂ [,]-⊤ᵢⱼ ⟩
   (Γ₂,ᵥ I[t]) , (Γ₂,ᵢ O[t]) , (Γ₂,ₒ V[t]) ≡⟨⟩
   Γ₂ (V[t] , I[t] , O[t])                ≈⟨ Γ₂-cong (Ω₂'ˢʸⁿᶜ=Γ₂ S (rec t ≤-refl)) ⟩
   (Γ₂ ^ (suc t)) S                       ∎

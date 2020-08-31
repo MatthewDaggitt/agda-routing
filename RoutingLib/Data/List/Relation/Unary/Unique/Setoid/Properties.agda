@@ -28,10 +28,9 @@ module RoutingLib.Data.List.Relation.Unary.Unique.Setoid.Properties where
 
 private
   variable
-    a b c ℓ ℓ₁ ℓ₂ ℓ₃ : Level
+    a ℓ : Level
 
-
-module _ (DS : DecSetoid c ℓ) where
+module _ (DS : DecSetoid a ℓ) where
 
   open DecSetoid DS renaming (setoid to S)
 
@@ -39,33 +38,7 @@ module _ (DS : DecSetoid c ℓ) where
   deduplicate⁺ []       = []
   deduplicate⁺ (x ∷ xs) = all-filter _ (deduplicate _ xs) ∷ (filter⁺ S _ (deduplicate⁺ xs))
 
-module _ (S : Setoid a ℓ₁) (T : Setoid b ℓ₂) (U : Setoid c ℓ₃) where
-
-  open Setoid S renaming (Carrier to A; _≈_ to _≈₁_; sym to sym₁; trans to trans₁)
-  open Setoid T renaming (Carrier to B; _≈_ to _≈₂_; sym to sym₂; trans to trans₂)
-  open Setoid U renaming (Carrier to C; _≈_ to _≈₃_)
-
-  open Disjoint U using (Disjoint)
-
-  combine⁺ : ∀ {xs ys} f → (∀ {w x y z} → f w y ≈₃ f x z → w ≈₁ x × y ≈₂ z) →
-              Unique S xs → Unique T ys → Unique U (combine f xs ys)
-  combine⁺ _ _ [] _ = []
-  combine⁺ {x ∷ xs} {ys} f f-inj (x∉xs ∷ xs!) ys! = ++⁺ U (map⁺ T U (proj₂ ∘ f-inj) ys!) (combine⁺ f f-inj xs! ys!) map#combine
-    where
-    map#combine : Disjoint (map (f x) ys) (combine f xs ys)
-    map#combine (v∈map , v∈com) with ∈-map⁻ T U v∈map | ∈-combine⁻ S T U f xs ys v∈com
-    ... | (c , _ , v≈fxc) | (a , b , a∈xs , _ , v≈fab) = All¬⇒¬Any x∉xs (∈-resp-≈ S (proj₁ (f-inj (trans (sym v≈fab) v≈fxc))) a∈xs)
-
-module _ (S : Setoid a ℓ₁) (T : Setoid b ℓ₂) where
-
-  open Setoid S renaming (Carrier to A; _≈_ to _≈₁_; sym to sym₁; trans to trans₁)
-  open Setoid T renaming (Carrier to B; _≈_ to _≈₂_; sym to sym₂; trans to trans₂)
-
-  allPairs⁺ : ∀ {xs ys} → Unique S xs → Unique T ys → Unique (S ×ₛ T) (allPairs xs ys)
-  allPairs⁺ = combine⁺ S T (S ×ₛ T) _,_ id
-
-
-module _ (S : Setoid a ℓ₁) where
+module _ (S : Setoid a ℓ) where
   open Setoid S
   
   lookup-injective : ∀ {xs} → Unique S xs → Injective _≡_ _≈_ (lookup xs)

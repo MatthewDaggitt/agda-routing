@@ -13,15 +13,18 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 import Relation.Binary.Reasoning.Setoid as EqReasoning
 
-open import RoutingLib.Algebra.Bundles
--- open import RoutingLib.Algebra.FunctionProperties
 open import RoutingLib.Relation.Nullary.Negation
+
+private
+  variable
+    a b ℓ ℓ₁ ℓ₂ : Level
+    A : Set a
+    B : Set b
 
 ------------------------------------------------------------------------
 -- Definition
 
-module _ {a b ℓ} {A : Set a} {B : Set b} {_≈_ : Rel A ℓ}
-         (_≟_ : Decidable _≈_) (_•_ : Op₂ A) (_◦_ : Op₂ B) where
+module _ {_≈_ : Rel A ℓ} (_≟_ : Decidable _≈_) (_•_ : Op₂ A) (_◦_ : Op₂ B) where
 
   -- Note: for non-selective • the result in the no+no case must be
   -- the identity of B (for associativity to hold).
@@ -37,11 +40,13 @@ module _ {a b ℓ} {A : Set a} {B : Set b} {_≈_ : Rel A ℓ}
 ------------------------------------------------------------------------
 -- Properties
 
-module _ {a b ℓ₁ ℓ₂} (∙-decMagma : DecMagma a ℓ₁) (◦-magma : Magma b ℓ₂) where
+module _ (∙-magma : Magma a ℓ₁) (◦-magma : Magma b ℓ₂)
+  (_≟₁_ : Decidable (Magma._≈_ ∙-magma))
+  where
 
-  open DecMagma ∙-decMagma public
+  open Magma ∙-magma public
     using () renaming
-    ( Carrier       to A
+    ( Carrier       to C₁
     ; _∙_           to _•_
     ; ∙-cong        to •-cong
     ; _≈_           to _≈₁_
@@ -49,12 +54,11 @@ module _ {a b ℓ₁ ℓ₂} (∙-decMagma : DecMagma a ℓ₁) (◦-magma : Mag
     ; sym           to ≈₁-sym
     ; trans         to ≈₁-trans
     ; setoid        to S₁
-    ; _≟_           to _≟₁_
     )
 
   open Magma ◦-magma
     renaming
-    ( Carrier       to B
+    ( Carrier       to C₂
     ; _≈_           to _≈₂_
     ; _∙_           to _◦_
     ; ∙-cong        to ◦-cong
@@ -66,18 +70,18 @@ module _ {a b ℓ₁ ℓ₂} (∙-decMagma : DecMagma a ℓ₁) (◦-magma : Mag
 
   private
     infix 7 _⊕_
-    infix 4 _≈ₓ_
+    infix 4 _≈ₓ_ _≉₁_
 
-    _≉₁_ : Rel A _
+    _≉₁_ : Rel C₁ _
     x ≉₁ y = ¬ (x ≈₁ y)
 
-    _⊕_ : Op₂ (A × B)
+    _⊕_ : Op₂ (C₁ × C₂)
     _⊕_ = Lex _≟₁_ _•_ _◦_
 
-    L₂ : A  → A  → B  → B → B
+    L₂ : C₁ → C₁ → C₂ → C₂ → C₂
     L₂ = Lex₂ _≟₁_ _•_ _◦_
 
-    _≈ₓ_ : Rel (A × B) _
+    _≈ₓ_ : Rel (C₁ × C₂) _
     _≈ₓ_ = Pointwise _≈₁_ _≈₂_
 
     L₂-cong : ∀ {a₁ a₂ b₁ b₂ x₁ x₂ y₁ y₂} → a₁ ≈₁ a₂ → b₁ ≈₁ b₂ → x₁ ≈₂ x₂ → y₁ ≈₂ y₂ → L₂ a₁ b₁ x₁ y₁ ≈₂ L₂ a₂ b₂ x₂ y₂

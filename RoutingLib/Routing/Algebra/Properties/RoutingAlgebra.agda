@@ -29,8 +29,6 @@ import Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
 import Relation.Binary.Reasoning.Setoid as EqReasoning
 
 open import RoutingLib.Routing algebra
-open import RoutingLib.Algebra.Bundles
-open import RoutingLib.Algebra.Structures
 import RoutingLib.Relation.Binary.Construct.NonStrictToStrict as NSTS
 import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.DecTotalOrder as NonStrictToStrict
 
@@ -82,12 +80,6 @@ open AlgebraStructures _≈_
 ⊕-isMonoid = record
   { isSemigroup = ⊕-isSemigroup
   ; identity    = ⊕-identity
-  }
-
-⊕-isDecMonoid : IsDecMonoid _≈_ _⊕_ ∞#
-⊕-isDecMonoid = record
-  { isMonoid = ⊕-isMonoid
-  ; _≟_      = _≟_
   }
 
 ------------------------------------------------------------------------------

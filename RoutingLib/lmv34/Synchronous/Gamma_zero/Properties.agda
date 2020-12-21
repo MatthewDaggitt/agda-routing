@@ -7,8 +7,6 @@ open import Relation.Binary using (DecSetoid)
 import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import Relation.Unary using (Pred)
 
-open import RoutingLib.Algebra.Bundles using (DecMagma)
-open import RoutingLib.Algebra.Structures using (IsDecMagma)
 open import RoutingLib.Iteration.Synchronous using (_^_; IsFixedPoint)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra)
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
@@ -40,17 +38,6 @@ open Gamma_zero_Algebra algebra n
 ⊕ₘ-magma : Magma _ _
 ⊕ₘ-magma = record
   { isMagma = ⊕ₘ-isMagma
-  }
-
-⊕ₘ-isDecMagma : IsDecMagma _≈ₘ_ _⊕ₘ_
-⊕ₘ-isDecMagma = record
-  { isMagma = ⊕ₘ-isMagma
-  ; _≟_     = _≟ₘ_
-  }
-
-⊕ₘ-decMagma : DecMagma _ _
-⊕ₘ-decMagma = record
-  { isDecMagma = ⊕ₘ-isDecMagma
   }
 
 ⨁-cong : ∀ {k} → {f g : Fin k → Route} →

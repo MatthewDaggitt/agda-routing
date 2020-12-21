@@ -19,9 +19,6 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 import Relation.Binary.Construct.NonStrictToStrict as NonStrictToStrict
 import Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
 
-open import RoutingLib.Algebra.Bundles
-open import RoutingLib.Algebra.Structures
-
 --------------------------------------------------------------------------------
 -- Raw routing algebras --
 --------------------------------------------------------------------------------
@@ -115,17 +112,6 @@ record RawRoutingAlgebra a b ℓ : Set (suc (a ⊔ b ⊔ ℓ)) where
   ⊕-magma : Magma _ _
   ⊕-magma = record
     { isMagma = ⊕-isMagma
-    }
-
-  ⊕-isDecMagma : IsDecMagma _≈_ _⊕_
-  ⊕-isDecMagma = record
-    { isMagma = ⊕-isMagma
-    ; _≟_     = _≟_
-    }
-
-  ⊕-decMagma : DecMagma _ _
-  ⊕-decMagma = record
-    { isDecMagma = ⊕-isDecMagma
     }
 
   open Magma ⊕-magma public using ()

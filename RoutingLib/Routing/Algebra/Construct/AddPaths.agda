@@ -15,10 +15,10 @@ module RoutingLib.Routing.Algebra.Construct.AddPaths
 
 open RawRoutingAlgebra A
 
-open import Algebra.FunctionProperties
+open import Algebra
 open import Data.Fin using (Fin; toℕ)
 open import Data.Maybe using (Maybe; just)
-open import Data.Product.Relation.Pointwise.NonDependent as Pointwise using (Pointwise)
+open import Data.Product.Relation.Binary.Pointwise.NonDependent as Pointwise using (Pointwise)
 open import Data.Sum as Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product
 open import Level using (_⊔_)
@@ -44,8 +44,7 @@ open import RoutingLib.Relation.Nullary.Negation using (contradiction₂)
 ------------------------------------------------------------------------
 -- Prelude
 
-
-module LexProperties = OpLexProperties′ ⊕-decMagma ⊓ₗₑₓ-magma
+module LexProperties = OpLexProperties′ ⊕-magma ⊓ₗₑₓ-magma _≟_
 
 _≈ₓ_ : Rel (Route × EPath) _
 _≈ₓ_ = (Pointwise _≈_ _≡_)
@@ -112,7 +111,6 @@ f∞⁺ = f∞
 ≈⁺-isEquivalence : IsEquivalence _≈⁺_
 ≈⁺-isEquivalence = PointedEq.≈∙-isEquivalence (Pointwise _≈_ _≡_)
   (Pointwise.×-isEquivalence ≈-isEquivalence isEquivalence)
-
 
 ≈⁺-isDecEquivalence : IsDecEquivalence _≈⁺_
 ≈⁺-isDecEquivalence = PointedEq.≈∙-isDecEquivalence (Pointwise _≈_ _≡_)

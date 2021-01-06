@@ -26,12 +26,6 @@ private
 
 module _ {_≤_ : Rel A ℓ} (total : Total _≤_) where
 
-  insert : A → List A → List A
-  insert v []       = [ v ]
-  insert v (x ∷ xs) with total v x
-  ... | inj₁ v≤x = v ∷ x ∷ xs
-  ... | inj₂ x≤v = x ∷ insert v xs
-
   merge : List A → List A → List A
   merge []       ys       = ys
   merge xs       []       = xs
@@ -54,6 +48,3 @@ module _ {_<_ : Rel A ℓ₂} {_≈_ : Rel A ℓ₃} (<-cmp : Trichotomous _≈_
 
 allFinPairs : ∀ n → List (Fin n × Fin n)
 allFinPairs n = cartesianProduct (allFin n) (allFin n)
-
-count : {P : Pred A p} → Decidable P → List A → ℕ
-count P? = length ∘ filter P?

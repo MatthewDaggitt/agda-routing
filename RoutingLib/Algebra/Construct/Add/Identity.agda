@@ -1,10 +1,6 @@
 
-open import Algebra.FunctionProperties.Core using (Op₂)
-
-module RoutingLib.Algebra.Construct.Add.Identity {a} {A : Set a} (_⊕_ : Op₂ A) where
-
+open import Algebra
 open import Level using (_⊔_)
-open import Algebra.FunctionProperties hiding (Op₂)
 open import Relation.Binary
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
@@ -13,6 +9,8 @@ import Relation.Binary.Construct.Add.Point.Equality as PointedEquality
 open import Data.Sum using (inj₁; inj₂; map)
 open import Data.Maybe using (Maybe)
 open import Data.Product using (_,_)
+
+module RoutingLib.Algebra.Construct.Add.Identity {a} {A : Set a} (_⊕_ : Op₂ A) where
 
 _⊕∙_ : Op₂ (Pointed A)
 ∙      ⊕∙ y     = y

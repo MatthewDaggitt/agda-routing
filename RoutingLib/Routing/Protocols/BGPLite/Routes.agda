@@ -6,8 +6,6 @@
 -- path along which it was generated.
 --------------------------------------------------------------------------------
 
-module RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Route where
-
 open import Data.Nat using (ℕ; _<_; _≤_; _≟_)
 open import Data.Nat.Properties hiding (≡-isDecEquivalence)
 open import Data.Fin using (Fin)
@@ -23,7 +21,9 @@ open import Relation.Unary using (Pred)
 open import RoutingLib.Data.Path.Uncertified
 open import RoutingLib.Data.Path.Uncertified.Properties
 
-open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Communities
+open import RoutingLib.Routing.Protocols.BGPLite.Communities
+
+module RoutingLib.Routing.Protocols.BGPLite.Routes where
 
 ------------------------------------------------------------------------
 -- Types
@@ -34,9 +34,6 @@ Level = ℕ
 data Route : Set where
   invalid : Route
   valid   : (l : Level) → (cs : CommunitySet) → (p : Path) → Route
-
--- data IsValid : Route → Set where
---   isValid : ∀ l cs p → IsValid (valid l cs p)
 
 ------------------------------------------------------------------------
 -- Equality over routes

@@ -42,7 +42,7 @@ private
   module A = RawRoutingAlgebra algebraA
   module B = RawRoutingAlgebra algebraB
 
-  module LexProperties = OpLexProperties′ A.⊕-decMagma B.⊕-magma
+  module LexProperties = OpLexProperties′ A.⊕-magma B.⊕-magma A._≟_
 
 ------------------------------------------------------------------------
 -- Algebra
@@ -76,7 +76,7 @@ f∞ : ∀ {n} (i j : Fin n) → Step i j
 f∞ i j = A.f∞ i j , B.f∞ i j
 
 ▷-cong : ∀ {n} {i j : Fin n} (f : Step i j) → Congruent₁ _≈_ (_▷_ f)
-▷-cong (f , g) (a≈b , x≈y) = (A.▷-cong f a≈b) , B.▷-cong g x≈y
+▷-cong (f , g) (a≈b , x≈y) = A.▷-cong f a≈b , B.▷-cong g x≈y
 
 f∞-reject : ∀ {n} (i j : Fin n) x → (f∞ i j ▷ x) ≈ ∞#
 f∞-reject i j (a , b) = A.f∞-reject i j a , B.f∞-reject i j b
@@ -119,6 +119,7 @@ isRoutingAlgebra A-isRA B-isRA = record
 ------------------------------------------------------------------------
 -- Other properties
 
+{-
 module _ (⊕ᴬ-comm : Commutative A._≈_ A._⊕_) (⊕ᴬ-sel : Selective A._≈_ A._⊕_) where
 
   distrib-bump :  ∀ {k ⊥ᴮ ⊤ᴮ} →
@@ -139,7 +140,6 @@ module _ (⊕ᴬ-comm : Commutative A._≈_ A._⊕_) (⊕ᴬ-sel : Selective A._
     recB : {!!}
     recB = {!!}
 
-{-
 
 
 distrib-1st-comp : Selective A._≈_ A._⊕_ → 

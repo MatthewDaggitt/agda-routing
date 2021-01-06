@@ -1,12 +1,13 @@
 --------------------------------------------------------------------------------
 -- Agda routing library
 --
--- Contains the properties of the alternate BGPLite algebra. This file shows
--- that not only is it a strictly increasing path algebra, it is also
--- indistinguishable from the main BGP algebra.
+-- Defines another algebra that is slightly better behaved than that of the main
+-- BGPLite algebra. It is however identical in operation. This allows the
+-- BGPLite algebra to be proved convergent via this algebra being shown to be
+-- convergent.
 --------------------------------------------------------------------------------
 
-module RoutingLib.Routing.Protocols.PathVector.BGPLite.Simulation.Properties where
+module RoutingLib.Routing.Protocols.BGPLite.Simulation where
 
 import Algebra.Construct.NaturalChoice.Min as Min
 open import Data.Maybe using (just; nothing; Is-just)
@@ -27,16 +28,14 @@ open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.Path.UncertifiedI using (Path; Pathᵛ; invalid; valid; source; sourceᵥ)
 open import RoutingLib.Data.Path.UncertifiedI.Properties using (valid-injective)
-open import RoutingLib.Data.Path.Uncertified using ([]; _∷_; inflate; deflate; length; _⇿_; _∈ₚ_)
+open import RoutingLib.Data.Path.Uncertified as Path using ([]; _∷_; deflate; length; _⇿_; _∈ₚ_)
 open import RoutingLib.Data.Path.Uncertified.Properties
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Main
-open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Simulation
-open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Policy
-  using (apply; apply-result)
-open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Route
-open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Communities
+open import RoutingLib.Routing.Protocols.BGPLite.Core
+open import RoutingLib.Routing.Protocols.BGPLite.Policies
+open import RoutingLib.Routing.Protocols.BGPLite.Routes
+open import RoutingLib.Routing.Protocols.BGPLite.Communities
 
 open ≡-Reasoning
 
@@ -46,6 +45,36 @@ private
     i j : Fin n
     r : Route
     p q : Pathᵛ
+
+--------------------------------------------------------------------------------
+-- The simulating algebra
+--
+-- The algebra is identical to the algebra of BGPLite except for a different
+-- choice operator. This new operator is fully associative, rather than just
+-- associative over comparable routes. As proving associativity of an operator
+-- requires O(n³) cases, this is instead implemented via the natural choice
+-- operation for the associated total order. The order can be proved to be
+-- transitive in O(n²) operations, and hence the operator is transitive.
+
+open Min ≤ᵣ-totalOrder public
+  using () renaming (_⊓_ to _⊕ₐₗₜ_; ⊓-cong to ⊕ₐₗₜ-cong)
+
+Aₐₗₜ : RawRoutingAlgebra _ _ _
+Aₐₗₜ = record
+  { Route              = Route
+  ; Step               = Step
+  ; _≈_                = _≡_
+  ; _⊕_                = _⊕ₐₗₜ_
+  ; _▷_                = _▷_
+  ; 0#                 = 0#
+  ; ∞#                 = ∞#
+  ; f∞                 = f∞
+  ; ≈-isDecEquivalence = ≡ᵣ-isDecEquivalence
+  ; ⊕-cong             = ⊕ₐₗₜ-cong
+  ; ▷-cong             = ▷-cong
+  ; f∞-reject          = f∞-reject
+  }
+
 
 --------------------------------------------------------------------------------
 -- The algebra Aₐₗₜ is a routing algebra
@@ -64,7 +93,7 @@ open Min ≤ᵣ-totalOrder
 ▷-fixedPoint (step _) = refl
 
 ▷-result : ∀ (f : Step i j) l cs p → f ▷ (valid l cs p) ≡ invalid ⊎
-           ∃₂ λ k ds → ∃ λ m → l ≤ k × f ▷ (valid l cs p) ≡ valid k ds (inflate ((toℕ i , toℕ j) ∷ p) m) 
+           ∃₂ λ k ds → ∃ λ m → l ≤ k × f ▷ (valid l cs p) ≡ valid k ds (Path.inflate ((toℕ i , toℕ j) ∷ p) m) 
 ▷-result {n} {i} {j} (step pol) l cs p with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p
 ... | no  _    | _       = inj₁ refl
 ... | yes _    | yes _   = inj₁ refl
@@ -126,12 +155,12 @@ path-accept {_} {i} {j} {valid l cs p} {q} (step pol) eq f▷r≉0 with (toℕ i
 ... | yes e⇿p | no  i∉p with apply-result pol l cs ((toℕ i , toℕ j) ∷ p)
 ...   | inj₁ ≡invalid = contradiction ≡invalid f▷r≉0
 ...   | inj₂ (k , ds , m , l≤k , ≡valid) = begin
-  path (apply pol (valid l cs ((toℕ i , toℕ j) ∷ p))) ≡⟨ cong path ≡valid ⟩
-  path (valid k ds (inflate ((toℕ i , toℕ j) ∷ p) m)) ≡⟨⟩
-  valid (deflate (inflate ((toℕ i , toℕ j) ∷ p) m))   ≡⟨ cong valid (deflate-inflate _ m) ⟩
-  valid (deflate ((toℕ i , toℕ j) ∷ p))               ≡⟨ cong valid (deflate-skip p (inj₁ (ij⇿p⇒i≢j e⇿p))) ⟩
-  valid ((toℕ i , toℕ j) ∷ deflate p)                 ≡⟨ cong (λ p → valid (_ ∷ p)) (valid-injective eq) ⟩
-  valid ((toℕ i , toℕ j) ∷ q)                         ∎
+  path (apply pol (valid l cs ((toℕ i , toℕ j) ∷ p)))      ≡⟨ cong path ≡valid ⟩
+  path (valid k ds (Path.inflate ((toℕ i , toℕ j) ∷ p) m)) ≡⟨⟩
+  valid (deflate (Path.inflate ((toℕ i , toℕ j) ∷ p) m))   ≡⟨ cong valid (deflate-inflate _ m) ⟩
+  valid (deflate ((toℕ i , toℕ j) ∷ p))                    ≡⟨ cong valid (deflate-skip p (inj₁ (ij⇿p⇒i≢j e⇿p))) ⟩
+  valid ((toℕ i , toℕ j) ∷ deflate p)                      ≡⟨ cong (λ p → valid (_ ∷ p)) (valid-injective eq) ⟩
+  valid ((toℕ i , toℕ j) ∷ q)                              ∎
 
 isPathAlgebra : IsPathAlgebra Aₐₗₜ
 isPathAlgebra = record

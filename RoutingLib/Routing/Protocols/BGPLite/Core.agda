@@ -1,16 +1,10 @@
 --------------------------------------------------------------------------------
 -- Agda routing library
 --
--- A specification of a path-vector routing protocol that shares many
--- similarities with the Border Gateway Protocol (BGP), including local
--- preferences, conditional policy, community values, path inflation and more.
---
--- Unlike BGP this algebra is strictly increasing as the local preference value
--- cannot be set arbitarily. In addition it does not implement the MED attribute
--- that violates associativity.
+-- Core definition of the BGPLite protocol
 --------------------------------------------------------------------------------
 
-module RoutingLib.Routing.Protocols.PathVector.BGPLite.Main where
+module RoutingLib.Routing.Protocols.BGPLite.Core where
 
 import Algebra.Construct.NaturalChoice.Min as NaturalChoice
 open import Algebra
@@ -40,9 +34,9 @@ private
 --------------------------------------------------------------------------------
 -- Definition of the underlying routing problem (i.e. routing algebra)
 
-open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Policy
-open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Communities
-open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Route
+open import RoutingLib.Routing.Protocols.BGPLite.Policies
+open import RoutingLib.Routing.Protocols.BGPLite.Communities
+open import RoutingLib.Routing.Protocols.BGPLite.Routes
 
 data Step (i j : Fin n) : Set₁ where
   step : Policy → Step i j

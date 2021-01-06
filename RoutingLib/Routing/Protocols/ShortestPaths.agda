@@ -6,7 +6,7 @@
 -- the paths with shortest length/lowest latency.
 --------------------------------------------------------------------------------
 
-module RoutingLib.Routing.Protocols.DistanceVector.ShortestPaths where
+module RoutingLib.Routing.Protocols.ShortestPaths where
 
 open import Level using (0ℓ)
 open import Relation.Binary.PropositionalEquality
@@ -35,9 +35,6 @@ Aˢʰᵒʳᵗᵉˢᵗ = record
   ; ▷-cong             = λ f → cong (f +_)
   ; f∞-reject          = λ _ _ _ → refl
   }
-
---------------------------------------------------------------------------------
--- Properties of the algebra
 
 isRoutingAlgebra : IsRoutingAlgebra Aˢʰᵒʳᵗᵉˢᵗ
 isRoutingAlgebra = record

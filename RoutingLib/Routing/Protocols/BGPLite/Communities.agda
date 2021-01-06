@@ -5,7 +5,7 @@
 -- a 32 bit vector. The choice of 32 is obviously arbitrary.
 --------------------------------------------------------------------------------
 
-module RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Communities where
+module RoutingLib.Routing.Protocols.BGPLite.Communities where
 
 open import Data.Bool
 open import Data.Bool.Properties

@@ -32,24 +32,6 @@ module _ {a b p} {A : Set a} {B : Set b} {P : A → Set p} {f : B → A} where
   map⁺₂ Pf (x ∷ xs) = Pf x ∷ map⁺₂ Pf xs
 
 ------------------------------------------------------------------------
--- insert
-
-module _ {a ℓ} {A : Set a} {_≤_ : Rel A ℓ} (total : Total _≤_)
-         {p} {P : Pred A p} where
-
-  insert⁺ : ∀ {v xs} → P v → All P xs → All P (insert total v xs)
-  insert⁺ {v} {[]}    pv []         = pv ∷ []
-  insert⁺ {v} {x ∷ _} pv (px ∷ pxs) with total v x
-  ... | inj₁ v≤x = pv ∷ (px ∷ pxs)
-  ... | inj₂ x≤v = px ∷ (insert⁺ pv pxs)
-
-  insert⁻ : ∀ v xs → All P (insert total v xs) → P v × All P xs
-  insert⁻ v []       (pv ∷ []) = pv , []
-  insert⁻ v (x ∷ xs) pvxxs      with total v x | pvxxs
-  ... | inj₁ _ | pv ∷ (px ∷ pxs) = pv , px ∷ pxs
-  ... | inj₂ _ | px ∷ pvxs       = Prod.map id (px ∷_) (insert⁻ v xs pvxs)
-
-------------------------------------------------------------------------
 -- other
 
 module _ {a ℓ} (S : Setoid a ℓ) where

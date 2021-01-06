@@ -43,9 +43,6 @@ n≤suc∘pred[n] (suc n) = s≤s ≤-refl
 ≥-decTotalOrder : DecTotalOrder 0ℓ 0ℓ 0ℓ
 ≥-decTotalOrder = Flip.decTotalOrder ≤-decTotalOrder
 
->⇒≰ : _>_ ⇒ _≰_
->⇒≰ = <⇒≱
-
 n≢0⇒0<n : ∀ {n} → n ≢ 0 → 0 < n
 n≢0⇒0<n {zero} 0≢0 = contradiction refl 0≢0
 n≢0⇒0<n {suc n} n+1≢0 = s≤s z≤n
@@ -101,8 +98,6 @@ a≤b*a a b = m≤m+n _ _
 
 -- _⊔_ and _≤_
 
-
-
 m≤o⇒m≤n⊔o : ∀ {m} → _⊔_ Preservesʳ (m ≤_)
 m≤o⇒m≤n⊔o n m≤o = ≤-trans m≤o (n≤m⊔n n _)
 
@@ -134,9 +129,6 @@ n⊔o≤m⇒n≤m⊎o≤m n o n⊔o≤m = inj₁ (n⊔o≤m⇒n≤m n o n⊔o≤
 
 
 -- _⊓_ and _≤_
-
-
-
 
 n≤m⇒n⊓o≤m : ∀ {m} → _⊓_ Preservesˡ (_≤ m)
 n≤m⇒n⊓o≤m o m≤n = ≤-trans (m⊓n≤m _ o) m≤n
@@ -192,6 +184,5 @@ n∸[1+m]<n : ∀ m {n} → 1 ≤ n → n ∸ suc m < n
 n∸[1+m]<n m (s≤s z≤n) = s≤s (m∸n≤m _ m)
 
 m<n⇒n∸m≡1+o : ∀ {m n} → m < n → ∃ λ o → n ∸ m ≡ suc o
-m<n⇒n∸m≡1+o {_}     {zero}  ()
 m<n⇒n∸m≡1+o {zero}  {suc n} (s≤s m<n) = n , refl
 m<n⇒n∸m≡1+o {suc m} {suc n} (s≤s m<n) = m<n⇒n∸m≡1+o m<n

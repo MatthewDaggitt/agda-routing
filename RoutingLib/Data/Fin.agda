@@ -2,11 +2,8 @@
 module RoutingLib.Data.Fin where
 
 open import Data.Fin hiding (_+_)
-open import Data.Nat
-open import Data.Nat.Properties
+open import Data.Nat.Base
 open import Data.Nat.DivMod
-open import Relation.Binary.PropositionalEquality
-open ≡-Reasoning
 
 private
   variable

@@ -6,7 +6,7 @@
 -- paths with highest bandwidth.
 --------------------------------------------------------------------------------
 
-module RoutingLib.Routing.Protocols.DistanceVector.WidestPaths where
+module RoutingLib.Routing.Protocols.WidestPaths where
 
 open import Level using (0ℓ)
 open import Relation.Binary.PropositionalEquality
@@ -35,9 +35,6 @@ Aʷⁱᵈᵉˢᵗ = record
   ; ▷-cong             = λ f → cong (f ⊓_)
   ; f∞-reject          = λ _ _ _ → ⊓-zeroˡ _
   }
-
---------------------------------------------------------------------------------
--- Properties of the algebra
 
 isRoutingAlgebra : IsRoutingAlgebra Aʷⁱᵈᵉˢᵗ
 isRoutingAlgebra = record

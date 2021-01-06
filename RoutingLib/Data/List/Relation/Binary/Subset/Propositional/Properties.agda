@@ -8,7 +8,6 @@ module RoutingLib.Data.List.Relation.Binary.Subset.Propositional.Properties wher
 module _ {a} {A : Set a} where
 
   applyUpTo⁺ : ∀ (f : ℕ → A) {m n} → m ≤ n → applyUpTo f m ⊆ applyUpTo f n
-  applyUpTo⁺ _ z≤n       ()
   applyUpTo⁺ _ (s≤s m≤n) (here  f≡f[0]) = here f≡f[0]
   applyUpTo⁺ _ (s≤s m≤n) (there v∈xs)   = there (applyUpTo⁺ _ m≤n v∈xs)
 

@@ -6,7 +6,7 @@
 -- made on its level, its communities and the path along which it was generated.
 --------------------------------------------------------------------------------
 
-module RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Policy where
+module RoutingLib.Routing.Protocols.BGPLite.Policies where
 
 open import Data.Bool as 𝔹 using (Bool; true; false; _∧_; _∨_; if_then_else_)
 open import Data.Fin using (fromℕ≤)
@@ -24,8 +24,8 @@ open import RoutingLib.Data.Path.Uncertified as Path
   using (Path; []; _∷_; length; deflate)
 open import RoutingLib.Data.Path.Uncertified.Properties
 
-open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Route
-open import RoutingLib.Routing.Protocols.PathVector.BGPLite.Components.Communities
+open import RoutingLib.Routing.Protocols.BGPLite.Routes
+open import RoutingLib.Routing.Protocols.BGPLite.Communities
 
 --------------------------------------------------------------------------------
 -- A language for writing conditional expressions

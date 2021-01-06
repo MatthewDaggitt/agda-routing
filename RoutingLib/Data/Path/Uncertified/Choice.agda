@@ -2,7 +2,7 @@
 
 module RoutingLib.Data.Path.Uncertified.Choice where
 
-open import Algebra.FunctionProperties
+open import Algebra.Definitions
 open import Algebra.Construct.NaturalChoice.Min as Min
 open import Data.Sum
 open import Data.Product using (_,_)

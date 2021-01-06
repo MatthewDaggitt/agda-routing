@@ -5,6 +5,7 @@ open import Data.Fin using (Fin) renaming (zero to fzero; suc to fsuc)
 open import Data.List
 open import Data.List.Relation.Unary.Any as Any using (here; there)
 open import Data.List.Membership.Propositional using (_∈_)
+open import Data.List.Membership.Propositional.Properties using (∈-allFin)
 open import Data.List.Relation.Binary.Permutation.Propositional using (_↭_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (∃; _,_; _×_; proj₂)
@@ -26,11 +27,10 @@ import Data.List.Membership.Propositional.Properties as GM
 
 private
   variable
-    a b c : Level
+    a : Level
     A : Set a
-    B : Set b
-    C : Set c
 
+-- Stdlib
 ∈-upTo⁺ : ∀ {n i} → i < n → i ∈ upTo n
 ∈-upTo⁺ = GM.∈-applyUpTo⁺ id
 
@@ -42,8 +42,6 @@ private
 ∈-downFrom⁺ : ∀ {n i} → i < n → i ∈ downFrom n
 ∈-downFrom⁺ i<n = ∈-applyDownFrom⁺ id i<n
 
-∈-allFin⁺ : ∀ {n} i → i ∈ allFin n
-∈-allFin⁺ = GM.∈-tabulate⁺
 
 ∈-allFinPairs⁺ : ∀ {n} i j → (i , j) ∈ allFinPairs n
-∈-allFinPairs⁺ i j = GM.∈-cartesianProduct⁺ (∈-allFin⁺ i) (∈-allFin⁺ j)
+∈-allFinPairs⁺ i j = GM.∈-cartesianProduct⁺ (∈-allFin i) (∈-allFin j)

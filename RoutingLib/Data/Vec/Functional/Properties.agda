@@ -2,12 +2,13 @@ open import Algebra.Core using (Op₂)
 open import Data.Nat using (ℕ; zero; suc; _<_; _≤_; _⊓_; _⊔_; z≤n; s≤s)
 open import Data.Nat.Properties using (≤-refl; ≤-trans; ⊔-sel; ⊓-sel; ⊓-mono-<; module ≤-Reasoning; +-mono-≤; +-mono-<-≤; +-mono-≤-<; m≤m⊔n; n≤m⊔n; ⊔-mono-≤; ⊔-monoʳ-≤)
 open import Data.Fin using (Fin; inject₁; inject≤) renaming (zero to fzero; suc to fsuc)
-open import Data.Fin.Subset using (Subset; inside; outside; _∈_; _∉_)
 open import Data.Product using (_,_; proj₁; proj₂; ∃)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Vec.Functional
 open import Data.Vec.Functional.Relation.Unary.All using (All)
 open import Data.Vec.Functional.Relation.Unary.Any using (Any)
+open import Data.Vec.Functional.Relation.Binary.Pointwise using (Pointwise)
+open import Data.Vec.Functional.Relation.Binary.Pointwise.Properties using (foldr-cong)
 open import Function using (_∘_)
 open import Level using () renaming (zero to lzero)
 open import Relation.Binary
@@ -16,7 +17,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; sym; cong₂; _�
 open import Relation.Unary using (Pred)
 
 open import RoutingLib.Data.Vec.Functional
-open import RoutingLib.Data.Vec.Functional.Relation.Binary.Pointwise using (Pointwise; foldr-cong; foldr⁺-cong)
+open import RoutingLib.Data.Vec.Functional.Relation.Binary.Pointwise using (foldr⁺-cong)
 open import RoutingLib.Algebra.Definitions
 open import RoutingLib.Data.Nat.Properties
 open import RoutingLib.Data.NatInf using (ℕ∞) renaming (_≤_ to _≤∞_; _⊓_ to _⊓∞_)
@@ -133,7 +134,7 @@ x≤max[t] ⊥ t (inj₂ x≤t) = foldr-⊎pres (_ ≤_) m≤n⊎m≤o⇒m≤n�
 
 max-cong : ∀ {n} {⊥₁ ⊥₂} → ⊥₁ ≡ ⊥₂ → {s t : Vector ℕ n} →
            Pointwise _≡_ s t → max ⊥₁ s ≡ max ⊥₂ t
-max-cong ⊥₁≡⊥₂ s≡t = foldr-cong {_~₁_ = _≡_} {_≡_}
+max-cong ⊥₁≡⊥₂ s≡t = foldr-cong {R = _≡_} {_≡_}
   (cong₂ _⊔_) ⊥₁≡⊥₂ s≡t
 
 max-constant : ∀ {n} {⊥} {t : Vector ℕ n} →

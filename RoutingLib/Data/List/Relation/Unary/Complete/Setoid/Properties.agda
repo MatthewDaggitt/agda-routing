@@ -6,6 +6,7 @@ open import Data.List
 open import Data.List.Membership.Setoid
 open import Data.List.Membership.Setoid.Properties
 open import Data.List.Relation.Unary.Any using (index)
+open import Data.List.Relation.Unary.Any.Properties using (lookup-index)
 open import Data.Sum.Relation.Binary.Pointwise using (_⊎ₛ_)
 open import Data.Product using (_,_; proj₁; proj₂)
 open import Data.Product.Relation.Binary.Pointwise.NonDependent using (_×ₛ_)
@@ -15,7 +16,6 @@ open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_)
 
 open import RoutingLib.Data.List
-open import RoutingLib.Data.List.Relation.Unary.Any.Properties
 open import RoutingLib.Data.List.Membership.Setoid.Properties
 open import RoutingLib.Data.List.Relation.Unary.Complete.Setoid
 

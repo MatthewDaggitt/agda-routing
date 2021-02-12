@@ -2,10 +2,10 @@ open import Algebra using (Semiring)
 open import Data.Fin using (_≟_; Fin; toℕ)
 open import Data.List using (List; []; _∷_; length; _++_; zip; foldr; map)
 open import Data.List.Properties using (map-++-commute)
-open import Data.List.All using (All; []; _∷_; tabulate; lookup)
-open import Data.List.All.Properties using (map⁺)
-open import Data.List.Any using (Any; here; there; tail; satisfied)
-open import Data.List.Any.Properties using (concat⁺; map⁻)
+open import Data.List.Relation.Unary.All using (All; []; _∷_; tabulate; lookup)
+open import Data.List.Relation.Unary.All.Properties using (map⁺)
+open import Data.List.Relation.Unary.Any using (Any; here; there; tail; satisfied)
+open import Data.List.Relation.Unary.Any.Properties using (concat⁺; map⁻)
 open import Data.List.Membership.DecPropositional using (_∈?_)
 open import Data.List.Membership.Propositional using (_∈_; find)
 open import Data.Nat using (ℕ; suc; _≤_; s≤s)
@@ -34,7 +34,7 @@ module _ where
 
 module _ {c ℓ} (S : Semiring c ℓ)  where
   open Semiring S
-  open import Algebra.FunctionProperties _≈_ using (Idempotent; _IdempotentOn_)
+  open import Algebra.Definitions _≈_ using (Idempotent; _IdempotentOn_)
 
   open import RoutingLib.db716.Algebra.SemiringMatrix S
   open import RoutingLib.db716.Data.Path.UncertifiedFinite
@@ -79,7 +79,7 @@ module _ {c ℓ} (S : Semiring c ℓ)  where
         1# * (m i j * loopWeightAux m (a , i) ((k , l) ∷ p) ai∈p) * (weight m (cutLoopAux (a , i) ((k , l) ∷ p) ai∈p))
           ≡⟨⟩
         1# * (loopWeight ((i , j) ∷ (k , l) ∷ p) m (here ai∈p)) * (weight m (cutLoop ((i , j) ∷ (k , l) ∷ p) (here ai∈p))) ∎
-        where open import Relation.Binary.EqReasoning setoid
+        where open import Relation.Binary.Reasoning.Setoid setoid
   factoriseLoop1 {n} ((i , j) ∷ p) m (there loop) =
     let w1 , w2 , w1w2≈w[cutloop] , w[p]≈w1[loop]w2 = factoriseLoop1 p m loop
     in (m i j) * w1 , w2 ,
@@ -107,7 +107,7 @@ module _ {c ℓ} (S : Semiring c ℓ)  where
         (w1 * (loopWeight p m loop + 1#)) * w2
           ≡⟨⟩
         w1 * (loopWeight p m loop + 1#) * w2 ∎
-        where open import Relation.Binary.EqReasoning setoid
+        where open import Relation.Binary.Reasoning.Setoid setoid
 
   0-stable⇒negligibleLoops : ∀ {n} (p : Path n) (m : SquareMatrix Carrier n) (loop : HasLoop p) → stableSemiring 0 S
     → weight m p + weight m (cutLoop p loop) ≈ weight m (cutLoop p loop)
@@ -126,7 +126,7 @@ module _ {c ℓ} (S : Semiring c ℓ)  where
       w1 * w2
         ≈⟨ wcut≈w1w2 ⟩
       weight m (cutLoop p loop) ∎
-      where open import Relation.Binary.EqReasoning setoid
+      where open import Relation.Binary.Reasoning.Setoid setoid
 
   0-stable⇒+Idempotent : stableSemiring 0 S  → Idempotent _+_
   0-stable⇒+Idempotent 0stab x = begin
@@ -139,4 +139,4 @@ module _ {c ℓ} (S : Semiring c ℓ)  where
     x * 1#
       ≈⟨ *-identityʳ x ⟩
     x ∎
-    where open import Relation.Binary.EqReasoning setoid
+    where open import Relation.Binary.Reasoning.Setoid setoid

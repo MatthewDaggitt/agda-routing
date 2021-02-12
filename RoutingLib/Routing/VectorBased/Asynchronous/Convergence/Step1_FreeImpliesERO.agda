@@ -30,7 +30,7 @@ open import Level using (Level; _⊔_) renaming (suc to lsuc)
 open import Relation.Binary hiding (NonEmpty)
 open import Relation.Binary.Construct.Union as Union using (_∪_)
 open import Relation.Binary.Construct.Closure.Transitive as TransClosure
-  renaming (Plus′ to TransitiveClosure) hiding ([_]; _∷_)
+  hiding ([_]; _∷_)
 import Relation.Binary.Construct.NonStrictToStrict as NonStrictToStrict
 open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Construct.Union as Union
@@ -79,13 +79,13 @@ open import Relation.Binary.Reasoning.PartialOrder ≤₊-poset
 infix 4 _<ᶠ_
 
 _≤ᶠ_ : Rel Route (a ⊔ ℓ)
-_≤ᶠ_ = TransitiveClosure (_≤₊_ ∪ _↝_)
+_≤ᶠ_ = TransClosure (_≤₊_ ∪ _↝_)
 
 _<ᶠ′_ : Rel Route (a ⊔ ℓ)
 _<ᶠ′_ = NonStrictToStrict._<_ _≈_ _≤ᶠ_
 
 _<ᶠ_ : Rel Route (a ⊔ ℓ)
-_<ᶠ_ = TransitiveClosure (_<₊_ ∪ _↝_)
+_<ᶠ_ = TransClosure (_<₊_ ∪ _↝_)
  
 -- Given two related routes, i.e. path through this graph, we identify the set
 -- of routes that are extended. If extensions exist in the path we return

@@ -6,6 +6,8 @@ open import Data.Fin using () renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties using (all?)
 open import Data.Fin.Subset using (Subset; _∉_; ∣_∣)
 open import Data.Nat using (ℕ; zero; suc)
+import Data.Vec.Functional.Relation.Binary.Pointwise.Properties as Vector
+open import Level using (Level)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
   using (_≡_)
@@ -16,20 +18,25 @@ import RoutingLib.Data.Vec.Functional as Vector
 open import RoutingLib.Data.Matrix
 import RoutingLib.Data.Vec.Functional.Relation.Binary.Pointwise as Vector
 
+private
+  variable
+    a b ℓ : Level
+    A B C D : Set a
+    m n : ℕ
+
 ------------------------------------------------------------------------------
 -- Type
 
-Pointwise : ∀ {a b ℓ} {A : Set a} {B : Set b} → REL A B ℓ →
+Pointwise : ∀ {A : Set a} {B : Set b} → REL A B ℓ →
             ∀ {m n} → REL (Matrix A m n) (Matrix B m n) ℓ
 Pointwise _~_ M N = ∀ i j → M i j ~ N i j
 
 ------------------------------------------------------------------------------
 -- Relational properties
 
-module _ {a ℓ} {A : Set a} {_~_ : Rel A ℓ} where
+module _ {_~_ : Rel A ℓ} where
 
   abstract
-
     reflexive : _≡_ ⇒ _~_ → ∀ {m n} → _≡_ ⇒ Pointwise _~_ {m} {n}
     reflexive reflexive ≡-refl = Vector.reflexive (Vector.reflexive reflexive) ≡-refl
 
@@ -53,7 +60,7 @@ module _ {a ℓ} {A : Set a} {_~_ : Rel A ℓ} where
       }
 
     isDecEquivalence : IsDecEquivalence _~_ →
-                       ∀ {m} {n} → IsDecEquivalence (Pointwise _~_ {m} {n})
+                       ∀ {m n} → IsDecEquivalence (Pointwise _~_ {m} {n})
     isDecEquivalence isDecEq = record
       { isEquivalence = isEquivalence (IsDecEquivalence.isEquivalence isDecEq)
       ; _≟_           = dec           (IsDecEquivalence._≟_           isDecEq)

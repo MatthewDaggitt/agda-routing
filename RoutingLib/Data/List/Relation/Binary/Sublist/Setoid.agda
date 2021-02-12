@@ -23,11 +23,6 @@ open import Relation.Unary using (Pred; Decidable)
 open import RoutingLib.Data.List.Relation.Binary.Equality.Setoid S
 open import RoutingLib.Function.Reasoning
 
-infix 4 _⊂_
-
-_⊂_ : Rel (List A) (a ⊔ ℓ)
-xs ⊂ ys = xs ⊆ ys × ¬ (xs ≋ ys)
-
 _∷ₛ_ : ∀ {x y xs ys} → x ≈ y → xs ⊂ ys → x ∷ xs ⊂ y ∷ ys
 x≈y ∷ₛ (xs⊆ys , ¬xs≋ys) = x≈y ∷ xs⊆ys , ¬xs≋ys ∘ tail
 

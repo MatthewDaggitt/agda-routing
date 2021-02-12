@@ -2,14 +2,7 @@ open import Relation.Binary using (DecSetoid; Setoid; Rel)
 
 module RoutingLib.Data.Vec.Functional.Relation.Binary.Equality {a ℓ} (S : Setoid a ℓ) where
 
-open import Data.Vec.Functional
-open import Data.Nat using (ℕ)
-open import Relation.Binary.Indexed.Homogeneous
-  using (IndexedSetoid)
-open import Relation.Nullary using (¬_)
-
-open import RoutingLib.Data.Vec.Functional.Relation.Binary.Pointwise using (setoid)
-
+{-
 open Setoid S using (_≈_) renaming (Carrier to A)
 
 𝕋ₛ : ℕ → Setoid a ℓ
@@ -28,3 +21,4 @@ module _ {n : ℕ} where
 
 _≉ₜ_ : ∀ {n} → Rel (Vector A n) ℓ
 t ≉ₜ s = ¬ (t ≈ₜ s)
+-}

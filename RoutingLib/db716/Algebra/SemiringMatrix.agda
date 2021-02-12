@@ -1,7 +1,7 @@
 open import Agda.Builtin.Equality using (_≡_; refl)
 
 open import Algebra using (Semiring)
-open import Algebra.FunctionProperties
+open import Algebra.Definitions
 open import Algebra.Structures
 open import Data.Fin using (Fin; suc; zero; _≟_) renaming (_≤_ to _F≤_)
 open import Data.Nat using (ℕ; suc; zero; _≤_; _<_)
@@ -12,10 +12,7 @@ open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.Matrix
-open import RoutingLib.Data.Table
-
-open import RoutingLib.db716.Data.Matrix
-open import RoutingLib.db716.Data.Table
+open import Data.Vec.Functional hiding (_⊛_)
 
 module RoutingLib.db716.Algebra.SemiringMatrix {c ℓ} (S : Semiring c ℓ ) where
 
@@ -29,11 +26,11 @@ private Mat : (n : ℕ) → Set _
 Mat n = SquareMatrix C n
 
 private Vec : (n : ℕ) → Set _
-Vec = Table C
+Vec = Vector C
 
 -- Define operators for elementwise and scalar multiplication for vectors for convenience.
 private _⊛_ : {n : ℕ} → Vec n → Vec n → Vec n
-_⊛_ u v = λ i → u i * v i
+_⊛_ u v = λ i → (u i) * v i
 
 -- Standard dot product on vectors
 _∙_ : {n : ℕ} → Vec n → Vec n → C
@@ -224,6 +221,12 @@ mat-zero n = (mat-zeroˡ n , mat-zeroʳ n)
   ; assoc = ⊕-assoc n
   }
 
+⊕-isMonoid : (n : ℕ) → IsMonoid _≈ₘ_ _⊕_ 𝟘
+⊕-isMonoid n = record
+  { isSemigroup = ⊕-isSemigroup n
+  ; identity = ⊕-identity n
+  }
+
 ⊗-isMonoid : (n : ℕ) → IsMonoid _≈ₘ_ _⊗_ 𝟙
 ⊗-isMonoid n = record
   { isSemigroup = ⊗-isSemigroup n
@@ -232,9 +235,8 @@ mat-zero n = (mat-zeroˡ n , mat-zeroʳ n)
 
 ⊕-isCommutativeMonoid : (n : ℕ) → IsCommutativeMonoid _≈ₘ_ _⊕_ 𝟘
 ⊕-isCommutativeMonoid n = record
-  { isSemigroup = ⊕-isSemigroup n
-  ; identityˡ = ⊕-identityˡ n
-  ; comm = ⊕-comm n
+  { isMonoid = ⊕-isMonoid n
+  ; comm     = ⊕-comm n
   }
 
 mat-isSemiringWithoutAnnihilatingZero : (n : ℕ) → IsSemiringWithoutAnnihilatingZero _≈ₘ_ _⊕_ _⊗_ 𝟘 𝟙

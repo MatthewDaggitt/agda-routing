@@ -1,4 +1,10 @@
 
+open import Data.Product
+open import Level using (_⊔_)
+open import Relation.Binary
+open import Relation.Binary.Construct.Closure.Transitive
+open import Relation.Nullary using (¬_)
+
 open import RoutingLib.Routing
 open import RoutingLib.Routing.Algebra
 
@@ -8,13 +14,6 @@ module RoutingLib.Routing.AdjacencyMatrix.Relations
   where
 
 open RawRoutingAlgebra algebra
-
-open import Data.Product
-open import Level using (_⊔_)
-open import Relation.Binary
-open import Relation.Binary.Construct.Closure.Transitive
-  using () renaming (Plus′ to TransitiveClosure)
-open import Relation.Nullary using (¬_)
 
 --------------------------------------------------------------------------------
 -- Extends relation
@@ -29,7 +28,7 @@ x ↝ₛ y = x ↝ y × x ≉ y
 
 -- x can be extended to form y
 _↝*_ : Route → Route → Set _
-_↝*_ = TransitiveClosure _↝_
+_↝*_ = TransClosure _↝_
 
 --------------------------------------------------------------------------------
 -- Threatens relation

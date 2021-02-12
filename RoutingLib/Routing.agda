@@ -26,8 +26,6 @@ open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; sym; trans)
 open import Relation.Binary.Indexed.Homogeneous
   using (IndexedSetoid; IndexedDecSetoid)
-import Relation.Binary.Construct.Closure.Transitive as TransitiveClosure
-import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
@@ -66,12 +64,18 @@ RoutingTable = Vector Route n
 
 -- Properties
 open VectorDecEquality DS public
+  renaming
+  ( _≋_     to _≈ₜ_
+  ; ≋-refl  to ≈ₜ-refl
+  ; ≋-sym   to ≈ₜ-sym
+  ; ≋-trans to ≈ₜ-trans
+  )
 
 ℝ𝕋ₛ : Setoid a ℓ
-ℝ𝕋ₛ = 𝕋ₛ n
+ℝ𝕋ₛ = VectorDecEquality.≋-setoid DS n
 
 Decℝ𝕋ₛ : DecSetoid a ℓ
-Decℝ𝕋ₛ = Dec𝕋ₛ n
+Decℝ𝕋ₛ = VectorDecEquality.≋-decSetoid DS n
 
 ℝ𝕋ₛⁱ : IndexedSetoid (Fin n) _ _
 ℝ𝕋ₛⁱ = triviallyIndexSetoid (Fin n) S

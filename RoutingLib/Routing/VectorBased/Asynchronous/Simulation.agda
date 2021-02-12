@@ -7,8 +7,32 @@
 -- general dynamic asynchronous iterations found in `RoutingLib.Iteration`.
 --------------------------------------------------------------------------------
 
+open import Data.Fin using (Fin; _≟_)
+open import Data.Fin.Subset using (Subset)
+open import Data.Fin.Subset.Properties using (_∈?_)
+open import Data.List using (foldr; tabulate; map)
+open import Data.List.Properties using (tabulate-cong; map-tabulate)
+open import Data.List.Relation.Unary.All using (All; []; _∷_)
+open import Data.List.Relation.Unary.All.Properties using (tabulate⁺)
+open import Data.List.Relation.Unary.AllPairs using (AllPairs; []; _∷_)
+open import Data.Nat using (ℕ)
+open import Function using (_∘_)
+open import Level using (Level; _⊔_) renaming (suc to lsuc)
+open import Relation.Binary using (REL)
+open import Relation.Nullary using (yes; no)
+open import Relation.Binary.PropositionalEquality using (_≡_; cong)
+
+open import RoutingLib.Routing using (Network)
+open import RoutingLib.Data.Matrix using (SquareMatrix)
+open import RoutingLib.Data.List.Properties using (foldr-map-commute-gen₂)
+open import RoutingLib.Data.List.Relation.Binary.Equality.Setoid using (foldr⁺)
+
+open import RoutingLib.Iteration.Asynchronous.Dynamic as Async using (Epoch; Convergent)
+import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence as Async
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Algebra.Simulation
+import RoutingLib.Routing.Algebra.Comparable as Comparable
+import RoutingLib.Routing.VectorBased.Asynchronous as BellmanFord
 
 module RoutingLib.Routing.VectorBased.Asynchronous.Simulation
   {a₁ b₁ ℓ₁ a₂ b₂ ℓ₂}
@@ -17,34 +41,6 @@ module RoutingLib.Routing.VectorBased.Asynchronous.Simulation
   (A⇉B : A Simulates B)
   where
 
-open import Data.Fin using (Fin; _≟_)
-open import Data.Fin.Subset using (Subset)
-open import Data.Fin.Subset.Properties using (_∈?_)
-open import Data.List using (foldr; tabulate; map)
-open import Data.List.Properties using (tabulate-cong)
-open import Data.List.Relation.Unary.All using (All; []; _∷_)
-open import Data.List.Relation.Unary.All.Properties using (tabulate⁺)
-open import Data.List.Relation.Unary.AllPairs using (AllPairs; []; _∷_)
-import Data.List.Relation.Unary.AllPairs.Properties as AllPairs
-open import Data.Nat using (ℕ)
-import Data.List.Relation.Binary.Equality.Setoid as ListEq
-open import Function using (_∘_)
-open import Level using (Level; _⊔_) renaming (suc to lsuc)
-open import Relation.Binary using (REL)
-open import Relation.Nullary using (yes; no)
-import Relation.Binary.Reasoning.Setoid as EqReasoning
-open import Relation.Binary.PropositionalEquality using (_≡_; cong)
-
-open import RoutingLib.Routing using (Network)
-open import RoutingLib.Data.Matrix using (SquareMatrix)
-open import RoutingLib.Data.List.Properties using (foldr-map-commute-gen₂)
-open import RoutingLib.Data.List.Relation.Binary.Equality.Setoid using (foldr⁺; map-tabulate)
-
-open import RoutingLib.Iteration.Asynchronous.Dynamic as Async using (Epoch; Convergent)
-import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence as Async
-
-import RoutingLib.Routing.Algebra.Comparable as Comparable
-import RoutingLib.Routing.VectorBased.Asynchronous as BellmanFord
 
 open RawRoutingAlgebra hiding (_≟_)
 open RawRoutingAlgebra A using ()
@@ -52,6 +48,10 @@ open RawRoutingAlgebra A using ()
 open RawRoutingAlgebra B using ()
   renaming (_≈_ to _≈ᵇ_; _⊕_ to _⊕ᵇ_; _▷_ to _▷ᵇ_; 0# to 0#ᵇ; ∞# to ∞ᵇ)
 open _Simulates_ A⇉B
+
+import Data.List.Relation.Unary.AllPairs.Properties as AllPairs
+open import Data.List.Relation.Binary.Equality.Setoid (S B) as ≋ using (≋-reflexive)
+open import Relation.Binary.Reasoning.Setoid (S B)
 
 private
   variable
@@ -104,16 +104,15 @@ module _ (Nᵇ : Network B n) where
       to (foldr _⊕ᵃ_ (Iᵃ i j) (tabulate (λ k → Aᵃ e p i k ▷ᵃ X k j)))
     ≈⟨ ≈-sym B (foldr-map-commute-gen₂ (S B) (⊕-cong B) ⊕-pres-≎ to-⊕ (All-≎-tabulate X j) (AllPairs-≎-tabulate X j)) ⟩
       foldr _⊕ᵇ_ (to (Iᵃ i j)) (map to (tabulate λ k → Aᵃ e p i k ▷ᵃ X k j))
-    ≈⟨ foldr⁺ (S B) (⊕-cong B) (toIᵃ≈Iᵇ i j) (map-tabulate (S B) to (λ k → Aᵃ e p i k ▷ᵃ X k j)) ⟩
+    ≈⟨ foldr⁺ (S B) (⊕-cong B) (toIᵃ≈Iᵇ i j) (≋-reflexive (map-tabulate (λ k → Aᵃ e p i k ▷ᵃ X k j) to)) ⟩
       foldr _⊕ᵇ_ (Iᵇ i j) (tabulate (λ k → to (Aᵃ e p i k ▷ᵃ X k j)))
-    ≈⟨ foldr⁺ (S B) (⊕-cong B) (≈-refl B) (ListEq.tabulate⁺ (S B) (λ k → to-▷ (Aᵃ e p i k) (X k j)) ) ⟩
+    ≈⟨ foldr⁺ (S B) (⊕-cong B) (≈-refl B) (≋.tabulate⁺ (λ k → to-▷ (Aᵃ e p i k) (X k j)) ) ⟩
       foldr _⊕ᵇ_ (Iᵇ i j) (tabulate (λ k → toₛ (Aᵃ e p i k) ▷ᵇ to (X k j)))
     ≡⟨ cong (foldr _⊕ᵇ_ (Iᵇ i j)) (tabulate-cong {n = n} λ k → cong (_▷ᵇ _) (toA k) ) ⟩
       foldr _⊕ᵇ_ (Iᵇ i j) (tabulate (λ k → Aᵇ e p i k ▷ᵇ to (X k j)))
     ≡⟨⟩
       Fᵇ e p (λ k l → to (X k l)) i j
     ∎
-    where open EqReasoning (S B)
 
   F∥ᵃ⇉F∥ᵇ : F∥ᵃ Async.Simulates F∥ᵇ
   F∥ᵃ⇉F∥ᵇ = record

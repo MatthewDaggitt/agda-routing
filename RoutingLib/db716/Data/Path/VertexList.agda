@@ -3,9 +3,9 @@ module RoutingLib.db716.Data.Path.VertexList where
 
 open import Data.Fin using (Fin)
 open import Data.List using (List ; _∷_; []; length; zip)
-open import Data.List.Any using (here; there)
+open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.List.Membership.Propositional using (_∈_)
-open import Data.List.Relation.Pointwise using (Pointwise; []; _∷_; Pointwise-≡⇒≡) renaming (refl to ≈ₚ-refl)
+open import Data.List.Relation.Binary.Pointwise using (Pointwise; []; _∷_; Pointwise-≡⇒≡) renaming (refl to ≈ₚ-refl)
 open import Data.Nat using (suc; _≤_; s≤s)
 open import Data.Nat.Properties using (≤-reflexive; ≤-trans; <-trans; n≤1+n)
 open import Data.Product using (proj₂; _,_; ∃)

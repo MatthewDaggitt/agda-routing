@@ -5,12 +5,14 @@ open import Algebra using (Semiring)
 
 open import Data.Fin using (Fin; zero; _≟_)
 open import Data.List using (List; []; _∷_; [_]; length; map)
-open import Data.List.All using (All; tabulate; _∷_; [])
-open import Data.List.All.Properties using () renaming (map⁺ to allMap⁺)
-open import Data.List.Any using (Any; here; there)
-open import Data.List.Any.Properties using (map⁻; map⁺)
+open import Data.List.Relation.Unary.All using (All; tabulate; _∷_; [])
+open import Data.List.Relation.Unary.All.Properties using () renaming (map⁺ to allMap⁺)
+open import Data.List.Relation.Unary.Any using (Any; here; there)
+open import Data.List.Relation.Unary.Any.Properties using (map⁻; map⁺)
 open import Data.List.Membership.Propositional using (_∈_; find; lose)
 open import Data.List.Membership.Propositional.Properties using (∈-map⁺; ∈-concat⁺′; ∈-concat⁺; ∈-++⁺ʳ; ∈-++⁺ˡ)
+open import Data.List.Relation.Unary.Any.Properties using (map⁻)
+open import Relation.Binary
 open import Data.Nat using (ℕ; suc; _≤_; s≤s; z≤n) renaming (_≟_ to _≟N_)
 open import Data.Nat.Properties using (≤-reflexive; ≤-trans; ≤∧≢⇒<)
 open import Data.Product using (_,_; _×_; ∃; ∃₂; proj₁; proj₂)
@@ -54,9 +56,6 @@ all-k-length-paths-from-to-correct {suc n} {suc ℕ.zero} {i} {j} {.((i , j) ∷
 all-k-length-paths-from-to-correct {suc n} {suc (suc k)} {i} {j} {(i , s) ∷ p} |vs|≡k here (there vs:*→j) (ve ∷ vp)
   rewrite (ij⇿p⇒i▻p≡ij::p (≤-trans (s≤s z≤n) (≤-reflexive (≡-sym (≡-pred (i , s) p |vs|≡k)))) ve ) =
   let
-      -- z : Path (suc n)
-      -- z∈all-all-paths : z ∈ map (λ i → all-k-length-paths-from-to (suc n) (suc k) i j) (allFins (suc n))
-      -- p∈z : p ∈ z
       (z , z∈all-all-paths , p∈z) = find (all-all-k-length-paths-correct {suc n} {suc k} {j} {p} (≡-pred (i , s) p |vs|≡k) vs:*→j vp)
   in (∈-map⁺ _ (∈-concat⁺′ p∈z z∈all-all-paths))
 
@@ -96,7 +95,7 @@ path-len-induction P p[] p[ij] pxs⇒pi▻xs n k xs i j xs∈paths = k-length-pa
     k-length-paths-prop3 {suc n} (suc 0) xs i j (here ≡-refl) = p[ij] i j
     k-length-paths-prop3 {suc n} (suc (suc k)) xs i j xs∈paths = ret
       where
-        open import Data.List.Any.Properties using (map⁻)
+        open import Data.List.Relation.Unary.Any.Properties using (map⁻)
         open import Relation.Binary
     
         mapPullback : Any (λ ys → xs ≡ i ▻ ys) (all-k-length-paths-to (suc n) (suc k) j)
@@ -144,8 +143,6 @@ path-len-induction' P p[ij] pxs⇒pi▻xs n k xs i j xs∈paths = k-length-paths
     k-length-paths-prop3 {suc n} 0 xs i j (here ≡-refl) = p[ij] i j
     k-length-paths-prop3 {suc n} (suc k) xs i j xs∈paths = ret
       where
-        open import Data.List.Any.Properties using (map⁻)
-        open import Relation.Binary
     
         mapPullback : Any (λ ys → xs ≡ i ▻ ys) (all-k-length-paths-to (suc n) (suc k) j)
         mapPullback = map⁻ xs∈paths --xs∈paths

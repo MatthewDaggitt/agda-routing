@@ -25,7 +25,6 @@ open import Relation.Binary.PropositionalEquality
   using (refl; _≡_; _≢_; cong; subst; subst₂; inspect; [_])
 
 open import RoutingLib.Data.List
-open import RoutingLib.Data.List.Relation.Unary.Any.Properties
 
 
 module RoutingLib.Data.List.Membership.Setoid.Properties where
@@ -45,22 +44,7 @@ module _ (S : Setoid c ℓ) where
 
   open Membership S using (_∈_; _∉_)
   open Membership (Pointwise.setoid S) using () renaming (_∈_ to _∈ₗ_)
-{-
-  ∈-++⁺ : ∀ {v} xs ys → v ∈ xs ⊎ v ∈ ys → v ∈ xs ++ ys
-  ∈-++⁺ _ _ = Sum.[ ∈-++⁺ˡ S , ∈-++⁺ʳ S _ ]
 
-  ∉-filter₁ : ∀ {P : A → Set p} (P? : Decidable P) {v} {xs} → v ∉ xs → v ∉ filter P? xs
-  ∉-filter₁ P? {v} {x ∷ xs} v∉x∷xs v∈f[x∷xs] with P? x | v∈f[x∷xs]
-  ... | no  _ | v∈f[xs]       = ∉-filter₁ P? (v∉x∷xs ∘ there) v∈f[xs]
-  ... | yes _ | here  v≈x     = v∉x∷xs (here v≈x)
-  ... | yes _ | there v∈f[xs] = ∉-filter₁ P? (v∉x∷xs ∘ there) v∈f[xs]
-
-  ∉-filter₂ : ∀ {P : A → Set p} (P? : Decidable P) → P Respects _≈_ → ∀ {v} → ¬ P v → ∀ xs → v ∉ filter P? xs
-  ∉-filter₂ P? resp ¬Pv (x ∷ xs) v∈f[x∷xs] with P? x | v∈f[x∷xs]
-  ... | no  _  | v∈f[xs]       = ∉-filter₂ P? resp ¬Pv xs v∈f[xs]
-  ... | yes Px | here  v≈x     = ¬Pv (resp (sym v≈x) Px)
-  ... | yes _  | there v∈f[xs] = ∉-filter₂ P? resp ¬Pv xs v∈f[xs]
--}
   index-cong : ∀ {x y xs} → (x∈xs : x ∈ xs) (y∈xs : y ∈ xs) → Unique S xs → x ≈ y → index x∈xs ≡ index y∈xs
   index-cong (here x≈z)   (here y≈z)   _            x≈y = refl
   index-cong (here x≈z)   (there y∈xs) (z≉xs ∷ xs!) x≈y = contradiction (∈-resp-≈ S (trans (sym x≈y) x≈z) y∈xs) (All¬⇒¬Any z≉xs)

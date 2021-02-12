@@ -16,8 +16,6 @@ open import Relation.Binary.PropositionalEquality
   using (_≡_; refl)
 open import Relation.Unary using (Pred)
 
-open import RoutingLib.Data.List using (insert)
-
 open PermutationReasoning
 
 module _ {a ℓ} (S : Setoid a ℓ) where
@@ -45,19 +43,3 @@ module _ {a} {A : Set a} where
   ... | (ps , qs , refl) = b ∷ a ∷ ps , qs , refl
   split x as           bs {xs}         (trans ↭₁ ↭₂) with split x as bs ↭₁
   ... | (ps , qs , refl) = split x ps qs ↭₂
-
---------------------------------------------------------------------------------
--- insert
-
-module _ {a ℓ} {A : Set a} {_≤_ : Rel A ℓ} (total : Total _≤_) where
-
-  insert⁺ : ∀ x {xs ys} → xs ↭ ys → insert total x xs ↭ x ∷ ys
-  insert⁺ x {[]}     {ys} xs↭ys = prep x xs↭ys
-  insert⁺ x {y ∷ xs} {ys} y∷xs↭ys with total x y
-  ... | inj₁ _ = prep x y∷xs↭ys
-  ... | inj₂ _ with split y [] xs y∷xs↭ys
-  ...   | ps , qs , refl = begin
-    y ∷ insert total x xs ↭⟨ prep y (insert⁺ x (drop-∷ (trans y∷xs↭ys (shift y ps qs)))) ⟩
-    y ∷ x ∷ ps ++ qs      ↭⟨ swap y x refl ⟩
-    x ∷ y ∷ ps ++ qs      ↭⟨ ↭-sym (prep x (shift y ps qs)) ⟩
-    x ∷ ps ++ [ y ] ++ qs ∎

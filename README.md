@@ -1,6 +1,6 @@
 # Agda-routing
 
-Requirements: Agda 2.6.1 and Standard Library 1.4
+Requirements: Agda 2.6.1 and Standard Library 1.5
 
 This library reasons about asynchronous iterative algorithms and network routing
 problems. It is organised in the same manner as the Agda standard library and

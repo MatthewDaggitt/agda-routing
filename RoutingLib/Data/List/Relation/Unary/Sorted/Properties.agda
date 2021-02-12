@@ -37,7 +37,6 @@ open import Relation.Unary using (Pred; Decidable)
 open import Data.List.Relation.Unary.Sorted.TotalOrder order as Sorted
 
 open import RoutingLib.Data.Fin.Properties as Fin
-open import RoutingLib.Data.List using (insert; count)
 open import RoutingLib.Data.List.Relation.Unary.All.Properties as Allₚ
 open import RoutingLib.Data.List.Relation.Binary.Pointwise
 open import RoutingLib.Data.List.Relation.Unary.Linked.Properties using (lookup-Linked)
@@ -66,12 +65,6 @@ _∷↗_ : ∀ {x xs} →
 _∷↗_ {xs = []}     _  _            = [-]
 _∷↗_ {xs = y ∷ xs} (just Rxy) Ryxs = Rxy ∷ Ryxs
 
-private
-  lemma′ : ∀ {p} {P : Pred A p} (P? : Decidable P) {v xs} → v <ℕ count P? xs → Any P xs
-  lemma′ P? {_} {x ∷ xs} 0< with P? x
-  ... | yes px = here px 
-  ... | no  _  = there (lemma′ P? 0<)
-
 lookup-Sorted : ∀ {xs} → Sorted xs →
                 ∀ {v} → Connected _≤_ (just v) (List.head xs) →
                 ∀ i → v ≤ lookup xs i
@@ -81,15 +74,6 @@ lookup-mono-≤ : ∀ {xs} → Sorted xs → ∀ {i j} → i ≤𝔽 j → looku
 lookup-mono-≤ {x ∷ xs} xs↗ {zero}  {zero}  z≤n       = refl
 lookup-mono-≤ {x ∷ xs} xs↗ {zero}  {suc j} z≤n       = lookup-Sorted xs↗ (just refl) (suc j)
 lookup-mono-≤ {x ∷ xs} xs↗ {suc i} {suc j} (s≤s i≤j) = lookup-mono-≤ (tail↗ xs↗) i≤j
-{-
-index-mono-< : ∀ {xs} → Sorted xs → ∀ {x y} (x∈xs : x ∈ xs) (y∈xs : y ∈ xs) →
-               x < y → index x∈xs <𝔽 index y∈xs
-index-mono-< _   (here x≈z)   (here y≈z)   (x≤y , x≉y) = contradiction (≈-trans x≈z (≈-sym y≈z)) x≉y
-index-mono-< _   (here x≈z)   (there y∈xs) _           = s≤s z≤n
-index-mono-< xs↗ (there x∈xs) (here y≈z)   (x≤y , x≉y) = contradiction (antisym x≤y (≤-respˡ-≈ (≈-sym y≈z) {!!})) x≉y
-  --lemma x≤xs x∈xs
-index-mono-< xs↗ (there x∈xs) (there y∈xs) x<y         = s≤s (index-mono-< (tail↗ xs↗) x∈xs y∈xs x<y)
--}
 
 
 private

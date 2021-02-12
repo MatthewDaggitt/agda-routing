@@ -84,6 +84,37 @@ module _ (∙-magma : Magma a ℓ₁) (◦-magma : Magma b ℓ₂)
     _≈ₓ_ : Rel (C₁ × C₂) _
     _≈ₓ_ = Pointwise _≈₁_ _≈₂_
 
+  Lex₂-case₁ : ∀ {a b x y} → (a • b) ≈₁ a → (a • b) ≉₁ b → L₂ a b x y ≈₂ x
+  Lex₂-case₁ {a} {b} {x} {y} ab=a ¬ab=b with (a • b) ≟₁ a | (a • b) ≟₁ b
+  ... | yes p | yes p₁ = contradiction p₁ ¬ab=b
+  ... | yes p | no ¬p  = ≈₂-refl
+  ... | no ¬p | yes p  = contradiction ab=a ¬p
+  ... | no ¬p | no ¬p₁ = contradiction ab=a ¬p
+
+  Lex₂-case₂ : ∀ {a b x y}  → (a • b) ≉₁ a → (a • b) ≈₁ b → L₂ a b x y ≈₂ y
+  Lex₂-case₂ {a} {b} {x} {y} ¬ab=a ab=b with (a • b) ≟₁ a | (a • b) ≟₁ b
+  ... | yes p | yes p₁ = contradiction p ¬ab=a
+  ... | yes p | no ¬p  = contradiction p ¬ab=a
+  ... | no ¬p | yes p  = ≈₂-refl
+  ... | no ¬p | no ¬p₁ = contradiction ab=b ¬p₁
+
+  Lex₂-case₃ : ∀ {a b x y}  → (a • b) ≈₁ a → (a • b) ≈₁ b → L₂ a b x y ≈₂ (x ◦ y)
+  Lex₂-case₃ {a} {b} {x} {y} ab=a ab=b with (a • b) ≟₁ a | (a • b) ≟₁ b
+  ... | yes p | yes p₁ = ≈₂-refl
+  ... | yes p | no ¬p  = contradiction ab=b ¬p
+  ... | no ¬p | yes p  = contradiction ab=a ¬p
+  ... | no ¬p | no ¬p₁ = contradiction ab=a ¬p
+
+  Lex-case₁ : ∀ {a b} x y  → (a • b) ≈₁ a → (a • b) ≉₁ b → (a , x) ⊕ (b , y) ≈ₓ (a , x)
+  Lex-case₁ x y ab=a ¬ab=b = ab=a , Lex₂-case₁ ab=a ¬ab=b
+
+  Lex-case₂ : ∀ {a b} x y  → (a • b) ≉₁ a → (a • b) ≈₁ b → (a , x) ⊕ (b , y) ≈ₓ (b , y)
+  Lex-case₂ x y ¬ab=a ab=b = ab=b , Lex₂-case₂ ¬ab=a ab=b
+
+  Lex-case₃ : ∀ {a b} x y  → (a • b) ≈₁ a → (a • b) ≈₁ b → (a , x) ⊕ (b , y) ≈ₓ (a , x ◦ y)
+  Lex-case₃ x y ab=a ab=b = ab=a , Lex₂-case₃ ab=a ab=b
+
+  private
     L₂-cong : ∀ {a₁ a₂ b₁ b₂ x₁ x₂ y₁ y₂} → a₁ ≈₁ a₂ → b₁ ≈₁ b₂ → x₁ ≈₂ x₂ → y₁ ≈₂ y₂ → L₂ a₁ b₁ x₁ y₁ ≈₂ L₂ a₂ b₂ x₂ y₂
     L₂-cong  {a₁} {a₂} {b₁} {b₂} a₁≈a₂ b₁≈b₂ x₁≈x₂ y₁≈y₂
       with (a₁ • b₁) ≟₁ a₁ | (a₁ • b₁) ≟₁ b₁ | (a₂ • b₂) ≟₁ a₂ | (a₂ • b₂) ≟₁ b₂
@@ -95,84 +126,45 @@ module _ (∙-magma : Magma a ℓ₁) (◦-magma : Magma b ℓ₂)
     ... | no ¬p | yes p  | no ¬p₁ | yes p₁ = y₁≈y₂
     ... | _     | yes p₁ | _      | no ¬p  = contradiction (≈₁-trans (≈₁-trans (≈₁-sym (•-cong a₁≈a₂ b₁≈b₂)) p₁) b₁≈b₂)  ¬p
     ... | yes p | _      | no ¬p  | _      = contradiction (≈₁-trans (≈₁-trans (≈₁-sym (•-cong a₁≈a₂ b₁≈b₂)) p) a₁≈a₂)   ¬p
-    ... | _     | no ¬p  | _      | yes p₂ = contradiction (≈₁-trans (≈₁-trans (•-cong a₁≈a₂ b₁≈b₂) p₂) (≈₁-sym b₁≈b₂)) ¬p
+    ... | _     | no ¬p  | _      | yes p₂ = contradiction (≈₁-trans (≈₁-trans (•-cong a₁≈a₂ b₁≈b₂) p₂) (≈₁-sym b₁≈b₂))  ¬p
     ... | no ¬p | _      | yes p  | _      = contradiction (≈₁-trans (≈₁-trans (•-cong a₁≈a₂ b₁≈b₂) p)  (≈₁-sym a₁≈a₂))  ¬p
 
-    Lex₂-case₁ : ∀ {a b x y} → (a • b) ≈₁ a → (a • b) ≉₁ b → L₂ a b x y ≈₂ x
-    Lex₂-case₁ {a} {b} {x} {y} ab=a ¬ab=b with (a • b) ≟₁ a | (a • b) ≟₁ b
-    ... | yes p | yes p₁ = contradiction p₁ ¬ab=b
-    ... | yes p | no ¬p  = ≈₂-refl
-    ... | no ¬p | yes p  = contradiction ab=a ¬p
-    ... | no ¬p | no ¬p₁ = contradiction ab=a ¬p
-
-    Lex₂-case₂ : ∀ {a b x y}  → (a • b) ≉₁ a → (a • b) ≈₁ b → L₂ a b x y ≈₂ y
-    Lex₂-case₂ {a} {b} {x} {y} ¬ab=a ab=b with (a • b) ≟₁ a | (a • b) ≟₁ b
-    ... | yes p | yes p₁ = contradiction p ¬ab=a
-    ... | yes p | no ¬p  = contradiction p ¬ab=a
-    ... | no ¬p | yes p  = ≈₂-refl
-    ... | no ¬p | no ¬p₁ = contradiction ab=b ¬p₁
-
-    Lex₂-case₃ : ∀ {a b x y}  → (a • b) ≈₁ a → (a • b) ≈₁ b → L₂ a b x y ≈₂ (x ◦ y)
-    Lex₂-case₃ {a} {b} {x} {y} ab=a ab=b with (a • b) ≟₁ a | (a • b) ≟₁ b
-    ... | yes p | yes p₁ = ≈₂-refl
-    ... | yes p | no ¬p  = contradiction ab=b ¬p
-    ... | no ¬p | yes p  = contradiction ab=a ¬p
-    ... | no ¬p | no ¬p₁ = contradiction ab=a ¬p
+    L₂-cong₁ : ∀ {a₁ a₂ b₁ b₂ x y} → a₁ ≈₁ a₂ → b₁ ≈₁ b₂ → L₂ a₁ b₁ x y ≈₂ L₂ a₂ b₂ x y
+    L₂-cong₁ a₁≈a₂ b₁≈b₂ = L₂-cong a₁≈a₂ b₁≈b₂ ≈₂-refl ≈₂-refl
+    
 
     L₂-assoc : Associative _≈₁_ _•_ → Associative _≈₂_ _◦_ → Selective _≈₁_ _•_ → Commutative _≈₁_ _•_ →
                ∀ a b c x y z  → L₂ (a • b) c (L₂ a b x y) z  ≈₂ L₂ a (b • c) x (L₂ b c y z)
     L₂-assoc •-assoc ◦-assoc •-sel •-comm a b c x y z with (a • b) ≟₁ a | (a • b) ≟₁ b | (b • c) ≟₁ b | (b • c) ≟₁ c
-    ... | yes ab=a | yes ab=b | yes bc=b | yes bc=c = prf
-      where
-      prf : L₂ (a • b) c (x ◦ y) z  ≈₂ L₂ a (b • c) x (y ◦ z)
-      prf = begin
-        L₂ (a • b) c (x ◦ y) z           ≈⟨ L₂-cong ab=b ≈₁-refl ≈₂-refl ≈₂-refl  ⟩
-        L₂ b c (x ◦ y) z                 ≈⟨ Lex₂-case₃ bc=b bc=c  ⟩
-        (x ◦ y) ◦ z                      ≈⟨ ◦-assoc x y z ⟩
-        x ◦ (y ◦ z)                      ≈⟨ ≈₂-sym (Lex₂-case₃ ab=a ab=b) ⟩
-        L₂ a b x (y ◦ z)                 ≈⟨ L₂-cong ≈₁-refl (≈₁-sym bc=b) ≈₂-refl ≈₂-refl   ⟩
-        L₂ a (b • c) x (y ◦ z)     ∎
-        where open EqReasoning S₂
-
-    ... | yes ab=a | yes ab=b | yes bc=b | no ¬bc=c = prf
-      where
-      prf : L₂ (a • b) c (x ◦ y) z  ≈₂ L₂ a (b • c) x y
-      prf = begin
-        L₂ (a • b) c (x ◦ y) z  ≈⟨ L₂-cong ab=b ≈₁-refl ≈₂-refl ≈₂-refl  ⟩
-        L₂ b c (x ◦ y) z        ≈⟨ Lex₂-case₁ bc=b ¬bc=c ⟩
-        x ◦ y                   ≈⟨ ≈₂-sym (Lex₂-case₃ ab=a ab=b) ⟩
-        L₂ a b x y              ≈⟨ L₂-cong ≈₁-refl (≈₁-sym bc=b) ≈₂-refl ≈₂-refl  ⟩
-        L₂ a (b • c) x y        ∎
-        where open EqReasoning S₂
-
-    ... | yes ab=a | yes ab=b | no ¬bc=b | yes bc=c = prf
-      where
-      b=a : b ≈₁ a
-      b=a = ≈₁-trans (≈₁-sym ab=b) ab=a
-
-      prf : L₂ (a • b) c (x ◦ y) z  ≈₂ L₂ a (b • c) x z
-      prf = begin
-        L₂ (a • b) c (x ◦ y) z      ≈⟨ L₂-cong ab=b ≈₁-refl ≈₂-refl ≈₂-refl  ⟩
-        L₂ b c (x ◦ y) z            ≈⟨ Lex₂-case₂ ¬bc=b bc=c ⟩
-        z                           ≈⟨ ≈₂-sym (Lex₂-case₂ ¬bc=b bc=c) ⟩
-        L₂ b c x z                  ≈⟨ L₂-cong b=a (≈₁-sym bc=c) ≈₂-refl ≈₂-refl ⟩
-        L₂ a (b • c) x z            ∎
-        where open EqReasoning S₂
-
-    ... | yes ab=a | no ¬ab=b | yes bc=b | yes bc=c = prf
-      where
-      c=b : c ≈₁ b
-      c=b = ≈₁-trans (≈₁-sym bc=c) bc=b
-
-      prf : L₂ (a • b) c x z  ≈₂ L₂ a (b • c) x (y ◦ z)
-      prf = begin
-        L₂ (a • b) c x z           ≈⟨ L₂-cong ab=a c=b ≈₂-refl ≈₂-refl  ⟩
-        L₂ a b x z                 ≈⟨ Lex₂-case₁ ab=a ¬ab=b ⟩
-        x                          ≈⟨ ≈₂-sym (Lex₂-case₁ ab=a ¬ab=b) ⟩
-        L₂ a b x (y ◦ z)           ≈⟨ L₂-cong ≈₁-refl (≈₁-sym bc=b) ≈₂-refl ≈₂-refl ⟩
-        L₂ a (b • c) x (y ◦ z)     ∎
-        where open EqReasoning S₂
-
+    ... | yes ab=a | yes ab=b | yes bc=b | yes bc=c = begin
+      L₂ (a • b) c (x ◦ y) z           ≈⟨ L₂-cong₁ ab=b ≈₁-refl ⟩
+      L₂ b c (x ◦ y) z                 ≈⟨ Lex₂-case₃ bc=b bc=c  ⟩
+      (x ◦ y) ◦ z                      ≈⟨ ◦-assoc x y z ⟩
+      x ◦ (y ◦ z)                      ≈⟨ ≈₂-sym (Lex₂-case₃ ab=a ab=b) ⟩
+      L₂ a b x (y ◦ z)                 ≈⟨ L₂-cong₁ ≈₁-refl (≈₁-sym bc=b) ⟩
+      L₂ a (b • c) x (y ◦ z)     ∎
+      where open EqReasoning S₂
+    ... | yes ab=a | yes ab=b | yes bc=b | no ¬bc=c = begin
+      L₂ (a • b) c (x ◦ y) z  ≈⟨ L₂-cong₁ ab=b ≈₁-refl ⟩
+      L₂ b c (x ◦ y) z        ≈⟨ Lex₂-case₁ bc=b ¬bc=c ⟩
+      x ◦ y                   ≈⟨ ≈₂-sym (Lex₂-case₃ ab=a ab=b) ⟩
+      L₂ a b x y              ≈⟨ L₂-cong₁ ≈₁-refl (≈₁-sym bc=b) ⟩
+      L₂ a (b • c) x y        ∎
+      where open EqReasoning S₂
+    ... | yes ab=a | yes ab=b | no ¬bc=b | yes bc=c = begin
+      L₂ (a • b) c (x ◦ y) z      ≈⟨ L₂-cong₁ ab=b ≈₁-refl ⟩
+      L₂ b c (x ◦ y) z            ≈⟨ Lex₂-case₂ ¬bc=b bc=c ⟩
+      z                           ≈⟨ ≈₂-sym (Lex₂-case₂ ¬bc=b bc=c) ⟩
+      L₂ b c x z                  ≈⟨ L₂-cong₁ (≈₁-trans (≈₁-sym ab=b) ab=a) (≈₁-sym bc=c) ⟩
+      L₂ a (b • c) x z            ∎
+      where open EqReasoning S₂
+    ... | yes ab=a | no ¬ab=b | yes bc=b | yes bc=c = begin
+      L₂ (a • b) c x z           ≈⟨ L₂-cong₁ ab=a (≈₁-trans (≈₁-sym bc=c) bc=b) ⟩
+      L₂ a b x z                 ≈⟨ Lex₂-case₁ ab=a ¬ab=b ⟩
+      x                          ≈⟨ ≈₂-sym (Lex₂-case₁ ab=a ¬ab=b) ⟩
+      L₂ a b x (y ◦ z)           ≈⟨ L₂-cong₁ ≈₁-refl (≈₁-sym bc=b) ⟩
+      L₂ a (b • c) x (y ◦ z)     ∎
+      where open EqReasoning S₂
     ... | yes ab=a | no ¬ab=b | yes bc=b | no ¬bc=c = prf
       where
       ac=a : (a • c) ≈₁ a
@@ -209,44 +201,31 @@ module _ (∙-magma : Magma a ℓ₁) (◦-magma : Magma b ℓ₂)
 
       prf : L₂ (a • b) c x z  ≈₂ L₂ a (b • c) x y
       prf = begin
-        L₂ (a • b) c x z           ≈⟨ L₂-cong ab=a ≈₁-refl ≈₂-refl ≈₂-refl  ⟩
+        L₂ (a • b) c x z           ≈⟨ L₂-cong₁ ab=a ≈₁-refl ⟩
         L₂ a c x z                 ≈⟨ Lex₂-case₁ ac=a ¬ac=c ⟩
         x                          ≈⟨ ≈₂-sym (Lex₂-case₁ ab=a ¬ab=b) ⟩
-        L₂ a b x y                 ≈⟨ L₂-cong ≈₁-refl (≈₁-sym bc=b) ≈₂-refl ≈₂-refl ⟩
+        L₂ a b x y                 ≈⟨ L₂-cong₁ ≈₁-refl (≈₁-sym bc=b) ⟩
         L₂ a (b • c) x y           ∎
         where open EqReasoning S₂
 
-    ... | yes ab=a | no ¬ab=b | no ¬bc=b | yes bc=c = prf
-      where
-      prf : L₂ (a • b) c x z  ≈₂ L₂ a (b • c) x z
-      prf = begin
-            L₂ (a • b) c x z           ≈⟨ L₂-cong ab=a ≈₁-refl ≈₂-refl ≈₂-refl  ⟩
-            L₂ a c x z                 ≈⟨ L₂-cong ≈₁-refl (≈₁-sym bc=c) ≈₂-refl ≈₂-refl  ⟩
-            L₂ a (b • c) x z           ∎
-            where open EqReasoning S₂
-
-    ... | no ¬ab=a | yes ab=b | yes bc=b | yes bc=c = prf
-      where
-      prf : L₂ (a • b) c y z  ≈₂ L₂ a (b • c) x (y ◦ z)
-      prf = begin
-            L₂ (a • b) c y z           ≈⟨ L₂-cong ab=b ≈₁-refl ≈₂-refl ≈₂-refl ⟩
-            L₂ b c y z                 ≈⟨ Lex₂-case₃ bc=b bc=c ⟩
-            y ◦ z                      ≈⟨ ≈₂-sym (Lex₂-case₂ ¬ab=a ab=b) ⟩
-            L₂ a b x (y ◦ z)           ≈⟨ L₂-cong ≈₁-refl (≈₁-sym bc=b) ≈₂-refl ≈₂-refl ⟩
-            L₂ a (b • c) x (y ◦ z)     ∎
-            where open EqReasoning S₂
-
-    ... | no ¬ab=a | yes ab=b | yes bc=b | no ¬bc=c = prf
-      where
-      prf : L₂ (a • b) c y z  ≈₂ L₂ a (b • c) x y
-      prf = begin
-            L₂ (a • b) c y z     ≈⟨ L₂-cong ab=b ≈₁-refl ≈₂-refl ≈₂-refl ⟩
-            L₂ b c y z           ≈⟨ Lex₂-case₁ bc=b ¬bc=c ⟩
-            y                    ≈⟨ ≈₂-sym (Lex₂-case₂ ¬ab=a ab=b) ⟩
-            L₂ a b x y           ≈⟨ L₂-cong ≈₁-refl (≈₁-sym bc=b) ≈₂-refl ≈₂-refl ⟩
-            L₂ a (b • c) x y     ∎
-            where open EqReasoning S₂
-
+    ... | yes ab=a | no ¬ab=b | no ¬bc=b | yes bc=c = begin
+      L₂ (a • b) c x z  ≈⟨ L₂-cong₁ ab=a (≈₁-sym bc=c) ⟩
+      L₂ a (b • c) x z  ∎
+      where open EqReasoning S₂
+    ... | no ¬ab=a | yes ab=b | yes bc=b | yes bc=c = begin
+      L₂ (a • b) c y z           ≈⟨ L₂-cong₁ ab=b ≈₁-refl ⟩
+      L₂ b c y z                 ≈⟨ Lex₂-case₃ bc=b bc=c ⟩
+      y ◦ z                      ≈⟨ ≈₂-sym (Lex₂-case₂ ¬ab=a ab=b) ⟩
+      L₂ a b x (y ◦ z)           ≈⟨ L₂-cong₁ ≈₁-refl (≈₁-sym bc=b) ⟩
+      L₂ a (b • c) x (y ◦ z)     ∎
+      where open EqReasoning S₂
+    ... | no ¬ab=a | yes ab=b | yes bc=b | no ¬bc=c = begin
+      L₂ (a • b) c y z     ≈⟨ L₂-cong₁ ab=b ≈₁-refl ⟩
+      L₂ b c y z           ≈⟨ Lex₂-case₁ bc=b ¬bc=c ⟩
+      y                    ≈⟨ ≈₂-sym (Lex₂-case₂ ¬ab=a ab=b) ⟩
+      L₂ a b x y           ≈⟨ L₂-cong₁ ≈₁-refl (≈₁-sym bc=b) ⟩
+      L₂ a (b • c) x y     ∎
+      where open EqReasoning S₂
     ... | no ¬ab=a | yes ab=b | no ¬bc=b | yes bc=c = prf
       where
       ac=c : (a • c) ≈₁ c
@@ -283,10 +262,10 @@ module _ (∙-magma : Magma a ℓ₁) (◦-magma : Magma b ℓ₂)
 
       prf : L₂ (a • b) c y z  ≈₂ L₂ a (b • c) x z
       prf = begin
-            L₂ (a • b) c y z           ≈⟨ L₂-cong ab=b ≈₁-refl ≈₂-refl ≈₂-refl ⟩
+            L₂ (a • b) c y z           ≈⟨ L₂-cong₁ ab=b ≈₁-refl ⟩
             L₂ b c y z                 ≈⟨ Lex₂-case₂ ¬bc=b bc=c ⟩
             z                          ≈⟨ ≈₂-sym (Lex₂-case₂ ¬ac=a ac=c ) ⟩
-            L₂ a c x z                 ≈⟨ L₂-cong ≈₁-refl (≈₁-sym bc=c) ≈₂-refl ≈₂-refl ⟩
+            L₂ a c x z                 ≈⟨ L₂-cong₁ ≈₁-refl (≈₁-sym bc=c) ⟩
             L₂ a (b • c) x z     ∎
             where open EqReasoning S₂
 
@@ -295,21 +274,13 @@ module _ (∙-magma : Magma a ℓ₁) (◦-magma : Magma b ℓ₂)
 
     L₂-comm : Commutative _≈₁_ _•_ → Commutative _≈₂_ _◦_ → ∀ a b x y → L₂ a b x y ≈₂ L₂ b a y x
     L₂-comm •-comm ◦-comm a b x y with (a • b) ≟₁ a | (a • b) ≟₁ b | (b • a) ≟₁ b | (b • a) ≟₁ a
+    ... | yes p | _      | _      | no ¬p  = contradiction (≈₁-trans (•-comm b a) p) ¬p
+    ... | no ¬p | _      | _      | yes p₂ = contradiction (≈₁-trans (•-comm a b) p₂) ¬p
+    ... | _     | yes p₁ | no ¬p  | _      = contradiction (≈₁-trans (•-comm b a) p₁) ¬p
+    ... | _     | no ¬p  | yes p₁ | _      = contradiction (≈₁-trans (•-comm a b) p₁) ¬p
     ... | yes p | yes p₁ | yes p₂ | yes p₃ = ◦-comm x y
-    ... | yes p | yes p₁ | yes p₂ | no ¬p  = contradiction (≈₁-trans (•-comm b a) p) ¬p
-    ... | yes p | yes p₁ | no ¬p  | yes p₂ = contradiction (≈₁-trans (•-comm b a) p₁) ¬p
-    ... | yes p | yes p₁ | no ¬p  | no ¬p₁ = contradiction (≈₁-trans (•-comm b a) p) ¬p₁
-    ... | yes p | no ¬p  | yes p₁ | yes p₂ = contradiction (≈₁-trans (•-comm a b) p₁) ¬p
-    ... | yes p | no ¬p  | yes p₁ | no ¬p₁ = contradiction (≈₁-trans (•-comm a b) p₁) ¬p
     ... | yes p | no ¬p  | no ¬p₁ | yes p₁ = ≈₂-refl
-    ... | yes p | no ¬p  | no ¬p₁ | no ¬p₂ = contradiction (≈₁-trans (•-comm b a) p) ¬p₂
-    ... | no ¬p | yes p  | yes p₁ | yes p₂ = contradiction (≈₁-trans (•-comm a b) p₂) ¬p
     ... | no ¬p | yes p  | yes p₁ | no ¬p₁ = ≈₂-refl
-    ... | no ¬p | yes p  | no ¬p₁ | yes p₁ = contradiction (≈₁-trans (•-comm b a) p) ¬p₁
-    ... | no ¬p | yes p  | no ¬p₁ | no ¬p₂ = contradiction (≈₁-trans (•-comm b a) p) ¬p₁
-    ... | no ¬p | no ¬p₁ | yes p  | yes p₁ = ◦-comm x y
-    ... | no ¬p | no ¬p₁ | yes p  | no ¬p₂ = contradiction (≈₁-trans (•-comm a b) p) ¬p₁
-    ... | no ¬p | no ¬p₁ | no ¬p₂ | yes p  = contradiction (≈₁-trans (•-comm a b) p) ¬p
     ... | no ¬p | no ¬p₁ | no ¬p₂ | no ¬p₃ = ◦-comm x y
 
     --------------
@@ -349,25 +320,3 @@ module _ (∙-magma : Magma a ℓ₁) (◦-magma : Magma b ℓ₂)
   ... | no  x∙0≉x | _     = contradiction (identityʳ₁ x) x∙0≉x
   ... | yes x•0≈x | no  _ = x•0≈x , ≈₂-refl
   ... | yes _     | yes _ = identityʳ₁ x , identityʳ₂ a
-
-  Lex-case-1 : ∀ {a b} x y  → (a • b) ≈₁ a → (a • b) ≉₁ b → (a , x) ⊕ (b , y) ≈ₓ (a , x)
-  Lex-case-1 {a} {b} x y ab=a ¬ab=b with (a • b) ≟₁ a | (a • b) ≟₁ b
-  ... | yes p | yes p₁ = contradiction p₁ ¬ab=b
-  ... | yes p | no ¬p  = ab=a , ≈₂-refl
-  ... | no ¬p | yes p  = contradiction ab=a ¬p
-  ... | no ¬p | no ¬p₁ = contradiction ab=a ¬p
-
-  Lex-case-2 : ∀ {a b} x y  → (a • b) ≉₁ a → (a • b) ≈₁ b → (a , x) ⊕ (b , y) ≈ₓ (b , y)
-  Lex-case-2 {a} {b} x y ¬ab=a ab=b with (a • b) ≟₁ a | (a • b) ≟₁ b
-  ... | yes p | yes p₁ = contradiction p ¬ab=a
-  ... | yes p | no ¬p  = contradiction p ¬ab=a
-  ... | no ¬p | yes p  = ab=b , ≈₂-refl
-  ... | no ¬p | no ¬p₁ = contradiction ab=b ¬p₁
-
-  Lex-case-3 : ∀ {a b} x y  → (a • b) ≈₁ a → (a • b) ≈₁ b → (a , x) ⊕ (b , y) ≈ₓ (a , x ◦ y)
-  Lex-case-3 {a} {b} x y ab=a ab=b with (a • b) ≟₁ a | (a • b) ≟₁ b
-  ... | yes p | yes p₁ = ab=a , ≈₂-refl
-  ... | yes p | no ¬p  = contradiction ab=b ¬p
-  ... | no ¬p | yes p  = contradiction ab=a ¬p
-  ... | no ¬p | no ¬p₁ = contradiction ab=a ¬p
-

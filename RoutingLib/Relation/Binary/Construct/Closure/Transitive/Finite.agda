@@ -28,7 +28,7 @@ open import RoutingLib.Relation.Nullary.Finite.Bijection.Setoid.Properties finit
 
 open Finite finite
    
-R⁺ = (Plus′ R)
+R⁺ = TransClosure R
 respʳ = proj₁ resp
 respˡ = proj₂ resp
 
@@ -140,5 +140,5 @@ mutual
   ...   | here₂ v≈x    = here₂ v≈x
   ...   | there v∈R⁺yz = there (R⁺⇒R⁺ᶠ-pres-∈⁺ᶠ _ (∈-contract⁻ _ (R⁺ᶠ⇒R⁺-cancel-∈ v∈R⁺yz)))
 
-R⁺? : Decidable R → Decidable (Plus′ R)
+R⁺? : Decidable R → Decidable (TransClosure R)
 R⁺? R? x y = Dec.map′ R⁺ᶠ⇒R⁺ (λ v → R⁺⇒R⁺ᶠ v (<-wellFounded _)) (R⁺ᶠ? R? (<-wellFounded ∣ ⊤ {n = n} ∣)  x y)

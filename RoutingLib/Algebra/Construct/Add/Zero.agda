@@ -1,6 +1,6 @@
 open import Level using (_⊔_)
-open import Algebra.FunctionProperties.Core using (Op₂)
-open import Algebra.FunctionProperties hiding (Op₂)
+open import Algebra.Core
+open import Algebra.Definitions
 open import Relation.Binary
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)

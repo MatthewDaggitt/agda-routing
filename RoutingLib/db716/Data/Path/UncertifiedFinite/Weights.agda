@@ -8,15 +8,15 @@ open import Data.Nat.Properties using (≰⇒>; n≤1+n; ≤-reflexive; <-trans)
 open import Data.Fin using (Fin; inject₁; _≟_; punchOut; punchIn; _<_; _<?_; reduce≥) renaming (suc to fsuc)
 open import Data.Fin.Properties using (pigeonhole; ≤∧≢⇒<; inject₁-injective)
 open import Data.List using (List; []; _∷_; _++_; foldl; foldr; map; concat; length; lookup; zip)
-open import Data.List.Any using (Any; here; there; any; index) renaming (map to anymap)
-open import Data.List.All using (All; []; _∷_; tabulate)
+open import Data.List.Relation.Unary.Any using (Any; here; there; any; index) renaming (map to anymap)
+open import Data.List.Relation.Unary.All using (All; []; _∷_; tabulate)
 open import Data.List.Properties
-open import Data.List.Relation.Pointwise using (Pointwise; []; _∷_; Pointwise-≡⇒≡) renaming (refl to ≈ₚ-refl)
+open import Data.List.Relation.Binary.Pointwise using (Pointwise; []; _∷_; Pointwise-≡⇒≡) renaming (refl to ≈ₚ-refl)
 open import Data.List.Membership.Propositional using (_∈_; find; mapWith∈; lose)
 open import Data.List.Membership.Propositional.Properties using (∈-lookup; ∈-∃++)
 open import Data.List.Membership.DecPropositional
 open import Data.Product using (_×_; _,_; <_,_>; proj₁; proj₂; ∃; ∃₂)
-open import Data.Product.Relation.Pointwise.NonDependent using (≡⇒≡×≡; ≡×≡⇒≡)
+open import Data.Product.Relation.Binary.Pointwise.NonDependent using (≡⇒≡×≡; ≡×≡⇒≡)
 open import Function using (_∘_)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
@@ -30,8 +30,7 @@ open import RoutingLib.Data.Matrix.Relation.Binary.Equality using (_≈ₘ_)
 open import RoutingLib.Data.Matrix using (SquareMatrix) renaming (map to matmap)
 open import RoutingLib.db716.Algebra.SemiringMatrix S
 open import RoutingLib.db716.Algebra.Properties.Summation S
-open import RoutingLib.db716.Data.Matrix
-open import RoutingLib.Data.Table using () renaming (foldr to tfoldr)
+open import Data.Vec.Functional using () renaming (foldr to tfoldr)
 
 open import RoutingLib.db716.Data.Path.UncertifiedFinite
 

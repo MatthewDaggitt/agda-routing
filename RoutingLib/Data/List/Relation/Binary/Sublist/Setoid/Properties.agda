@@ -9,7 +9,7 @@ open Setoid S renaming (Carrier to A)
 open import Data.List hiding (_∷ʳ_)
 open import Data.List.Relation.Binary.Sublist.Setoid S
 open import Data.List.Relation.Binary.Sublist.Setoid.Properties S
-open import Data.List.Relation.Binary.Equality.Setoid S
+open import Data.List.Relation.Binary.Equality.Setoid S hiding (filter⁺)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.List.Membership.Setoid S
 open import Data.Nat using (_<_; z≤n; s≤s)
@@ -28,19 +28,6 @@ private
   variable
     p q : Level
 
-module _ {P : Pred A p} (P? : Decidable P)
-         {Q : Pred A q} (Q? : Decidable Q)
-         (P⊆Q : P ⊆ᵤ Q)
-         where
-
-  filter⁺₂ : ∀ xs → filter P? xs ⊆ filter Q? xs
-  filter⁺₂ []       = []
-  filter⁺₂ (x ∷ xs) with P? x | Q? x
-  ... | yes x∈P | yes x∈Q = refl ∷ filter⁺₂ xs
-  ... | yes x∈P | no  x∉Q = contradiction (P⊆Q x∈P) x∉Q
-  ... | no  x∉P | yes x∈Q = x ∷ʳ filter⁺₂ xs
-  ... | no  x∉P | no  x∉Q = filter⁺₂ xs
-
 module _ {P : Pred A p} (P? : Decidable P) (P-resp-≈ : P Respects _≈_)
          {Q : Pred A q} (Q? : Decidable Q) (Q-resp-≈ : Q Respects _≈_)
          (P⊆Q : P ⊆ᵤ Q)
@@ -50,11 +37,11 @@ module _ {P : Pred A p} (P? : Decidable P) (P-resp-≈ : P Respects _≈_)
   filter-⊂ {v} {x ∷ xs} (here v≈x) (v∈Q , v∉P) with P? x | Q? x
   ... | yes x∈P | _       = contradiction (P-resp-≈ (sym v≈x) x∈P) v∉P
   ... | no  _   | no  x∉Q = contradiction (Q-resp-≈ v≈x v∈Q) x∉Q
-  ... | no  _   | yes _   = x ∷ʳₛ′ filter⁺₂ P? Q? P⊆Q xs
+  ... | no  _   | yes _   = x ∷ʳₛ′ filter⁺ P? Q? (λ a≈b → Q-resp-≈ a≈b ∘ P⊆Q) (⊆-refl {xs})
   filter-⊂ {v} {x ∷ xs} (there v∈xs) v∈Q/P with P? x | Q? x
   ... | yes x∈P | no  x∉Q = contradiction (P⊆Q x∈P) x∉Q
   ... | yes x∈P | yes x∈Q = refl ∷ₛ filter-⊂ v∈xs v∈Q/P
-  ... | no  x∉P | yes x∈Q = x ∷ʳₛ′ filter⁺₂ P? Q? P⊆Q xs
+  ... | no  x∉P | yes x∈Q = x ∷ʳₛ′ filter⁺ P? Q? (λ a≈b → Q-resp-≈ a≈b ∘ P⊆Q) (⊆-refl {xs})
   ... | no  x∉P | no  x∉Q = filter-⊂ v∈xs v∈Q/P
 
 length-mono-< : ∀ {xs ys} → xs ⊂ ys → length xs < length ys

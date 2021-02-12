@@ -50,7 +50,7 @@ private
 module _ {P : A → Set p} (P? : Decidable P) where
 
   filter-length₂ : ∀ xs → length (filter (∁? P?) xs) + length (filter P? xs) ≡ length xs
-  filter-length₂ [] = refl
+  filter-length₂ []       = refl
   filter-length₂ (x ∷ xs) with P? x
   ... | no  _ = cong suc (filter-length₂ xs)
   ... | yes _ = trans (+-suc (length (filter (∁? P?) xs)) (length (filter P? xs))) (cong suc (filter-length₂ xs))

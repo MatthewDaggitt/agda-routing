@@ -5,7 +5,7 @@ module RoutingLib.db716.Results.MatrixPowers {c ℓ} (S : Semiring c ℓ) where
   open import Data.Nat using (ℕ; suc)
   open import Data.Fin using (Fin; _≟_)
   open import Data.List using (List; []; _∷_; _++_; foldr; map; concat)
-  open import Data.List.All using (All; []; _∷_; tabulate)
+  open import Data.List.Relation.Unary.All using (All; []; _∷_; tabulate)
   open import Data.List.Properties using (map-compose; concat-map)
   open import Data.Product using (_×_; _,_; proj₁; proj₂; ∃; ∃₂)
   open import Function using (_∘_)
@@ -15,11 +15,9 @@ module RoutingLib.db716.Results.MatrixPowers {c ℓ} (S : Semiring c ℓ) where
   open import RoutingLib.Data.Matrix.Relation.Binary.Equality using (_≈ₘ_)
 
 
-  open import RoutingLib.Data.Matrix using (SquareMatrix)
+  open import RoutingLib.Data.Matrix hiding (All; map)
   open import RoutingLib.db716.Algebra.SemiringMatrix S
   open import RoutingLib.db716.Algebra.Properties.Summation S
-  open import RoutingLib.db716.Data.Matrix
-  
   open import RoutingLib.db716.Data.Path.UncertifiedFinite
   open import RoutingLib.db716.Data.Path.UncertifiedFinite.Weights S
 
@@ -54,7 +52,7 @@ module RoutingLib.db716.Results.MatrixPowers {c ℓ} (S : Semiring c ℓ) where
     x + (accum l1 + accum l2)
       ≈⟨ +-cong refl (folds-lemma2' l1 l2) ⟩
     x + (accum (l1 ++ l2)) ∎
-    where open import Relation.Binary.EqReasoning setoid
+    where open import Relation.Binary.Reasoning.Setoid setoid
 
   
   folds-lemma2 : ∀ (n : ℕ) (μ : Path n → Carrier) (l1 l2 : List (Path n)) →
@@ -66,7 +64,7 @@ module RoutingLib.db716.Results.MatrixPowers {c ℓ} (S : Semiring c ℓ) where
     μ x + ((accumFunc l1 μ) + (accumFunc l2 μ))
       ≈⟨ +-cong refl (folds-lemma2 n μ l1 l2) ⟩
     μ x + accumFunc (l1 ++ l2) μ ∎
-    where open import Relation.Binary.EqReasoning setoid
+    where open import Relation.Binary.Reasoning.Setoid setoid
  
   map-distr-++ˡ : ∀ {a b} {A : Set a} {B : Set b} (f : A → B) (xs ys : List A) → map f (xs ++ ys) ≡ (map f xs) ++ (map f ys)
   map-distr-++ˡ f [] ys = ≡-refl
@@ -80,7 +78,7 @@ module RoutingLib.db716.Results.MatrixPowers {c ℓ} (S : Semiring c ℓ) where
     accumFunc ((i ▻* l1) ++ (i ▻* l2)) μ
       ≡⟨ ≡-cong (foldr (λ p → μ p +_) 0#) (≡-sym (map-distr-++ˡ (i ▻_) l1 l2)) ⟩
     accumFunc (i ▻* (l1 ++ l2)) μ ∎
-    where open import Relation.Binary.EqReasoning setoid
+    where open import Relation.Binary.Reasoning.Setoid setoid
 
   folds-lemma4 : ∀ (n : ℕ) (pathWeights : Fin n → List Carrier) →
     ∑ (λ k → accum (pathWeights k)) ≈ accum (concat (map pathWeights (allFins n)))
@@ -95,7 +93,7 @@ module RoutingLib.db716.Results.MatrixPowers {c ℓ} (S : Semiring c ℓ) where
     accum (pathWeights Fin.zero) + accum (concat (map pathWeights (map Fin.suc (allFins n))))
       ≈⟨ folds-lemma2' ((pathWeights Fin.zero)) (concat (map pathWeights (map Fin.suc (allFins n)))) ⟩
     accum (pathWeights Fin.zero ++ concat (map pathWeights (map Fin.suc (allFins n)))) ∎
-    where open import Relation.Binary.EqReasoning setoid
+    where open import Relation.Binary.Reasoning.Setoid setoid
 
   folds-lemma : ∀ (n : ℕ) (i : Fin n) (μ : Path n → Carrier) (pathsFrom : Fin n → (List (Path n))) →
     ∑ (λ k → accumFunc (pathsFrom k) (μ ∘ (i ▻_))) ≈ accumFunc (i ▻* (concat (map pathsFrom (allFins n)))) μ
@@ -118,7 +116,7 @@ module RoutingLib.db716.Results.MatrixPowers {c ℓ} (S : Semiring c ℓ) where
     accum (map μ (i ▻* (concat (map pathsFrom (allFins (suc n))))))
       ≈˘⟨ folds-lemma1 μ _+_ 0# (i ▻* (concat (map pathsFrom (allFins (suc n))))) ⟩
     foldr (λ p x → (μ p) + x) 0# (i ▻* (concat (map pathsFrom (allFins (suc n))))) ∎
-    where open import Relation.Binary.EqReasoning setoid
+    where open import Relation.Binary.Reasoning.Setoid setoid
 
   path-accum-distr : ∀ (n : ℕ) (y : Carrier) (M : SquareMatrix Carrier n) (ps : List (Path n)) → y * (accumFunc ps (weight M)) ≈ accumFunc ps (λ p → y * weight M p)
   path-accum-distr n y M [] = zeroʳ y
@@ -128,7 +126,7 @@ module RoutingLib.db716.Results.MatrixPowers {c ℓ} (S : Semiring c ℓ) where
     y * (weight M x) + y * (accumFunc ps (weight M))
       ≈⟨ +-cong refl (path-accum-distr n y M ps) ⟩
     y * (weight M x) + (accumFunc ps (λ p → y * weight M p)) ∎ 
-    where open import Relation.Binary.EqReasoning setoid
+    where open import Relation.Binary.Reasoning.Setoid setoid
                                                   
   accumFunc-cong : ∀ {a} {A : Set a} {f g : A → Carrier} → (l : List A) → (All (λ x → f x ≈ g x) l) → accumFunc l f ≈ accumFunc l g
   accumFunc-cong {a} {A} {f} {g} [] f≈g = refl
@@ -176,4 +174,4 @@ module RoutingLib.db716.Results.MatrixPowers {c ℓ} (S : Semiring c ℓ) where
     accumFunc (map (i ▻_) (concat (map (λ u → all-k-length-paths-from-to (suc n) (suc k) u j) (allFins (suc n))))) (weight M)
       ≡⟨⟩
     best-path-weight M (all-k-length-paths-from-to (suc n) (suc (suc k)) i j) ∎
-    where open import Relation.Binary.EqReasoning setoid
+    where open import Relation.Binary.Reasoning.Setoid setoid

@@ -4,10 +4,10 @@ module RoutingLib.db716.Data.Path.FindLoop where
 open import Data.Fin using (Fin; _<_; _<?_) renaming (suc to fsuc)
 open import Data.Fin.Properties using (pigeonhole; ≤∧≢⇒<)
 open import Data.List using (List ; _∷_; []; length; zip; lookup)
-open import Data.List.Any using (Any; here; there)
+open import Data.List.Relation.Unary.Any using (Any; here; there)
 open import Data.List.Membership.Propositional using (_∈_)
 open import Data.List.Membership.Propositional.Properties using (∈-lookup)
-open import Data.List.Relation.Pointwise using (Pointwise-≡⇒≡) renaming (refl to ≈ₚ-refl)
+open import Data.List.Relation.Binary.Pointwise using (Pointwise-≡⇒≡) renaming (refl to ≈ₚ-refl)
 open import Data.Nat using (ℕ; suc; _≤_; s≤s)
 open import Data.Nat.Properties using (≤-reflexive; ≤-trans; <-trans; n≤1+n; ≰⇒>)
 open import Data.Product using (proj₁; proj₂; _,_; _×_; ∃; ∃₂)
@@ -38,7 +38,7 @@ indexCertified (there pxs) =
 vertexLoop→edgeLoop : ∀ {n : ℕ} {l : List (Vertex n)} (i j : Fin (length l)) → i < j → lookup l i ≡ lookup l j → HasLoop ( fromVertexList l)
 vertexLoop→edgeLoop {suc n} {x ∷ y ∷ l} Fin.zero (fsuc Fin.zero) 0<1 l[0]≡l[1] rewrite l[0]≡l[1] = trivial
 vertexLoop→edgeLoop {suc n} {x ∷ y ∷ l} Fin.zero (fsuc (fsuc j)) 0<2+j x≡l[j] =
-  let (z , [z,x]∈zip) = zip-∈ʳ (y ∷ l) (l) x (n≤1+n _) (Data.List.Any.map (λ l[j]≡? → trans x≡l[j] l[j]≡?) (∈-lookup l j))
+  let (z , [z,x]∈zip) = zip-∈ʳ (y ∷ l) (l) x (n≤1+n _) (Data.List.Relation.Unary.Any.map (λ l[j]≡? → trans x≡l[j] l[j]≡?) (∈-lookup j))
   in here {suc n} {fromVertexList (y ∷ l)} {z} {x} {y} [z,x]∈zip
   where
     zip-∈ʳ : ∀ {a} {A : Set a} (xs ys : List A) (y : A) → length ys ≤ length xs → y ∈ ys → ∃ λ x → (x , y) ∈ (zip xs ys)

@@ -34,7 +34,7 @@ module RoutingLib.lmv34.Synchronous.Gamma_one.Algebra
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (n : ℕ) where
 
-open Routing algebra n using (𝕋ₛ; RoutingMatrix; AdjacencyMatrix)
+open Routing algebra n using (RoutingMatrix; AdjacencyMatrix)
 open RawRoutingAlgebra algebra
 open RoutingAlgebra isRoutingAlgebra using (≤₊-decTotalOrder)
 

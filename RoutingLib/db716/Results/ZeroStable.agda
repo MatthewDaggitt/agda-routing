@@ -6,8 +6,8 @@ open Semiring S
 open import Data.Fin using (Fin; _≟_)
 open import Data.List using (List; []; _∷_; length; _++_; foldr; map)
 open import Data.List.Properties using (map-++-commute)
-open import Data.List.All using (All; []; _∷_; tabulate; lookup)
-open import Data.List.Any using (Any; here; there)
+open import Data.List.Relation.Unary.All using (All; []; _∷_; tabulate; lookup)
+open import Data.List.Relation.Unary.Any using (Any; here; there)
 open import Data.List.Membership.Propositional using (_∈_)
 open import Data.Nat using (ℕ; suc; _≤_)
 open import Data.Nat.Properties using (≤-reflexive; <⇒≤pred; ≤-trans)
@@ -42,7 +42,7 @@ lemma1 m (xs ∷ xss) ys (here ys≡xs) 0stab = begin
   weight m xs + best-path-weight m xss + weight m xs
     ≈⟨ +-cong refl (reflexive (≡-cong (weight m) (≡-sym ys≡xs))) ⟩
   best-path-weight m (xs ∷ xss) + weight m ys ∎
-  where open import Relation.Binary.EqReasoning setoid
+  where open import Relation.Binary.Reasoning.Setoid setoid
   
 lemma1 m (xs ∷ xss) ys (there ys∈xss) 0stab = begin
   best-path-weight m (xs ∷ xss)
@@ -54,7 +54,7 @@ lemma1 m (xs ∷ xss) ys (there ys∈xss) 0stab = begin
   weight m xs + best-path-weight m xss + weight m ys
     ≡⟨⟩
   best-path-weight m (xs ∷ xss) + weight m ys ∎
-  where open import Relation.Binary.EqReasoning setoid
+  where open import Relation.Binary.Reasoning.Setoid setoid
 
 
 
@@ -83,7 +83,7 @@ lemma3 {n} {k} {m} i j (ys ∷ yss) (pys ∷ pyss) 0stab =
   best-path-weight m (all-≤k-length-paths-from-to n k i j) + best-path-weight m yss
     ≈⟨ lemma3 i j yss pyss 0stab ⟩
   best-path-weight m (all-≤k-length-paths-from-to n k i j) ∎
-  where open import Relation.Binary.EqReasoning setoid
+  where open import Relation.Binary.Reasoning.Setoid setoid
 
 
 
@@ -143,7 +143,7 @@ trimPathLifted {n} (ys ∷ yss) m 0stab (ys:i→* ∷ allFrom) (ys:*→j ∷ all
           ≡⟨⟩
         best-path-weight m (xs ∷ xss) ∎
   in xs ∷ xss ,  xs:i→* ∷ allFrom' , xs:*→j ∷ allTo' , |xs|≤n ∷ allLen≤n , (valid ∷ valid') , proof
-  where open import Relation.Binary.EqReasoning setoid
+  where open import Relation.Binary.Reasoning.Setoid setoid
 
 
 
@@ -182,7 +182,7 @@ best-path-weight-lemma n i j 0stab m with i ≟ j
     best-path-weight m (all-≤k-length-paths-from-to (suc n) n i j) + weight m []
       ≈˘⟨ lemma1 m (all-≤k-length-paths-from-to (suc n) n i j) [] (i≡j⇒[]∈paths≤k (suc n) n i j i≡j) 0stab ⟩
     best-path-weight m (all-≤k-length-paths-from-to (suc n) n i j) ∎
-    where open import Relation.Binary.EqReasoning setoid
+    where open import Relation.Binary.Reasoning.Setoid setoid
 ... | no i≢j =
   let xss , allFrom , allTo , allLen≤n , valid , eqn = trim-all-n-length-paths n i j m 0stab i≢j
       lem3 = lemma3 {suc n} {n} {m} i j xss (tabulate λ {xs} xs∈paths →
@@ -203,7 +203,7 @@ best-path-weight-lemma n i j 0stab m with i ≟ j
     best-path-weight m (all-≤k-length-paths-from-to (suc n) n i j) + best-path-weight m xss
       ≈⟨ lem3 ⟩
     best-path-weight m (all-≤k-length-paths-from-to (suc n) n i j) ∎
-  where open import Relation.Binary.EqReasoning setoid
+  where open import Relation.Binary.Reasoning.Setoid setoid
         open import RoutingLib.db716.Data.List.Properties.MonoidFolds +-monoid
 
 
@@ -233,6 +233,6 @@ matricesInheritStability (suc n') 0stab m i j =
     best-path-weight m (all-≤k-length-paths-from-to (suc n) n i j)
       ≈˘⟨ mat-pow-sums-find-best-paths (suc n) n i j m ⟩
     powSum 𝕄 m n i j ∎
-  where open import Relation.Binary.EqReasoning setoid
+  where open import Relation.Binary.Reasoning.Setoid setoid
         open import RoutingLib.db716.Data.List.Properties.MonoidFolds +-monoid
         𝕄 = SemiringMat (suc (suc n'))

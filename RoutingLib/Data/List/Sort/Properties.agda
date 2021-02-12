@@ -23,7 +23,7 @@ open import Data.List.Relation.Binary.Permutation.Setoid.Properties Eq.setoid as
   using (Unique-resp-↭; ∈-resp-↭)
 open import Data.List.Relation.Binary.Equality.Setoid Eq.setoid using (_≋_)
 
-open import RoutingLib.Data.List.Relation.Unary.All.Properties as All hiding (insert⁺)
+open import RoutingLib.Data.List.Relation.Unary.All.Properties as All
 
 import RoutingLib.Data.List.Relation.Unary.Sorted.Properties totalOrder as Sortedₚ
 

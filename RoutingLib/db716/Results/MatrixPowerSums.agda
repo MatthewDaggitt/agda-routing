@@ -13,7 +13,7 @@ open import RoutingLib.Data.Matrix using (SquareMatrix)
 
 open import RoutingLib.db716.Algebra.SemiringMatrix S
 open import RoutingLib.db716.Algebra.Properties.Summation S
-open import RoutingLib.db716.Data.Matrix
+open import RoutingLib.Data.Matrix
 
 open import RoutingLib.db716.Data.Path.UncertifiedFinite
 open import RoutingLib.db716.Data.Path.UncertifiedFinite.Weights S
@@ -43,5 +43,5 @@ mat-pow-sums-find-best-paths n (suc k) i j M = begin
   best-path-weight M (all-≤k-length-paths-from-to n k i j ++ all-k-length-paths-from-to n (suc k) i j)
     ≡⟨⟩
   best-path-weight M (all-≤k-length-paths-from-to n (suc k) i j) ∎
-  where open import Relation.Binary.EqReasoning setoid
+  where open import Relation.Binary.Reasoning.Setoid setoid
 

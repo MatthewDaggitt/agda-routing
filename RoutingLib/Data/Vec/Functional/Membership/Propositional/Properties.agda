@@ -11,7 +11,7 @@ open import RoutingLib.Data.Nat.Properties using (ℕₛ)
 open import RoutingLib.Data.NatInf using (ℕ∞)
 open import RoutingLib.Data.NatInf.Properties using () renaming (⊓-sel to ⊓∞-sel)
 open import RoutingLib.Data.Vec.Functional
-import RoutingLib.Data.Vec.Functional.Membership.Properties as SetoidProp
+import RoutingLib.Data.Vec.Functional.Membership.Setoid.Properties as SetoidProp
 open import RoutingLib.Data.Vec.Functional.Membership.Propositional
 
 module RoutingLib.Data.Vec.Functional.Membership.Propositional.Properties where

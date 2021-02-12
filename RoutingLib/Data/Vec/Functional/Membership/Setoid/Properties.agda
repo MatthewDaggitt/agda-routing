@@ -10,7 +10,7 @@ open import Relation.Binary using (Setoid)
 open import RoutingLib.Data.Vec.Functional
 import RoutingLib.Data.Vec.Functional.Membership as Membership
 
-module RoutingLib.Data.Vec.Functional.Membership.Properties {a ℓ} (S : Setoid a ℓ) where
+module RoutingLib.Data.Vec.Functional.Membership.Setoid.Properties {a ℓ} (S : Setoid a ℓ) where
 
 open Membership S
 open Setoid S renaming (Carrier to A)

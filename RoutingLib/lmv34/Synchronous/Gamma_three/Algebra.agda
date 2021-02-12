@@ -4,7 +4,7 @@ open import Data.Nat using (ℕ)
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
 open import Relation.Nullary.Negation using (¬?)
 
-import RoutingLib.Data.List.Membership.DecSetoid as Membership′
+import Data.List.Membership.DecSetoid as Membership′
 
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 import RoutingLib.lmv34.Synchronous.Gamma_one.Algebra as Gamma_one_Algebra

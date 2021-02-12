@@ -22,7 +22,7 @@ open import Data.List.Relation.Binary.Equality.Setoid S
   using (_≋_; ≋-length; ≋-refl)
 open import Data.List.Relation.Binary.Sublist.Setoid S
 open import Data.List.Relation.Binary.Sublist.Setoid.Properties
-open import Function using (_∘_; flip)
+open import Function using (_∘_; _∘₂_; flip)
 open import Level using (_⊔_)
 open import Relation.Unary using () renaming (_⊆_ to _⇒_)
 open import Relation.Nullary using (¬_; yes; no)
@@ -67,7 +67,7 @@ h x = suc (length (↑ x))
 
 h≤H : ∀ x → h x ≤ h 0#
 h≤H x = begin⟨ (λ {y} → x<y⇒0<y {y}) ⟩
-  ∴ (x <ᵣ_) ⇒ (0# <ᵣ_) $⟨ flip (filter⁺₂ S (x <ᵣ?_) (0# <ᵣ?_)) routes ⟩
+  ∴ (x <ᵣ_) ⇒ (0# <ᵣ_) $⟨ (λ v → filter⁺ S (x <ᵣ?_) (0# <ᵣ?_) (v ∘₂ <ᵣ-respʳ-≈) (⊆-refl {routes})) ⟩
   ∴ ↑ x     ⊆ ↑ 0#     $⟨ s≤s ∘ length-mono-≤ S ⟩
   ∴ h x     ≤ h 0#     ∎
   where
@@ -84,7 +84,7 @@ h-resp-↝ {x} {y} x↝y = begin⟨ ↝⇒<ᵣ x↝y , <ᵣ-irrefl ≈-refl ⟩
 
 h-resp-≤ : ∀ {x y} → x <₊ y → h y ≤ h x
 h-resp-≤ {x} {y} = begin⟨_⟩
-  ∴ x <₊ y     $⟨ (λ x<₊y → filter⁺₂ S (y <ᵣ?_) (x <ᵣ?_) (<₊∧<ᵣ⇒<ᵣ x<₊y) routes) ⟩
+  ∴ x <₊ y     $⟨ (λ v → filter⁺ S (y <ᵣ?_) (x <ᵣ?_) (<₊∧<ᵣ⇒<ᵣ v ∘₂ <ᵣ-respʳ-≈) (⊆-refl {routes})) ⟩
   ∴ ↑ y ⊆ ↑ x  $⟨ s≤s ∘ length-mono-≤ S ⟩
   ∴ h y ≤ h x  ∎
 

@@ -2,24 +2,21 @@ open import Algebra using (Semiring)
 open import Data.Nat using (ℕ; suc; zero)
 open import Data.Fin using (Fin; suc; zero; punchIn)
 open import Data.Product using (∃; ∃-syntax; _,_; proj₁; proj₂)
+open import Data.Vec.Functional using (Vector; foldr; tail)
 open import Function using (_∘_)
 
-open import RoutingLib.Data.Matrix using (SquareMatrix)
-open import RoutingLib.Data.Table using (Table; foldr)
-
-open import RoutingLib.db716.Data.Matrix using (row; col)
-open import RoutingLib.db716.Data.Table using (tail)
+open import RoutingLib.Data.Matrix
 
 -- Properties of sums over Tables of Semirings
 module RoutingLib.db716.Algebra.Properties.Summation {c ℓ} (S : Semiring c ℓ) where
 
 open Semiring S renaming (Carrier to C)
 
-open import Relation.Binary.EqReasoning setoid
+open import Relation.Binary.Reasoning.Setoid setoid
 
 -- Definitions for vectors and summation
 private Vec : ∀ (n : ℕ) →  Set c
-Vec n = Table C n
+Vec n = Vector C n
 
 ∑ : ∀ {n} → Vec n → C
 ∑ {n} v = foldr _+_ 0# v

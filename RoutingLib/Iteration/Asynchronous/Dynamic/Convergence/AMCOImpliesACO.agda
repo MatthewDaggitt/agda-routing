@@ -5,16 +5,6 @@
 --------------------------------------------------------------------------
 
 open import Data.Fin.Subset using (Subset) renaming (_∈_ to _∈ₛ_; _∉_ to _∉ₛ_; ⊤ to ⊤ₛ)
-open import Relation.Unary using (Pred; _∈_)
-
-open import RoutingLib.Iteration.Asynchronous.Dynamic using (AsyncIterable; Epoch)
-open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions using (PartialACO; PartialAMCO)
-
-module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.AMCOImpliesACO
-  {a ℓ n} {I∥ : AsyncIterable a ℓ n}
-  {q} {Q : Pred (Subset n) q}
-  (amco : PartialAMCO I∥ Q) where
-
 open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Nat using (ℕ; _≤_; _<_; z≤n; s≤s; zero; suc; _+_; _∸_; ≤-pred)
 open import Data.Nat.Properties hiding (_≟_)
@@ -27,6 +17,7 @@ open import Relation.Binary using (Rel; Decidable; _Respects_; _Preserves₂_⟶
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; subst; cong; sym; trans)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
+open import Relation.Unary using (Pred; _∈_)
 
 open import RoutingLib.Data.Vec.Functional using (max)
 open import RoutingLib.Data.Vec.Functional.Properties using (max[t]≤x; x≤max[t]; max-cong)
@@ -37,7 +28,14 @@ open import RoutingLib.Relation.Unary.Indexed
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.DecEquality as SubsetEquality
 import RoutingLib.Function.Reasoning as FunctionReasoning
 
+open import RoutingLib.Iteration.Asynchronous.Dynamic using (AsyncIterable; Epoch)
+open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions using (PartialACO; PartialAMCO)
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Properties using (xy∈Aₚ∧x≈ₚy⇒x≈y)
+
+module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.AMCOImpliesACO
+  {a ℓ n} {I∥ : AsyncIterable a ℓ n}
+  {q} {Q : Pred (Subset n) q}
+  (amco : PartialAMCO I∥ Q) where
 
 open ≤-Reasoning
 
@@ -138,25 +136,25 @@ module _ (e : Epoch) {p : Subset n} .(p∈Q : p ∈ Q) where
       f : S → S
       f = F e p
 
-      fixedPoint : ∃ (λ x → f x ≈ x)
+      fixedPoint : ∃ (λ x* → f x* ≈ x* × x* ∈ Accordant p)
       fixedPoint = inner {⊥} (λ _ → ≈ᵢ-refl) (<-wellFounded (d e p∈Q ⊥ (f ⊥)))
         where
-        inner : ∀ {x} → x ∈ Accordant p → Acc _<_ (d e p∈Q x (f x)) → ∃ (λ x* → f x* ≈ x*)
+        inner : ∀ {x} → x ∈ Accordant p → Acc _<_ (d e p∈Q x (f x)) → ∃ (λ x* → f x* ≈ x* × x* ∈ Accordant p)
         inner {x} x∈Aₚ (acc x-acc) with F e p x ≟[ p ] x
-        ... | yes fx≈ₚx = x , inactiveEq p (F-inactive e p∈Q x) x∈Aₚ fx≈ₚx
-        ... | no  fx≉ₚx = inner (F-inactive e p∈Q x) (x-acc _ (F-strContrOnOrbits p∈Q x∈Aₚ fx≉ₚx))
+        ... | yes fx≈ₚx = x , inactiveEq p (F-pres-Aₚ p∈Q x∈Aₚ) x∈Aₚ fx≈ₚx , x∈Aₚ
+        ... | no  fx≉ₚx = inner (F-pres-Aₚ p∈Q x∈Aₚ) (x-acc _ (F-strContrOnOrbits p∈Q x∈Aₚ fx≉ₚx))
 
     x* : S
     x* = proj₁ fixedPoint
 
     Fx*≈x* : F e p x* ≈ x*
-    Fx*≈x* = proj₂ fixedPoint
+    Fx*≈x* = proj₁ (proj₂ fixedPoint)
 
     Fx*≈ₚx* : F e p x* ≈[ p ] x*
     Fx*≈ₚx* = ≈⇒≈ₛ Fx*≈x*
 
-    x*-wellFormed : ∀ {i} → i ∉ₛ p → x* i ≈ᵢ ⊥ i
-    x*-wellFormed {i} i∉p = ≈ᵢ-trans (≈ᵢ-sym (Fx*≈x* i)) (F-inactive e p∈Q x* i∉p)
+    x*∈Aₚ : x* ∈ Accordant p
+    x*∈Aₚ = proj₂ (proj₂ fixedPoint)
 
 -----------
 -- Boxes --
@@ -198,7 +196,7 @@ B-finish e {p} p∈Q = k* e p∈Q , x* e p∈Q , λ k*≤k → x*∈B[k] k*≤k 
   x∈B[k]⇒x*≈x {zero}  k*≤0   {x} x∈B[k] i = dᵢ≡0⇒x≈y e p∈Q (n≤0⇒n≡0 (≤-trans (dᵢ≤k* e p∈Q (x i) _) k*≤0))
   x∈B[k]⇒x*≈x {suc k} k*≤1+k {x} x∈B[k] i with x∈B[k] i
   ... | xᵢ∈B with i ∈? p
-  ...   | no i∉p = ≈ᵢ-trans xᵢ∈B (≈ᵢ-sym (x*-wellFormed e p∈Q i∉p))
+  ...   | no i∉p = ≈ᵢ-trans xᵢ∈B (≈ᵢ-sym (x*∈Aₚ e p∈Q i∉p))
   ...   | yes _  = ≈ᵢ-sym (dᵢ≡0⇒x≈y e p∈Q (n≤0⇒n≡0 (begin
     dᵢ e p∈Q (x* e p∈Q i) (x i) ≤⟨ lower xᵢ∈B ⟩
     r[_] e p∈Q (suc k)          ≡⟨ k*≤k⇒r[k]≡0 e p∈Q k*≤1+k ⟩
@@ -208,7 +206,7 @@ B-finish e {p} p∈Q = k* e p∈Q , x* e p∈Q , λ k*≤k → x*∈B[k] k*≤k 
   x*∈B[k] {zero}  k*≤k i = lift tt
   x*∈B[k] {suc k} k*≤k i with i ∈? p
   ... | yes _   = lift (subst (_≤ r[_] e p∈Q (suc k)) (sym (x≈y⇒dᵢ≡0 e p∈Q ≈ᵢ-refl)) z≤n)
-  ... | no  i∉p = x*-wellFormed e p∈Q i∉p
+  ... | no  i∉p = x*∈Aₚ e p∈Q i∉p
 
 
 ∈Bᵢ⇒dᵢ≤r : ∀ {e p b i xᵢ} .(p∈Q : p ∈ Q) → xᵢ ∈ B e p∈Q (suc b) i → dₛᵢ e p∈Q (x* e p∈Q i) xᵢ ≤ r[_] e p∈Q (suc b)
@@ -222,10 +220,10 @@ B-finish e {p} p∈Q = k* e p∈Q , x* e p∈Q , λ k*≤k → x*∈B[k] k*≤k 
 
 F-mono-B  : ∀ {e p} .(p∈Q : p ∈ Q) → ∀ {k x} → x ∈ Accordant p → x ∈ᵢ B e p∈Q k → F e p x ∈ᵢ B e p∈Q (suc k)
 F-mono-B {e} {p} p∈Q {k} {x} x∈Aₚ x∈B i with i ∈? p
-... | no  i∉p = F-inactive e p∈Q x i∉p
+... | no  i∉p = F-pres-Aₚ p∈Q x∈Aₚ i∉p
 ... | yes i∈p with x ≟[ p ] x* e p∈Q
 ...   | yes x≈ₚx* = lift (begin
-  dᵢ e p∈Q (x* e p∈Q i) (F e p x        i)   ≡⟨ dᵢ-cong e p∈Q ≈ᵢ-refl (F-cong e p (xy∈Aₚ∧x≈ₚy⇒x≈y I∥ x∈Aₚ (x*-wellFormed e p∈Q) x≈ₚx*) i∈p) ⟩
+  dᵢ e p∈Q (x* e p∈Q i) (F e p x        i)   ≡⟨ dᵢ-cong e p∈Q ≈ᵢ-refl (F-cong e p (xy∈Aₚ∧x≈ₚy⇒x≈y I∥ x∈Aₚ (x*∈Aₚ e p∈Q) x≈ₚx*) i∈p) ⟩
   dᵢ e p∈Q (x* e p∈Q i) (F e p (x* e p∈Q) i) ≡⟨ dᵢ-cong e p∈Q ≈ᵢ-refl (Fx*≈ₚx* e p∈Q i∈p) ⟩
   dᵢ e p∈Q (x* e p∈Q i) (x* e p∈Q i)         ≡⟨ x≈y⇒dᵢ≡0 e p∈Q ≈ᵢ-refl ⟩
   0                                          ≤⟨ z≤n ⟩

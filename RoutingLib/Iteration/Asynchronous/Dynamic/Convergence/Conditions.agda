@@ -135,7 +135,7 @@ module _ {a ℓ n} (𝓘 : AsyncIterable a ℓ n) where
     field
       F-strContrOnOrbits  : ∀ {e p x} → x ∈ Accordant p → F e p x ≉[ p ] x → d e p (F e p x) (F e p (F e p x)) < d e p x (F e p x)
       F-strContrOnFP      : ∀ {e p x} → x ∈ Accordant p → ∀ {x*} → F e p x* ≈ x* → x ≉[ p ] x* → d e p x* (F e p x) < d e p x* x
-      F-inactive          : ∀ e p x   → F e p x ∈ Accordant p
+      F-pres-Aₚ           : ∀ {e p x} → x ∈ Accordant p → F e p x ∈ Accordant p
 
     module _ e p {i} where
       open IsQuasiSemiMetric (dᵢ-isQuasiSemiMetric e p i) public
@@ -162,7 +162,7 @@ module _ {a ℓ n} (𝓘 : AsyncIterable a ℓ n) where
     field
       F-strContrOnOrbits  : ∀ {e p} .(p∈Q : p ∈ Q) → ∀ {x} → x ∈ Accordant p → F e p x ≉[ p ] x → d e p∈Q (F e p x) (F e p (F e p x)) < d e p∈Q x (F e p x)
       F-strContrOnFP      : ∀ {e p} .(p∈Q : p ∈ Q) → ∀ {x} → x ∈ Accordant p → ∀ {x*} → F e p x* ≈ x* → x ≉[ p ] x* → d e p∈Q x* (F e p x) < d e p∈Q x* x
-      F-inactive          : ∀ e {p} .(p∈Q : p ∈ Q)       → ∀ x   → F e p x ∈ Accordant p
+      F-pres-Aₚ           : ∀ {e p} .(p∈Q : p ∈ Q) → ∀ {x} → x ∈ Accordant p → F e p x ∈ Accordant p
 
     module _ e {p} .(p∈Q : p ∈ Q) {i} where
       open IsQuasiSemiMetric (dᵢ-isQuasiSemiMetric e p∈Q i) public
@@ -180,7 +180,7 @@ module _ {a ℓ n} (𝓘 : AsyncIterable a ℓ n) where
     ; dᵢ-bounded           = λ e {p} _ → dᵢ-bounded e p
     ; F-strContrOnOrbits   = λ _ → F-strContrOnOrbits
     ; F-strContrOnFP       = λ _ → F-strContrOnFP
-    ; F-inactive           = λ e {p} _ → F-inactive e p
+    ; F-pres-Aₚ            = λ _ → F-pres-Aₚ
     } where open AMCO amco
 
   partialAMCO⇒AMCO : ∀ {ℓ₁} {Q : Pred (Subset n) ℓ₁} → Universal Q →
@@ -189,9 +189,9 @@ module _ {a ℓ n} (𝓘 : AsyncIterable a ℓ n) where
     { dᵢ                   = λ e p → dᵢ e (p ∈Q)
     ; dᵢ-isQuasiSemiMetric = λ e p → dᵢ-isQuasiSemiMetric e (p ∈Q)
     ; dᵢ-bounded           = λ e p → dᵢ-bounded e (p ∈Q)
-    ; F-strContrOnOrbits  = F-strContrOnOrbits (_ ∈Q)
-    ; F-strContrOnFP      = F-strContrOnFP (_ ∈Q)
-    ; F-inactive          = λ e p → F-inactive e (p ∈Q)
+    ; F-strContrOnOrbits   = F-strContrOnOrbits (_ ∈Q)
+    ; F-strContrOnFP       = F-strContrOnFP (_ ∈Q)
+    ; F-pres-Aₚ            = F-pres-Aₚ (_ ∈Q)
     } where open PartialAMCO partialAMCO
 
   partialAMCO⇒AMCO′ : PartialAMCO U → AMCO

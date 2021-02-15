@@ -115,7 +115,7 @@ map₂-map ((d , v) ∷ xs) f = cong ((d , f v) ∷_) (map₂-map xs f)
 map₂-tabulate : ∀ {a b c} {n} {A : Set a} {B : Set b} {C : Set c}
                (g : Fin n → C × A) (f : A → B) →
                map₂ f (tabulate g) ≡ tabulate ((λ {(d , v) → (d , f v)}) ∘ g)
-map₂-tabulate g f = ≡-trans (map₂-map (tabulate g) f) ? --(map-tabulate g (λ {(d , v) → (d , f v)}))
+map₂-tabulate g f = ≡-trans (map₂-map (tabulate g) f) (map-tabulate g (λ {(d , v) → (d , f v)}))
 
 --------------------------------------------------------------------------------
 -- Properties of _<₂_ / _≤₂_

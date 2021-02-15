@@ -1,20 +1,4 @@
 open import Data.Fin.Subset using (Subset; _∈_)
-
-open import RoutingLib.Routing using (Network)
-open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing.VectorBased.Asynchronous as AsyncVectorBasedRouting
-open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.InternalDefinitions
-
-module RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Step4_DFImpliesAMCO
-  {a b ℓ} {alg : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra : IsRoutingAlgebra alg)
-  {n} (N : Network alg n)
-  (open AsyncVectorBasedRouting alg N hiding (F))
-  (N-d : ∀ (e : Epoch) (p : Subset n) → RouteDistanceFunction alg (Aₜ e p))
-  where
-
-open RawRoutingAlgebra alg
-
 open import Data.Bool using (if_then_else_)
 open import Data.Nat hiding (_⊔_)
 open import Data.Nat.Properties hiding (_≟_)
@@ -29,6 +13,7 @@ open import Function.Metric.Nat
 open import Relation.Binary.PropositionalEquality using (_≡_; sym; subst)
 open import Relation.Nullary
 open import Relation.Nullary.Decidable using (⌊_⌋)
+open import Relation.Unary using () renaming (_∈_ to _∈ᵘ_)
 
 open import RoutingLib.Data.Nat.Properties
 open import RoutingLib.Data.Vec.Functional using (max)
@@ -38,6 +23,20 @@ import RoutingLib.Function.Metric.Construct.MaxLift as MaxLift
 import RoutingLib.Relation.Nullary.Decidable as Dec
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence
+open import RoutingLib.Routing using (Network)
+open import RoutingLib.Routing.Algebra
+import RoutingLib.Routing.VectorBased.Asynchronous as AsyncVectorBasedRouting
+open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.InternalDefinitions
+
+module RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Step4_DFImpliesAMCO
+  {a b ℓ} {alg : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra alg)
+  {n} (N : Network alg n)
+  (open AsyncVectorBasedRouting alg N hiding (F))
+  (N-d : ∀ (e : Epoch) (p : Subset n) → RouteDistanceFunction alg (Aₜ e p))
+  where
+
+open RawRoutingAlgebra alg
 open import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Properties isRoutingAlgebra N
 
 ------------------------------------------------------------------------
@@ -108,10 +107,11 @@ module _ (e : Epoch) (p : Subset n) where
   r≤D : ∀ X Y i j → (i ∈ p ⊎ X i ≈ₜ Y i) → r (X i j) (Y i j) ≤ D X Y
   r≤D X Y i j op = ≤-trans (r≤d (X i) (Y i) j) (d≤D X Y i op)
 
-  r≤D-wf : ∀ {X Y} → WellFormed p X → WellFormed p Y → ∀ i j → r (X i j) (Y i j) ≤ D X Y
+  r≤D-wf : ∀ {X Y} → X ∈ᵘ Accordant p → Y ∈ᵘ Accordant p →
+           ∀ i j → r (X i j) (Y i j) ≤ D X Y
   r≤D-wf {X} {Y} wfX wfY i j with i ∈? p
   ... | yes i∈p = r≤D X Y i j (inj₁ i∈p)
-  ... | no  i∉p = r≤D X Y i j (inj₂ (WellFormed-cong wfX wfY i∉p))
+  ... | no  i∉p = r≤D X Y i j (inj₂ (Accordant-cong wfX wfY i∉p))
 
 ------------------------------------------------------------------------
 -- Strictly contracting proofs
@@ -119,29 +119,29 @@ module _ (e : Epoch) (p : Subset n) where
 -- These two lemmas are a mess as can't pattern match on `i ∈? p` directly
 -- as it unfolds the adjacency matrix
 
-  d[FXᵢ,F²Xᵢ]<D[X,FX] : ∀ {X} → WellFormed p X → F X ≉ₘ[ p ] X →
+  d[FXᵢ,F²Xᵢ]<D[X,FX] : ∀ {X} → X ∈ᵘ Accordant p → F X ≉ₘ[ p ] X →
                         ∀ i → dᵢ i (F X i) (F² X i) < D X (F X)
   d[FXᵢ,F²Xᵢ]<D[X,FX] {X} wfX FX≉X i with Y≉ₚX⇒0<DXY FX≉X
-  ... | 0<DXY with max[t]<x 0<DXY (r-strContrOrbits 0<DXY (r≤D-wf wfX (F′-inactive e p X)) i)
+  ... | 0<DXY with max[t]<x 0<DXY (r-strContrOrbits 0<DXY (r≤D-wf wfX (F′[X]∈Aₚ e p X)) i)
   ...   | d[FXᵢ,F²Xᵢ]<D[X,FX] = Dec.[
         (λ i∈p → subst (_< D X (F X)) (sym (Condition.accept d (_∈? p) i∈p)) d[FXᵢ,F²Xᵢ]<D[X,FX]) ,
         (λ i∉p → subst (_< D X (F X)) (sym (Condition.reject d (_∈? p) i∉p)) 0<DXY)
       ] (i ∈? p)
 
-  dᵢ[X*ᵢ,FXᵢ]<D[X*,X] : ∀ {X*} → F X* ≈ₘ X* → ∀ {X} → WellFormed p X → X ≉ₘ[ p ] X* →
+  dᵢ[X*ᵢ,FXᵢ]<D[X*,X] : ∀ {X*} → F X* ≈ₘ X* → ∀ {X} → X ∈ᵘ Accordant p → X ≉ₘ[ p ] X* →
                         ∀ i → dᵢ i (X* i) (F X i) < D X* X
   dᵢ[X*ᵢ,FXᵢ]<D[X*,X] {X*} FX*≈X* {X} wfX X≉X* i with Y≉ₚX⇒0<DXY X≉X*
-  ... | 0<DXY with max[t]<x 0<DXY (r-strContrFP FX*≈X* 0<DXY (r≤D-wf (X*-wf e p FX*≈X*) wfX) i)
+  ... | 0<DXY with max[t]<x 0<DXY (r-strContrFP FX*≈X* 0<DXY (r≤D-wf (X*∈Aₚ e p FX*≈X*) wfX) i)
   ...   | d[FXᵢ,F²Xᵢ]<D[X,FX] = Dec.[
         (λ i∈p → subst (_< D X* X) (sym (Condition.accept d (_∈? p) i∈p)) d[FXᵢ,F²Xᵢ]<D[X,FX]) ,
         (λ i∉p → subst (_< D X* X) (sym (Condition.reject d (_∈? p) i∉p)) 0<DXY)
       ] (i ∈? p)
 
-  Fₜ-strContrOnOrbits : ∀ {X} → WellFormed p X → F X ≉ₘ[ p ] X →
+  Fₜ-strContrOnOrbits : ∀ {X} → X ∈ᵘ Accordant p → F X ≉ₘ[ p ] X →
                         D (F X) (F² X) < D X (F X)
   Fₜ-strContrOnOrbits {X} wfX FX≉X = max[t]<x (Y≉ₚX⇒0<DXY FX≉X) (d[FXᵢ,F²Xᵢ]<D[X,FX] wfX FX≉X)
 
-  Fₜ-strContrOnFP : ∀ {X} → WellFormed p X → ∀ {X*} → F X* ≈ₘ X* → X ≉ₘ[ p ] X* →
+  Fₜ-strContrOnFP : ∀ {X} → X ∈ᵘ Accordant p → ∀ {X*} → F X* ≈ₘ X* → X ≉ₘ[ p ] X* →
                     D X* (F X) < D X* X
   Fₜ-strContrOnFP {X} wfX {X*} FX*≈X* X≉X* = max[t]<x (Y≉ₚX⇒0<DXY X≉X*) (dᵢ[X*ᵢ,FXᵢ]<D[X*,X] FX*≈X* wfX X≉X*)
 
@@ -155,5 +155,5 @@ amco = record
   ; dᵢ-bounded           = λ e p → proj₁ (d-bounded e p) , proj₂ (d-bounded e p)
   ; F-strContrOnOrbits   = λ {e p} → Fₜ-strContrOnOrbits e p
   ; F-strContrOnFP       = λ {e p} → Fₜ-strContrOnFP e p
-  ; F-inactive           = F′-inactive
+  ; F-pres-Aₚ            = F′-pres-Aₚ
   }

@@ -28,6 +28,7 @@ open import Relation.Binary.Indexed.Homogeneous
   using (IndexedSetoid; IndexedDecSetoid)
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
+open import Relation.Unary using (_∈_)
 
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous
 import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.Equality as SubsetEquality
@@ -142,12 +143,12 @@ Iᵢⱼ≡Iₖₗ j≢i l≢k = trans (Iᵢⱼ≡∞ j≢i) (sym (Iᵢⱼ≡∞ 
 --------------------------------------------------------------------------------
 -- WellFormed
 
--- Let p be the set of active nodes, then a routing matrix is well-formed if
--- every entry not in the subset is inactive
+-- Let p be the set of active nodes, then a routing matrix is accordant with p
+-- if every entry not in the subset is inactive
 
-WellFormed : Subset n → RoutingMatrix → Set ℓ
-WellFormed p X = ∀ {i} → i ∉ p → X i ≈ₜ I i
+Accordant : Subset n → RoutingMatrix → Set ℓ
+Accordant p X = ∀ {i} → i ∉ p → X i ≈ₜ I i
 
-WellFormed-cong : ∀ {X Y p} → WellFormed p X → WellFormed p Y →
+Accordant-cong : ∀ {X Y p} → X ∈ Accordant p → Y ∈ Accordant p →
                   ∀ {i} → i ∉ p → X i ≈ₜ Y i
-WellFormed-cong wfX wfY i∉p = ≈ₜ-trans (wfX i∉p) (≈ₜ-sym (wfY i∉p))
+Accordant-cong wfX wfY i∉p = ≈ₜ-trans (wfX i∉p) (≈ₜ-sym (wfY i∉p))

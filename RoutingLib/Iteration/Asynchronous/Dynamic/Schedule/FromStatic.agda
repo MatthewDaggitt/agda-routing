@@ -13,8 +13,8 @@ open import RoutingLib.Data.Fin.Subset using (Full)
 open import RoutingLib.Data.Fin.Subset.Properties using (⊤-full)
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
-open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudoperiod
-import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod as Static
+open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudocycle
+import RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudocycle as Static
 
 --------------------------------------------------------------------------------
 -- Any static schedule can be converted to a dynamic schedule with a single

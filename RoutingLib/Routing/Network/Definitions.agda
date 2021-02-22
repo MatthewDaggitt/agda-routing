@@ -6,6 +6,20 @@
 -- the adjacency matrix, routing tables, global routing state etc.
 --------------------------------------------------------------------------------
 
+open import Data.Fin using (Fin) renaming (_≟_ to _≟𝔽_)
+open import Data.Fin.Subset using (Subset; _∉_)
+open import Data.Fin.Properties using (any?)
+open import Data.Fin.Subset.Properties using (_∈?_)
+open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Data.Product using (∃₂; _×_; _,_)
+open import Level using (_⊔_)
+open import Relation.Binary
+open import Relation.Binary.PropositionalEquality
+  using (_≡_; _≢_; refl; sym; trans)
+import Relation.Binary.Reasoning.Setoid as EqReasoning
+open import Relation.Nullary using (¬_; Dec; yes; no)
+open import Relation.Nullary.Negation using (contradiction)
+
 open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing as Routing
 
@@ -16,21 +30,6 @@ module RoutingLib.Routing.Network.Definitions
   where
 
 open RawRoutingAlgebra algebra
-
-open import Data.Fin using (Fin) renaming (_≟_ to _≟𝔽_)
-open import Data.Fin.Subset using (Subset; _∉_)
-open import Data.Fin.Properties using (any?)
-open import Data.Fin.Subset.Properties using (_∈?_)
-open import Data.Sum using (_⊎_; inj₁; inj₂)
-open import Data.Product using (∃₂)
-open import Level using (_⊔_)
-open import Relation.Binary
-open import Relation.Binary.PropositionalEquality
-  using (_≡_; _≢_; refl; sym; trans)
-import Relation.Binary.Reasoning.Setoid as EqReasoning
-open import Relation.Nullary using (¬_; Dec; yes; no)
-open import Relation.Nullary.Negation using (contradiction)
-
 open import RoutingLib.Routing.AdjacencyMatrix.Cycles algebra
 
 ------------------------------------------------------------------------
@@ -44,8 +43,8 @@ Aₜ e p i j with i ∈? p | j ∈? p
 ------------------------------------------------------------------------
 -- Free networks
 
--- A network is free if for any epoch and set of participants, then it's
--- topology remains CycleFree
+-- A network is free during an epoch and set of participants if the
+-- resulting participation topology is CycleFree
 
-Free : Set (a ⊔ ℓ)
-Free = ∀ e p → CycleFree (Aₜ e p)
+TopologyIsFree : Epoch × Subset n → Set (a ⊔ ℓ)
+TopologyIsFree (e , p) = CycleFree (Aₜ e p)

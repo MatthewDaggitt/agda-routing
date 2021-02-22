@@ -63,24 +63,24 @@ module _ {a ℓ n} (I : AsyncIterable a ℓ n) (𝓢 : Schedule n) where
 
 -------------------------------------------------------------------------
 -- Convergent
-
+{-
 module _ {a ℓ n} {I : AsyncIterable a ℓ n} where
 
   open AsyncIterable I
 
   partiallyConvergent-shrink : ∀ {p} {X₀ Y₀ : IPred Sᵢ p} → X₀ ⊆ᵢ Y₀ →
-                          ∀ {q} {P Q : Pred (Subset n) q} → P ⊆ Q →
-                          (Y₀ᶜ : PartiallyConvergent I Y₀ Q) →
-                          (∀ e {p} (p∈Q : p ∈ Q) → (PartiallyConvergent.x* Y₀ᶜ e p∈Q) ∈ᵢ X₀) →
+                          ∀ {q} {P Q : Pred (Epoch × Subset n) q} → P ⊆ Q →
+                          (Y₀ᶜ : PartiallyConvergent I Q) →
+                          (∀ {e p} (ep∈Q : (e , p) ∈ Q) → (PartiallyConvergent.x* Y₀ᶜ ep∈Q) ∈ᵢ X₀) →
                           PartiallyConvergent I X₀ P
   partiallyConvergent-shrink X₀⊆Y₀ P⊆Q Y₀-safe x*∈X₀ = record
-    { x*         = λ e p∈P → x* e (P⊆Q p∈P)
-    ; k*         = λ e p∈P → k* e (P⊆Q p∈P)
-    ; x*-fixed   = λ e p∈P → x*-fixed e (P⊆Q p∈P)
-    ; x*-reached = λ x₀∈Y₀ ρ∈Q → x*-reached (X₀⊆Y₀ ∘ x₀∈Y₀) (P⊆Q ∘ ρ∈Q)
+    { x*         = λ ep∈P → x* (P⊆Q ep∈P)
+    ; k*         = λ ep∈P → k* (P⊆Q ep∈P)
+    ; x*-fixed   = λ ep∈P → x*-fixed (P⊆Q ep∈P)
+    ; x*-reached = λ ep∈Q x₀∈Y₀ → x*-reached (P⊆Q ∘ ep∈Q) (X₀⊆Y₀ ∘ x₀∈Y₀)
     }
     where open PartiallyConvergent Y₀-safe
-
+-}
 -------------------------------------------------------------------------
 -- Accordant
 

@@ -56,11 +56,7 @@ module _ {a ℓ n} {I∥ : AsyncIterable a ℓ n} where
   ACO⇒converges-partial = ACOImpliesConverges.convergent I∥
 
   ACO⇒converges : ∀ {ℓ} → ACO I∥ ℓ → Converges I∥
-  ACO⇒converges {ℓ} = begin⟨_⟩
-    ∴ ACO                I∥ ℓ    $⟨ ACO⇒partialACO I∥ ⟩
-    ∴ PartialACO         I∥ Uᵢ ℓ $⟨ ACO⇒converges-partial ⟩
-    ∴ PartiallyConverges I∥ Uᵢ   $⟨ partiallyConverges⇒converges′ I∥ ⟩
-    ∴ Converges          I∥      ∎
+  ACO⇒converges = ACO⇒converges-partial
 
 ------------------------------------------------------------------------
 -- AMCO
@@ -74,11 +70,7 @@ module _ {a ℓ n} {I∥ : AsyncIterable a ℓ n} where
   AMCO⇒converges-partial amco = ACO⇒converges-partial (AMCO⇒ACO-partial amco)
   
   AMCO⇒ACO : AMCO I∥ → ACO I∥ 0ℓ
-  AMCO⇒ACO = begin⟨_⟩
-    ∴ AMCO        I∥       $⟨ AMCO⇒partialAMCO I∥ ⟩
-    ∴ PartialAMCO I∥ Uᵢ    $⟨ AMCO⇒ACO-partial ⟩
-    ∴ PartialACO  I∥ Uᵢ 0ℓ $⟨ partialACO⇒ACO′ I∥ ⟩
-    ∴ ACO         I∥ 0ℓ    ∎
+  AMCO⇒ACO = AMCO⇒ACO-partial
   
   AMCO⇒converges : AMCO I∥ → Converges I∥
   AMCO⇒converges amco = ACO⇒converges (AMCO⇒ACO amco)
@@ -97,14 +89,10 @@ module _ {a ℓ n} {I∥ : AsyncIterable a ℓ n} where
     { x*         = Sync.x*
     ; k*         = Sync.k*
     ; x*-fixed   = Sync.x*-fixed
-    ; x*-reached = λ x∈X₀ → PartiallyConverges.x*-reached (ACO⇒converges-partial (SyncProofs.aco x∈X₀)) (SyncProofs.y∈D₀ x∈X₀)
+    ; x*-reached = λ x∈X₀ → PartiallyConverges.x*-reached (ACO⇒converges-partial (SyncProofs.aco x∈X₀)) (SyncProofs.y∈B₀ x∈X₀)
     } where
     module Sync       = PartialSynchronousConditions sync
     module SyncProofs = SyncImpliesACO I∥ sync
   
   sync⇒converges : ∀ {ℓ} → SynchronousConditions I∥ ℓ → Converges I∥
-  sync⇒converges {ℓ} = begin⟨_⟩
-    ∴ SynchronousConditions         I∥ ℓ    $⟨ sync⇒partialSync I∥ ⟩
-    ∴ PartialSynchronousConditions  I∥ Uᵢ ℓ $⟨ sync⇒converges-partial ⟩
-    ∴ PartiallyConverges            I∥ Uᵢ   $⟨ partiallyConverges⇒converges′ I∥ ⟩
-    ∴ Converges                     I∥      ∎
+  sync⇒converges = sync⇒converges-partial

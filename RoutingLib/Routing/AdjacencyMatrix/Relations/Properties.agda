@@ -19,7 +19,7 @@ open import Data.Fin.Patterns using (0F)
 open import Data.Nat using (s≤s; _<_)
 open import Data.Nat.Induction using (Acc; acc; <-wellFounded)
 open import Data.Nat.Properties using (≤-reflexive)
-open import Data.Product using (_×_)
+open import Data.Product as Prod using (_×_)
 open import Function.Base using (flip; _∘_)
 open import Relation.Binary
 open import Relation.Binary.Construct.Closure.Transitive public using ([_]; _∷_)
@@ -30,6 +30,7 @@ open import Relation.Binary.Reasoning.PartialOrder ≤₊-poset
 
 open import RoutingLib.Data.FiniteSet renaming (FiniteSet to FiniteSet⁺)
 open import RoutingLib.Relation.Binary.Construct.Closure.Transitive
+import RoutingLib.Relation.Nullary.Finite.Bijection.Setoid.Properties as Finite
 
 import Relation.Binary.Construct.NonStrictToStrict _≈_ _↝_ as NSTS
 
@@ -99,3 +100,7 @@ _↝ₛ?_ = NSTS.<-decidable _≟_ _↝?_
 strIncr∧⊴⇒<₊ : IsStrictlyIncreasing algebra → _⊴_ ⇒ _<₊_
 strIncr∧⊴⇒<₊ strIncr (z , x↝z , z≤y) = <-≤₊-trans (strIncr∧↝⇒<₊ strIncr x↝z) z≤y
 
+-- If the algebra is finite then the "threatens" relation is decidable
+⊴-dec : IsFinite algebra → Decidable _⊴_
+⊴-dec finite x y = Finite.any? finite (λ z → (x ↝? z) ×-dec (z ≤₊? y))
+  λ u≈v → Prod.map (↝-respʳ-≈ u≈v) (≤₊-respˡ-≈ u≈v)

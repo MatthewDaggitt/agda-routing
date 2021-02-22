@@ -48,7 +48,7 @@ x : S
 x = proj₁ B₀-nonEmpty
 
 x∈B₀ : x ∈ᵢ B 0
-x∈B₀ i = proj₁ X₀≋B₀ (proj₂ B₀-nonEmpty i)
+x∈B₀ i = X₀⊆B₀ (proj₂ B₀-nonEmpty i)
 
 --------------------------------------------------------------------------
 -- Befine the new boxes

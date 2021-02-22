@@ -4,13 +4,6 @@
 -- Properties of routing algebras
 --------------------------------------------------------------------------------
 
-open import RoutingLib.Routing.Algebra
-
-module RoutingLib.Routing.Algebra.Properties.RoutingAlgebra
-  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  where
-
 import Algebra.Definitions as AlgebraDefinitions
 import Algebra.Structures as AlgebraStructures
 import Algebra.Consequences.Setoid as Consequences
@@ -28,11 +21,18 @@ import Relation.Binary.Construct.Converse as Converse
 import Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
 import Relation.Binary.Reasoning.Setoid as EqReasoning
 
-open import RoutingLib.Routing algebra
+open import RoutingLib.Relation.Binary
 import RoutingLib.Relation.Binary.Construct.NonStrictToStrict as NSTS
 import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.DecTotalOrder as NonStrictToStrict
 
-open import RoutingLib.Relation.Binary
+open import RoutingLib.Routing.Algebra
+
+module RoutingLib.Routing.Algebra.Properties.RoutingAlgebra
+  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  where
+
+open import RoutingLib.Routing algebra
 
 open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra

@@ -5,12 +5,11 @@
 module RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.FromStatic where
 
 open import Data.Nat
-open import Data.Fin.Subset using (⊤)
+open import Data.Fin.Subset using (Subset; ⊤)
+open import Data.Product using (_×_)
 open import Function using (_∘_; const)
 open import Relation.Binary.PropositionalEquality using (refl)
-
-open import RoutingLib.Data.Fin.Subset using (Full)
-open import RoutingLib.Data.Fin.Subset.Properties using (⊤-full)
+open import Relation.Unary using (U)
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudocycle
@@ -73,5 +72,5 @@ module _ {n} (ψˢ : StaticSchedule n) where
   convert-multiPseudocycle (Static.next m pp mpp) =
     next m (convert-pseudoperiod pp) (convert-multiPseudocycle mpp)
 
-  convert∈Full : ψᵈ satisfies Full
-  convert∈Full t = ⊤-full
+  convert∈Full : ψᵈ satisfies U
+  convert∈Full t = _

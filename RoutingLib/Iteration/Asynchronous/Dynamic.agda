@@ -41,7 +41,8 @@ open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudocycle
 -- Publicly re-export the notions of epochs and times so that they may
 -- be imported from directly from this module.
 
-open Schedules public using (Epoch; 𝕋)
+open Schedules public
+  using (Epoch; 𝕋)
 
 --------------------------------------------------------------------------------
 -- The definition of what it means for a function F to be able to be
@@ -105,7 +106,7 @@ record IsAsyncIterable
 
   open FiniteSubsetEquality ≈-iDecSetoid public hiding (_≈[_]_)
 
--- A package that contains all the required components of an
+-- A bundle that contains all the required components of an
 -- async iterable
 record AsyncIterable a ℓ n : Set (lsuc (a ⊔ ℓ)) where
   field
@@ -157,74 +158,41 @@ module _ {a ℓ n} (I : AsyncIterable a ℓ n) (𝓢 : Schedule n) where
 module _ {a ℓ n} (I : AsyncIterable a ℓ n) where
 
   open AsyncIterable I
-  open Schedule
 
+  record LocalFixedPoint (e : Epoch) (p : Subset n) : Set (a ⊔ ℓ) where
+    field
+      x*         : S
+      k*         : ℕ
+      x*-fixed   : F e p x* ≈ x*
+
+  -- This is a specialised definition of convergence that only
+  -- guarantees the iteration is convergent when:
+  --   i)  the initial state is in the set X₀,
+  --   ii) the set of participants is always in the set Q.
+  record PartiallyConvergent {ℓ₁} (X₀ : IPred Sᵢ ℓ₁)               -- Allowable initial states
+                             {ℓ₂} (Q : Pred (Epoch × Subset n) ℓ₂) -- Configurations in which it converges
+                             : Set (# 1 ⊔ a ⊔ ℓ ⊔ ℓ₁ ⊔ ℓ₂) where
+    field
+      localFP    : ∀ {e p} → (e , p) ∈ Q → LocalFixedPoint e p
+      -- For every schedule ψ , starting point x₀ and point in time tₛ,
+      -- then if the epoch and subset satisfies the predicate Q then
+      -- if the schedule has k*-pseudocycles between t₁ and t₂
+      -- then for every time t₃ after t₂ that is within the same epoch
+      -- the iteration will be at the fixed point x*.
+      reachesFP : ∀ (ψ : Schedule n) (open Schedule ψ) → 
+                  ∀ {x : S} → x ∈ᵢ X₀ →
+                  ∀ {tₛ : 𝕋} (tₛ∈Q : (η tₛ , ρ tₛ) ∈ Q) (open LocalFixedPoint (localFP tₛ∈Q)) →
+                  ∀ {tₘ : 𝕋} → MultiPseudocycle ψ k* [ tₛ , tₘ ] →
+                  ∀ {tₑ : 𝕋} → SubEpoch ψ [ tₘ , tₑ ] →
+                  asyncIter I ψ x tₑ ≈ x*
+   
   -- The definition below says that the iteration will always converge to
   -- a fixed point after a sufficiently long period of stability. Note
   -- that the definition does *not* guarantee that such a period of
   -- stability will ever occur. Hence why the property is named
   -- "Convergent" as opposed to "Converges".
-  record Convergent : Set (# 1 ⊔ a ⊔ ℓ) where
-    field
-      -- The fixed point reached for each epoch and set of participants
-      x*         : Epoch → Subset n → S
-      -- The number of pseudo-cycles required to reach said fixed point
-      k*         : Epoch → Subset n → ℕ
-      -- The fixed points are truly fixed points
-      x*-fixed   : ∀ e p → F e p (x* e p) ≈ x* e p
-      -- For every schedule S , starting point x₀ and point in time tₛ,
-      -- then if the schedule has k*-pseudocycles between t₁ and t₂
-      -- then for every time t₃ after t₂ that is within the same epoch
-      -- the iteration will be at the fixed point x*.
-      x*-reached : ∀ (x₀ : S) (S : Schedule n) →
-                   ∀ {tₛ tₘ : 𝕋} →
-                   MultiPseudocycle S (k* (η S tₛ) (ρ S tₛ)) [ tₛ , tₘ ] →
-                   ∀ {tₑ : 𝕋} → SubEpoch S [ tₘ , tₑ ] →
-                   asyncIter I S x₀ tₑ ≈ x* (η S tₛ) (ρ S tₛ)
-
-  -- This is a specialised instance of the definition above that only
-  -- guarantees the iteration is convergent when the initial state is in
-  -- the set X₀ and the set of participants is always in the set Q.
-  record PartiallyConvergent {ℓ₁ ℓ₂} (X₀ : IPred Sᵢ ℓ₁) (Q : Pred (Subset n) ℓ₂)
-                             : Set (# 1 ⊔ a ⊔ ℓ ⊔ ℓ₁ ⊔ ℓ₂) where
-    field
-      x*         : Epoch → ∀ {p} → p ∈ Q → S
-      k*         : Epoch → ∀ {p} → p ∈ Q → ℕ
-      x*-fixed   : ∀ e {p} (p∈Q : p ∈ Q) → F e p (x* e p∈Q) ≈ x* e p∈Q
-      x*-reached : ∀ {x₀} → x₀ ∈ᵢ X₀ →
-                   ∀ {S : Schedule n} (ρ∈Q : S satisfies Q) →
-                   ∀ {tₛ tₘ : 𝕋} →
-                   MultiPseudocycle S (k* (η S tₛ) (ρ∈Q tₛ)) [ tₛ , tₘ ] →
-                   ∀ {tₑ} → SubEpoch S [ tₘ , tₑ ] →
-                   asyncIter I S x₀ tₑ ≈ x* (η S tₛ) (ρ∈Q tₛ)
-
--- The relationship between convergent and partially convergent
-
-module _ {a ℓ n} {I : AsyncIterable a ℓ n} where
-
-  open AsyncIterable I
-
-  convergent⇒partiallyConvergent : Convergent I → PartiallyConvergent I Uᵢ U
-  convergent⇒partiallyConvergent convergent = record
-    { x*         = λ e {p} _ → x* e p
-    ; k*         = λ e {p} _ → k* e p
-    ; x*-fixed   = λ e {p} _ → x*-fixed e p
-    ; x*-reached = λ {x₀} _ {S} _ → x*-reached x₀ S
-    } where open Convergent convergent
-
-  partiallyConvergent⇒convergent : ∀ {ℓ₁} {X₀ : IPred Sᵢ ℓ₁} → Universalᵢ X₀ →
-                                   ∀ {ℓ₂} {Q : Pred (Subset n) ℓ₂} → Universal Q →
-                                   PartiallyConvergent I X₀ Q → Convergent I
-  partiallyConvergent⇒convergent (_∈X₀) (_∈Q) pConvergent = record
-    { x*         = λ e p → x* e (p ∈Q)
-    ; k*         = λ e p → k* e (p ∈Q)
-    ; x*-fixed   = λ e p → x*-fixed e (p ∈Q)
-    ; x*-reached = λ x₀ S → x*-reached (λ i → _ ∈X₀) (λ t → _ ∈Q)
-    } where open PartiallyConvergent pConvergent
-
-  partiallyConvergent⇒convergent′ : PartiallyConvergent I Uᵢ U → Convergent I
-  partiallyConvergent⇒convergent′ = partiallyConvergent⇒convergent
-    (Uᵢ-universal Sᵢ) U-Universal
+  Convergent : Set (# 1 ⊔ a ⊔ ℓ)
+  Convergent = PartiallyConvergent Uᵢ U
 
 --------------------------------------------------------------------------------
 -- Simulation
@@ -239,27 +207,35 @@ module _ {a₁ a₂ ℓ₁ ℓ₂ n}
          where
 
   private
-    module P = AsyncIterable I∥
-    module Q = AsyncIterable J∥
+    module I = AsyncIterable I∥
+    module J = AsyncIterable J∥
 
-  record _Simulates_ : Set (a₁ ⊔ a₂ ⊔ ℓ₁ ⊔ ℓ₂) where
+  record PartiallySimulates {ℓ₃} (X₀ : IPred I.Sᵢ ℓ₃)
+                            {ℓ₄} (Y₀ : IPred J.Sᵢ ℓ₄)
+                            : Set (a₁ ⊔ a₂ ⊔ ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃ ⊔ ℓ₄) where
     field
-      toᵢ       : ∀ {i} → P.Sᵢ i → Q.Sᵢ i
-      fromᵢ     : ∀ {i} → Q.Sᵢ i → P.Sᵢ i
+      toᵢ       : ∀ {i} → I.Sᵢ i → J.Sᵢ i
+      fromᵢ     : ∀ {i} → J.Sᵢ i → I.Sᵢ i
 
-      toᵢ-⊥     : ∀ {i} → toᵢ (P.⊥ i) Q.≈ᵢ Q.⊥ i
-      toᵢ-cong  : ∀ {i} {x y : P.Sᵢ i} → x P.≈ᵢ y → toᵢ x Q.≈ᵢ toᵢ y
-      toᵢ-fromᵢ : ∀ {i} (x : Q.Sᵢ i) → toᵢ (fromᵢ x) Q.≈ᵢ x
-      toᵢ-F     : ∀ {i e p} x → toᵢ (P.F e p x i) Q.≈ᵢ Q.F e p (toᵢ ∘ x) i
+      toᵢ-⊥     : ∀ {i} → toᵢ (I.⊥ i) J.≈ᵢ J.⊥ i
+      toᵢ-cong  : ∀ {i} {x y : I.Sᵢ i} → x I.≈ᵢ y → toᵢ x J.≈ᵢ toᵢ y
+      toᵢ-fromᵢ : ∀ {i} (x : J.Sᵢ i) → toᵢ (fromᵢ x) J.≈ᵢ x
+      toᵢ-F     : ∀ {e p i} x → toᵢ (I.F e p x i) J.≈ᵢ J.F e p (toᵢ ∘ x) i
 
-    to : P.S → Q.S
+      from-Y₀   : ∀ {x} → x ∈ᵢ Y₀ → (fromᵢ ∘ x) ∈ᵢ X₀
+      
+    to : I.S → J.S
     to x i = toᵢ (x i)
 
-    from : Q.S → P.S
+    from : J.S → I.S
     from x i = fromᵢ (x i)
 
-    to-cong : ∀ {x y : P.S} → x P.≈ y → to x Q.≈ to y
+    to-cong : ∀ {x y : I.S} → x I.≈ y → to x J.≈ to y
     to-cong x≈y i = toᵢ-cong (x≈y i)
 
-    to-F : ∀ {e p} (x : P.S) → to (P.F e p x) Q.≈ Q.F e p (to x)
+    to-F : ∀ {e p} → (x : I.S) → to (I.F e p x) J.≈ J.F e p (to x)
     to-F x i = toᵢ-F x
+
+
+  _Simulates_ : Set _
+  _Simulates_ = PartiallySimulates Uᵢ Uᵢ

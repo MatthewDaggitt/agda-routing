@@ -20,6 +20,7 @@ module RoutingLib.Iteration.Asynchronous.Static.Convergence.Properties.ACO
 open import Data.Nat hiding (_^_)
 open import Data.Nat.Properties
 open import Data.Product
+open import Function.Base using (_∘_)
 
 open import RoutingLib.Function.Reasoning
 open import RoutingLib.Relation.Unary.Indexed
@@ -53,6 +54,15 @@ x*-fixed = begin⟨ x*∈B[k*] ⟩
 --------------------------------------------------------------------------
 -- Synchronous iterations
 
+X₀⊆B₀ : X₀ ⊆ᵢ B 0
+X₀⊆B₀ = proj₁ X₀≋B₀
+
+B₀⊆X₀ : B 0 ⊆ᵢ X₀
+B₀⊆X₀ = proj₂ X₀≋B₀
+
+F-resp-B₀ : ∀ {x} → x ∈ᵢ B 0 → F x ∈ᵢ B 0
+F-resp-B₀ x∈B₀ = X₀⊆B₀ ∘ F-resp-X₀ (B₀⊆X₀ ∘ x∈B₀)
+
 Fᵏx∈B₀ : ∀ k {x} → x ∈ᵢ B 0 → (F ^ k) x ∈ᵢ B 0
 Fᵏx∈B₀ zero    x∈B₀ = x∈B₀
 Fᵏx∈B₀ (suc k) x∈B₀ = F-resp-B₀ (Fᵏx∈B₀ k x∈B₀)
@@ -78,3 +88,6 @@ x*∈Bₖ x∈B₀ (suc k) = begin⟨ x*∈Bₖ x∈B₀ k ⟩
   ∴ x*   ∈ᵢ B k        $⟨ F-mono-B ⟩
   ∴ F x* ∈ᵢ B (suc k)  $⟨ B-cong x*-fixed ⟩
   ∴ x*   ∈ᵢ B (suc k)  ∎
+
+x*∈X₀ : ∀ {x} → x ∈ᵢ X₀ → x* ∈ᵢ X₀
+x*∈X₀ x∈X₀ = B₀⊆X₀ ∘ x*∈B₀ (X₀⊆B₀ ∘ x∈X₀)

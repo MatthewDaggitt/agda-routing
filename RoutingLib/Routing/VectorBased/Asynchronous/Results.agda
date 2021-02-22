@@ -10,12 +10,15 @@ module RoutingLib.Routing.VectorBased.Asynchronous.Results where
 open import Data.Nat using (zero; suc; s≤s; z≤n)
 open import Level using (Level)
 
+open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence
+  using (completeConvergence)
+
 open import RoutingLib.Routing using (Network)
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Algebra.Properties.PathAlgebra
 open import RoutingLib.Routing.Algebra.Simulation using (_Simulates_)
-open import RoutingLib.Routing.Network.Definitions using (Free)
-open import RoutingLib.Routing.Network.Properties using (strIncr⇒free)
+open import RoutingLib.Routing.Network.Definitions using (TopologyIsFree)
+open import RoutingLib.Routing.Algebra.Consequences using (strIncr⇒free)
 import RoutingLib.Routing.VectorBased.Asynchronous.Simulation as Simulation
 import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Proof as Convergence
 
@@ -47,7 +50,7 @@ simulate A⇉B conv = Simulation.simulate A⇉B conv
 
 finite⇒convergentOverFreeNetworks : IsRoutingAlgebra A →
                                     IsFinite A →
-                                    PartiallyConvergent A (λ N → Free A N)
+                                    PartiallyConvergent A (TopologyIsFree A)
 finite⇒convergentOverFreeNetworks routingAlg =
   Convergence.finite⇒convergentOverFreeNetworks routingAlg
 
@@ -58,8 +61,9 @@ finite+strictlyIncr⇒convergent : IsRoutingAlgebra A →
                                  IsFinite A →
                                  IsStrictlyIncreasing A →
                                  Convergent A
-finite+strictlyIncr⇒convergent routingAlg finite strIncr N =
-  finite⇒convergentOverFreeNetworks routingAlg finite (strIncr⇒free _ N routingAlg strIncr)
+finite+strictlyIncr⇒convergent routingAlg finite strIncr N = completeConvergence
+  (finite⇒convergentOverFreeNetworks routingAlg finite N) _
+  (strIncr⇒free routingAlg strIncr N)
 
 --------------------------------------------------------------------------------
 -- Path vector protocols
@@ -69,7 +73,7 @@ finite+strictlyIncr⇒convergent routingAlg finite strIncr N =
 
 paths⇒convergentOverFreeNetworks : IsRoutingAlgebra A →
                                    IsPathAlgebra A →  
-                                   PartiallyConvergent A (λ N → Free A N)
+                                   PartiallyConvergent A (TopologyIsFree A)
 paths⇒convergentOverFreeNetworks = Convergence.paths⇒convergentOverFreeNetworks
 
 -- If the path algebra is increasing (or equivalently strictly increasing) then
@@ -79,7 +83,6 @@ incrPaths⇒convergent : IsRoutingAlgebra A →
                        IsPathAlgebra A →
                        IsIncreasing A →
                        Convergent A
-incrPaths⇒convergent routingAlg pathAlg incr N =
-  paths⇒convergentOverFreeNetworks routingAlg pathAlg
-    (strIncr⇒free _ N routingAlg
-      (incr⇒strIncr routingAlg pathAlg incr))
+incrPaths⇒convergent routingAlg pathAlg incr N = completeConvergence
+  (paths⇒convergentOverFreeNetworks routingAlg pathAlg N) _
+  (strIncr⇒free routingAlg (incr⇒strIncr routingAlg pathAlg incr) N)

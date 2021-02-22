@@ -72,6 +72,6 @@ record Schedule (n : ℕ) : Set where
 -- Sometimes it is necessary to restrict the allowable sets of participants
 -- in the schedule.
 
-_satisfies_ : ∀ {n} → Schedule n → ∀ {p} → Pred (Subset n) p → Set p
-S satisfies P = ∀ (t : 𝕋) → ρ t ∈ᵤ P
+_satisfies_ : ∀ {n} → Schedule n → ∀ {p} → Pred (Epoch × Subset n) p → Set p
+S satisfies P = ∀ (t : 𝕋) → (η t , ρ t) ∈ᵤ P
   where open Schedule S

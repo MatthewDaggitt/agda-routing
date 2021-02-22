@@ -18,7 +18,7 @@ private
 
 Lift∙ : ∀ {p} → IPred Aᵢ p → IPred (Pointedᵢ Aᵢ) p
 Lift∙ {_} Pᵢ i [ xᵢ ]ᵢ = Pᵢ i xᵢ
-Lift∙ {p} Pᵢ i ∙ᵢ     = Level.Lift p ⊥
+Lift∙ {p} Pᵢ i ∙ᵢ      = Level.Lift p ⊥
 
 ------------------------------------------------------------------------
 -- Properties

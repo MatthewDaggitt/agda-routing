@@ -1,7 +1,7 @@
 open import Data.Product
 open import Data.Sum using (_⊎_)
 open import Data.Unit using (⊤)
-open import Function using (id)
+open import Function using (id; _∘_)
 open import Level
 open import Relation.Nullary using (Dec; ¬_)
 open import Relation.Unary using (Pred; _∈_; _⊆_)
@@ -56,6 +56,8 @@ P ⊆ᵢ Q = ∀ {i} → P i ⊆ Q i
 ⊆ᵢ-refl : (Aᵢ : I → Set a) → Reflexive {A = IPred Aᵢ p} _⊆ᵢ_
 ⊆ᵢ-refl Aᵢ xᵢ∈Pᵢ = xᵢ∈Pᵢ
 
+⊆ᵢ-trans : (Aᵢ : I → Set a) → Transitive {A = IPred Aᵢ p} _⊆ᵢ_
+⊆ᵢ-trans Aᵢ P⊆Q Q⊆R = Q⊆R ∘ P⊆Q
 
 _≋ᵢ_ : REL (IPred Aᵢ p) (IPred Aᵢ q) _
 p ≋ᵢ q = p ⊆ᵢ q × q ⊆ᵢ p

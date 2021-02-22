@@ -6,21 +6,12 @@
 -- the adjacency matrix, routing tables, global routing state etc.
 --------------------------------------------------------------------------------
 
-open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing as Routing
-
-module RoutingLib.Routing.Network.Properties
-  {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)
-  {n} (open Routing algebra n)
-  (N : Network)
-  where
-
 open import Data.Fin using (Fin) renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Subset using (Subset; _∉_)
 open import Data.Fin.Properties using (any?)
 open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
-open import Data.Product using (∃₂)
+open import Data.Product using (∃₂; _,_)
 open import Level using (_⊔_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
@@ -28,13 +19,22 @@ open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
+
 open import RoutingLib.Data.Fin using (_+ₘ_; _-ₘ_)
 open import RoutingLib.Data.FiniteSet using (⟦_∣_⟧) renaming (FiniteSet to FiniteSet⁺)
 
-open RawRoutingAlgebra algebra
-
-open import RoutingLib.Routing.Network.Definitions algebra N
+open import RoutingLib.Routing.Algebra
+import RoutingLib.Routing as Routing
 import RoutingLib.Routing.AdjacencyMatrix.Cycles as Cycles
+
+module RoutingLib.Routing.Network.Properties
+  {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)
+  {n} (open Routing algebra n)
+  (N : Network)
+  where
+
+open RawRoutingAlgebra algebra
+open import RoutingLib.Routing.Network.Definitions algebra N
 
 ------------------------------------------------------------------------
 -- The adjacency matrix in each epoch, adjusted for participants
@@ -62,10 +62,3 @@ Aₜ-cong e p {X} {Y} X≈Y {i} {j} k with i ∈? p | k ∈? p
 ... | yes _ | no  _   = ≈-trans (f∞-reject i k (X k j)) (≈-sym (f∞-reject i k (Y k j)))
 ... | no  _ | yes _   = ≈-trans (f∞-reject i k (X k j)) (≈-sym (f∞-reject i k (Y k j)))
 ... | no  _ | no  _   = ≈-trans (f∞-reject i k (X k j)) (≈-sym (f∞-reject i k (Y k j)))
-
-------------------------------------------------------------------------
--- Free networks
-
--- If the algebra is strictly increasing, then every network is free
-strIncr⇒free : IsRoutingAlgebra algebra → IsStrictlyIncreasing algebra → Free
-strIncr⇒free isRoutingAlg strIncr N p = Cycles.strIncr⇒allCycleFree _ isRoutingAlg strIncr (Aₜ N p)

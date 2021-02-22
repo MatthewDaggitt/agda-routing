@@ -5,41 +5,31 @@
 -- convergent over the initial box.
 --------------------------------------------------------------------------
 
+open import Data.Fin using (Fin)
 open import Data.Fin.Subset
   using (Subset; ⊤) renaming (_∈_ to _∈ₛ_; _∉_ to _∉ₛ_)
-open import Relation.Unary using (Pred; _⊆_; _∈_)
-open import RoutingLib.Relation.Unary.Indexed
-
-open import RoutingLib.Iteration.Asynchronous.Dynamic
-open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
-
-module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.ACOImpliesConvergent
-  {a ℓ ℓ₁ ℓ₂ ℓ₃ n}
-  (I∥  : AsyncIterable a ℓ n)
-  {B₀  : IPred _ ℓ₁}
-  {Q   : Pred (Subset n) ℓ₂}
-  (aco : PartialACO I∥ B₀ Q ℓ₃)
-  where
-
-open import Data.Fin using (Fin)
 open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Maybe using (just; nothing)
-open import Data.Nat renaming (_≟_ to _≟ℕ_)
+open import Data.Nat renaming (_≟_ to _≟ℕ_) hiding (_⊔_)
 open import Data.Nat.Properties hiding (_≟_)
 open import Data.Nat.Induction using (Acc; acc; <-wellFounded)
 open import Data.Product as Prod using (∃; proj₂; proj₁; _,_; _×_; map)
 open import Function using (id; _∘_; _$_)
-open import Level using ()
+open import Level using (_⊔_)
 open import Relation.Binary using (tri<; tri≈; tri>)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; subst; subst₂; cong; cong₂; refl; sym; trans)
 open import Relation.Nullary using (yes; no; ¬_)
 open import Relation.Nullary.Negation using (contradiction)
+open import Relation.Unary using (Pred; _⊆_; _∈_)
 
+open import RoutingLib.Relation.Unary.Indexed
 open import RoutingLib.Relation.Binary.Indexed.Homogeneous
 open import RoutingLib.Relation.Unary.Properties
 open import RoutingLib.Function.Reasoning
 
+open import RoutingLib.Iteration.Asynchronous.Dynamic
+open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Properties
 import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Properties.ACO
   as ACOProperties
@@ -47,17 +37,25 @@ open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule
 import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudocycle
   as Pseudocycles
 
-open AsyncIterable I∥
-open PartialACO  aco
-open ACOProperties I∥ aco
+module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.ACOImpliesConvergent
+  {a ℓ ℓ₁ ℓ₂ ℓ₃ n}
+  (I∥  : AsyncIterable a ℓ n) (open AsyncIterable I∥)
+  {X₀  : IPred Sᵢ ℓ₁}
+  {Q   : Pred (Epoch × Subset n) ℓ₂}
+  (partialACO : PartialACO I∥ X₀ Q ℓ₃)
+  where
+
+open PartialACO partialACO
+open ACOProperties I∥ partialACO
+
+module _ {e p} .(ep∈Q : (e , p) ∈ Q) where
+  open LocalACO (localACO ep∈Q) public
 
 ------------------------------------------------------------------------
 -- Notation
 
-module _ {x : S}               -- Initial state
-         (x∈B₀ : x ∈ᵢ B₀)      -- Initial state is in initial box
-         {ψ : Schedule n}      
-         (ρ∈Q : ψ satisfies Q)
+module _ (ψ : Schedule n)
+         {x : S} (x∈X₀ : x ∈ᵢ X₀)               -- Initial state
          where
 
   open Schedule ψ
@@ -69,40 +67,43 @@ module _ {x : S}               -- Initial state
   Fₜ : 𝕋 → S → S
   Fₜ t = F (η t) (ρ t)
 
-  Bₜ : 𝕋 → ℕ → IPred Sᵢ ℓ₃
-  Bₜ t = B (η t) (ρ∈Q t)
-
   δ' : S → ∀ {t} → Acc _<_ t → S
   δ' = asyncIter' I∥ ψ
 
   δ : S → 𝕋 → S
   δ = asyncIter I∥ ψ
-  
+
+  _∈Q : 𝕋 → Set ℓ₂
+  t ∈Q = (η t , ρ t) ∈ Q
+
+  η-pres-∈Q : ∀ {s e : 𝕋} → η s ≡ η e → e ∈Q → s ∈Q
+  η-pres-∈Q ηₛ≡ηₑ e∈Q rewrite ηₛ≡ηₑ = e∈Q
+
+  η-inRange′ : ∀ {s m e : 𝕋} → η s ≡ η e → m ∈ₜ [ s , e ] → e ∈Q → η s ≡ η m × η m ≡ η e × s ∈Q × m ∈Q
+  η-inRange′ ηₛ≡ηₑ m∈[s,e] e∈Q with η-inRange ηₛ≡ηₑ m∈[s,e]
+  ... | (ηₛ≡ηₘ , ηₘ≡ηₑ) = ηₛ≡ηₘ , ηₘ≡ηₑ , η-pres-∈Q ηₛ≡ηₑ e∈Q , η-pres-∈Q ηₘ≡ηₑ e∈Q
+
   -- Membership substitution for equal times
 
-  δ'∈-resp-Bₜᵢ : ∀ t {s e k} {rec : Acc _<_ t} → η s ≡ η e →
-                 ∀ {i} → δ' x rec i ∈ Bₜ s k i → δ' x rec i ∈ Bₜ e k i
-  δ'∈-resp-Bₜᵢ t {s} {e} {k} {rec} ηₛ≡ηₑ {i} =
-    subst (λ v → δ' x rec i ∈ v k i) (B-subst ηₛ≡ηₑ (cong π ηₛ≡ηₑ) (ρ∈Q s) (ρ∈Q e))
-
-  δ'∈-resp-Bₜ : ∀ t {b s e} {rec : Acc _<_ t} → η s ≡ η e →
-                δ' x rec ∈ᵢ Bₜ s b → δ' x rec ∈ᵢ Bₜ e b
-  δ'∈-resp-Bₜ t ηₛ≡ηₑ ∈b i = δ'∈-resp-Bₜᵢ t ηₛ≡ηₑ (∈b i)
+  δ'∈-resp-Bₜᵢ : ∀ t {s e} (s∈Q : s ∈Q) (e∈Q : e ∈Q) {rec : Acc _<_ t} → η s ≡ η e →
+                 ∀ {k i} → δ' x rec i ∈ B s∈Q k i → δ' x rec i ∈ B e∈Q k i
+  δ'∈-resp-Bₜᵢ t {s} {e} s∈Q e∈Q {rec} ηₛ≡ηₑ {k} {i} =
+    subst (λ v → δ' x rec i ∈ v k i) (B-subst s∈Q e∈Q ηₛ≡ηₑ (cong π ηₛ≡ηₑ))
 
   -- The concept of being locally safe
 
-  StateOfNode_InBox_AtTime_ : Fin n → ℕ → 𝕋 → Set ℓ₃
-  StateOfNode i InBox k AtTime t = (acc : Acc _<_ t) → δ' x acc i ∈ Bₜ t k i
+  StateOfNode_InBox_AtTime_ : Fin n → ℕ → 𝕋 → Set _
+  StateOfNode i InBox k AtTime t = (t∈Q : t ∈Q) (acc : Acc _<_ t) → δ' x acc i ∈ B t∈Q k i
 
-  StateInBox_AtTime_ : ℕ → 𝕋 → Set ℓ₃
+  StateInBox_AtTime_ : ℕ → 𝕋 → Set _
   StateInBox k AtTime t = ∀ i → StateOfNode i InBox k AtTime t
 
-  MessagesToNode_InBox_AtTime_ : Fin n → ℕ → 𝕋 → Set ℓ₃
-  MessagesToNode i InBox k AtTime t = ∀ {s} → t < s → SubEpoch [ t , s ] →
-                                      ∀ {j} {acc : Acc _<_ (β s i j)} →
-                                      δ' x acc j ∈ Bₜ t k j
+  MessagesToNode_InBox_AtTime_ : Fin n → ℕ → 𝕋 → Set _
+  MessagesToNode i InBox k AtTime t = ∀ {s} → t < s → SubEpoch [ t , s ] → (t∈Q : t ∈Q) → 
+                                      ∀ {j} {acc : Acc _<_ (β s i j)} → 
+                                      δ' x acc j ∈ B t∈Q k j
 
-  MessagesInBox_AtTime_ : ℕ → 𝕋 → Set ℓ₃
+  MessagesInBox_AtTime_ : ℕ → 𝕋 → Set _
   MessagesInBox k AtTime t = ∀ i → MessagesToNode i InBox k AtTime t
 
   -- Concept of all messages being the current epoch
@@ -119,7 +120,7 @@ module _ {x : S}               -- Initial state
 
   ComputationInBox_AtTime_ : ℕ → 𝕋 → Set _
   ComputationInBox k AtTime t = ∀ i → i ∈ₛ ρ t → ComputationAtNode i InBox k AtTime t
-  
+
 --------------------------------------------------------------------------
 -- Actual proofs
 --------------------------------------------------------------------------
@@ -137,30 +138,28 @@ module _ {x : S}               -- Initial state
     ∴ δ' x accβ j ≈ᵢ ⊥ j   ∎
 
   i∉ρ⇒state∈Bₖ : ∀ {i t k} → i ∉ₛ ρ t → StateOfNode i InBox k AtTime t
-  i∉ρ⇒state∈Bₖ {i} {t} {k} i∉ρₜ recₑ = begin⟨ B-null (ρ∈Q t) i∉ρₜ ⟩
-    ∴ ⊥ i          ∈ Bₜ t k i $⟨ Bᵢ-cong (ρ∈Q t) (≈ᵢ-sym (≈ᵢ-reflexive (asyncIter-inactive I∥ ψ x recₑ i∉ρₜ))) ⟩
-    ∴ δ' x {t} _ i ∈ Bₜ t k i ∎
+  i∉ρ⇒state∈Bₖ {i} {t} {k} i∉ρₜ t∈Q recₑ = begin⟨ B-null t∈Q i∉ρₜ ⟩
+    ∴ ⊥ i          ∈ B t∈Q k i $⟨ Bᵢ-cong t∈Q (≈ᵢ-sym (≈ᵢ-reflexive (asyncIter-inactive I∥ ψ x recₑ i∉ρₜ))) ⟩
+    ∴ δ' x {t} _ i ∈ B t∈Q k i ∎
 
 --------------------------------------------------------------------------
 -- Base case: the asynchronous iteration is always in the initial box
 
+  state∈X₀ : ∀ t {accₜ : Acc _<_ t} → δ' x accₜ ∈ᵢ X₀
+  state∈X₀ zero    {acc rec} i with i ∈? ρ 0
+  ... | no  i∉ρ₀ = ⊥∈X₀ i
+  ... | yes _    = x∈X₀ i
+  state∈X₀ (suc t) {acc rec} i with i ∈? ρ (suc t) | i ∈? ρ t | i ∈? α (suc t)
+  ... | no  i∉ρ₁₊ₜ  | _     | _     = ⊥∈X₀ i
+  ... | yes _       | no  _ | _     = x∈X₀ i
+  ... | yes _       | yes _ | no  _ = state∈X₀ t i
+  ... | yes _       | yes _ | yes _ = F-pres-X₀ (λ j → state∈X₀ (β (suc t) i j) j) i
+  
   state∈B₀ : ∀ t → StateInBox 0 AtTime t
-  state∈B₀ zero    i (acc rec) with i ∈? ρ 0
-  ... | no  i∉ρ₀ = B-null (ρ∈Q 0) i∉ρ₀
-  ... | yes _    = proj₁ (B₀-eqᵢ (ρ∈Q 0)) (x∈B₀ i)
-  state∈B₀ (suc t) i (acc rec) with i ∈? ρ (suc t) | i ∈? ρ t | i ∈? α (suc t)
-  ... | no  i∉ρ₁₊ₜ  | _     | _     = B-null (ρ∈Q (suc t)) i∉ρ₁₊ₜ
-  ... | yes _       | no  _ | _     = proj₁ (B₀-eqᵢ (ρ∈Q (suc t))) (x∈B₀ i)
-  ... | yes _       | yes _ | no  _ = B₀ₑ-eqᵢ (ρ∈Q t) (ρ∈Q (suc t)) (state∈B₀ t i (rec t _))
-  ... | yes _       | yes _ | yes _ = begin⟨ (λ j → state∈B₀ (β (suc t) i j) j _) ⟩
-    ∴ (∀ j → _ ∈ Bₜ (β (suc t) i j) 0 j) $⟨ B₀ₑ-eqᵢ (ρ∈Q _) (ρ∈Q (suc t)) ∘_ ⟩
-    ∴ (∀ j → _ ∈ Bₜ (suc t)         0 j) $⟨ (λ prf → F-resp-B₀ₑ (ρ∈Q (suc t)) prf i) ⟩
-    ∴ Fₜ (suc t) _ i ∈ Bₜ (suc t)   0 i  ∎
-
+  state∈B₀ t i t∈Q rec = X₀⊆B₀ t∈Q (state∈X₀ t i)
+  
   messages∈B₀ : ∀ t → MessagesInBox 0 AtTime t
-  messages∈B₀ t i {s} t<s η[t,s] {j} {accβ} = begin⟨ state∈B₀ (β s i j) j accβ ⟩
-    ∴ δ' x accβ j ∈ Bₜ (β s i j) 0 j $⟨ B₀ₑ-eqᵢ (ρ∈Q (β s i j)) (ρ∈Q t) ⟩
-    ∴ δ' x accβ j ∈ Bₜ t         0 j ∎
+  messages∈B₀ t i {s} t<s η[t,s] t∈Q {j} {accβ} = X₀⊆B₀ t∈Q (state∈X₀ (β s i j) j)
 
 --------------------------------------------------------------------------
 -- Preservation: if the asynchronous iteration is in a box and
@@ -176,23 +175,25 @@ module _ {x : S}               -- Initial state
   state-stability : ∀ {k s e i} → SubEpoch [ s , e ] →
                     ComputationAtNode i InBox k AtTime s →
                     StateOfNode i InBox k AtTime e
-  state-stability {k}     {s} {zero}  {i} η[s,1+e]@(mkₛₑ z≤n   _)       (_ , _ , s∈Bₖ)    = s∈Bₖ
-  state-stability {zero}  {s} {suc e} {i} η[s,1+e]                      (_ , _ , _)   (acc rec) = state∈B₀ (suc e) i (acc rec)
-  state-stability {suc k} {s} {suc e} {i} η[s,1+e]@(mkₛₑ s≤1+e ηₛ≡η₁₊ₑ) (wf , m∈Bₖ , s∈Bₖ) (acc rec) with <-cmp s (suc e)
-  ... | tri≈ _ refl _      = s∈Bₖ (acc rec)
+  state-stability {k}     {s} {zero}  {i} η[s,1+e]@(mkₛₑ z≤n   _)       (_ , _ , s∈Bₖ)                     = s∈Bₖ
+  state-stability {zero}  {s} {suc e} {i} η[s,1+e]                      (_ , _ , _)        1+e∈Q (acc rec) =
+    state∈B₀ (suc e) i 1+e∈Q (acc rec)
+  state-stability {suc k} {s} {suc e} {i} η[s,1+e]@(mkₛₑ s≤1+e ηₛ≡η₁₊ₑ) (wf , m∈Bₖ , s∈Bₖ) 1+e∈Q (acc rec)
+    with <-cmp s (suc e)
+  ... | tri≈ _ refl _      = s∈Bₖ 1+e∈Q (acc rec)
   ... | tri> _ _ s>1+e     = contradiction s≤1+e (<⇒≱ s>1+e)
-  ... | tri< (s≤s s≤e) _ _ with η-inRange ηₛ≡η₁₊ₑ (s≤e , n≤1+n _)
-  ...   | ηₛ≡ηₑ , ηₑ≡η₁₊ₑ with i ∈? ρ (suc e) | i ∈? ρ e | i ∈? α (suc e)
-  ...     | no  i∉ρ₁₊ₑ | _       | _     = B-null (ρ∈Q (suc e)) i∉ρ₁₊ₑ
+  ... | tri< (s≤s s≤e) _ _ with η-inRange′ ηₛ≡η₁₊ₑ (s≤e , n≤1+n _) 1+e∈Q
+  ...   | ηₛ≡ηₑ , ηₑ≡η₁₊ₑ , s∈Q , e∈Q with i ∈? ρ (suc e) | i ∈? ρ e | i ∈? α (suc e)
+  ...     | no  i∉ρ₁₊ₑ | _       | _     = B-null 1+e∈Q i∉ρ₁₊ₑ
   ...     | yes i∈ρ₁₊ₑ | no i∉ρₑ | _     = contradiction (∈ρ-subst (sym ηₑ≡η₁₊ₑ) i∈ρ₁₊ₑ) i∉ρₑ
-  ...     | yes _      | yes _   | no  _ = begin⟨ state-stability (mkₛₑ s≤e ηₛ≡ηₑ) (wf , m∈Bₖ , s∈Bₖ) (rec e ≤-refl) ⟩
-    ∴ δ' x {e} _ i ∈ Bₜ e       (suc k) i $⟨ δ'∈-resp-Bₜᵢ e ηₑ≡η₁₊ₑ ⟩
-    ∴ δ' x {e} _ i ∈ Bₜ (suc e) (suc k) i ∎
+  ...     | yes _      | yes _   | no  _ = begin⟨ state-stability (mkₛₑ s≤e ηₛ≡ηₑ) (wf , m∈Bₖ , s∈Bₖ) e∈Q (rec e ≤-refl) ⟩
+    ∴ δ' x {e} _ i ∈ B e∈Q       (suc k) i $⟨ δ'∈-resp-Bₜᵢ e e∈Q 1+e∈Q ηₑ≡η₁₊ₑ ⟩
+    ∴ δ' x {e} _ i ∈ B 1+e∈Q (suc k) i     ∎
   ...     | yes i∈ρ₁₊ₑ | yes _   | yes _ with ∈ρ-subst (sym ηₛ≡η₁₊ₑ) i∈ρ₁₊ₑ
-  ...       | i∈ρₛ = begin⟨ (λ j → m∈Bₖ (s≤s s≤e) η[s,1+e]) ⟩
-    ∴ (∀ j → δ' x {β (suc e) i j} _ j ∈ Bₜ s       k      j)  $⟨ (λ prf j → δ'∈-resp-Bₜᵢ (β (suc e) i j) ηₛ≡η₁₊ₑ (prf j)) ⟩
-    ∴ (∀ j → δ' x {β (suc e) i j} _ j ∈ Bₜ (suc e) k      j)  $⟨ (λ prf → F-mono-B (ρ∈Q (suc e)) (wf (s≤s s≤e) η[s,1+e]) prf i) ⟩
-    ∴ Fₜ (suc e) _ i                  ∈ Bₜ (suc e) (suc k) i  ∎
+  ...       | i∈ρₛ = begin⟨ (λ j → m∈Bₖ (s≤s s≤e) η[s,1+e] s∈Q) ⟩
+    ∴ (∀ j → δ' x {β (suc e) i j} _ j ∈ B s∈Q   k      j)  $⟨ (λ prf j → δ'∈-resp-Bₜᵢ (β (suc e) i j) s∈Q 1+e∈Q ηₛ≡η₁₊ₑ (prf j)) ⟩
+    ∴ (∀ j → δ' x {β (suc e) i j} _ j ∈ B 1+e∈Q k      j)  $⟨ (λ prf → F-mono-B 1+e∈Q (λ j → state∈X₀ (β (suc e) i j) j) (wf (s≤s s≤e) η[s,1+e]) prf i) ⟩
+    ∴ Fₜ (suc e) _ i                  ∈ B 1+e∈Q (suc k) i  ∎
 
   state-stability′ : ∀ {k s e} → SubEpoch [ s , e ] →
                     ComputationInBox k AtTime s →
@@ -204,8 +205,9 @@ module _ {x : S}               -- Initial state
   message-stability : ∀ {k s e i} → SubEpoch [ s , e ] →
                       MessagesToNode i InBox k AtTime s →
                       MessagesToNode i InBox k AtTime e
-  message-stability η[s,e]@(mkₛₑ s≤e ηₛ≡ηₑ) m∈b e<t η[e,t] {j} {recβ} =
-    δ'∈-resp-Bₜᵢ (β _ _ _) ηₛ≡ηₑ (m∈b (<-transʳ s≤e e<t) (η[s,e] ++ₛₑ η[e,t]))
+  message-stability η[s,e]@(mkₛₑ s≤e ηₛ≡ηₑ) m∈b e<t η[e,t] e∈Q {j} {recβ} =
+    δ'∈-resp-Bₜᵢ (β _ _ _) s∈Q e∈Q ηₛ≡ηₑ (m∈b (<-transʳ s≤e e<t) (η[s,e] ++ₛₑ η[e,t]) s∈Q)
+    where s∈Q = η-pres-∈Q ηₛ≡ηₑ e∈Q
 
 --------------------------------------------------------------------------
 -- Step: after one pseudocycle the node is guaranteed to have
@@ -217,29 +219,30 @@ module _ {x : S}               -- Initial state
                   MessagesToNode i InBox k AtTime s →
                   StateOfNode i InBox (suc k) AtTime e
   advance-state {s} {zero}  {i} (mkₐᵢ ηₛ≡η₁₊ₑ m ()  z≤n   i∈αₘ)
-  advance-state {s} {suc e} {i} (mkₐᵢ ηₛ≡η₁₊ₑ m s<m m≤1+e i∈αₘ) wf m∈Bₖ (acc recₑ)
-    with η-inRange ηₛ≡η₁₊ₑ (≤-pred (≤-trans s<m m≤1+e) , n≤1+n _)
-  ... | ηₛ≡ηₑ , ηₑ≡η₁₊ₑ with i ∈? ρ (suc e) | i ∈? ρ e | i ∈? α (suc e)
-  ...   | no  i∉ρ₁₊ₑ | _       | _     = B-null (ρ∈Q (suc e)) i∉ρ₁₊ₑ
+  advance-state {s} {suc e} {i} (mkₐᵢ ηₛ≡η₁₊ₑ m s<m m≤1+e i∈αₘ) wf m∈Bₖ 1+e∈Q (acc recₑ)
+    with η-inRange′ ηₛ≡η₁₊ₑ (≤-pred (≤-trans s<m m≤1+e) , n≤1+n _) 1+e∈Q
+  ... | ηₛ≡ηₑ , ηₑ≡η₁₊ₑ , s∈Q , e∈Q with i ∈? ρ (suc e) | i ∈? ρ e | i ∈? α (suc e)
+  ...   | no  i∉ρ₁₊ₑ | _       | _     = B-null 1+e∈Q i∉ρ₁₊ₑ
   ...   | yes i∈ρ₁₊ₑ | no i∉ρₑ | _     = contradiction (∈ρ-subst (sym ηₑ≡η₁₊ₑ) i∈ρ₁₊ₑ) i∉ρₑ
-  ...   | yes i∈ρ₁₊ₑ | yes _   | yes _ = F-mono-B (ρ∈Q (suc e)) (wf s<1+e (mkₛₑ s≤1+e ηₛ≡η₁₊ₑ)) (λ j → δ'∈-resp-Bₜᵢ (β (suc e) i j) ηₛ≡η₁₊ₑ (m∈Bₖ s<1+e (mkₛₑ s≤1+e ηₛ≡η₁₊ₑ))) i
+  ...   | yes i∈ρ₁₊ₑ | yes _   | yes _ = F-mono-B 1+e∈Q ((λ j → state∈X₀ (β (suc e) i j) j)) (wf s<1+e (mkₛₑ s≤1+e ηₛ≡η₁₊ₑ)) (λ j → δ'∈-resp-Bₜᵢ (β (suc e) i j) s∈Q 1+e∈Q ηₛ≡η₁₊ₑ (m∈Bₖ s<1+e (mkₛₑ s≤1+e ηₛ≡η₁₊ₑ) s∈Q)) i
     where s<1+e = ≤-trans s<m m≤1+e; s≤1+e = ≤-trans (n≤1+n s) s<1+e
   ...   | yes _       | yes _   | no  i∉α₁₊ₑ with m ≟ℕ suc e
   ...     | yes refl  = contradiction i∈αₘ i∉α₁₊ₑ
-  ...     | no  m≢1+e = δ'∈-resp-Bₜᵢ e ηₑ≡η₁₊ₑ (advance-state (mkₐᵢ ηₛ≡ηₑ m s<m m≤e i∈αₘ) wf m∈Bₖ _)
+  ...     | no  m≢1+e = δ'∈-resp-Bₜᵢ e e∈Q 1+e∈Q ηₑ≡η₁₊ₑ (advance-state (mkₐᵢ ηₛ≡ηₑ m s<m m≤e i∈αₘ) wf m∈Bₖ e∈Q _)
     where m≤e = ≤-pred (≤∧≢⇒< m≤1+e m≢1+e)
-
+ 
   advance-messages : ∀ {s e k i} → MessagesTo i ExpireIn [ s , e ] →
                      ComputationInBox k AtTime s →
                      MessagesToNode i InBox k AtTime e
-  advance-messages {s} {e} {k} {i} (mkₑ (mkₛₑ _ ηₛ≡ηₑ) expiryᵢ) c∈Bₖ e<t (mkₛₑ _ ηₑ≡ηₜ) {j} {recβ}
-    with trans ηₛ≡ηₑ ηₑ≡ηₜ | expiryᵢ e<t j
-  ... | ηₛ≡ηₜ | s≤β with η-inRange ηₛ≡ηₜ (s≤β , (β-decreasing i j (<-transʳ z≤n e<t)))
+  advance-messages {s} {e} {k} {i} (mkₑ (mkₛₑ _ ηₛ≡ηₑ) expiryᵢ) c∈Bₖ e<t (mkₛₑ _ ηₑ≡ηₜ) e∈Q {j} {recβ}
+    with expiryᵢ e<t j
+  ... | s≤β with η-inRange (trans ηₛ≡ηₑ ηₑ≡ηₜ) (s≤β , (β-decreasing i j (<-transʳ z≤n e<t)))
   ...   | (ηₛ≡ηβ , ηβ≡ηₜ) with trans ηβ≡ηₜ (sym ηₑ≡ηₜ)
-  ...     | ηβ≡ηₑ with j ∈? ρ s
-  ...       | yes j∈ρₛ = δ'∈-resp-Bₜᵢ (β _ _ _) ηβ≡ηₑ (state-stability (mkₛₑ s≤β ηₛ≡ηβ) (c∈Bₖ j j∈ρₛ) recβ)
-  ...       | no  j∉ρₛ = δ'∈-resp-Bₜᵢ (β _ _ _) ηβ≡ηₑ (i∉ρ⇒state∈Bₖ (j∉ρₛ ∘ ∈ρ-subst (sym ηₛ≡ηβ)) recβ)
-  
+  ...     | ηβ≡ηₑ with η-pres-∈Q ηβ≡ηₑ e∈Q
+  ...       | β∈Q with j ∈? ρ s
+  ...         | yes j∈ρₛ = δ'∈-resp-Bₜᵢ (β _ _ _) β∈Q e∈Q ηβ≡ηₑ (state-stability (mkₛₑ s≤β ηₛ≡ηβ) (c∈Bₖ j j∈ρₛ) β∈Q recβ)
+  ...         | no  j∉ρₛ = δ'∈-resp-Bₜᵢ (β _ _ _) β∈Q e∈Q ηβ≡ηₑ (i∉ρ⇒state∈Bₖ (j∉ρₛ ∘ ∈ρ-subst (sym ηₛ≡ηβ)) β∈Q recβ)
+
   advance-computation₁ : ∀ {s e k} → Pseudocycle [ s , e ] →
                          ComputationInBox k       AtTime s →
                          ComputationInBox (suc k) AtTime e
@@ -252,7 +255,7 @@ module _ {x : S}               -- Initial state
     m∈Bₖᵐ  = advance-messages (β[s,m] i∈ρₛ) c∈Bₖ
     m∈Bₖᵉ  = message-stability (η[m,e] i) m∈Bₖᵐ
     s∈B₁₊ₖ = advance-state (α[m,e] i∈ρₛ) m∈wfᵐ m∈Bₖᵐ
-    
+
   advance-computationₙ : ∀ {s e k n} →
                          MultiPseudocycle n [ s , e ] →
                          ComputationInBox k       AtTime s →
@@ -276,37 +279,44 @@ module _ {x : S}               -- Initial state
     m∈wfᵉ  = wellFormed-stability (η[m,e] i) m∈wfᵐ
     s∈B₁   = advance-state (α[m,e] i∈ρₛ) m∈wfᵐ (messages∈B₀ (m i) i)
 
-  module _ {s e : 𝕋} where
+  module _ {s : 𝕋} (s∈Q : s ∈Q)  where
 
     k*' : ℕ
-    k*' = k* (η s) (ρ∈Q s)
+    k*' = k* s∈Q
 
     x*' : S
-    x*' = x* (η s) (ρ∈Q s)
+    x*' = x* s∈Q
 
-    B[k*]-reached : MultiPseudocycle k*' [ s , e ] →
-                    ∀ {t} → SubEpoch [ e , t ] →
-                    δ x t ∈ᵢ Bₜ t k*'
-    B[k*]-reached pp {t} η[e,t] with k*' | pp
-    ... | zero  | _              = λ i → state∈B₀ t i (<-wellFounded t)
-    ... | suc k | next m pp' mpp = begin⟨ computation∈B₁ pp' ⟩
-      ∴ ComputationInBox 1       AtTime m   $⟨ advance-computationₙ mpp ⟩
-      ∴ ComputationInBox (suc k) AtTime e   $⟨ (λ prf i → state-stability′ η[e,t] prf i (<-wellFounded t)) ⟩
-      ∴ δ x t ∈ᵢ Bₜ t (suc k)               ∎
-    
-    x*-reached : MultiPseudocycle k*' [ s , e ] →
-                 ∀ {t} → SubEpoch [ e , t ] →
-                 δ x t ≈ x*'
-    x*-reached mpp {t} η[e,t] = begin⟨ B[k*]-reached mpp η[e,t] ⟩
-      ∴ δ x t ∈ᵢ Bₜ t k*'  $⟨ δ'∈-resp-Bₜ t ηₛ≡ηₜ ⟩
-      ∴ δ x t ∈ᵢ Bₜ s k*'  $⟨ k*≤k∧x∈Bₖ⇒x≈x* (η s) (ρ∈Q s) ≤-refl ⟩
-      ∴ δ x t ≈ x*'        ∎
-      where ηₛ≡ηₜ = sym (trans (ηₛ≡ηₑ-mpp mpp) (SubEpoch.ηₛ≡ηₑ η[e,t]))
+    private
+      mpp+e⇒ηₜ≡ηₛ : ∀ {e k} → MultiPseudocycle k [ s , e ] → ∀ {t} → SubEpoch [ e , t ] → η t ≡ η s
+      mpp+e⇒ηₜ≡ηₛ mpp η[e,t] = sym (trans (ηₛ≡ηₑ-mpp mpp) (SubEpoch.ηₛ≡ηₑ η[e,t]))
 
-convergent : PartiallyConvergent I∥ B₀ Q
+      mpp+e⇒t∈Q : ∀ {e k} → MultiPseudocycle k [ s , e ] → ∀ {t} → SubEpoch [ e , t ] → t ∈Q
+      mpp+e⇒t∈Q mpp η[e,t] = η-pres-∈Q (mpp+e⇒ηₜ≡ηₛ mpp η[e,t]) s∈Q
+      
+    B[k*]-reached : ∀ {e k} (mpp : MultiPseudocycle k [ s , e ]) →
+                    ∀ {t} → (se : SubEpoch [ e , t ]) →
+                    δ x t ∈ᵢ B (mpp+e⇒t∈Q mpp se) k
+    B[k*]-reached {e} {zero}  mpp                   {t} se = λ i → state∈B₀ t i (mpp+e⇒t∈Q mpp se) (<-wellFounded t)
+    B[k*]-reached {e} {suc k} mpp@(next m pp' mpp') {t} se = begin⟨ computation∈B₁ pp' ⟩
+      ∴ ComputationInBox 1       AtTime m  $⟨ advance-computationₙ mpp' ⟩
+      ∴ ComputationInBox (suc k) AtTime e  $⟨ (λ prf i → state-stability′ se prf i t∈Q (<-wellFounded t)) ⟩
+      ∴ δ x t ∈ᵢ B _ (suc k)               ∎
+      where t∈Q = mpp+e⇒t∈Q mpp se
+      
+    reachesFP : ∀ {e} → MultiPseudocycle k*' [ s , e ] →
+                ∀ {t} → SubEpoch [ e , t ] →
+                δ x t ≈ x*'
+    reachesFP mpp {t} η[e,t] = begin⟨ B[k*]-reached mpp η[e,t] ⟩
+      ∴ δ x t ∈ᵢ B t∈Q k*'  $⟨ δ'∈-resp-Bₜᵢ t t∈Q s∈Q ηₛ≡ηₜ ∘_ ⟩
+      ∴ δ x t ∈ᵢ B s∈Q k*'  $⟨ k*≤k∧x∈Bₖ⇒x≈x* s∈Q ≤-refl ⟩
+      ∴ δ x t ≈ x*'          ∎
+      where
+      ηₛ≡ηₜ = mpp+e⇒ηₜ≡ηₛ mpp η[e,t]
+      t∈Q   = η-pres-∈Q ηₛ≡ηₜ s∈Q
+
+convergent : PartiallyConvergent I∥ X₀ Q
 convergent = record
-  { x*         = x*
-  ; k*         = k*
-  ; x*-fixed   = x*-fixed
-  ; x*-reached = x*-reached
+  { localFP   = localFP
+  ; reachesFP = reachesFP
   }

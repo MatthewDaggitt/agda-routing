@@ -11,6 +11,7 @@
 --------------------------------------------------------------------------------
 
 open import RoutingLib.Routing.VectorBased.Asynchronous.Results
+open import RoutingLib.Routing.Protocols.BGPLite.Simulation
 
 module RoutingLib.Routing.Protocols.BGPLite where
 
@@ -25,8 +26,6 @@ open import RoutingLib.Routing.Protocols.BGPLite.Core public
 --------------------------------------------------------------------------------
 -- The algebra always converges (proved via simulation with an equivalent but
 -- better behaved routing algebra).
-
-open import RoutingLib.Routing.Protocols.BGPLite.Simulation
 
 δ-alwaysConvergent : Convergent A
 δ-alwaysConvergent = simulate Aₐₗₜ-simulates-A Aₐₗₜ-convergent

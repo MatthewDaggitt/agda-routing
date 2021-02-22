@@ -191,7 +191,7 @@ X₀⊆B₀ : X₀ ⊆ᵢ B 0
 X₀⊆B₀ x∈X₀ = x∈X₀ , dᵢ≤r[0] _ _
 
 B₀⊆X₀ : B 0 ⊆ᵢ X₀
-B₀⊆X₀ (x∈X₀ , _) = x∈X₀
+B₀⊆X₀ = proj₁
 
 X₀≋B₀ : X₀ ≋ᵢ B 0
 X₀≋B₀ = X₀⊆B₀ , B₀⊆X₀
@@ -204,7 +204,7 @@ aco : PartialACO I∥ X₀ p
 aco = record
   { B            = B
   ; Bᵢ-cong      = Bᵢ-cong
-  ; F-resp-B₀    = F-resp-B₀
+  ; F-resp-X₀    = X₀-closed
   ; F-mono-B     = F-mono-B
   ; x*           = x*
   ; k*           = k*

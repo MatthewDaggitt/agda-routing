@@ -43,28 +43,20 @@ open import RoutingLib.Routing.VectorBased.Synchronous algebra A
 -- I say trivial as it's only 8 small lemmas in Agda, which if that's not
 -- trivial I'm not sure what is!
 
-record IsExtensionRespectingOrder {ℓ₂} (_<ᵣ_ : Rel Route ℓ₂) : Set (a ⊔ ℓ ⊔ ℓ₂) where
-  field
-    isDecStrictPartialOrder : IsDecStrictPartialOrder _≈_ _<ᵣ_
-    ↝⇒<ᵣ                    : _↝_ ⇒ _<ᵣ_
-    <₊∧<ᵣ⇒<ᵣ                : Trans _<₊_ _<ᵣ_ _<ᵣ_
-    <ᵣ-min                  : StrictMinimum _≈_ _<ᵣ_ 0#
-
-  open IsDecStrictPartialOrder isDecStrictPartialOrder public
-    renaming
-    ( irrefl    to <ᵣ-irrefl
-    ; trans     to <ᵣ-trans
-    ; _<?_      to _<ᵣ?_
-    ; <-respʳ-≈ to <ᵣ-respʳ-≈
-    ; <-respˡ-≈ to <ᵣ-respˡ-≈
-    )
+-- This can't be defined in terms of IsDecStrictTotalOrder as we
+-- need the irreflexive relation to irrelevant
     
 record ExtensionRespectingOrder ℓ₂ : Set (a ⊔ ℓ ⊔ suc ℓ₂) where
   field
-    _<ᵣ_                       : Rel Route ℓ₂
-    isExtensionRespectingOrder : IsExtensionRespectingOrder _<ᵣ_
-
-  open IsExtensionRespectingOrder isExtensionRespectingOrder public
+    _<ᵣ_         : Rel Route ℓ₂
+    ↝⇒<ᵣ         : _↝_ ⇒ _<ᵣ_
+    <₊∧<ᵣ⇒<ᵣ     : Trans _<₊_ _<ᵣ_ _<ᵣ_
+    .<ᵣ-irrefl   : Irreflexive _≈_ _<ᵣ_
+    <ᵣ-trans     : Transitive _<ᵣ_
+    _<ᵣ?_        : Decidable _<ᵣ_
+    <ᵣ-respʳ-≈   : _<ᵣ_ Respectsʳ _≈_
+    <ᵣ-respˡ-≈   : _<ᵣ_ Respectsˡ _≈_
+    <ᵣ-min       : StrictMinimum _≈_ _<ᵣ_ 0#
 
 ------------------------------------------------------------------------
 -- Height function

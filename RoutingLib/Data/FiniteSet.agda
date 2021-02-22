@@ -8,8 +8,12 @@ open import Data.Product hiding (map)
 open import Data.Vec.Functional hiding (map; last)
 open import Function
 open import Level using (Level)
+open import Relation.Nullary using (Dec; yes; no)
+open import Relation.Unary using (Pred)
+open import Relation.Binary using (Setoid)
 
 open import RoutingLib.Data.Vec.Functional hiding (⟦_⟧)
+open import RoutingLib.Relation.Nullary.Finite.Bijection.Setoid using (Finite)
 
 private
   variable

@@ -82,7 +82,7 @@ record IsAsyncIterable
     ; setoid        to ≈-setoid
     ; indexedSetoid to ≈ᵢ-iSetoid
     )
-
+  
   _≟_ : B.Decidable _≈_
   x ≟ y = all? (λ i → x i ≟ᵢ y i)
 
@@ -130,16 +130,6 @@ module _ {a ℓ n} (I∥ : AsyncIterable a ℓ n) where
 
   open AsyncIterable I∥
 
-  record Converges : Set (lsuc 0ℓ ⊔ a ⊔ ℓ) where
-    field
-      x*         : S
-      k*         : ℕ
-      x*-fixed   : F x* ≈ x*
-      x*-reached : ∀ x → (ψ : Schedule n) →
-                   ∀ {s e : 𝕋} → MultiPseudocycle ψ k* [ s , e ] →
-                   ∀ {t} → e ≤ t →
-                   asyncIter I∥ ψ x t ≈ x*
-
   record PartiallyConverges {p} (X₀ : IPred Sᵢ p) : Set (lsuc 0ℓ ⊔ a ⊔ ℓ ⊔ p) where
     field
       x*         : S
@@ -151,13 +141,8 @@ module _ {a ℓ n} (I∥ : AsyncIterable a ℓ n) where
                    ∀ {t} → e ≤ t →
                    asyncIter I∥ ψ x t ≈ x*
 
-  converges⇒partiallyConverges : Converges → PartiallyConverges Uᵢ
-  converges⇒partiallyConverges conv = record
-    { x*         = x*
-    ; k*         = k*
-    ; x*-fixed   = x*-fixed
-    ; x*-reached = λ {x} _ → x*-reached x
-    } where open Converges conv
+  Converges : Set (lsuc 0ℓ ⊔ a ⊔ ℓ)
+  Converges = PartiallyConverges Uᵢ
 
   partiallyConverges⇒converges : ∀ {p} {X₀ : IPred Sᵢ p} → Universalᵢ X₀ →
                                  PartiallyConverges X₀ → Converges
@@ -165,9 +150,5 @@ module _ {a ℓ n} (I∥ : AsyncIterable a ℓ n) where
     { x*         = x*
     ; k*         = k*
     ; x*-fixed   = x*-fixed
-    ; x*-reached = λ x → x*-reached (λ i → x i ∈X₀)
+    ; x*-reached = λ x → x*-reached (λ i → _ ∈X₀)
     } where open PartiallyConverges partialConv
-
-  
-  partiallyConverges⇒converges′ : PartiallyConverges Uᵢ → Converges
-  partiallyConverges⇒converges′ = partiallyConverges⇒converges (λ _ → tt)

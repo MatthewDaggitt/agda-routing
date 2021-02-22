@@ -1,28 +1,12 @@
-
-open import RoutingLib.Routing using (AdjacencyMatrix)
-open import RoutingLib.Routing.Algebra
-
-module RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Step1_FreeImpliesERO
-  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  {n} (A : AdjacencyMatrix algebra n)
-  where
-
-open RawRoutingAlgebra algebra
-open IsRoutingAlgebra isRoutingAlgebra
-
 open import Data.Nat as ℕ using (ℕ; zero; suc; _≤_; z≤n; s≤s)
 open import Data.Fin using (Fin; suc; inject₁)
 open import Data.Fin.Patterns
 open import Data.List hiding ([_])
-open import Data.List.Membership.Setoid S
 open import Data.Sum as Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product as Product using (∃; ∃₂; _,_; proj₁; proj₂; _×_)
 open import Data.Maybe
 open import Data.Maybe.Relation.Unary.Any
 open import Data.Maybe.Relation.Unary.All as All
-open import Data.List.Relation.Binary.Sublist.Setoid S
-open import Data.List.Relation.Binary.Sublist.Setoid.Properties S
 open import Data.Unit using (tt)
 open import Function
 open import Induction.WellFounded using (WellFounded; Acc; acc)
@@ -38,21 +22,39 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Nullary.Decidable using (False; fromWitnessFalse)
 
-open import RoutingLib.Routing algebra n
-open import RoutingLib.Routing.AdjacencyMatrix.Cycles algebra
-open import RoutingLib.Routing.AdjacencyMatrix.Relations algebra A
-open import RoutingLib.Routing.AdjacencyMatrix.Relations.Properties isRoutingAlgebra A
-open import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra isRoutingAlgebra
-
 open import RoutingLib.Data.Fin using (_+ₘ_; _-ₘ_)
-open import RoutingLib.Data.List.Relation.Binary.Sublist.Setoid S
-open import RoutingLib.Data.List.Relation.Binary.Sublist.Setoid.Properties S
 open import RoutingLib.Data.FiniteSet renaming (FiniteSet to FiniteSet⁺)
 open import RoutingLib.Relation.Nullary.Finite.Bijection.Setoid using (Finite)
 open import RoutingLib.Data.Maybe.Properties
 open import RoutingLib.Relation.Binary using (StrictMinimum)
 import RoutingLib.Relation.Binary.Construct.Closure.Transitive.Finite as TransClosure
 import RoutingLib.Relation.Binary.Construct.Closure.Transitive as TransClosure
+
+open import RoutingLib.Routing using (AdjacencyMatrix)
+open import RoutingLib.Routing.Algebra
+
+module RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Step1_FreeImpliesERO
+  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  {n} (A : AdjacencyMatrix algebra n)
+  where
+
+open RawRoutingAlgebra algebra
+open IsRoutingAlgebra isRoutingAlgebra
+
+open import RoutingLib.Routing algebra n
+open import RoutingLib.Routing.AdjacencyMatrix.Cycles algebra
+open import RoutingLib.Routing.AdjacencyMatrix.Relations algebra A
+open import RoutingLib.Routing.AdjacencyMatrix.Relations.Properties isRoutingAlgebra A
+open import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra isRoutingAlgebra
+
+open import Data.List.Membership.Setoid S
+open import Data.List.Relation.Binary.Sublist.Setoid S
+open import Data.List.Relation.Binary.Sublist.Setoid.Properties S
+open import RoutingLib.Data.List.Relation.Binary.Sublist.Setoid S
+open import RoutingLib.Data.List.Relation.Binary.Sublist.Setoid.Properties S
+
+
 
 open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.InternalDefinitions algebra
 
@@ -153,7 +155,7 @@ y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v {v} y≤v (inj₂ x↝w ∷ w<ᶠy) with ⟦ w
 --     by the irreflexivity of _<₊_
 --   ∙ if the path does contain extensions then the set of extended routes must form
 --     a cycle thanks to x ≈ y and the previous lemmas.
-<ᶠ-irrefl : CycleFree A → Irreflexive _≈_ _<ᶠ_
+.<ᶠ-irrefl : CycleFree A → Irreflexive _≈_ _<ᶠ_
 <ᶠ-irrefl cf x≈y x<ᶠy with IsJust? ⟦ x<ᶠy ⟧↝
 ... | no  ¬∣x<ᶠy∣↝ = <₊-irrefl x≈y (¬⟦x<ᶠy⟧↝⇒x<y x<ᶠy ¬∣x<ᶠy∣↝)
 ... | yes ∣x<ᶠy∣↝  = cf (to-witness ∣x<ᶠy∣↝) ∣x<ᶠy∣↝-cyclic
@@ -192,31 +194,15 @@ y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v {v} y≤v (inj₂ x↝w ∷ w<ᶠy) with ⟦ w
 <₊∧<ᶠ⇒<ᶠ : Trans _<₊_ _<ᶠ_ _<ᶠ_
 <₊∧<ᶠ⇒<ᶠ x<₊y y<ᶠz = inj₁ x<₊y ∷ y<ᶠz
 
-<ᶠ-isStrictPartialOrder : CycleFree A → IsStrictPartialOrder _≈_ _<ᶠ_
-<ᶠ-isStrictPartialOrder cf = record
-  { isEquivalence = ≈-isEquivalence
-  ; irrefl        = <ᶠ-irrefl cf
-  ; trans         = <ᶠ-trans
-  ; <-resp-≈      = <ᶠ-resp-≈
-  }
-
-<ᶠ-isDecStrictPartialOrder : IsFinite algebra → CycleFree A → IsDecStrictPartialOrder _≈_ _<ᶠ_
-<ᶠ-isDecStrictPartialOrder fin cf = record
-  { isStrictPartialOrder = <ᶠ-isStrictPartialOrder cf
-  ; _≟_                  = _≟_
-  ; _<?_                 = <ᶠ-dec fin
-  }
-
-<ᶠ-isExtensionRespectingOrder : IsFinite algebra → CycleFree A → IsExtensionRespectingOrder A _<ᶠ_
-<ᶠ-isExtensionRespectingOrder fin cf = record
-  { isDecStrictPartialOrder = <ᶠ-isDecStrictPartialOrder fin cf
-  ; ↝⇒<ᵣ                    = ↝⇒<ᶠ
-  ; <₊∧<ᵣ⇒<ᵣ                = <₊∧<ᶠ⇒<ᶠ
-  ; <ᵣ-min                  = <ᶠ-min
-  }
-
-<ᶠ-extensionRespectingOrder : IsFinite algebra → CycleFree A → ExtensionRespectingOrder A _
+<ᶠ-extensionRespectingOrder : IsFinite algebra → .(CycleFree A) → ExtensionRespectingOrder A _
 <ᶠ-extensionRespectingOrder fin cf = record
-  { _<ᵣ_                       = _<ᶠ_
-  ; isExtensionRespectingOrder = <ᶠ-isExtensionRespectingOrder fin cf
+  { _<ᵣ_       = _<ᶠ_
+  ; ↝⇒<ᵣ       = ↝⇒<ᶠ
+  ; <₊∧<ᵣ⇒<ᵣ   = <₊∧<ᶠ⇒<ᶠ
+  ; <ᵣ-irrefl  = <ᶠ-irrefl cf
+  ; <ᵣ-trans   = <ᶠ-trans
+  ; _<ᵣ?_      = <ᶠ-dec fin
+  ; <ᵣ-respʳ-≈ = <ᶠ-respʳ-≈
+  ; <ᵣ-respˡ-≈ = <ᶠ-respˡ-≈
+  ; <ᵣ-min     = <ᶠ-min
   }

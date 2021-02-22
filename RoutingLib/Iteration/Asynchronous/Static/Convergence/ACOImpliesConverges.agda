@@ -101,7 +101,7 @@ module _ {x : S} (x∈X₀ : x ∈ᵢ X₀) (ψ : Schedule n) where
 -- Base case: the asynchronous iteration is always in the initial box
 
   state∈B₀ : ∀ t → StateInBox 0 AtTime t
-  state∈B₀ zero    i (acc rec) = proj₁ X₀≋B₀ (x∈X₀ i)
+  state∈B₀ zero    i (acc rec) = X₀⊆B₀ (x∈X₀ i)
   state∈B₀ (suc t) i (acc rec) with i ∈? α (suc t)
   ... | no  _ = state∈B₀ t i (rec t _)
   ... | yes _ = F-resp-B₀ (λ j → state∈B₀ (β (suc t) i j) j _) i 

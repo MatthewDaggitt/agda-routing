@@ -21,10 +21,12 @@ open import RoutingLib.Data.Vec.Functional.Properties using (max[t]<x; x≤max[t
 import RoutingLib.Function.Metric.Construct.Condition as Condition
 import RoutingLib.Function.Metric.Construct.MaxLift as MaxLift
 import RoutingLib.Relation.Nullary.Decidable as Dec
+open import RoutingLib.Relation.Unary.Indexed using (Uᵢ)
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence
 open import RoutingLib.Routing using (Network)
 open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Network.Definitions using (TopologyIsFree)
 import RoutingLib.Routing.VectorBased.Asynchronous as AsyncVectorBasedRouting
 open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.InternalDefinitions
 
@@ -33,16 +35,17 @@ module RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Step4_DFImpliesAM
   (isRoutingAlgebra : IsRoutingAlgebra alg)
   {n} (N : Network alg n)
   (open AsyncVectorBasedRouting alg N hiding (F))
-  (N-d : ∀ (e : Epoch) (p : Subset n) → RouteDistanceFunction alg (Aₜ e p))
+  (N-d : ∀ {e p} → .(TopologyIsFree alg N (e , p)) → RouteDistanceFunction alg (Aₜ e p))
   where
 
 open RawRoutingAlgebra alg
 open import RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Properties isRoutingAlgebra N
 
+
 ------------------------------------------------------------------------
 -- Lifting the distance function
 
-module _ (e : Epoch) (p : Subset n) where
+module _ {e : Epoch} {p : Subset n} .(free : TopologyIsFree alg N (e , p)) where
 
   private
     F : RoutingMatrix → RoutingMatrix
@@ -51,7 +54,7 @@ module _ (e : Epoch) (p : Subset n) where
     F² : RoutingMatrix → RoutingMatrix
     F² = F ∘ F
     
-  open RouteDistanceFunction (N-d e p)
+  open RouteDistanceFunction (N-d free)
   
   -- The distance between two routing tables
   d : RoutingTable → RoutingTable → ℕ
@@ -145,15 +148,22 @@ module _ (e : Epoch) (p : Subset n) where
                     D X* (F X) < D X* X
   Fₜ-strContrOnFP {X} wfX {X*} FX*≈X* X≉X* = max[t]<x (Y≉ₚX⇒0<DXY X≉X*) (dᵢ[X*ᵢ,FXᵢ]<D[X*,X] FX*≈X* wfX X≉X*)
 
+  localAMCO : LocalAMCO F∥ Uᵢ e p 
+  localAMCO = record
+    { dᵢ                   = d
+    ; dᵢ-isQuasiSemiMetric = λ i → d-isQuasiSemiMetric
+    ; dᵢ-bounded           = proj₁ d-bounded , proj₂ d-bounded
+    ; F-strContrOnOrbits   = λ _ → Fₜ-strContrOnOrbits
+    ; F-strContrOnFP       = λ _ → Fₜ-strContrOnFP
+    ; F-pres-Aₚ            = λ _ → F′-pres-Aₚ
+    }
+  
 ------------------------------------------------------------------------
 -- AMCO
 
-amco : AMCO F∥
+amco : PartialAMCO F∥ Uᵢ (TopologyIsFree alg N)
 amco = record
-  { dᵢ                   = λ e p {i} → d e p
-  ; dᵢ-isQuasiSemiMetric = λ e p i → d-isQuasiSemiMetric e p
-  ; dᵢ-bounded           = λ e p → proj₁ (d-bounded e p) , proj₂ (d-bounded e p)
-  ; F-strContrOnOrbits   = λ {e p} → Fₜ-strContrOnOrbits e p
-  ; F-strContrOnFP       = λ {e p} → Fₜ-strContrOnFP e p
-  ; F-pres-Aₚ            = F′-pres-Aₚ
+  { localAMCO = localAMCO
+  ; F-pres-X₀ = _
+  ; ⊥∈X₀      = _
   }

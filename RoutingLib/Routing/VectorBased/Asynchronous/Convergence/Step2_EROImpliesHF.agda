@@ -36,7 +36,7 @@ open import RoutingLib.Relation.Nullary.Finite.Bijection.Setoid
 import RoutingLib.Relation.Nullary.Finite.Bijection.Setoid.Properties as FiniteProperties
 open import RoutingLib.Function.Reasoning
 
-open ExtensionRespectingOrder extRespOrder hiding (_≟_)
+open ExtensionRespectingOrder extRespOrder
 open Finite finite hiding (cong)
 open FiniteProperties finite hiding (_≟_)
 open import RoutingLib.Routing.AdjacencyMatrix.Relations algebra A
@@ -77,8 +77,7 @@ h≤H x = begin⟨ (λ {y} → x<y⇒0<y {y}) ⟩
   ... | no  x≉0 = <ᵣ-trans (<ᵣ-min x≉0) x<y
 
 h-resp-↝ : ∀ {x y} → x ↝ y → h y < h x
-h-resp-↝ {x} {y} x↝y = begin⟨ ↝⇒<ᵣ x↝y , <ᵣ-irrefl ≈-refl ⟩
-  ∴ (x <ᵣ y) × ¬ (y <ᵣ y) $⟨ filter-⊂ S _ <ᵣ-respʳ-≈ _ <ᵣ-respʳ-≈ (<ᵣ-trans (↝⇒<ᵣ x↝y)) (∈-routes y) ⟩
+h-resp-↝ {x} {y} x↝y = begin⟨ filter-⊂ S _ <ᵣ-respʳ-≈ _ <ᵣ-respʳ-≈ (<ᵣ-trans (↝⇒<ᵣ x↝y)) (∈-routes y) (↝⇒<ᵣ x↝y) (<ᵣ-irrefl ≈-refl) ⟩
   ∴ ↑ y ⊂ ↑ x             $⟨ s≤s ∘ length-mono-< S ⟩
   ∴ h y < h x             ∎
 

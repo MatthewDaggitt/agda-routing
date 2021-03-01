@@ -14,7 +14,7 @@ module RoutingLib.Routing.VectorBased.Synchronous
   {n} (A : AdjacencyMatrix algebra n)
   where
 
-open import Data.Nat using (ℕ)
+open import Data.Nat using (ℕ; zero; suc)
 open import Data.List using (foldr; tabulate)
 open import Data.List.Relation.Binary.Pointwise using (tabulate⁺)
 
@@ -44,3 +44,7 @@ F X i j = foldr _⊕_ (I i j) (tabulate (λ k → A i k ▷ X k j))
 F-cong : ∀ {X Y} → X ≈ₘ Y → F X ≈ₘ F Y
 F-cong X≈Y i j = foldr⁺ _≈_ ⊕-cong ≈-refl (tabulate⁺ (λ k → ▷-cong _ (X≈Y k j)))
 
+-- σ respects the underlying matrix equality
+σ-cong : ∀ t {X Y} → X ≈ₘ Y → σ t X ≈ₘ σ t Y
+σ-cong zero    X≈Y = X≈Y
+σ-cong (suc t) X≈Y = F-cong (σ-cong t X≈Y)

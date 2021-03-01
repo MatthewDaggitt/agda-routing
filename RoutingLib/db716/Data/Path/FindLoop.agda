@@ -27,14 +27,6 @@ sortPair i j i≢j f[i]≡f[j] with i <? j
 ... | yes i<j = i , j , i<j , f[i]≡f[j]
 ... | no i≰j = j , i , (≰⇒> λ i≤j → i≰j (≤∧≢⇒< i≤j i≢j)) , (sym f[i]≡f[j])
 
-{-
--- Modified version of Data.List.Any.index which retains the proof of P (lookup xs i)
-indexCertified : ∀ {a p} {A : Set a} {P : A → Set p} {xs} → Any P xs → ∃ λ i → P (lookup xs i)
-indexCertified (here px) = Fin.zero , px
-indexCertified (there pxs) =
-  let (i , pxs[i]) = indexCertified pxs
-  in Fin.suc i , pxs[i]-}
-
 vertexLoop→edgeLoop : ∀ {n : ℕ} {l : List (Vertex n)} (i j : Fin (length l)) → i < j → lookup l i ≡ lookup l j → HasLoop ( fromVertexList l)
 vertexLoop→edgeLoop {suc n} {x ∷ y ∷ l} Fin.zero (fsuc Fin.zero) 0<1 l[0]≡l[1] rewrite l[0]≡l[1] = trivial
 vertexLoop→edgeLoop {suc n} {x ∷ y ∷ l} Fin.zero (fsuc (fsuc j)) 0<2+j x≡l[j] =

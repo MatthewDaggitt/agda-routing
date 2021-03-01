@@ -95,11 +95,3 @@ isUltraMetric um = record
   { isSemiMetric = isSemiMetric (IsUltraMetric.isSemiMetric um)
   ; triangle     = maxTriIneq (IsUltraMetric.triangle um)
   }
-
-{-
-ultrametric : (∀ i → UltraMetric a ℓ) → UltraMetric {!!} {!!}
-ultrametric um = record
-  { d             = {!!} --d (λ {i} → UltraMetric.d (um i))
-  ; isUltraMetric = isUltraMetric {!!} --(λ {i} → UltraMetric.isUltraMetric (um i))
-  }
--}

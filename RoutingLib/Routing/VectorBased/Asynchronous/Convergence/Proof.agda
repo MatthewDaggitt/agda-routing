@@ -10,7 +10,7 @@ open import RoutingLib.Routing.Network.Definitions
 open import RoutingLib.Routing.AdjacencyMatrix.Cycles
 open import RoutingLib.Routing.VectorBased.Asynchronous hiding (AdjacencyMatrix; Aₜ)
 open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Definitions
-open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.InternalDefinitions
+open import RoutingLib.Routing.VectorBased.Convergence.Definitions
 
 import RoutingLib.Iteration.Asynchronous.Dynamic as Iteration
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence as Iteration using (PartialAMCO; AMCO)

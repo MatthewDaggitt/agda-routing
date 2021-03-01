@@ -1,6 +1,6 @@
 open import RoutingLib.Routing using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.InternalDefinitions
+open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Definitions
 
 module RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Step2_EROImpliesHF
   {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)

@@ -13,6 +13,7 @@ import Algebra.Construct.NaturalChoice.Min as Min
 open import Data.Maybe using (just; nothing; Is-just)
 open import Data.Maybe.Properties using (just-injective)
 open import Data.Nat using (ℕ; _≤_)
+open import Data.Nat.Base using (_^_)
 open import Data.Nat.Properties using (≤-refl; <-cmp; <-transˡ)
 open import Data.List.Properties using (∷-injectiveˡ)
 open import Data.Fin using (Fin; toℕ)
@@ -252,7 +253,10 @@ Aₐₗₜ-simulates-A = record
 --------------------------------------------------------------------------------
 -- Aₐₗₜ is convergent
 
-open import RoutingLib.Routing.VectorBased.Asynchronous.Results
+open import RoutingLib.Routing.VectorBased.Convergence.Results
 
 Aₐₗₜ-convergent : Convergent Aₐₗₜ
 Aₐₗₜ-convergent = incrPaths⇒convergent isRoutingAlgebra isPathAlgebra isIncreasing
+
+Aₐₗₜ-syncConverges-O[n²] : SynchronouslyConvergesIn Aₐₗₜ (λ n → n ^ 2)
+Aₐₗₜ-syncConverges-O[n²] = incrPaths⇒syncConvergesIn-n² isRoutingAlgebra isPathAlgebra isIncreasing

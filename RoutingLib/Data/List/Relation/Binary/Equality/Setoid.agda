@@ -1,22 +1,17 @@
 open import Relation.Binary hiding (Decidable)
 
+open import Algebra.Core using (Op₂)
+open import Data.List
+import Data.List.Relation.Binary.Pointwise as Pointwise
+open import Function.Base using (_∘_)
+open import Relation.Unary
+
 module RoutingLib.Data.List.Relation.Binary.Equality.Setoid
   {a ℓ} (S : Setoid a ℓ) where
 
-open import Algebra.Core using (Op₂)
-open import Data.Fin using (Fin)
-open import Data.List
-import Data.List.Relation.Binary.Equality.Setoid as SetoidEquality hiding (filter⁺)
-import Data.List.Relation.Binary.Pointwise as Pointwise
-open import Function using (_∘_)
-open import Relation.Unary
-
-import RoutingLib.Data.List.Relation.Binary.Pointwise as PW
-
-open Pointwise public using (head; tail)
-
 open Setoid S renaming (Carrier to A)
-open SetoidEquality S
+
+open import Data.List.Relation.Binary.Equality.Setoid S hiding (filter⁺)
 
 --stdlib
 foldr⁺ : ∀ {_•_ : Op₂ A} {_◦_ : Op₂ A} →

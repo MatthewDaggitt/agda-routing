@@ -28,8 +28,8 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; cong₂) 
 open import RoutingLib.Data.Matrix.Relation.Binary.Equality using (_≈ₘ_)
 
 open import RoutingLib.Data.Matrix using (SquareMatrix) renaming (map to matmap)
-open import RoutingLib.db716.Algebra.SemiringMatrix S
-open import RoutingLib.db716.Algebra.Properties.Summation S
+open import RoutingLib.Data.Matrix.Algebra.Semiring S
+open import RoutingLib.Algebra.Properties.Semiring.Sum S
 open import Data.Vec.Functional using () renaming (foldr to tfoldr)
 
 open import RoutingLib.db716.Data.Path.UncertifiedFinite
@@ -42,9 +42,10 @@ edgeWeight M (i , j) = M i j
 weight : ∀ {n} → SquareMatrix Carrier n → Path n → Carrier 
 weight M p = foldr _*_ 1# (map (edgeWeight M) p)
 
-private pow : ∀ {n} → SquareMatrix Carrier n → ℕ → SquareMatrix Carrier n
-pow {n} = pow'
-  where open import RoutingLib.db716.Algebra.Semiring (SemiringMat n) using () renaming (pow to pow')
+private
+  pow : ∀ {n} → SquareMatrix Carrier n → ℕ → SquareMatrix Carrier n
+  pow {n} = pow'
+    where open import Algebra.Properties.Semiring.Exp (⊕-⊗-semiring n) using () renaming (_^_ to pow')
 
 data StartsWith : ∀ {n} → Path n → Fin n → Set where
   startsWith : ∀ {n} (p : Path n) (i : Fin n) {j : Fin n} → StartsWith ((i , j) ∷ p) i

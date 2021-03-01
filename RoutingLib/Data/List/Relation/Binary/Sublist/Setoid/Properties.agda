@@ -1,17 +1,6 @@
 
-open import Relation.Binary using (Setoid; _Respects_)
-
-module RoutingLib.Data.List.Relation.Binary.Sublist.Setoid.Properties
-  {a ℓ} (S : Setoid a ℓ) where
-
-open Setoid S renaming (Carrier to A)
-
 open import Data.List hiding (_∷ʳ_)
-open import Data.List.Relation.Binary.Sublist.Setoid S
-open import Data.List.Relation.Binary.Sublist.Setoid.Properties S
-open import Data.List.Relation.Binary.Equality.Setoid S hiding (filter⁺)
 open import Data.List.Relation.Unary.Any using (here; there)
-open import Data.List.Membership.Setoid S
 open import Data.Nat using (_<_; z≤n; s≤s)
 open import Data.Product using (_×_; _,_)
 open import Data.Empty.Irrelevant using (⊥-elim)
@@ -21,9 +10,19 @@ open import Relation.Unary using (Pred; Decidable)
   renaming (_∈_ to _∈ᵤ_; _∉_ to _∉ᵤ_; _⊆_ to _⊆ᵤ_)
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
+open import Relation.Binary using (Setoid; _Respects_)
+
+module RoutingLib.Data.List.Relation.Binary.Sublist.Setoid.Properties
+  {a ℓ} (S : Setoid a ℓ) where
+
+open Setoid S renaming (Carrier to A)
+
+open import Data.List.Relation.Binary.Sublist.Setoid S
+open import Data.List.Relation.Binary.Sublist.Setoid.Properties S
+open import Data.List.Relation.Binary.Equality.Setoid S hiding (filter⁺)
+open import Data.List.Membership.Setoid S
 
 open import RoutingLib.Data.List.Relation.Binary.Sublist.Setoid S
-open import RoutingLib.Relation.Unary using (_/_)
 
 private
   variable

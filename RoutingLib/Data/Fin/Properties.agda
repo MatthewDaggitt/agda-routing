@@ -1,7 +1,8 @@
 open import Data.Fin renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties
 open import Data.Product using (_,_)
-open import Data.Nat as ℕ using (ℕ; z≤n; s≤s; zero; suc) renaming (_<_ to _<ℕ_; _≤_ to _≤ℕ_; _≤?_ to _≤ℕ?_; ≤-pred to ≤ℕ-pred)
+open import Data.Nat as ℕ using (ℕ; z≤n; s≤s; zero; suc)
+  renaming (_<_ to _<ℕ_; _≤_ to _≤ℕ_; _≤?_ to _≤ℕ?_; ≤-pred to ≤ℕ-pred)
 import Data.Nat.Properties as ℕₚ
 open import Relation.Nullary using (¬_)
 open import Relation.Nullary.Negation using (contradiction)

@@ -56,7 +56,7 @@ open import RoutingLib.Data.List.Relation.Binary.Sublist.Setoid.Properties S
 
 
 
-open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.InternalDefinitions algebra
+open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Definitions algebra
 
 open import Relation.Binary.Reasoning.PartialOrder ≤₊-poset
 

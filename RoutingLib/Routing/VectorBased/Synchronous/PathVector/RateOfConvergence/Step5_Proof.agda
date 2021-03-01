@@ -16,8 +16,8 @@ open import RoutingLib.Data.Fin.Subset using (Nonfull)
 open import RoutingLib.Data.Fin.Subset.Properties
   using (∣p∣<n⇒Nonfull; ∣p∪⁅i⁆∣≡1+∣p∣; i∉⁅j⁆; Nonfull⁅i⁆′; x∉p∪q⁺)
 
-open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing using (AdjacencyMatrix)
+open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Prelude as Prelude
 import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step1_NodeSets as Step1_NodeSets
 import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step2_ConvergedSubtree as Step2_ConvergedSubtree
@@ -129,9 +129,6 @@ module _ (X : RoutingMatrix) (j : Fin n) where
     v : n-1 + suc (n-1 * n) ≡ n ^ 2
     v rewrite *-identityʳ n-1 = +-suc n-1 _
 
-Tᶜᵒⁿᵛ : ℕ → ℕ
-Tᶜᵒⁿᵛ n = n ^ 2
-
-Tᶜᵒⁿᵛ-converged : ∀ X t → σ (Tᶜᵒⁿᵛ n + t) X ≈ₘ σ (Tᶜᵒⁿᵛ n) X
-Tᶜᵒⁿᵛ-converged X t i j = proj₁ (Cₙ₋₁-converged X j (Cₙ₋₁-complete X j i)) t
+n²-convergence : ∀ X t → σ (n ^ 2 + t) X ≈ₘ σ (n ^ 2) X
+n²-convergence X t i j = proj₁ (Cₙ₋₁-converged X j (Cₙ₋₁-complete X j i)) t
 

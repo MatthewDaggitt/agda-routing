@@ -8,8 +8,8 @@ open import Level using () renaming (zero to 0ℓ)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (sym; _≗_)
 
-open import RoutingLib.Data.Rational
-open import RoutingLib.Data.Rational.Properties
+open import Data.Rational
+open import Data.Rational.Properties
 open import RoutingLib.Data.Nat.Properties using (a≤b*a)
 -- open ≤-Reasoning
 

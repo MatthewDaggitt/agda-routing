@@ -15,18 +15,21 @@ module RoutingLib.db716.Results.MatrixPowers {c ℓ} (S : Semiring c ℓ) where
   open import RoutingLib.Data.Matrix.Relation.Binary.Equality using (_≈ₘ_)
 
 
+  open Semiring S
+
+  open import Algebra.Properties.CommutativeMonoid.Sum +-commutativeMonoid renaming (sum-cong-≋ to ∑-cong)
   open import RoutingLib.Data.Matrix hiding (All; map)
-  open import RoutingLib.db716.Algebra.SemiringMatrix S
-  open import RoutingLib.db716.Algebra.Properties.Summation S
+  open import RoutingLib.Data.Matrix.Algebra.Semiring S
+  open import RoutingLib.Algebra.Properties.Semiring.Sum S
   open import RoutingLib.db716.Data.Path.UncertifiedFinite
   open import RoutingLib.db716.Data.Path.UncertifiedFinite.Weights S
 
-  open Semiring S
 
 
-  private pow : ∀ {n} → SquareMatrix Carrier n → ℕ → SquareMatrix Carrier n
-  pow {n} = pow'
-    where open import RoutingLib.db716.Algebra.Semiring (SemiringMat n) using () renaming (pow to pow')
+  private
+    pow : ∀ {n} → SquareMatrix Carrier n → ℕ → SquareMatrix Carrier n
+    pow {n} = pow'
+      where open import RoutingLib.db716.Algebra.Semiring (⊕-⊗-semiring n) using () renaming (pow to pow')
 
   addVertex-weights-lemma : ∀ {n} {i j : Fin n} {p : Path n} {M : SquareMatrix Carrier n} → StartsWith p j → M i j * weight M p ≈ weight M (addVertex i p)
   addVertex-weights-lemma {n} {i} {j} {((j , _) ∷ p)} {M} (startsWith p j) = refl

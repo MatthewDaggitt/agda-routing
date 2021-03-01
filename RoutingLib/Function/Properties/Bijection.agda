@@ -15,7 +15,7 @@ refl : ∀ {S : Setoid a ℓ} → Bijection S S
 refl {S = S} = record
   { f         = id
   ; cong      = id
-  ; bijective = id , (λ x → x , Setoid.refl S)
+  ; bijective = id , _, Setoid.refl S
   }
 
 -- Can't prove full symmetry as we have no proof that the first projection of surjection

@@ -25,7 +25,7 @@ and is organised as follows:
 * Static schedules:  
 [RoutingLib.Iteration.Asynchronous.Static.Schedule](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Iteration/Asynchronous/Static/Schedule.agda)
 
-* Static pseudoperiods:  
+* Static pseudoperiods:
 [RoutingLib.Iteration.Asynchronous.Static.Schedule.Pseudoperiod](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Iteration/Asynchronous/Static/Schedule/Pseudoperiod.agda)
 
 * The static asynchronous iteration state function `δ`, and what it means for it to be correct:  
@@ -41,42 +41,42 @@ A formalisation of the new theory of dynamic asynchronous iterations
 can be found in the directory `RoutingLib.Iteration.Asynchronous.Dynamic`
 and is organised as follows:
 
-* Dynamic schedules:  
+* Dynamic schedules:
 [RoutingLib.Iteration.Asynchronous.Dynamic.Schedule](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Iteration/Asynchronous/Dynamic/Schedule.agda)
 
-* Dynamic pseudoperiods:  
+* Dynamic pseudoperiods:
 [RoutingLib.Iteration.Asynchronous.Dynamic.Schedule.Pseudoperiod](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Iteration/Asynchronous/Dynamic/Schedule/Pseudoperiod.agda)
 
-*  The dynamic asynchronous iteration state function `δ`, and what it means for it to be correct:  
+*  The dynamic asynchronous iteration state function `δ`, and what it means for it to be correct:
 [RoutingLib.Iteration.Asynchronous.Dynamic](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Iteration/Asynchronous/Dynamic.agda)
 
-* Conditions sufficient for convergence (dynamic ACO, dynamic AMCO etc.):  
+* Conditions sufficient for convergence (dynamic ACO, dynamic AMCO etc.):
 [RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Iteration/Asynchronous/Dynamic/Convergence/Conditions.agda)
 
-* Proof that `F` being a dynamic ACO implies that `δ` is convergent:  
+* Proof that `F` being a dynamic ACO implies that `δ` is convergent:
 [RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.ACOImpliesConvergent](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Iteration/Asynchronous/Dynamic/Convergence/ACOImpliesConvergent.agda)
 
-* Proof that `F` is a dynamic AMCO implies `F` is a dynamic ACO is found in:  
+* Proof that `F` is a dynamic AMCO implies `F` is a dynamic ACO is found in:
 [RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.AMCOImpliesACO](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Iteration/Asynchronous/Dynamic/Convergence/AMCOImpliesACO.agda)
 
 * Public facing interface that contains all convergence conditions and theorems,
-which should be used to prove new convergence results:  
+which should be used to prove new convergence results:
 [RoutingLib.Iteration.Asynchronous.Dynamic.Convergence](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Iteration/Asynchronous/Dynamic/Convergence.agda)
 
 ## Chapter 4 - An algebraic model for vector-based protocols
 
 * The definition of routing algebras and path algebras as well as the definition of properties
-like distributive, strictly increasing, finite etc. can be found in:  
+like distributive, strictly increasing, finite etc. can be found in:
 [RoutingLib.Routing.Algebra](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/Algebra.agda)
 
 * The basic definitions of next-hop routing, including the definition of the network,
-adjacency matrices, routing states etc. can be found in:  
+adjacency matrices, routing states etc. can be found in:
 [RoutingLib.Routing](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing.agda)
 
-* The synchronous model for an abstract vector-based routing protocol can be found in:  
+* The synchronous model for an abstract vector-based routing protocol can be found in:
 [RoutingLib.Routing.VectorBased.Synchronous](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/VectorBased/Synchronous.agda)
 
-* The asynchronous model for an abstract vector-based routing protocol can be found in:  
+* The asynchronous model for an abstract vector-based routing protocol can be found in:
 [RoutingLib.Routing.VectorBased.Asynchronous](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/VectorBased/Asynchronous.agda)
 
 * The code for ℙ(∙), the generic method of constructing path algebras from routing algebras,
@@ -93,30 +93,30 @@ is in:
 The proof of convergence of finite, strictly increasing distance-vector protocols is
 organised as follows:
 
-* The definitions of the height function and associated metrics are in:  
+* The definitions of the height function and associated metrics are in:
 [RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Metrics](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/VectorBased/Asynchronous/DistanceVector/Convergence/Metrics.agda)
 
-* The properties of the height function and associated metrics are in:  
+* The properties of the height function and associated metrics are in:
 [RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.Properties](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/VectorBased/Asynchronous/DistanceVector/Convergence/Properties.agda)
 
-* The proof that `F` is strictly contracting over the metric `D` is in:  
+* The proof that `F` is strictly contracting over the metric `D` is in:
 [RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Convergence.StrictlyContracting](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/VectorBased/Asynchronous/DistanceVector/Convergence/StrictlyContracting.agda)
 
 The proof of convergence of increasing path-vector protocols is organised as follows:
 
-* The definition of the consistent sub-algebra is in:  
+* The definition of the consistent sub-algebra is in:
 [RoutingLib.Routing.Algebra.Construct.Consistent](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/Algebra/Construct/Consistent.agda)
 
-* The definitions of the height function and associated metrics are in:  
+* The definitions of the height function and associated metrics are in:
 [RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.Metrics](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/VectorBased/Asynchronous/PathVector/Convergence/Metrics.agda)
 
-* The properties of the height function and associated metrics are in:  
+* The properties of the height function and associated metrics are in:
 [RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.Properties](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/VectorBased/Asynchronous/PathVector/Convergence/Properties.agda)
 
-* The proof that `F` is strictly contracting on orbits and fixed points over the metric `D` is found in:  
+* The proof that `F` is strictly contracting on orbits and fixed points over the metric `D` is found in:
 [RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Convergence.StrictlyContracting](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/VectorBased/Asynchronous/PathVector/Convergence/StrictlyContracting.agda)
 
-A summary of all the convergence results can be found in:  
+A summary of all the convergence results can be found in:
 [RoutingLib.Routing.VectorBased.Asynchronous.Results](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/VectorBased/Asynchronous/Results.agda)
 
 ## Chapter 6 - Rate of convergence
@@ -135,44 +135,44 @@ the `Qₙ` gadgets is the only major proof not formalised in Agda. This is becau
 
 The proof of the `Ω(n²)` bound on convergence in the worst case is laid out as follows:
 
-* Definition and properties of the set of fixed/converged/real nodes:  
+* Definition and properties of the set of fixed/converged/real nodes:
 [RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step1_NodeSets.agda](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/VectorBased/Synchronous/PathVector/RateOfConvergence/Step1_NodeSets.agda)
 
-* Identification of the converged subtree and the minimal edge out of it:  
+* Identification of the converged subtree and the minimal edge out of it:
 [RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step2_ConvergedSubtree.agda](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/VectorBased/Synchronous/PathVector/RateOfConvergence/Step2_ConvergedSubtree.agda)
 
-* Definition and properties of the set of dangerous nodes:  
+* Definition and properties of the set of dangerous nodes:
 [RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step3_DangerousNodes.agda](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/VectorBased/Synchronous/PathVector/RateOfConvergence/Step3_DangerousNodes.agda)
 
-* The main inductive step of the argument:  
+* The main inductive step of the argument:
 [RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step4_InductiveStep.agda](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/VectorBased/Synchronous/PathVector/RateOfConvergence/Step4_InductiveStep.agda)
 
-* The full inductive argument:  
+* The full inductive argument:
 [RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step5_Proof.agda](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/VectorBased/Synchronous/PathVector/RateOfConvergence/Step5_Proof.agda)
 
 ## Chapter 7 - Practicalities
 
-* Definition of comparability:  
+* Definition of comparability:
 [RoutingLib.Routing.Algebra.Comparable](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/Algebra/Comparable.agda)
 
-* Definition of similarity and proof that it preserves convergence:  
+* Definition of similarity and proof that it preserves convergence:
 [RoutingLib.Routing.Algebra.Simulation](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/Algebra/Simulation.agda)
 
-* Path inflation and deflation functions can be found in:  
+* Path inflation and deflation functions can be found in:
 [RoutingLib.Data.Path.Uncertified](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Data/Path/Uncertified.agda)
 
 ## Chapter 8 - Agda: proofs and protocols
 
-* Definition of the algebra `BGPLite` based on a fragment BGP:  
+* Definition of the algebra `BGPLite` based on a fragment BGP:
 [RoutingLib.Routing.Protocols.PathVector.BGPLite.Main](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/Protocols/PathVector/BGPLite/Main.agda)
 
-* Definition of a algebra `BGPLite-sim` that is similar to `BGPLite` yet has better algebraic properties:  
+* Definition of a algebra `BGPLite-sim` that is similar to `BGPLite` yet has better algebraic properties:
 [RoutingLib.Routing.Protocols.PathVector.BGPLite.Simulation](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/Protocols/PathVector/BGPLite/Simulation.agda)
 
-* Proof that `BGPLite-sim` i) simulates `BGPLite` and ii) convergent:  
+* Proof that `BGPLite-sim` i) simulates `BGPLite` and ii) convergent:
 [RoutingLib.Routing.Protocols.PathVector.BGPLite.Simulation.Properties](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/Protocols/PathVector/BGPLite/Simulation/Properties.agda)
 
-* Proof that `BGPLite` is convergent:  
+* Proof that `BGPLite` is convergent:
 [RoutingLib.Routing.Protocols.PathVector.BGPLite.Simulation.Properties](https://github.com/MatthewDaggitt/agda-routing/blob/master/RoutingLib/Routing/Protocols/PathVector/BGPLite/Main/Properties.agda)
 
 ## Related work

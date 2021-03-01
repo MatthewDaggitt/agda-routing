@@ -28,7 +28,7 @@ open import RoutingLib.Routing using (Network)
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Network.Definitions using (TopologyIsFree)
 import RoutingLib.Routing.VectorBased.Asynchronous as AsyncVectorBasedRouting
-open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.InternalDefinitions
+open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Definitions
 
 module RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Step4_DFImpliesAMCO
   {a b ℓ} {alg : RawRoutingAlgebra a b ℓ}

@@ -16,7 +16,6 @@ open import Function using (_∘_)
 open import Algebra.Core using (Op₂)
 
 open import RoutingLib.Data.Vec.Functional
-open import RoutingLib.Data.Fin.Subset.Properties using (∉-contract)
 
 
 ------------------------------------------------------------------------------

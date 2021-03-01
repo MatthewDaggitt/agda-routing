@@ -1,7 +1,7 @@
 
 open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.InternalDefinitions
+open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Definitions
 import RoutingLib.Routing.Algebra.Construct.Consistent as Consistent
 
 module RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Step3_HFImpliesDF_PathVector

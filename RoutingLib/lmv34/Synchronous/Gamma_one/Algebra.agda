@@ -24,7 +24,6 @@ open import Data.Product as Prod using (_×_; _,_)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 import RoutingLib.Routing as Routing
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebra
-import RoutingLib.Data.Vec.Functional.Relation.Binary.Equality as TableEquality
 open import RoutingLib.Data.List using (partialMerge)
 import RoutingLib.Data.List.Sort as Sort
 import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties as PermutationProperties
@@ -131,9 +130,6 @@ _<₂_ = _<ₗₑₓ_ _≈ᵣ_ _≤₂_
  
 open StrictTotalOrder <₂-strictTotalOrder public
   using () renaming (compare to <₂-cmp)
-
---_≈₁_ : Rel (Fin n × Route) 0ℓ
---(d₁ , v₁) ≈₁ (d₂ , v₂) = d₁ ≡ d₂
 
 _⊕₂_ : Op₂ (Fin n × Route)
 (d₁ , v₁) ⊕₂ (d₂ , v₂) = (d₁ , v₁ ⊕ v₂)

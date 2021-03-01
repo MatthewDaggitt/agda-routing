@@ -11,8 +11,8 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
 
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 
-open import RoutingLib.db716.Algebra.SemiringMatrix S
-open import RoutingLib.db716.Algebra.Properties.Summation S
+open import RoutingLib.Data.Matrix.Algebra.Semiring S
+open import RoutingLib.Algebra.Properties.Semiring.Sum S
 open import RoutingLib.Data.Matrix
 
 open import RoutingLib.db716.Data.Path.UncertifiedFinite
@@ -23,11 +23,11 @@ open Semiring S
 
 private pow : ∀ {n} → SquareMatrix Carrier n → ℕ → SquareMatrix Carrier n
 pow {n} = pow'
-  where open import RoutingLib.db716.Algebra.Semiring (SemiringMat n) using () renaming (pow to pow')
+  where open import RoutingLib.db716.Algebra.Semiring (⊕-⊗-semiring n) using () renaming (pow to pow')
 
 private powSum : ∀ {n} → SquareMatrix Carrier n → ℕ → SquareMatrix Carrier n
 powSum {n} = powSum'
-  where open import RoutingLib.db716.Algebra.Semiring (SemiringMat n) using () renaming (powSum to powSum')
+  where open import RoutingLib.db716.Algebra.Semiring (⊕-⊗-semiring n) using () renaming (powSum to powSum')
 
 mat-pow-sums-find-best-paths : ∀ n k (i j : Vertex n) (M : SquareMatrix Carrier n) → powSum M k i j ≈ best-path-weight M (all-≤k-length-paths-from-to n k i j)
 mat-pow-sums-find-best-paths n ℕ.zero i j M with i ≟ j

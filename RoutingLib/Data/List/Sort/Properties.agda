@@ -9,7 +9,9 @@ open import Relation.Unary using (Pred; Decidable)
 
 import Data.List.Relation.Unary.Sorted.TotalOrder as Sorted
 open import Data.List.Relation.Unary.Sorted.TotalOrder.Properties using (filter⁺)
+
 open import RoutingLib.Data.List.Sort.Base
+open import RoutingLib.Data.List.Relation.Unary.All.Properties as All
 open import RoutingLib.Data.List.Relation.Binary.Permutation.Propositional.Properties
 
 module RoutingLib.Data.List.Sort.Properties
@@ -22,8 +24,6 @@ open import Data.List.Relation.Binary.Permutation.Setoid Eq.setoid
 open import Data.List.Relation.Binary.Permutation.Setoid.Properties Eq.setoid as Perm
   using (Unique-resp-↭; ∈-resp-↭)
 open import Data.List.Relation.Binary.Equality.Setoid Eq.setoid using (_≋_)
-
-open import RoutingLib.Data.List.Relation.Unary.All.Properties as All
 
 import RoutingLib.Data.List.Relation.Unary.Sorted.Properties totalOrder as Sortedₚ
 

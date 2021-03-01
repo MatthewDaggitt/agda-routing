@@ -19,7 +19,7 @@ open import Relation.Binary
 open import Relation.Nullary using (Dec; ¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction; contraposition)
 import Relation.Nullary.Decidable as Dec
-open import Relation.Binary.PropositionalEquality as P using (_≡_)
+open import Relation.Binary.PropositionalEquality as P using (_≡_; _≢_)
 
 open import RoutingLib.Data.List
 open import RoutingLib.Data.Nat.Properties
@@ -92,42 +92,37 @@ xs↭ys⇒|xs|≡|ys| (prep eq xs↭ys)      = P.cong suc (xs↭ys⇒|xs|≡|ys|
 xs↭ys⇒|xs|≡|ys| (swap eq₁ eq₂ xs↭ys) = P.cong (λ x → suc (suc x)) (xs↭ys⇒|xs|≡|ys| xs↭ys)
 xs↭ys⇒|xs|≡|ys| (trans xs↭ys xs↭ys₁) = P.trans (xs↭ys⇒|xs|≡|ys| xs↭ys) (xs↭ys⇒|xs|≡|ys| xs↭ys₁)
 
-|xs|≠|ys|⇒¬xs↭ys : ∀ {xs} {ys} → ¬(length xs ≡ length ys) → ¬(xs ↭ ys)
-|xs|≠|ys|⇒¬xs↭ys = contraposition xs↭ys⇒|xs|≡|ys|
+|xs|≢|ys|⇒¬xs↭ys : ∀ {xs ys} → length xs ≢ length ys → ¬ (xs ↭ ys)
+|xs|≢|ys|⇒¬xs↭ys = contraposition xs↭ys⇒|xs|≡|ys|
+
+¬[]↭x∷xs : ∀ x xs → ¬([] ↭ x ∷ xs)
+¬[]↭x∷xs x xs = |xs|≢|ys|⇒¬xs↭ys λ()
+
+¬x∷xs↭[] : ∀ x xs → ¬(x ∷ xs ↭ [])
+¬x∷xs↭[] x xs = |xs|≢|ys|⇒¬xs↭ys λ()
 
 tabulate⁺ : ∀ {n} {f g : Fin n → A} →
             (∀ {i} → f i ≈ g i) → tabulate f ↭ tabulate g
-tabulate⁺ {zero}  f=g = refl []
-tabulate⁺ {suc k} f=g = prep f=g (tabulate⁺ {k} f=g)
+tabulate⁺ {zero}  f≈g = refl []
+tabulate⁺ {suc k} f≈g = prep f≈g (tabulate⁺ {k} f≈g)
 
-↭-nil-cons : ∀ x xs → ¬([] ↭ x ∷ xs)
-↭-nil-cons x xs = |xs|≠|ys|⇒¬xs↭ys λ ()
-
-↭-cons-nil : ∀ x xs → ¬(x ∷ xs ↭ [])
-↭-cons-nil x xs = |xs|≠|ys|⇒¬xs↭ys λ ()
-
-↭⇒cons-∈ : ∀ {x xs ys} → x ∷ xs ↭ ys → x ∈ ys
-↭⇒cons-∈ (refl (x≈y ∷ _))      = here x≈y
-↭⇒cons-∈ (prep x≈y _)          = here x≈y
-↭⇒cons-∈ (swap x₁≈y₂ _ _)      = there (here x₁≈y₂)
-↭⇒cons-∈ (trans x∷xs↭zs zs↭ys) = ∈-resp-↭ zs↭ys (↭⇒cons-∈ x∷xs↭zs)
+x∷xs↭ys⇒x∈ys : ∀ {x xs ys} → x ∷ xs ↭ ys → x ∈ ys
+x∷xs↭ys⇒x∈ys (refl (x≈y ∷ _))      = here x≈y
+x∷xs↭ys⇒x∈ys (prep x≈y _)          = here x≈y
+x∷xs↭ys⇒x∈ys (swap x₁≈y₂ _ _)      = there (here x₁≈y₂)
+x∷xs↭ys⇒x∈ys (trans x∷xs↭zs zs↭ys) = ∈-resp-↭ zs↭ys (x∷xs↭ys⇒x∈ys x∷xs↭zs)
 
 ∉-resp-↭ : ∀ {x} → (x ∉_) Respects _↭_
 ∉-resp-↭ xs↭ys = _∘ ∈-resp-↭ (↭-sym xs↭ys)
 
 module _ (_≟_ : Decidable _≈_) where
 
-  ≈-isDecEquivalence : IsDecEquivalence _≈_
-  ≈-isDecEquivalence = record
-    { isEquivalence = ≈-isEquivalence
-    ; _≟_           = _≟_
-    }
-
   DS : DecSetoid a ℓ
   DS = record
-    { Carrier          = A
-    ; _≈_              = _≈_
-    ; isDecEquivalence = ≈-isDecEquivalence
+    { isDecEquivalence = record
+      { isEquivalence = ≈-isEquivalence
+      ; _≟_           = _≟_
+      }
     }
 
   open DecMembership DS using (_∈?_)
@@ -137,9 +132,9 @@ module _ (_≟_ : Decidable _≈_) where
 
   _↭?_ : Decidable _↭_
   []       ↭? []       = yes (refl [])
-  []       ↭? (y ∷ ys) = no (↭-nil-cons y ys)
+  []       ↭? (y ∷ ys) = no (¬[]↭x∷xs y ys)
   (x ∷ xs) ↭? ys       with x ∈? ys
-  ... | no x∉ys  = no (x∉ys ∘ ↭⇒cons-∈)
+  ... | no  x∉ys  = no (x∉ys ∘ x∷xs↭ys⇒x∈ys)
   ... | yes x∈ys with Membershipₚ.∈-∃++ S x∈ys
   ...   | zs , ws , y , x≈y , ys≋zs++y++ws with xs ↭? zs ++ ws
   ...     | yes xs↭zs++ws = yes (begin
@@ -147,7 +142,7 @@ module _ (_≟_ : Decidable _≈_) where
     x ∷ (zs ++ ws)    ↭˘⟨ shift (≈-sym x≈y) zs ws ⟩
     zs ++ [ y ] ++ ws ≋˘⟨ ys≋zs++y++ws ⟩
     ys                ∎)
-  ...     | no xs¬↭zs++ws = no (xs¬↭zs++ws ∘ λ xs↭zs++ws → dropMiddleElement [] [] (begin
+  ...     | no ¬xs↭zs++ws = no (¬xs↭zs++ws ∘ λ xs↭zs++ws → dropMiddleElement [] [] (begin
     x ∷ xs            ↭⟨ xs↭zs++ws ⟩
     ys                ≋⟨ ys≋zs++y++ws ⟩
     zs ++ [ y ] ++ ws ↭⟨ shift (≈-sym x≈y) zs ws ⟩
@@ -160,4 +155,6 @@ module _ (_≟_ : Decidable _≈_) where
     }
 
   ↭-decSetoid : DecSetoid _ _
-  ↭-decSetoid = record { isDecEquivalence = ↭-isDecEquivalence }
+  ↭-decSetoid = record
+    { isDecEquivalence = ↭-isDecEquivalence
+    }

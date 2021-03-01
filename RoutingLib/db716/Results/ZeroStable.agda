@@ -1,6 +1,11 @@
 open import Algebra using (Semiring)
 
-module RoutingLib.db716.Results.ZeroStable {c ℓ} (S : Semiring c ℓ) where
+open import RoutingLib.db716.Algebra.Semiring.QStable
+
+module RoutingLib.db716.Results.ZeroStable
+  {c ℓ} (S : Semiring c ℓ)
+  (0stab : StableSemiring S 0) where
+
 open Semiring S
 
 open import Data.Fin using (Fin; _≟_)
@@ -17,8 +22,8 @@ open import Relation.Nullary using (yes; no)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_) renaming (refl to ≡-refl; sym to ≡-sym; cong to ≡-cong)
 
 open import RoutingLib.Data.Matrix using (SquareMatrix)
+open import RoutingLib.Data.Matrix.Algebra.Semiring S
 open import RoutingLib.db716.Algebra.Semiring
-open import RoutingLib.db716.Algebra.SemiringMatrix S
 open import RoutingLib.db716.Data.Path.UncertifiedFinite
 open import RoutingLib.db716.Data.Path.UncertifiedFinite.Properties
 open import RoutingLib.db716.Data.Path.FindLoop
@@ -26,11 +31,10 @@ open import RoutingLib.db716.Data.Path.UncertifiedFinite.CutLoop.Properties
 open import RoutingLib.db716.Data.Path.UncertifiedFinite.Weights S
 open import RoutingLib.db716.Results.MatrixPowers S
 open import RoutingLib.db716.Results.MatrixPowerSums S
-open import RoutingLib.db716.Algebra.Semiring.QStable
 
-lemma1 : ∀ {n} m xss (ys : Path n) → ys ∈ xss → stableSemiring 0 S →  best-path-weight m xss ≈ best-path-weight m xss + weight m ys
+lemma1 : ∀ {n} m xss (ys : Path n) → ys ∈ xss →  best-path-weight m xss ≈ best-path-weight m xss + weight m ys
 
-lemma1 m (xs ∷ xss) ys (here ys≡xs) 0stab = begin
+lemma1 m (xs ∷ xss) ys (here ys≡xs) = begin
   best-path-weight m (xs ∷ xss)
     ≡⟨⟩
   weight m xs + best-path-weight m xss
@@ -44,11 +48,11 @@ lemma1 m (xs ∷ xss) ys (here ys≡xs) 0stab = begin
   best-path-weight m (xs ∷ xss) + weight m ys ∎
   where open import Relation.Binary.Reasoning.Setoid setoid
   
-lemma1 m (xs ∷ xss) ys (there ys∈xss) 0stab = begin
+lemma1 m (xs ∷ xss) ys (there ys∈xss) = begin
   best-path-weight m (xs ∷ xss)
     ≡⟨⟩
   weight m xs + best-path-weight m xss
-    ≈⟨ +-cong refl (lemma1 m xss ys ys∈xss 0stab) ⟩
+    ≈⟨ +-cong refl (lemma1 m xss ys ys∈xss) ⟩
   weight m xs + (best-path-weight m xss + weight m ys)
     ≈˘⟨ +-assoc _ _ _ ⟩
   weight m xs + best-path-weight m xss + weight m ys
@@ -58,20 +62,20 @@ lemma1 m (xs ∷ xss) ys (there ys∈xss) 0stab = begin
 
 
 
-lemma2 : ∀ {n k m i j ys} → PathFrom i ys → PathTo j ys → length ys ≤ k → ValidPath ys → stableSemiring 0 S
-  → best-path-weight m (all-≤k-length-paths-from-to n k i j) ≈ best-path-weight m (all-≤k-length-paths-from-to n k i j) + weight m ys
+lemma2 : ∀ {n k m i j ys} → PathFrom i ys → PathTo j ys → length ys ≤ k → ValidPath ys →
+         best-path-weight m (all-≤k-length-paths-from-to n k i j) ≈ best-path-weight m (all-≤k-length-paths-from-to n k i j) + weight m ys
 
-lemma2 {n} {k} {m} {i} {j} {ys} ys:i→* ys:*→j |ys|≤k valid 0stab
-  = lemma1 m (all-≤k-length-paths-from-to n k i j) ys (all-≤k-length-paths-from-to-correct |ys|≤k ys:i→* ys:*→j valid) 0stab 
+lemma2 {n} {k} {m} {i} {j} {ys} ys:i→* ys:*→j |ys|≤k valid
+  = lemma1 m (all-≤k-length-paths-from-to n k i j) ys (all-≤k-length-paths-from-to-correct |ys|≤k ys:i→* ys:*→j valid)
 
 
 
-lemma3 : ∀ {n k m} (i j : Fin n) yss → All (λ ys → PathFrom i ys × PathTo j ys × length ys ≤ k × ValidPath ys) yss → stableSemiring 0 S
+lemma3 : ∀ {n k m} (i j : Fin n) yss → All (λ ys → PathFrom i ys × PathTo j ys × length ys ≤ k × ValidPath ys) yss
   → best-path-weight m (all-≤k-length-paths-from-to n k i j) + best-path-weight m yss ≈ best-path-weight m (all-≤k-length-paths-from-to n k i j)
 
-lemma3 {n} {k} {m} i j [] [] 0stab = +-identityʳ _
+lemma3 {n} {k} {m} i j [] [] = +-identityʳ _
 
-lemma3 {n} {k} {m} i j (ys ∷ yss) (pys ∷ pyss) 0stab =
+lemma3 {n} {k} {m} i j (ys ∷ yss) (pys ∷ pyss) =
   let (ys:i→* , ys:*→j , |ys|≤k , valid) = pys
   in begin
   best-path-weight m (all-≤k-length-paths-from-to n k i j) + best-path-weight m (ys ∷ yss)
@@ -79,18 +83,18 @@ lemma3 {n} {k} {m} i j (ys ∷ yss) (pys ∷ pyss) 0stab =
   best-path-weight m (all-≤k-length-paths-from-to n k i j) + (weight m ys + best-path-weight m yss)
     ≈˘⟨ +-assoc _ _ _ ⟩
   best-path-weight m (all-≤k-length-paths-from-to n k i j) + weight m ys + best-path-weight m yss
-    ≈˘⟨ +-cong (lemma2 ys:i→* ys:*→j |ys|≤k valid 0stab) refl ⟩
+    ≈˘⟨ +-cong (lemma2 ys:i→* ys:*→j |ys|≤k valid) refl ⟩
   best-path-weight m (all-≤k-length-paths-from-to n k i j) + best-path-weight m yss
-    ≈⟨ lemma3 i j yss pyss 0stab ⟩
+    ≈⟨ lemma3 i j yss pyss ⟩
   best-path-weight m (all-≤k-length-paths-from-to n k i j) ∎
   where open import Relation.Binary.Reasoning.Setoid setoid
 
 
 
-trimPath : ∀ {n i j} m → stableSemiring 0 S → (p : Path (suc n)) → PathFrom i p → PathTo j p → length p ≡ (suc n) → ValidPath p → i ≢ j →
+trimPath : ∀ {n i j} m → (p : Path (suc n)) → PathFrom i p → PathTo j p → length p ≡ (suc n) → ValidPath p → i ≢ j →
   ∃ λ q → (PathFrom i q) × (PathTo j q) × (length q ≤ n) × (ValidPath q) × (weight m p + weight m q ≈ weight m q)
 
-trimPath {n} {i} {j} m 0stab p p:i→* p:*→j |p|≡1+n valid i≢j =
+trimPath {n} {i} {j} m p p:i→* p:*→j |p|≡1+n valid i≢j =
   cutLoop p loop ,
   cutLoopFrom i j p loop p:i→* p:*→j valid i≢j ,
   cutLoopTo i j p loop p:i→* p:*→j valid i≢j  ,
@@ -102,7 +106,7 @@ trimPath {n} {i} {j} m 0stab p p:i→* p:*→j |p|≡1+n valid i≢j =
     
 
 
-trimPathLifted : ∀ {n i j} (yss : List (Path (suc n))) m → stableSemiring 0 S
+trimPathLifted : ∀ {n i j} (yss : List (Path (suc n))) m
   → All (PathFrom i) yss
   → All (PathTo j) yss
   → All (λ ys → length ys ≡ suc n) yss
@@ -115,11 +119,11 @@ trimPathLifted : ∀ {n i j} (yss : List (Path (suc n))) m → stableSemiring 0 
     All ValidPath xss ×
     best-path-weight m yss + best-path-weight m xss ≈ best-path-weight m xss
 
-trimPathLifted {n} [] m 0stab xssFrom xssTo allLen≡1+n allValid i≢j  = [] , [] , [] , [] , [] , +-identityˡ _
+trimPathLifted {n} [] m xssFrom xssTo allLen≡1+n allValid i≢j  = [] , [] , [] , [] , [] , +-identityˡ _
 
-trimPathLifted {n} (ys ∷ yss) m 0stab (ys:i→* ∷ allFrom) (ys:*→j ∷ allTo) (|ys|≡1+n ∷ allLen≡1+n) (ysValid ∷ allValid) i≢j =
-  let xs , xs:i→* , xs:*→j , |xs|≤n , valid , wys+wxs≈wxs = trimPath {n} m 0stab ys ys:i→* ys:*→j |ys|≡1+n ysValid i≢j
-      xss , allFrom' , allTo' , allLen≤n , valid' , eqn = trimPathLifted yss m 0stab allFrom allTo allLen≡1+n allValid i≢j
+trimPathLifted {n} (ys ∷ yss) m (ys:i→* ∷ allFrom) (ys:*→j ∷ allTo) (|ys|≡1+n ∷ allLen≡1+n) (ysValid ∷ allValid) i≢j =
+  let xs , xs:i→* , xs:*→j , |xs|≤n , valid , wys+wxs≈wxs = trimPath {n} m ys ys:i→* ys:*→j |ys|≡1+n ysValid i≢j
+      xss , allFrom' , allTo' , allLen≤n , valid' , eqn = trimPathLifted yss m allFrom allTo allLen≡1+n allValid i≢j
       proof = begin
         best-path-weight m (ys ∷ yss) + best-path-weight m (xs ∷ xss)
           ≡⟨⟩
@@ -147,14 +151,14 @@ trimPathLifted {n} (ys ∷ yss) m 0stab (ys:i→* ∷ allFrom) (ys:*→j ∷ all
 
 
 
-trim-all-n-length-paths : ∀ n (i j : Fin (suc n)) m → stableSemiring 0 S → i ≢ j → ∃ λ xss →
+trim-all-n-length-paths : ∀ n (i j : Fin (suc n)) m → StableSemiring S 0 → i ≢ j → ∃ λ xss →
   All (PathFrom i) xss ×
   All (PathTo j) xss ×
   All (λ xs → length xs ≤ n) xss ×
   All ValidPath xss ×
   best-path-weight m (all-k-length-paths-from-to (suc n) (suc n) i j) + best-path-weight m xss ≈ best-path-weight m xss
 
-trim-all-n-length-paths n i j m 0stab i≢j = trimPathLifted (all-k-length-paths-from-to (suc n) (suc n) i j) m 0stab
+trim-all-n-length-paths n i j m 0stab i≢j = trimPathLifted (all-k-length-paths-from-to (suc n) (suc n) i j) m
     (k-length-paths-from-i {suc n} n i j)
     (tabulate λ {p} p∈paths → k-length-paths-to-j {suc n} n p i j p∈paths)
     (tabulate λ {p} p∈paths → k-length-paths-length (suc n) p i j p∈paths)
@@ -163,14 +167,14 @@ trim-all-n-length-paths n i j m 0stab i≢j = trimPathLifted (all-k-length-paths
 
 
 
-best-path-weight-lemma : ∀ n (i j : Fin (suc n)) → stableSemiring 0 S → (m : SquareMatrix Carrier (suc n))
+best-path-weight-lemma : ∀ n (i j : Fin (suc n)) → (m : SquareMatrix Carrier (suc n))
   → best-path-weight m (all-≤k-length-paths-from-to (suc n) n i j) + best-path-weight m (all-k-length-paths-from-to (suc n) (suc n) i j)
     ≈ best-path-weight m (all-≤k-length-paths-from-to (suc n) n i j)
     
-best-path-weight-lemma n i j 0stab m with i ≟ j
+best-path-weight-lemma n i j m with i ≟ j
 ... | yes i≡j = begin
     best-path-weight m (all-≤k-length-paths-from-to (suc n) n i j) + best-path-weight m (all-k-length-paths-from-to (suc n) (suc n) i j)
-      ≈⟨ +-cong (lemma1 m (all-≤k-length-paths-from-to (suc n) n i j) [] (i≡j⇒[]∈paths≤k (suc n) n i j i≡j) 0stab) refl ⟩
+      ≈⟨ +-cong (lemma1 m (all-≤k-length-paths-from-to (suc n) n i j) [] (i≡j⇒[]∈paths≤k (suc n) n i j i≡j)) refl ⟩
     best-path-weight m (all-≤k-length-paths-from-to (suc n) n i j) + weight m [] + best-path-weight m (all-k-length-paths-from-to (suc n) (suc n) i j)
       ≡⟨⟩
     best-path-weight m (all-≤k-length-paths-from-to (suc n) n i j) + 1# + best-path-weight m (all-k-length-paths-from-to (suc n) (suc n) i j)
@@ -180,7 +184,7 @@ best-path-weight-lemma n i j 0stab m with i ≟ j
     best-path-weight m (all-≤k-length-paths-from-to (suc n) n i j) + 1#
       ≡⟨⟩
     best-path-weight m (all-≤k-length-paths-from-to (suc n) n i j) + weight m []
-      ≈˘⟨ lemma1 m (all-≤k-length-paths-from-to (suc n) n i j) [] (i≡j⇒[]∈paths≤k (suc n) n i j i≡j) 0stab ⟩
+      ≈˘⟨ lemma1 m (all-≤k-length-paths-from-to (suc n) n i j) [] (i≡j⇒[]∈paths≤k (suc n) n i j i≡j) ⟩
     best-path-weight m (all-≤k-length-paths-from-to (suc n) n i j) ∎
     where open import Relation.Binary.Reasoning.Setoid setoid
 ... | no i≢j =
@@ -190,7 +194,6 @@ best-path-weight-lemma n i j 0stab m with i ≟ j
         lookup allTo xs∈paths ,
         lookup allLen≤n xs∈paths ,
         lookup valid xs∈paths)
-        0stab
   in begin
     best-path-weight m (all-≤k-length-paths-from-to (suc n) n i j) + best-path-weight m (all-k-length-paths-from-to (suc n) (suc n) i j)
       ≈˘⟨ +-cong lem3 refl ⟩
@@ -204,15 +207,14 @@ best-path-weight-lemma n i j 0stab m with i ≟ j
       ≈⟨ lem3 ⟩
     best-path-weight m (all-≤k-length-paths-from-to (suc n) n i j) ∎
   where open import Relation.Binary.Reasoning.Setoid setoid
-        open import RoutingLib.db716.Data.List.Properties.MonoidFolds +-monoid
 
 
 
-matricesInheritStability : ∀ n → stableSemiring 0 S → stableSemiring n (SemiringMat (suc n))
+matricesInheritStability : ∀ n → StableSemiring (⊕-⊗-semiring (suc n)) n
 
-matricesInheritStability 0 0stab m Fin.zero Fin.zero = 0stab _
+matricesInheritStability 0 m Fin.zero Fin.zero = 0stab _
 
-matricesInheritStability (suc n') 0stab m i j =
+matricesInheritStability (suc n') m i j =
   let n = suc n'
   in begin
     powSum 𝕄 m (suc n) i j
@@ -229,10 +231,10 @@ matricesInheritStability (suc n') 0stab m i j =
       ≈˘⟨ +-cong (foldr-map (all-≤k-length-paths-from-to (suc n) n i j) (weight m))
                 (foldr-map (all-k-length-paths-from-to (suc n) (suc n) i j) (weight m)) ⟩
     best-path-weight m (all-≤k-length-paths-from-to (suc n) n i j) + best-path-weight m (all-k-length-paths-from-to (suc n) (suc n) i j)
-      ≈⟨ best-path-weight-lemma n i j 0stab m ⟩
+      ≈⟨ best-path-weight-lemma n i j m ⟩
     best-path-weight m (all-≤k-length-paths-from-to (suc n) n i j)
       ≈˘⟨ mat-pow-sums-find-best-paths (suc n) n i j m ⟩
     powSum 𝕄 m n i j ∎
   where open import Relation.Binary.Reasoning.Setoid setoid
         open import RoutingLib.db716.Data.List.Properties.MonoidFolds +-monoid
-        𝕄 = SemiringMat (suc (suc n'))
+        𝕄 = ⊕-⊗-semiring (suc (suc n'))

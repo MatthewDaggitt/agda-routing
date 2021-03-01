@@ -227,8 +227,8 @@ module _ {e : Epoch} {p : Subset n} .(ep∈Q : (e , p) ∈ Q) where
   ...   | no  x≉ₚx* = lift (v<r[k]⇒v≤r[1+k] (begin-strict
     dᵢ (x* i) (F′ x i)  ≤⟨ dᵢ≤d x* (F′ x) i∈p ⟩
     d x* (F′ x)         <⟨ F-strContrOnFP x∈X₀ x∈Aₚ Fx*≈x* x≉ₚx* ⟩
-    d x* x                 ≤⟨ ∈B⇒d≤r x∈B ⟩
-    r[ k ]                 ∎))
+    d x* x              ≤⟨ ∈B⇒d≤r x∈B ⟩
+    r[ k ]              ∎))
 
   X₀⊆B₀ : X₀ ⊆ᵢ B 0
   X₀⊆B₀ = _

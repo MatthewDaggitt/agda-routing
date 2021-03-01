@@ -224,7 +224,7 @@ module _ (ψ : Schedule n)
   ... | ηₛ≡ηₑ , ηₑ≡η₁₊ₑ , s∈Q , e∈Q with i ∈? ρ (suc e) | i ∈? ρ e | i ∈? α (suc e)
   ...   | no  i∉ρ₁₊ₑ | _       | _     = B-null 1+e∈Q i∉ρ₁₊ₑ
   ...   | yes i∈ρ₁₊ₑ | no i∉ρₑ | _     = contradiction (∈ρ-subst (sym ηₑ≡η₁₊ₑ) i∈ρ₁₊ₑ) i∉ρₑ
-  ...   | yes i∈ρ₁₊ₑ | yes _   | yes _ = F-mono-B 1+e∈Q ((λ j → state∈X₀ (β (suc e) i j) j)) (wf s<1+e (mkₛₑ s≤1+e ηₛ≡η₁₊ₑ)) (λ j → δ'∈-resp-Bₜᵢ (β (suc e) i j) s∈Q 1+e∈Q ηₛ≡η₁₊ₑ (m∈Bₖ s<1+e (mkₛₑ s≤1+e ηₛ≡η₁₊ₑ) s∈Q)) i
+  ...   | yes i∈ρ₁₊ₑ | yes _   | yes _ = F-mono-B 1+e∈Q (λ j → state∈X₀ (β (suc e) i j) j) (wf s<1+e (mkₛₑ s≤1+e ηₛ≡η₁₊ₑ)) (λ j → δ'∈-resp-Bₜᵢ (β (suc e) i j) s∈Q 1+e∈Q ηₛ≡η₁₊ₑ (m∈Bₖ s<1+e (mkₛₑ s≤1+e ηₛ≡η₁₊ₑ) s∈Q)) i
     where s<1+e = ≤-trans s<m m≤1+e; s≤1+e = ≤-trans (n≤1+n s) s<1+e
   ...   | yes _       | yes _   | no  i∉α₁₊ₑ with m ≟ℕ suc e
   ...     | yes refl  = contradiction i∈αₘ i∉α₁₊ₑ

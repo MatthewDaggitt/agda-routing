@@ -5,9 +5,7 @@
 -- routing protocols.
 --------------------------------------------------------------------------------
 
-module RoutingLib.Routing.VectorBased.Asynchronous.Results where
-
-open import Data.Nat using (zero; suc; s≤s; z≤n)
+open import Data.Nat using (zero; suc; s≤s; z≤n; _^_)
 open import Level using (Level)
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence
@@ -15,12 +13,16 @@ open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence
 
 open import RoutingLib.Routing using (Network)
 open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Algebra.Certification
 open import RoutingLib.Routing.Algebra.Properties.PathAlgebra
 open import RoutingLib.Routing.Algebra.Simulation using (_Simulates_)
 open import RoutingLib.Routing.Network.Definitions using (TopologyIsFree)
 open import RoutingLib.Routing.Algebra.Consequences using (strIncr⇒free)
-import RoutingLib.Routing.VectorBased.Asynchronous.Simulation as Simulation
+import RoutingLib.Routing.VectorBased.Convergence.Simulation as Simulation
 import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Proof as Convergence
+open import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step5_Proof
+
+module RoutingLib.Routing.VectorBased.Convergence.Results where
 
 private
   variable
@@ -31,7 +33,7 @@ private
 --------------------------------------------------------------------------------
 -- Re-export convergence definitions
 
-open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Definitions public
+open import RoutingLib.Routing.VectorBased.Convergence.Definitions public
 
 --------------------------------------------------------------------------------
 -- Bisimilarity
@@ -39,8 +41,13 @@ open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Definitions 
 -- If an algebra is always convergent then any algebra simulated by it is also
 -- convergent
 
-simulate : A Simulates B → Convergent A → Convergent B
-simulate A⇉B conv = Simulation.simulate A⇉B conv
+simulate-convergent : A Simulates B → Convergent A → Convergent B
+simulate-convergent = Simulation.convergent
+
+simulate-syncConvergesIn : A Simulates B → ∀ f →
+                           SynchronouslyConvergesIn A f →
+                           SynchronouslyConvergesIn B f
+simulate-syncConvergesIn = Simulation.syncConvergesIn
 
 --------------------------------------------------------------------------------
 -- Distance vector protocols
@@ -86,3 +93,13 @@ incrPaths⇒convergent : IsRoutingAlgebra A →
 incrPaths⇒convergent routingAlg pathAlg incr N = completeConvergence
   (paths⇒convergentOverFreeNetworks routingAlg pathAlg N) _
   (strIncr⇒free routingAlg (incr⇒strIncr routingAlg pathAlg incr) N)
+
+-- If the path algebra is increasing then the synchronous iteration σ
+-- is guaranteed to converge in n² steps over any adjacency matrix.
+
+incrPaths⇒syncConvergesIn-n² : IsRoutingAlgebra A →
+                               IsPathAlgebra A →
+                               IsIncreasing A →
+                               SynchronouslyConvergesIn A (λ n → n ^ 2)
+incrPaths⇒syncConvergesIn-n² routingAlg pathAlg incr n@{suc _} =
+  n²-convergence routingAlg (certifiedPathAlgebra pathAlg n) incr

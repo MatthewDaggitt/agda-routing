@@ -19,7 +19,7 @@ open import Function using (_∘_)
 open import Level using (Lift; lift; _⊔_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
-import Relation.Binary.EqReasoning as EqReasoning
+import Relation.Binary.Reasoning.Setoid as SetoidReasoning
 import Relation.Binary.Reasoning.PartialOrder as POR
 open import Relation.Binary.Construct.Add.Point.Equality as PointedEq
   renaming (_≈∙_ to PointedEq)
@@ -32,9 +32,8 @@ import RoutingLib.Routing.Algebra.Properties.PathAlgebra as PathAlgebraPropertie
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
 open import RoutingLib.Algebra.Construct.Add.Identity as AddIdentity
   renaming (_⊕∙_ to AddIdentity) using (⊕∙-comm)
-open import RoutingLib.Algebra.Construct.Lexicographic as Lex
-  using (Lex; Lex₂)
-open import RoutingLib.Algebra.Construct.Lexicographic.Magma as OpLexProperties′
+open import RoutingLib.Algebra.Construct.Lexicographic.Base
+import RoutingLib.Algebra.Construct.Lexicographic as OpLexProperties′
 open import RoutingLib.Data.Path.Uncertified.Choice
 open import RoutingLib.Data.Path.Uncertified.Properties
 open import RoutingLib.Data.Path.UncertifiedI using (Pathᵛ; Path; _∉ᵥₚ_; _∈ᵥₚ_; _⇿ᵥ_; _∈ₚ_; _∉ₚ_;_⇿_;_∷_ ) 

@@ -13,7 +13,8 @@ open import Relation.Nullary using (yes; no)
 
 open import RoutingLib.Relation.Unary using (Finite)
 
-module RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.Subset {i} {I : Set i}  where
+module RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.Subset
+  {i} {I : Set i}  where
 
 module _ {a p ℓ} {Aᵢ : I → Set a} (_∼ᵢ_ : IRel Aᵢ ℓ) (P : Pred I p) where
 

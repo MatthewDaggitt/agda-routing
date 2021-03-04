@@ -32,17 +32,13 @@ open import Relation.Binary
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation
 
-open import RoutingLib.Algebra.Construct.Lexicographic
-  as OpLex renaming (Lex to OpLex)
-open import RoutingLib.Algebra.Construct.Lexicographic.Magma
-  as OpLexProperties′
-import RoutingLib.Routing.Algebra.Properties.RawRoutingAlgebra
-
 private
   module A = RawRoutingAlgebra algebraA
   module B = RawRoutingAlgebra algebraB
 
-  module LexProperties = OpLexProperties′ A.⊕-magma B.⊕-magma A._≟_
+open import RoutingLib.Algebra.Construct.Lexicographic.Base using (lex)
+import RoutingLib.Algebra.Construct.Lexicographic A.⊕-magma B.⊕-magma A._≟_ as Lex
+import RoutingLib.Routing.Algebra.Properties.RawRoutingAlgebra
 
 ------------------------------------------------------------------------
 -- Algebra
@@ -61,7 +57,7 @@ _≈_ : Rel Route _
 _≈_ = Pointwise A._≈_ B._≈_
 
 _⊕_ : Op₂ Route
-_⊕_ = OpLex A._≟_ A._⊕_ B._⊕_
+_⊕_ = lex A._⊕_ B._⊕_ A._≟_ 
 
 _▷_ : ∀ {n} {i j : Fin n} → Step i j → Route → Route
 (f , g) ▷ (a , b) = f A.▷ a , g B.▷ b
@@ -92,7 +88,7 @@ Lex = record
   ; ∞#                 = ∞#
   ; f∞                 = f∞
   ; ≈-isDecEquivalence = Pointwise.×-isDecEquivalence A.≈-isDecEquivalence B.≈-isDecEquivalence
-  ; ⊕-cong             = LexProperties.cong
+  ; ⊕-cong             = Lex.cong
   ; ▷-cong             = ▷-cong
   ; f∞-reject          = f∞-reject
   }
@@ -106,11 +102,11 @@ isRoutingAlgebra : IsRoutingAlgebra algebraA →
                    IsRoutingAlgebra algebraB →
                    IsRoutingAlgebra Lex
 isRoutingAlgebra A-isRA B-isRA = record
-  { ⊕-sel         = LexProperties.sel       Aᵣ.⊕-sel       Bᵣ.⊕-sel
-  ; ⊕-comm        = LexProperties.comm      Aᵣ.⊕-comm      Bᵣ.⊕-comm
-  ; ⊕-assoc       = LexProperties.assoc     Aᵣ.⊕-assoc     Bᵣ.⊕-assoc Aᵣ.⊕-sel Aᵣ.⊕-comm
-  ; ⊕-zeroʳ       = LexProperties.zeroʳ     Aᵣ.⊕-zeroʳ     Bᵣ.⊕-zeroʳ
-  ; ⊕-identityʳ   = LexProperties.identityʳ Aᵣ.⊕-identityʳ Bᵣ.⊕-identityʳ
+  { ⊕-sel         = Lex.sel Aᵣ.⊕-sel Bᵣ.⊕-sel
+  ; ⊕-comm        = Lex.comm Aᵣ.⊕-comm Bᵣ.⊕-comm
+  ; ⊕-assoc       = Lex.assoc Aᵣ.⊕-assoc Aᵣ.⊕-comm Aᵣ.⊕-sel Bᵣ.⊕-assoc 
+  ; ⊕-zeroʳ       = Lex.zeroʳ Aᵣ.⊕-zeroʳ Bᵣ.⊕-zeroʳ
+  ; ⊕-identityʳ   = Lex.identityʳ Aᵣ.⊕-identityʳ Bᵣ.⊕-identityʳ
   ; ▷-fixedPoint  = λ {(f , g) → Aᵣ.▷-fixedPoint f , Bᵣ.▷-fixedPoint g}
   } where
   module Aᵣ = IsRoutingAlgebra A-isRA

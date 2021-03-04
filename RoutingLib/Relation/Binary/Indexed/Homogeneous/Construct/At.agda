@@ -1,60 +1,62 @@
-
-module RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.At where
-
+open import Level
 open import Relation.Binary
 open import Relation.Binary.Indexed.Homogeneous
 
+module RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.At where
+
+private
+  variable
+    a i ℓ ℓ₁ ℓ₂ : Level
+    I : Set i
+    Aᵢ : I → Set a
+    
 ------------------------------------------------------------------------
 -- Structures
 
-module _ {a i} {I : Set i} {A : I → Set a} where
+isEquivalence : ∀ {_≈_ : IRel Aᵢ ℓ} → IsIndexedEquivalence Aᵢ _≈_ →
+                (index : I) → IsEquivalence (_≈_ {index})
+isEquivalence isEq index = record
+  { refl  = reflᵢ
+  ; sym   = symᵢ
+  ; trans = transᵢ
+  } where open IsIndexedEquivalence isEq
 
-  isEquivalence : ∀ {ℓ} {_≈_ : IRel A ℓ} → IsIndexedEquivalence A _≈_ →
-                  (index : I) → IsEquivalence (_≈_ {index})
-  isEquivalence isEq index = record
-    { refl  = reflᵢ
-    ; sym   = symᵢ
-    ; trans = transᵢ
-    }
-    where open IsIndexedEquivalence isEq
+isDecEquivalence : ∀ {_≈_ : IRel Aᵢ ℓ} → IsIndexedDecEquivalence Aᵢ _≈_ →
+                   (index : I) → IsDecEquivalence (_≈_ {index})
+isDecEquivalence isEq index = record
+  { isEquivalence = isEquivalence E.isEquivalenceᵢ index
+  ; _≟_           = E._≟ᵢ_
+  } where module E = IsIndexedDecEquivalence isEq
 
-  isPreorder : ∀ {ℓ₁ ℓ₂} {_≈_ : IRel A ℓ₁} {_∼_ : IRel A ℓ₂} →
-               IsIndexedPreorder A _≈_ _∼_ →
-               (index : I) → IsPreorder (_≈_ {index}) _∼_
-  isPreorder isPreorder index = record
-    { isEquivalence = isEquivalence O.isEquivalenceᵢ index
-    ; reflexive     = O.reflexiveᵢ
-    ; trans         = O.transᵢ
-    }
-    where module O = IsIndexedPreorder isPreorder
+isPreorder : ∀ {_≈_ : IRel Aᵢ ℓ₁} {_∼_ : IRel Aᵢ ℓ₂} →
+             IsIndexedPreorder Aᵢ _≈_ _∼_ →
+             (index : I) → IsPreorder (_≈_ {index}) _∼_
+isPreorder isPreorder index = record
+  { isEquivalence = isEquivalence O.isEquivalenceᵢ index
+  ; reflexive     = O.reflexiveᵢ
+  ; trans         = O.transᵢ
+  } where module O = IsIndexedPreorder isPreorder
 
 ------------------------------------------------------------------------
--- Packages
+-- Bundles
 
-module _ {a i} {I : Set i} where
+setoid : IndexedSetoid I a ℓ → I → Setoid a ℓ
+setoid S index = record
+  { isEquivalence = isEquivalence S.isEquivalenceᵢ index
+  } where module S = IndexedSetoid S
 
-  setoid : ∀ {ℓ} → IndexedSetoid I a ℓ → I → Setoid a ℓ
-  setoid S index = record
-    { Carrier       = S.Carrierᵢ index
-    ; _≈_           = S._≈ᵢ_
-    ; isEquivalence = isEquivalence S.isEquivalenceᵢ index
-    }
-    where module S = IndexedSetoid S
+decSetoid : IndexedDecSetoid I a ℓ → I → DecSetoid a ℓ
+decSetoid S index = record
+  { isDecEquivalence = isDecEquivalence DS.isDecEquivalenceᵢ index
+  } where module DS = IndexedDecSetoid S
 
-  preorder : ∀ {ℓ₁ ℓ₂} → IndexedPreorder I a ℓ₁ ℓ₂ → I → Preorder a ℓ₁ ℓ₂
-  preorder O index = record
-    { Carrier    = O.Carrierᵢ index
-    ; _≈_        = O._≈ᵢ_
-    ; _∼_        = O._∼ᵢ_
-    ; isPreorder = isPreorder O.isPreorderᵢ index
-    }
-    where module O = IndexedPreorder O
-
+preorder : IndexedPreorder I a ℓ₁ ℓ₂ → I → Preorder a ℓ₁ ℓ₂
+preorder O index = record
+  { isPreorder = isPreorder O.isPreorderᵢ index
+  } where module O = IndexedPreorder O
 
 ------------------------------------------------------------------------
 -- Some useful shorthand infix notation
 
-module _ {a i} {I : Set i} where
-
-  _atₛ_ : ∀ {ℓ} → IndexedSetoid I a ℓ → I → Setoid a ℓ
-  _atₛ_ = setoid
+_atₛ_ : ∀ {ℓ} → IndexedSetoid I a ℓ → I → Setoid a ℓ
+_atₛ_ = setoid

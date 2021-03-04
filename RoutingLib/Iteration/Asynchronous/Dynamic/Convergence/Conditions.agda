@@ -66,11 +66,11 @@ record LocalACO {ℓ₁} (X₀ : IPred Sᵢ ℓ₁)
   field
     B            : ℕ → IPred Sᵢ ℓ₃
     Bᵢ-cong      : ∀ {k i} → (_∈ B k i) Respects _≈ᵢ_
-    B-finish     : ∃₂ λ k* x* → x* ∈ᵢ X₀ × (∀ {k} → k* ≤ k →
-                     (x* ∈ᵢ B k × (∀ {x} → x ∈ᵢ B k → x ≈ x*)))
+    X₀⊆B₀        : X₀ ⊆ᵢ B 0
     B-null       : ∀ {k i} → i ∉ p → ⊥ i ∈ B k i
     F-mono-B     : ∀ {k x} → x ∈ᵢ X₀ → x ∈ Accordant p → x ∈ᵢ B k → F′ x ∈ᵢ B (suc k)
-    X₀⊆B₀        : X₀ ⊆ᵢ B 0
+    B-finish     : ∃₂ λ k* x* → x* ∈ᵢ X₀ × (∀ {k} → k* ≤ k →
+                     (x* ∈ᵢ B k × (∀ {x} → x ∈ᵢ B k → x ≈ x*)))
 
 record PartialACO {ℓ₁} (X₀ : IPred Sᵢ ℓ₁)
                   {ℓ₂} (Q  : Pred (Epoch × Subset n) ℓ₂) ℓ₃ :

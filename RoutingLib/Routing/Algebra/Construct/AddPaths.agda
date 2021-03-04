@@ -8,13 +8,6 @@
 -- on a route's associated path.
 --------------------------------------------------------------------------------
 
-open import RoutingLib.Routing.Algebra
-
-module RoutingLib.Routing.Algebra.Construct.AddPaths
-  {a b ℓ} (A : RawRoutingAlgebra a b ℓ) where
-
-open RawRoutingAlgebra A
-
 open import Algebra
 open import Data.Fin using (Fin; toℕ)
 open import Data.Maybe using (Maybe; just)
@@ -33,31 +26,37 @@ open import Relation.Nullary.Construct.Add.Point renaming (∙ to invalid; [_] t
 
 open import RoutingLib.Algebra.Construct.Add.Identity as AddIdentity
   renaming (_⊕∙_ to AddIdentity) using (⊕∙-comm)
-open import RoutingLib.Algebra.Construct.Lexicographic as Lex using (Lex; Lex₂)
-open import RoutingLib.Algebra.Construct.Lexicographic.Magma as OpLexProperties′
+open import RoutingLib.Algebra.Construct.Lexicographic.Base
 open import RoutingLib.Data.Path.Uncertified
   renaming (_∈ₚ_ to _∈ᴱ_; _∉ₚ_ to _∉ᴱ_; Path to EPath; _⇿_ to _⇿ᴱ_)
 open import RoutingLib.Data.Path.Uncertified.Choice
 open import RoutingLib.Data.Path.Uncertified.Properties
 open import RoutingLib.Relation.Nullary.Negation using (contradiction₂)
 
+open import RoutingLib.Routing.Algebra
+
+module RoutingLib.Routing.Algebra.Construct.AddPaths
+  {a b ℓ} (A : RawRoutingAlgebra a b ℓ) where
+
+open RawRoutingAlgebra A
+
+
+import RoutingLib.Algebra.Construct.Lexicographic ⊕-magma ⊓ₗₑₓ-magma _≟_ as Lex
+
 ------------------------------------------------------------------------
 -- Prelude
-
-module LexProperties = OpLexProperties′ ⊕-magma ⊓ₗₑₓ-magma _≟_
 
 _≈ₓ_ : Rel (Route × EPath) _
 _≈ₓ_ = (Pointwise _≈_ _≡_)
 
-_⊕ₗ_  = Lex _≟_ _⊕_ _⊓ₗₑₓ_
-G     = Lex₂ _≟_ _⊕_ _⊓ₗₑₓ_
+_⊕ₗₑₓ_ : Op₂ (Route × EPath)
+_⊕ₗₑₓ_  = lex _⊕_ _⊓ₗₑₓ_ _≟_
 
 ≈ₓ-refl : Reflexive (Pointwise {A₂ = EPath} _≈_ _≡_)
 ≈ₓ-refl = Pointwise.×-refl {_∼₁_ = _≈_} {_≡_} ≈-refl refl
 
-≈ₓ-cong : Congruent₂ (Pointwise _≈_ _≡_) (Lex _≟_ _⊕_ _⊓ₗₑₓ_)
-≈ₓ-cong = LexProperties.cong
-
+≈ₓ-cong : Congruent₂ _≈ₓ_ _⊕ₗₑₓ_
+≈ₓ-cong = Lex.cong
 
 ------------------------------------------------------------------------
 -- Definition
@@ -88,7 +87,7 @@ _≉⁺_ : Rel Route⁺ _
 x ≉⁺ y = ¬ (x ≈⁺ y)
 
 _⊕⁺_ : Op₂ Route⁺
-_⊕⁺_ = AddIdentity _⊕ₗ_
+_⊕⁺_ = AddIdentity _⊕ₗₑₓ_
 
 _▷⁺_ : ∀ {n} {i j : Fin n} → Step⁺ i j → Route⁺ → Route⁺
 _▷⁺_ {_} {i} {j} f invalid         = invalid
@@ -167,14 +166,14 @@ open RawRoutingAlgebra AddPaths using ()
 module _ (A-isRoutingAlgebra : IsRoutingAlgebra A) where
   open IsRoutingAlgebra A-isRoutingAlgebra
 
-  ⊕ₓ-sel : Selective (Pointwise _≈_ _≡_) (Lex _≟_ _⊕_ _⊓ₗₑₓ_)
-  ⊕ₓ-sel = LexProperties.sel ⊕-sel ⊓ₗₑₓ-sel
+  ⊕ₓ-sel : Selective _≈ₓ_ _⊕ₗₑₓ_
+  ⊕ₓ-sel = Lex.sel ⊕-sel ⊓ₗₑₓ-sel
 
-  ⊕ₓ-comm : Commutative (Pointwise _≈_ _≡_) (Lex _≟_ _⊕_ _⊓ₗₑₓ_)
-  ⊕ₓ-comm = LexProperties.comm ⊕-comm ⊓ₗₑₓ-comm
+  ⊕ₓ-comm : Commutative _≈ₓ_ _⊕ₗₑₓ_
+  ⊕ₓ-comm = Lex.comm ⊕-comm ⊓ₗₑₓ-comm
 
-  ⊕ₓ-assoc : Associative (Pointwise _≈_ _≡_) (Lex _≟_ _⊕_ _⊓ₗₑₓ_)
-  ⊕ₓ-assoc = LexProperties.assoc ⊕-assoc ⊓ₗₑₓ-assoc ⊕-sel ⊕-comm 
+  ⊕ₓ-assoc : Associative _≈ₓ_ _⊕ₗₑₓ_
+  ⊕ₓ-assoc = Lex.assoc ⊕-assoc ⊕-comm ⊕-sel ⊓ₗₑₓ-assoc 
 
   ⊕⁺-sel : Selective _≈⁺_ _⊕⁺_
   ⊕⁺-sel = AddIdentity.⊕∙-sel _ ≈ₓ-refl ⊕ₓ-sel 
@@ -191,7 +190,7 @@ module _ (A-isRoutingAlgebra : IsRoutingAlgebra A) where
   ⊕⁺-assoc = AddIdentity.⊕∙-assoc _ ≈ₓ-refl ⊕ₓ-assoc
 
   ⊕⁺-zeroʳ : RightZero _≈⁺_ 0#⁺ _⊕⁺_
-  ⊕⁺-zeroʳ = AddIdentity.⊕∙-zeroʳ _ ≈ₓ-refl (LexProperties.zeroʳ ⊕-zeroʳ ⊓ₗₑₓ-zeroʳ)
+  ⊕⁺-zeroʳ = AddIdentity.⊕∙-zeroʳ _ ≈ₓ-refl (Lex.zeroʳ ⊕-zeroʳ ⊓ₗₑₓ-zeroʳ)
 
   ⊕⁺-identityʳ : RightIdentity _≈⁺_ ∞#⁺ _⊕⁺_
   ⊕⁺-identityʳ = AddIdentity.⊕∙-identityʳ _ ≈ₓ-refl
@@ -274,19 +273,19 @@ isPathAlgebra = record
 ⊕⁺invalidᵣ (valid(x , p)) = ≈⁺-refl 
 
 ⊕⁺-case₁ : ∀ {a b} x y  → (a ⊕ b) ≈ a → (a ⊕ b) ≉ b → valid(a , x) ⊕⁺ valid(b , y) ≈⁺ valid(a , x) 
-⊕⁺-case₁ x y ab=a ¬ab=b = [ LexProperties.Lex-case₁ x y ab=a ¬ab=b  ]
+⊕⁺-case₁ x y ab=a ¬ab=b = [ Lex.case₁ ab=a ¬ab=b x y ]
 
 ⊕⁺-case₁⁻¹ : ∀ {a b x y}  → valid(a , x) ⊕⁺ valid(b , y) ≈⁺ valid(a , x) → a ⊕ b ≈ a 
 ⊕⁺-case₁⁻¹ [ fst , _ ] = fst
 
 ⊕⁺-case₂ : ∀ {a b} x y  → (a ⊕ b) ≉ a → (a ⊕ b) ≈ b → valid(a , x) ⊕⁺ valid(b , y) ≈⁺ valid(b , y) 
-⊕⁺-case₂ x y ¬ab=a ab=b = [ LexProperties.Lex-case₂  x y ¬ab=a ab=b  ]
+⊕⁺-case₂ x y ¬ab=a ab=b = [ Lex.case₂ ¬ab=a ab=b x y ]
 
 ⊕⁺-case₂⁻¹ : ∀ {a b x y}  → valid(a , x) ⊕⁺ valid(b , y) ≈⁺ valid(b , y) → a ⊕ b ≈ b 
 ⊕⁺-case₂⁻¹ [ fst , _ ] = fst
 
 ⊕⁺-case₃ : ∀ {a b} x y  → (a ⊕ b) ≈ a → (a ⊕ b) ≈ b → valid(a , x) ⊕⁺ valid(b , y) ≈⁺ valid(a , x ⊓ₗₑₓ y) 
-⊕⁺-case₃ x y ab=a ab=b = [ LexProperties.Lex-case₃ x y ab=a ab=b  ]
+⊕⁺-case₃ x y ab=a ab=b = [ Lex.case₃ ab=a ab=b x y ]
 
 
 ≤₊⁺⇒≤⁺ : ∀ {x y p q} → valid (x , p) ≤₊⁺ valid (y , q) → x ≤₊ y

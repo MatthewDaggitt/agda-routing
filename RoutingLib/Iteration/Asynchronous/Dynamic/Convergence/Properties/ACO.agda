@@ -22,15 +22,13 @@ open import RoutingLib.Iteration.Asynchronous.Dynamic
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
 
 module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Properties.ACO
-  {a ℓ n}
-  (I∥ : AsyncIterable a ℓ n) (open AsyncIterable I∥)
-  {ℓ₁ ℓ₂ ℓ₃}
-  {X₀ : IPred Sᵢ ℓ₁}
-  {Q  : Pred (Epoch × Subset n) ℓ₂}
-  (partialACO : PartialACO I∥ X₀ Q ℓ₃)
+  {a ℓ ℓ₁ ℓ₂ ℓ₃ n}
+  (I∥ : AsyncIterable a ℓ n)
+  (open AsyncIterable I∥)
+  {X : IPred Sᵢ ℓ₁}
+  {C : Pred (Epoch × Subset n) ℓ₂}
+  (partialACO : PartialACO I∥ X C ℓ₃)
   where
-
-open PartialACO partialACO
 
 private
   variable
@@ -40,11 +38,10 @@ private
 --------------------------------------------------------------------------------
 -- Replacing one element of an indexed type with another
 
-module _ {e p f q} (ep∈Q : (e , p) ∈ Q) (fq∈Q : (f , q) ∈ Q) where
+module _ {e p f q} (ep∈C : (e , p) ∈ C) (fq∈C : (f , q) ∈ C) where
 
-
-  B₁ = LocalACO.B (localACO ep∈Q)
-  B₂ = LocalACO.B (localACO fq∈Q)
+  B₁ = LocalACO.B (partialACO ep∈C)
+  B₂ = LocalACO.B (partialACO fq∈C)
   
   B-subst : e ≡ f → p ≡ q → B₁ ≡ B₂
   B-subst refl refl = refl
@@ -52,9 +49,9 @@ module _ {e p f q} (ep∈Q : (e , p) ∈ Q) (fq∈Q : (f , q) ∈ Q) where
 --------------------------------------------------------------------------------
 -- Fixed points
 
-module _ {e} {p} (ep∈Q : (e , p) ∈ Q) where
+module _ {e} {p} (ep∈C : (e , p) ∈ C) where
 
-  open LocalACO (localACO ep∈Q)
+  open LocalACO (partialACO ep∈C)
   
   x* : S
   x* = proj₁ $ proj₂ B-finish
@@ -64,8 +61,8 @@ module _ {e} {p} (ep∈Q : (e , p) ∈ Q) where
 
   -- Properties
 
-  x*∈X₀ : x* ∈ᵢ X₀
-  x*∈X₀ = proj₁ $ proj₂ $ proj₂ B-finish
+  x*∈X : x* ∈ᵢ X
+  x*∈X = proj₁ $ proj₂ $ proj₂ B-finish
   
   k*≤k⇒x*∈Bₖ : ∀ {k} → k* ≤ k → x* ∈ᵢ B k
   k*≤k⇒x*∈Bₖ k*≤k = proj₁ $ (proj₂ $ proj₂ $ proj₂ B-finish) k*≤k
@@ -88,7 +85,7 @@ module _ {e} {p} (ep∈Q : (e , p) ∈ Q) where
   
   x*-fixed : (F e p) x* ≈ x*
   x*-fixed = begin⟨ k*≤k⇒x*∈Bₖ ≤-refl ⟩
-    ∴ x*         ∈ᵢ B k*       $⟨ F-mono-B x*∈X₀ x*∈Aₚ ⟩
+    ∴ x*         ∈ᵢ B k*       $⟨ F-mono-B x*∈X x*∈Aₚ ⟩
     ∴ F e p (x*) ∈ᵢ B (suc k*) $⟨ k*≤k∧x∈Bₖ⇒x≈x* (n≤1+n k*) ⟩
     ∴ F e p (x*) ≈ x*          ∎
   

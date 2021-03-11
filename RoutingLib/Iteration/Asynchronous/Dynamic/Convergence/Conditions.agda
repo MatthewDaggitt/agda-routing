@@ -31,7 +31,7 @@ open import Data.Bool using (if_then_else_)
 open import Data.Unit using (tt)
 open import Data.Vec.Functional.Relation.Binary.Pointwise using (Pointwise)
 open import Function.Metric.Nat
-open import Level using (Level; _⊔_) renaming (suc to lsuc)
+open import Level using (Level; 0ℓ; _⊔_) renaming (suc to lsuc)
 open import Level.Literals using (#_)
 open import Relation.Binary as B using (DecSetoid; _Respects_; Total; _Preserves_⟶_; _Preserves₂_⟶_⟶_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
@@ -51,35 +51,48 @@ module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
   {a ℓ n} (𝓘 : AsyncIterable a ℓ n) where
 open AsyncIterable 𝓘
 
+private
+  variable
+    ℓ₁ ℓ₂ ℓ₃ : Level
+
+--------------------------------------------------------------------------------
+-- Initial set
+--------------------------------------------------------------------------------
+
+record IsValidInitialSet (X : IPred Sᵢ ℓ₁) : Set (a ⊔ ℓ₁) where
+  field
+    -- The set it closed over every operator
+    F-pres-X  : ∀ {e p x} → x ∈ᵢ X → F e p x ∈ᵢ X
+    -- The set contains the non-participating set
+    ⊥∈X       : ⊥ ∈ᵢ X
+
+-- The universal set is a valid initial set
+Uᵢ-validInitialSet : IsValidInitialSet Uᵢ
+Uᵢ-validInitialSet = _
+  
 --------------------------------------------------------------------------------
 -- Asynchronously contracting operator (ACO) --
 --------------------------------------------------------------------------------
 -- Sufficient conditions for convergence
 
-record LocalACO {ℓ₁} (X₀ : IPred Sᵢ ℓ₁)
-                (e : Epoch) (p : Subset n) ℓ₃
+record LocalACO (X : IPred Sᵢ ℓ₁) (e : Epoch) (p : Subset n) ℓ₃
                 : Set (a ⊔ ℓ ⊔ ℓ₁ ⊔ lsuc ℓ₃) where
 
   F′ : S → S
   F′ = F e p
   
   field
-    B            : ℕ → IPred Sᵢ ℓ₃
-    Bᵢ-cong      : ∀ {k i} → (_∈ B k i) Respects _≈ᵢ_
-    X₀⊆B₀        : X₀ ⊆ᵢ B 0
-    B-null       : ∀ {k i} → i ∉ p → ⊥ i ∈ B k i
-    F-mono-B     : ∀ {k x} → x ∈ᵢ X₀ → x ∈ Accordant p → x ∈ᵢ B k → F′ x ∈ᵢ B (suc k)
-    B-finish     : ∃₂ λ k* x* → x* ∈ᵢ X₀ × (∀ {k} → k* ≤ k →
+    B         : ℕ → IPred Sᵢ ℓ₃
+    Bᵢ-cong   : ∀ {k i} → (_∈ B k i) Respects _≈ᵢ_
+    X⊆B₀      : X ⊆ᵢ B 0
+    B-null    : ∀ {k i} → i ∉ p → ⊥ i ∈ B k i
+    F-mono-B  : ∀ {k x} → x ∈ᵢ X → x ∈ Accordant p → x ∈ᵢ B k → F′ x ∈ᵢ B (suc k)
+    B-finish  : ∃₂ λ k* x* → x* ∈ᵢ X × (∀ {k} → k* ≤ k →
                      (x* ∈ᵢ B k × (∀ {x} → x ∈ᵢ B k → x ≈ x*)))
 
-record PartialACO {ℓ₁} (X₀ : IPred Sᵢ ℓ₁)
-                  {ℓ₂} (Q  : Pred (Epoch × Subset n) ℓ₂) ℓ₃ :
-                  Set (a ⊔ ℓ ⊔ ℓ₁ ⊔ lsuc ℓ₂ ⊔ lsuc ℓ₃) where
-  field
-    localACO  : ∀ {e p} .(ep∈Q : (e , p) ∈ Q) → LocalACO X₀ e p ℓ₃
-    F-pres-X₀ : ∀ {e p x} → x ∈ᵢ X₀ → F e p x ∈ᵢ X₀
-    ⊥∈X₀      : ⊥ ∈ᵢ X₀
-    
+PartialACO : ∀ (X : IPred Sᵢ ℓ₁) (C : Pred (Epoch × Subset n) ℓ₂) ℓ₃ → Set (a ⊔ ℓ ⊔ ℓ₁ ⊔ ℓ₂ ⊔ lsuc ℓ₃)
+PartialACO X C ℓ₃ = ∀ {e p} .(ep∈C : (e , p) ∈ C) → LocalACO X e p ℓ₃
+
 ACO : ∀ ℓ₃ → Set (a ⊔ ℓ ⊔ lsuc ℓ₃)
 ACO = PartialACO Uᵢ U
 
@@ -89,7 +102,7 @@ ACO = PartialACO Uᵢ U
 --------------------------------------------------------------------------------
 -- Sufficient conditions for convergence
 
-record LocalAMCO {ℓ₁} (X₀ : IPred Sᵢ ℓ₁)
+record LocalAMCO {ℓ₁} (X : IPred Sᵢ ℓ₁)
                  (e : Epoch) (p : Subset n)
                  : Set (a ⊔ ℓ ⊔ ℓ₁) where
   field
@@ -107,9 +120,9 @@ record LocalAMCO {ℓ₁} (X₀ : IPred Sᵢ ℓ₁)
   F′ = F e p
 
   field
-    F-strContrOnOrbits  : ∀ {x} → x ∈ᵢ X₀ → x ∈ Accordant p → F′ x ≉[ p ] x → d (F′ x) (F′ (F′ x)) < d x (F′ x)
-    F-strContrOnFP      : ∀ {x} → x ∈ᵢ X₀ → x ∈ Accordant p → ∀ {x*} → F′ x* ≈ x* → x ≉[ p ] x* → d x* (F′ x) < d x* x
-    F-pres-Aₚ           : ∀ {x} → x ∈ᵢ X₀ → x ∈ Accordant p → F′ x ∈ Accordant p
+    F-strContrOnOrbits  : ∀ {x} → x ∈ᵢ X → x ∈ Accordant p → F′ x ≉[ p ] x → d (F′ x) (F′ (F′ x)) < d x (F′ x)
+    F-strContrOnFP      : ∀ {x} → x ∈ᵢ X → x ∈ Accordant p → ∀ {x*} → F′ x* ≈ x* → x ≉[ p ] x* → d x* (F′ x) < d x* x
+    F-pres-Aₚ           : ∀ {x} → x ∈ᵢ X → x ∈ Accordant p → F′ x ∈ Accordant p
 
   module _ {i} where
     open IsQuasiSemiMetric (dᵢ-isQuasiSemiMetric i) public
@@ -120,13 +133,8 @@ record LocalAMCO {ℓ₁} (X₀ : IPred Sᵢ ℓ₁)
       ; 0⇒≈  to dᵢ≡0⇒x≈y
       )
 
-record PartialAMCO {ℓ₁} (X₀ : IPred Sᵢ ℓ₁)
-                   {ℓ₂} (Q : Pred (Epoch × Subset n) ℓ₂)
-                   :  Set (a ⊔ ℓ ⊔ ℓ₁ ⊔ ℓ₂) where
-  field
-    localAMCO : ∀ {e p} → .((e , p) ∈ Q) → LocalAMCO X₀ e p
-    F-pres-X₀ : ∀ {e p x} → x ∈ᵢ X₀ → F e p x ∈ᵢ X₀
-    ⊥∈X₀      : ⊥ ∈ᵢ X₀
+PartialAMCO : (X : IPred Sᵢ ℓ₁) (C : Pred (Epoch × Subset n) ℓ₂) → Set (a ⊔ ℓ ⊔ ℓ₁ ⊔ ℓ₂)
+PartialAMCO X C = ∀ {e p} → .((e , p) ∈ C) → LocalAMCO X e p
 
 AMCO : Set (a ⊔ ℓ)
 AMCO = PartialAMCO Uᵢ U

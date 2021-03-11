@@ -161,9 +161,5 @@ module _ {e : Epoch} {p : Subset n} .(free : TopologyIsFree alg N (e , p)) where
 ------------------------------------------------------------------------
 -- AMCO
 
-amco : PartialAMCO F∥ Uᵢ (TopologyIsFree alg N)
-amco = record
-  { localAMCO = localAMCO
-  ; F-pres-X₀ = _
-  ; ⊥∈X₀      = _
-  }
+partialAMCO : PartialAMCO F∥ Uᵢ (TopologyIsFree alg N)
+partialAMCO = localAMCO

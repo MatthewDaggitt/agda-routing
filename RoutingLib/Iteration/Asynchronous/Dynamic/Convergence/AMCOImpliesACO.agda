@@ -29,33 +29,31 @@ import RoutingLib.Relation.Binary.Indexed.Homogeneous.Construct.FiniteSubset.Dec
 import RoutingLib.Function.Reasoning as FunctionReasoning
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic using (AsyncIterable; Epoch)
-open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions using (LocalAMCO; LocalACO; PartialACO; PartialAMCO)
+open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Properties using (xy∈Aₚ∧x≈ₚy⇒x≈y)
 
 module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.AMCOImpliesACO
   {a ℓ n} {I∥ : AsyncIterable a ℓ n} (open AsyncIterable I∥)
-  {ℓ₁} {X₀ : IPred Sᵢ ℓ₁}
-  {ℓ₂} {Q : Pred (Epoch × Subset n) ℓ₂}
-  (partialAMCO : PartialAMCO I∥ X₀ Q) where
+  {ℓ₁} {X : IPred Sᵢ ℓ₁} (X-valid : IsValidInitialSet I∥ X)
+  {ℓ₂} {C : Pred (Epoch × Subset n) ℓ₂}
+  (partialAMCO : PartialAMCO I∥ X C) where
 
-open PartialAMCO partialAMCO
+open IsValidInitialSet X-valid
 open ≤-Reasoning
 
 ----------------------------------------------
 -- Export and define some useful properties --
 ----------------------------------------------
 
-abstract
-
-  inactiveEq : ∀ p {x y} → x ∈ Accordant p → y ∈ Accordant p → x ≈[ p ] y → x ≈ y
-  inactiveEq p x∈Aₚ y∈Aₚ x≈ₚy i with i ∈? p
-  ... | yes i∈p = x≈ₚy i∈p
-  ... | no  i∉p = ≈ᵢ-trans (x∈Aₚ i∉p) (≈ᵢ-sym (y∈Aₚ i∉p))
+inactiveEq : ∀ p {x y} → x ∈ Accordant p → y ∈ Accordant p → x ≈[ p ] y → x ≈ y
+inactiveEq p x∈Aₚ y∈Aₚ x≈ₚy i with i ∈? p
+... | yes i∈p = x≈ₚy i∈p
+... | no  i∉p = ≈ᵢ-trans (x∈Aₚ i∉p) (≈ᵢ-sym (y∈Aₚ i∉p))
 
 
-module _ {e : Epoch} {p : Subset n} .(ep∈Q : (e , p) ∈ Q) where
+module _ {e : Epoch} {p : Subset n} .(ep∈C : (e , p) ∈ C) where
 
-  open LocalAMCO (localAMCO ep∈Q)
+  open LocalAMCO (partialAMCO ep∈C)
 
   dₘₐₓ : ℕ
   dₘₐₓ = proj₁ dᵢ-bounded
@@ -130,14 +128,14 @@ module _ {e : Epoch} {p : Subset n} .(ep∈Q : (e , p) ∈ Q) where
 
   abstract
     private
-      fixedPoint : ∃ (λ x* → F′ x* ≈ x* × x* ∈ᵢ X₀ × x* ∈ Accordant p)
-      fixedPoint = inner {⊥} (λ _ → ≈ᵢ-refl) ⊥∈X₀ (<-wellFounded (d ⊥ (F′ ⊥)))
+      fixedPoint : ∃ (λ x* → F′ x* ≈ x* × x* ∈ᵢ X × x* ∈ Accordant p)
+      fixedPoint = inner {⊥} (λ _ → ≈ᵢ-refl) ⊥∈X (<-wellFounded (d ⊥ (F′ ⊥)))
         where
-        inner : ∀ {x} → x ∈ Accordant p → x ∈ᵢ X₀ → Acc _<_ (d x (F′ x)) →
-                  ∃ (λ x* → F′ x* ≈ x* × x* ∈ᵢ X₀ × x* ∈ Accordant p)
-        inner {x} x∈Aₚ x∈X₀ (acc x-acc) with F′ x ≟[ p ] x | F-pres-Aₚ x∈X₀ x∈Aₚ
-        ... | yes fx≈ₚx | Fx∈Aₚ = x , inactiveEq p Fx∈Aₚ x∈Aₚ fx≈ₚx , x∈X₀ , x∈Aₚ
-        ... | no  fx≉ₚx | Fx∈Aₚ = inner Fx∈Aₚ (F-pres-X₀ x∈X₀) (x-acc _ (F-strContrOnOrbits x∈X₀ x∈Aₚ fx≉ₚx))
+        inner : ∀ {x} → x ∈ Accordant p → x ∈ᵢ X → Acc _<_ (d x (F′ x)) →
+                  ∃ (λ x* → F′ x* ≈ x* × x* ∈ᵢ X × x* ∈ Accordant p)
+        inner {x} x∈Aₚ x∈X (acc x-acc) with F′ x ≟[ p ] x | F-pres-Aₚ x∈X x∈Aₚ
+        ... | yes fx≈ₚx | Fx∈Aₚ = x , inactiveEq p Fx∈Aₚ x∈Aₚ fx≈ₚx , x∈X , x∈Aₚ
+        ... | no  fx≉ₚx | Fx∈Aₚ = inner Fx∈Aₚ (F-pres-X x∈X) (x-acc _ (F-strContrOnOrbits x∈X x∈Aₚ fx≉ₚx))
 
     x* : S
     x* = proj₁ fixedPoint
@@ -148,8 +146,8 @@ module _ {e : Epoch} {p : Subset n} .(ep∈Q : (e , p) ∈ Q) where
     Fx*≈ₚx* : F′ x* ≈[ p ] x*
     Fx*≈ₚx* = ≈⇒≈ₛ Fx*≈x*
 
-    x*∈X₀ : x* ∈ᵢ X₀
-    x*∈X₀ = proj₁ (proj₂ (proj₂ fixedPoint))
+    x*∈X : x* ∈ᵢ X
+    x*∈X = proj₁ (proj₂ (proj₂ fixedPoint))
     
     x*∈Aₚ : x* ∈ Accordant p
     x*∈Aₚ = proj₂ (proj₂ (proj₂ fixedPoint))
@@ -184,9 +182,9 @@ module _ {e : Epoch} {p : Subset n} .(ep∈Q : (e , p) ∈ Q) where
   ... | yes i∈p = contradiction i∈p i∉p
   ... | no  _   = ≈ᵢ-refl
 
-  B-finish : ∃₂ λ k* x* → x* ∈ᵢ X₀ × (∀ {k} → k* ≤ k →
+  B-finish : ∃₂ λ k* x* → x* ∈ᵢ X × (∀ {k} → k* ≤ k →
                (x* ∈ᵢ B k × (∀ {x} → x ∈ᵢ B k → x ≈ x*)))
-  B-finish = k* , x* , x*∈X₀ , λ k*≤k → x*∈B[k] k*≤k , x∈B[k]⇒x*≈x k*≤k
+  B-finish = k* , x* , x*∈X , λ k*≤k → x*∈B[k] k*≤k , x∈B[k]⇒x*≈x k*≤k
     where
     x∈B[k]⇒x*≈x : ∀ {k} → k* ≤ k → ∀ {x} → x ∈ᵢ B k → x ≈ x*
     x∈B[k]⇒x*≈x {zero}  k*≤0   {x} x∈B[k] i = dᵢ≡0⇒x≈y (n≤0⇒n≡0 (≤-trans (dᵢ≤k* (x i) _) k*≤0))
@@ -214,45 +212,34 @@ module _ {e : Epoch} {p : Subset n} .(ep∈Q : (e , p) ∈ Q) where
   ∈B⇒d≤r {zero}  {x} x∈B = d≤r[0] x* x
   ∈B⇒d≤r {suc b} {x} x∈B = max[t]≤x z≤n (λ i → ∈Bᵢ⇒dᵢ≤r (x∈B i))
 
-  F-mono-B  : ∀ {k x} → x ∈ᵢ X₀ → x ∈ Accordant p → x ∈ᵢ B k → F′ x ∈ᵢ B (suc k)
-  F-mono-B {k} {x} x∈X₀ x∈Aₚ x∈B i with i ∈? p
-  ... | no  i∉p = F-pres-Aₚ x∈X₀ x∈Aₚ i∉p
+  F-mono-B  : ∀ {k x} → x ∈ᵢ X → x ∈ Accordant p → x ∈ᵢ B k → F′ x ∈ᵢ B (suc k)
+  F-mono-B {k} {x} x∈X x∈Aₚ x∈B i with i ∈? p
+  ... | no  i∉p = F-pres-Aₚ x∈X x∈Aₚ i∉p
   ... | yes i∈p with x ≟[ p ] x*
   ...   | yes x≈ₚx* = lift (begin
     dᵢ (x* i) (F′ x  i)  ≡⟨ dᵢ-cong ≈ᵢ-refl (F-cong e p (xy∈Aₚ∧x≈ₚy⇒x≈y I∥ x∈Aₚ x*∈Aₚ x≈ₚx*) i∈p) ⟩
     dᵢ (x* i) (F′ x* i)  ≡⟨ dᵢ-cong ≈ᵢ-refl (Fx*≈ₚx* i∈p) ⟩
-    dᵢ (x* i) (x* i)        ≡⟨ x≈y⇒dᵢ≡0 ≈ᵢ-refl ⟩
-    0                       ≤⟨ z≤n ⟩
-    r[ suc k ]              ∎)
+    dᵢ (x* i) (x* i)     ≡⟨ x≈y⇒dᵢ≡0 ≈ᵢ-refl ⟩
+    0                    ≤⟨ z≤n ⟩
+    r[ suc k ]           ∎)
   ...   | no  x≉ₚx* = lift (v<r[k]⇒v≤r[1+k] (begin-strict
-    dᵢ (x* i) (F′ x i)  ≤⟨ dᵢ≤d x* (F′ x) i∈p ⟩
-    d x* (F′ x)         <⟨ F-strContrOnFP x∈X₀ x∈Aₚ Fx*≈x* x≉ₚx* ⟩
-    d x* x              ≤⟨ ∈B⇒d≤r x∈B ⟩
-    r[ k ]              ∎))
+    dᵢ (x* i) (F′ x i)   ≤⟨ dᵢ≤d x* (F′ x) i∈p ⟩
+    d x* (F′ x)          <⟨ F-strContrOnFP x∈X x∈Aₚ Fx*≈x* x≉ₚx* ⟩
+    d x* x               ≤⟨ ∈B⇒d≤r x∈B ⟩
+    r[ k ]               ∎))
 
-  X₀⊆B₀ : X₀ ⊆ᵢ B 0
-  X₀⊆B₀ = _
+  X⊆B₀ : X ⊆ᵢ B 0
+  X⊆B₀ = _
   
-  localACO : LocalACO I∥ X₀ e p ℓ
+  localACO : LocalACO I∥ X e p ℓ
   localACO = record
-    { B            = B
-    ; Bᵢ-cong      = λ {k} → B-cong {k}
-    ; X₀⊆B₀        = X₀⊆B₀
-    ; B-finish     = B-finish
-    ; B-null       = λ {k} → B-null {k}
-    ; F-mono-B     = F-mono-B
+    { B         = B
+    ; Bᵢ-cong   = λ {k} → B-cong {k}
+    ; X⊆B₀      = X⊆B₀
+    ; B-finish  = B-finish
+    ; B-null    = λ {k} → B-null {k}
+    ; F-mono-B  = F-mono-B
     }
-
-----------------------
--- ACO construction --
-----------------------
-
-partialACO : PartialACO I∥ X₀ Q _
-partialACO = record
-  { localACO  = localACO
-  ; F-pres-X₀ = F-pres-X₀
-  ; ⊥∈X₀      = ⊥∈X₀
-  }
 
 -----------------------------------------------------------------
 -- Some hard-won knowledge on which box definitions don't work --

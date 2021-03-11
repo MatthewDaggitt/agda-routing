@@ -8,7 +8,7 @@
 
 module RoutingLib.Iteration.Asynchronous.Dynamic where
 
-open import Level using (_⊔_) renaming (suc to lsuc)
+open import Level using (0ℓ; _⊔_) renaming (suc to lsuc)
 open import Level.Literals using (#_)
 open import Data.Fin using (Fin)
 open import Data.Fin.Properties using (all?)
@@ -158,7 +158,7 @@ module _ {a ℓ n} (I : AsyncIterable a ℓ n) (𝓢 : Schedule n) where
 module _ {a ℓ n} (I : AsyncIterable a ℓ n) where
 
   open AsyncIterable I
-
+  
   record LocalFixedPoint (e : Epoch) (p : Subset n) : Set (a ⊔ ℓ) where
     field
       x*         : S
@@ -169,19 +169,20 @@ module _ {a ℓ n} (I : AsyncIterable a ℓ n) where
   -- guarantees the iteration is convergent when:
   --   i)  the initial state is in the set X₀,
   --   ii) the set of participants is always in the set Q.
-  record PartiallyConvergent {ℓ₁} (X₀ : IPred Sᵢ ℓ₁)               -- Allowable initial states
-                             {ℓ₂} (Q : Pred (Epoch × Subset n) ℓ₂) -- Configurations in which it converges
+  record PartiallyConvergent {ℓ₁} (X : IPred Sᵢ ℓ₁)               -- Allowable initial states
+                             {ℓ₂} (C : Pred (Epoch × Subset n) ℓ₂) -- Configurations in which it converges
                              : Set (# 1 ⊔ a ⊔ ℓ ⊔ ℓ₁ ⊔ ℓ₂) where
     field
-      localFP    : ∀ {e p} → (e , p) ∈ Q → LocalFixedPoint e p
+      localFP    : ∀ {e p} → (e , p) ∈ C → LocalFixedPoint e p
       -- For every schedule ψ , starting point x₀ and point in time tₛ,
       -- then if the epoch and subset satisfies the predicate Q then
       -- if the schedule has k*-pseudocycles between t₁ and t₂
       -- then for every time t₃ after t₂ that is within the same epoch
       -- the iteration will be at the fixed point x*.
       reachesFP : ∀ (ψ : Schedule n) (open Schedule ψ) → 
-                  ∀ {x : S} → x ∈ᵢ X₀ →
-                  ∀ {tₛ : 𝕋} (tₛ∈Q : (η tₛ , ρ tₛ) ∈ Q) (open LocalFixedPoint (localFP tₛ∈Q)) →
+                  ∀ {x : S} → x ∈ᵢ X →
+                  ∀ {tₛ : 𝕋} (tₛ∈C : (η tₛ , ρ tₛ) ∈ C) →
+                  (open LocalFixedPoint (localFP tₛ∈C)) →
                   ∀ {tₘ : 𝕋} → MultiPseudocycle ψ k* [ tₛ , tₘ ] →
                   ∀ {tₑ : 𝕋} → SubEpoch ψ [ tₘ , tₑ ] →
                   asyncIter I ψ x tₑ ≈ x*

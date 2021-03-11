@@ -13,7 +13,7 @@ open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Definitions
 open import RoutingLib.Routing.VectorBased.Convergence.Definitions
 
 import RoutingLib.Iteration.Asynchronous.Dynamic as Iteration
-open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence as Iteration using (PartialAMCO; AMCO)
+open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence as Iteration using (PartialAMCO; AMCO; Uᵢ-validInitialSet)
 import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Step1_FreeImpliesERO as Step1
 import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Step2_EROImpliesHF as Step2
 import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Step3_HFImpliesDF_DistanceVector as Step3_DV
@@ -43,16 +43,16 @@ finite⇒convergentOverFreeNetworks : IsRoutingAlgebra algebra →
                                     IsFinite algebra →
                                     PartiallyConvergent algebra (TopologyIsFree algebra)
 finite⇒convergentOverFreeNetworks {algebra = algebra} isRoutingAlgebra finite N =
-  Iteration.AMCO⇒convergent-partial
-    (Step4.amco isRoutingAlgebra N
+  Iteration.AMCO⇒convergent-partial (Uᵢ-validInitialSet _)
+    (Step4.partialAMCO isRoutingAlgebra N
       (finite+cycleFree⇒routeDistanceFunction isRoutingAlgebra finite))
 
 paths⇒convergentOverFreeNetworks : IsRoutingAlgebra algebra →
                                    IsPathAlgebra algebra →
                                    PartiallyConvergent algebra (TopologyIsFree algebra)                                 
 paths⇒convergentOverFreeNetworks {algebra = algebra} isRoutingAlgebra isPathAlgebra {n} N =
-  Iteration.AMCO⇒convergent-partial
-    (Step4.amco isRoutingAlgebra N
+  Iteration.AMCO⇒convergent-partial (Uᵢ-validInitialSet _)
+    (Step4.partialAMCO isRoutingAlgebra N
       λ free → Step3_PV.routeDistanceFunction isRoutingAlgebra isCertifiedPathAlgebra
         (finite+cycleFree⇒routeDistanceFunction isRoutingAlgebraᶜ isFiniteᶜ
           (cycleFreeᶜ free)))

@@ -31,7 +31,7 @@ private
     I∥ : AsyncIterable a ℓ₁ n
     J∥ : AsyncIterable b ℓ₂ n
     X₀ Y₀ : IPred (AsyncIterable.Sᵢ I∥) ℓ
-    Q R : Pred (Epoch × Subset n) ℓ
+    C D : Pred (Epoch × Subset n) ℓ
     
 ------------------------------------------------------------------------
 -- Export convergence conditions publically
@@ -56,20 +56,20 @@ open Conditions public
 
 shrinkConvergence : {X₀ : IPred (AsyncIterable.Sᵢ I∥) ℓ₂}
                     {Y₀ : IPred (AsyncIterable.Sᵢ I∥) ℓ₃} →
-                    PartiallyConvergent I∥ X₀ Q →
-                    Y₀ ⊆ᵢ X₀ → R ⊆ Q →
-                    PartiallyConvergent I∥ Y₀ R
-shrinkConvergence partial Y₀⊆X₀ R⊆Q = record
-  { localFP   = localFP ∘ R⊆Q
-  ; reachesFP = λ S x∈X₀ ep∈R → reachesFP S (Y₀⊆X₀ ∘ x∈X₀) (R⊆Q ep∈R)
+                    PartiallyConvergent I∥ X₀ C →
+                    Y₀ ⊆ᵢ X₀ → D ⊆ C →
+                    PartiallyConvergent I∥ Y₀ D
+shrinkConvergence partial Y₀⊆X₀ D⊆C = record
+  { localFP   = localFP ∘ D⊆C
+  ; reachesFP = λ S x∈X₀ ep∈R → reachesFP S (Y₀⊆X₀ ∘ x∈X₀) (D⊆C ep∈R)
   } where open PartiallyConvergent partial
 
 completeConvergence : ∀ {X₀ : IPred (AsyncIterable.Sᵢ I∥) ℓ₂} →
-                      PartiallyConvergent I∥ X₀ Q →
-                      Universalᵢ X₀ → Universal Q →
+                      PartiallyConvergent I∥ X₀ C →
+                      Universalᵢ X₀ → Universal C →
                       Convergent I∥
-completeConvergence partial _∈X₀ _∈Q =
-  shrinkConvergence partial (λ _ → _ ∈X₀) (λ _ → _ ∈Q)
+completeConvergence partial _∈X₀ _∈C =
+  shrinkConvergence partial (λ _ → _ ∈X₀) (λ _ → _ ∈C)
 
 ------------------------------------------------------------------------
 -- If a convergent iteration is bisimilar to a second iteration then
@@ -78,8 +78,8 @@ completeConvergence partial _∈X₀ _∈Q =
 simulate-partial : {X₀ : IPred (AsyncIterable.Sᵢ I∥) ℓ₂} →
                    {Y₀ : IPred (AsyncIterable.Sᵢ J∥) ℓ₂} →
                    PartiallySimulates I∥ J∥ X₀ Y₀ →
-                   PartiallyConvergent I∥ X₀ Q →
-                   PartiallyConvergent J∥ Y₀ Q
+                   PartiallyConvergent I∥ X₀ C →
+                   PartiallyConvergent J∥ Y₀ C
 simulate-partial I∥⇉J∥ = Simulation.simulate I∥⇉J∥
 
 simulate : I∥ Simulates J∥ → Convergent I∥ → Convergent J∥
@@ -91,12 +91,13 @@ simulate {I∥ = I∥} {J∥ = J∥} I∥⇉J∥ = simulate-partial I∥⇉J∥
 -- The operator being ACO implies that the iteration is convergent
 
 ACO⇒convergent-partial : {X₀ : IPred (AsyncIterable.Sᵢ I∥) ℓ₂} →
-                         PartialACO I∥ X₀ Q ℓ₃ →
-                         PartiallyConvergent I∥ X₀ Q
-ACO⇒convergent-partial = ACOImpliesConvergent.convergent _
+                         IsValidInitialSet I∥ X₀ → 
+                         PartialACO I∥ X₀ C ℓ₃ →
+                         PartiallyConvergent I∥ X₀ C
+ACO⇒convergent-partial v p = ACOImpliesConvergent.convergent _ v p
 
 ACO⇒convergent : ACO I∥ ℓ → Convergent I∥
-ACO⇒convergent = ACO⇒convergent-partial
+ACO⇒convergent = ACO⇒convergent-partial (Uᵢ-validInitialSet _)
 
 ------------------------------------------------------------------------
 -- AMCO
@@ -105,17 +106,19 @@ ACO⇒convergent = ACO⇒convergent-partial
 -- and hence that the iteration is convergent
 
 AMCO⇒ACO-partial : {X₀ : IPred (AsyncIterable.Sᵢ I∥) ℓ₂} →
-                   PartialAMCO I∥ X₀ Q →
-                   PartialACO I∥ X₀ Q _
-AMCO⇒ACO-partial = AMCOImpliesACO.partialACO
+                   IsValidInitialSet I∥ X₀ → 
+                   PartialAMCO I∥ X₀ C →
+                   PartialACO I∥ X₀ C _
+AMCO⇒ACO-partial v = AMCOImpliesACO.localACO v
 
 AMCO⇒convergent-partial : {X₀ : IPred (AsyncIterable.Sᵢ I∥) ℓ₂} →
-                          PartialAMCO I∥ X₀ Q →
-                          PartiallyConvergent I∥ X₀ Q
-AMCO⇒convergent-partial = ACO⇒convergent-partial ∘ AMCO⇒ACO-partial
+                          IsValidInitialSet I∥ X₀ → 
+                          PartialAMCO I∥ X₀ C →
+                          PartiallyConvergent I∥ X₀ C
+AMCO⇒convergent-partial v p = ACO⇒convergent-partial v (AMCO⇒ACO-partial v p)
 
 AMCO⇒ACO : AMCO I∥ → ACO I∥ _
-AMCO⇒ACO = AMCO⇒ACO-partial
+AMCO⇒ACO = AMCO⇒ACO-partial (Uᵢ-validInitialSet _)
 
 AMCO⇒convergent : AMCO I∥ → Convergent I∥
-AMCO⇒convergent = AMCO⇒convergent-partial
+AMCO⇒convergent = AMCO⇒convergent-partial (Uᵢ-validInitialSet _)

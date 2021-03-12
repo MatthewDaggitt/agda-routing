@@ -22,37 +22,20 @@ open import RoutingLib.Iteration.Asynchronous.Dynamic
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Conditions
 
 module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.Properties.ACO
-  {a ℓ ℓ₁ ℓ₂ ℓ₃ n}
-  (I∥ : AsyncIterable a ℓ n)
+  {a ℓ ℓ₁ ℓ₂ n}
+  {I∥ : AsyncIterable a ℓ n}
   (open AsyncIterable I∥)
   {X : IPred Sᵢ ℓ₁}
-  {C : Pred (Epoch × Subset n) ℓ₂}
-  (partialACO : PartialACO I∥ X C ℓ₃)
+  {e p} (localACO : LocalACO I∥ X e p ℓ₂)
   where
-
-private
-  variable
-    e f : Epoch
-    p q : Subset n
-
---------------------------------------------------------------------------------
--- Replacing one element of an indexed type with another
-
-module _ {e p f q} (ep∈C : (e , p) ∈ C) (fq∈C : (f , q) ∈ C) where
-
-  B₁ = LocalACO.B (partialACO ep∈C)
-  B₂ = LocalACO.B (partialACO fq∈C)
-  
-  B-subst : e ≡ f → p ≡ q → B₁ ≡ B₂
-  B-subst refl refl = refl
   
 --------------------------------------------------------------------------------
 -- Fixed points
 
-module _ {e} {p} (ep∈C : (e , p) ∈ C) where
+open LocalACO localACO
 
-  open LocalACO (partialACO ep∈C)
-  
+abstract
+
   x* : S
   x* = proj₁ $ proj₂ B-finish
 
@@ -63,7 +46,7 @@ module _ {e} {p} (ep∈C : (e , p) ∈ C) where
 
   x*∈X : x* ∈ᵢ X
   x*∈X = proj₁ $ proj₂ $ proj₂ B-finish
-  
+
   k*≤k⇒x*∈Bₖ : ∀ {k} → k* ≤ k → x* ∈ᵢ B k
   k*≤k⇒x*∈Bₖ k*≤k = proj₁ $ (proj₂ $ proj₂ $ proj₂ B-finish) k*≤k
 
@@ -71,7 +54,7 @@ module _ {e} {p} (ep∈C : (e , p) ∈ C) where
   k*≤k∧x∈Bₖ⇒x≈x* k*≤k = proj₂ $ (proj₂ $ proj₂ $ proj₂ B-finish) k*≤k
 
   open Replacement Sᵢ _≟𝔽_
-  
+
   k*≤k∧x∈Bₖᵢ⇒x≈x*ᵢ : ∀ {k} → k* ≤ k → ∀ {i} {xᵢ : Sᵢ i} → xᵢ ∈ B k i → xᵢ ≈ᵢ x* i
   k*≤k∧x∈Bₖᵢ⇒x≈x*ᵢ {k} k*≤k {i} {xᵢ} xᵢ∈Bₖᵢ = begin⟨ k*≤k⇒x*∈Bₖ k*≤k ⟩
     ∴ x*              ∈ᵢ B k       $⟨ (λ p → ∈-replace (B k) p xᵢ∈Bₖᵢ) ⟩
@@ -82,19 +65,19 @@ module _ {e} {p} (ep∈C : (e , p) ∈ C) where
 
   x*∈Aₚ : x* ∈ Accordant p
   x*∈Aₚ i∉p = ≈ᵢ-sym (k*≤k∧x∈Bₖᵢ⇒x≈x*ᵢ ≤-refl (B-null i∉p))
-  
+
   x*-fixed : (F e p) x* ≈ x*
   x*-fixed = begin⟨ k*≤k⇒x*∈Bₖ ≤-refl ⟩
     ∴ x*         ∈ᵢ B k*       $⟨ F-mono-B x*∈X x*∈Aₚ ⟩
     ∴ F e p (x*) ∈ᵢ B (suc k*) $⟨ k*≤k∧x∈Bₖ⇒x≈x* (n≤1+n k*) ⟩
     ∴ F e p (x*) ≈ x*          ∎
-  
-  localFP : LocalFixedPoint I∥ e p
-  localFP = record
-    { x*       = x*
-    ; k*       = k*
-    ; x*-fixed = x*-fixed
-    }
 
   B-cong : ∀ {k x y} → x ≈ y → x ∈ᵢ B k → y ∈ᵢ B k
   B-cong x≈y x∈Bₖ i = Bᵢ-cong (x≈y i) (x∈Bₖ i)
+
+localFP : LocalFixedPoint I∥ e p
+localFP = record
+  { x*       = x*
+  ; k*       = k*
+  ; x*-fixed = x*-fixed
+  }

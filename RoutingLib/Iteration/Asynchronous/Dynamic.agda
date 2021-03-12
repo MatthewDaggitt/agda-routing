@@ -79,7 +79,7 @@ record IsAsyncIterable
     F-cong            : ∀ e p → (F e p) Preserves _≈_ ⟶ _≈[ p ]_
 
   -- The notion of a state being in agreement with a set of participants
-  Accordant : Subset n → S → Set _
+  Accordant : Subset n → Pred S _
   Accordant p x = ∀ {i} → i ∉ₛ p → x i ≈ᵢ ⊥ i
 
   ≈-iDecSetoid : IndexedDecSetoid (Fin n) a ℓ
@@ -173,7 +173,7 @@ module _ {a ℓ n} (I : AsyncIterable a ℓ n) where
                              {ℓ₂} (C : Pred (Epoch × Subset n) ℓ₂) -- Configurations in which it converges
                              : Set (# 1 ⊔ a ⊔ ℓ ⊔ ℓ₁ ⊔ ℓ₂) where
     field
-      localFP    : ∀ {e p} → (e , p) ∈ C → LocalFixedPoint e p
+      localFP    : ∀ {e p} → .((e , p) ∈ C) → LocalFixedPoint e p
       -- For every schedule ψ , starting point x₀ and point in time tₛ,
       -- then if the epoch and subset satisfies the predicate Q then
       -- if the schedule has k*-pseudocycles between t₁ and t₂

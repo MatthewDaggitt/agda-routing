@@ -60,7 +60,7 @@ shrinkConvergence : {X₀ : IPred (AsyncIterable.Sᵢ I∥) ℓ₂}
                     Y₀ ⊆ᵢ X₀ → D ⊆ C →
                     PartiallyConvergent I∥ Y₀ D
 shrinkConvergence partial Y₀⊆X₀ D⊆C = record
-  { localFP   = localFP ∘ D⊆C
+  { localFP   = λ ep∈C → localFP (D⊆C ep∈C)
   ; reachesFP = λ S x∈X₀ ep∈R → reachesFP S (Y₀⊆X₀ ∘ x∈X₀) (D⊆C ep∈R)
   } where open PartiallyConvergent partial
 
@@ -109,7 +109,7 @@ AMCO⇒ACO-partial : {X₀ : IPred (AsyncIterable.Sᵢ I∥) ℓ₂} →
                    IsValidInitialSet I∥ X₀ → 
                    PartialAMCO I∥ X₀ C →
                    PartialACO I∥ X₀ C _
-AMCO⇒ACO-partial v = AMCOImpliesACO.localACO v
+AMCO⇒ACO-partial X-valid AMCO ep∈C = AMCOImpliesACO.localACO X-valid (AMCO ep∈C)
 
 AMCO⇒convergent-partial : {X₀ : IPred (AsyncIterable.Sᵢ I∥) ℓ₂} →
                           IsValidInitialSet I∥ X₀ → 

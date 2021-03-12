@@ -23,7 +23,7 @@
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (Subset; _∉_; ⊤) renaming (_∈_ to _∈ₛ_)
 open import Data.Fin.Subset.Properties using (_∈?_)
-open import Data.Nat using (ℕ; suc; _<_; _≤_)
+open import Data.Nat using (ℕ; suc; _<_; _≤_; _≥_)
 open import Data.Product using (∃; ∃₂; _×_; _,_; proj₁; proj₂)
 open import Data.List using (List)
 open import Data.Maybe using (Maybe)
@@ -87,7 +87,7 @@ record LocalACO (X : IPred Sᵢ ℓ₁) (e : Epoch) (p : Subset n) ℓ₃
     X⊆B₀      : X ⊆ᵢ B 0
     B-null    : ∀ {k i} → i ∉ p → ⊥ i ∈ B k i
     F-mono-B  : ∀ {k x} → x ∈ᵢ X → x ∈ Accordant p → x ∈ᵢ B k → F′ x ∈ᵢ B (suc k)
-    B-finish  : ∃₂ λ k* x* → x* ∈ᵢ X × (∀ {k} → k* ≤ k →
+    B-finish  : ∃₂ λ k* x* → x* ∈ᵢ X × (∀ {k} → k ≥ k* →
                      (x* ∈ᵢ B k × (∀ {x} → x ∈ᵢ B k → x ≈ x*)))
 
 PartialACO : ∀ (X : IPred Sᵢ ℓ₁) (C : Pred (Epoch × Subset n) ℓ₂) ℓ₃ → Set (a ⊔ ℓ ⊔ ℓ₁ ⊔ ℓ₂ ⊔ lsuc ℓ₃)
@@ -106,9 +106,7 @@ record LocalAMCO {ℓ₁} (X : IPred Sᵢ ℓ₁)
                  (e : Epoch) (p : Subset n)
                  : Set (a ⊔ ℓ ⊔ ℓ₁) where
   field
-    dᵢ                   : ∀ {i} → Sᵢ i → Sᵢ i → ℕ
-    dᵢ-isQuasiSemiMetric : ∀ i → IsQuasiSemiMetric {A = Sᵢ i} _≈ᵢ_ dᵢ
-    dᵢ-bounded           : ∃ λ dₘₐₓ → ∀ {i} x y → dᵢ {i} x y ≤ dₘₐₓ
+    dᵢ : ∀ {i} → Sᵢ i → Sᵢ i → ℕ
 
   dₛᵢ : ∀ {i} → Sᵢ i → Sᵢ i → ℕ
   dₛᵢ {i} x y = if ⌊ i ∈? p ⌋ then dᵢ x y else 0
@@ -118,11 +116,13 @@ record LocalAMCO {ℓ₁} (X : IPred Sᵢ ℓ₁)
 
   F′ : S → S
   F′ = F e p
-
+  
   field
-    F-strContrOnOrbits  : ∀ {x} → x ∈ᵢ X → x ∈ Accordant p → F′ x ≉[ p ] x → d (F′ x) (F′ (F′ x)) < d x (F′ x)
-    F-strContrOnFP      : ∀ {x} → x ∈ᵢ X → x ∈ Accordant p → ∀ {x*} → F′ x* ≈ x* → x ≉[ p ] x* → d x* (F′ x) < d x* x
-    F-pres-Aₚ           : ∀ {x} → x ∈ᵢ X → x ∈ Accordant p → F′ x ∈ Accordant p
+    dᵢ-isQuasiSemiMetric : ∀ i → IsQuasiSemiMetric {A = Sᵢ i} _≈ᵢ_ dᵢ
+    dᵢ-bounded           : ∃ λ dₘₐₓ → ∀ {i} x y → dᵢ {i} x y ≤ dₘₐₓ
+    F-strContrOnOrbits   : ∀ {x} → x ∈ᵢ X → x ∈ Accordant p → F′ x ≉[ p ] x → d (F′ x) (F′ (F′ x)) < d x (F′ x)
+    F-strContrOnFP       : ∀ {x} → x ∈ᵢ X → x ∈ Accordant p → ∀ {x*} → F′ x* ≈ x* → x ≉[ p ] x* → d x* (F′ x) < d x* x
+    F-pres-Aₚ            : ∀ {x} → x ∈ᵢ X → x ∈ Accordant p → F′ x ∈ Accordant p
 
   module _ {i} where
     open IsQuasiSemiMetric (dᵢ-isQuasiSemiMetric i) public

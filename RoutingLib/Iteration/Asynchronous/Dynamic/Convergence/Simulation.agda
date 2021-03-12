@@ -60,7 +60,7 @@ module _ {ℓ₅} {Q  : Pred (Epoch × Subset n) ℓ₅}
       (J.F-cong (η s (suc t)) (ρ s (suc t))
         (λ j → asyncIter-eq s x₀ (tAcc (β s (suc t) i j) _) j) i∈ρ₁₊ₜ)
 
-  module _ {e : Epoch} {p : Subset n} (ep∈Q : (e , p) ∈ Q) where
+  module _ {e : Epoch} {p : Subset n} .(ep∈Q : (e , p) ∈ Q) where
     open LocalFixedPoint (y*-localFP ep∈Q) 
       renaming
       ( x*         to y*

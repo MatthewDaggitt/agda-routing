@@ -19,7 +19,7 @@ open import Level using (_⊔_)
 open import Relation.Binary using (tri<; tri≈; tri>)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; subst; subst₂; cong; cong₂; refl; sym; trans)
-open import Relation.Nullary using (yes; no; ¬_)
+open import Relation.Nullary using (yes; no; ¬_; recompute)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Pred; _⊆_; _∈_)
 
@@ -47,11 +47,21 @@ module RoutingLib.Iteration.Asynchronous.Dynamic.Convergence.ACOImpliesConvergen
   (partialACO : PartialACO I∥ X C ℓ₃)
   where
 
-open ACOProperties I∥ partialACO
 open IsValidInitialSet X-valid
 
-module _ {e p} .(ep∈C : (e , p) ∈ C) where
+module _ {e p f q} (ep∈C : (e , p) ∈ C) (fq∈C : (f , q) ∈ C) where
+
+  B₁ = LocalACO.B (partialACO ep∈C)
+  B₂ = LocalACO.B (partialACO fq∈C)
+  
+  B-subst : e ≡ f → p ≡ q → B₁ ≡ B₂
+  B-subst refl refl = refl
+
+module _ {e p} (ep∈C : (e , p) ∈ C) where
   open LocalACO (partialACO ep∈C) public
+
+module _ {e p} .(ep∈C : (e , p) ∈ C) where
+  open ACOProperties (partialACO ep∈C) public
 
 ------------------------------------------------------------------------
 -- Notation
@@ -111,8 +121,8 @@ module _ (ψ : Schedule n)
   -- Concept of all messages being the current epoch
   MessagesToNode_AccordantAtTime_ : Fin n → 𝕋 → Set ℓ
   MessagesToNode i AccordantAtTime t = ∀ {s} → t < s → SubEpoch [ t , s ] →
-                                        ∀ {j} {accβ : Acc _<_ (β s i j)} →
-                                        j ∉ₛ ρ s → δ' x accβ j ≈ᵢ ⊥ j
+                                       ∀ {j} {accβ : Acc _<_ (β s i j)} →
+                                       j ∉ₛ ρ s → δ' x accβ j ≈ᵢ ⊥ j
 
   ComputationAtNode_InBox_AtTime_ : Fin n → ℕ → 𝕋 → Set _
   ComputationAtNode i InBox k AtTime t =
@@ -280,7 +290,7 @@ module _ (ψ : Schedule n)
 
     x*' : S
     x*' = x* cₛ∈C
-
+    
     reachesFP : ∀ {e} → MultiPseudocycle k*' [ s , e ] →
                 ∀ {t} → SubEpoch [ e , t ] →
                 δ x t ≈ x*'

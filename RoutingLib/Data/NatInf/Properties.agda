@@ -1,10 +1,5 @@
-module RoutingLib.Data.NatInf.Properties where
-
 open import Data.Nat using (zero; suc) renaming (_+_ to _+ℕ_; _≤_ to _≤ℕ_; z≤n to z≤ℕn; s≤s to s≤ℕs; _≤′_ to _≤'ℕ_; ≤′-refl to ≤'ℕ-refl; ≤′-step to ≤'ℕ-step; _⊓_ to _⊓ℕ_)
-open import Data.Nat.Properties using (+-suc; n≤1+n; <⇒≢)
-  renaming (+-identityʳ to +-idʳℕ; +-comm to +-commℕ; +-mono-≤ to +ℕ-mono-≤ℕ)
-  renaming (⊓-sel to ⊓ℕ-sel; m⊓n≤n to m⊓n≤ℕn; m⊓n≤m to m⊓n≤ℕm; ⊓-assoc to ⊓ℕ-assoc; ⊓-comm to ⊓ℕ-comm; ⊓-zeroʳ to ⊓ℕ-zeroʳ; +-distribˡ-⊓ to +ℕ-distribˡ-⊓ℕ)
-  renaming (⊔-sel to ⊔ℕ-sel; ⊔-assoc to ⊔ℕ-assoc; ⊔-comm to ⊔ℕ-comm; ⊔-identityʳ to ⊔ℕ-identityʳ; ⊓-distribˡ-⊔ to ⊓ℕ-distribˡ-⊔ℕ; ⊔-abs-⊓ to ⊔ℕ-abs-⊓ℕ; ⊓-abs-⊔ to ⊓ℕ-abs-⊔ℕ)
+open import Data.Nat.Properties as ℕ using ()
 open import Data.Product using (∃; _,_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Function using (_∘_)
@@ -19,6 +14,9 @@ open import RoutingLib.Data.NatInf
 
 open import Algebra.Definitions {A = ℕ∞} _≡_
 open import Algebra.Consequences.Propositional using (sel⇒idem)
+
+
+module RoutingLib.Data.NatInf.Properties where
 
 ------------------------------------------------------------------------
 -- Properties of equality
@@ -116,11 +114,11 @@ n≤0⇒n≡0 n n≤0 = ≤-antisym n≤0 z≤n
 <⇒≤ {∞} {∞} n≤∞ = n≤∞
 <⇒≤ {∞} {N x} ()
 <⇒≤ {N x} {∞} n≤∞ = n≤∞
-<⇒≤ {N x} {N (suc n)} (s≤s m<n) = ≤-trans m<n (≤ℕ⇒≤ (n≤1+n n))
+<⇒≤ {N x} {N (suc n)} (s≤s m<n) = ≤-trans m<n (≤ℕ⇒≤ (ℕ.n≤1+n n))
 
 <+≢∞⇒≢ : ∀ {m n} → N m < n → N m ≢ n
 <+≢∞⇒≢ {m} {∞} _ = ≢∞
-<+≢∞⇒≢ {m} {N x} m<n = ≢ℕ⇒≢ (<⇒≢ (≤⇒≤ℕ m<n))
+<+≢∞⇒≢ {m} {N x} m<n = ≢ℕ⇒≢ (ℕ.<⇒≢ (≤⇒≤ℕ m<n))
 
 ≤+<⇒< : ∀ {x y z} → x ≤ y → y < z → x < z
 ≤+<⇒< {∞} {∞} {.∞} n≤∞ n≤∞ = n≤∞
@@ -142,7 +140,7 @@ n≤0⇒n≡0 n n≤0 = ≤-antisym n≤0 z≤n
 <-trans {N x} {∞} {N x₁} n≤∞ ()
 <-trans {N x} {N (suc y)} {∞} (s≤s x<y) n≤∞ = n≤∞
 <-trans {N x} {N (suc y)} {N (suc z)} (s≤s x<y) (s≤s y<z) = ≤-trans (s≤s x<y)
-           (≤-trans y<z (≤ℕ⇒≤ (n≤1+n z )))
+           (≤-trans y<z (≤ℕ⇒≤ (ℕ.n≤1+n z )))
 
 ------------------------------------------------------------------------
 -- Properties of ≤'
@@ -197,7 +195,7 @@ n≤m+n : ∀ m n → n ≤ m + n
 n≤m+n ∞ _ = n≤∞
 n≤m+n (N m) ∞ = n≤∞
 n≤m+n (N m) (N zero) = z≤n
-n≤m+n (N m) (N (suc n)) = subst (N (suc n) ≤_) (sym (cong N (+-suc m n)))
+n≤m+n (N m) (N (suc n)) = subst (N (suc n) ≤_) (sym (cong N (ℕ.+-suc m n)))
                                                (s≤s (n≤m+n (N m) (N n)))
 
 +-identityˡ : ∀ n → (N 0) + n ≡ n
@@ -206,7 +204,7 @@ n≤m+n (N m) (N (suc n)) = subst (N (suc n) ≤_) (sym (cong N (+-suc m n)))
 
 +-identityʳ : ∀ n → n + (N 0) ≡ n
 +-identityʳ ∞ = refl
-+-identityʳ (N n) = cong N (+-idʳℕ n)
++-identityʳ (N n) = cong N (ℕ.+-identityʳ n)
 
 +-zeroʳ : RightZero ∞ _+_
 +-zeroʳ ∞ = refl
@@ -216,12 +214,12 @@ n≤m+n (N m) (N (suc n)) = subst (N (suc n) ≤_) (sym (cong N (+-suc m n)))
 +-comm ∞ ∞ = refl
 +-comm ∞ (N n) = refl
 +-comm (N m) ∞ = refl
-+-comm (N m) (N n) = cong N (+-commℕ m n)
++-comm (N m) (N n) = cong N (ℕ.+-comm m n)
 
 +-mono-≤ : _+_ Preserves₂ _≤_ ⟶ _≤_ ⟶ _≤_
 +-mono-≤ {_} {m} {o} {p} z≤n o≤p = ≤-trans (subst (_≤ p) (sym (+-identityˡ o)) (o≤p)) (n≤m+n m p)
 +-mono-≤ {N (suc m)} {N (suc n)} {_} {p} (s≤s m≤n) z≤n = ≤-trans
-            (subst (_≤ N (suc n)) (cong N (sym (+-idʳℕ (suc m)))) (s≤s m≤n))
+            (subst (_≤ N (suc n)) (cong N (sym (ℕ.+-identityʳ (suc m)))) (s≤s m≤n))
             (subst (N (suc n) ≤_) (+-comm p (N (suc n))) (n≤m+n p (N (suc n))))
 +-mono-≤ (s≤s m≤n) (s≤s o≤p) = s≤s (+-mono-≤ m≤n (s≤s o≤p))
 +-mono-≤ (s≤s m≤n) n≤∞ = n≤∞
@@ -232,7 +230,7 @@ m<o×n<o⇒m+n<o+o {∞} {∞} {o} () n<o
 m<o×n<o⇒m+n<o+o {∞} {N x} {o} () n<o
 m<o×n<o⇒m+n<o+o {N m} {∞} {.(suc _)} (s≤s m<o) ()
 m<o×n<o⇒m+n<o+o {N m} {N n} {(suc o)} (s≤s m<o) (s≤s n<o) = ≤ℕ⇒≤ (s≤ℕs
-                (+ℕ-mono-≤ℕ {m} {o} {n} {suc o} (≤⇒≤ℕ m<o) (≤⇒≤ℕ (≤-step n<o))))
+                (ℕ.+-mono-≤ {m} {o} {n} {suc o} (≤⇒≤ℕ m<o) (≤⇒≤ℕ (≤-step n<o))))
 
 +-mono : ∀ {a b c d} → a ≡ c → b ≡ d → a + b ≡ c + d
 +-mono refl refl = refl
@@ -246,7 +244,7 @@ m<o×n<o⇒m+n<o+o {N m} {N n} {(suc o)} (s≤s m<o) (s≤s n<o) = ≤ℕ⇒≤ 
 ⊓-sel (N x)       ∞           = inj₁ refl
 ⊓-sel (N zero)    (N _)       = inj₁ refl
 ⊓-sel (N (suc x)) (N zero)    = inj₂ refl
-⊓-sel (N (suc x)) (N (suc y)) with ⊓ℕ-sel x y
+⊓-sel (N (suc x)) (N (suc y)) with ℕ.⊓-sel x y
 ... | inj₁ m⊓n≡m = inj₁ (cong N (cong suc m⊓n≡m))
 ... | inj₂ m⊓n≡n = inj₂ (cong N (cong suc m⊓n≡n))
 
@@ -261,13 +259,13 @@ m<o×n<o⇒m+n<o+o {N m} {N n} {(suc o)} (s≤s m<o) (s≤s n<o) = ≤ℕ⇒≤ 
 ⊓-assoc (N m) ∞     ∞     = refl
 ⊓-assoc (N m) ∞     (N o) = refl
 ⊓-assoc (N m) (N n) ∞     = refl
-⊓-assoc (N m) (N n) (N o) = cong N (⊓ℕ-assoc m n o)
+⊓-assoc (N m) (N n) (N o) = cong N (ℕ.⊓-assoc m n o)
 
 ⊓-comm : Commutative _⊓_
 ⊓-comm ∞     ∞     = refl
 ⊓-comm ∞     (N n) = refl
 ⊓-comm (N m) ∞     = refl
-⊓-comm (N m) (N n) = cong N (⊓ℕ-comm m n)
+⊓-comm (N m) (N n) = cong N (ℕ.⊓-comm m n)
 
 ⊓-identityˡ : LeftIdentity ∞ _⊓_
 ⊓-identityˡ ∞     = refl
@@ -283,19 +281,19 @@ m<o×n<o⇒m+n<o+o {N m} {N n} {(suc o)} (s≤s m<o) (s≤s n<o) = ≤ℕ⇒≤ 
 
 ⊓-zeroʳ : RightZero (N 0) _⊓_
 ⊓-zeroʳ ∞     = refl
-⊓-zeroʳ (N m) = cong N (⊓ℕ-zeroʳ m)
+⊓-zeroʳ (N m) = cong N (ℕ.⊓-zeroʳ m)
 
 m⊓n≤n : ∀ m n → m ⊓ n ≤ n
 m⊓n≤n ∞     ∞     = ≤-refl
 m⊓n≤n ∞     (N n) = ≤-refl
 m⊓n≤n (N m) ∞     = n≤∞
-m⊓n≤n (N m) (N n) = ≤ℕ⇒≤ (m⊓n≤ℕn m n)
+m⊓n≤n (N m) (N n) = ≤ℕ⇒≤ (ℕ.m⊓n≤n m n)
 
 m⊓n≤m : ∀ m n → m ⊓ n ≤ m
 m⊓n≤m ∞     ∞     = ≤-refl
 m⊓n≤m ∞     (N n) = n≤∞
 m⊓n≤m (N m) ∞     = ≤-refl
-m⊓n≤m (N m) (N n) = ≤ℕ⇒≤ (m⊓n≤ℕm m n)
+m⊓n≤m (N m) (N n) = ≤ℕ⇒≤ (ℕ.m⊓n≤m m n)
 
 ⊓-mono-≤ : _⊓_ Preserves₂ _≤_ ⟶ _≤_ ⟶ _≤_
 ⊓-mono-≤ {x} {y} {u} {v} x≤y u≤v with ⊓-sel y v
@@ -323,7 +321,7 @@ m≤n×m≤o⇒m≤n⊓o m≤n m≤o = subst (_≤ _) (⊓-idem _) (⊓-mono-≤
 +-distribˡ-⊓ (N m) ∞     ∞     = refl
 +-distribˡ-⊓ (N m) ∞     (N o) = refl
 +-distribˡ-⊓ (N m) (N n) ∞     = refl
-+-distribˡ-⊓ (N m) (N n) (N o) = cong N (+ℕ-distribˡ-⊓ℕ m n o)
++-distribˡ-⊓ (N m) (N n) (N o) = cong N (ℕ.+-distribˡ-⊓ m n o)
 
 ------------------------------------------------------------------------
 -- Properties of ⊔
@@ -332,7 +330,7 @@ m≤n×m≤o⇒m≤n⊓o m≤n m≤o = subst (_≤ _) (⊓-idem _) (⊓-mono-≤
 ⊔-sel ∞     ∞     = inj₁ refl
 ⊔-sel ∞     (N n) = inj₁ refl
 ⊔-sel (N m) ∞     = inj₂ refl
-⊔-sel (N m) (N n) with ⊔ℕ-sel m n
+⊔-sel (N m) (N n) with ℕ.⊔-sel m n
 ... | inj₁ m⊔n≡m = inj₁ (cong N m⊔n≡m)
 ... | inj₂ m⊔n≡n = inj₂ (cong N m⊔n≡n)
 
@@ -347,13 +345,13 @@ m≤n×m≤o⇒m≤n⊓o m≤n m≤o = subst (_≤ _) (⊓-idem _) (⊓-mono-≤
 ⊔-assoc (N m) ∞     ∞     = refl
 ⊔-assoc (N m) ∞     (N o) = refl
 ⊔-assoc (N m) (N n) ∞     = refl
-⊔-assoc (N m) (N n) (N o) = cong N (⊔ℕ-assoc m n o)
+⊔-assoc (N m) (N n) (N o) = cong N (ℕ.⊔-assoc m n o)
 
 ⊔-comm : Commutative _⊔_
 ⊔-comm ∞     ∞     = refl
 ⊔-comm ∞     (N n) = refl
 ⊔-comm (N m) ∞     = refl
-⊔-comm (N m) (N n) = cong N (⊔ℕ-comm m n)
+⊔-comm (N m) (N n) = cong N (ℕ.⊔-comm m n)
 
 ⊔-identityˡ : LeftIdentity (N 0) _⊔_
 ⊔-identityˡ ∞     = refl
@@ -361,7 +359,7 @@ m≤n×m≤o⇒m≤n⊓o m≤n m≤o = subst (_≤ _) (⊓-idem _) (⊓-mono-≤
 
 ⊔-identityʳ : RightIdentity (N 0) _⊔_
 ⊔-identityʳ ∞     = refl
-⊔-identityʳ (N m) = cong N (⊔ℕ-identityʳ m)
+⊔-identityʳ (N m) = cong N (ℕ.⊔-identityʳ m)
 
 ⊔-zeroˡ : LeftZero ∞ _⊔_
 ⊔-zeroˡ ∞     = refl
@@ -377,7 +375,6 @@ m≤n×m≤o⇒m≤n⊓o m≤n m≤o = subst (_≤ _) (⊓-idem _) (⊓-mono-≤
 ⊓-distribˡ-⊔ ∞     (N n) ∞     = refl
 ⊓-distribˡ-⊔ ∞     (N n) (N o) = refl
 ⊓-distribˡ-⊔ (N m) ∞     ∞     = sym (⊔-idem (N m))
-⊓-distribˡ-⊔ (N m) ∞     (N o) = cong N (sym (⊔ℕ-abs-⊓ℕ m o))
-⊓-distribˡ-⊔ (N m) (N n) ∞     = cong N (trans (sym (⊔ℕ-abs-⊓ℕ m n))
-                                               (⊔ℕ-comm m (m ⊓ℕ n)))
-⊓-distribˡ-⊔ (N m) (N n) (N o) = cong N (⊓ℕ-distribˡ-⊔ℕ m n o)
+⊓-distribˡ-⊔ (N m) ∞     (N o) = cong N (sym (ℕ.⊔-absorbs-⊓ m o))
+⊓-distribˡ-⊔ (N m) (N n) ∞     = cong N (trans (sym (ℕ.⊔-absorbs-⊓ m n)) (ℕ.⊔-comm m (m ⊓ℕ n)))
+⊓-distribˡ-⊔ (N m) (N n) (N o) = cong N (ℕ.⊓-distribˡ-⊔ m n o)

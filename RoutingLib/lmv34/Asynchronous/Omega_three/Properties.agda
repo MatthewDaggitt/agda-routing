@@ -1,3 +1,12 @@
+open import Data.Nat using (ℕ; zero; suc; _<_)
+open import Data.Nat.Properties using (≤-refl)
+open import Data.Nat.Induction using (Acc; acc; <-wellFounded)
+open import Data.Product using (_×_; _,_)
+  renaming (proj₁ to π₁; proj₂ to π₂)
+open import Relation.Binary using (DecSetoid)
+import Relation.Binary.Reasoning.Setoid as EqReasoning
+open import Function.Base using (_∘_; _∘₂_)
+
 open import RoutingLib.Routing using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 open import RoutingLib.lmv34.Synchronous.Gamma_two.Algebra as Gamma_two_Algebra using (IsComposition; RouteMapMatrix)
@@ -9,16 +18,6 @@ module RoutingLib.lmv34.Asynchronous.Omega_three.Properties
   (Imp Prot Exp : RouteMapMatrix isRoutingAlgebra n )
   (A=Imp∘Prot∘Exp : IsComposition isRoutingAlgebra n A Imp Prot Exp)
   where
-
-open import Data.Nat using (ℕ; zero; suc; _<_)
-open import Data.Nat.Properties using (≤-refl)
-open import Data.Nat.Induction using (<-wellFounded)
-open import Data.Product using (_×_; _,_)
-  renaming (proj₁ to π₁; proj₂ to π₂)
-open import Induction.WellFounded using (Acc; acc)
-open import Relation.Binary using (DecSetoid)
-import Relation.Binary.Reasoning.Setoid as EqReasoning
-open import Function.Base using (_∘_; _∘₂_)
 
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule using (Schedule)
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule.Construct.Synchronous

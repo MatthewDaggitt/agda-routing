@@ -1,5 +1,6 @@
 
 open import Data.Product
+open import Data.Fin using (Fin)
 open import Level using (_⊔_)
 open import Relation.Binary
 open import Relation.Binary.Construct.Closure.Transitive

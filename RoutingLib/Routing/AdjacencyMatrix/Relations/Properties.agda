@@ -104,3 +104,6 @@ strIncr∧⊴⇒<₊ strIncr (z , x↝z , z≤y) = <-≤₊-trans (strIncr∧↝
 ⊴-dec : IsFinite algebra → Decidable _⊴_
 ⊴-dec finite x y = Finite.any? finite (λ z → (x ↝? z) ×-dec (z ≤₊? y))
   λ u≈v → Prod.map (↝-respʳ-≈ u≈v) (≤₊-respˡ-≈ u≈v)
+
+--------------------------------------------------------------------------------
+-- Properties of _◂_

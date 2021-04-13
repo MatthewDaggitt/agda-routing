@@ -96,17 +96,7 @@ filter-lemma {P? = P?} {P?' = P?'} (x ∷ xs) P=P' with P? x | P?' x
 ... | yes Px | no ¬P'x  = contradiction ((π₁ (P=P' x)) Px) ¬P'x
 ... | no ¬Px | yes P'x  = contradiction ((π₂ (P=P' x)) P'x) ¬Px
 ... | no _   | no _     = filter-lemma xs P=P'
-{-
-∈-congᵣ : ∀ {z xs ys} → xs ↭ ys → z ∈ xs → z ∈ ys
-∈-congᵣ (refl (x∼y ∷ xs≋ys)) (here z∼x) = here (≈ᵣ-trans z∼x x∼y)
-∈-congᵣ (refl (x∼y ∷ xs≋ys)) (there z∈xs) = there (∈-congᵣ (refl xs≋ys) z∈xs)
-∈-congᵣ (prep x=y xs=ys) (here z=x) = here (≈ᵣ-trans z=x x=y)
-∈-congᵣ (prep x=y xs=ys) (there z∈xs) = there (∈-congᵣ xs=ys z∈xs)
-∈-congᵣ (swap x₁=y₂ x₂=y₁ xs=ys) (here z=x₁) = there (here (≈ᵣ-trans z=x₁ x₁=y₂))
-∈-congᵣ (swap x₁=y₂ x₂=y₁ xs=ys) (there (here z=x₂)) = here (≈ᵣ-trans z=x₂ x₂=y₁)
-∈-congᵣ (swap x₁=y₂ x₂=y₁ xs=ys) (there (there z∈xs)) = there (there (∈-congᵣ xs=ys z∈xs))
-∈-congᵣ (trans xs=ys ys=zs) z∈xs = ∈-congᵣ ys=zs (∈-congᵣ xs=ys z∈xs)
--}
+
 minus-respects-≈ᵣ : ∀ {xs} → (_∉ xs) Respects _≈ᵣ_
 minus-respects-≈ᵣ {(x ∷ xs)} {y} {y'} y=y' Py with y' ∈? (x ∷ xs)
 ... | yes (here y'=x) = contradiction (here (≈ᵣ-trans y=y' y'=x)) Py

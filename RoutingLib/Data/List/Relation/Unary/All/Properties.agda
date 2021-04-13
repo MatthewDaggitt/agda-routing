@@ -3,21 +3,15 @@ open import Data.List.Relation.Unary.All as All using (All; []; _∷_; head; tai
 open import Data.List.Relation.Unary.All.Properties
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.Nat using (ℕ; suc; zero; z≤n; s≤s; _≤_; _<_)
-open import Data.Nat.Properties using (≤-refl; ≤-step)
 open import Data.Fin using (Fin)
 open import Data.Product as Prod using (_×_; _,_)
-open import Data.Sum using (inj₁; inj₂)
-open import Relation.Nullary using (¬_; yes; no)
-open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Pred)
 open import Relation.Binary using (Rel; REL; Total; Setoid; _Respects_; DecSetoid)
-open import Relation.Binary.PropositionalEquality using (_≡_; inspect; [_]; subst; subst₂) renaming (refl to ≡-refl; sym to ≡-sym; trans to ≡-trans)
+open import Relation.Binary.PropositionalEquality using (_≡_; inspect; [_]; subst; subst₂)
+  renaming (refl to ≡-refl; sym to ≡-sym; trans to ≡-trans)
 open import Function using (_∘_; id)
-open import Algebra using (Op₂; Congruent₂)
-open import Relation.Unary using () renaming (_⊆_ to _⋐_)
 
 open import RoutingLib.Data.List
-open import RoutingLib.Data.List.Properties
 open import RoutingLib.Data.Fin.Properties using (𝔽ₛ)
 
 module RoutingLib.Data.List.Relation.Unary.All.Properties where
@@ -30,6 +24,9 @@ module _ {a b p} {A : Set a} {B : Set b} {P : A → Set p} {f : B → A} where
   map⁺₂ : (∀ x → P (f x)) → ∀ xs → All P (map f xs)
   map⁺₂ Pf []       = []
   map⁺₂ Pf (x ∷ xs) = Pf x ∷ map⁺₂ Pf xs
+{-# WARNING_ON_USAGE map⁺₂
+"Use All.universal instead"
+#-}
 
 ------------------------------------------------------------------------
 -- other
@@ -52,7 +49,9 @@ module _ {a ℓ} (S : Setoid a ℓ) where
             (∀ {x} → x ∈ xs → P (f x)) → All P (map f xs)
   map-all f {[]}     pres = []
   map-all f {x ∷ xs} pres = pres (here refl) ∷ map-all f (pres ∘ there)
-
+{-# WARNING_ON_USAGE map-all
+"Use map⁺ and All.tabulate"
+#-}
 
 allFinPairs⁺ : ∀ {n p} {P : Pred (Fin n × Fin n) p} →
                (∀ e → P e) → All P (allFinPairs n)

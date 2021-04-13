@@ -1,26 +1,26 @@
 
-module RoutingLib.Data.List.Sorting.Nat where
+module RoutingLib.Data.List.Sort.Nat where
 
 open import Data.Nat using (ℕ; _<_; _≤_; _≥_; z≤n; s≤s)
-open import Data.Nat.Properties using (≤∧≢⇒<; <⇒≯; <⇒≤; ≤-decTotalOrder; n≮n)
+open import Data.Nat.Properties using (≤∧≢⇒<; <⇒≯; <⇒≤; ≤-decTotalOrder; n≮n; ≤-totalOrder)
 open import Data.Fin using (zero; suc) renaming (_<_ to _<𝔽_)
 open import Data.List using (upTo; downFrom; lookup)
 open import Data.List.All using () renaming (map to mapₐ; lookup to lookupₐ)
 open import Data.List.Membership.Propositional.Properties using (∈-lookup)
+import Data.List.Relation.Unary.Sorted.TotalOrder as Sorting
 open import Data.Product using (_,_; uncurry′)
 open import Relation.Binary using (DecTotalOrder)
 open import Relation.Binary.PropositionalEquality using () renaming (setoid to ≡-setoid)
 open import Function using (id)
 open import Relation.Nullary.Negation using (contradiction)
 
-import RoutingLib.Data.List.Relation.Unary.Sorted as Sorted
 open import RoutingLib.Data.List
-open import RoutingLib.Data.List.Relation.Unary.Uniqueness.Propositional using (Unique)
-open import RoutingLib.Data.List.Relation.Unary.AllPairs using (AllPairs; []; _∷_; map; zip)
-open import RoutingLib.Data.List.Relation.Unary.AllPairs.Properties using (applyUpTo⁺₁; applyDownFrom⁺₁)
+open import Data.List.Relation.Unary.Unique.Propositional using (Unique)
+open import Data.List.Relation.Unary.AllPairs using (AllPairs; []; _∷_; map; zip)
+open import Data.List.Relation.Unary.AllPairs.Properties using (applyUpTo⁺₁; applyDownFrom⁺₁)
 
-open Sorting _≤_ using () renaming (Sorted to ↑-Sorted)
-open Sorting _≥_ using () renaming (Sorted to ↓-Sorted)
+open Sorting ≤-totalOrder using () renaming (Sorted to ↑-Sorted)
+open Sorting ≤-totalOrder using () renaming (Sorted to ↓-Sorted)
 
 strictlySorted : ∀ {xs} → ↑-Sorted xs → Unique xs → AllPairs _<_ xs
 strictlySorted xs↑ xs! = map (uncurry′ ≤∧≢⇒<) (zip (xs↑ , xs!))

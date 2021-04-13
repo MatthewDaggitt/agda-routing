@@ -10,7 +10,7 @@ open import Relation.Unary using (Pred; Decidable)
 import Data.List.Relation.Unary.Sorted.TotalOrder as Sorted
 open import Data.List.Relation.Unary.Sorted.TotalOrder.Properties using (filter⁺)
 
-open import RoutingLib.Data.List.Sort.Base
+open import Data.List.Sort.Base
 open import RoutingLib.Data.List.Relation.Unary.All.Properties as All
 open import RoutingLib.Data.List.Relation.Binary.Permutation.Propositional.Properties
 

@@ -1,5 +1,3 @@
-module RoutingLib.Data.Fin.Subset.Cutset {n} where
-
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset
 open import Data.Fin.Subset.Properties using (∈⊤; ∉⊥; _∈?_)
@@ -24,6 +22,8 @@ open import RoutingLib.Data.List using (allFinPairs)
 open import RoutingLib.Data.List.Relation.Unary.All.Properties using (allFinPairs⁺)
 open import RoutingLib.Data.List.Membership.Propositional.Properties
   using (∈-allFinPairs⁺)
+
+module RoutingLib.Data.Fin.Subset.Cutset {n} where
 
 ------------------------------------------------------------------------------
 -- The "cuts" relation

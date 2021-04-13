@@ -1,7 +1,7 @@
 open import Data.Nat as ℕ using (ℕ; zero; suc; _≤_; z≤n; s≤s)
 open import Data.Fin using (Fin; suc; inject₁)
 open import Data.Fin.Patterns
-open import Data.List hiding ([_])
+open import Data.List hiding ([_]; last)
 open import Data.Sum as Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product as Product using (∃; ∃₂; _,_; proj₁; proj₂; _×_)
 open import Data.Maybe
@@ -79,12 +79,6 @@ open import Relation.Binary.Reasoning.PartialOrder ≤₊-poset
 -- distributivity violation links to merely `can be extended to` links.
 
 infix 4 _<ᶠ_
-
-_≤ᶠ_ : Rel Route (a ⊔ ℓ)
-_≤ᶠ_ = TransClosure (_≤₊_ ∪ _↝_)
-
-_<ᶠ′_ : Rel Route (a ⊔ ℓ)
-_<ᶠ′_ = NonStrictToStrict._<_ _≈_ _≤ᶠ_
 
 _<ᶠ_ : Rel Route (a ⊔ ℓ)
 _<ᶠ_ = TransClosure (_<₊_ ∪ _↝_)

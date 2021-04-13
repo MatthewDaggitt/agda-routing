@@ -24,15 +24,6 @@ private
 -- Other --
 -----------
 
-module _ {_≤_ : Rel A ℓ} (total : Total _≤_) where
-
-  merge : List A → List A → List A
-  merge []       ys       = ys
-  merge xs       []       = xs
-  merge (x ∷ xs) (y ∷ ys) with total x y | merge xs (y ∷ ys) | merge (x ∷ xs) ys
-  ... | inj₁ x≤y | vs | _  = x ∷ vs
-  ... | inj₂ y≤x | _  | us = y ∷ us
-
 module _ {_<_ : Rel A ℓ₂} {_≈_ : Rel A ℓ₃} (<-cmp : Trichotomous _≈_ _<_) (_⊕_ : Op₂ A) where
 
   partialMerge : List A → List A → List A

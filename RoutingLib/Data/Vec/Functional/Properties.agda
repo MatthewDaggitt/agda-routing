@@ -1,6 +1,6 @@
 open import Algebra.Core using (Op₂)
 open import Data.Nat using (ℕ; zero; suc; _<_; _≤_; _⊓_; _⊔_; z≤n; s≤s)
-open import Data.Nat.Properties using (≤-refl; ≤-trans; ⊔-sel; ⊓-sel; ⊓-mono-<; module ≤-Reasoning; +-mono-≤; +-mono-<-≤; +-mono-≤-<; m≤m⊔n; n≤m⊔n; ⊔-mono-≤; ⊔-monoʳ-≤)
+open import Data.Nat.Properties
 open import Data.Fin using (Fin; inject₁; inject≤) renaming (zero to fzero; suc to fsuc)
 open import Data.Product using (_,_; proj₁; proj₂; ∃)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
@@ -117,7 +117,7 @@ t≤max⁺[t] {zero} t fzero = ≤-refl
 t≤max⁺[t] {zero} t (fsuc ())
 t≤max⁺[t] {suc n} t fzero = m≤m⊔n (t fzero) (max⁺ ((λ j → t j) ∘ fsuc))
 t≤max⁺[t] {suc n} t (fsuc i) = ≤-trans (t≤max⁺[t] ((λ j → t j) ∘ fsuc) i)
-  (n≤m⊔n (t fzero) (max⁺ ((λ j → t j) ∘ fsuc)))
+  (m≤n⊔m (t fzero) (max⁺ ((λ j → t j) ∘ fsuc)))
 
 max⁺[t]≤x : ∀ {n} {t : Vector ℕ (suc n)} {x} → All (_≤ x) t → max⁺ t ≤ x
 max⁺[t]≤x {n} {t} {x} all = foldr⁺-×pres (_≤ x) n≤m×o≤m⇒n⊔o≤m all
@@ -129,7 +129,7 @@ max[t]<x : ∀ {n} {t : Vector ℕ n} {x ⊥} → ⊥ < x → All (_< x) t → m
 max[t]<x {x = x} ⊥<x xs<x = foldr-×pres (_< x) n≤m×o≤m⇒n⊔o≤m ⊥<x xs<x
 
 x≤max[t] : ∀ {n x} ⊥ (t : Vector ℕ n) → x ≤ ⊥ ⊎ Any (x ≤_) t → x ≤ max ⊥ t
-x≤max[t] {n} {x} ⊥ t (inj₁ x≤⊥) = foldr-⊎presʳ (_ ≤_) m≤o⇒m≤n⊔o x≤⊥ t
+x≤max[t] {n} {x} ⊥ t (inj₁ x≤⊥) = foldr-⊎presʳ (_ ≤_) (λ a → m≤n⇒m≤o⊔n a) x≤⊥ t -- 
 x≤max[t] ⊥ t (inj₂ x≤t) = foldr-⊎pres (_ ≤_) m≤n⊎m≤o⇒m≤n⊔o ⊥ x≤t
 
 max-cong : ∀ {n} {⊥₁ ⊥₂} → ⊥₁ ≡ ⊥₂ → {s t : Vector ℕ n} →
@@ -148,7 +148,7 @@ t≤max[t] : ∀ {n} ⊥ (t : Vector ℕ n) → All (_≤ max ⊥ t) t
 t≤max[t] ⊥ t i = x≤max[t] ⊥ t (inj₂ (i , ≤-refl))
 
 x<max[t] : ∀ {n x} {t : Vector ℕ n} ⊥ → x < ⊥ ⊎ Any (x <_) t → x < max ⊥ t
-x<max[t] {n} {x} {t} ⊥ (inj₁ x<⊥) = foldr-⊎presʳ (_ <_) m≤o⇒m≤n⊔o x<⊥ t
+x<max[t] {n} {x} {t} ⊥ (inj₁ x<⊥) = foldr-⊎presʳ (_ <_) (λ a → m≤n⇒m≤o⊔n a) x<⊥ t
 x<max[t] ⊥ (inj₂ x<t) = foldr-⊎pres (_ <_) m≤n⊎m≤o⇒m≤n⊔o ⊥ x<t
 
 max[s]≤max[t] : ∀ ⊥₁ {⊥₂} {m n} {s : Vector ℕ m} {t : Vector ℕ n} → ⊥₁ ≤ ⊥₂ ⊎ Any (⊥₁ ≤_) t →

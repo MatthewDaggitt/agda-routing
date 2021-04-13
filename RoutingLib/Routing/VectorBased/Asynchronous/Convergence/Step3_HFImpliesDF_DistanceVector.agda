@@ -94,7 +94,7 @@ r-maxTriIneq x y z with x ≟ y | y ≟ z | x ≟ z
 ... | yes x≈y | yes y≈z | no x≉z = contradiction (≈-trans x≈y y≈z) x≉z
 ... | yes x≈y | no  _   | no _   = ≤-reflexive (cong (_⊔ h z) (h-cong x≈y))
 ... | no  _   | yes y≈z | no _   = ≤-reflexive (trans (cong (h x ⊔_) (h-cong (≈-sym y≈z))) (sym (⊔-identityʳ _)))
-... | no  _   | no  _   | no _   = ⊔-mono-≤ (m≤m⊔n (h x) (h y)) (n≤m⊔n (h y) (h z))
+... | no  _   | no  _   | no _   = ⊔-mono-≤ (m≤m⊔n (h x) (h y)) (m≤n⊔m (h y) (h z))
 
 r[x,y]≡hx⊔hy : ∀ {x y} → x ≉ y → r x y ≡ h x ⊔ h y
 r[x,y]≡hx⊔hy {x} {y} x≉y with x ≟ y
@@ -127,7 +127,7 @@ h[FXᵢⱼ]⊔h[FYᵢⱼ]<v : ∀ X Y {i j v} → F X i j <₊ F Y i j →
 h[FXᵢⱼ]⊔h[FYᵢⱼ]<v X Y {i} {j} {v} FXᵢⱼ<FYᵢⱼ@(FXᵢⱼ≤FYᵢⱼ , FXᵢⱼ≉FYᵢⱼ) d≤v with FXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
 ... | inj₂ FXᵢⱼ≈Iᵢⱼ = contradiction FXᵢⱼ≈Iᵢⱼ (FXᵢⱼ<FYᵢⱼ⇒FXᵢⱼ≉Iᵢⱼ X Y FXᵢⱼ<FYᵢⱼ)
 ... | inj₁ (k , FXᵢⱼ≈AᵢₖXₖⱼ) = begin-strict
-  h (F X i j) ⊔ h (F Y i j) ≡⟨ m≤n⇒n⊔m≡n (h-resp-≤ FXᵢⱼ<FYᵢⱼ) ⟩
+  h (F X i j) ⊔ h (F Y i j) ≡⟨ m≥n⇒m⊔n≡m (h-resp-≤ FXᵢⱼ<FYᵢⱼ) ⟩
   h (F X i j)               <⟨ h-resp-↝ (Xₖⱼ≉∞ , i , k , ≈-sym FXᵢⱼ≈AᵢₖXₖⱼ) ⟩
   h (X k j)                 ≤⟨ m≤m⊔n (h (X k j)) (h (Y k j)) ⟩
   h (X k j) ⊔ h (Y k j)     ≡⟨ sym (r[x,y]≡hx⊔hy Xₖⱼ≉Yₖⱼ) ⟩

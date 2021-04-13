@@ -1,26 +1,19 @@
 open import Relation.Binary using (TotalOrder)
-
-module RoutingLib.Data.List.Relation.Unary.Sorted.Properties
-  {a ℓ₁ ℓ₂} (order : TotalOrder a ℓ₁ ℓ₂) where
-
-open TotalOrder order renaming (Carrier to A)
-open Eq using () renaming (setoid to S; trans to ≈-trans; sym to ≈-sym)
-
 open import Data.Maybe using (nothing; just)
+open import Data.Maybe.Relation.Binary.Connected hiding (refl)
 open import Data.Nat as ℕ using (ℕ; z≤n; s≤s; suc; ≤-pred) renaming (_<_ to _<ℕ_; _≤_ to _≤ℕ_)
 open import Data.Nat.Properties as ℕ using (≤+≢⇒<; ≤⇒≯; <⇒≢; suc-injective; module ≤-Reasoning; <-cmp)
 open import Data.Fin as Fin using (Fin; Fin′; zero; suc; cast; pred; toℕ) renaming (_≤_ to _≤𝔽_; _<_ to _<𝔽_)
 open import Data.Fin.Properties as Fin using (toℕ-cast; toℕ-injective)
 open import Data.Fin.Patterns
 open import Data.Fin.Induction
-open import Data.List as List
+open import Data.List as List hiding (tail)
 open import Data.List.Relation.Unary.All as All using (All; []; _∷_)
 open import Data.List.Relation.Unary.Any as Any using (Any; here; there; index)
 open import Data.List.Membership.Propositional.Properties using (∈-lookup; ∈-∃++)
 open import Data.List.Relation.Unary.AllPairs as AllPairs using ([]; _∷_)
-open import Data.List.Relation.Unary.Linked using ([]; [-]; _∷_)
+open import Data.List.Relation.Unary.Linked using ([]; [-]; _∷_; head′; _∷′_; tail)
 open import Data.List.Relation.Unary.Linked.Properties using (Linked⇒AllPairs)
-import Data.List.Relation.Binary.Permutation.Setoid.Properties S as Permₚ
 open import Data.List.Properties
 open import Data.List.Relation.Unary.All.Properties using (Any¬⇒¬All)
 open import Data.Product using (∃; _×_; _,_; proj₁; proj₂; uncurry′)
@@ -34,36 +27,28 @@ import Relation.Binary.Reasoning.PartialOrder as PosetReasoning
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Pred; Decidable)
-open import Data.List.Relation.Unary.Sorted.TotalOrder order as Sorted
+
+module RoutingLib.Data.List.Relation.Unary.Sorted.Properties
+  {a ℓ₁ ℓ₂} (order : TotalOrder a ℓ₁ ℓ₂) where
+
+open TotalOrder order renaming (Carrier to A)
+open Eq using () renaming (setoid to S; trans to ≈-trans; sym to ≈-sym)
 
 open import RoutingLib.Data.Fin.Properties as Fin
 open import RoutingLib.Data.List.Relation.Unary.All.Properties as Allₚ
 open import RoutingLib.Data.List.Relation.Binary.Pointwise
 open import RoutingLib.Data.List.Relation.Unary.Linked.Properties using (lookup-Linked)
-open import RoutingLib.Data.Maybe.Relation.Binary.Connected hiding (refl)
+import Data.List.Relation.Binary.Permutation.Setoid.Properties S as Permₚ
+open import Data.List.Relation.Unary.Sorted.TotalOrder order as Sorted hiding (tail)
 
 open import Data.List.Relation.Binary.Permutation.Setoid S as Perm using (_↭_; ↭-sym)
+open import Data.List.Relation.Binary.Equality.Setoid S
+
 open import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties S
   using (xs↭ys⇒|xs|≡|ys|; permute; permute-lookup; permute-injective)
-open import Data.List.Relation.Binary.Equality.Setoid S
 open import RoutingLib.Data.List.Relation.Binary.Sublist.Setoid.Properties S using (length-mono-<; filter-⊂)
 
 open import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.TotalOrder order
-
-tail↗ : ∀ {x xs} → Sorted (x ∷ xs) → Sorted xs
-tail↗ [-]       = []
-tail↗ (_ ∷ Rxs) = Rxs
-
-head↗ : ∀ {x xs} → Sorted (x ∷ xs) → Connected _≤_ (just x) (List.head xs)
-head↗ [-]       = just-nothing
-head↗ (Rxy ∷ _) = just Rxy
-
-_∷↗_ : ∀ {x xs} →
-       Connected _≤_ (just x) (List.head xs) →
-       Sorted xs →
-       Sorted (x ∷ xs)
-_∷↗_ {xs = []}     _  _            = [-]
-_∷↗_ {xs = y ∷ xs} (just Rxy) Ryxs = Rxy ∷ Ryxs
 
 lookup-Sorted : ∀ {xs} → Sorted xs →
                 ∀ {v} → Connected _≤_ (just v) (List.head xs) →
@@ -73,7 +58,7 @@ lookup-Sorted xs↗ c i = lookup-Linked trans xs↗ c i
 lookup-mono-≤ : ∀ {xs} → Sorted xs → ∀ {i j} → i ≤𝔽 j → lookup xs i ≤ lookup xs j
 lookup-mono-≤ {x ∷ xs} xs↗ {zero}  {zero}  z≤n       = refl
 lookup-mono-≤ {x ∷ xs} xs↗ {zero}  {suc j} z≤n       = lookup-Sorted xs↗ (just refl) (suc j)
-lookup-mono-≤ {x ∷ xs} xs↗ {suc i} {suc j} (s≤s i≤j) = lookup-mono-≤ (tail↗ xs↗) i≤j
+lookup-mono-≤ {x ∷ xs} xs↗ {suc i} {suc j} (s≤s i≤j) = lookup-mono-≤ (tail xs↗) i≤j
 
 
 private

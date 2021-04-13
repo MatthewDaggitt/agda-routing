@@ -13,14 +13,6 @@ open Setoid S renaming (Carrier to A)
 
 open import Data.List.Relation.Binary.Equality.Setoid S hiding (filter⁺)
 
---stdlib
-foldr⁺ : ∀ {_•_ : Op₂ A} {_◦_ : Op₂ A} →
-         (∀ {w x y z} → w ≈ x → y ≈ z → (w • y) ≈ (x ◦ z)) →
-         ∀ {xs ys e f} → e ≈ f → xs ≋ ys →
-         foldr _•_ e xs ≈ foldr _◦_ f ys
-foldr⁺ _    e~f []            = e~f
-foldr⁺ pres e~f (x~y ∷ xs~ys) = pres x~y (foldr⁺ pres e~f xs~ys)
-
 module _ {p q} {P : Pred A p} {Q : Pred A q}
          (P? : Decidable P) (Q? : Decidable Q)
          (P⇒Q : ∀ {a b} → a ≈ b → P a → Q b)

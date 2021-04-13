@@ -15,6 +15,7 @@ open import Data.List.Properties using (tabulate-cong; map-tabulate)
 open import Data.List.Relation.Unary.All using (All; []; _∷_)
 open import Data.List.Relation.Unary.All.Properties using (tabulate⁺)
 open import Data.List.Relation.Unary.AllPairs using (AllPairs; []; _∷_)
+open import Data.List.Relation.Binary.Equality.Setoid using (foldr⁺)
 import Data.List.Relation.Unary.AllPairs.Properties as AllPairs
 open import Data.Nat using (ℕ; _+_)
 open import Function using (_∘_; _∘₂′_)
@@ -27,7 +28,6 @@ import Relation.Binary.Reasoning.Setoid as SetoidReasoning
 open import RoutingLib.Routing using (Network; RoutingMatrix; AdjacencyMatrix; I)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.List.Properties using (foldr-map-commute-gen₂)
-open import RoutingLib.Data.List.Relation.Binary.Equality.Setoid using (foldr⁺)
 
 open import RoutingLib.Routing.VectorBased.Convergence.Definitions
 open import RoutingLib.Iteration.Asynchronous.Dynamic as Async using (Epoch)

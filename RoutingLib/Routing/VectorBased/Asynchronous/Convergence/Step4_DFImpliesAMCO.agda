@@ -102,7 +102,7 @@ module _ {e : Epoch} {p : Subset n} .(free : TopologyIsFree alg N (e , p)) where
   D≡0⇒X≈ₛY D≡0 i∈p = Conditionₜ.≡0⇒x≈y d≡0⇒x≈y i∈p (MaxLiftₘ.d≡0⇒dᵢ≡0 D≡0 _)
   
   Y≉ₚX⇒0<DXY : ∀ {X Y} → Y ≉ₘ[ p ] X → 0 < D X Y
-  Y≉ₚX⇒0<DXY Y≉X = n≢0⇒0<n (Y≉X ∘ ≈ₛ-sym ∘ D≡0⇒X≈ₛY)
+  Y≉ₚX⇒0<DXY Y≉X = n≢0⇒n>0 (Y≉X ∘ ≈ₛ-sym ∘ D≡0⇒X≈ₛY)
 
   d≤D : ∀ X Y i → (i ∈ p ⊎ X i ≈ₜ Y i) → d (X i) (Y i) ≤ D X Y
   d≤D X Y i cond  = subst (_≤ D X Y) (Conditionₜ.dᶜ≡d⁺ i (X i) (Y i) (map₂ x≈y⇒d≡0 cond)) (MaxLiftₘ.dᵢ≤d X Y i)

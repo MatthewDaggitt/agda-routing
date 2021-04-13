@@ -11,7 +11,7 @@ open import RoutingLib.Routing algebra
 
 open import Data.Bool using (true; false)
 open import Data.Product using (∃₂; _,_)
-open import Data.Fin.Base using (zero; suc; inject₁; toℕ)
+open import Data.Fin.Base using (Fin; zero; suc; inject₁; toℕ)
 open import Data.Fin.Properties as F using (any?; toℕ-inject₁)
 open import Data.Fin.Patterns
 open import Data.Nat using (s≤s; _<_)

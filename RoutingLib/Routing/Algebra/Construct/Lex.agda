@@ -19,8 +19,13 @@ module RoutingLib.Routing.Algebra.Construct.Lex
   (algebraB : RawRoutingAlgebra a₂ b₂ ℓ₂)
   where
 
+private
+  module A = RawRoutingAlgebra algebraA
+  module B = RawRoutingAlgebra algebraB
+
 open import Algebra
 open import Algebra.Consequences.Setoid
+import Algebra.Construct.LexProduct A.⊕-magma B.⊕-magma A._≟_ as Lex
 open import Data.Nat
 open import Data.Fin
 open import Data.Product
@@ -32,12 +37,6 @@ open import Relation.Binary
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation
 
-private
-  module A = RawRoutingAlgebra algebraA
-  module B = RawRoutingAlgebra algebraB
-
-open import RoutingLib.Algebra.Construct.Lexicographic.Base using (lex)
-import RoutingLib.Algebra.Construct.Lexicographic A.⊕-magma B.⊕-magma A._≟_ as Lex
 import RoutingLib.Routing.Algebra.Properties.RawRoutingAlgebra
 
 ------------------------------------------------------------------------
@@ -57,7 +56,7 @@ _≈_ : Rel Route _
 _≈_ = Pointwise A._≈_ B._≈_
 
 _⊕_ : Op₂ Route
-_⊕_ = lex A._⊕_ B._⊕_ A._≟_ 
+_⊕_ = Lex._⊕_
 
 _▷_ : ∀ {n} {i j : Fin n} → Step i j → Route → Route
 (f , g) ▷ (a , b) = f A.▷ a , g B.▷ b

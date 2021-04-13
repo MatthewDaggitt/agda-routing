@@ -9,6 +9,7 @@ open import Data.Nat.Properties using (<⇒≤)
 open import Data.Product using (_,_; _×_; proj₁; proj₂)
 open import Data.List using (List; []; _∷_; filter; tabulate; map; foldr; head)
 open import Data.List.Properties
+import Data.List.Sort as Sort
 open import Data.Maybe.Base using (just; nothing)
 import Data.List.Relation.Binary.Permutation.Setoid.Properties as PermProperties
 open import Data.List.Relation.Binary.Pointwise using (Pointwise; []; _∷_)
@@ -34,15 +35,15 @@ open import RoutingLib.Iteration.Synchronous using (_^_; IsFixedPoint)
 open import RoutingLib.Data.List using () renaming (partialMerge to partialMerge')
 open import RoutingLib.Data.List.Properties
   using (partialMerge-identityʳ; partialMerge-∷ˡ-min; partialMerge-∷ʳ-min; partialMerge-∷-eq; partialMerge-idempotent; partialMerge-cong)
-import RoutingLib.Data.List.Sort as Sort
 import RoutingLib.Data.List.Relation.Unary.Sorted.Properties as SortedProperties2
 import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties as Perm
 open import RoutingLib.Data.Maybe.Relation.Binary.Connected.Left as Connectedˡ using (Connectedˡ; just; nothing)
+open import RoutingLib.Data.Matrix using (SquareMatrix)
 
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
 open import RoutingLib.Routing as Routing using () renaming (AdjacencyMatrix to AdjacencyMatrix₁)
-open import RoutingLib.Data.Matrix using (SquareMatrix)
+
 import RoutingLib.lmv34.Synchronous.Gamma_zero as Gamma_zero
 import RoutingLib.lmv34.Synchronous.Gamma_zero.Algebra as Gamma_zero_Algebra
 import RoutingLib.lmv34.Synchronous.Gamma_zero.Properties as Gamma_zero_Properties
@@ -88,6 +89,7 @@ open module Sorted = Sorting ≤₂-totalOrder using (Sorted)
 open Equality FinRoute-setoid using (_≋_; ≋-refl; ≋-sym; ≋-trans; ≋-reflexive)
 open PermProperties FinRoute-setoid using (≋⇒↭)
 open SortedProperties2 ≤₂-totalOrder using (head↗; tail↗; ↗↭↗⇒≋; _∷↗_)
+open import RoutingLib.Data.List.Sort.Properties sortingAlgorithm
 
 --------------------------------------------------------------------------------
 -- Operation properties

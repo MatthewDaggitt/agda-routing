@@ -5,7 +5,7 @@ open import Data.Maybe
 open import Relation.Binary
 open import Level using (Level)
 
-open import RoutingLib.Data.Maybe.Relation.Binary.Connected
+open import Data.Maybe.Relation.Binary.Connected
 
 module RoutingLib.Data.List.Relation.Unary.Linked.Properties where
 

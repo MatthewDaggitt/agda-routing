@@ -10,7 +10,7 @@ open import Relation.Binary.PropositionalEquality as P using (_≡_)
 open import Relation.Nullary
 import Relation.Nullary.Decidable as Dec
 
-import RoutingLib.Data.Maybe.Relation.Binary.Connected as C
+import Data.Maybe.Relation.Binary.Connected as C
 
 private
   variable

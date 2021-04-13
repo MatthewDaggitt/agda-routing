@@ -4,6 +4,7 @@ open import Data.Nat using (ℕ)
 open import Data.Fin using (Fin; _<_)
 open import Data.Fin.Properties as Finₚ using (_≤?_; <-cmp) renaming (_≟_ to _≟F_)
 open import Data.List using ([]; _∷_; List; foldr; filter; map; tabulate)
+import Data.List.Sort as Sort
 import Data.List.Relation.Binary.Permutation.Setoid as PermutationEq
 open import Data.Product.Relation.Binary.Lex.NonStrict using (×-decTotalOrder)
 open import Data.Product.Relation.Binary.Pointwise.NonDependent using (×-decSetoid)
@@ -24,8 +25,8 @@ open import Data.Product as Prod using (_×_; _,_)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 import RoutingLib.Routing as Routing
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebra
+
 open import RoutingLib.Data.List using (partialMerge)
-import RoutingLib.Data.List.Sort as Sort
 import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties as PermutationProperties
 
 module RoutingLib.lmv34.Synchronous.Gamma_one.Algebra
@@ -84,10 +85,7 @@ open DecSetoid ≈ᵥ-decSetoid public using ()
   ; isEquivalence to ≈ᵥ-isEquivalence
   ; setoid        to 𝕍ₛ
   )
-{-
-≈ᵥ-reflexiveₛ : {!!} B.⇒ _≈ᵥ_
-≈ᵥ-reflexiveₛ = ?
--}
+
 --------------------------------------------------------------------------------
 -- Auxilaries
 

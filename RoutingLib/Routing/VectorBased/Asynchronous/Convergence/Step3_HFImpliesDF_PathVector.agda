@@ -1,18 +1,4 @@
 
-open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
-open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Definitions
-import RoutingLib.Routing.Algebra.Construct.Consistent as Consistent
-
-module RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Step3_HFImpliesDF_PathVector
-  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  {n} (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
-  {A : AdjacencyMatrix algebra n}
-  (open Consistent isRoutingAlgebra isPathAlgebra A)
-  (distanceFunctionᶜ : RouteDistanceFunction algebraᶜ Aᶜ)
-  where
-
 open import Data.Nat hiding (_≟_)
 open import Data.Fin using (Fin) renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Subset using (Subset; _∈_)
@@ -30,11 +16,23 @@ open import Relation.Nullary.Decidable using (⌊_⌋)
 
 open import RoutingLib.Data.Nat.Properties
 
+open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
+open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Definitions
+import RoutingLib.Routing.Algebra.Construct.Consistent as Consistent
+
+module RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Step3_HFImpliesDF_PathVector
+  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  {n} (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
+  {A : AdjacencyMatrix algebra n}
+  (open Consistent isRoutingAlgebra isPathAlgebra A)
+  (distanceFunctionᶜ : RouteDistanceFunction algebraᶜ Aᶜ)
+  where
+
 open ≤-Reasoning
 
-import RoutingLib.Routing.Algebra.Construct.Consistent as Consistent
 open import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra isRoutingAlgebra isPathAlgebra
-
 
 open Routing algebra n
 open RawRoutingAlgebra algebra
@@ -134,13 +132,7 @@ rⁱ-sym : ∀ x y → rⁱ x y ≡ rⁱ y x
 rⁱ-sym x y = ⊔-comm (hⁱ x) (hⁱ y)
 
 rⁱ≡0⇒x≈y : rⁱ x y ≡ 0 → x ≈ y
-rⁱ≡0⇒x≈y {x} {y} rⁱ≡0 = contradiction rⁱ≡0 (m<n⇒n≢0 (m≤o⇒m≤n⊔o (hⁱ x) (1≤hⁱ y)))
-
-rⁱ-maxTriIneq : MaxTriangleInequality rⁱ
-rⁱ-maxTriIneq x y z = begin
-  hⁱ x ⊔ hⁱ z                   ≤⟨ ⊔-monoˡ-≤ (hⁱ z) (m≤m⊔n (hⁱ x) (hⁱ y)) ⟩
-  hⁱ x ⊔ hⁱ y ⊔ hⁱ z            ≡⟨ ⊔-triangulate (hⁱ x) (hⁱ y) (hⁱ z) ⟩
-  (hⁱ x ⊔ hⁱ y) ⊔ (hⁱ y ⊔ hⁱ z) ∎
+rⁱ≡0⇒x≈y {x} {y} rⁱ≡0 = contradiction rⁱ≡0 (m<n⇒n≢0 (m≤n⇒m≤o⊔n (hⁱ x) (1≤hⁱ y)))
 
 1≤rⁱ : ∀ x y → 1 ≤ rⁱ x y
 1≤rⁱ x y = m≤n⇒m≤n⊔o (hⁱ y) (1≤hⁱ x)
@@ -357,7 +349,7 @@ rⁱ-strContrOrbits : ∀ {X i j} → 𝑰 (F X i j) ⊎ 𝑰 (F (F X) i j) →
                      Hᶜ + rⁱ (F X i j) (F (F X) i j) < v
 rⁱ-strContrOrbits {X} {i} {j} FXᵢⱼⁱ⊎F²Xᵢⱼⁱ {v} r≤v with ≤-total (hⁱ (F X i j)) (hⁱ (F (F X) i j))
 ... | inj₁ hⁱFXᵢⱼ≤hⁱF²Xᵢⱼ = subst (_< v) (sym (cong (Hᶜ +_) (m≤n⇒m⊔n≡n hⁱFXᵢⱼ≤hⁱF²Xᵢⱼ))) (rⁱ-strContrOrbits-F²X (hⁱ-force-𝑰 FXᵢⱼⁱ⊎F²Xᵢⱼⁱ hⁱFXᵢⱼ≤hⁱF²Xᵢⱼ) r≤v)
-... | inj₂ hⁱF²Xᵢⱼ≤hⁱFXᵢⱼ = subst (_< v) (sym (cong (Hᶜ +_) (m≤n⇒n⊔m≡n hⁱF²Xᵢⱼ≤hⁱFXᵢⱼ))) (rⁱ-strContrOrbits-FX {X} {i} {j} (hⁱ-force-𝑰 (swap FXᵢⱼⁱ⊎F²Xᵢⱼⁱ) hⁱF²Xᵢⱼ≤hⁱFXᵢⱼ) r≤v)
+... | inj₂ hⁱF²Xᵢⱼ≤hⁱFXᵢⱼ = subst (_< v) (sym (cong (Hᶜ +_) (m≥n⇒m⊔n≡m hⁱF²Xᵢⱼ≤hⁱFXᵢⱼ))) (rⁱ-strContrOrbits-FX {X} {i} {j} (hⁱ-force-𝑰 (swap FXᵢⱼⁱ⊎F²Xᵢⱼⁱ) hⁱF²Xᵢⱼ≤hⁱFXᵢⱼ) r≤v)
 
 ------------------------------------------------------------------------
 -- rᶜ is contracting in the right way

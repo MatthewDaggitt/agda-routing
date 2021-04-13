@@ -25,6 +25,7 @@ open import Relation.Unary as U using (Pred)
 open import RoutingLib.Data.Fin.Subset
 open import RoutingLib.Data.Fin.Subset.Properties
 open import RoutingLib.Relation.Nullary.Finite.Bijection.Setoid.Properties finite
+open import RoutingLib.Relation.Binary.Construct.Closure.Transitive.Any
 
 open Finite finite
    
@@ -44,10 +45,8 @@ R⁺ᶠ⇒R⁺ : ∀ {p x y} → R⁺ᶠ p x y → R⁺ x y
 R⁺ᶠ⇒R⁺ (nil  _ Rxy)      = [ Rxy ]
 R⁺ᶠ⇒R⁺ (cons _ Rxy R⁺yz) = Rxy ∷ R⁺ᶠ⇒R⁺ R⁺yz
 
-data _∈⁺_ : A → ∀ {x y} → R⁺ x y → Set ℓ where
-  here₁  : ∀ {v x y}   {Rxy : R x y}                 → v ≈ x     → v ∈⁺ [ Rxy ]
-  here₂  : ∀ {v x y z} {Rxy : R x y} {R⁺yz : R⁺ y z} → v ≈ x     → v ∈⁺ (Rxy ∷ R⁺yz)
-  there  : ∀ {v x y z} {Rxy : R x y} {R⁺yz : R⁺ y z} → v ∈⁺ R⁺yz → v ∈⁺ (Rxy ∷ R⁺yz)
+_∈⁺_ : A → ∀ {x y} → R⁺ x y → Set ℓ
+v ∈⁺ Rxy = AnyNode (v ≈_) Rxy
 
 _∈⁺ᶠ_ : ∀ {p} → A → ∀ {x y} → R⁺ᶠ p x y → Set ℓ
 v ∈⁺ᶠ R⁺ᶠxy = v ∈⁺ R⁺ᶠ⇒R⁺ R⁺ᶠxy
@@ -82,17 +81,7 @@ contract {x = x} {y} {R⁺ᶠxy = cons {y = z} fx∈p Rxy R⁺ᶠyz} v∉R = con
 ∈-contract⁻ {R⁺ᶠxy = cons fx∈p x₁ R⁺yz} v∉ (there w∈R⁺yz) = there (∈-contract⁻ (v∉∷⇒v∉ fx∈p v∉) (∈-transfer⁻ _ _ (R⁺ᶠ⇒R⁺-cancel-∈ w∈R⁺yz)))
 
 _∈⁺?_ : ∀ v {x y} (R⁺xy : R⁺ x y) → Dec (v ∈⁺ R⁺xy)
-_∈⁺?_ v {x} [ Rxy ]      with v ≟ x
-... | yes v≈x = yes (here₁ v≈x)
-... | no  v≉x = no λ { (here₁ v≈x) → v≉x v≈x}
-_∈⁺?_ v {x} (Rxy ∷ R⁺yz) with v ≟ x
-... | yes v≈x = yes (here₂ v≈x)
-... | no  v≉x with v ∈⁺? R⁺yz
-...   | yes v∈R⁺yz = yes (there v∈R⁺yz)
-...   | no  v∉R⁺yz = no λ
-  { (here₂ v≈x)    → v≉x v≈x
-  ; (there v∈R⁺yz) → v∉R⁺yz v∈R⁺yz
-  }
+v ∈⁺? R⁺xy = anyNode? (v ≟_) R⁺xy
 
 truncate : ∀ {v x y} {R⁺xy : R⁺ x y} → v ∈⁺ R⁺xy → R⁺ v y
 truncate (here₁ {Rxy = Rxy}               v≈x) = [ respˡ (sym v≈x) Rxy ]

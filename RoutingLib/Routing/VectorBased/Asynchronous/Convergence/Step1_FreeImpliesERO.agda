@@ -18,10 +18,11 @@ open import Relation.Binary.Construct.Closure.Transitive as TransClosure
 import Relation.Binary.Construct.NonStrictToStrict as NonStrictToStrict
 open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Construct.Union as Union
-open import Relation.Nullary using (¬_; yes; no)
+open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Nullary.Decidable using (False; fromWitnessFalse)
 
+open import RoutingLib.Data.Sum
 open import RoutingLib.Data.Fin using (_+ₘ_; _-ₘ_)
 open import RoutingLib.Data.FiniteSet renaming (FiniteSet to FiniteSet⁺)
 open import RoutingLib.Relation.Nullary.Finite.Bijection.Setoid using (Finite)
@@ -29,6 +30,7 @@ open import RoutingLib.Data.Maybe.Properties
 open import RoutingLib.Relation.Binary using (StrictMinimum)
 import RoutingLib.Relation.Binary.Construct.Closure.Transitive.Finite as TransClosure
 import RoutingLib.Relation.Binary.Construct.Closure.Transitive as TransClosure
+open import RoutingLib.Relation.Binary.Construct.Closure.Transitive.Any
 
 open import RoutingLib.Routing using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra
@@ -60,6 +62,10 @@ open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Definitions 
 
 open import Relation.Binary.Reasoning.PartialOrder ≤₊-poset
 
+private
+  variable
+    x y : Route
+    
 --------------------------------------------------------------------------------
 -- An ordering over routes
 --------------------------------------------------------------------------------
@@ -82,66 +88,76 @@ infix 4 _<ᶠ_
 
 _<ᶠ_ : Rel Route (a ⊔ ℓ)
 _<ᶠ_ = TransClosure (_<₊_ ∪ _↝_)
- 
--- Given two related routes, i.e. path through this graph, we identify the set
--- of routes that are extended. If extensions exist in the path we return
--- nothing, otherwise we return a non-empty set of routes.
-⟦_⟧↝ : ∀ {x y} → x <ᶠ y → Maybe (FiniteSet⁺ Route)
-⟦_⟧↝ {x} [ inj₁ x<y ]     = nothing
-⟦_⟧↝ {x} [ inj₂ x↝y ]     = just ⟦ x ⟧
-⟦_⟧↝ {x} (inj₁ x<z ∷ z<y) = ⟦ z<y ⟧↝
-⟦_⟧↝ {x} (inj₂ x↝z ∷ z<y) with ⟦ z<y ⟧↝
-... | nothing = just ⟦ x ⟧
-... | just t  = just (⟦ x ⟧∪ t)
+
+-- Predicates stating whether a path contains any extensions
+
+↝∈_ : x <ᶠ y → Set
+↝∈_ = AnyEdge IsInj₂
+
+↝∉_ : x <ᶠ y → Set
+↝∉ x = ¬ (↝∈ x)
+
+-- It's decidable if a path contains any extensions
+
+↝∈?_ : (x<ᶠy : x <ᶠ y) → Dec (↝∈ x<ᶠy)
+↝∈?_ = anyEdge? isInj₂?
 
 -- If the set of extended routes are empty then the first route in the
 -- path must be strictly preferred to the last route in the path.
-¬⟦x<ᶠy⟧↝⇒x<y : ∀ {x y} (x<y : x <ᶠ y) → ¬ Is-just ⟦ x<y ⟧↝ → x <₊ y
-¬⟦x<ᶠy⟧↝⇒x<y [ inj₁ x<y ]     _  = x<y
-¬⟦x<ᶠy⟧↝⇒x<y [ inj₂ x<y ]     v  = contradiction (just tt) v
-¬⟦x<ᶠy⟧↝⇒x<y (inj₁ x<y ∷ y<z) eq = <₊-trans x<y (¬⟦x<ᶠy⟧↝⇒x<y y<z eq)
-¬⟦x<ᶠy⟧↝⇒x<y (inj₂ x↝y ∷ y<z) eq with ⟦ y<z ⟧↝
-... | nothing = contradiction (just tt) eq
-... | just _  = contradiction (just tt) eq
+↝∉⇒x<₊y : (x<y : x <ᶠ y) → ↝∉ x<y → x <₊ y
+↝∉⇒x<₊y [ inj₁ x<y ]     _  = x<y
+↝∉⇒x<₊y [ inj₂ x<y ]     ↝∉ = contradiction (here₁ _) ↝∉
+↝∉⇒x<₊y (inj₁ x<y ∷ y<z) ↝∉ = <₊-trans x<y (↝∉⇒x<₊y y<z (↝∉ ∘ there))
+↝∉⇒x<₊y (inj₂ x↝y ∷ y<z) ↝∉ with ↝∈? y<z
+... | no _  = contradiction (here₂ _) ↝∉
+... | yes _ = contradiction (here₂ _) ↝∉
+
+-- Given two related routes, i.e. path through this graph, we identify the set
+-- of routes that are extended. If extensions exist in the path we return
+-- nothing, otherwise we return a non-empty set of routes.
+extendedRoutes : (x<ᶠy : x <ᶠ y) → ↝∈ x<ᶠy → FiniteSet⁺ Route
+extendedRoutes {x} [ inj₁ x<y ]      (here₁ ())
+extendedRoutes {x} [ inj₂ x↝y ]      _          = ⟦ x ⟧
+extendedRoutes {x} (inj₁ x<z ∷ z<ᶠy) (there ↝∈) = extendedRoutes z<ᶠy ↝∈ 
+extendedRoutes {x} (inj₂ x↝z ∷ z<ᶠy) _          with ↝∈? z<ᶠy
+... | no  _   = ⟦ x ⟧
+... | yes ext = ⟦ x ⟧∪ extendedRoutes z<ᶠy ext
 
 -- If some route `v` is preferred to the start point of the path then `v` must also
 -- be preferred to the first extended route in the path (if it exists).
-v≤x⇒v≤⟦x<ᶠy⟧↝₀ : ∀ {v x y} → v ≤₊ x → (x<ᶠy : x <ᶠ y) → All (λ w → v ≤₊ first w) ⟦ x<ᶠy ⟧↝
-v≤x⇒v≤⟦x<ᶠy⟧↝₀ v≤x [ inj₁ _ ]        = nothing
-v≤x⇒v≤⟦x<ᶠy⟧↝₀ v≤x [ inj₂ _ ]        = just v≤x
-v≤x⇒v≤⟦x<ᶠy⟧↝₀ v≤x (inj₁ x<z ∷ z<ᶠy) = v≤x⇒v≤⟦x<ᶠy⟧↝₀ (≤₊-trans v≤x (<₊⇒≤₊ x<z)) z<ᶠy
-v≤x⇒v≤⟦x<ᶠy⟧↝₀ v≤x (inj₂ x↝z ∷ z<ᶠy) with ⟦ z<ᶠy ⟧↝
-... | nothing = just v≤x
-... | just _  = just v≤x
+v≤x⇒v≤er[x<ᶠy]₀ : ∀ {v} → v ≤₊ x → (x<ᶠy : x <ᶠ y) → (↝∈x<y : ↝∈ x<ᶠy) →
+                 v ≤₊ first (extendedRoutes x<ᶠy ↝∈x<y)
+v≤x⇒v≤er[x<ᶠy]₀ v≤x [ inj₁ _ ]        (here₁ ()) 
+v≤x⇒v≤er[x<ᶠy]₀ v≤x [ inj₂ _ ]        _          = v≤x
+v≤x⇒v≤er[x<ᶠy]₀ v≤x (inj₁ x<z ∷ z<ᶠy) (there ↝∈) = v≤x⇒v≤er[x<ᶠy]₀ (≤₊-trans v≤x (<₊⇒≤₊ x<z)) z<ᶠy ↝∈
+v≤x⇒v≤er[x<ᶠy]₀ v≤x (inj₂ x↝z ∷ z<ᶠy) _          with ↝∈? z<ᶠy
+... | no  _ = v≤x
+... | yes _ = v≤x
 
 -- If the end point of the path is preferred to some route `v` then last extended route
 -- in the path (if it exists) must be dominated by `v`.
-y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v : ∀ {v x y} → y ≤₊ v → (x<ᶠy : x <ᶠ y) → All (λ w → last w ⊴ v) ⟦ x<ᶠy ⟧↝
-y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v y≤v [ inj₁ x<y ]      = nothing
-y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v y≤v [ inj₂ x↝y ]      = just (⊴-≤₊-trans (↝⇒⊴ x↝y) y≤v)
-y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v y≤v (inj₁ x<z ∷ z<ᶠy) = y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v y≤v z<ᶠy
-y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v {v} y≤v (inj₂ x↝w ∷ w<ᶠy) with ⟦ w<ᶠy ⟧↝ | inspect ⟦_⟧↝ w<ᶠy
-... | nothing | [ eq ] = just (⊴-≤₊-trans (↝⇒⊴ x↝w) (≤₊-trans (proj₁ (¬⟦x<ᶠy⟧↝⇒x<y w<ᶠy (subst (λ v → ¬ Is-just v) (sym eq) λ()))) y≤v))
-... | just q  | [ eq ] = just (subst (λ v → last v ⊴ _) (to-witness-subst eq) (All-witness test (y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v y≤v w<ᶠy)))
-  where
-  test : Is-just ⟦ w<ᶠy ⟧↝
-  test = subst Is-just (sym eq) (just {x = q} tt)
+y≤v⇒er[x<ᶠy]₋₁⊴v : ∀ {v} → y ≤₊ v → (x<ᶠy : x <ᶠ y) → (↝∈x<y : ↝∈ x<ᶠy) →
+                  last (extendedRoutes x<ᶠy ↝∈x<y) ⊴ v
+y≤v⇒er[x<ᶠy]₋₁⊴v y≤v [ inj₁ x<y ]      (here₁ ()) 
+y≤v⇒er[x<ᶠy]₋₁⊴v y≤v [ inj₂ x↝y ]      _          = ⊴-≤₊-trans (↝⇒⊴ x↝y) y≤v
+y≤v⇒er[x<ᶠy]₋₁⊴v y≤v (inj₁ x<z ∷ z<ᶠy) (there ↝∈) = y≤v⇒er[x<ᶠy]₋₁⊴v y≤v z<ᶠy ↝∈
+y≤v⇒er[x<ᶠy]₋₁⊴v y≤v (inj₂ x↝w ∷ w<ᶠy) _          with ↝∈? w<ᶠy
+... | no  ↝∉w<ᶠy = ⊴-≤₊-trans (↝⇒⊴ x↝w) (≤₊-trans (proj₁ (↝∉⇒x<₊y w<ᶠy ↝∉w<ᶠy)) y≤v)
+... | yes ↝∈w<ᶠy = y≤v⇒er[x<ᶠy]₋₁⊴v y≤v w<ᶠy ↝∈w<ᶠy
 
 -- The iᵗʰ extended route in the path is threatened by i+1ᵗʰ extended route in the path
-⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ : ∀ {x y} (x<ᶠy : x <ᶠ y) → All (λ v → (∀ i → iᵗʰ v (inject₁ i) ⊴ iᵗʰ v (suc i))) ⟦ x<ᶠy ⟧↝
-⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ [ inj₁ _ ]         = nothing
-⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ [ inj₂ _ ]         = just λ()
-⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ (inj₁ x≤z ∷ z<ᶠy)  = ⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ z<ᶠy
-⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ {x} {y} (_∷_ {y = z} (inj₂ x↝z) z<ᶠy)  with ⟦ z<ᶠy ⟧↝ | inspect ⟦_⟧↝ z<ᶠy 
-... | nothing | _      = just λ()
-... | just v  | [ eq ] = just λ
-  -- Please don't ask about this monstrosity. Horrible hacks around definitional equality of `to-witness`
-  { 0F      → ⊴-≤₊-trans (↝⇒⊴ x↝z) (subst (λ q → z ≤₊ FiniteSet⁺.x q 0F) (to-witness-subst eq) (All-witness test (v≤x⇒v≤⟦x<ᶠy⟧↝₀ ≤₊-refl z<ᶠy)))
-  ; (suc i) → subst (λ v → ∀ i → iᵗʰ v (inject₁ i) ⊴ iᵗʰ v (suc i)) (to-witness-subst eq) (All-witness test (⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ z<ᶠy)) i
+⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ : (x<ᶠy : x <ᶠ y) → (↝∈x<y : ↝∈ x<ᶠy) →
+                      let er = extendedRoutes x<ᶠy ↝∈x<y in
+                      ∀ i → iᵗʰ er (inject₁ i) ⊴ iᵗʰ er (suc i)
+⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ [ inj₁ _ ]         (here₁ ())
+⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ [ inj₂ _ ]         _          = λ()
+⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ (inj₁ x≤z ∷ z<ᶠy)  (there ↝∈) = ⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ z<ᶠy ↝∈
+⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ {x} {y} (_∷_ {y = z} (inj₂ x↝z) z<ᶠy) _ with ↝∈? z<ᶠy
+... | no  ↝∉z<ᶠy = λ()
+... | yes ↝∈z<ᶠy = λ
+  { 0F      → ⊴-≤₊-trans (↝⇒⊴ x↝z) (v≤x⇒v≤er[x<ᶠy]₀ ≤₊-refl z<ᶠy ↝∈z<ᶠy)
+  ; (suc i) → ⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ z<ᶠy ↝∈z<ᶠy i
   }
-  where
-  test : Is-just ⟦ z<ᶠy ⟧↝
-  test = subst Is-just (sym eq) (just {x = v} tt)
 
 -- When the topology is cycle free then irreflexivity can now be proved. This follows
 -- as if the start point of the path is equal to the end point then:
@@ -150,17 +166,17 @@ y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v {v} y≤v (inj₂ x↝w ∷ w<ᶠy) with ⟦ w
 --   ∙ if the path does contain extensions then the set of extended routes must form
 --     a cycle thanks to x ≈ y and the previous lemmas.
 .<ᶠ-irrefl : CycleFree A → Irreflexive _≈_ _<ᶠ_
-<ᶠ-irrefl cf x≈y x<ᶠy with IsJust? ⟦ x<ᶠy ⟧↝
-... | no  ¬∣x<ᶠy∣↝ = <₊-irrefl x≈y (¬⟦x<ᶠy⟧↝⇒x<y x<ᶠy ¬∣x<ᶠy∣↝)
-... | yes ∣x<ᶠy∣↝  = cf (to-witness ∣x<ᶠy∣↝) ∣x<ᶠy∣↝-cyclic
+<ᶠ-irrefl cf x≈y x<ᶠy with ↝∈? x<ᶠy
+... | no  ↝∉x<ᶠy = <₊-irrefl x≈y (↝∉⇒x<₊y x<ᶠy ↝∉x<ᶠy)
+... | yes ↝∈x<ᶠy = cf (extendedRoutes x<ᶠy ↝∈x<ᶠy) er[x<ᶠy]-cyclic
   where
-  ⟦x<ᶠy⟧₋₁⊴x         = All-witness ∣x<ᶠy∣↝ (y≤v⇒⟦x<ᶠy⟧↝₋₁⊴v ≤₊-refl x<ᶠy)
-  x≤⟦x<ᶠy⟧₀          = All-witness ∣x<ᶠy∣↝ (v≤x⇒v≤⟦x<ᶠy⟧↝₀ (≤₊-reflexive (≈-sym x≈y)) x<ᶠy)
-  ⟦x<ᶠy⟧ᵢ⊴⟦x<ᶠy⟧ᵢ₊₁  = All-witness ∣x<ᶠy∣↝ (⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ x<ᶠy)
+  ⟦x<ᶠy⟧₋₁⊴x         = y≤v⇒er[x<ᶠy]₋₁⊴v ≤₊-refl x<ᶠy ↝∈x<ᶠy
+  x≤⟦x<ᶠy⟧₀          = v≤x⇒v≤er[x<ᶠy]₀ (≤₊-reflexive (≈-sym x≈y)) x<ᶠy ↝∈x<ᶠy
+  ⟦x<ᶠy⟧ᵢ⊴⟦x<ᶠy⟧ᵢ₊₁  = ⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ x<ᶠy ↝∈x<ᶠy
  
-  ∣x<ᶠy∣↝-cyclic : Cyclic A (to-witness ∣x<ᶠy∣↝)
-  ∣x<ᶠy∣↝-cyclic 0F      = ⊴-≤₊-trans ⟦x<ᶠy⟧₋₁⊴x x≤⟦x<ᶠy⟧₀
-  ∣x<ᶠy∣↝-cyclic (suc i) = ⟦x<ᶠy⟧ᵢ⊴⟦x<ᶠy⟧ᵢ₊₁ i
+  er[x<ᶠy]-cyclic : Cyclic A (extendedRoutes x<ᶠy ↝∈x<ᶠy)
+  er[x<ᶠy]-cyclic 0F      = ⊴-≤₊-trans ⟦x<ᶠy⟧₋₁⊴x x≤⟦x<ᶠy⟧₀
+  er[x<ᶠy]-cyclic (suc i) = ⟦x<ᶠy⟧ᵢ⊴⟦x<ᶠy⟧ᵢ₊₁ i
 
 <ᶠ-trans : Transitive _<ᶠ_
 <ᶠ-trans = TransClosure.trans

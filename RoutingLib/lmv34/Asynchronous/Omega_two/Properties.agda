@@ -68,12 +68,12 @@ open Routing algebra n using (ℝ𝕄ₛ; _≈ₘ_; ≈ₘ-refl) renaming (I to 
 A||V||-cong' : ∀ {F F' V} → F ≈ₐ,₂ F' → F || V ||' ≈ᵥ  F' || V ||'
 A||V||-cong' {F} {F'} {V} F=F' i = ⨁ₛ-cong (λ {q} → f[]-cong {X = V i q} (F=F' i q))
 
-LemmaA₄' : ∀ F G V → (F 〖 (G 【 V 】') 〗) ↓ ≈ᵥ (F ●ₘ (G ᵀ)) || V ||'
+LemmaA₄' : ∀ F G V → (F 〖 (G 【 V 】') 〗) ↓ ≈ᵥ (F ∘ₘ (G ᵀ)) || V ||'
 LemmaA₄' F G V i = begin
    ((F 〖 G 【 V 】' 〗) ↓) i ↭⟨ ↭-refl ⟩
    ⨁ₛ (λ q → (F i q) [ (G q i) [ V i q ] ]) ↭⟨ ⨁ₛ-cong (λ {q} → (LemmaA₃ (F i q) (G q i) (V i q))) ⟩
-   ⨁ₛ (λ q → ((F i q) ● (G q i)) [ V i q ]) ↭⟨ ↭-refl ⟩
-   ((F ●ₘ (G ᵀ)) || V ||') i ∎
+   ⨁ₛ (λ q → ((F i q) ∘ (G q i)) [ V i q ]) ↭⟨ ↭-refl ⟩
+   ((F ∘ₘ (G ᵀ)) || V ||') i ∎
    where open PermutationReasoning
 
 -- Generalised (asynchronous) cycle property
@@ -82,8 +82,8 @@ LemmaA₄' F G V i = begin
   Γ₁' V                                         ≈⟨ ≈ᵥ-refl ⟩
   (A ⟦ V ⟧') ⊕ᵥ ~ M                              ≈⟨ ⊕ᵥ-cong (⟦⟧=||' {A} {V}) (≈ₘ⇒≈ᵥ ≈ₘ-refl) ⟩ 
   (toRouteMapMatrix A) || V ||'  ⊕ᵥ ~ M      ≈⟨ ⊕ᵥ-cong (A||V||-cong' {V = V} A=Imp∘Prot∘Exp) (≈ₘ⇒≈ᵥ ≈ₘ-refl) ⟩
-  ((Imp ●ₘ Prot) ●ₘ (Exp ᵀ)) || V ||' ⊕ᵥ ~ M    ≈⟨ ⊕ᵥ-cong (≈ᵥ-sym (LemmaA₄' (Imp ●ₘ Prot) Exp V)) (≈ₘ⇒≈ᵥ ≈ₘ-refl)   ⟩ 
-  ((Imp ●ₘ Prot) 〖 Exp 【 V 】' 〗) ↓ ⊕ᵥ ~ M    ≈⟨ ≈ᵥ-refl ⟩
+  ((Imp ∘ₘ Prot) ∘ₘ (Exp ᵀ)) || V ||' ⊕ᵥ ~ M    ≈⟨ ⊕ᵥ-cong (≈ᵥ-sym (LemmaA₄' (Imp ∘ₘ Prot) Exp V)) (≈ₘ⇒≈ᵥ ≈ₘ-refl)   ⟩ 
+  ((Imp ∘ₘ Prot) 〖 Exp 【 V 】' 〗) ↓ ⊕ᵥ ~ M    ≈⟨ ≈ᵥ-refl ⟩
   (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ') V                        ∎
   where open EqReasoning 𝕍ₛ
 

@@ -33,7 +33,7 @@ open Gamma_two_Algebra isRoutingAlgebra n
 Γ₂,ᵥ I = I ↓ ⊕ᵥ ~ M
 
 Γ₂,ᵢ : RoutingVector₂ → RoutingVector₂
-Γ₂,ᵢ O = (Imp ●ₘ Prot) 〖 O 〗
+Γ₂,ᵢ O = (Imp ∘ₘ Prot) 〖 O 〗
 
 Γ₂,ₒ : RoutingVector → RoutingVector₂
 Γ₂,ₒ V = Exp 【 V 】

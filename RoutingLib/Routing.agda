@@ -15,10 +15,11 @@ module RoutingLib.Routing
 
 open import Data.Fin using (Fin) renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Subset using (Subset; _∉_)
-open import Data.Fin.Properties using (any?)
+open import Data.Fin.Properties as Fin using (any?)
 open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
-open import Data.Product using (∃₂)
+open import Data.Product using (_×_; ∃₂; proj₂)
+open import Data.Product.Relation.Binary.Pointwise.NonDependent using (×-decSetoid)
 open import Data.Vec.Functional using (Vector)
 open import Level using (_⊔_)
 open import Relation.Binary

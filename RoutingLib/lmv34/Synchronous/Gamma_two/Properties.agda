@@ -47,8 +47,6 @@ open Gamma_one_Properties isRAlg A
 open Gamma_two_Algebra isRAlg n
 open Gamma_two isRAlg Imp Prot Exp
 
-open DecSetoid FinRoute-decSetoid using () renaming (_≈_ to _≈ᵣ_)
-
 import RoutingLib.Data.Matrix.Relation.Binary.Equality as MatrixEquality
 
 ------------------------------------
@@ -86,7 +84,7 @@ open DecSetoid Γ₂-State-decSetoid using () renaming
 〖〗-cong O=O' i j = []-cong (O=O' j i)
 
 f[]-cong : ∀ {f f' : Route → Route} → {X : RoutingSet} →
-           f ≈ₐ f' → f [ X ] ↭ f' [ X ]
+           (∀ s → f s ≈ f' s) → f [ X ] ↭ f' [ X ]
 f[]-cong {f} {f'} {X} f=f' = †-cong (lemma {xs = X} f=f')
    where lemma : {f g : Route → Route} → {xs : RoutingSet} →
                  (∀ r → f r ≈ g r) → map₂ f xs ↭ map₂ g xs
@@ -142,7 +140,7 @@ A〚〛-cong {F} {F'} {V} F=F' i = ⨁ₛ-cong (λ {q} → f[]-cong {X = V q} (F
 FixedPoint-Γ₂ : ∀ {V I O} →
                 Γ₂ (V , I , O) ≈ₛ (V , I , O) →
                 (V ≈ᵥ I ↓ ⊕ᵥ ~ M) ×
-                (I ≈ᵥ,₂ ((Imp ●ₘ Prot) 〖 O 〗)) ×
+                (I ≈ᵥ,₂ ((Imp ∘ₘ Prot) 〖 O 〗)) ×
                 (O ≈ᵥ,₂ (Exp 【 V 】))
 FixedPoint-Γ₂ (V=V , I=I , O=O) = ≈ᵥ-sym V=V , ≈ᵥ,₂-sym I=I , ≈ᵥ,₂-sym O=O
 
@@ -151,20 +149,20 @@ private
     ▷-fixedPoint : ∀ (f : Route → Route) s → s ≈ ∞# → f s ≈ ∞# -- need this to prove LemmaA₃
 
 LemmaA₃ : ∀ (f g : (Route → Route)) → (X : RoutingSet) →
-            f [ g [ X ] ] ↭ (f ● g) [ X ]
+            f [ g [ X ] ] ↭ (f ∘ g) [ X ]
 LemmaA₃ f g [] = ↭-refl
 LemmaA₃ f g ((d , v) ∷ X) with
       g v ≟ ∞#
 ... | yes gv=∞ = prf
     where
-      prf : f [ g [ X ] ] ↭ (f ● g) [ (d , v) ∷ X ]
+      prf : f [ g [ X ] ] ↭ (f ∘ g) [ (d , v) ∷ X ]
       prf with
             f (g v) ≟ ∞#
       ... | no fg≠∞  = contradiction (▷-fixedPoint f (g v) gv=∞) fg≠∞
       ... | yes _    = LemmaA₃ f g X
 ... | no _  = prf
     where
-      prf : f [(d , g v) ∷ (g [ X ])] ↭ (f ● g) [ (d , v) ∷ X ]
+      prf : f [(d , g v) ∷ (g [ X ])] ↭ (f ∘ g) [ (d , v) ∷ X ]
       prf with
             f (g v) ≟ ∞#
       ... | yes _ = LemmaA₃ f g X
@@ -181,12 +179,12 @@ A||V||-cong {F} {F'} {V} F=F' i = ⨁ₛ-cong (λ {q} → f[]-cong {X = V q} (F=
 〚〛=|| : ∀ {A V} → A 〚 V 〛 ≈ᵥ (toRouteMapMatrix A) || V ||
 〚〛=|| {A} {V} = ≈ᵥ-refl
 
-LemmaA₄ : ∀ F G V → (F 〖 G 【 V 】 〗) ↓ ≈ᵥ (F ●ₘ (G ᵀ)) || V ||
+LemmaA₄ : ∀ F G V → (F 〖 G 【 V 】 〗) ↓ ≈ᵥ (F ∘ₘ (G ᵀ)) || V ||
 LemmaA₄ F G V i = begin
    ((F 〖 G 【 V 】 〗) ↓) i ↭⟨ ↭-refl ⟩
    ⨁ₛ (λ q → (F i q) [ (G q i) [ V q ] ]) ↭⟨ ⨁ₛ-cong (λ {q} → (LemmaA₃ (F i q) (G q i) (V q))) ⟩
-   ⨁ₛ (λ q → ((F i q) ● (G q i)) [ V q ]) ↭⟨ ↭-refl ⟩
-   ((F ●ₘ (G ᵀ)) || V ||) i ∎
+   ⨁ₛ (λ q → ((F i q) ∘ (G q i)) [ V q ]) ↭⟨ ↭-refl ⟩
+   ((F ∘ₘ (G ᵀ)) || V ||) i ∎
    where open PermutationReasoning
 
 Γ₁=Γ₂-comp : ∀ (V : RoutingVector) → Γ₁ V ≈ᵥ (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) V 
@@ -194,20 +192,20 @@ LemmaA₄ F G V i = begin
         Γ₁ V                                          ≈⟨ ≈ᵥ-refl ⟩
         A 〚 V 〛 ⊕ᵥ ~ M                              ≈⟨ ⊕ᵥ-cong (〚〛=|| {A} {V}) (≈ₘ⇒≈ᵥ ≈ₘ-refl) ⟩ 
         ((toRouteMapMatrix A) || V || ) ⊕ᵥ ~ M        ≈⟨ ⊕ᵥ-cong (A||V||-cong {V = V} A=Imp∘Prot∘Exp) (≈ₘ⇒≈ᵥ ≈ₘ-refl) ⟩
-        ((Imp ●ₘ Prot) ●ₘ (Exp ᵀ)) || V || ⊕ᵥ ~ M     ≈⟨ ⊕ᵥ-cong (≈ᵥ-sym (LemmaA₄ (Imp ●ₘ Prot) Exp V)) (≈ₘ⇒≈ᵥ ≈ₘ-refl)   ⟩ 
-        ((Imp ●ₘ Prot) 〖 Exp 【 V 】 〗) ↓ ⊕ᵥ ~ M    ≈⟨ ≈ᵥ-refl ⟩
+        ((Imp ∘ₘ Prot) ∘ₘ (Exp ᵀ)) || V || ⊕ᵥ ~ M     ≈⟨ ⊕ᵥ-cong (≈ᵥ-sym (LemmaA₄ (Imp ∘ₘ Prot) Exp V)) (≈ₘ⇒≈ᵥ ≈ₘ-refl)   ⟩ 
+        ((Imp ∘ₘ Prot) 〖 Exp 【 V 】 〗) ↓ ⊕ᵥ ~ M    ≈⟨ ≈ᵥ-refl ⟩
         (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) V                        ∎
         where open EqReasoning 𝕍ₛ using (begin_; _∎; step-≈)
 
 -- Theorem 6
 FixedPoint-Γ₀-Γ₂ : ∀ {X : RoutingMatrix} →
                    let V = ~ X
-                       I = (Imp ●ₘ Prot) 〖 Exp 【 ~ X 】 〗
+                       I = (Imp ∘ₘ Prot) 〖 Exp 【 ~ X 】 〗
                        O = Exp 【 ~ X 】
                    in
                    X ≈ₘ (A 〔 X 〕 ⊕ₘ M) →
                    (V ≈ᵥ I ↓ ⊕ᵥ ~ M) ×
-                   (I ≈ᵥ,₂ ((Imp ●ₘ Prot) 〖 O 〗) ×
+                   (I ≈ᵥ,₂ ((Imp ∘ₘ Prot) 〖 O 〗) ×
                    (O ≈ᵥ,₂ (Exp 【 V 】)))
 FixedPoint-Γ₀-Γ₂ {X} X=AX⊕M  = 
         (begin
@@ -221,7 +219,7 @@ FixedPoint-Γ₀-Γ₂ {X} X=AX⊕M  =
         ≈ᵥ,₂-refl
         where
           open EqReasoning 𝕍ₛ
-          I = (Imp ●ₘ Prot) 〖 Exp 【 ~ X 】 〗
+          I = (Imp ∘ₘ Prot) 〖 Exp 【 ~ X 】 〗
 
 private
     lem1 : ∀ V I O → (Γ₂ ^ 3) (V , I , O)

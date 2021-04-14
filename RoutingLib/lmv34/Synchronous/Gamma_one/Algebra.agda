@@ -15,7 +15,8 @@ open import Level using (_⊔_; 0ℓ; lift) renaming (suc to lsuc)
 open import Relation.Binary as B using (Rel; DecTotalOrder; Setoid; DecSetoid; StrictTotalOrder; IsStrictTotalOrder)
 import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import Relation.Binary using (Trichotomous; tri<; tri≈; tri>)
-open import Relation.Binary.Construct.NonStrictToStrict using (<-isStrictTotalOrder₂) renaming (_<_ to _<ₗₑₓ_)
+open import Relation.Binary.Construct.NonStrictToStrict
+  using (<-isStrictTotalOrder₂) renaming (_<_ to _<ₗₑₓ_)
 open import Relation.Binary.PropositionalEquality using (_≡_)
 open import Relation.Nullary using (Dec; yes; no; ¬_; does; proof)
 open import Relation.Nullary.Negation using (¬?; ¬-reflects)
@@ -34,46 +35,96 @@ module RoutingLib.lmv34.Synchronous.Gamma_one.Algebra
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (n : ℕ) where
 
-open Routing algebra n using (RoutingMatrix; AdjacencyMatrix)
+open Routing algebra n
 open RawRoutingAlgebra algebra
 open RoutingAlgebra isRoutingAlgebra using (≤₊-decTotalOrder)
 
+
+map₂ : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c} → (A → B) → List (C × A) → List (C × B)
+map₂ f = map (Prod.map₂ f)
+
+--------------------------------------------------------------------------------
+-- Assignments
+
+open import RoutingLib.Routing.Assignment algebra n public
+open import RoutingLib.Routing.Assignment.Properties isRoutingAlgebra n public
+
+_⊕ₐ_ : Op₂ Assignment
+(d₁ , v₁) ⊕ₐ (d₂ , v₂) = (d₁ , v₁ ⊕ v₂)
+
 --------------------------------------------------------------------------------
 -- Routing sets
+--------------------------------------------------------------------------------
+-- Definition
 
 RoutingSet : Set a
-RoutingSet = List (Fin n × Route)
+RoutingSet = List Assignment
+
+--------------------------------------------------------------------------------
+-- Examples
 
 Ø : RoutingSet
 Ø = []
 
--- RoutingVector setoid
-FinRoute-decSetoid = ×-decSetoid (Finₚ.≡-decSetoid n) DS
-open DecSetoid FinRoute-decSetoid public
-  using () renaming
-  ( _≈_           to _≈ᵣ_
-  ; _≉_           to _≉ᵣ_
-  ; refl          to ≈ᵣ-refl
-  ; trans         to ≈ᵣ-trans
-  ; sym           to ≈ᵣ-sym
-  ; _≟_           to _≟ᵣ_
-  ; isEquivalence to ≈ᵣ-isEquivalence
-  ; setoid        to FinRoute-setoid
-  )
-open PermutationEq FinRoute-setoid public
-open PermutationProperties FinRoute-setoid using (↭-decSetoid)
+--------------------------------------------------------------------------------
+-- Equality over routing sets
+
+open PermutationEq 𝔸ₛ public
+open PermutationProperties 𝔸ₛ using (↭-decSetoid)
+
+--------------------------------------------------------------------------------
+-- Operations
+
+-- Remove invalid routes
+infix 11 _†
+_† : RoutingSet → RoutingSet
+xs † = filter IsValid? xs
+
+mergeSorted : Op₂ RoutingSet
+mergeSorted = partialMerge <ₐₜ-cmp _⊕ₐ_
+
+-- Set addition
+infixl 10 _⊕ₛ_
+_⊕ₛ_ : Op₂ RoutingSet
+S₁ ⊕ₛ S₂ = mergeSorted (sort S₁) (sort S₂)
+  where open Sort ≤ₐₜ-decTotalOrder using (sort)
+
+-- Big addition
+infix 5 ⨁ₛ
+⨁ₛ : ∀ {k} → (Fin k → RoutingSet) → RoutingSet
+⨁ₛ iter = foldr _⊕ₛ_ Ø (tabulate iter)
+
+-- Function application to sets
+infix 13 _[_]
+_[_] : (Route → Route) → RoutingSet → RoutingSet
+f [ X ] = (map₂ f X) †
+
+-- Lookup of destinations
+lookup-d : RoutingSet → Fin n → Route
+lookup-d []            j = ∞#
+lookup-d ((d , s) ∷ S) j with d ≟F j
+... | yes _ = s
+... | no _  = lookup-d S j
 
 --------------------------------------------------------------------------------
 -- Routing vector
+--------------------------------------------------------------------------------
+-- Definition
 
 RoutingVector : Set a
 RoutingVector = Vector RoutingSet n
 
+--------------------------------------------------------------------------------
+-- Examples
+
 Øᵥ : RoutingVector
 Øᵥ i = Ø
 
+--------------------------------------------------------------------------------
+-- Equality over routing vectors
+
 ≈ᵥ-decSetoid : DecSetoid _ _
-≈ᵥ-decSetoid = decSetoidᵥ (↭-decSetoid _≟ᵣ_) n
+≈ᵥ-decSetoid = decSetoidᵥ (↭-decSetoid _≟ₐ_) n
 
 open DecSetoid ≈ᵥ-decSetoid public using ()
   renaming
@@ -87,105 +138,22 @@ open DecSetoid ≈ᵥ-decSetoid public using ()
   )
 
 --------------------------------------------------------------------------------
--- Auxilaries
-
-IsInvalid : Pred (Fin n × Route) _
-IsInvalid (d , v) = v ≈ ∞#
-
-IsInvalid? : Decidable IsInvalid
-IsInvalid? (d , v) = v ≟ ∞#
-
-IsValid : Pred (Fin n × Route) _
-IsValid = ∁ IsInvalid
-
-IsValid? : Decidable IsValid
-IsValid? p = ¬? (IsInvalid? p)
-
-≤₂-decTotalOrder : DecTotalOrder a ℓ ℓ
-≤₂-decTotalOrder = ×-decTotalOrder (Finₚ.≤-decTotalOrder n) ≤₊-decTotalOrder
-
-open DecTotalOrder ≤₂-decTotalOrder public
-  using () renaming
-  ( _≤_             to _≤₂_
-  ; _≤?_            to _≤₂?_
-  ; isPreorder      to ≤₂-isPreorder
-  ; totalOrder      to ≤₂-totalOrder
-  ; isDecTotalOrder to ≤₂-isDecTotalOrder)
-
-_<₂_ : Rel (Fin n × Route) _
-_<₂_ = _<ₗₑₓ_ _≈ᵣ_ _≤₂_
-
-<₂-isStrictTotalOrder : IsStrictTotalOrder _≈ᵣ_ _<₂_
-<₂-isStrictTotalOrder = <-isStrictTotalOrder₂ _≈ᵣ_ _≤₂_ ≤₂-isDecTotalOrder
-
-<₂-strictTotalOrder : StrictTotalOrder a ℓ ℓ
-<₂-strictTotalOrder = record
-  { Carrier            = Fin n × Route
-  ; _≈_                = _≈ᵣ_
-  ; _<_                = _<₂_
-  ; isStrictTotalOrder = <₂-isStrictTotalOrder
-  }
- 
-open StrictTotalOrder <₂-strictTotalOrder public
-  using () renaming (compare to <₂-cmp)
-
-_⊕₂_ : Op₂ (Fin n × Route)
-(d₁ , v₁) ⊕₂ (d₂ , v₂) = (d₁ , v₁ ⊕ v₂)
-
-mergeSorted : Op₂ RoutingSet
-mergeSorted = partialMerge <₂-cmp _⊕₂_
-
---------------------------------------------------------------------------------
 -- Definitions
-
--- Remove invalid routes
-infix 11 _†
-_† : RoutingSet → RoutingSet
-xs † = filter IsValid? xs
-
--- Set addition
-infixl 10 _⊕ₛ_
-_⊕ₛ_ : Op₂ RoutingSet
-S₁ ⊕ₛ S₂ = mergeSorted (sort S₁) (sort S₂)
-  where open Sort ≤₂-decTotalOrder using (sort)
 
 -- Vector addition
 infixl 9 _⊕ᵥ_
 _⊕ᵥ_ : Op₂ RoutingVector
 (V₁ ⊕ᵥ V₂) i = (V₁ i) ⊕ₛ (V₂ i)
 
--- Big addition
-infix 5 ⨁ₛ
-⨁ₛ : ∀ {k} → (Fin k → RoutingSet) → RoutingSet
-⨁ₛ iter = foldr _⊕ₛ_ Ø (tabulate iter)
-
 -- Matrix to vector-of-sets transformation (Gamma_0 to Gamma_1)
 infix 12 ~_
 ~_ : RoutingMatrix → RoutingVector
 (~ M) i = (tabulate λ j → (j , M i j)) †
 
-map₂ : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c} → (A → B) → List (C × A) → List (C × B)
-map₂ f = map (Prod.map₂ f)
-
--- Function application to sets
-infix 13 _[_]
-_[_] : (Route → Route) → RoutingSet → RoutingSet
-f [ X ] = (map₂ f X) †
-
 -- Matrix application to vector-of-sets
 infix 10 _〚_〛
 _〚_〛 : AdjacencyMatrix → RoutingVector → RoutingVector
 (A 〚 V 〛) i = ⨁ₛ (λ q → (A i q ▷_) [ V q ])
-
---------------------------------------
--- Asynchronous
-
--- Lookup of destinations
-lookup-d : RoutingSet → Fin n → Route
-lookup-d []            j = ∞#
-lookup-d ((d , s) ∷ S) j with d ≟F j
-... | yes _ = s
-... | no _  = lookup-d S j
 
 -- Vector-of-sets to matrix transformation (Gamma_1 to Gamma_0)
 infix 12 ─_

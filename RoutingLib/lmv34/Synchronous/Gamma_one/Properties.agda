@@ -26,7 +26,7 @@ open import Relation.Nullary using (¬_; yes; no; does; proof; _because_; ofʸ; 
 open import Relation.Nullary.Negation using (¬?; contradiction; contraposition)
 open import Relation.Unary using (Pred; Decidable; ∁)
 open import Function using (_∘_)
-open import Relation.Binary as B using (IsEquivalence; Setoid; DecSetoid; DecTotalOrder; StrictTotalOrder; Rel; Reflexive; Trans; _Respects_; _Respects₂_; _⇒_; Trichotomous; tri<; tri≈; tri>)
+open import Relation.Binary as B 
 open import Relation.Binary.Construct.NonStrictToStrict using (<-≤-trans)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym) renaming (trans to ≡-trans)
 import Relation.Binary.Reasoning.Setoid as EqReasoning
@@ -35,8 +35,6 @@ open import RoutingLib.Iteration.Synchronous using (_^_; IsFixedPoint)
 open import RoutingLib.Data.List using () renaming (partialMerge to partialMerge')
 open import RoutingLib.Data.List.Properties
   using (partialMerge-identityʳ; partialMerge-∷ˡ-min; partialMerge-∷ʳ-min; partialMerge-∷-eq; partialMerge-idempotent; partialMerge-cong)
-import RoutingLib.Data.List.Relation.Unary.Sorted.Properties as SortedProperties2
-import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties as Perm
 open import RoutingLib.Data.Maybe.Relation.Binary.Connected.Left as Connectedˡ using (Connectedˡ; just; nothing)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 
@@ -67,28 +65,16 @@ open Gamma_one isRoutingAlgebra A
 open Gamma_one_Algebra isRoutingAlgebra n
 
 open Setoid (Fin-setoid n) using () renaming (refl to Fin-refl; sym to Fin-sym)
-open DecTotalOrder ≤₂-decTotalOrder
-  using () renaming
-    ( antisym   to ≤₂-antisym
-    ; ≤-respˡ-≈ to ≤₂-respˡ-≈ᵣ
-    ; ≤-respʳ-≈ to ≤₂-respʳ-≈ᵣ
-    ; trans     to ≤₂-trans
-    ; total     to ≤₂-total
-    ; refl      to ≤₂-refl
-    ; reflexive to ≤₂-reflexive
-    )
-open StrictTotalOrder <₂-strictTotalOrder
-  using () renaming
-    ( <-resp-≈  to <₂-resp-≈ᵣ
-    ; irrefl    to <₂-irrefl
-    ; compare   to <₂-compare
-    ; asym      to <₂-asym
-    )
-open Sort ≤₂-decTotalOrder
-open module Sorted = Sorting ≤₂-totalOrder using (Sorted)
-open Equality FinRoute-setoid using (_≋_; ≋-refl; ≋-sym; ≋-trans; ≋-reflexive)
-open PermProperties FinRoute-setoid using (≋⇒↭)
-open SortedProperties2 ≤₂-totalOrder using (head↗; tail↗; ↗↭↗⇒≋; _∷↗_)
+
+open Sort ≤ₐₜ-decTotalOrder
+open module Sorted = Sorting ≤ₐₜ-totalOrder using (Sorted)
+open Equality 𝔸ₛ using (_≋_; ≋-refl; ≋-sym; ≋-trans; ≋-reflexive)
+open PermProperties 𝔸ₛ using (≋⇒↭)
+import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties as Perm
+open import Data.List.Relation.Unary.Linked
+  using () renaming (head′ to head↗; tail to tail↗; _∷′_ to _∷↗_)
+open import RoutingLib.Data.List.Relation.Unary.Sorted.Properties ≤ₐₜ-totalOrder
+  using (↗↭↗⇒≋)
 open import RoutingLib.Data.List.Sort.Properties sortingAlgorithm
 
 --------------------------------------------------------------------------------
@@ -120,42 +106,30 @@ map₂-tabulate : ∀ {a b c} {n} {A : Set a} {B : Set b} {C : Set c}
 map₂-tabulate g f = ≡-trans (map₂-map (tabulate g) f) (map-tabulate g (λ {(d , v) → (d , f v)}))
 
 --------------------------------------------------------------------------------
--- Properties of _<₂_ / _≤₂_
+-- Properties of _⊕ₐ_
 
-<₂-≤₂-trans : Trans _<₂_ _≤₂_ _<₂_
-<₂-≤₂-trans = <-≤-trans _≈ᵣ_ _≤₂_ ≈ᵣ-sym ≤₂-trans ≤₂-antisym ≤₂-respʳ-≈ᵣ
+⊕ₐ-cong : Congruent₂ _≈ₐ_ _⊕ₐ_
+⊕ₐ-cong (refl , x≈y) (refl , w≈z) = refl , ⊕-cong x≈y w≈z
 
-Tri-≈ : ∀ {x y} → ¬ (x <₂ y) → ¬ (y <₂ x) → x ≈ᵣ y
-Tri-≈ {x} {y} ¬x<y ¬y<x with <₂-compare x y
-... | tri< x<y _   _   = contradiction x<y ¬x<y
-... | tri≈ _   x≈y _   = x≈y
-... | tri> _   _   y<x = contradiction y<x ¬y<x
+⊕ₐ-idem : Idempotent _≈ₐ_ _⊕ₐ_
+⊕ₐ-idem (d , v) = refl , ⊕-idem v
 
---------------------------------------------------------------------------------
--- Properties of _⊕₂_
+⊕ₐ-invalid : ∀ x y → IsInvalid x → IsInvalid y → IsInvalid (x ⊕ₐ y)
+⊕ₐ-invalid x y x=∞ y=∞ = ≈-trans (⊕-cong x=∞ y=∞) (⊕-idem ∞#)
 
-⊕₂-cong : Congruent₂ _≈ᵣ_ _⊕₂_
-⊕₂-cong (refl , x≈y) (refl , w≈z) = refl , ⊕-cong x≈y w≈z
-
-⊕₂-idem : Idempotent _≈ᵣ_ _⊕₂_
-⊕₂-idem (d , v) = refl , ⊕-idem v
-
-⊕₂-invalid : ∀ x y → IsInvalid x → IsInvalid y → IsInvalid (x ⊕₂ y)
-⊕₂-invalid x y x=∞ y=∞ = ≈-trans (⊕-cong x=∞ y=∞) (⊕-idem ∞#)
-
-⊕₂-valid : ∀ x y → IsValid x → IsValid y → IsValid (x ⊕₂ y)
-⊕₂-valid (_ , v₁) (_ , v₂) v₁≠∞ v₂≠∞ v₁⊕v₂=∞ with ⊕-sel v₁ v₂
-... | inj₁ v₁⊕v₂=v₁ = contradiction (≈-trans (≈-sym v₁⊕v₂=v₁) v₁⊕v₂=∞) v₁≠∞
-... | inj₂ v₁⊕v₂=v₂ = contradiction (≈-trans (≈-sym v₁⊕v₂=v₂) v₁⊕v₂=∞) v₂≠∞
+⊕ₐ-valid : ∀ x y → IsValid x → IsValid y → IsValid (x ⊕ₐ y)
+⊕ₐ-valid (_ , v₁) (_ , vₐ) v₁≠∞ vₐ≠∞ v₁⊕vₐ=∞ with ⊕-sel v₁ vₐ
+... | inj₁ v₁⊕vₐ=v₁ = contradiction (≈-trans (≈-sym v₁⊕vₐ=v₁) v₁⊕vₐ=∞) v₁≠∞
+... | inj₂ v₁⊕vₐ=vₐ = contradiction (≈-trans (≈-sym v₁⊕vₐ=vₐ) v₁⊕vₐ=∞) vₐ≠∞
 
 --------------------------------------------------------------------------------
 -- Properties of mergeSorted
 
 mergeSorted-cong : ∀ {xs xs' ys ys'} → xs ≋ xs' → ys ≋ ys' → mergeSorted xs ys ≋ mergeSorted xs' ys' 
-mergeSorted-cong = partialMerge-cong ≈ᵣ-isEquivalence <₂-resp-≈ᵣ ⊕₂-cong
+mergeSorted-cong = partialMerge-cong ≈ₐ-isEquivalence <ₐₜ-resp-≈ₐ ⊕ₐ-cong
 
 mergeSorted-idem : Idempotent _↭_ mergeSorted
-mergeSorted-idem xs = ≋⇒↭ (partialMerge-idempotent ≈ᵣ-refl <₂-irrefl ⊕₂-idem xs)
+mergeSorted-idem xs = ≋⇒↭ (partialMerge-idempotent ≈ₐ-refl <ₐₜ-irrefl ⊕ₐ-idem xs)
 
 mergeSorted-identityʳ : RightIdentity _↭_ [] mergeSorted
 mergeSorted-identityʳ xs = ↭-reflexive (partialMerge-identityʳ xs)
@@ -202,11 +176,11 @@ valid-invalid {d , v} ¬valid with v ≟ ∞#
 ... | yes v=∞ = v=∞
 ... | no v≠∞  = contradiction v≠∞ ¬valid
 
-invalid-cong : ∀ {x y} → x ≈ᵣ y → IsInvalid x → IsInvalid y
+invalid-cong : ∀ {x y} → x ≈ₐ y → IsInvalid x → IsInvalid y
 invalid-cong (x₁=y₁ , x₂=y₂) x-invalid = ≈-trans (≈-sym x₂=y₂) x-invalid
 
-valid-cong : ∀ {x y} → x ≈ᵣ y → IsValid x → IsValid y
-valid-cong x=y = contraposition (invalid-cong (≈ᵣ-sym x=y))
+valid-cong : ∀ {x y} → x ≈ₐ y → IsValid x → IsValid y
+valid-cong x=y = contraposition (invalid-cong (≈ₐ-sym x=y))
 
 invalid-pair : ∀ d → IsInvalid (d , ∞#)
 invalid-pair d = ≈-refl
@@ -240,11 +214,11 @@ invalid-pair d = ≈-refl
 --------------------------------------------------------------------------------
 -- Properties of †_
 
-†-respects-≈ᵣ : IsValid Respects _≈ᵣ_
-†-respects-≈ᵣ (_ , v₁=v₂) = _∘ ≈-trans (v₁=v₂)
+†-respects-≈ₐ : IsValid Respects _≈ₐ_
+†-respects-≈ₐ (_ , v₁=v₂) = _∘ ≈-trans (v₁=v₂)
 
 †-cong : Congruent₁ _↭_ _†
-†-cong A=A' = PermProperties.filter⁺ FinRoute-setoid IsValid? †-respects-≈ᵣ A=A'
+†-cong A=A' = PermProperties.filter⁺ 𝔸ₛ IsValid? †-respects-≈ₐ A=A'
 
 †-identity : Ø † ↭ Ø
 †-identity = ↭-refl
@@ -265,18 +239,12 @@ map-†-lemma f ((d , v) ∷ xs) with IsInvalid? (d , v)
 ... | no  _       with IsInvalid? (d , f v)
 ...   | no  _ = cong ((d , f v) ∷_) (map-†-lemma f xs)
 ...   | yes _ = map-†-lemma f xs
-{-
-All-≤-distrib-† : ∀ {y zs} → All (y ≤₂_) zs → All (y ≤₂_) (zs †)
-All-≤-distrib-† {y} {[]}     []           = []
-All-≤-distrib-† {y} {z ∷ zs} (y≤z ∷ y≤zs) with IsInvalid? z
-... | yes z-invalid = All-≤-distrib-† y≤zs
-... | no  z-valid   = y≤z ∷ All-≤-distrib-† y≤zs
--}
-con-<-transʳ : ∀ {v x xs} → v <₂ x → Connectedˡ _≤₂_ x (head xs) → Connectedˡ _<₂_ v (head xs)
-con-<-transʳ {xs = []}     v<x nothing    = nothing
-con-<-transʳ {xs = y ∷ xs} v<x (just x≤y) = just (<₂-≤₂-trans v<x x≤y)
 
-con-<-† : ∀ {v xs} → Sorted xs → Connectedˡ _<₂_ v (head xs) → Connectedˡ _<₂_ v (head (xs †))
+con-<-transʳ : ∀ {v x xs} → v <ₐₜ x → Connectedˡ _≤ₐₜ_ x (head xs) → Connectedˡ _<ₐₜ_ v (head xs)
+con-<-transʳ {xs = []}     v<x nothing    = nothing
+con-<-transʳ {xs = y ∷ xs} v<x (just x≤y) = just (<ₐₜ-≤ₐₜ-trans v<x x≤y)
+
+con-<-† : ∀ {v xs} → Sorted xs → Connectedˡ _<ₐₜ_ v (head xs) → Connectedˡ _<ₐₜ_ v (head (xs †))
 con-<-† {v} {[]}     _   _          = nothing
 con-<-† {v} {x ∷ xs} xs↗ (just v<x) with IsInvalid? x
 ... | yes _ = con-<-† (tail↗ xs↗) (con-<-transʳ v<x (head↗ xs↗))
@@ -285,29 +253,29 @@ con-<-† {v} {x ∷ xs} xs↗ (just v<x) with IsInvalid? x
 †-distrib-sort : ∀ xs → sort (xs †) ≋ (sort xs) †
 †-distrib-sort xs = sort-filter-≋ IsValid? valid-cong xs
 
-†-distrib-mergeSorted-⊕ : ∀ {x y xs ys} → x ≈ᵣ y →
+†-distrib-mergeSorted-⊕ : ∀ {x y xs ys} → x ≈ₐ y →
                           mergeSorted (xs †) (ys †) ↭ (mergeSorted xs ys) † →
-                          mergeSorted ((x ∷ xs) †) ((y ∷ ys) †) ↭ (x ⊕₂ y ∷ mergeSorted xs ys) †
+                          mergeSorted ((x ∷ xs) †) ((y ∷ ys) †) ↭ (x ⊕ₐ y ∷ mergeSorted xs ys) †
 †-distrib-mergeSorted-⊕ {x} {y} {xs} {ys} x≈y rec with IsInvalid? x | IsInvalid? y
 ... | yes xⁱ | no  yᵛ = contradiction (invalid-cong x≈y xⁱ) yᵛ
 ... | no  xᵛ | yes yⁱ = contradiction yⁱ (valid-cong x≈y xᵛ)
 ... | yes xⁱ | yes yⁱ = begin
   mergeSorted (xs †) (ys †)      ↭⟨ rec ⟩
-  (mergeSorted xs ys) †          ≡˘⟨ †-cons-invalid (x ⊕₂ y) (mergeSorted xs ys) (⊕₂-invalid x y xⁱ yⁱ) ⟩
-  (x ⊕₂ y ∷ mergeSorted xs ys) † ∎
+  (mergeSorted xs ys) †          ≡˘⟨ †-cons-invalid (x ⊕ₐ y) (mergeSorted xs ys) (⊕ₐ-invalid x y xⁱ yⁱ) ⟩
+  (x ⊕ₐ y ∷ mergeSorted xs ys) † ∎
   where open PermutationReasoning
 ... | no  xᵛ   | no  yᵛ   = begin
-  mergeSorted (x ∷ (xs †)) (y ∷ (ys †)) ≡⟨  partialMerge-∷-eq ≈ᵣ-sym <₂-irrefl {xs = xs †} {ys = ys †} x≈y ⟩
-  x ⊕₂ y ∷ mergeSorted (xs †) (ys †)    ↭⟨  ↭-prep (x ⊕₂ y) rec ⟩
-  x ⊕₂ y ∷ (mergeSorted xs ys) †        ≡˘⟨ †-cons-valid (x ⊕₂ y) (mergeSorted xs ys) (⊕₂-valid x y xᵛ yᵛ) ⟩
-  (x ⊕₂ y ∷ mergeSorted xs ys) †        ∎
+  mergeSorted (x ∷ (xs †)) (y ∷ (ys †)) ≡⟨  partialMerge-∷-eq ≈ₐ-sym <ₐₜ-irrefl {xs = xs †} {ys = ys †} x≈y ⟩
+  x ⊕ₐ y ∷ mergeSorted (xs †) (ys †)    ↭⟨  ↭-prep (x ⊕ₐ y) rec ⟩
+  x ⊕ₐ y ∷ (mergeSorted xs ys) †        ≡˘⟨ †-cons-valid (x ⊕ₐ y) (mergeSorted xs ys) (⊕ₐ-valid x y xᵛ yᵛ) ⟩
+  (x ⊕ₐ y ∷ mergeSorted xs ys) †        ∎
   where open PermutationReasoning
   
 †-distrib-mergeSorted : ∀ {xs ys} → Sorted xs → Sorted ys →
                         mergeSorted (xs †) (ys †) ↭ (mergeSorted xs ys) †
 †-distrib-mergeSorted {[]}     {ys}     _   _   = ↭-refl
 †-distrib-mergeSorted {x ∷ xs} {[]}     _   _   = mergeSorted-identityʳ ((x ∷ xs) †)
-†-distrib-mergeSorted {x ∷ xs} {y ∷ ys} xs↗ ys↗ with <₂-cmp x y
+†-distrib-mergeSorted {x ∷ xs} {y ∷ ys} xs↗ ys↗ with <ₐₜ-cmp x y
   | †-distrib-mergeSorted xs↗         (tail↗ ys↗)
   | †-distrib-mergeSorted (tail↗ xs↗) ys↗
   | †-distrib-mergeSorted (tail↗ xs↗) (tail↗ ys↗)
@@ -316,15 +284,15 @@ con-<-† {v} {x ∷ xs} xs↗ (just v<x) with IsInvalid? x
   where prf : mergeSorted ((x ∷ xs) †) ((y ∷ ys) †) ↭ (x ∷ (mergeSorted xs (y ∷ ys))) †
         prf with IsInvalid? x
         ... | yes x-invalid = rec₂
-        ... | no  x-valid   = ↭-trans (↭-reflexive (partialMerge-∷ˡ-min <₂-asym All-<-ys)) (prep ≈ᵣ-refl rec₂)
-          where All-<-ys : Connectedˡ _<₂_ x (head ((y ∷ ys) †))
+        ... | no  x-valid   = ↭-trans (↭-reflexive (partialMerge-∷ˡ-min <ₐₜ-asym All-<-ys)) (prep ≈ₐ-refl rec₂)
+          where All-<-ys : Connectedˡ _<ₐₜ_ x (head ((y ∷ ys) †))
                 All-<-ys = con-<-† ys↗ (just x<y)
 ... | tri> _ _ y<x | rec₁ | _ | _ = prf
   where prf : mergeSorted ((x ∷ xs) †) ((y ∷ ys) †) ↭ (y ∷ (mergeSorted (x ∷ xs) ys)) †
         prf with IsInvalid? y
         ... | yes y-invalid = rec₁
-        ... | no  y-valid   = ↭-trans (↭-reflexive (partialMerge-∷ʳ-min <₂-asym All-<-xs)) (prep ≈ᵣ-refl rec₁)
-          where All-<-xs : Connectedˡ _<₂_ y (head ((x ∷ xs) †))
+        ... | no  y-valid   = ↭-trans (↭-reflexive (partialMerge-∷ʳ-min <ₐₜ-asym All-<-xs)) (prep ≈ₐ-refl rec₁)
+          where All-<-xs : Connectedˡ _<ₐₜ_ y (head ((x ∷ xs) †))
                 All-<-xs = con-<-† xs↗ (just y<x)
 
 †-⊕ₛ-distributive : ∀ {xs ys} → (xs †) ⊕ₛ (ys †) ↭ (xs ⊕ₛ ys) †
@@ -342,11 +310,11 @@ con-<-† {v} {x ∷ xs} xs↗ (just v<x) with IsInvalid? x
             A ↭ A' → f [ A ] ↭ f [ A' ]
 []-cong {f} A=A' = †-cong (lemma A=A')
    where f-cong₂ : ∀ {d d' : Fin n} {v v' : Route} → 
-                   (d , v) ≈ᵣ (d' , v') → (d , f v) ≈ᵣ (d' , f v')
+                   (d , v) ≈ₐ (d' , v') → (d , f v) ≈ₐ (d' , f v')
          f-cong₂ (d=d' , v=v') = d=d' , f-cong f v=v'
          lemma : {A A' : RoutingSet} →
                  A ↭ A' → map₂ f A ↭ map₂ f A'
-         lemma = PermProperties.map⁺ FinRoute-setoid FinRoute-setoid f-cong₂
+         lemma = PermProperties.map⁺ 𝔸ₛ 𝔸ₛ f-cong₂
 
 --------------------------------------------------------------------------------
 -- Properties of _⟦_⟧
@@ -355,7 +323,7 @@ con-<-† {v} {x ∷ xs} xs↗ (just v<x) with IsInvalid? x
 〚〛-cong V=V' i = ⨁ₛ-cong (λ {q} → []-cong (V=V' q))
 
 ≈ₘ⇒≈ᵥ : ∀ {M M' : RoutingMatrix} → M ≈ₘ M' → ~ M ≈ᵥ ~ M'
-(≈ₘ⇒≈ᵥ M=M') i = †-cong (Perm.tabulate⁺ FinRoute-setoid (λ {j} → (Fin-refl , M=M' i j)))
+(≈ₘ⇒≈ᵥ M=M') i = †-cong (Perm.tabulate⁺ 𝔸ₛ (λ {j} → (Fin-refl , M=M' i j)))
 
 --------------------------------------------------------------------------------
 -- Properties of Γ₁

@@ -44,7 +44,7 @@ module RoutingLib.lmv34.Synchronous.Gamma_three.Properties
   where
 
 open RawRoutingAlgebra alg
-open Routing alg n renaming (I to M) using (RoutingMatrix; _≈ₘ_; ≈ₘ-refl)
+open Routing alg n renaming (I to M)
 open Gamma_zero alg A
 open Gamma_zero_Algebra alg n
 open Gamma_one isRAlg A
@@ -56,9 +56,9 @@ open Gamma_two_Properties isRAlg A Imp Prot Exp A=Imp∘Prot∘Exp
 open Gamma_three isRAlg Imp Prot Exp
 open Gamma_three_Algebra isRAlg n
 
-open Membership FinRoute-decSetoid using (_∈?_; _∈_; _∉_)
-open PermutationProperties FinRoute-setoid using (filter⁺; ++⁺; ++-identityˡ; ++-identityʳ; ++-assoc)
-open PermutationProperties′ FinRoute-setoid using (∉-resp-↭)
+open Membership Dec𝔸ₛ using (_∈?_; _∈_; _∉_)
+open PermutationProperties 𝔸ₛ using (filter⁺; ++⁺; ++-identityˡ; ++-identityʳ; ++-assoc)
+open PermutationProperties′ 𝔸ₛ using (∉-resp-↭)
 
 ------------------------------------
 -- Γ₃-State
@@ -92,22 +92,22 @@ filter-lemma : ∀ {p} {P P' : Pred (Fin n × Route) p} {P? : Decidable P} {P?' 
                xs → (∀ x → (P ⇔ P') x) → filter P? xs ↭ filter P?' xs
 filter-lemma [] P=P' = ↭-refl
 filter-lemma {P? = P?} {P?' = P?'} (x ∷ xs) P=P' with P? x | P?' x
-... | yes _  | yes _    = prep ≈ᵣ-refl (filter-lemma xs P=P')
+... | yes _  | yes _    = ↭-prep x (filter-lemma xs P=P')
 ... | yes Px | no ¬P'x  = contradiction ((π₁ (P=P' x)) Px) ¬P'x
 ... | no ¬Px | yes P'x  = contradiction ((π₂ (P=P' x)) P'x) ¬Px
 ... | no _   | no _     = filter-lemma xs P=P'
 
-minus-respects-≈ᵣ : ∀ {xs} → (_∉ xs) Respects _≈ᵣ_
-minus-respects-≈ᵣ {(x ∷ xs)} {y} {y'} y=y' Py with y' ∈? (x ∷ xs)
-... | yes (here y'=x) = contradiction (here (≈ᵣ-trans y=y' y'=x)) Py
-... | yes (there Py') = contradiction (there (∈-resp-≈ FinRoute-setoid (≈ᵣ-sym y=y') Py')) Py
+minus-respects-≈ₐ : ∀ {xs} → (_∉ xs) Respects _≈ₐ_
+minus-respects-≈ₐ {(x ∷ xs)} {y} {y'} y=y' Py with y' ∈? (x ∷ xs)
+... | yes (here y'=x) = contradiction (here (≈ₐ-trans y=y' y'=x)) Py
+... | yes (there Py') = contradiction (there (∈-resp-≈ 𝔸ₛ (≈ₐ-sym y=y') Py')) Py
 ... | no ¬Py' = ¬Py'
 
 minus-congₗ : LeftCongruent _↭_ _-_
 minus-congₗ {A} B=B' = filter-lemma A (λ x → ∉-resp-↭ B=B' , ∉-resp-↭ (↭-sym B=B'))
 
 minus-congᵣ : RightCongruent _↭_ _-_
-minus-congᵣ A=A' = filter⁺ (λ x → ¬? (x ∈? _)) minus-respects-≈ᵣ A=A'
+minus-congᵣ A=A' = filter⁺ (λ x → ¬? (x ∈? _)) minus-respects-≈ₐ A=A'
 
 minus-cong : Congruent₂ _↭_ _-_
 minus-cong {A} {A'} {B} {B'} A=A' B=B' = begin
@@ -127,7 +127,7 @@ minus-identityᵣ []       = ↭-refl
 minus-identityᵣ (x ∷ xs) = ↭-prep x (minus-identityᵣ xs)
 
 ∪-cong : Congruent₂ _↭_ _∪_
-∪-cong A=A' B=B' = ++⁺ A=A' (minus-cong B=B' A=A')
+∪-cong A=A' B=B' = PermutationProperties.++⁺ 𝔸ₛ A=A' (minus-cong B=B' A=A')
 
 ∪-identityₗ : LeftIdentity _↭_ Ø _∪_
 ∪-identityₗ xs = minus-identityᵣ xs
@@ -243,7 +243,7 @@ F-minus-distrib : ∀ F O O'  → (F 〖 O -ᵥ O' 〗) ≈ᵥ,₂ ((F 〖 O  �
 F-minus-distrib F O O' i j = f-minus-distrib (F i j) (O j i) (O' j i)
 
 Γ₂,ᵢ-distrib : ∀ O O' → Γ₂,ᵢ (O -ᵥ O') ≈ᵥ,₂ (Γ₂,ᵢ (O) -ᵥ Γ₂,ᵢ (O'))
-Γ₂,ᵢ-distrib O O' i j = F-minus-distrib (Imp ●ₘ Prot) O O' i j
+Γ₂,ᵢ-distrib O O' i j = F-minus-distrib (Imp ∘ₘ Prot) O O' i j
 
 -- To show relationship of Γ₃ and Γ₂ 
 -- we simply need an invariant, so that we can equate each step of Γ₃ with a step of Γ₂.

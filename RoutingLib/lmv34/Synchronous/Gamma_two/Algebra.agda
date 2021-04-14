@@ -5,6 +5,7 @@ open import Data.List using (List; [])
 open import Data.Nat using (ℕ)
 open import Data.Product using (_×_)
 open import Level using (_⊔_) renaming (suc to lsuc)
+open import Function.Base using (_∘_)
 
 import RoutingLib.Routing as Routing
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
@@ -25,7 +26,7 @@ open Gamma_one_Algebra isRoutingAlgebra n
 -- Data
 
 RoutingVector₂ : Set a
-RoutingVector₂ = SquareMatrix (List (Fin n × Route)) n
+RoutingVector₂ = SquareMatrix (List Assignment) n
 
 Øᵥ,₂ : RoutingVector₂
 Øᵥ,₂ i j = Ø
@@ -62,31 +63,20 @@ _↓ : RoutingVector₂ → RoutingVector
 --   field
 --     isCompositionOp : ∀ {i j : Fin n} (f g : Step i j) (s : Route) → (f ● g) ▷ s ≈ f ▷ (g ▷ s)
 
-
--- tgg: we should replace this with normal function composition ...
--- then equalities _≈ₐ_  _≈ₐ,₂_ are probably already defined somewhere ... 
-infix 5 _●_
-_●_ : ∀ (f g : Route → Route) → Route → Route
-f ● g = λ s → f (g s)
-
-infix 5 _≈ₐ_
-_≈ₐ_ : ∀ (f f' : Route → Route) → Set (a ⊔ ℓ)
-f ≈ₐ f' = (s : Route) → (f s) ≈ (f' s)
-
 infix 5 _≈ₐ,₂_
 _≈ₐ,₂_ : RouteMapMatrix → RouteMapMatrix → Set (a ⊔ ℓ)
-A ≈ₐ,₂ A' = ∀ i j → (A i j) ≈ₐ (A' i j)
+A ≈ₐ,₂ A' = ∀ i j s → (A i j) s ≈ (A' i j) s
 
 -- module Composition
---  (_●_ : CompositionOp) where
+--  (_∘_ : CompositionOp) where
   
-infix 12 _●ₘ_
-_●ₘ_ : Op₂ RouteMapMatrix
-(A ●ₘ A') i j = (A i j) ● (A' i j)
+infix 12 _∘ₘ_
+_∘ₘ_ : Op₂ RouteMapMatrix
+(A ∘ₘ A') i j = (A i j) ∘ (A' i j)
 
 -- need to coerce A to a RouteMapMatrix! 
 toRouteMapMatrix : AdjacencyMatrix → RouteMapMatrix
 toRouteMapMatrix A i j = A i j ▷_
 
 IsComposition : AdjacencyMatrix → RouteMapMatrix → RouteMapMatrix → RouteMapMatrix → Set (a ⊔ ℓ)
-IsComposition A Imp Prot Exp = (toRouteMapMatrix A) ≈ₐ,₂ ((Imp ●ₘ Prot) ●ₘ (Exp ᵀ))
+IsComposition A Imp Prot Exp = (toRouteMapMatrix A) ≈ₐ,₂ ((Imp ∘ₘ Prot) ∘ₘ (Exp ᵀ))

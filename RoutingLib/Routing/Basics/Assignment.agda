@@ -9,7 +9,7 @@ open import Data.Fin.Base as Fin using (Fin)
 open import Data.Fin.Properties as Fin using (any?)
 open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Nat using (ℕ)
-open import Data.Product using (_×_; _,_; ∃₂; proj₁; proj₂)
+open import Data.Product using (∃; _×_; _,_; ∃₂; proj₁; proj₂)
 import Data.Product.Relation.Binary.Pointwise.NonDependent as DirectProduct
 import Data.Product.Relation.Binary.Lex.NonStrict as LexProduct
 open import Level using (_⊔_)
@@ -22,25 +22,28 @@ open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary as U using (Pred; _∈_; ∁)
 import Relation.Binary.Construct.NonStrictToStrict as NonStrictToStrict
 
+open import RoutingLib.Relation.Nullary.Finite.List.Setoid
 
 open import RoutingLib.Routing.Algebra
 
-module RoutingLib.Routing.Assignment
+module RoutingLib.Routing.Basics.Assignment
   {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) (n : ℕ)
   where
 
 open RawRoutingAlgebra algebra
+open import RoutingLib.Routing.Basics.Node n
+open import RoutingLib.Routing.Basics.Network algebra n
 
 --------------------------------------------------------------------------------
 -- Definition
 
 Assignment : Set a
-Assignment = Fin n × Route
+Assignment = Node × Route
 
 --------------------------------------------------------------------------------
 -- Functions
 
-node : Assignment → Fin n
+node : Assignment → Node
 node = proj₁
 
 value : Assignment → Route
@@ -87,8 +90,14 @@ open DecSetoid Dec𝔸ₛ public
 _≤ₐₚ_ : Rel Assignment ℓ
 _≤ₐₚ_ = DirectProduct.Pointwise _≡_ _≤₊_
 
+_<ₐₚ_ : Rel Assignment ℓ
+_<ₐₚ_ = NonStrictToStrict._<_ _≈ₐ_ _≤ₐₚ_
+
 _≤ₐₚ?_ : Decidable _≤ₐₚ_
 _≤ₐₚ?_ = DirectProduct.×-decidable Fin._≟_ _≤₊?_
+
+_<ₐₚ?_ : Decidable _<ₐₚ_
+_<ₐₚ?_ = NonStrictToStrict.<-decidable _ _ _≟ₐ_ _≤ₐₚ?_
 
 --------------------------------------------------------------------------------
 -- Total ordering relation
@@ -106,3 +115,29 @@ _≤ₐₜ?_ = LexProduct.×-decidable Fin._≟_ Fin._≤?_ _≤₊?_
 
 _<ₐₜ?_ : Decidable _<ₐₜ_
 _<ₐₜ?_ = NonStrictToStrict.<-decidable _ _ _≟ₐ_ _≤ₐₜ?_
+
+--------------------------------------------------------------------------------
+-- Extends relation
+
+-- Assigment x can be directly extended to form y
+
+infix 7 _↝[_]_
+_↝[_]_ : Assignment → AdjacencyMatrix → Assignment → Set ℓ
+(j , x) ↝[ A ] (i , y) = x ≉ ∞# × A i j ▷ x ≈ y 
+
+--------------------------------------------------------------------------------
+-- Threatens relation
+
+-- In order to define a free network, we first define the threatens relation.
+-- Route x threatens y if there exists some extension of x that is
+-- preferred over y.
+
+infix 7 _⊴[_]_
+_⊴[_]_ : Assignment → AdjacencyMatrix → Assignment → Set (a ⊔ ℓ)
+a ⊴[ A ] (i , y) = ∃ λ c → a ↝[ A ] (i , c) × c ≤₊ y
+
+--------------------------------------------------------------------------------
+-- Properties of the type
+
+finite : IsFinite algebra → Finite 𝔸ₛ
+finite S-finite = Fin-finite n ×ᶠ S-finite

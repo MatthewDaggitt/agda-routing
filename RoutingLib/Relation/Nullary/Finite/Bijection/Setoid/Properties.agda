@@ -11,23 +11,17 @@ module RoutingLib.Relation.Nullary.Finite.Bijection.Setoid.Properties
 open import Data.Fin as Fin hiding (_≟_)
 import Data.Fin.Properties as Fin
 open import Data.Product
+open import Data.Product.Relation.Binary.Pointwise.NonDependent
 open import Function
 open import Relation.Unary as U using (Pred)
 open import Relation.Binary.PropositionalEquality hiding (sym; cong)
 open import Relation.Nullary using (Dec; yes; no)
 open import Relation.Nullary.Decidable
 
+import RoutingLib.Relation.Nullary.Finite.List.Setoid as ListFinite
+
 open Setoid S renaming (Carrier to A)
 open Finite finite
-
-f⁻¹ : Fin n → A
-f⁻¹ i = proj₁ (surjective i)
-
-f∘f⁻¹ : ∀ x → f (f⁻¹ x) ≡ x
-f∘f⁻¹ i = proj₂ (surjective i)
-
-f⁻¹∘f : ∀ x → f⁻¹ (f x) ≈ x
-f⁻¹∘f x = injective (f∘f⁻¹ (f x))
 
 _≟_ : Decidable _≈_
 x ≟ y = map′ injective cong (f x Fin.≟ f y)

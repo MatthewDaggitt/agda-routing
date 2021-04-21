@@ -1,11 +1,12 @@
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
-open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
+import RoutingLib.Routing.Prelude as RoutingPrelude
 open import RoutingLib.lmv34.Synchronous.Gamma_two.Algebra as Gamma_two_Algebra using (IsComposition; RouteMapMatrix)
 
 module RoutingLib.lmv34.Asynchronous.Omega_two
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra : IsRoutingAlgebra algebra) {n}
-  (A    : AdjacencyMatrix algebra n)
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  {n} (open RoutingPrelude algebra n)
+  (A    : AdjacencyMatrix)
   (Imp Prot Exp : RouteMapMatrix isRoutingAlgebra n )
   (A=Imp∘Prot∘Exp : IsComposition isRoutingAlgebra n A Imp Prot Exp)
   where

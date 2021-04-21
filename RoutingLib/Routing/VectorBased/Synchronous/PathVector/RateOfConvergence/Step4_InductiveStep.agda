@@ -14,12 +14,12 @@ open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Reasoning.PartialOrder as POR
 import Relation.Binary.Reasoning.Setoid as EqReasoning
 
-open import RoutingLib.Data.Path.CertifiedI.All
-open import RoutingLib.Data.Path.CertifiedI.Properties
+open import RoutingLib.Routing.Basics.Path.CertifiedI.All
+open import RoutingLib.Routing.Basics.Path.CertifiedI.Properties
 open import RoutingLib.Data.Fin.Subset using (Nonfull)
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing using (RoutingMatrix; AdjacencyMatrix)
+open import RoutingLib.Routing.Prelude using (RoutingMatrix; AdjacencyMatrix)
 import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Prelude as Prelude
 import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step1_NodeSets as Step1_NodeSets
 import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step2_ConvergedSubtree as Step2_ConvergedSubtree

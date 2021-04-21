@@ -12,7 +12,17 @@
 -- `RoutingLib.Routing.Protocols.BGPLite`)
 --------------------------------------------------------------------------------
 
+open import Data.Nat using (ℕ) renaming (_≟_ to _≟ℕ_)
+open import Function using (_∘_)
+open import Level using (_⊔_)
+open import Relation.Binary using (Rel; Decidable; Symmetric)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; sym; subst₂)
+open import Relation.Nullary using (yes; no)
+open import Relation.Nullary.Negation using (contradiction)
+
 open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Basics.Node using (Node)
+open import RoutingLib.Routing.Basics.Path.UncertifiedI
 
 module RoutingLib.Routing.Algebra.Comparable
   {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)
@@ -20,24 +30,10 @@ module RoutingLib.Routing.Algebra.Comparable
 
 open RawRoutingAlgebra algebra
 
-open import Algebra.Definitions _≈_
-open import Data.Nat using (ℕ) renaming (_≟_ to _≟ℕ_)
-open import Data.Fin using (Fin)
-open import Data.Maybe using (Maybe)
-open import Function using (_∘_)
-open import Level using (0ℓ; _⊔_)
-open import Relation.Binary using (Rel; Decidable; Symmetric)
-open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; sym; subst₂)
-open import Relation.Nullary using (yes; no)
-open import Relation.Nullary.Negation using (contradiction)
-
-open import RoutingLib.Algebra.Definitions using (_Preservesᵇ_)
-open import RoutingLib.Data.Path.UncertifiedI
-
 private
   variable
     n : ℕ
-    i j k : Fin n
+    i j k : Node n
     w x y z : Route
  
 --------------------------------------------------------------------------------

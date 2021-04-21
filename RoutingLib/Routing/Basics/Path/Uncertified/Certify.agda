@@ -11,12 +11,12 @@ open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; trans; subst; cong; cong₂)
 
-open import RoutingLib.Data.Path.Certified
-open import RoutingLib.Data.Path.Certified.Properties
-open import RoutingLib.Data.Path.Uncertified as U using ([]; _∷_; left; right)
-open import RoutingLib.Data.Path.Uncertified.Properties as Uₚ
+open import RoutingLib.Routing.Basics.Path.Certified
+open import RoutingLib.Routing.Basics.Path.Certified.Properties
+open import RoutingLib.Routing.Basics.Path.Uncertified as U using ([]; _∷_; left; right)
+open import RoutingLib.Routing.Basics.Path.Uncertified.Properties as Uₚ
 
-module RoutingLib.Data.Path.Uncertified.Certify {n : ℕ} where
+module RoutingLib.Routing.Basics.Path.Uncertified.Certify {n : ℕ} where
 
 private
 

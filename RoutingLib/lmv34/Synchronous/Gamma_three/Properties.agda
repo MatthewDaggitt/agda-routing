@@ -22,7 +22,7 @@ import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties as Per
 
 open import RoutingLib.Iteration.Synchronous using (_^_)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
-open import RoutingLib.Routing as Routing using () renaming (AdjacencyMatrix to AdjacencyMatrix')
+open import RoutingLib.Routing.Prelude as Routing using () renaming (AdjacencyMatrix to AdjacencyMatrix')
 import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties as Perm
 import RoutingLib.lmv34.Synchronous.Gamma_zero as Gamma_zero
 import RoutingLib.lmv34.Synchronous.Gamma_zero.Algebra as Gamma_zero_Algebra

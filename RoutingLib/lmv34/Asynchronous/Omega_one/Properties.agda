@@ -1,10 +1,11 @@
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
-open import RoutingLib.Routing as Routing using () renaming (AdjacencyMatrix to AdjacencyMatrix')
+import RoutingLib.Routing.Prelude as RoutingPrelude
 
 module RoutingLib.lmv34.Asynchronous.Omega_one.Properties
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  {n} (A : AdjacencyMatrix' algebra n)
+  {n} (open RoutingPrelude algebra n renaming (_≈ₘ_ to infix 4 _≈ₘ_))
+  (A : AdjacencyMatrix)
   where
 
 open import Data.Fin using (Fin)
@@ -35,7 +36,6 @@ open import RoutingLib.lmv34.Synchronous.Gamma_one.Algebra isRoutingAlgebra n
 open import RoutingLib.lmv34.Synchronous.Gamma_one.Properties isRoutingAlgebra A
 
 open RawRoutingAlgebra algebra using (≈-refl; _▷_)
-open Routing algebra n using (RoutingMatrix; I; ℝ𝕄ₛ; ≈ₘ-refl) renaming (_≈ₘ_ to infix 4 _≈ₘ_)
 
 --------------------------------------------------------------------------------
 -- Operation properties

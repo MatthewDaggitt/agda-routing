@@ -2,7 +2,7 @@ open import Algebra.Core using (Op₂)
 open import Data.Fin using (Fin)
 open import Data.Product using (_×_; _,_)
 
-open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
+open import RoutingLib.Routing.Prelude as Routing using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 import RoutingLib.lmv34.Synchronous.Gamma_one.Algebra as Gamma_one_Algebra
 import RoutingLib.lmv34.Synchronous.Gamma_two as Gamma_two using (Γ₂,ᵥ; Γ₂,ᵢ; Γ₂,ₒ)

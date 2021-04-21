@@ -1,10 +1,11 @@
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
-open import RoutingLib.Routing as Routing using () renaming (AdjacencyMatrix to AdjacencyMatrix')
+import RoutingLib.Routing.Prelude as RoutingPrelude
 
 module RoutingLib.lmv34.Asynchronous.Omega_one
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  {n} (A : AdjacencyMatrix' algebra n)
+  {n} (open RoutingPrelude algebra n)
+  (A : AdjacencyMatrix)
   where
 
 open import Data.Fin using (Fin)
@@ -19,8 +20,6 @@ open import RoutingLib.lmv34.Asynchronous.Omega_one.Algebra isRoutingAlgebra A u
 open import RoutingLib.lmv34.Synchronous.Gamma_zero algebra A
 open import RoutingLib.lmv34.Synchronous.Gamma_one isRoutingAlgebra A
 open import RoutingLib.lmv34.Synchronous.Gamma_one.Algebra isRoutingAlgebra n using (RoutingVector; ─_)
-
-open Routing algebra n using (RoutingMatrix)
 
 --------------------------------------------------------------------------------
 -- Implementation of Ω₁

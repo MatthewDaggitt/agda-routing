@@ -9,7 +9,7 @@ open import Relation.Nullary using (¬_)
 open import Relation.Binary using (Rel)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_)
 
-module RoutingLib.Data.Path.Certified where
+module RoutingLib.Routing.Basics.Path.Certified where
 
 ------------------------------------------------------------------------------
 -- Vertices and edges

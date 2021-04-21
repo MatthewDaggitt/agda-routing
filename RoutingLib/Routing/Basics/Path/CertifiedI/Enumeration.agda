@@ -4,7 +4,7 @@ open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.List.Relation.Unary.All using (_∷_)
 open import Data.List.Membership.Setoid.Properties using (∈-map⁺)
 
-module RoutingLib.Data.Path.CertifiedI.Enumeration where
+module RoutingLib.Routing.Basics.Path.CertifiedI.Enumeration where
 
 open import RoutingLib.Relation.Nullary.Finite.List.Setoid
   renaming (Finite to ListFinite)
@@ -12,9 +12,9 @@ open import RoutingLib.Relation.Nullary.Finite.List.Setoid.Properties
 open import RoutingLib.Relation.Nullary.Finite.Bijection.Setoid
   using (Finite)
 
-open import RoutingLib.Data.Path.CertifiedI
-open import RoutingLib.Data.Path.CertifiedI.Properties
-import RoutingLib.Data.Path.Certified.Enumeration as Eⁿᵗ
+open import RoutingLib.Routing.Basics.Path.CertifiedI
+open import RoutingLib.Routing.Basics.Path.CertifiedI.Properties
+import RoutingLib.Routing.Basics.Path.Certified.Enumeration as Eⁿᵗ
 
 private
   module _ {n : ℕ} where

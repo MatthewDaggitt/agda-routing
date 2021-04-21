@@ -6,9 +6,9 @@ open import Relation.Binary.PropositionalEquality using (refl)
 open import Relation.Unary using (Pred; _⊆_; Decidable)
 open import Relation.Nullary using (yes; no)
 
-open import RoutingLib.Data.Path.Certified
+open import RoutingLib.Routing.Basics.Path.Certified
 
-module RoutingLib.Data.Path.Certified.All {n : ℕ} where
+module RoutingLib.Routing.Basics.Path.Certified.All {n : ℕ} where
 
 ----------------------------------------------------------------------------
 -- Datatypes

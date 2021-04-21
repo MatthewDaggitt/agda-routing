@@ -13,7 +13,7 @@ open import Level
 open import Relation.Nullary
 open import Relation.Unary using (Pred; Decidable)
 import Relation.Nullary.Decidable as Dec
-open import Relation.Binary.PropositionalEquality using (setoid)
+open import Relation.Binary.PropositionalEquality using (_≡_; setoid)
 open import Data.Product.Relation.Binary.Pointwise.NonDependent using (_×ₛ_)
 open import Data.Sum.Relation.Binary.Pointwise using (_⊎ₛ_)
 
@@ -35,6 +35,17 @@ record Finite (S : Setoid a ℓ) : Set (a ⊔ suc ℓ) where
     bijection : Bijection S (𝔽 n) 
 
   open Bijection bijection public
+  open Setoid S renaming (Carrier to A)
+  
+  f⁻¹ : Fin n → A
+  f⁻¹ i = proj₁ (surjective i)
+
+  f∘f⁻¹ : ∀ x → f (f⁻¹ x) ≡ x
+  f∘f⁻¹ i = proj₂ (surjective i)
+
+  f⁻¹∘f : ∀ x → f⁻¹ (f x) ≈ x
+  f⁻¹∘f x = injective (f∘f⁻¹ (f x))
+
 
 Countable : (S : Setoid a ℓ) → Set _
 Countable S = Injection S (setoid ℕ)

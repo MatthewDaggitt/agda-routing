@@ -1,5 +1,5 @@
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra)
-open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
+open import RoutingLib.Routing.Prelude as RoutingPrelude using (AdjacencyMatrix)
 import RoutingLib.lmv34.Synchronous.Gamma_zero.Algebra as Gamma_zero_Algebra
 
 module RoutingLib.lmv34.Synchronous.Gamma_zero
@@ -7,7 +7,7 @@ module RoutingLib.lmv34.Synchronous.Gamma_zero
   {n} (A : AdjacencyMatrix algebra n)
   where
 
-open Routing algebra n renaming (I to M)
+open RoutingPrelude algebra n renaming (I to M)
 open Gamma_zero_Algebra algebra n
 
 ------------------------------------

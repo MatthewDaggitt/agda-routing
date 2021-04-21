@@ -4,13 +4,13 @@ open import Data.Fin using (Fin)
 open import Data.List using (foldr; tabulate)
 
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra)
-import RoutingLib.Routing as Routing
+import RoutingLib.Routing.Prelude as RoutingPrelude
 
 module RoutingLib.lmv34.Synchronous.Gamma_zero.Algebra
   {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) (n : ℕ)
   where
 
-open Routing algebra n
+open RoutingPrelude algebra n
 open RawRoutingAlgebra algebra
 
 ------------------------------------

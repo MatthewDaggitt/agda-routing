@@ -16,7 +16,7 @@ module RoutingLib.Routing.Algebra.Certification
   (n : ℕ)
   where
 
-open import Data.Fin using (Fin; toℕ)
+open import Data.Fin using (toℕ)
 open import Data.List using (_∷_)
 open import Data.Nat using (ℕ)
 open import Data.Maybe
@@ -31,18 +31,20 @@ import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Data.Path.Uncertified using ([]; _∷_)
-open import RoutingLib.Data.Path.Uncertified.Properties using (_⇿?_; _∈ₚ?_)
-open import RoutingLib.Data.Path.Uncertified.Certify
-open import RoutingLib.Data.Path.CertifiedI
-open import RoutingLib.Data.Path.CertifiedI.Properties hiding (_⇿?_)
+open import RoutingLib.Routing.Basics.Path.Uncertified using ([]; _∷_)
+open import RoutingLib.Routing.Basics.Path.Uncertified.Properties using (_⇿?_; _∈ₚ?_)
+open import RoutingLib.Routing.Basics.Path.Uncertified.Certify
+open import RoutingLib.Routing.Basics.Path.CertifiedI
+open import RoutingLib.Routing.Basics.Path.CertifiedI.Properties hiding (_⇿?_)
+
+open import RoutingLib.Routing.Basics.Node n
 
 open RawRoutingAlgebra algebra
 open IsPathAlgebra isPathAlgebra
 
 private
   variable
-    i j : Fin n
+    i j : Node
     r : Route
     p : Pathᵛ n
 

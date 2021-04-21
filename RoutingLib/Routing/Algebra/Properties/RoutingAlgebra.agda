@@ -4,9 +4,6 @@
 -- Properties of routing algebras
 --------------------------------------------------------------------------------
 
-import Algebra.Definitions as AlgebraDefinitions
-import Algebra.Structures as AlgebraStructures
-import Algebra.Consequences.Setoid as Consequences
 open import Algebra.Bundles
 open import Algebra.Consequences.Propositional using (sel⇒idem)
 open import Data.Product using (proj₁; _,_)
@@ -32,12 +29,11 @@ module RoutingLib.Routing.Algebra.Properties.RoutingAlgebra
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
   where
 
-open import RoutingLib.Routing algebra
-
 open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
-open AlgebraDefinitions _≈_
-open AlgebraStructures _≈_
+
+open import Algebra.Definitions _≈_
+open import Algebra.Structures _≈_
 
 ------------------------------------------------------------------------------
 -- _⊕_

@@ -1,6 +1,6 @@
 
 
-module RoutingLib.Data.Path.Uncertified.Properties where
+module RoutingLib.Routing.Basics.Path.Uncertified.Properties where
 
 open import Data.List.Relation.Unary.Any using (any?; there; here)
 open import Data.Maybe using (just; nothing)
@@ -23,7 +23,7 @@ open import RoutingLib.Data.Nat.Properties using (<⇒≤suc)
 import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.DecTotalOrder
   as ToStrict
 
-open import RoutingLib.Data.Path.Uncertified
+open import RoutingLib.Routing.Basics.Path.Uncertified
 
 open ≡-Reasoning
 

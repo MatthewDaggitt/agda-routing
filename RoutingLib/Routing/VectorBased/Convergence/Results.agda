@@ -11,13 +11,11 @@ open import Level using (Level)
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence
   using (completeConvergence)
 
-open import RoutingLib.Routing using (Network)
+open import RoutingLib.Routing.Basics.Network.Cycles using (TopologyIsFree; strIncr⇒alwaysFree)
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Algebra.Certification
 open import RoutingLib.Routing.Algebra.Properties.PathAlgebra
 open import RoutingLib.Routing.Algebra.Simulation using (_Simulates_)
-open import RoutingLib.Routing.Network.Definitions using (TopologyIsFree)
-open import RoutingLib.Routing.Algebra.Consequences using (strIncr⇒free)
 import RoutingLib.Routing.VectorBased.Convergence.Simulation as Simulation
 import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Proof as Convergence
 open import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step5_Proof
@@ -70,7 +68,7 @@ finite+strictlyIncr⇒convergent : IsRoutingAlgebra A →
                                  Convergent A
 finite+strictlyIncr⇒convergent routingAlg finite strIncr N = completeConvergence
   (finite⇒convergentOverFreeNetworks routingAlg finite N) _
-  (strIncr⇒free routingAlg strIncr N)
+  (strIncr⇒alwaysFree _ routingAlg strIncr N)
 
 --------------------------------------------------------------------------------
 -- Path vector protocols
@@ -92,7 +90,7 @@ incrPaths⇒convergent : IsRoutingAlgebra A →
                        Convergent A
 incrPaths⇒convergent routingAlg pathAlg incr N = completeConvergence
   (paths⇒convergentOverFreeNetworks routingAlg pathAlg N) _
-  (strIncr⇒free routingAlg (incr⇒strIncr routingAlg pathAlg incr) N)
+  (strIncr⇒alwaysFree _ routingAlg (incr⇒strIncr routingAlg pathAlg incr) N)
 
 -- If the path algebra is increasing then the synchronous iteration σ
 -- is guaranteed to converge in n² steps over any adjacency matrix.

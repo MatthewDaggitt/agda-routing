@@ -12,7 +12,8 @@ module RoutingLib.Routing.Algebra.Construct.AddIdentity
 
 open RawRoutingAlgebra A
 
-open import Algebra.FunctionProperties
+open import Algebra.Core
+open import Algebra.Definitions
 open import Data.Fin using (Fin; toℕ)
 open import Level using (_⊔_)
 open import Relation.Binary

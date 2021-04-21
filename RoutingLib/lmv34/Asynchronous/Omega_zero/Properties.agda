@@ -1,5 +1,5 @@
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra)
-open import RoutingLib.Routing as Routing using () renaming (AdjacencyMatrix to AdjacencyMatrix')
+open import RoutingLib.Routing.Prelude as RoutingPrelude using () renaming (AdjacencyMatrix to AdjacencyMatrix')
 
 module RoutingLib.lmv34.Asynchronous.Omega_zero.Properties
   {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)
@@ -30,7 +30,7 @@ open import RoutingLib.lmv34.Synchronous.Gamma_zero algebra A using (Γ₀)
 open import RoutingLib.lmv34.Synchronous.Gamma_zero.Properties algebra A using (Γ₀-cong; ⨁-cong; ⊕ₘ-cong)
 
 open RawRoutingAlgebra algebra using (▷-cong; ≈-refl)
-open Routing algebra n using (RoutingMatrix; RoutingTable; ≈ₘ-refl; _≈ₜ_; ℝ𝕄ₛ; Decℝ𝕄ₛⁱ) renaming (_≈ₘ_ to infix 4 _≈ₘ_)
+open RoutingPrelude algebra n using (RoutingMatrix; RoutingTable; ≈ₘ-refl; _≈ₜ_; ℝ𝕄ₛ; Decℝ𝕄ₛⁱ) renaming (_≈ₘ_ to infix 4 _≈ₘ_)
 open IndexedDecSetoid Decℝ𝕄ₛⁱ using () renaming (isDecEquivalenceᵢ to ℝ𝕄-isDecEquivalenceᵢ)
 
 --------------------------------------------------------------------------------

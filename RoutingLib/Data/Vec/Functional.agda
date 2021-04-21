@@ -1,4 +1,3 @@
-module RoutingLib.Data.Vec.Functional where
 
 open import Data.Nat using (ℕ; zero; suc; _⊔_; _⊓_; _+_; _≟_)
 open import Data.Nat.Properties using (≤-refl)
@@ -17,6 +16,9 @@ open import Algebra.Core using (Op₂)
 open import RoutingLib.Data.NatInf using (ℕ∞) renaming (_⊓_ to _⊓∞_)
 
 open import Data.Vec.Functional
+
+module RoutingLib.Data.Vec.Functional where
+
 
 private
   variable
@@ -58,11 +60,7 @@ sum t = foldr _+_ 0 t
 ⟦_⟧ : A → Vector A 1
 ⟦ x ⟧ zero = x
 
-[_]+_ : ∀ {n} → A → Vector A n → Vector A (suc n)
-([ x ]+ t) zero    = x
-([ x ]+ t) (suc i) = t i
-
-_+[_] : ∀ {n} → Vector A n → A → Vector A (suc n)
-_+[_] {n = n} t x i with n ≟ toℕ i
+_∷ʳ_ : ∀ {n} → Vector A n → A → Vector A (suc n)
+_∷ʳ_ {n = n} t x i with n ≟ toℕ i
 ... | yes _   = x
 ... | no  n≢i = t (lower₁ i n≢i)

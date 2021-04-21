@@ -40,7 +40,7 @@ open import RoutingLib.Data.Matrix using (SquareMatrix)
 
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
-open import RoutingLib.Routing as Routing using () renaming (AdjacencyMatrix to AdjacencyMatrix₁)
+import RoutingLib.Routing.Prelude as RoutingPrelude
 
 import RoutingLib.lmv34.Synchronous.Gamma_zero as Gamma_zero
 import RoutingLib.lmv34.Synchronous.Gamma_zero.Algebra as Gamma_zero_Algebra
@@ -51,13 +51,13 @@ import RoutingLib.lmv34.Synchronous.Gamma_one.Algebra as Gamma_one_Algebra
 module RoutingLib.lmv34.Synchronous.Gamma_one.Properties
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  {n} (A : AdjacencyMatrix₁ algebra n)
+  {n} (open RoutingPrelude algebra n renaming (I to M))
+  (A : AdjacencyMatrix)
   where
 
 open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
 open RoutingAlgebraProperties isRoutingAlgebra
-open Routing algebra n renaming (I to M)
 open Gamma_zero algebra A
 open Gamma_zero_Algebra algebra n
 open Gamma_zero_Properties algebra A using (IsFixedPoint-Γ₀)

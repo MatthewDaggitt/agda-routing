@@ -26,8 +26,8 @@ import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import Relation.Nullary using (yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Data.Path.Uncertified
-open import RoutingLib.Data.Path.Uncertified.Properties
+open import RoutingLib.Routing.Basics.Path.Uncertified
+open import RoutingLib.Routing.Basics.Path.Uncertified.Properties
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra
   as RoutingAlgebraProperties
 

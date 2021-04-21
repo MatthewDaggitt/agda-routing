@@ -1,7 +1,7 @@
 
 open import Data.Nat using (ℕ; suc; z≤n; s≤s; _<_)
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing using (AdjacencyMatrix)
+open import RoutingLib.Routing.Basics.Network using (AdjacencyMatrix)
 
 module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Prelude
   {a b ℓ n-1} {algebra : RawRoutingAlgebra a b ℓ}
@@ -10,14 +10,13 @@ module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.P
   (A : AdjacencyMatrix algebra (suc n-1))
   where
 
-open import Data.Fin using (Fin)
 open import Data.Product using (_,_)
 open import Relation.Nullary using (Dec)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; sym; cong; module ≡-Reasoning)
 
-import RoutingLib.Data.Path.CertifiedI as CertifiedPaths
-open import RoutingLib.Data.Path.CertifiedI.Properties using (length-cong)
+import RoutingLib.Routing.Basics.Path.CertifiedI as CertifiedPaths
+open import RoutingLib.Routing.Basics.Path.CertifiedI.Properties using (length-cong)
 
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebraProperties
 import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra as CertifiedPathAlgebraProperties
@@ -46,10 +45,7 @@ n = suc n-1
 Edge : Set
 Edge = CertifiedPaths.Edge n
 
-Vertex : Set
-Vertex = CertifiedPaths.Vertex n
-
-module Notation (X : RoutingMatrix) (j : Fin n) where
+module Notation (X : RoutingMatrix) (j : Node) where
 
   --------------------------------------------------------------------------
   -- Some notation for comparing edges.
@@ -94,7 +90,7 @@ module Notation (X : RoutingMatrix) (j : Fin n) where
     where open ≡-Reasoning
 
 
-  lengthₙ : 𝕋 → Vertex → ℕ
+  lengthₙ : 𝕋 → Node → ℕ
   lengthₙ t k = size (σ t X k j)
 
   lengthₙ<n : ∀ s e → lengthₙ s e < n

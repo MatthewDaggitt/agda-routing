@@ -19,10 +19,10 @@ open import RoutingLib.Data.Fin.Subset using (Nonfull)
 open import RoutingLib.Data.Fin.Subset.Properties using (Nonfull-witness)
 open import RoutingLib.Data.Fin.Subset.Cutset
 open import RoutingLib.Data.List using (allFinPairs)
-open import RoutingLib.Data.Path.CertifiedI.All
+open import RoutingLib.Routing.Basics.Path.CertifiedI.All
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing using (RoutingMatrix; AdjacencyMatrix)
+open import RoutingLib.Routing.Prelude using (RoutingMatrix; AdjacencyMatrix)
 import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Prelude as Prelude
 import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step1_NodeSets as Step1_NodeSets
 
@@ -77,13 +77,13 @@ abstract
   eₘᵢₙ↷C : eₘᵢₙ ↷ C
   eₘᵢₙ↷C = argmin-all (weightₑ t) eₐ↷C (∈cutset⇒↷ C)
 
-iₘᵢₙ : Vertex
+iₘᵢₙ : Node
 iₘᵢₙ = proj₁ eₘᵢₙ
 
 iₘᵢₙ∉C : iₘᵢₙ ∉ C
 iₘᵢₙ∉C = proj₁ eₘᵢₙ↷C
 
-kₘᵢₙ : Vertex
+kₘᵢₙ : Node
 kₘᵢₙ = proj₂ eₘᵢₙ
 
 kₘᵢₙ∈C : kₘᵢₙ ∈ C

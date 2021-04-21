@@ -32,8 +32,8 @@ import Data.List.Relation.Binary.Equality.Setoid as Equality
 import Data.List.Relation.Binary.Permutation.Setoid as PermutationSetoid
 import Data.List.Relation.Binary.Permutation.Setoid.Properties as PermutationSetoidProperties
 import Data.List.Relation.Unary.Unique.Setoid as Unique
+import Data.List.Relation.Binary.Pointwise as Pointwise using (lookup⁺)
 
-open import RoutingLib.Data.List.Relation.Binary.Pointwise using (lookup⁺)
 import RoutingLib.Data.List.Relation.Binary.Sublist.Setoid as Sublist
 
 module RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties
@@ -65,7 +65,7 @@ permute (swap _ _ ↭₁) (suc (suc i)) = suc (suc (permute ↭₁ i))
 permute (trans ↭₁ ↭₂)               = permute ↭₂ ∘ permute ↭₁
 
 permute-lookup : ∀ (xs↭ys : xs ↭ ys) → ∀ i → lookup xs i ≈ lookup ys (permute xs↭ys i)
-permute-lookup (refl xs≋ys)        i             = lookup⁺ xs≋ys i
+permute-lookup (refl xs≋ys)        i             = Pointwise.lookup⁺ xs≋ys i
 permute-lookup (prep eq xs↭ys)     zero          = eq
 permute-lookup (prep _  xs↭ys)     (suc i)       = permute-lookup xs↭ys i
 permute-lookup (swap eq _ xs↭ys)   zero          = eq

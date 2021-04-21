@@ -6,21 +6,12 @@
 -- algebra is a path-vector algebra.
 --------------------------------------------------------------------------------
 
-open import RoutingLib.Routing using (AdjacencyMatrix)
-open import RoutingLib.Routing.Algebra
-
-module RoutingLib.Routing.VectorBased.Synchronous.PathVector.Properties
-  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
-  (A : AdjacencyMatrix algebra n)
-  where
-
 open import Data.Fin.Properties using (¬∀⟶∃¬; all?) renaming (_≟_ to _≟𝔽_)
 open import Data.List using (List; foldr)
 import Data.List.Relation.Unary.All.Properties as All
 open import Data.List.Properties
-open import Data.List.Relation.Binary.Pointwise as Pointwise using (Pointwise; []; _∷_)
+open import Data.List.Relation.Binary.Pointwise as Pointwise
+  using (Pointwise; []; _∷_)
 open import Data.Nat using (_<_)
 open import Data.Nat.Induction using (Acc; acc; <-wellFounded)
 open import Data.Nat.Properties
@@ -32,25 +23,32 @@ open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Decidable)
-import Relation.Binary.Reasoning.Setoid as EqReasoning
+import Relation.Binary.Reasoning.Setoid as SetoidReasoning
 
 open import RoutingLib.Data.Matrix using (SquareMatrix)
-open import RoutingLib.Data.Path.CertifiedI
-open import RoutingLib.Data.Path.CertifiedI.Properties
-  using (∉ₚ-resp-≈ₚ; ≈ₚ-trans; ≈ₚ-sym; ≈ₚ-reflexive; ℙₛ; _∉ᵥₚ?_; _⇿ᵥ?_)
 
-import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra as PathAlgebraProperties
-import RoutingLib.Routing.Algebra.Construct.Consistent as Consistent
+open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Basics.Network using (AdjacencyMatrix)
+open import RoutingLib.Routing.Basics.Path.CertifiedI
+open import RoutingLib.Routing.Basics.Path.CertifiedI.Properties
+  using (∉ₚ-resp-≈ₚ; ≈ₚ-trans; ≈ₚ-sym; ≈ₚ-reflexive; ℙₛ; _∉ᵥₚ?_; _⇿ᵥ?_)
 import RoutingLib.Routing.VectorBased.Synchronous as VectorBased
-import RoutingLib.Routing.VectorBased.Synchronous.DistanceVector.Properties as CoreProperties
+
+module RoutingLib.Routing.VectorBased.Synchronous.PathVector.Properties
+  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
+  (A : AdjacencyMatrix algebra n)
+  where
 
 open RawRoutingAlgebra algebra
 open IsCertifiedPathAlgebra isPathAlgebra
-open PathAlgebraProperties isRoutingAlgebra isPathAlgebra
-open Consistent isRoutingAlgebra isPathAlgebra A
+
+open import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra isRoutingAlgebra isPathAlgebra
+open import RoutingLib.Routing.Algebra.Construct.Consistent isRoutingAlgebra isPathAlgebra A
+open import RoutingLib.Routing.VectorBased.Synchronous.DistanceVector.Properties isRoutingAlgebra A
 
 open VectorBased algebra A
-open CoreProperties isRoutingAlgebra A
 
 ------------------------------------------------------------------------------
 -- Path properties
@@ -92,7 +90,7 @@ abstract
     path (A i k ▷ X k j)  ≈⟨ ≈ₚ-sym (path-cong FXᵢⱼ≈AᵢₖXₖⱼ) ⟩
     path (F X i j)        ≈⟨ p[FXᵢⱼ]≈[] ⟩
     valid []              ∎) λ {(valid ())}
-    where open EqReasoning (ℙₛ n)
+    where open SetoidReasoning (ℙₛ n)
 
   alignPathExtension : ∀ (X : RoutingMatrix) i j k {u v p e⇿p i∉p} →
             path (A i k ▷ X k j) ≈ₚ valid ((u , v) ∷ p ∣ e⇿p ∣ i∉p) →

@@ -18,8 +18,8 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Pred)
 
-open import RoutingLib.Data.Path.Uncertified
-open import RoutingLib.Data.Path.Uncertified.Properties
+open import RoutingLib.Routing.Basics.Path.Uncertified
+open import RoutingLib.Routing.Basics.Path.Uncertified.Properties
 
 open import RoutingLib.Routing.Protocols.BGPLite.Communities
 

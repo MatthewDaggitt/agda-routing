@@ -2,13 +2,12 @@ open import Level using (Level)
 
 open import RoutingLib.Function.Reasoning
 
-open import RoutingLib.Routing using (Network; AdjacencyMatrix)
+open import RoutingLib.Routing.Prelude using (Network; AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Algebra.Certification
 import RoutingLib.Routing.Algebra.Construct.Consistent as ConsistentRoutes
-open import RoutingLib.Routing.Network.Definitions
-open import RoutingLib.Routing.AdjacencyMatrix.Cycles
-open import RoutingLib.Routing.VectorBased.Asynchronous hiding (AdjacencyMatrix; Aₜ)
+open import RoutingLib.Routing.Basics.Network.Cycles
+open import RoutingLib.Routing.VectorBased.Asynchronous hiding (AdjacencyMatrix)
 open import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Definitions
 open import RoutingLib.Routing.VectorBased.Convergence.Definitions
 
@@ -31,7 +30,7 @@ private
   finite+cycleFree⇒routeDistanceFunction : IsRoutingAlgebra algebra →
                                            IsFinite algebra →
                                            ∀ {n} {A : AdjacencyMatrix algebra n} →
-                                           .(CycleFree algebra A) →
+                                           .(IsFreeAdjacencyMatrix algebra A) →
                                            RouteDistanceFunction algebra A
   finite+cycleFree⇒routeDistanceFunction {algebra = algebra} isRoutingAlgebra fin {n} {A} free =
     begin⟨ Step1.<ᶠ-extensionRespectingOrder isRoutingAlgebra A fin free ⟩
@@ -49,13 +48,13 @@ finite⇒convergentOverFreeNetworks {algebra = algebra} isRoutingAlgebra finite 
 
 paths⇒convergentOverFreeNetworks : IsRoutingAlgebra algebra →
                                    IsPathAlgebra algebra →
-                                   PartiallyConvergent algebra (TopologyIsFree algebra)                                 
+                                   PartiallyConvergent algebra (TopologyIsFree algebra)                      
 paths⇒convergentOverFreeNetworks {algebra = algebra} isRoutingAlgebra isPathAlgebra {n} N =
   Iteration.AMCO⇒convergent-partial (Uᵢ-validInitialSet _)
     (Step4.partialAMCO isRoutingAlgebra N
       λ free → Step3_PV.routeDistanceFunction isRoutingAlgebra isCertifiedPathAlgebra
         (finite+cycleFree⇒routeDistanceFunction isRoutingAlgebraᶜ isFiniteᶜ
-          (cycleFreeᶜ free)))
+          (freeᶜ free)))
   where
   isCertifiedPathAlgebra = certifiedPathAlgebra isPathAlgebra n
   

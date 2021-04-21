@@ -4,10 +4,10 @@ open import Data.Product using (_×_)
 open import Relation.Unary using (Pred; Decidable; _⊆_)
 open import Relation.Nullary using (yes; no)
 
-open import RoutingLib.Data.Path.CertifiedI
-import RoutingLib.Data.Path.Certified.All as NEP
+open import RoutingLib.Routing.Basics.Path.CertifiedI
+import RoutingLib.Routing.Basics.Path.Certified.All as NEP
 
-module RoutingLib.Data.Path.CertifiedI.All {n : ℕ} where
+module RoutingLib.Routing.Basics.Path.CertifiedI.All {n : ℕ} where
 
 ----------------------------------------------------------------------------
 -- Datatypes

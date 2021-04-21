@@ -1,5 +1,5 @@
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra)
-open import RoutingLib.Routing as Routing using () renaming (AdjacencyMatrix to AdjacencyMatrix')
+open import RoutingLib.Routing.Prelude as RoutingPrelude using () renaming (AdjacencyMatrix to AdjacencyMatrix')
 
 module RoutingLib.lmv34.Asynchronous.Omega_zero
   {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)
@@ -16,7 +16,7 @@ open import RoutingLib.lmv34.Asynchronous.Omega_zero.Algebra algebra A
 open import RoutingLib.lmv34.Synchronous.Gamma_zero algebra A
 open import RoutingLib.Iteration.Asynchronous.Static.Schedule using (Schedule; 𝕋)
 
-open Routing algebra n using (RoutingMatrix)
+open RoutingPrelude algebra n using (RoutingMatrix)
 
 --------------------------------------------------------------------------------
 -- Implementation of Ω₀

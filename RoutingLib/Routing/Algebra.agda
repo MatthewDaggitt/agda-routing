@@ -7,10 +7,8 @@
 -- shortest paths problem, the widest paths problem).
 --------------------------------------------------------------------------------
 
-module RoutingLib.Routing.Algebra where
-
 open import Algebra
-open import Data.Fin using (Fin; toℕ)
+open import Data.Fin using (toℕ)
 open import Data.List using (List)
 import Data.List.Membership.Setoid as ListMembership
 open import Data.Nat using (ℕ; zero; suc)
@@ -22,10 +20,13 @@ open import Relation.Nullary using (¬_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality using (_≡_)
 
-import RoutingLib.Data.Path.UncertifiedI as UncertifiedPaths
-import RoutingLib.Data.Path.CertifiedI as CertifiedPaths
-open import RoutingLib.Data.Path.UncertifiedI.Properties
-open import RoutingLib.Relation.Nullary.Finite.Bijection.Setoid using (Finite)
+open import RoutingLib.Relation.Nullary.Finite.List.Setoid using (Finite)
+
+import RoutingLib.Routing.Basics.Path.UncertifiedI as UncertifiedPaths
+import RoutingLib.Routing.Basics.Path.CertifiedI as CertifiedPaths
+open import RoutingLib.Routing.Basics.Node
+
+module RoutingLib.Routing.Algebra where
 
 --------------------------------------------------------------------------------
 -- Raw routing algebras --
@@ -53,15 +54,15 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 
   -- Distributivity = you and your neighbour's choices always agree
   IsDistributive : Set _
-  IsDistributive = ∀ {n} {i j : Fin n} (f : Step i j) x y → f ▷ (x ⊕ y) ≈ (f ▷ x) ⊕ (f ▷ y)
+  IsDistributive = ∀ {n} {i j : Node n} (f : Step i j) x y → f ▷ (x ⊕ y) ≈ (f ▷ x) ⊕ (f ▷ y)
   
   -- Increasing = extending a route never makes it better
   IsIncreasing : Set _
-  IsIncreasing = ∀ {n} {i j : Fin n} (f : Step i j) x → x ≤₊ (f ▷ x)
+  IsIncreasing = ∀ {n} {i j : Node n} (f : Step i j) x → x ≤₊ (f ▷ x)
 
   -- Strictly increasing = extending a route always makes it worse
   IsStrictlyIncreasing : Set _
-  IsStrictlyIncreasing = ∀ {n} {i j : Fin n} (f : Step i j) {x} → x ≉ ∞# → x <₊ (f ▷ x)
+  IsStrictlyIncreasing = ∀ {n} {i j : Node n} (f : Step i j) {x} → x ≉ ∞# → x <₊ (f ▷ x)
 
   -- Finite = there only exist a finite number of weights
   IsFinite : Set _
@@ -69,11 +70,11 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 
   Level_DistributiveIn[_,_] : ℕ → Route → Route → Set _
   Level 0       DistributiveIn[ ⊥ , ⊤ ] =
-    ∀ {n} {i j : Fin n} (f : Step i j) →
+    ∀ {n} {i j : Node n} (f : Step i j) →
     ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
     f ▷ (x ⊕ y) ≈ (f ▷ x) ⊕ (f ▷ y) 
   Level (suc k) DistributiveIn[ ⊥ , ⊤ ] =
-    ∀ {n} {i j : Fin n} (f : Step i j) →
+    ∀ {n} {i j : Node n} (f : Step i j) →
     ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
     Level k DistributiveIn[ f ▷ (x ⊕ y) , (f ▷ x) ⊕ (f ▷ y) ]
 
@@ -83,7 +84,7 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
   Level_DistributiveIn[_,_]Alt : ℕ → Route → Route → Set _
   Level 0       DistributiveIn[ ⊥ , ⊤ ]Alt = Lift (a ⊔ b ⊔ ℓ) (⊥ ≈ ⊤)
   Level (suc k) DistributiveIn[ ⊥ , ⊤ ]Alt =
-    ∀ {n} {i j : Fin n} (f : Step i j) →
+    ∀ {n} {i j : Node n} (f : Step i j) →
     ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
     Level k DistributiveIn[ f ▷ (x ⊕ y) , (f ▷ x) ⊕ (f ▷ y) ]Alt
 
@@ -111,7 +112,7 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
       -- Any route is always chosen over the invalid route ∞#
       ⊕-identityʳ  : RightIdentity _≈_ ∞# _⊕_
       -- When you extend the invalid route, the result is always invalid
-      ▷-fixedPoint : ∀ {n} {i j : Fin n} (f : Step i j) → f ▷ ∞# ≈ ∞#
+      ▷-fixedPoint : ∀ {n} {i j : Node n} (f : Step i j) → f ▷ ∞# ≈ ∞#
 
 --------------------------------------------------------------------------------
 -- Path algebras
@@ -124,10 +125,10 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 
   open RawRoutingAlgebra algebra
   open UncertifiedPaths
-
+  
   record IsPathAlgebra : Set (a ⊔ b ⊔ ℓ) where
     no-eta-equality -- Needed due to bug #2732 in Agda
-
+    
     field
       -- Every route has an associated path
       path           : Route → Path
@@ -142,11 +143,11 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
       -- The extension of a route along an edge that either doesn't match up
       -- with the start of its path (⇿) or would form a loop (i ∈ p) is always
       -- the invalid route.
-      path-reject    : ∀ {n} {i j : Fin n} {r p} (f : Step i j) → path r ≡ valid p →
+      path-reject    : ∀ {n} {i j : Node n} {r p} (f : Step i j) → path r ≡ valid p →
                        (¬ (toℕ i , toℕ j) ⇿ᵥ p) ⊎ toℕ i ∈ᵥₚ p → f ▷ r ≈ ∞#
       -- The extension of a route along a valid edge always actually adds that
       -- edge to the path.
-      path-accept    : ∀ {n} {i j : Fin n} {r p} (f : Step i j) → path r ≡ valid p →
+      path-accept    : ∀ {n} {i j : Node n} {r p} (f : Step i j) → path r ≡ valid p →
                        f ▷ r ≉ ∞# → path (f ▷ r) ≡ valid ((toℕ i , toℕ j) ∷ p)
 
 --------------------------------------------------------------------------------
@@ -166,7 +167,7 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 
   open RawRoutingAlgebra algebra
   open CertifiedPaths
-
+  
   record IsCertifiedPathAlgebra (n : ℕ) : Set (a ⊔ b ⊔ ℓ) where
     no-eta-equality -- Needed due to bug #2732 in Agda
 
@@ -176,9 +177,9 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
       r≈0⇒path[r]≈[] : ∀ {r} → r ≈ 0# → path r ≈ₚ valid []
       r≈∞⇒path[r]≈∅  : ∀ {r} → r ≈ ∞#  → path r ≈ₚ invalid
       path[r]≈∅⇒r≈∞  : ∀ {r} → path r ≈ₚ invalid → r ≈ ∞#
-      path-reject    : ∀ {i j : Fin n} {r p} (f : Step i j) → path r ≈ₚ valid p →
+      path-reject    : ∀ {i j : Node n} {r p} (f : Step i j) → path r ≈ₚ valid p →
                        (¬ (i , j) ⇿ᵛ p) ⊎ i ∈ᵥₚ p → f ▷ r ≈ ∞#
-      path-accept    : ∀ {i j : Fin n} {r p} (f : Step i j) → path r ≈ₚ valid p → f ▷ r ≉ ∞# →
+      path-accept    : ∀ {i j : Node n} {r p} (f : Step i j) → path r ≈ₚ valid p → f ▷ r ≉ ∞# →
                        ∀ ij⇿p i∉p → path (f ▷ r) ≈ₚ valid ((i , j) ∷ p ∣ ij⇿p ∣ i∉p)
 
     -- Functions
@@ -203,14 +204,14 @@ module PathDistributivity
   open UncertifiedPaths
 
   PathDistributive : Set _
-  PathDistributive = ∀ {n} {i j : Fin n} (f : Step i j) →
+  PathDistributive = ∀ {n} {i j : Node n} (f : Step i j) →
                      ∀ {x y} → toℕ i ∉ₚ path x → toℕ i ∉ₚ path y → f ▷ (x ⊕ y) ≈ (f ▷ x) ⊕ (f ▷ y)
 
 
   IsLevel_PathDistributiveIn[_,_]Alt : ℕ → Route → Route → Set _
   IsLevel 0       PathDistributiveIn[ ⊥ , ⊤ ]Alt = Lift (a ⊔ b ⊔ ℓ) (⊥ ≈ ⊤)
   IsLevel (suc k) PathDistributiveIn[ ⊥ , ⊤ ]Alt =
-    ∀ {n} {i j : Fin n} (f : Step i j) →
+    ∀ {n} {i j : Node n} (f : Step i j) →
     ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
     toℕ i ∉ₚ path x → toℕ i ∉ₚ path y →
     (toℕ i , toℕ j) ⇿ path x → (toℕ i , toℕ j) ⇿ path y →
@@ -220,13 +221,13 @@ module PathDistributivity
   -- kᵗʰ level distributivity
   IsLevel_PathDistributiveIn[_,_] : ℕ → Route → Route → Set _
   IsLevel 0       PathDistributiveIn[ ⊥ , ⊤ ] =
-    ∀ {n} {i j : Fin n} (f : Step i j) →
+    ∀ {n} {i j : Node n} (f : Step i j) →
     ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
     toℕ i ∉ₚ path x → toℕ i ∉ₚ path y →
     (toℕ i , toℕ j) ⇿ path x → (toℕ i , toℕ j) ⇿ path y →
     f ▷ (x ⊕ y) ≈ (f ▷ x) ⊕ (f ▷ y) 
   IsLevel (suc k) PathDistributiveIn[ ⊥ , ⊤ ] =
-    ∀ {n} {i j : Fin n} (f : Step i j) →
+    ∀ {n} {i j : Node n} (f : Step i j) →
     ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
     toℕ i ∉ₚ path x → toℕ i ∉ₚ path y →
     IsLevel k PathDistributiveIn[ f ▷ (x ⊕ y) , (f ▷ x) ⊕ (f ▷ y) ]

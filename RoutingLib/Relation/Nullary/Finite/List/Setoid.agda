@@ -6,7 +6,10 @@ open import Data.List.Relation.Unary.Any using (index)
 import Data.List.Membership.Setoid as Membership
 open import Data.List.Membership.Setoid.Properties
 open import Data.List.Relation.Unary.Unique.Setoid
+open import Data.List.Relation.Binary.Disjoint.Setoid
+import Data.Fin.Properties as Fin
 import Data.List.Relation.Unary.Unique.Setoid.Properties as Unique
+import Data.List.Relation.Unary.Unique.Propositional.Properties as Uniqueₚ
 open import Data.Product using (_,_; proj₁; proj₂)
 open import Data.Product.Relation.Binary.Pointwise.NonDependent
 open import Data.Sum as Sum using (inj₁; inj₂)
@@ -63,11 +66,32 @@ module _ {S : Setoid a ℓ₁} {T : Setoid b ℓ₂} where
     ; complete = Complete.cartesianProduct⁺ S T SF.complete TF.complete
     ; unique   = Unique.cartesianProduct⁺   S T SF.unique   TF.unique
     } where module SF = Finite fin₁; module TF = Finite fin₂
-{-
+
   _⊎ᶠ_ : Finite S → Finite T → Finite (S ⊎ₛ T)
   fin₁ ⊎ᶠ fin₂ = record
     { xs       = map inj₁ SF.xs ++ map inj₂ TF.xs
-    ; complete = λ x → ∈-++⁺ (S ⊎ₛ T) (map inj₁ SF.xs) (map inj₂ TF.xs) (Sum.map {!∈-map⁺ ? ? ?!} {!!} x) 
-    ; unique   = Unique.++⁺ (S ⊎ₛ T) {!!} {!!} {!!}
-    } where module SF = Finite fin₁; module TF = Finite fin₂
--}
+    ; complete = Complete.++⁺ S T SF.complete TF.complete
+    ; unique   = Unique.++⁺ (S ⊎ₛ T)
+                   (Unique.map⁺ S (S ⊎ₛ T) drop-inj₁ SF.unique)
+                   (Unique.map⁺ T (S ⊎ₛ T) drop-inj₂ TF.unique)
+                   disjoint
+    }
+    where
+    module SF = Finite fin₁
+    module TF = Finite fin₂
+
+    disjoint : Disjoint (S ⊎ₛ T) (map inj₁ SF.xs) (map inj₂ TF.xs)
+    disjoint {inj₁ x} (_ , x∈ys) with ∈-map⁻ T (S ⊎ₛ T) x∈ys
+    ... | _ , _ , ()
+    disjoint {inj₂ y} (y∈xs , _) with ∈-map⁻ S (S ⊎ₛ T) y∈xs
+    ... | _ , _ , ()
+
+------------------------------------------------------------------------
+-- Examples
+
+Fin-finite : ∀ n → Finite (Fin.≡-setoid n)
+Fin-finite n = record
+  { xs       = allFin n
+  ; complete = Complete.allFin⁺ n
+  ; unique   = Uniqueₚ.allFin⁺ n
+  }

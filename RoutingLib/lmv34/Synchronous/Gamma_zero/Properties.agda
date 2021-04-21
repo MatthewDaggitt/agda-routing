@@ -9,7 +9,7 @@ open import Relation.Unary using (Pred)
 
 open import RoutingLib.Iteration.Synchronous using (_^_; IsFixedPoint)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra)
-open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
+open import RoutingLib.Routing.Prelude as RoutingPrelude using (AdjacencyMatrix)
 import RoutingLib.lmv34.Synchronous.Gamma_zero as Gamma_zero
 import RoutingLib.lmv34.Synchronous.Gamma_zero.Algebra as Gamma_zero_Algebra
 
@@ -18,7 +18,7 @@ module RoutingLib.lmv34.Synchronous.Gamma_zero.Properties
   {n} (A : AdjacencyMatrix algebra n)
   where
 
-open Routing algebra n renaming (I to M)
+open RoutingPrelude algebra n renaming (I to M)
 open RawRoutingAlgebra algebra
 open Gamma_zero algebra A
 open Gamma_zero_Algebra algebra n

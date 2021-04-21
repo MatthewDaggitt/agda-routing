@@ -24,8 +24,8 @@ open import Relation.Binary.PropositionalEquality
 open import Relation.Unary using (Decidable)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Data.Path.CertifiedI
-open import RoutingLib.Data.Path.CertifiedI.Properties
+open import RoutingLib.Routing.Basics.Path.CertifiedI
+open import RoutingLib.Routing.Basics.Path.CertifiedI.Properties
 
 open RawRoutingAlgebra algebra
 open IsCertifiedPathAlgebra isPathAlgebra

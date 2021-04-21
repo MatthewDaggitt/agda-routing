@@ -20,9 +20,9 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Decidable using (⌊_⌋)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Data.Path.Uncertified as Path
+open import RoutingLib.Routing.Basics.Path.Uncertified as Path
   using (Path; []; _∷_; length; deflate)
-open import RoutingLib.Data.Path.Uncertified.Properties
+open import RoutingLib.Routing.Basics.Path.Uncertified.Properties
 
 open import RoutingLib.Routing.Protocols.BGPLite.Routes
 open import RoutingLib.Routing.Protocols.BGPLite.Communities

@@ -19,15 +19,15 @@ open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Reasoning.PartialOrder as POR
 
 open import RoutingLib.Data.Matrix using (SquareMatrix)
-open import RoutingLib.Data.Path.CertifiedI.All
-open import RoutingLib.Data.Path.CertifiedI.Properties
+open import RoutingLib.Routing.Basics.Path.CertifiedI.All
+open import RoutingLib.Routing.Basics.Path.CertifiedI.Properties
 open import RoutingLib.Data.Fin.Subset using (Nonfull)
 open import RoutingLib.Data.List using (allFinPairs)
 open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-allFinPairs⁺)
 import RoutingLib.Function.Reasoning as FunctionalReasoning
 
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing using (RoutingMatrix; AdjacencyMatrix)
+open import RoutingLib.Routing.Prelude using (RoutingMatrix; AdjacencyMatrix)
 import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Prelude as Prelude
 import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step1_NodeSets as Step1_NodeSets
 import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step2_ConvergedSubtree as Step2_ConvergedSubtree
@@ -114,7 +114,7 @@ module _ where
 -- real, and therefore don't respect the minimal spanning tree
 -- constraints.
 
-𝓓 : 𝕋 → Vertex → Set ℓ
+𝓓 : 𝕋 → Node → Set ℓ
 𝓓 s k = k ∉ᵤ 𝓡 (t + s) × ∃ λ i → (i , k) ∈ᵤ Dangerous s
 
 abstract

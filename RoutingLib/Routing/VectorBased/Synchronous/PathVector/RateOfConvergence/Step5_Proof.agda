@@ -1,6 +1,6 @@
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (Subset; ⁅_⁆; ∣_∣; _∪_; _∈_; _∉_)
-open import Data.Fin.Subset.Properties using (x∈⁅x⁆; x∈p∪q⁺; x∈p∪q⁻; x∈⁅y⁆⇒x≡y; ∈⊤; ∣⁅x⁆∣≡1; ∣p∣≡n⇒p≡⊤)
+open import Data.Fin.Subset.Properties using (x∈⁅x⁆; x∈p∪q⁺; x∈p∪q⁻; x∈⁅y⁆⇒x≡y; ∈⊤; ∣⁅x⁆∣≡1; ∣p∣≡n⇒p≡⊤; x≢y⇒x∉⁅y⁆)
 open import Data.Nat as ℕ using (ℕ; zero; suc; z≤n; s≤s; _+_; _^_; _*_; _<_; _≤_)
 open import Data.Nat.Properties
 open import Data.Sum using (inj₁; inj₂)
@@ -14,9 +14,9 @@ open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.Fin.Subset using (Nonfull)
 open import RoutingLib.Data.Fin.Subset.Properties
-  using (∣p∣<n⇒Nonfull; ∣p∪⁅i⁆∣≡1+∣p∣; i∉⁅j⁆; Nonfull⁅i⁆′; x∉p∪q⁺)
+  using (∣p∣<n⇒Nonfull; ∣p∪⁅i⁆∣≡1+∣p∣; Nonfull⁅i⁆′; x∉p∪q⁺)
 
-open import RoutingLib.Routing using (AdjacencyMatrix)
+open import RoutingLib.Routing.Prelude using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra
 import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Prelude as Prelude
 import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step1_NodeSets as Step1_NodeSets
@@ -103,10 +103,10 @@ module _ (X : RoutingMatrix) (j : Fin n) where
     ...   | refl = x∈p∪q⁺ (inj₂ rec₂)
 
     iᵗʰ∉Cₖ : ∀ i (i<n : i < n) k (k<n : k < n) → k < i → iᵗʰ i i<n ∉ C k k<n
-    iᵗʰ∉Cₖ (suc i) 1+i<n zero    k<n   k<i = i∉⁅j⁆ (iᵗʰ≢kᵗʰ (suc i) 0 1+i<n k<n k<i)
+    iᵗʰ∉Cₖ (suc i) 1+i<n zero    k<n   k<i = x≢y⇒x∉⁅y⁆ (iᵗʰ≢kᵗʰ (suc i) 0 1+i<n k<n k<i)
     iᵗʰ∉Cₖ (suc i) 1+i<n (suc k) 1+k<n k<i = x∉p∪q⁺
       (iᵗʰ∉Cₖ (suc i) 1+i<n k (≤⇒pred≤ 1+k<n) (≤⇒pred≤ k<i))
-      (i∉⁅j⁆ (iᵗʰ≢kᵗʰ (suc i) (suc k) 1+i<n 1+k<n k<i))
+      (x≢y⇒x∉⁅y⁆ (iᵗʰ≢kᵗʰ (suc i) (suc k) 1+i<n 1+k<n k<i))
 
     |Cᵢ|≡i : ∀ i → (i<n : i < n) → ∣ C i i<n ∣ ≡ suc i
     |Cᵢ|≡i zero    _     = ∣⁅x⁆∣≡1 j

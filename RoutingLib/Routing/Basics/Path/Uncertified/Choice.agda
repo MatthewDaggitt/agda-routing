@@ -1,6 +1,6 @@
 
 
-module RoutingLib.Data.Path.Uncertified.Choice where
+module RoutingLib.Routing.Basics.Path.Uncertified.Choice where
 
 open import Algebra.Definitions
 open import Algebra.Construct.NaturalChoice.Min as Min
@@ -8,8 +8,8 @@ open import Data.Sum
 open import Data.Product using (_,_)
 open import Relation.Binary.PropositionalEquality
 
-open import RoutingLib.Data.Path.Uncertified
-open import RoutingLib.Data.Path.Uncertified.Properties
+open import RoutingLib.Routing.Basics.Path.Uncertified
+open import RoutingLib.Routing.Basics.Path.Uncertified.Properties
 
 abstract
 

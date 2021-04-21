@@ -6,6 +6,7 @@ open import Data.Fin.Patterns
 open import Data.Nat
 open import Data.Product hiding (map)
 open import Data.Vec.Functional hiding (map; last)
+open import Data.Unit using (⊤)
 open import Function
 open import Level using (Level)
 open import Relation.Nullary using (Dec; yes; no)
@@ -28,11 +29,14 @@ private
 record FiniteSet (A : Set a) : Set a where
   constructor ⟦_∣_⟧
   field
-    m : ℕ
-    x : Vector A (suc m)
+    n            : ℕ
+    x            : Vector A (suc n)
 
 ∣_∣ : FiniteSet A → ℕ
 ∣ ⟦ n ∣ _ ⟧ ∣ = suc n
+
+content : (X : FiniteSet A) → Vector A ∣ X ∣
+content ⟦ _ ∣ x ⟧ = x
 
 ⟦_⟧ : A → FiniteSet A
 ⟦ x ⟧ = ⟦ 0 ∣ const x ⟧
@@ -41,10 +45,10 @@ record FiniteSet (A : Set a) : Set a where
 ⟦ x , y ⟧₂ = ⟦ 1 ∣ (λ {0F → x; 1F → y}) ⟧
 
 ⟦_⟧∪_ : A → FiniteSet A → FiniteSet A
-⟦ y ⟧∪ ⟦ n ∣ X ⟧ = ⟦ suc n ∣ [ y ]+ X ⟧
+⟦ y ⟧∪ ⟦ n ∣ X ⟧ = ⟦ suc n ∣ y ∷ X ⟧
 
 _∪⟦_⟧ : FiniteSet A → A → FiniteSet A
-⟦ n ∣ X ⟧ ∪⟦ y ⟧ = ⟦ suc n ∣ X +[ y ]  ⟧
+⟦ n ∣ X ⟧ ∪⟦ y ⟧ = ⟦ suc n ∣ X ∷ʳ y ⟧
 
 first : FiniteSet A → A
 first ⟦ _ ∣ x ⟧ = x 0F

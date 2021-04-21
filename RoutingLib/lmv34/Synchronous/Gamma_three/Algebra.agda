@@ -16,7 +16,7 @@ module RoutingLib.lmv34.Synchronous.Gamma_three.Algebra
   (n : ℕ)
   where
 
-open import RoutingLib.Routing algebra n
+open import RoutingLib.Routing.Prelude algebra n
 open RawRoutingAlgebra algebra
 open Gamma_one_Algebra isRoutingAlgebra n
 open Gamma_two_Algebra isRoutingAlgebra n using (RoutingVector₂)

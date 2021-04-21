@@ -1,6 +1,6 @@
 open import RoutingLib.lmv34.Synchronous.Gamma_two.Algebra as Gamma_two_Algebra using (IsComposition)
   renaming (RouteMapMatrix to RouteMapMatrix')
-open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
+open import RoutingLib.Routing.Prelude as RoutingPrelude using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 
 module RoutingLib.lmv34.Asynchronous.Omega_two.Properties
@@ -51,7 +51,7 @@ open DecSetoid Γ₂-State-decSetoid using () renaming
   ; setoid  to 𝕊ₛ
   ; refl    to ≈ₛ-refl
   )
-open Routing algebra n using (ℝ𝕄ₛ; _≈ₘ_; ≈ₘ-refl) renaming (I to M)
+open RoutingPrelude algebra n using (ℝ𝕄ₛ; _≈ₘ_; ≈ₘ-refl) renaming (I to M)
 
 --------------------------------------------------------------------------------
 -- Operation properties

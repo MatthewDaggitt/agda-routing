@@ -1,4 +1,4 @@
-open import RoutingLib.Routing using (AdjacencyMatrix)
+open import RoutingLib.Routing.Prelude using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 open import RoutingLib.lmv34.Synchronous.Gamma_two.Algebra as Gamma_two_Algebra using (IsComposition; RouteMapMatrix)
 

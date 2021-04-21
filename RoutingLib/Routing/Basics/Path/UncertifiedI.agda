@@ -1,5 +1,5 @@
 
-module RoutingLib.Data.Path.UncertifiedI where
+module RoutingLib.Routing.Basics.Path.UncertifiedI where
 
 open import Data.Fin using (Fin)
 open import Data.Fin.Properties using (_≟_)
@@ -13,7 +13,7 @@ open import Relation.Nullary using (¬_)
 open import Relation.Binary using (Rel; REL)
 open import Relation.Binary.PropositionalEquality using (_≡_)
 
-import RoutingLib.Data.Path.Uncertified as Uncertified
+import RoutingLib.Routing.Basics.Path.Uncertified as Uncertified
 
 ----------------------------------------------------------------------------
 -- Reimports

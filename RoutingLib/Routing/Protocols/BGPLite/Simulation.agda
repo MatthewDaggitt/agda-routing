@@ -27,10 +27,10 @@ open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Data.Path.UncertifiedI using (Path; Pathᵛ; invalid; valid; source; sourceᵥ)
-open import RoutingLib.Data.Path.UncertifiedI.Properties using (valid-injective)
-open import RoutingLib.Data.Path.Uncertified as Path using ([]; _∷_; deflate; length; _⇿_; _∈ₚ_)
-open import RoutingLib.Data.Path.Uncertified.Properties
+open import RoutingLib.Routing.Basics.Path.UncertifiedI using (Path; Pathᵛ; invalid; valid; source; sourceᵥ)
+open import RoutingLib.Routing.Basics.Path.UncertifiedI.Properties using (valid-injective)
+open import RoutingLib.Routing.Basics.Path.Uncertified as Path using ([]; _∷_; deflate; length; _⇿_; _∈ₚ_)
+open import RoutingLib.Routing.Basics.Path.Uncertified.Properties
 
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Protocols.BGPLite.Core

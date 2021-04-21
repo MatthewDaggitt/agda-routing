@@ -11,16 +11,6 @@
 -- set of consistent routes.
 --------------------------------------------------------------------------------
 
-open import RoutingLib.Routing using (AdjacencyMatrix)
-open import RoutingLib.Routing.Algebra
-
-module RoutingLib.Routing.Algebra.Construct.Consistent
-  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
-  (A : AdjacencyMatrix algebra n)
-  where
-
 open import Algebra.Core  using (Op₂)
 import Algebra.Definitions as AlgebraicDefinitions
 open import Data.Fin as Fin using (Fin)
@@ -29,14 +19,14 @@ import Data.List.Membership.Setoid as Membership
 open import Data.List.Membership.Setoid.Properties using (∈-resp-≈; ∈-map⁺)
 open import Data.Maybe using (Maybe; nothing; just)
 open import Data.Nat using (suc)
-open import Data.Product using (Σ; _×_; _,_; proj₁)
+open import Data.Product using (Σ; _×_; _,_; proj₁; map₂)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Data.Vec.Functional using (Vector; map)
 open import Function
 open import Level using (_⊔_) renaming (zero to 0ℓ)
 open import Relation.Binary as B hiding (Decidable)
 open import Relation.Binary.PropositionalEquality using (inspect; [_]; _≡_; _≢_; refl; sym; trans)
 import Relation.Binary.Construct.On as On
-import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import Relation.Unary as U hiding (Decidable; U)
 open import Relation.Nullary using (¬_; yes; no; recompute)
 open import Relation.Nullary.Negation using (contradiction)
@@ -44,23 +34,38 @@ open import Relation.Nullary.Negation using (contradiction)
 open import RoutingLib.Relation.Nullary.Decidable using (toSum)
 open import RoutingLib.Relation.Nullary.Finite.List.Setoid.Properties
   using (Finite⇒Finiteₛ; via-dec-surjection)
-open import RoutingLib.Data.FiniteSet using (map) renaming (FiniteSet to FiniteSet⁺)
+open import RoutingLib.Data.FiniteSet using () renaming (FiniteSet to FiniteSet⁺)
+open import RoutingLib.Data.Fin using (_-ₘ_)
 
-open import RoutingLib.Data.Path.CertifiedI
-open import RoutingLib.Data.Path.CertifiedI.Enumeration
-open import RoutingLib.Data.Path.CertifiedI.Properties
-open import RoutingLib.Routing.AdjacencyMatrix.Cycles using (Cyclic; CycleFree)
-import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra
-  as PathAlgebraProperties
-import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra
-  as RoutingAlgebraProperties
+open import RoutingLib.Routing.Basics.Path.CertifiedI
+open import RoutingLib.Routing.Basics.Path.CertifiedI.Enumeration
+open import RoutingLib.Routing.Basics.Path.CertifiedI.Properties
+open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Basics.Network
+open import RoutingLib.Routing.Basics.Network.Cycles
+
+module RoutingLib.Routing.Algebra.Construct.Consistent
+  {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  (isPathAlgebra : IsCertifiedPathAlgebra algebra n)
+  (A : AdjacencyMatrix algebra n)
+  where
 
 open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
 open IsCertifiedPathAlgebra isPathAlgebra
-open PathAlgebraProperties isRoutingAlgebra isPathAlgebra
-open RoutingAlgebraProperties isRoutingAlgebra
 
+open import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra isRoutingAlgebra isPathAlgebra
+open import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra isRoutingAlgebra
+open import RoutingLib.Routing.Basics.Assignment algebra n
+
+open import Relation.Binary.Reasoning.Setoid S
+
+private
+  variable
+    i j : Fin n
+    f : Step i j
+    
 --------------------------------------------------------------------------------
 -- Definition
 --------------------------------------------------------------------------------
@@ -112,9 +117,8 @@ open RoutingAlgebraProperties isRoutingAlgebra
   weight A (valid ((i , j) ∷ q ∣ ij⇿q ∣ i∉q))   ≡⟨⟩
   A i j ▷ weight A (valid q)                    ≈⟨ ▷-cong (A i j) rᶜ ⟩
   A i j ▷ r                                     ∎
-  where open EqReasoning S
 
-▷-forces-𝑰 : ∀ {i j r} → 𝑰 (A i j ▷ r) → 𝑰 r
+▷-forces-𝑰 : ∀ {r} → 𝑰 (A i j ▷ r) → 𝑰 r
 ▷-forces-𝑰 f▷rⁱ rᶜ = f▷rⁱ (▷-pres-𝑪 _ _ rᶜ)
 
 weightᶜ : ∀ p → 𝑪 (weight A p)
@@ -132,10 +136,9 @@ weightᶜ (valid ((i , j) ∷ p ∣ e⇿p ∣ e∉p)) with A i j ▷ weight A (v
   weight A (valid ((i , j) ∷ q ∣ ij⇿q ∣ i∉q))   ≡⟨⟩
   A i j ▷ weight A (valid q)                    ≈⟨ ▷-cong (A i j) w[p]ᶜ ⟩
   A i j ▷ weight A (valid p)                    ∎
-  where open EqReasoning S
 
-sizeⁱ-incr : ∀ {i j : Fin n} {r} {f : Step i j} → 𝑰 (f ▷ r) → suc (size r) ≡ size (f ▷ r)
-sizeⁱ-incr {i} {j} {r} {f} f▷rⁱ with f ▷ r ≟ ∞#
+sizeⁱ-incr : ∀ {r} → 𝑰 (f ▷ r) → suc (size r) ≡ size (f ▷ r)
+sizeⁱ-incr {i} {j} {f} {r} f▷rⁱ with f ▷ r ≟ ∞#
 ... | yes f▷r≈∞ = contradiction (𝑪-cong (≈-sym f▷r≈∞) ∞ᶜ) f▷rⁱ
 ... | no  f▷r≉∞ with path r | inspect path r
 ...   | invalid | [ pᵣ≡∅ ] = contradiction (p[r]≡∅⇒f▷r≈∞ f pᵣ≡∅) f▷r≉∞
@@ -144,7 +147,7 @@ sizeⁱ-incr {i} {j} {r} {f} f▷rⁱ with f ▷ r ≟ ∞#
 ...     | pᵣ≈q | _        | no  i∈q = contradiction (path-reject f pᵣ≈q (inj₂ i∈q)) f▷r≉∞
 ...     | pᵣ≈q | yes ij⇿q | yes i∉q = sym (length-cong (path-accept f pᵣ≈q f▷r≉∞ ij⇿q i∉q))
 
-sizeⁱ-incr′ : ∀ {i j : Fin n} {r s} {f : Step i j} → 𝑰 s → s ≈ f ▷ r → suc (size r) ≡ size s
+sizeⁱ-incr′ : ∀ {r s} → 𝑰 s → s ≈ f ▷ r → suc (size r) ≡ size s
 sizeⁱ-incr′ sⁱ s≈f▷r = trans (sizeⁱ-incr (𝑰-cong s≈f▷r sⁱ)) (size-cong (≈-sym s≈f▷r))
 
 recomputeᶜ : ∀ {x} → .(𝑪 x) → 𝑪 x
@@ -223,7 +226,7 @@ _⊕ᶜ_ : Op₂ CRoute
 
 infix 6 _▷ᶜ_
 
-_▷ᶜ_ : ∀{n} {i j : Fin n} → CStep i j → CRoute → CRoute
+_▷ᶜ_ : ∀ {n} {i j : Fin n} → CStep i j → CRoute → CRoute
 (nothing       , _) ▷ᶜ (r , rᶜ) = C∞#
 (valid (k , l) , _) ▷ᶜ (r , rᶜ) = A k l ▷ r , ▷-pres-𝑪 k l rᶜ
 -- As mentioned the invalid arc weight is simply `nothing`
@@ -337,18 +340,25 @@ isStrictlyIncreasingᶜ sIncr (valid (k , l) , _)     = sIncr (A k l)
 isStrictlyIncreasingᶜ sIncr (nothing       , _) r≉∞ = ≈-sym (⊕-identityˡ _) , r≉∞
 
 isFiniteᶜ : IsFinite algebraᶜ
-isFiniteᶜ = Finite⇒Finiteₛ (via-dec-surjection (finiteₗ n) DSᶜ fromPath-surjection)
+isFiniteᶜ = via-dec-surjection (finiteₗ n) DSᶜ fromPath-surjection
 
 ------------------------------------------------------------------------------
--- Finally the corresponding adjacency matrix for the consitent algebra may be
--- built
+-- Finally the corresponding adjacency matrix for the consistent algebra may
+-- be built and freeness of the topology is conserved.
 
 Aᶜ : AdjacencyMatrix algebraᶜ n
 Aᶜ i j = just (i , j) , toSum (i Fin.≟ j)
 
-cyclicᶜ : ∀ X → Cyclic algebraᶜ Aᶜ X → Cyclic algebra A (map fromCRoute X)
-cyclicᶜ X cyclic i with cyclic i
-... | (z , Xᵢ↝z , z≤y) = fromCRoute z , Xᵢ↝z , z≤y
+nonFreeCycleᶜ : ∀ C → IsNonFreeCycle algebraᶜ Aᶜ C → IsNonFreeCycle algebra A C
+nonFreeCycleᶜ (m , C) (routesᶜ , nonFreeᶜ) = routes , nonFree
+  where
+  routes : Vector Route (suc m)
+  routes = map fromCRoute routesᶜ
+  
+  nonFree : ∀ i → (C (i -ₘ 1) , routes (i -ₘ 1)) ⊴[ A ] (C i , routes i)
+  nonFree i with nonFreeᶜ i
+  ... | (z , Xᵢ↝z , z≤y) = fromCRoute z , Xᵢ↝z , z≤y
 
-cycleFreeᶜ : CycleFree algebra A → CycleFree algebraᶜ Aᶜ
-cycleFreeᶜ cf X X-cyclic = cf (map fromCRoute X) (cyclicᶜ X X-cyclic)
+freeᶜ : IsFreeAdjacencyMatrix algebra A → IsFreeAdjacencyMatrix algebraᶜ Aᶜ
+freeᶜ cf C C-nonFree = cf C (nonFreeCycleᶜ C C-nonFree)
+

@@ -1,4 +1,4 @@
-open import RoutingLib.Routing as Routing using () renaming (AdjacencyMatrix to AdjacencyMatrix')
+open import RoutingLib.Routing.Prelude as RoutingPrelude using () renaming (AdjacencyMatrix to AdjacencyMatrix')
 open import RoutingLib.Routing.Algebra
 
 module RoutingLib.lmv34.Asynchronous.Omega_zero.Algebra
@@ -12,7 +12,7 @@ open import Data.Fin.Subset.Properties using (_∈?_)
 open import Relation.Nullary using (yes; no)
 
 open import RoutingLib.lmv34.Synchronous.Gamma_zero.Algebra algebra n using (_⊕ₘ_; ⨁)
-open Routing algebra n
+open RoutingPrelude algebra n
 open RawRoutingAlgebra algebra
 
 --------------------------------------------------------------------------------

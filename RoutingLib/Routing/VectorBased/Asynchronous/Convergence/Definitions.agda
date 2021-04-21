@@ -2,7 +2,23 @@
 -- These are some internal definition used in the proof of convergence
 ------------------------------------------------------------------------
 
-open import RoutingLib.Routing using (AdjacencyMatrix)
+open import Data.Nat using (ℕ; _≤_; _<_)
+open import Data.Nat.Properties using (≤-totalOrder)
+open import Data.Product using (_,_; proj₁; proj₂)
+open import Data.Fin using (Fin)
+open import Data.Sum using (inj₂)
+open import Function.Base using (_∘_)
+open import Function.Metric.Nat
+open import Level
+open import Relation.Binary
+open import Relation.Binary.PropositionalEquality using (_≡_)
+open import Relation.Nullary using (¬_)
+
+open import RoutingLib.Relation.Binary
+open import RoutingLib.Data.Vec.Functional
+open import RoutingLib.Data.Vec.Functional.Properties
+
+open import RoutingLib.Routing.Basics.Network using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra
 
 module RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Definitions
@@ -11,18 +27,7 @@ module RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Definitions
   where
 
 open RawRoutingAlgebra algebra
-
-open import Data.Nat using (ℕ; _≤_; _<_)
-open import Data.Product using (proj₁; proj₂)
-open import Function.Metric.Nat
-open import Level
-open import Relation.Binary
-open import Relation.Binary.PropositionalEquality using (_≡_)
-open import Relation.Nullary using (¬_)
-
-open import RoutingLib.Relation.Binary
-
-open import RoutingLib.Routing.AdjacencyMatrix.Relations algebra A
+open import RoutingLib.Routing.Basics.Assignment algebra n
 open import RoutingLib.Routing.VectorBased.Synchronous algebra A
 
 ------------------------------------------------------------------------
@@ -45,52 +50,55 @@ open import RoutingLib.Routing.VectorBased.Synchronous algebra A
 
 -- This can't be defined in terms of IsDecStrictTotalOrder as we
 -- need the irreflexive relation to irrelevant
-    
+
 record ExtensionRespectingOrder ℓ₂ : Set (a ⊔ ℓ ⊔ suc ℓ₂) where
   field
-    _<ᵣ_         : Rel Route ℓ₂
-    ↝⇒<ᵣ         : _↝_ ⇒ _<ᵣ_
-    <₊∧<ᵣ⇒<ᵣ     : Trans _<₊_ _<ᵣ_ _<ᵣ_
-    .<ᵣ-irrefl   : Irreflexive _≈_ _<ᵣ_
-    <ᵣ-trans     : Transitive _<ᵣ_
+    _<ᵣ_         : Rel Assignment ℓ₂
+    ↝⇒<ᵣ         : _↝[ A ]_ ⇒ _<ᵣ_
+    <₊∧<ᵣ⇒<ᵣ     : Trans _<ₐₚ_ _<ᵣ_ _<ᵣ_
+    ↝∧<ᵣ⇒<ᵣ      : Trans _↝[ A ]_  _<ᵣ_ _<ᵣ_
+    .<ᵣ-irrefl   : Irreflexive _≈ₐ_ _<ᵣ_
     _<ᵣ?_        : Decidable _<ᵣ_
-    <ᵣ-respʳ-≈   : _<ᵣ_ Respectsʳ _≈_
-    <ᵣ-respˡ-≈   : _<ᵣ_ Respectsˡ _≈_
-    <ᵣ-min       : StrictMinimum _≈_ _<ᵣ_ 0#
+    <ᵣ-respʳ-≈ₐ  : _<ᵣ_ Respectsʳ _≈ₐ_
+    <ᵣ-respˡ-≈ₐ  : _<ᵣ_ Respectsˡ _≈ₐ_
+    <ᵣ-min       : ∀ {x y} → x <ᵣ y → (node x , 0#) <ᵣ y
+
+
+  <ᵣ-resp₂-≈ₐ : ∀ {w x y z} → w ≈ₐ x → y ≈ₐ z → w <ᵣ y → x <ᵣ z
+  <ᵣ-resp₂-≈ₐ w≈y y≈z = <ᵣ-respʳ-≈ₐ y≈z ∘ <ᵣ-respˡ-≈ₐ w≈y
 
 ------------------------------------------------------------------------
 -- Height function
 
 record HeightFunction : Set (a ⊔ ℓ) where
   field
-    h         : Route → ℕ
+    h         : Assignment → ℕ
     1≤h       : ∀ x → 1 ≤ h x
-    h≤H       : ∀ x → h x ≤ h 0#
-    h-resp-↝  : ∀ {x y} → x ↝  y → h y < h x
-    h-resp-≤  : ∀ {x y} → x <₊ y → h y ≤ h x
-    h-cong    : ∀ {x y} → x ≈  y → h x ≡ h y
-
-  H : ℕ
-  H = h 0#
-
+    h≤h[0]    : ∀ i x → h (i , x) ≤ h (i , 0#)
+    h-resp-↝  : ∀ {x y} → x ↝[ A ] y → h y < h x
+    h-resp-≤  : ∀ {x y} → x <ₐₚ y → h y ≤ h x
+    h-cong    : ∀ {x y} → x ≈ₐ  y → h x ≡ h y
+  
 ------------------------------------------------------------------------
 -- Route level distance function
 
 record RouteDistanceFunction : Set (a ⊔ ℓ) where
   field
-    r                   : Route → Route → ℕ
-    r-isQuasiSemiMetric : IsQuasiSemiMetric _≈_ r 
-    r-bounded           : Bounded r
-    r-strContrOrbits    : ∀ {X v} → 0 < v → (∀ k l → r (X k l) (F X k l) ≤ v) →
-                          ∀ i j → r (F X i j) (F (F X) i j) < v
+    r                   : Node → Route → Route → ℕ
+    r-isQuasiSemiMetric : ∀ i → IsQuasiSemiMetric _≈_ (r i) 
+    r-bounded           : ∀ i → Bounded (r i)
+    r-strContrOrbits    : ∀ {X v} → 0 < v → (∀ k l → r k (X k l) (F X k l) ≤ v) →
+                          ∀ i j → r i (F X i j) (F (F X) i j) < v
     r-strContrFP        : ∀ {X*} → F X* ≈ₘ X* →
-                          ∀ {X v} → 0 < v → (∀ k l → r (X* k l) (X k l) ≤ v) →
-                          ∀ i j → r (X* i j) (F X i j) < v
+                          ∀ {X v} → 0 < v → (∀ k l → r k (X* k l) (X k l) ≤ v) →
+                          ∀ i j → r i (X* i j) (F X i j) < v
 
-  rₘₐₓ : ℕ
-  rₘₐₓ = proj₁ r-bounded
+  module _ (i : Node) where
+    open IsQuasiSemiMetric (r-isQuasiSemiMetric i) public
 
-  r≤rₘₐₓ : ∀ x y → r x y ≤ rₘₐₓ
-  r≤rₘₐₓ = proj₂ r-bounded
-  
-  open IsQuasiSemiMetric r-isQuasiSemiMetric public
+  abstract
+    rₘₐₓ : ℕ
+    rₘₐₓ = max 0 (proj₁ ∘ r-bounded)
+
+    r≤rₘₐₓ : ∀ i x y → r i x y ≤ rₘₐₓ
+    r≤rₘₐₓ i x y = x≤max[t] 0 _ (inj₂ (i , proj₂ (r-bounded i) x y))

@@ -1,7 +1,7 @@
 open import Data.Nat using (ℕ; suc; z≤n; s≤s; _+_; _∸_; _<_; _≤_)
 open import Data.Fin using (Fin)
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing using (AdjacencyMatrix; RoutingMatrix)
+open import RoutingLib.Routing.Prelude using (AdjacencyMatrix; RoutingMatrix)
 
 module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step1_NodeSets
   {a b ℓ n-1}
@@ -24,17 +24,17 @@ open import Relation.Binary.PropositionalEquality
   using (_≡_; cong; subst; refl; sym; trans; inspect; [_])
 import Relation.Binary.Reasoning.Setoid as EqReasoning
 
-open import RoutingLib.Data.Path.CertifiedI.All
-open import RoutingLib.Data.Path.CertifiedI.Properties
+open import RoutingLib.Routing.Basics.Path.CertifiedI.All
+open import RoutingLib.Routing.Basics.Path.CertifiedI.Properties
 
 import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Prelude as Prelude
 
 open Prelude isRoutingAlgebra isPathAlgebra A
 
 ------------------------------------------------------------------------------
--- Fixed vertices -- vertices that don't change their value after time t
+-- Fixed nodes -- nodes that don't change their value after time t
 
-𝓕 : 𝕋 → Vertex → Set _
+𝓕 : 𝕋 → Node → Set _
 𝓕 t i = ∀ s → σ (t + s) X i j ≈ σ t X i j
 
 j∈𝓕₁ : j ∈ᵤ 𝓕 1
@@ -61,7 +61,7 @@ j∈𝓕₁ s = FXᵢᵢ≈FYᵢᵢ (σ s X) X refl
 -- Converged nodes -- nodes for which all nodes they route through are fixed
 -- after time t
 
-𝓒 : 𝕋 → Vertex → Set _
+𝓒 : 𝕋 → Node → Set _
 𝓒 t i = i ∈ᵤ 𝓕 t × Allᵥ (𝓕 t) (path (σ t X i j))
 
 𝓒-cong : ∀ {s t k} → k ∈ᵤ 𝓒 s → s ≡ t → k ∈ᵤ 𝓒 t
@@ -113,7 +113,7 @@ Aligned? t (i , k) = σ t X i j ≟ A i k ▷ σ t X k j
 -- Real nodes -- Nodes that are using paths that are consistent with the
 -- current routing choices of the other nodes in the network.
 
-𝓡 : 𝕋 → Vertex → Set ℓ
+𝓡 : 𝕋 → Node → Set ℓ
 𝓡 t i = Allₑ (Aligned t) (path (σ t X i j))
 
 𝓡? : ∀ t → Decidable (𝓡 t)

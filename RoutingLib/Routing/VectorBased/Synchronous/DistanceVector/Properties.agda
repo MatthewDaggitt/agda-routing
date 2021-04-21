@@ -6,17 +6,7 @@
 -- algebra is a distance-vector algebra.
 --------------------------------------------------------------------------------
 
-open import RoutingLib.Routing using (AdjacencyMatrix)
-open import RoutingLib.Routing.Algebra
-
-module RoutingLib.Routing.VectorBased.Synchronous.DistanceVector.Properties
-  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  {n} (A : AdjacencyMatrix algebra n)
-  where
-
-import Algebra.Definitions as AlgebraDefinitions
-open import Data.Fin.Properties using () renaming (_≟_ to _≟𝔽_)
+import Data.Fin.Properties as Fin
 open import Data.List using (tabulate)
 open import Data.List.Membership.Setoid.Properties
   using (foldr-selective; ∈-tabulate⁻; ∈-tabulate⁺)
@@ -27,20 +17,26 @@ open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; sym; trans)
-import Relation.Binary.Reasoning.PartialOrder as POR
 
 open import RoutingLib.Data.List.Properties using (foldr≤ₗe; foldr≤ᵣxs)
-import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra
-  as RoutingAlgebraProperties
-import RoutingLib.Routing.VectorBased.Synchronous as VectorBasedRouting
 
-open VectorBasedRouting algebra A
+open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Basics.Network using (AdjacencyMatrix)
+
+module RoutingLib.Routing.VectorBased.Synchronous.DistanceVector.Properties
+  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  {n} (A : AdjacencyMatrix algebra n)
+  where
+
 open RawRoutingAlgebra algebra
 open IsRoutingAlgebra isRoutingAlgebra
-open RoutingAlgebraProperties isRoutingAlgebra
 
-open AlgebraDefinitions _≈_
-open POR ≤₊-poset
+open import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra isRoutingAlgebra
+open import RoutingLib.Routing.VectorBased.Synchronous algebra A
+
+open import Algebra.Definitions _≈_
+open import Relation.Binary.Reasoning.PartialOrder ≤₊-poset
 
 ------------------------------------------------------------------------------
 -- Properties of I, the identity matrix/initial state
@@ -78,7 +74,7 @@ FXᵢᵢ≈FYᵢᵢ X Y {i} refl = ≈-trans (FXᵢᵢ≈Iᵢᵢ X i) (≈-sym (
 
 -- After an iteration, if one entry is less than the other than it cannot be the identity matrix
 FXᵢⱼ<FYᵢⱼ⇒FXᵢⱼ≉Iᵢⱼ : ∀ X Y {i j} → F X i j <₊ F Y i j → F X i j ≉ I i j
-FXᵢⱼ<FYᵢⱼ⇒FXᵢⱼ≉Iᵢⱼ X Y {i} {j} FXᵢⱼ<FYᵢⱼ@(FXᵢⱼ≤FYᵢⱼ , FXᵢⱼ≉FYᵢⱼ) with i ≟𝔽 j
+FXᵢⱼ<FYᵢⱼ⇒FXᵢⱼ≉Iᵢⱼ X Y {i} {j} FXᵢⱼ<FYᵢⱼ@(FXᵢⱼ≤FYᵢⱼ , FXᵢⱼ≉FYᵢⱼ) with i Fin.≟ j
 ... | yes i≡j = contradiction (FXᵢᵢ≈FYᵢᵢ X Y i≡j) FXᵢⱼ≉FYᵢⱼ
 ... | no  i≢j = <₊⇒≉ (begin-strict
   F X i j <⟨ FXᵢⱼ<FYᵢⱼ ⟩

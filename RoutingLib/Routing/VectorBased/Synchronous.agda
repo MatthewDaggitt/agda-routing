@@ -6,33 +6,31 @@
 -- provided routing algebra.
 --------------------------------------------------------------------------------
 
+open import Data.Nat using (ℕ; zero; suc)
+open import Data.List using (foldr; tabulate)
+open import Data.List.Relation.Binary.Pointwise using (tabulate⁺; foldr⁺)
+
+open import RoutingLib.Iteration.Synchronous
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing as Routing using (AdjacencyMatrix)
+open import RoutingLib.Routing.Basics.Network using (AdjacencyMatrix)
 
 module RoutingLib.Routing.VectorBased.Synchronous
   {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)
-  {n} (A : AdjacencyMatrix algebra n)
+  {n : ℕ} (A : AdjacencyMatrix algebra n)
   where
-
-open import Data.Nat using (ℕ; zero; suc)
-open import Data.List using (foldr; tabulate)
-open import Data.List.Relation.Binary.Pointwise using (tabulate⁺)
-
-open import RoutingLib.Data.List.Relation.Binary.Pointwise using (foldr⁺)
-open import RoutingLib.Iteration.Synchronous
 
 open RawRoutingAlgebra algebra
 
 --------------------------------------------------------------------------------
--- Publicly re-export the contents of next-hop routing so that we don't have
+-- Publicly re-export the contents of the routing prelude so that we don't have
 -- to open every time we used vector-based routing.
 
-open Routing algebra n public
+open import RoutingLib.Routing.Prelude algebra n public
 
 --------------------------------------------------------------------------------
 -- Algorithm
 
--- Single iteration
+-- A single iteration
 F : RoutingMatrix → RoutingMatrix
 F X i j = foldr _⊕_ (I i j) (tabulate (λ k → A i k ▷ X k j))
 
@@ -42,7 +40,7 @@ F X i j = foldr _⊕_ (I i j) (tabulate (λ k → A i k ▷ X k j))
 
 -- F respects the underlying matrix equality
 F-cong : ∀ {X Y} → X ≈ₘ Y → F X ≈ₘ F Y
-F-cong X≈Y i j = foldr⁺ _≈_ ⊕-cong ≈-refl (tabulate⁺ (λ k → ▷-cong _ (X≈Y k j)))
+F-cong X≈Y i j = foldr⁺ {R = _≈_} ⊕-cong ≈-refl (tabulate⁺ (λ k → ▷-cong _ (X≈Y k j)))
 
 -- σ respects the underlying matrix equality
 σ-cong : ∀ t {X Y} → X ≈ₘ Y → σ t X ≈ₘ σ t Y

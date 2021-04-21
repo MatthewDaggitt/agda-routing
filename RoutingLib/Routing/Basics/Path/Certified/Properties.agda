@@ -16,9 +16,9 @@ open import Relation.Nullary.Negation using (¬?)
 open import RoutingLib.Data.Nat.Properties using (<⇒≤suc)
 import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.DecTotalOrder as ToStrict
 
-open import RoutingLib.Data.Path.Certified
+open import RoutingLib.Routing.Basics.Path.Certified
 
-module RoutingLib.Data.Path.Certified.Properties where
+module RoutingLib.Routing.Basics.Path.Certified.Properties where
 
 ----------------------------------------------------------------------------
 -- Edges

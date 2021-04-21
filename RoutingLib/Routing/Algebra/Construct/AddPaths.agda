@@ -21,17 +21,15 @@ open import Relation.Binary.Construct.Add.Point.Equality as PointedEq
   renaming (_≈∙_ to PointedEq)
   using (∙≈∙; [_]; [≈]-injective; ≈∙-refl; ≈∙-sym; ≈∙-trans)
 open import Relation.Nullary using (¬_; yes; no)
-open import Relation.Nullary.Negation using (contradiction)
+open import Relation.Nullary.Negation using (contradiction; contradiction₂)
 open import Relation.Nullary.Construct.Add.Point renaming (∙ to invalid; [_] to valid)
 
 open import RoutingLib.Algebra.Construct.Add.Identity as AddIdentity
   renaming (_⊕∙_ to AddIdentity) using (⊕∙-comm)
-open import RoutingLib.Algebra.Construct.Lexicographic.Base
 open import RoutingLib.Data.Path.Uncertified
   renaming (_∈ₚ_ to _∈ᴱ_; _∉ₚ_ to _∉ᴱ_; Path to EPath; _⇿_ to _⇿ᴱ_)
 open import RoutingLib.Data.Path.Uncertified.Choice
 open import RoutingLib.Data.Path.Uncertified.Properties
-open import RoutingLib.Relation.Nullary.Negation using (contradiction₂)
 
 open import RoutingLib.Routing.Algebra
 
@@ -40,9 +38,9 @@ module RoutingLib.Routing.Algebra.Construct.AddPaths
 
 open RawRoutingAlgebra A
 
-
-import RoutingLib.Algebra.Construct.Lexicographic ⊕-magma ⊓ₗₑₓ-magma _≟_ as Lex
-
+open import Algebra.Construct.LexProduct ⊕-magma ⊓ₗₑₓ-magma _≟_ as Lex
+  renaming (_⊕_ to lex)
+  
 ------------------------------------------------------------------------
 -- Prelude
 
@@ -50,7 +48,7 @@ _≈ₓ_ : Rel (Route × EPath) _
 _≈ₓ_ = (Pointwise _≈_ _≡_)
 
 _⊕ₗₑₓ_ : Op₂ (Route × EPath)
-_⊕ₗₑₓ_  = lex _⊕_ _⊓ₗₑₓ_ _≟_
+_⊕ₗₑₓ_  = lex
 
 ≈ₓ-refl : Reflexive (Pointwise {A₂ = EPath} _≈_ _≡_)
 ≈ₓ-refl = Pointwise.×-refl {_∼₁_ = _≈_} {_≡_} ≈-refl refl

@@ -24,7 +24,7 @@ open import Relation.Unary using (Pred; Decidable; ∁)
 open import Data.Product as Prod using (_×_; _,_)
 
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
-import RoutingLib.Routing as Routing
+import RoutingLib.Routing.Prelude as RoutingPrelude
 import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra as RoutingAlgebra
 
 open import RoutingLib.Data.List using (partialMerge)
@@ -35,7 +35,7 @@ module RoutingLib.lmv34.Synchronous.Gamma_one.Algebra
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (n : ℕ) where
 
-open Routing algebra n
+open RoutingPrelude algebra n
 open RawRoutingAlgebra algebra
 open RoutingAlgebra isRoutingAlgebra using (≤₊-decTotalOrder)
 
@@ -46,8 +46,8 @@ map₂ f = map (Prod.map₂ f)
 --------------------------------------------------------------------------------
 -- Assignments
 
-open import RoutingLib.Routing.Assignment algebra n public
-open import RoutingLib.Routing.Assignment.Properties isRoutingAlgebra n public
+open import RoutingLib.Routing.Basics.Assignment algebra n public
+open import RoutingLib.Routing.Basics.Assignment.Properties isRoutingAlgebra n public
 
 _⊕ₐ_ : Op₂ Assignment
 (d₁ , v₁) ⊕ₐ (d₂ , v₂) = (d₁ , v₁ ⊕ v₂)

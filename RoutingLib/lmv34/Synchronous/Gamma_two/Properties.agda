@@ -17,7 +17,7 @@ import Relation.Binary.Reasoning.Setoid as EqReasoning
 
 open import RoutingLib.Iteration.Synchronous using (_^_)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
-open import RoutingLib.Routing as Routing using () renaming (AdjacencyMatrix to AdjacencyMatrix')
+import RoutingLib.Routing.Prelude as RoutingPrelude
 import RoutingLib.lmv34.Synchronous.Gamma_zero as Gamma_zero
 import RoutingLib.lmv34.Synchronous.Gamma_zero.Algebra as Gamma_zero_Algebra
 import RoutingLib.lmv34.Synchronous.Gamma_one as Gamma_one
@@ -28,14 +28,14 @@ import RoutingLib.lmv34.Synchronous.Gamma_two.Algebra as Gamma_two_Algebra
 
 module RoutingLib.lmv34.Synchronous.Gamma_two.Properties
   {a b ℓ} {alg : RawRoutingAlgebra a b ℓ}
-  (isRAlg : IsRoutingAlgebra alg) {n}
-  (A    : AdjacencyMatrix' alg n)
+  (isRAlg : IsRoutingAlgebra alg)
+  {n} (open RoutingPrelude alg n renaming (I to M) hiding (≈ₛ-refl))
+  (A : AdjacencyMatrix)
   (Imp Prot Exp : Gamma_two_Algebra.RouteMapMatrix isRAlg n )
   (A=Imp∘Prot∘Exp : Gamma_two_Algebra.IsComposition isRAlg n A Imp Prot Exp)
   where
 
 open RawRoutingAlgebra alg
-open Routing alg n renaming (I to M) using (RoutingMatrix; _≈ₘ_; ≈ₘ-refl)
 
 open Gamma_zero alg A
 open Gamma_zero_Algebra alg n
@@ -72,10 +72,9 @@ open DecSetoid ≈ᵥ,₂-decSetoid public using () renaming
 
 open DecSetoid Γ₂-State-decSetoid using () renaming
   ( _≈_    to _≈ₛ_
-  ; refl   to ≈ₛ-refl
+  ; refl   to ≈ₛ-refl 
   ; setoid to 𝕊ₛ
   )
-
 
 【】-cong : ∀ {F V V'} → V ≈ᵥ V' → (F 【 V 】) ≈ᵥ,₂ (F 【 V' 】)
 【】-cong V=V' i j = []-cong (V=V' i)

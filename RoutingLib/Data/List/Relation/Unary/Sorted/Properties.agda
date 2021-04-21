@@ -36,13 +36,13 @@ open Eq using () renaming (setoid to S; trans to ≈-trans; sym to ≈-sym)
 
 open import RoutingLib.Data.Fin.Properties as Fin
 open import RoutingLib.Data.List.Relation.Unary.All.Properties as Allₚ
-open import RoutingLib.Data.List.Relation.Binary.Pointwise
 open import RoutingLib.Data.List.Relation.Unary.Linked.Properties using (lookup-Linked)
 import Data.List.Relation.Binary.Permutation.Setoid.Properties S as Permₚ
 open import Data.List.Relation.Unary.Sorted.TotalOrder order as Sorted hiding (tail)
 
 open import Data.List.Relation.Binary.Permutation.Setoid S as Perm using (_↭_; ↭-sym)
 open import Data.List.Relation.Binary.Equality.Setoid S
+import Data.List.Relation.Binary.Pointwise as Pointwise
 
 open import RoutingLib.Data.List.Relation.Binary.Permutation.Setoid.Properties S
   using (xs↭ys⇒|xs|≡|ys|; permute; permute-lookup; permute-injective)
@@ -107,6 +107,6 @@ private
     ... | no  i≢k    = ∀k k (ℕ.≤∧≢⇒< (P.subst (_≤ℕ toℕ k) (Fin.suc-pred i≢0) i∸1≤k) (i≢k ∘ toℕ-injective)) k≤j
     
 ↗↭↗⇒≋ : ∀ {xs ys} → Sorted xs → Sorted ys → xs ↭ ys → xs ≋ ys
-↗↭↗⇒≋ {xs} {ys} xs↗ ys↗ xs↭ys = lookup⁻ (xs↭ys⇒|xs|≡|ys| xs↭ys) (λ {i} {j} i≡j → antisym
+↗↭↗⇒≋ {xs} {ys} xs↗ ys↗ xs↭ys = Pointwise.lookup⁻ (xs↭ys⇒|xs|≡|ys| xs↭ys) (λ {i} {j} i≡j → antisym
   (↗↭↗⇒≤ (↭-sym xs↭ys) ys↗ xs↗ (<-wellFounded j) (ℕ.≤-reflexive (≡-sym i≡j)) (λ k j<k k≤i → contradiction (ℕ.<-transˡ j<k k≤i) (ℕ.<-irrefl (≡-sym i≡j))) refl)
   (↗↭↗⇒≤ xs↭ys         xs↗ ys↗ (<-wellFounded i) (ℕ.≤-reflexive i≡j)         (λ k i<k k≤j → contradiction (ℕ.<-transˡ i<k k≤j) (ℕ.<-irrefl i≡j)) refl))

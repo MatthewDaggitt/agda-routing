@@ -13,10 +13,10 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
-open import RoutingLib.Data.Path.UncertifiedI
-import RoutingLib.Data.Path.Uncertified.Properties as UncertifiedProperties
+open import RoutingLib.Routing.Basics.Path.UncertifiedI
+import RoutingLib.Routing.Basics.Path.Uncertified.Properties as UncertifiedProperties
 
-module RoutingLib.Data.Path.UncertifiedI.Properties where
+module RoutingLib.Routing.Basics.Path.UncertifiedI.Properties where
 
 open UncertifiedProperties public
   using ()

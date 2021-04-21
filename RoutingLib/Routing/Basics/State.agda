@@ -6,13 +6,7 @@
 -- matrix, routing tables, global routing state etc.
 --------------------------------------------------------------------------------
 
-open import RoutingLib.Routing.Algebra
 open import Data.Nat using (ℕ)
-
-module RoutingLib.Routing
-  {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) (n : ℕ)
-  where
-
 open import Data.Fin using (Fin) renaming (_≟_ to _≟𝔽_)
 open import Data.Fin.Subset using (Subset; _∉_)
 open import Data.Fin.Properties as Fin using (any?)
@@ -37,26 +31,16 @@ open import RoutingLib.Data.Matrix
 import RoutingLib.Data.Matrix.Relation.Binary.DecidableEquality as MatrixDecEquality
 import RoutingLib.Data.Vec.Functional.Relation.Binary.DecidableEquality as VectorDecEquality
 
+open import RoutingLib.Routing.Algebra
 import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule as Schedule
 
+module RoutingLib.Routing.Basics.State
+  {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)
+  (n : ℕ)
+  where
+
 open RawRoutingAlgebra algebra
-
---------------------------------------------------------------------------------
--- Adjacency matrices represent the topology of the network at a point in time
-
-AdjacencyMatrix : Set b
-AdjacencyMatrix = ∀ (i j : Fin n) → Step i j
-
---------------------------------------------------------------------------------
--- A network is a epoch indexed family of adjacency matrices
-
-open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule public
-  using (Epoch)
-
--- TODO make Network a record and hide the size
-
-Network : Set b
-Network = Epoch → AdjacencyMatrix
+open import RoutingLib.Routing.Basics.Node n
 
 --------------------------------------------------------------------------------
 -- Routing tables store a node's routing decisions
@@ -79,11 +63,11 @@ open VectorDecEquality DS public
 Decℝ𝕋ₛ : DecSetoid a ℓ
 Decℝ𝕋ₛ = VectorDecEquality.≋-decSetoid DS n
 
-ℝ𝕋ₛⁱ : IndexedSetoid (Fin n) _ _
-ℝ𝕋ₛⁱ = triviallyIndexSetoid (Fin n) S
+ℝ𝕋ₛⁱ : IndexedSetoid Node a ℓ
+ℝ𝕋ₛⁱ = triviallyIndexSetoid Node S
 
-Decℝ𝕋ₛⁱ : IndexedDecSetoid (Fin n) _ _
-Decℝ𝕋ₛⁱ = triviallyIndexDecSetoid (Fin n) DS
+Decℝ𝕋ₛⁱ : IndexedDecSetoid Node a ℓ
+Decℝ𝕋ₛⁱ = triviallyIndexDecSetoid Node DS
 
 --------------------------------------------------------------------------------
 -- Routing matrices store the routing decisions of the entire network
@@ -97,13 +81,13 @@ open MatrixDecEquality DS public
 ℝ𝕄ₛ : Setoid a ℓ
 ℝ𝕄ₛ = 𝕄ₛ n n
 
-ℝ𝕄ₛⁱ : IndexedSetoid (Fin n) _ _
-ℝ𝕄ₛⁱ = triviallyIndexSetoid (Fin n) ℝ𝕋ₛ
+ℝ𝕄ₛⁱ : IndexedSetoid Node _ _
+ℝ𝕄ₛⁱ = triviallyIndexSetoid Node ℝ𝕋ₛ
 
 Decℝ𝕄ₛ : DecSetoid a ℓ
 Decℝ𝕄ₛ = Dec𝕄ₛ n n
 
-Decℝ𝕄ₛⁱ : IndexedDecSetoid (Fin n) a ℓ
+Decℝ𝕄ₛⁱ : IndexedDecSetoid Node a ℓ
 Decℝ𝕄ₛⁱ = triviallyIndexDecSetoid (Fin n) Decℝ𝕋ₛ
 
 -- Equality over only a subset of routing tables
@@ -147,7 +131,7 @@ Iᵢⱼ≡Iₖₗ j≢i l≢k = trans (Iᵢⱼ≡∞ j≢i) (sym (Iᵢⱼ≡∞ 
 -- Let p be the set of active nodes, then a routing matrix is accordant with p
 -- if every entry not in the subset is inactive
 
-Accordant : Subset n → RoutingMatrix → Set ℓ
+Accordant : Participants → RoutingMatrix → Set ℓ
 Accordant p X = ∀ {i} → i ∉ p → X i ≈ₜ I i
 
 Accordant-cong : ∀ {X Y p} → X ∈ Accordant p → Y ∈ Accordant p →

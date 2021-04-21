@@ -1,5 +1,5 @@
 open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing using (AdjacencyMatrix)
+open import RoutingLib.Routing.Basics.Network using (AdjacencyMatrix)
 
 module RoutingLib.Routing.VectorBased.Asynchronous.PathVector.Properties
   {a b ℓ n} {algebra : RawRoutingAlgebra a b ℓ}

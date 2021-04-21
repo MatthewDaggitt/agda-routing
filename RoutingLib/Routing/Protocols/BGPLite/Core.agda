@@ -20,9 +20,9 @@ open import Relation.Binary.PropositionalEquality
 import Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
 open import Level using (0ℓ) renaming (suc to lsuc)
 
-open import RoutingLib.Data.Path.Uncertified
+open import RoutingLib.Routing.Basics.Path.Uncertified
   using (Path; []; _∷_; inflate; deflate; length)
-open import RoutingLib.Data.Path.Uncertified.Properties
+open import RoutingLib.Routing.Basics.Path.Uncertified.Properties
 
 open import RoutingLib.Routing.Algebra
 
@@ -105,7 +105,7 @@ A = record
 -- Definition of the routing protocol
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule using (𝕋; Schedule)
-open import RoutingLib.Routing A
+open import RoutingLib.Routing.Prelude A
   using (Network; RoutingMatrix; AdjacencyMatrix; I)
 import RoutingLib.Routing.VectorBased.Asynchronous A as AsyncRouting
 import RoutingLib.Routing.VectorBased.Synchronous  A as SyncRouting

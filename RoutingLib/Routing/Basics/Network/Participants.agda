@@ -12,11 +12,12 @@ open import Data.Fin.Properties using (any?)
 open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (∃₂; _,_)
+open import Data.Nat using (ℕ)
 open import Level using (_⊔_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; sym; trans)
-import Relation.Binary.Reasoning.Setoid as EqReasoning
+import Relation.Binary.Reasoning.Setoid as SetoidReasoning
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 
@@ -24,17 +25,23 @@ open import RoutingLib.Data.Fin using (_+ₘ_; _-ₘ_)
 open import RoutingLib.Data.FiniteSet using (⟦_∣_⟧) renaming (FiniteSet to FiniteSet⁺)
 
 open import RoutingLib.Routing.Algebra
-import RoutingLib.Routing as Routing
-import RoutingLib.Routing.AdjacencyMatrix.Cycles as Cycles
+import RoutingLib.Routing.Prelude as RoutingPrelude
 
-module RoutingLib.Routing.Network.Properties
+module RoutingLib.Routing.Basics.Network.Participants
   {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ)
-  {n} (open Routing algebra n)
+  {n : ℕ} (open RoutingPrelude algebra n)
   (N : Network)
   where
 
 open RawRoutingAlgebra algebra
-open import RoutingLib.Routing.Network.Definitions algebra N
+
+------------------------------------------------------------------------
+-- The adjacency matrix in each epoch, adjusted for participants
+
+Aₜ : Epoch → Participants → AdjacencyMatrix
+Aₜ e p i j with i ∈? p | j ∈? p
+... | yes _ | yes _ = N e i j
+... | _     | _     = f∞ i j
 
 ------------------------------------------------------------------------
 -- The adjacency matrix in each epoch, adjusted for participants
@@ -50,10 +57,10 @@ Aₜ-reject e {p} i j op x with i ∈? p | j ∈? p
 
 Aₜ-reject-eq : ∀ e {p} i j → i ∉ p → ∀ x y → Aₜ e p i j ▷ x ≈ Aₜ e p i j ▷ y
 Aₜ-reject-eq e {p} i j i∉p x y = begin
-  Aₜ e p i j ▷ x ≈⟨ Aₜ-reject e i j (inj₁ i∉p) x ⟩
-  ∞#             ≈⟨ ≈-sym (Aₜ-reject e i j (inj₁ i∉p) y) ⟩
-  Aₜ e p i j ▷ y ∎
-  where open EqReasoning S
+  Aₜ e p i j ▷ x  ≈⟨  Aₜ-reject e i j (inj₁ i∉p) x ⟩
+  ∞#              ≈˘⟨ Aₜ-reject e i j (inj₁ i∉p) y ⟩
+  Aₜ e p i j ▷ y  ∎
+  where open SetoidReasoning S
 
 Aₜ-cong : ∀ e p {X Y : RoutingMatrix} → X ≈ₘ[ p ] Y →
           ∀ {i j} k → Aₜ e p i k ▷ X k j ≈ Aₜ e p i k ▷ Y k j

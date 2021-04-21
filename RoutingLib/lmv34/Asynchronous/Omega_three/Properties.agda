@@ -7,7 +7,7 @@ open import Relation.Binary using (DecSetoid)
 import Relation.Binary.Reasoning.Setoid as EqReasoning
 open import Function.Base using (_∘_; _∘₂_)
 
-open import RoutingLib.Routing using (AdjacencyMatrix)
+open import RoutingLib.Routing.Basics.Network using (AdjacencyMatrix)
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 open import RoutingLib.lmv34.Synchronous.Gamma_two.Algebra as Gamma_two_Algebra using (IsComposition; RouteMapMatrix)
 

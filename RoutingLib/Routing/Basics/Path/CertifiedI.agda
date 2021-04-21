@@ -10,9 +10,9 @@ open import Level using () renaming (zero to 0ℓ)
 open import Relation.Nullary using (¬_)
 open import Relation.Binary using (Rel; REL)
 
-import RoutingLib.Data.Path.Certified as Certified
+import RoutingLib.Routing.Basics.Path.Certified as Certified
 
-module RoutingLib.Data.Path.CertifiedI where
+module RoutingLib.Routing.Basics.Path.CertifiedI where
 
 ----------------------------------------------------------------------------
 -- Reimports

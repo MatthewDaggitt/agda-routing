@@ -42,14 +42,6 @@ Nonfull-witness {n = n} {p} ¬pᶠ = ¬∀⟶∃¬ n (_∈ p) (_∈? p) ¬pᶠ
 ------------------------------------------------------------------------
 -- ⁅_⁆
 
-i∉⁅j⁆ : x ≢ y → x ∉ ⁅ y ⁆
-i∉⁅j⁆ {_} {zero}  {zero}  i≢j _             = contradiction refl i≢j
-i∉⁅j⁆ {_} {suc i} {zero}  i≢j (there i∈⁅j⁆) = contradiction i∈⁅j⁆ ∉⊥
-i∉⁅j⁆ {_} {suc i} {suc j} i≢j i∈⁅j⁆         = i≢j (x∈⁅y⁆⇒x≡y (suc j) i∈⁅j⁆)
-{-# WARNING_ON_USAGE i∉⁅j⁆
-"Use x≢y⇒x∉⁅y⁆"
-#-}
-
 Nonfull⁅i⁆ : ∀ (i : Fin (suc (suc n))) → Nonfull ⁅ i ⁆
 Nonfull⁅i⁆ zero    full = ∉⊥ (drop-there (full (suc zero)))
 Nonfull⁅i⁆ (suc i) full = contradiction (full zero) λ()

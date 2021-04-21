@@ -7,7 +7,7 @@ open import Data.Product using (_×_)
 open import Level using (_⊔_) renaming (suc to lsuc)
 open import Function.Base using (_∘_)
 
-import RoutingLib.Routing as Routing
+import RoutingLib.Routing.Prelude as RoutingPrelude
 open import RoutingLib.Routing.Algebra using (RawRoutingAlgebra; IsRoutingAlgebra)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 
@@ -18,7 +18,7 @@ module RoutingLib.lmv34.Synchronous.Gamma_two.Algebra
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (n : ℕ) where
 
-open Routing algebra n using (RoutingMatrix; AdjacencyMatrix)
+open RoutingPrelude algebra n using (RoutingMatrix; AdjacencyMatrix)
 open RawRoutingAlgebra algebra
 open Gamma_one_Algebra isRoutingAlgebra n
 

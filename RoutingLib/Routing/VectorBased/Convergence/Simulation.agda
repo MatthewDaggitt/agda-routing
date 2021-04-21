@@ -25,7 +25,7 @@ open import Relation.Nullary using (yes; no)
 open import Relation.Binary.PropositionalEquality using (_≡_; cong)
 import Relation.Binary.Reasoning.Setoid as SetoidReasoning
 
-open import RoutingLib.Routing using (Network; RoutingMatrix; AdjacencyMatrix; I)
+open import RoutingLib.Routing.Prelude using (Network; RoutingMatrix; AdjacencyMatrix; I)
 open import RoutingLib.Data.Matrix using (SquareMatrix)
 open import RoutingLib.Data.List.Properties using (foldr-map-commute-gen₂)
 
@@ -86,8 +86,8 @@ fromₐ N i j = fromₛ (N i j)
 
 module _ {n : ℕ} where
 
-  open RoutingLib.Routing A n using () renaming (I to Iᵃ)
-  open RoutingLib.Routing B n using () renaming (I to Iᵇ)
+  open RoutingLib.Routing.Prelude A n using () renaming (I to Iᵃ)
+  open RoutingLib.Routing.Prelude B n using () renaming (I to Iᵇ)
 
   toIᵃ≈Iᵇ : ∀ i j → to (Iᵃ i j) ≈ᵇ Iᵇ i j
   toIᵃ≈Iᵇ i j with j ≟ i

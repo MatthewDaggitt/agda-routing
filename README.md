@@ -1,6 +1,6 @@
 # Agda-routing
 
-Requirements: Agda 2.6.1 and Standard Library 1.5
+Requirements: Agda 2.6.1 and Standard Library 1.6
 
 This library reasons about asynchronous iterative algorithms and network routing
 problems. It is organised in the same manner as the Agda standard library and
@@ -196,3 +196,5 @@ _An Agda Formalization of Üresin & Dubois’ Asynchronous Fixed-Point Theory_, 
 
 [6] `Daggitt M.L.`, `Zmigrod, R.`, Griffin T.G.` _A Relaxation of Üresin & Dubois' 
 Asynchronous Fixed-Point Theory in Agda_ JAR (2019)
+
+[7] `Daggitt M.L.`, `Griffin T.G.` _Dynamic Asynchronous Iterations_ (2021) https://arxiv.org/abs/2012.01686

@@ -144,15 +144,15 @@ open StrictTotalOrder <ₐₜ-strictTotalOrder public
 -- Properties of _↝_
 
 _↝[_]?_ : ∀ x A y → Dec (x ↝[ A ] y)
-(j , x) ↝[ A ]? (i , y) = ¬? (x ≟ ∞#) ×-dec (A i j ▷ x ≟ y)
+(j , x) ↝[ A ]? (i , y) = (A i j ▷ x ≟ y) ×-dec ¬? (x ≟ ∞#)
 
 ↝-respˡ-≈ₐ : _↝[ A ]_ Respectsˡ _≈ₐ_
-↝-respˡ-≈ₐ (refl , x≈y) (x≉∞ , Aᵢⱼx≈z) =
-  x≉∞ ∘ ≈-trans x≈y ,
-  ≈-trans (▷-cong _ (≈-sym x≈y)) Aᵢⱼx≈z
-
+↝-respˡ-≈ₐ (refl , x≈y) (Aᵢⱼx≈z , x≉∞) =
+  ≈-trans (▷-cong _ (≈-sym x≈y)) Aᵢⱼx≈z ,
+  x≉∞ ∘ ≈-trans x≈y
+  
 ↝-respʳ-≈ₐ : _↝[ A ]_ Respectsʳ _≈ₐ_
-↝-respʳ-≈ₐ (refl , x≈y) (x≉∞ , Aᵢⱼz≈x) = x≉∞ , ≈-trans Aᵢⱼz≈x x≈y
+↝-respʳ-≈ₐ (refl , x≈y) (Aᵢⱼz≈x , x≉∞) = ≈-trans Aᵢⱼz≈x x≈y , x≉∞
 
 ↝-resp-≈ₐ : _↝[ A ]_ Respects₂ _≈ₐ_
 ↝-resp-≈ₐ {A} = ↝-respʳ-≈ₐ {A} , ↝-respˡ-≈ₐ {A}
@@ -160,12 +160,12 @@ _↝[_]?_ : ∀ x A y → Dec (x ↝[ A ] y)
 -- If the algebra is increasing then x extends y implies
 -- x is preferred over y
 incr∧↝⇒≤₊ : IsIncreasing algebra → ∀ A {x y} → x ↝[ A ] y → value x ≤₊ value y
-incr∧↝⇒≤₊ incr A (x≉∞ , Aᵢⱼx≈y) = ≤₊-respʳ-≈ Aᵢⱼx≈y (incr _ _)
+incr∧↝⇒≤₊ incr A (Aᵢⱼx≈y , x≉∞) = ≤₊-respʳ-≈ Aᵢⱼx≈y (incr _ _)
 
 -- If the algebra is strictly increasing then x extends y implies
 -- x is strictly preferred over y
 strIncr∧↝⇒<₊ : IsStrictlyIncreasing algebra → ∀ A {x y} → x ↝[ A ] y → value x <₊ value y
-strIncr∧↝⇒<₊ strIncr A (x≉∞ , Aᵢⱼx≈y) = <₊-respʳ-≈ Aᵢⱼx≈y (strIncr _ x≉∞)
+strIncr∧↝⇒<₊ strIncr A (Aᵢⱼx≈y , x≉∞) = <₊-respʳ-≈ Aᵢⱼx≈y (strIncr _ x≉∞)
 
 --------------------------------------------------------------------------------
 -- Properties of _⊴_
@@ -183,7 +183,7 @@ strIncr∧↝⇒<₊ strIncr A (x≉∞ , Aᵢⱼx≈y) = <₊-respʳ-≈ Aᵢ�
 ↝∧≤ₐₚ⇒⊴ _ x↝y (refl , y≤z) = _ , x↝y , y≤z
 
 x⊴y⇒A▷x≤₊y : ∀ A {i j x y} → (i , x) ⊴[ A ] (j , y) → A j i ▷ x ≤₊ y
-x⊴y⇒A▷x≤₊y A (z , x↝z , z≤y) = ≤₊-respˡ-≈ (≈-sym (proj₂ x↝z)) z≤y
+x⊴y⇒A▷x≤₊y A (z , x↝z , z≤y) = ≤₊-respˡ-≈ (≈-sym (proj₁ x↝z)) z≤y
 
 -- If the algebra is increasing then x threatens y implies x <₊ y
 incr∧⊴⇒≤₊ : IsIncreasing algebra → ∀ A {x} y → x ⊴[ A ] y → value x ≤₊ value y

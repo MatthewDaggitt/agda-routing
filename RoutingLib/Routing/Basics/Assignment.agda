@@ -123,7 +123,7 @@ _<ₐₜ?_ = NonStrictToStrict.<-decidable _ _ _≟ₐ_ _≤ₐₜ?_
 
 infix 7 _↝[_]_
 _↝[_]_ : Assignment → AdjacencyMatrix → Assignment → Set ℓ
-(j , x) ↝[ A ] (i , y) = x ≉ ∞# × A i j ▷ x ≈ y 
+(j , y) ↝[ A ] (i , x) = (A i j ▷ y ≈ x) × (y ≉ ∞#)
 
 --------------------------------------------------------------------------------
 -- Threatens relation

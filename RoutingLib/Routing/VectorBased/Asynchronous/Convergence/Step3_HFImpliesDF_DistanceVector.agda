@@ -143,7 +143,7 @@ h[FXᵢⱼ]⊔h[FYᵢⱼ]<v X Y {i} {j} {v} FXᵢⱼ<FYᵢⱼ@(FXᵢⱼ≤FYᵢ�
 ... | inj₂ FXᵢⱼ≈Iᵢⱼ = contradiction FXᵢⱼ≈Iᵢⱼ (FXᵢⱼ<FYᵢⱼ⇒FXᵢⱼ≉Iᵢⱼ X Y FXᵢⱼ<FYᵢⱼ)
 ... | inj₁ (k , FXᵢⱼ≈AᵢₖXₖⱼ) = begin-strict
   h i (F X i j) ⊔ h i (F Y i j) ≡⟨ m≥n⇒m⊔n≡m (h-resp-≤ ((refl , FXᵢⱼ≤FYᵢⱼ) , λ {(refl , eq) → FXᵢⱼ≉FYᵢⱼ eq})) ⟩
-  h i (F X i j)                 <⟨ h-resp-↝ (Xₖⱼ≉∞ , ≈-sym FXᵢⱼ≈AᵢₖXₖⱼ) ⟩
+  h i (F X i j)                 <⟨ h-resp-↝ (≈-sym FXᵢⱼ≈AᵢₖXₖⱼ , Xₖⱼ≉∞) ⟩
   h k (X k j)                   ≤⟨ m≤m⊔n (h k (X k j)) (h k (Y k j)) ⟩
   h k (X k j) ⊔ h k (Y k j)     ≡⟨ sym (r[x,y]≡hx⊔hy k Xₖⱼ≉Yₖⱼ) ⟩
   r k (X k j) (Y k j)           ≤⟨ d≤v k ⟩

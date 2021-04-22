@@ -94,7 +94,7 @@ Cyclic? A (⟦ _ ∣ X ⟧) = all? (λ i → X (i -ₘ 1) ⊴? (X i))
                        AllLinksEqual A C → IsNonFreeCycle A C
   equalLinks⇒nonFree A (_ , C) (x , x≉∞ , A▷x≈x) =
     (λ _ → x) ,
-    (λ i → x , (x≉∞ , A▷x≈x i) , ≤₊-refl)
+    (λ i → x , (A▷x≈x i , x≉∞) , ≤₊-refl)
   
   incr∧nonFree⇒equalLinks : IsIncreasing algebra →
                             (A : AdjacencyMatrix) (C : Cycle) →
@@ -105,7 +105,7 @@ Cyclic? A (⟦ _ ∣ X ⟧) = all? (λ i → X (i -ₘ 1) ⊴? (X i))
     x = X (0F -ₘ 1)
 
     x≉∞ : x ≉ ∞#
-    x≉∞ = proj₁ (proj₁ (proj₂ (Cᵢ₋₁⊴Cᵢ 0F)))
+    x≉∞ = proj₂ (proj₁ (proj₂ (Cᵢ₋₁⊴Cᵢ 0F)))
 
     X₋₁≤X₀ : x ≤₊ X 0F
     X₋₁≤X₀ = incr∧⊴⇒≤₊ incr A (C 0F , _) (Cᵢ₋₁⊴Cᵢ 0F)

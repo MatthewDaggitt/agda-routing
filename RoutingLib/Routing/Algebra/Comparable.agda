@@ -1,14 +1,14 @@
 --------------------------------------------------------------------------------
 -- Agda routing library
 --
--- This module defines the notion of two routes being comparable. A pair of
--- routes are comparable if there exists a chance that a router may at some
--- point in some computation be forced to choose between them.
+-- This module defines the notion of two path-weights being comparable. A pair
+-- of path-weights are comparable if there exists a chance that a router may at
+-- some point in some computation be forced to choose between them.
 --
 -- If a pair of nodes are not comparable then we may not need to guarantee that
 -- the choice function is well behaved with respect to them (e.g. obeys
 -- properties like commutativity). Indeed in some algebras the choice function
--- is only well behaved for comparable routes (see
+-- is only well behaved for comparable path-weights (see
 -- `RoutingLib.Routing.Protocols.BGPLite`)
 --------------------------------------------------------------------------------
 
@@ -34,7 +34,7 @@ private
   variable
     n : ℕ
     i j k : Node n
-    w x y z : Route
+    w x y z : PathWeight
  
 --------------------------------------------------------------------------------
 -- Definition
@@ -46,15 +46,15 @@ private
 
 infix 4 _≎_
 
-data _≎_ : Rel Route (a ⊔ b ⊔ ℓ) where
+data _≎_ : Rel PathWeight (a ⊔ b ⊔ ℓ) where
   0∞# : x ≈ 0# → y ≈ ∞# → x ≎ y
   ∞0# : x ≈ ∞# → y ≈ 0# → x ≎ y
   ∞∞# : x ≈ ∞# → y ≈ ∞# → x ≎ y
-  0e# : (g : Step i j) (w : Route) → x ≈ 0# → y ≈ g ▷ w → x ≎ y
-  e0# : (f : Step i j) (v : Route) → x ≈ f ▷ v → y ≈ 0# → x ≎ y
-  ∞e# : (g : Step i j) (w : Route) → x ≈ ∞# → y ≈ g ▷ w → x ≎ y
-  e∞# : (f : Step i j) (v : Route) → x ≈ f ▷ v → y ≈ ∞# → x ≎ y
-  ee# : (f : Step i j) (g : Step i k) (v w : Route) → j ≢ k → x ≈ f ▷ v → y ≈ g ▷ w → x ≎ y
+  0e# : (g : Step i j) (w : PathWeight) → x ≈ 0# → y ≈ g ▷ w → x ≎ y
+  e0# : (f : Step i j) (v : PathWeight) → x ≈ f ▷ v → y ≈ 0# → x ≎ y
+  ∞e# : (g : Step i j) (w : PathWeight) → x ≈ ∞# → y ≈ g ▷ w → x ≎ y
+  e∞# : (f : Step i j) (v : PathWeight) → x ≈ f ▷ v → y ≈ ∞# → x ≎ y
+  ee# : (f : Step i j) (g : Step i k) (v w : PathWeight) → j ≢ k → x ≈ f ▷ v → y ≈ g ▷ w → x ≎ y
 
 --------------------------------------------------------------------------------
 -- Properties

@@ -5,7 +5,7 @@
 -- adding a component that tracks and removes paths. Note that the choice and
 -- extension operators of the original algebra cannot access the paths and
 -- therefore this is not suitable for protocols which makes decisions based
--- on a route's associated path.
+-- on a path-weight's associated path.
 --------------------------------------------------------------------------------
 
 open import Algebra
@@ -26,10 +26,10 @@ open import Relation.Nullary.Construct.Add.Point renaming (∙ to invalid; [_] t
 
 open import RoutingLib.Algebra.Construct.Add.Identity as AddIdentity
   renaming (_⊕∙_ to AddIdentity) using (⊕∙-comm)
-open import RoutingLib.Data.Path.Uncertified
+open import RoutingLib.Routing.Basics.Path.Uncertified
   renaming (_∈ₚ_ to _∈ᴱ_; _∉ₚ_ to _∉ᴱ_; Path to EPath; _⇿_ to _⇿ᴱ_)
-open import RoutingLib.Data.Path.Uncertified.Choice
-open import RoutingLib.Data.Path.Uncertified.Properties
+open import RoutingLib.Routing.Basics.Path.Uncertified.Choice
+open import RoutingLib.Routing.Basics.Path.Uncertified.Properties
 
 open import RoutingLib.Routing.Algebra
 
@@ -44,10 +44,10 @@ open import Algebra.Construct.LexProduct ⊕-magma ⊓ₗₑₓ-magma _≟_ as L
 ------------------------------------------------------------------------
 -- Prelude
 
-_≈ₓ_ : Rel (Route × EPath) _
+_≈ₓ_ : Rel (PathWeight × EPath) _
 _≈ₓ_ = (Pointwise _≈_ _≡_)
 
-_⊕ₗₑₓ_ : Op₂ (Route × EPath)
+_⊕ₗₑₓ_ : Op₂ (PathWeight × EPath)
 _⊕ₗₑₓ_  = lex
 
 ≈ₓ-refl : Reflexive (Pointwise {A₂ = EPath} _≈_ _≡_)
@@ -63,13 +63,13 @@ infix 4 _≈⁺_ _≉⁺_
 infix 7 _⊕⁺_
 infix 6 _▷⁺_
 
-Route⁺ : Set a
-Route⁺ = Pointed (Route × EPath)
+PathWeight⁺ : Set a
+PathWeight⁺ = Pointed (PathWeight × EPath)
 
 Step⁺ : ∀ {n} → Fin n → Fin n → Set b
 Step⁺ i j = Step i j
 
-_≈⁺_ : Rel Route⁺ _
+_≈⁺_ : Rel PathWeight⁺ _
 _≈⁺_ = PointedEq _≈ₓ_ 
 
 ≈⁺-refl : Reflexive _≈⁺_
@@ -81,13 +81,13 @@ _≈⁺_ = PointedEq _≈ₓ_
 ≈⁺-trans : Transitive _≈⁺_
 ≈⁺-trans = ≈∙-trans _≈ₓ_ ( Pointwise.×-transitive {_∼₁_ = _≈_} {_∼₂_ = _≡_} ≈-trans trans ) 
 
-_≉⁺_ : Rel Route⁺ _
+_≉⁺_ : Rel PathWeight⁺ _
 x ≉⁺ y = ¬ (x ≈⁺ y)
 
-_⊕⁺_ : Op₂ Route⁺
+_⊕⁺_ : Op₂ PathWeight⁺
 _⊕⁺_ = AddIdentity _⊕ₗₑₓ_
 
-_▷⁺_ : ∀ {n} {i j : Fin n} → Step⁺ i j → Route⁺ → Route⁺
+_▷⁺_ : ∀ {n} {i j : Fin n} → Step⁺ i j → PathWeight⁺ → PathWeight⁺
 _▷⁺_ {_} {i} {j} f invalid         = invalid
 _▷⁺_ {_} {i} {j} f (valid (x , p))
   with  f ▷ x ≟ ∞#  | (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p
@@ -96,10 +96,10 @@ _▷⁺_ {_} {i} {j} f (valid (x , p))
 ... |  _     | _     | yes _ = invalid  
 ... | no  _  | yes _ | no  _ = valid (f ▷ x , (toℕ i , toℕ j) ∷ p)
 
-0#⁺ : Route⁺
+0#⁺ : PathWeight⁺
 0#⁺ = valid (0# , [])
 
-∞#⁺ : Route⁺
+∞#⁺ : PathWeight⁺
 ∞#⁺ = invalid
 
 f∞⁺ : ∀ {n} (i j : Fin n) → Step i j
@@ -127,7 +127,7 @@ f∞⁺ = f∞
 ... | no f▷x≉∞  | no  f▷y≉∞  | yes _ | yes _ = ∙≈∙
 ... | no f▷x≉∞  | no  f▷y≉∞  | yes _ | no _  = [ ▷-cong f x≈y , refl ]
 
-f∞⁺-reject : ∀ {n} (i j : Fin n) (x : Route⁺) → f∞⁺ i j ▷⁺ x ≈⁺ ∞#⁺
+f∞⁺-reject : ∀ {n} (i j : Fin n) (x : PathWeight⁺) → f∞⁺ i j ▷⁺ x ≈⁺ ∞#⁺
 f∞⁺-reject i j invalid         = ∙≈∙
 f∞⁺-reject i j (valid (x , p)) with f∞ i j ▷ x ≟ ∞# | (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p 
 ... | yes _      | _     | _     = ∙≈∙
@@ -137,7 +137,7 @@ f∞⁺-reject i j (valid (x , p)) with f∞ i j ▷ x ≟ ∞# | (toℕ i , to�
 
 AddPaths : RawRoutingAlgebra a b (a ⊔ ℓ)
 AddPaths = record
-  { Route              = Route⁺
+  { PathWeight              = PathWeight⁺
   ; Step               = Step⁺
   ; _≈_                = _≈⁺_
   ; _⊕_                = _⊕⁺_
@@ -209,7 +209,7 @@ module _ (A-isRoutingAlgebra : IsRoutingAlgebra A) where
 --------------------------------------------------------------------------------
 -- The resulting algebra is a path algebra
 
-path⁺ : Route⁺ → Maybe EPath
+path⁺ : PathWeight⁺ → Maybe EPath
 path⁺ invalid         = invalid
 path⁺ (valid (x , p)) = valid p
 

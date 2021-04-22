@@ -84,12 +84,12 @@ open import RoutingLib.Data.List.Sort.Properties sortingAlgorithm
 -- Only provable for the application operator _▷_
 -- LEX: iirc, these were put here because the adjacency matrix A was a matrix
 -- of Steps, but the decomposed matrices Exp, Prot, Imp (Gamma_2) had to be
--- matrices of the more general type "Route → Route". Tim mentioned this at some
+-- matrices of the more general type "PathWeight → PathWeight". Tim mentioned this at some
 -- point. Probably worth checking out if this is still necessary, or whether we
 -- could have Exp, Prot, Imp be of type AdjacencyMatrix as well.
 postulate
-  f-cong : ∀ (f : Route → Route) {s s' : Route} → s ≈ s' → f s ≈ f s' -- need this to prove []-cong
-  f-fix : ∀ (f : Route → Route) → f ∞# ≈ ∞# -- need this to prove ~-lemma
+  f-cong : ∀ (f : PathWeight → PathWeight) {s s' : PathWeight} → s ≈ s' → f s ≈ f s' -- need this to prove []-cong
+  f-fix : ∀ (f : PathWeight → PathWeight) → f ∞# ≈ ∞# -- need this to prove ~-lemma
 
 --------------------------------------------------------------------------------
 -- Properties of `map₂`
@@ -159,13 +159,13 @@ mergeSorted-identityʳ xs = ↭-reflexive (partialMerge-identityʳ xs)
 --------------------------------------------------------------------------------
 -- Properties of IsValid / IsInvalid
 
-x=∞⇒fx=∞ : ∀ {v} {f : Route → Route} → v ≈ ∞# → f v ≈ ∞#
+x=∞⇒fx=∞ : ∀ {v} {f : PathWeight → PathWeight} → v ≈ ∞# → f v ≈ ∞#
 x=∞⇒fx=∞ {v} {f} v=∞ = ≈-trans (f-cong f v=∞) (f-fix f)
 
-isValid-f : ∀ {d v} {f : Route → Route} → IsValid (d , f v) → IsValid (d , v)
+isValid-f : ∀ {d v} {f : PathWeight → PathWeight} → IsValid (d , f v) → IsValid (d , v)
 isValid-f {d} {v} {f} = contraposition (x=∞⇒fx=∞ {v} {f})
 
-isInvalid-f : ∀ {d v} {f : Route → Route} → IsInvalid (d , v) → IsInvalid (d , f v)
+isInvalid-f : ∀ {d v} {f : PathWeight → PathWeight} → IsInvalid (d , v) → IsInvalid (d , f v)
 isInvalid-f {d} {v} {f} v=∞ = x=∞⇒fx=∞ {v} {f} v=∞
 
 invalid-valid : ∀ {p} → IsInvalid p → ¬ (IsValid p)
@@ -306,10 +306,10 @@ con-<-† {v} {x ∷ xs} xs↗ (just v<x) with IsInvalid? x
 --------------------------------------------------------------------------------
 -- Properties of _[_]
 
-[]-cong : ∀ {f : Route → Route} {A A'} →
+[]-cong : ∀ {f : PathWeight → PathWeight} {A A'} →
             A ↭ A' → f [ A ] ↭ f [ A' ]
 []-cong {f} A=A' = †-cong (lemma A=A')
-   where f-cong₂ : ∀ {d d' : Fin n} {v v' : Route} → 
+   where f-cong₂ : ∀ {d d' : Fin n} {v v' : PathWeight} → 
                    (d , v) ≈ₐ (d' , v') → (d , f v) ≈ₐ (d' , f v')
          f-cong₂ (d=d' , v=v') = d=d' , f-cong f v=v'
          lemma : {A A' : RoutingSet} →
@@ -344,9 +344,9 @@ IsFixedPoint-Γ₁ V = Γ₁ V ≈ᵥ V
 -- Lemma A.2
 private
   postulate
-    lemma : ∀ (f g : Fin n → Route) → (tabulate λ d → (d , f d)) ⊕ₛ (tabulate λ d → (d , g d)) ↭ tabulate λ d → (d , f d ⊕ g d)
+    lemma : ∀ (f g : Fin n → PathWeight) → (tabulate λ d → (d , f d)) ⊕ₛ (tabulate λ d → (d , g d)) ↭ tabulate λ d → (d , f d ⊕ g d)
 
-LemmaA₂ : ∀ (f g : Fin n → Route) →
+LemmaA₂ : ∀ (f g : Fin n → PathWeight) →
           ((tabulate λ d → (d , f d)) †) ⊕ₛ ((tabulate λ d → (d , g d)) †) ↭
           (tabulate λ d → (d , f d ⊕ g d)) †
 LemmaA₂ f g = begin
@@ -358,7 +358,7 @@ LemmaA₂ f g = begin
 tabulate-∞ : (tabulate (_, ∞#)) † ≡ []
 tabulate-∞ = filter-none IsValid? (All.tabulate⁺ λ d → invalid-valid {d , ∞#} (invalid-pair d))
 
-LemmaA₂-iter : ∀ {k} (f : Fin k → Fin n → Route) →
+LemmaA₂-iter : ∀ {k} (f : Fin k → Fin n → PathWeight) →
                ⨁ₛ (λ q → ((tabulate λ d → (d , f q d)) †)) ↭ (tabulate λ d → (d , (⨁ λ q → f q d))) †
 LemmaA₂-iter {zero} f = ↭-reflexive (sym tabulate-∞)
 LemmaA₂-iter {suc k} f = begin

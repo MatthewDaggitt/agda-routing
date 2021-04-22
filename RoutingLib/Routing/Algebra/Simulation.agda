@@ -33,15 +33,15 @@ private
   variable
     n : ℕ
     i j : Fin n
-    x y z : Route A
+    x y z : PathWeight A
   
 --------------------------------------------------------------------------------
 -- Definition
 
 record _Simulates_ : Set (lsuc (a₁ ⊔ a₂ ⊔ b₁ ⊔ b₂ ⊔ ℓ₁ ⊔ ℓ₂))where
   field
-    to        : Route A → Route B
-    from      : Route B → Route A
+    to        : PathWeight A → PathWeight B
+    from      : PathWeight B → PathWeight A
     to-from   : ∀ x → to (from x) ≈ᵇ x
 
     toₛ       : Step A i j → Step B i j
@@ -54,7 +54,7 @@ record _Simulates_ : Set (lsuc (a₁ ⊔ a₂ ⊔ b₁ ⊔ b₂ ⊔ ℓ₁ ⊔ �
     to-▷      : ∀ (f : Step A i j) x → to (f  ▷ᵃ x) ≈ᵇ toₛ f ▷ᵇ to x
     to-f∞     : toₛ (f∞ᵃ i j) ≡ f∞ᵇ i j
     
-    -- Note that A need only simulate B's choice for routes that are comparable.
+    -- Note that A need only simulate B's choice for path-weights that are comparable.
     -- This allows only "morally" commutative routing algebras to be proved correct.
     to-⊕     : x ≎ y → to x ⊕ᵇ to y ≈ᵇ to (x ⊕ᵃ y)
     ⊕-pres-≎ : x ≎ y → x ≎ z → x ≎ (y ⊕ᵃ z)

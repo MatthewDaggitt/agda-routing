@@ -36,7 +36,7 @@ open import RoutingLib.Routing.VectorBased.Synchronous algebra A
 -- It occured to me (whilst programming dropdown boxes in Java) that what
 -- determines whether or not we have a suitable height function on which our
 -- entire proof in the SIGCOMM paper is based, is whether or not we have a
--- strict partial order over the routes which respects the extension,
+-- strict partial order over the assignments which respects the extension,
 -- i.e. x < Aᵢⱼ(x).
 
 -- Obviously when the algebra is strictly contracting this is trivial and we
@@ -84,7 +84,7 @@ record HeightFunction : Set (a ⊔ ℓ) where
 
 record RouteDistanceFunction : Set (a ⊔ ℓ) where
   field
-    r                   : Node → Route → Route → ℕ
+    r                   : Node → PathWeight → PathWeight → ℕ
     r-isQuasiSemiMetric : ∀ i → IsQuasiSemiMetric _≈_ (r i) 
     r-bounded           : ∀ i → Bounded (r i)
     r-strContrOrbits    : ∀ {X v} → 0 < v → (∀ k l → r k (X k l) (F X k l) ≤ v) →

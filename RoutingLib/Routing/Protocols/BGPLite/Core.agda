@@ -36,19 +36,19 @@ private
 
 open import RoutingLib.Routing.Protocols.BGPLite.Policies
 open import RoutingLib.Routing.Protocols.BGPLite.Communities
-open import RoutingLib.Routing.Protocols.BGPLite.Routes
+open import RoutingLib.Routing.Protocols.BGPLite.PathWeights
 
 data Step (i j : Fin n) : Set₁ where
   step : Policy → Step i j
 
-0# : Route
+0# : PathWeight
 0# = valid 0 ∅ []
 
-∞# : Route
+∞# : PathWeight
 ∞# = invalid
 
 infix 5 _⊕_
-_⊕_ : Op₂ Route
+_⊕_ : Op₂ PathWeight
 x@invalid        ⊕ y            = y
 x                ⊕ y@invalid    = x
 x@(valid l cs p) ⊕ y@(valid m ds q) with compare l m
@@ -62,7 +62,7 @@ x@(valid l cs p) ⊕ y@(valid m ds q) with compare l m
 ...     | no  q≤p = y
 
 infix 5 _▷_
-_▷_ : Step i j → Route → Route
+_▷_ : Step i j → PathWeight → PathWeight
 _▷_ {_} {_} {_} _          invalid       = invalid
 _▷_ {_} {i} {j} (step pol) (valid x c p) with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p
 ... | no  _    | _       = invalid
@@ -78,7 +78,7 @@ f∞ i j = step reject
 ⊕-cong : Congruent₂ _≡_ _⊕_
 ⊕-cong = cong₂ _⊕_
 
-f∞-reject : ∀ (i j : Fin n) (x : Route) → f∞ i j ▷ x ≡ invalid
+f∞-reject : ∀ (i j : Fin n) (x : PathWeight) → f∞ i j ▷ x ≡ invalid
 f∞-reject i j invalid        = refl
 f∞-reject i j (valid l cs p) with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p
 ... | no  _    | _       = refl
@@ -87,8 +87,8 @@ f∞-reject i j (valid l cs p) with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ?
 
 A : RawRoutingAlgebra _ _ _
 A = record
-  { Step               = Step
-  ; Route              = Route
+  { PathWeight         = PathWeight
+  ; Step               = Step
   ; _≈_                = _≡_
   ; _⊕_                = _⊕_
   ; _▷_                = _▷_

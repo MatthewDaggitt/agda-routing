@@ -35,7 +35,7 @@ open import RoutingLib.Routing.Basics.Path.Uncertified.Properties
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Protocols.BGPLite.Core
 open import RoutingLib.Routing.Protocols.BGPLite.Policies
-open import RoutingLib.Routing.Protocols.BGPLite.Routes
+open import RoutingLib.Routing.Protocols.BGPLite.PathWeights
 open import RoutingLib.Routing.Protocols.BGPLite.Communities
 
 open ≡-Reasoning
@@ -44,7 +44,7 @@ private
   variable
     n : ℕ
     i j : Fin n
-    r : Route
+    r : PathWeight
     p q : Pathᵛ
 
 --------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ open Min ≤ᵣ-totalOrder public
 
 Aₐₗₜ : RawRoutingAlgebra _ _ _
 Aₐₗₜ = record
-  { Route              = Route
+  { PathWeight         = PathWeight
   ; Step               = Step
   ; _≈_                = _≡_
   ; _⊕_                = _⊕ₐₗₜ_
@@ -123,7 +123,7 @@ isRoutingAlgebra = record
 --------------------------------------------------------------------------------
 -- The algebra Aₐₗₜ is a path algebra
 
-path : Route → Path
+path : PathWeight → Path
 path invalid       = invalid
 path (valid _ _ p) = valid (deflate p)
 

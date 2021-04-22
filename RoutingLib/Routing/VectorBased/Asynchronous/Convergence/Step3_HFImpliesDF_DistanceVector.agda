@@ -60,13 +60,13 @@ open CoreVectorBasedRoutingProperties isRoutingAlgebra A
 
 module _ (i : Node) where
 
-  h : Route → ℕ
+  h : PathWeight → ℕ
   h x = h′ (i , x)
 
   H : ℕ
   H = h 0#
   
-  r : Route → Route → ℕ
+  r : PathWeight → PathWeight → ℕ
   r x y with x ≟ y
   ... | yes _ = zero
   ... | no  _ = h x ⊔ h y

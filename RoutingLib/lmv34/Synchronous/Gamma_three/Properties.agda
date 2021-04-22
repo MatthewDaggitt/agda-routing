@@ -88,7 +88,7 @@ infix 4 _⇔_
 _⇔_ : ∀ {a ℓ₁ ℓ₂} {A : Set a} → Pred A ℓ₁ → Pred A ℓ₂ → Pred A _
 P ⇔ Q = λ x → (P x → Q x) × (Q x → P x)
 
-filter-lemma : ∀ {p} {P P' : Pred (Fin n × Route) p} {P? : Decidable P} {P?' : Decidable P'}
+filter-lemma : ∀ {p} {P P' : Pred Assignment p} {P? : Decidable P} {P?' : Decidable P'}
                xs → (∀ x → (P ⇔ P') x) → filter P? xs ↭ filter P?' xs
 filter-lemma [] P=P' = ↭-refl
 filter-lemma {P? = P?} {P?' = P?'} (x ∷ xs) P=P' with P? x | P?' x

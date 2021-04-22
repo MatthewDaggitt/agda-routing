@@ -66,22 +66,24 @@ private
     x y : Assignment
 
 --------------------------------------------------------------------------------
--- An ordering over routes
+-- An ordering over assignments
 --------------------------------------------------------------------------------
 -- In order to build a height function all we need to have is a
--- strict partial order over routes with the property `x < Aᵢⱼ(x)`. When
--- the algebra is strictly increasing this is simply `_<₊_`. However when the
--- network is cycle free we must come up with something more complicated. The
--- hard part is proving that any such order is irreflexive, i.e. it has no
--- cycles in it.
+-- strict partial order over assignments with the property `x < Aᵢⱼ(x)`. When
+-- the algebra is strictly increasing, one can simply use the ordering `_<ₐₚ_`
+-- which compares the path-weights of the assignments and ignores the nodes.
+
+-- However when the network is cycle free we must come up with something more
+-- complicated. The hard part is proving that any such order is irreflexive, i.e.
+-- it has no cycles in it.
 
 -- The relation below is a generalisation of the dispute digraph. It says that
--- route `x` is less than route `y` if there exists some path of either
--- `<₊ = is preferred to` or `↝ = can be extended to` relations between them.
--- It is more general than the dispute digraph as used by both Griffin and
--- Sobrinho, as a) it doesn't require all the routes to have the same source
--- (something not easily expressible in an algebra) and b) it weakens
--- distributivity violation links to merely `can be extended to` links.
+-- path-weight `x` is less than path-weight `y` if there exists some path of
+-- either `<₊ = is preferred to` or `↝ = can be extended to` relations between
+-- them. It is more general than the dispute digraph as used by both Griffin and
+-- Sobrinho, as a) it only requires assignments (i.e. node + path-weight) rather
+-- than couples (i.e. path + path-weight) and b) it weakens distributivity
+-- violation links to merely `can be extended to` links.
 
 infix 4 _<ᶠ_
 
@@ -101,8 +103,8 @@ _<ᶠ_ = TransClosure (_<ₐₚ_ ∪ _↝[ A ]_)
 ↝∈?_ : (x<ᶠy : x <ᶠ y) → Dec (↝∈ x<ᶠy)
 ↝∈?_ = anyEdge? isInj₂?
 
--- If the set of extended routes are empty then the first route in the
--- path must be strictly preferred to the last route in the path.
+-- If the set of extended assignments are empty then the first assignment in the
+-- path must be strictly preferred to the last assignment in the path.
 ↝∉⇒x<₊y : (x<y : x <ᶠ y) → ↝∉ x<y → x <ₐₚ y
 ↝∉⇒x<₊y [ inj₁ x<y ]     _  = x<y
 ↝∉⇒x<₊y [ inj₂ x<y ]     ↝∉ = contradiction (here₁ _) ↝∉
@@ -111,56 +113,56 @@ _<ᶠ_ = TransClosure (_<ₐₚ_ ∪ _↝[ A ]_)
 ... | no _  = contradiction (here₂ _) ↝∉
 ... | yes _ = contradiction (here₂ _) ↝∉
 
--- Given two related routes, i.e. path through this graph, we identify the set
--- of routes that are extended. If extensions exist in the path we return
--- nothing, otherwise we return a non-empty set of routes.
-extendedRoutes : (x<ᶠy : x <ᶠ y) → ↝∈ x<ᶠy → FiniteSet⁺ Assignment
-extendedRoutes {x} [ inj₁ x<y ]      (here₁ ())
-extendedRoutes {x} [ inj₂ x↝y ]      _          = ⟦ x ⟧
-extendedRoutes {x} (inj₁ x<z ∷ z<ᶠy) (there ↝∈) = extendedRoutes z<ᶠy ↝∈ 
-extendedRoutes {x} (inj₂ x↝z ∷ z<ᶠy) _          with ↝∈? z<ᶠy
+-- Given two related assignments, i.e. path through this graph, we identify the set
+-- of assignments that are extended. If extensions exist in the path we return
+-- nothing, otherwise we return a non-empty set of assignments.
+extensions : (x<ᶠy : x <ᶠ y) → ↝∈ x<ᶠy → FiniteSet⁺ Assignment
+extensions {x} [ inj₁ x<y ]      (here₁ ())
+extensions {x} [ inj₂ x↝y ]      _          = ⟦ x ⟧
+extensions {x} (inj₁ x<z ∷ z<ᶠy) (there ↝∈) = extensions z<ᶠy ↝∈ 
+extensions {x} (inj₂ x↝z ∷ z<ᶠy) _          with ↝∈? z<ᶠy
 ... | no  _   = ⟦ x ⟧
-... | yes ext = ⟦ x ⟧∪ extendedRoutes z<ᶠy ext
+... | yes ext = ⟦ x ⟧∪ extensions z<ᶠy ext
 
 -- If some assignment `v` is preferred to the start point of the path then `v` must also
 -- be preferred to the first extended assignment in the path (if it exists).
-v≤x⇒v≤er[x<ᶠy]₀ : ∀ {v} → v ≤ₐₚ x → (x<ᶠy : x <ᶠ y) → (↝∈x<y : ↝∈ x<ᶠy) →
-                 v ≤ₐₚ first (extendedRoutes x<ᶠy ↝∈x<y)
-v≤x⇒v≤er[x<ᶠy]₀ v≤x [ inj₁ _ ]        (here₁ ()) 
-v≤x⇒v≤er[x<ᶠy]₀ v≤x [ inj₂ _ ]        _          = v≤x
-v≤x⇒v≤er[x<ᶠy]₀ v≤x (inj₁ x<z ∷ z<ᶠy) (there ↝∈) = v≤x⇒v≤er[x<ᶠy]₀ (≤ₐₚ-trans v≤x (proj₁ x<z)) z<ᶠy ↝∈
-v≤x⇒v≤er[x<ᶠy]₀ v≤x (inj₂ x↝z ∷ z<ᶠy) _          with ↝∈? z<ᶠy
+v≤x⇒v≤e[x<ᶠy]₀ : ∀ {v} → v ≤ₐₚ x → (x<ᶠy : x <ᶠ y) → (↝∈x<y : ↝∈ x<ᶠy) →
+                 v ≤ₐₚ first (extensions x<ᶠy ↝∈x<y)
+v≤x⇒v≤e[x<ᶠy]₀ v≤x [ inj₁ _ ]        (here₁ ()) 
+v≤x⇒v≤e[x<ᶠy]₀ v≤x [ inj₂ _ ]        _          = v≤x
+v≤x⇒v≤e[x<ᶠy]₀ v≤x (inj₁ x<z ∷ z<ᶠy) (there ↝∈) = v≤x⇒v≤e[x<ᶠy]₀ (≤ₐₚ-trans v≤x (proj₁ x<z)) z<ᶠy ↝∈
+v≤x⇒v≤e[x<ᶠy]₀ v≤x (inj₂ x↝z ∷ z<ᶠy) _          with ↝∈? z<ᶠy
 ... | no  _ = v≤x
 ... | yes _ = v≤x
 
--- If the end point of the path is preferred to some route `v` then last extended route
+-- If the end point of the path is preferred to some assignment `v` then last extended assignment
 -- in the path (if it exists) must be dominated by `v`.
-y≤v⇒er[x<ᶠy]₋₁⊴v : ∀ {v} → y ≤ₐₚ v → (x<ᶠy : x <ᶠ y) → (↝∈x<y : ↝∈ x<ᶠy) →
-                   last (extendedRoutes x<ᶠy ↝∈x<y) ⊴[ A ] v
-y≤v⇒er[x<ᶠy]₋₁⊴v y≤v [ inj₁ x<y ]      (here₁ ()) 
-y≤v⇒er[x<ᶠy]₋₁⊴v y≤v [ inj₂ x↝y ]      _          = ↝∧≤ₐₚ⇒⊴ A x↝y y≤v
-y≤v⇒er[x<ᶠy]₋₁⊴v y≤v (inj₁ x<z ∷ z<ᶠy) (there ↝∈) = y≤v⇒er[x<ᶠy]₋₁⊴v y≤v z<ᶠy ↝∈
-y≤v⇒er[x<ᶠy]₋₁⊴v y≤v (inj₂ x↝w ∷ w<ᶠy) _          with ↝∈? w<ᶠy
+y≤v⇒e[x<ᶠy]₋₁⊴v : ∀ {v} → y ≤ₐₚ v → (x<ᶠy : x <ᶠ y) → (↝∈x<y : ↝∈ x<ᶠy) →
+                   last (extensions x<ᶠy ↝∈x<y) ⊴[ A ] v
+y≤v⇒e[x<ᶠy]₋₁⊴v y≤v [ inj₁ x<y ]      (here₁ ()) 
+y≤v⇒e[x<ᶠy]₋₁⊴v y≤v [ inj₂ x↝y ]      _          = ↝∧≤ₐₚ⇒⊴ A x↝y y≤v
+y≤v⇒e[x<ᶠy]₋₁⊴v y≤v (inj₁ x<z ∷ z<ᶠy) (there ↝∈) = y≤v⇒e[x<ᶠy]₋₁⊴v y≤v z<ᶠy ↝∈
+y≤v⇒e[x<ᶠy]₋₁⊴v y≤v (inj₂ x↝w ∷ w<ᶠy) _          with ↝∈? w<ᶠy
 ... | no  ↝∉w<ᶠy = ↝∧≤ₐₚ⇒⊴ A x↝w (≤ₐₚ-trans (proj₁ (↝∉⇒x<₊y w<ᶠy ↝∉w<ᶠy)) y≤v)
-... | yes ↝∈w<ᶠy = y≤v⇒er[x<ᶠy]₋₁⊴v y≤v w<ᶠy ↝∈w<ᶠy
+... | yes ↝∈w<ᶠy = y≤v⇒e[x<ᶠy]₋₁⊴v y≤v w<ᶠy ↝∈w<ᶠy
 
--- The iᵗʰ extended route in the path is threatened by i+1ᵗʰ extended route in the path
+-- The iᵗʰ extended assignment in the path is threatened by i+1ᵗʰ extended assignment in the path
 ⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ : (x<ᶠy : x <ᶠ y) (↝∈x<y : ↝∈ x<ᶠy) →
-                      let er = extendedRoutes x<ᶠy ↝∈x<y in
-                      ∀ i → iᵗʰ er (inject₁ i) ⊴[ A ] iᵗʰ er (suc i)
+                      let e = extensions x<ᶠy ↝∈x<y in
+                      ∀ i → iᵗʰ e (inject₁ i) ⊴[ A ] iᵗʰ e (suc i)
 ⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ [ inj₁ _ ]         (here₁ ())
 ⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ [ inj₂ _ ]         _          = λ()
 ⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ (inj₁ x≤z ∷ z<ᶠy)  (there ↝∈) = ⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ z<ᶠy ↝∈
 ⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ {x} {y} (_∷_ {y = z} (inj₂ x↝z) z<ᶠy) _ with ↝∈? z<ᶠy
 ... | no  ↝∉z<ᶠy = λ()
 ... | yes ↝∈z<ᶠy = λ
-  { 0F      → ↝∧≤ₐₚ⇒⊴ A x↝z (v≤x⇒v≤er[x<ᶠy]₀ ≤ₐₚ-refl z<ᶠy ↝∈z<ᶠy)
+  { 0F      → ↝∧≤ₐₚ⇒⊴ A x↝z (v≤x⇒v≤e[x<ᶠy]₀ ≤ₐₚ-refl z<ᶠy ↝∈z<ᶠy)
   ; (suc i) → ⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ z<ᶠy ↝∈z<ᶠy i
   }
 
 module MakeCycle (x<ᶠy : x <ᶠ y) (↝∈x<ᶠy : ↝∈ x<ᶠy) where
   assignments : FiniteSet⁺ Assignment
-  assignments = extendedRoutes x<ᶠy ↝∈x<ᶠy
+  assignments = extensions x<ᶠy ↝∈x<ᶠy
   
   m : ℕ
   m = FiniteSet⁺.n assignments
@@ -168,8 +170,8 @@ module MakeCycle (x<ᶠy : x <ᶠ y) (↝∈x<ᶠy : ↝∈ x<ᶠy) where
   nodes : Vector Node (suc m)
   nodes = proj₁ ∘ content assignments
   
-  routes : Vector Route (suc m)
-  routes i = proj₂ (content assignments i)
+  weights : Vector PathWeight (suc m)
+  weights i = proj₂ (content assignments i)
 
   cycle : Cycle
   cycle = m , nodes
@@ -178,20 +180,20 @@ module MakeCycle (x<ᶠy : x <ᶠ y) (↝∈x<ᶠy : ↝∈ x<ᶠy) where
   nonFree x≈y (suc i) = ⟦y<ᶠz⟧↝ᵢ⊴⟦y<ᶠz⟧↝ᵢ₊₁ x<ᶠy ↝∈x<ᶠy i
   nonFree x≈y 0F      = ⊴∧≤ₐₚ⇒⊴ A ⟦x<ᶠy⟧₋₁⊴x x≤⟦x<ᶠy⟧₀
     where
-    ⟦x<ᶠy⟧₋₁⊴x = y≤v⇒er[x<ᶠy]₋₁⊴v ≤ₐₚ-refl x<ᶠy ↝∈x<ᶠy
-    x≤⟦x<ᶠy⟧₀  = v≤x⇒v≤er[x<ᶠy]₀ (≤ₐₚ-reflexive (≈ₐ-sym x≈y)) x<ᶠy ↝∈x<ᶠy
+    ⟦x<ᶠy⟧₋₁⊴x = y≤v⇒e[x<ᶠy]₋₁⊴v ≤ₐₚ-refl x<ᶠy ↝∈x<ᶠy
+    x≤⟦x<ᶠy⟧₀  = v≤x⇒v≤e[x<ᶠy]₀ (≤ₐₚ-reflexive (≈ₐ-sym x≈y)) x<ᶠy ↝∈x<ᶠy
 
 
 -- When the topology is cycle free then irreflexivity can now be proved. This follows
 -- as if the start point of the path is equal to the end point then:
 --   ∙ if the path contains no extensions then x ≈ y and x <₊ y which is contradiction
 --     by the irreflexivity of _<₊_
---   ∙ if the path does contain extensions then the set of extended routes must form
+--   ∙ if the path does contain extensions then the set of extended assignments must form
 --     a cycle thanks to x ≈ y and the previous lemmas.
 .<ᶠ-irrefl : IsFreeAdjacencyMatrix A → Irreflexive _≈ₐ_ _<ᶠ_
 <ᶠ-irrefl cf x≈y x<ᶠy with ↝∈? x<ᶠy
 ... | no  ↝∉x<ᶠy = <ₐₚ-irrefl x≈y (↝∉⇒x<₊y x<ᶠy ↝∉x<ᶠy)
-... | yes ↝∈x<ᶠy = cf cycle (routes , nonFree x≈y)
+... | yes ↝∈x<ᶠy = cf cycle (weights , nonFree x≈y)
   where open MakeCycle x<ᶠy ↝∈x<ᶠy
 
 <ᶠ-respʳ-≈ : _<ᶠ_ Respectsʳ _≈ₐ_
@@ -224,7 +226,7 @@ module MakeCycle (x<ᶠy : x <ᶠ y) (↝∈x<ᶠy : ↝∈ x<ᶠy) where
 ↝∧<ᶠ⇒<ᶠ : Trans _↝[ A ]_ _<ᶠ_ _<ᶠ_
 ↝∧<ᶠ⇒<ᶠ x↝y = TransClosure.trans (↝⇒<ᶠ x↝y)
 
-<ᶠ-extensionRespectingOrder : IsFinite algebra → .(IsFreeAdjacencyMatrix A) → ExtensionRespectingOrder A _
+<ᶠ-extensionRespectingOrder : IsFinite algebra → .(IsFreeAdjacencyMatrix A) → ExtensionRespectingOrder _ _
 <ᶠ-extensionRespectingOrder fin cf = record
   { _<ᵣ_        = _<ᶠ_
   ; ↝⇒<ᵣ        = ↝⇒<ᶠ

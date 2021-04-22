@@ -45,13 +45,13 @@ Cycle : Set
 Cycle = ∃ λ m → Vector Node (suc m)
 
 -- A cycle (v₁ , v₂ , ... , vₘ , v₁) is non-free with respect to an adjacency
--- matrix if there exists a set of routes (x₁ , x₂ , ... , xₘ , x₁) such that
--- for all i, the assignment (u i , x i) threatens the assignment (u i , x i).
--- i.e. if every route in the set threatens the adoption of the previous route
--- in the set.
+-- matrix if there exists a set of path-weights (x₁ , x₂ , ... , xₘ , x₁) such
+-- that for all i, the assignment (u i , x i) threatens the assignment
+-- (u i , x i). i.e. if every path-weight in the set threatens the adoption of
+-- the previous path-weight in the set.
 
 IsNonFreeCycle : AdjacencyMatrix → Cycle → Set (a ⊔ ℓ)
-IsNonFreeCycle A (m , C) = ∃ λ (X : Vector Route (suc m)) →
+IsNonFreeCycle A (m , C) = ∃ λ (X : Vector PathWeight (suc m)) →
   ∀ i → (C (i -ₘ 1) , X (i -ₘ 1)) ⊴[ A ] (C i , X i)
 
 IsFreeCycle : AdjacencyMatrix → Cycle → Set (a ⊔ ℓ)
@@ -101,7 +101,7 @@ Cyclic? A (⟦ _ ∣ X ⟧) = all? (λ i → X (i -ₘ 1) ⊴? (X i))
                             IsNonFreeCycle A C → AllLinksEqual A C
   incr∧nonFree⇒equalLinks incr A (m , C) (X , Cᵢ₋₁⊴Cᵢ) = x , x≉∞ , A▷x≈x
     where
-    x : Route
+    x : PathWeight
     x = X (0F -ₘ 1)
 
     x≉∞ : x ≉ ∞#

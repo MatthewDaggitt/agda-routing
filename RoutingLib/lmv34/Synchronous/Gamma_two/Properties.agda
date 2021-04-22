@@ -82,10 +82,10 @@ open DecSetoid Γ₂-State-decSetoid using () renaming
 〖〗-cong : ∀ {F O O'} → O ≈ᵥ,₂ O' → (F 〖 O 〗) ≈ᵥ,₂ (F 〖 O' 〗)
 〖〗-cong O=O' i j = []-cong (O=O' j i)
 
-f[]-cong : ∀ {f f' : Route → Route} → {X : RoutingSet} →
+f[]-cong : ∀ {f f' : PathWeight → PathWeight} → {X : RoutingSet} →
            (∀ s → f s ≈ f' s) → f [ X ] ↭ f' [ X ]
 f[]-cong {f} {f'} {X} f=f' = †-cong (lemma {xs = X} f=f')
-   where lemma : {f g : Route → Route} → {xs : RoutingSet} →
+   where lemma : {f g : PathWeight → PathWeight} → {xs : RoutingSet} →
                  (∀ r → f r ≈ g r) → map₂ f xs ↭ map₂ g xs
          lemma {f} {g} {[]} f=g = ↭-refl
          lemma {f} {g} {(d , v) ∷ xs} f=g = prep (refl , f=g v) (lemma {xs = xs} f=g)
@@ -145,9 +145,9 @@ FixedPoint-Γ₂ (V=V , I=I , O=O) = ≈ᵥ-sym V=V , ≈ᵥ,₂-sym I=I , ≈�
 
 private
   postulate
-    ▷-fixedPoint : ∀ (f : Route → Route) s → s ≈ ∞# → f s ≈ ∞# -- need this to prove LemmaA₃
+    ▷-fixedPoint : ∀ (f : PathWeight → PathWeight) s → s ≈ ∞# → f s ≈ ∞# -- need this to prove LemmaA₃
 
-LemmaA₃ : ∀ (f g : (Route → Route)) → (X : RoutingSet) →
+LemmaA₃ : ∀ (f g : (PathWeight → PathWeight)) → (X : RoutingSet) →
             f [ g [ X ] ] ↭ (f ∘ g) [ X ]
 LemmaA₃ f g [] = ↭-refl
 LemmaA₃ f g ((d , v) ∷ X) with
@@ -188,13 +188,13 @@ LemmaA₄ F G V i = begin
 
 Γ₁=Γ₂-comp : ∀ (V : RoutingVector) → Γ₁ V ≈ᵥ (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) V 
 Γ₁=Γ₂-comp V = begin 
-        Γ₁ V                                          ≈⟨ ≈ᵥ-refl ⟩
-        A 〚 V 〛 ⊕ᵥ ~ M                              ≈⟨ ⊕ᵥ-cong (〚〛=|| {A} {V}) (≈ₘ⇒≈ᵥ ≈ₘ-refl) ⟩ 
-        ((toRouteMapMatrix A) || V || ) ⊕ᵥ ~ M        ≈⟨ ⊕ᵥ-cong (A||V||-cong {V = V} A=Imp∘Prot∘Exp) (≈ₘ⇒≈ᵥ ≈ₘ-refl) ⟩
-        ((Imp ∘ₘ Prot) ∘ₘ (Exp ᵀ)) || V || ⊕ᵥ ~ M     ≈⟨ ⊕ᵥ-cong (≈ᵥ-sym (LemmaA₄ (Imp ∘ₘ Prot) Exp V)) (≈ₘ⇒≈ᵥ ≈ₘ-refl)   ⟩ 
-        ((Imp ∘ₘ Prot) 〖 Exp 【 V 】 〗) ↓ ⊕ᵥ ~ M    ≈⟨ ≈ᵥ-refl ⟩
-        (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) V                        ∎
-        where open EqReasoning 𝕍ₛ using (begin_; _∎; step-≈)
+  Γ₁ V                                         ≡⟨⟩
+  A 〚 V 〛 ⊕ᵥ ~ M                              ≈⟨ ⊕ᵥ-cong (〚〛=|| {A} {V}) (≈ₘ⇒≈ᵥ ≈ₘ-refl) ⟩ 
+  ((toRouteMapMatrix A) || V || ) ⊕ᵥ ~ M       ≈⟨ ⊕ᵥ-cong (A||V||-cong {V = V} A=Imp∘Prot∘Exp) (≈ₘ⇒≈ᵥ ≈ₘ-refl) ⟩
+  ((Imp ∘ₘ Prot) ∘ₘ (Exp ᵀ)) || V || ⊕ᵥ ~ M    ≈⟨ ⊕ᵥ-cong (≈ᵥ-sym (LemmaA₄ (Imp ∘ₘ Prot) Exp V)) (≈ₘ⇒≈ᵥ ≈ₘ-refl)   ⟩ 
+  ((Imp ∘ₘ Prot) 〖 Exp 【 V 】 〗) ↓ ⊕ᵥ ~ M    ≡⟨⟩
+  (Γ₂,ᵥ ∘ Γ₂,ᵢ ∘ Γ₂,ₒ) V                       ∎
+  where open EqReasoning 𝕍ₛ
 
 -- Theorem 6
 FixedPoint-Γ₀-Γ₂ : ∀ {X : RoutingMatrix} →

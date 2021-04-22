@@ -34,7 +34,7 @@ module RoutingLib.Routing.Algebra where
 -- This definition defines the structure of a routing algebra. In this record
 -- the algebra is not assumed to have any of the natural properties we would
 -- expect, only that the operations respect the associated notion of equality
--- over routes.
+-- over path-weights.
 --
 -- These raw structures are useful when one algebra that may
 -- not technically be a routing algebra but still simulates a true routing
@@ -56,19 +56,19 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
   IsDistributive : Set _
   IsDistributive = ∀ {n} {i j : Node n} (f : Step i j) x y → f ▷ (x ⊕ y) ≈ (f ▷ x) ⊕ (f ▷ y)
   
-  -- Increasing = extending a route never makes it better
+  -- Increasing = extending a path-weight never makes it better
   IsIncreasing : Set _
   IsIncreasing = ∀ {n} {i j : Node n} (f : Step i j) x → x ≤₊ (f ▷ x)
 
-  -- Strictly increasing = extending a route always makes it worse
+  -- Strictly increasing = extending a path-weight always makes it worse
   IsStrictlyIncreasing : Set _
   IsStrictlyIncreasing = ∀ {n} {i j : Node n} (f : Step i j) {x} → x ≉ ∞# → x <₊ (f ▷ x)
 
-  -- Finite = there only exist a finite number of weights
+  -- Finite = there only exist a finite number of path-weights
   IsFinite : Set _
   IsFinite = Finite S
 
-  Level_DistributiveIn[_,_] : ℕ → Route → Route → Set _
+  Level_DistributiveIn[_,_] : ℕ → PathWeight → PathWeight → Set _
   Level 0       DistributiveIn[ ⊥ , ⊤ ] =
     ∀ {n} {i j : Node n} (f : Step i j) →
     ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →
@@ -81,7 +81,7 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
   IsLevel_Distributive : ℕ → Set _
   IsLevel k Distributive = Level k DistributiveIn[ 0# , ∞# ]
 
-  Level_DistributiveIn[_,_]Alt : ℕ → Route → Route → Set _
+  Level_DistributiveIn[_,_]Alt : ℕ → PathWeight → PathWeight → Set _
   Level 0       DistributiveIn[ ⊥ , ⊤ ]Alt = Lift (a ⊔ b ⊔ ℓ) (⊥ ≈ ⊤)
   Level (suc k) DistributiveIn[ ⊥ , ⊤ ]Alt =
     ∀ {n} {i j : Node n} (f : Step i j) →
@@ -131,7 +131,7 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
     
     field
       -- Every route has an associated path
-      path           : Route → Path
+      path           : PathWeight → Path
       -- The paths of two equal routes are equal
       path-cong      : path Preserves _≈_ ⟶ _≡_
       -- The path of the trivial route is the empty path
@@ -155,7 +155,7 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 --------------------------------------------------------------------------------
 -- This is an alternative more convenient internal representation of a path
 -- algebra used by the various proofs in the library. The difference is that
--- in a certified path algebra the paths themselves contain proofs that they
+-- in a certified path algebra the path-weights themselves contain proofs that they
 -- are indeed simple paths and that all nodes in the path are truely node in the
 -- network.
 --
@@ -172,7 +172,7 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
     no-eta-equality -- Needed due to bug #2732 in Agda
 
     field
-      path           : Route → Path n
+      path           : PathWeight → Path n
       path-cong      : path Preserves _≈_ ⟶ _≈ₚ_
       r≈0⇒path[r]≈[] : ∀ {r} → r ≈ 0# → path r ≈ₚ valid []
       r≈∞⇒path[r]≈∅  : ∀ {r} → r ≈ ∞#  → path r ≈ₚ invalid
@@ -184,10 +184,10 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 
     -- Functions
 
-    size : Route → ℕ
+    size : PathWeight → ℕ
     size r = length (path r)
 
-    weight : (∀ i j → Step i j) → Path n → Route
+    weight : (∀ i j → Step i j) → Path n → PathWeight
     weight A invalid                       = ∞#
     weight A (valid [])                    = 0#
     weight A (valid ((i , j) ∷ p ∣ _ ∣ _)) = A i j ▷ weight A (valid p)
@@ -208,7 +208,7 @@ module PathDistributivity
                      ∀ {x y} → toℕ i ∉ₚ path x → toℕ i ∉ₚ path y → f ▷ (x ⊕ y) ≈ (f ▷ x) ⊕ (f ▷ y)
 
 
-  IsLevel_PathDistributiveIn[_,_]Alt : ℕ → Route → Route → Set _
+  IsLevel_PathDistributiveIn[_,_]Alt : ℕ → PathWeight → PathWeight → Set _
   IsLevel 0       PathDistributiveIn[ ⊥ , ⊤ ]Alt = Lift (a ⊔ b ⊔ ℓ) (⊥ ≈ ⊤)
   IsLevel (suc k) PathDistributiveIn[ ⊥ , ⊤ ]Alt =
     ∀ {n} {i j : Node n} (f : Step i j) →
@@ -219,7 +219,7 @@ module PathDistributivity
 
 
   -- kᵗʰ level distributivity
-  IsLevel_PathDistributiveIn[_,_] : ℕ → Route → Route → Set _
+  IsLevel_PathDistributiveIn[_,_] : ℕ → PathWeight → PathWeight → Set _
   IsLevel 0       PathDistributiveIn[ ⊥ , ⊤ ] =
     ∀ {n} {i j : Node n} (f : Step i j) →
     ∀ {x y} → ⊥ ≤₊ x → x ≤₊ ⊤ → ⊥ ≤₊ y → y ≤₊ ⊤ →

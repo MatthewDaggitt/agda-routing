@@ -50,7 +50,7 @@ module Notation (X : RoutingMatrix) (j : Node) where
   --------------------------------------------------------------------------
   -- Some notation for comparing edges.
 
-  weightₑ : 𝕋 → Edge → Route
+  weightₑ : 𝕋 → Edge → PathWeight
   weightₑ t (i , k) = A i k ▷ σ t X k j
 
   --------------------------------------------------------------------------

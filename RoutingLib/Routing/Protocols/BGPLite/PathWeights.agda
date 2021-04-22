@@ -1,9 +1,9 @@
 --------------------------------------------------------------------------------
 -- Agda routing library
 --
--- The underlying data contained in each route in the BGPLite algebra. Each
--- route is either invalid or consists of a level, a set of communities and a
--- path along which it was generated.
+-- The underlying data contained in each path-weight in the BGPLite algebra.
+-- Each path-weight is either invalid or consists of a level, a set of
+-- communities and the path along which it was generated.
 --------------------------------------------------------------------------------
 
 open import Data.Nat using (ℕ; _<_; _≤_; _≟_)
@@ -23,7 +23,7 @@ open import RoutingLib.Routing.Basics.Path.Uncertified.Properties
 
 open import RoutingLib.Routing.Protocols.BGPLite.Communities
 
-module RoutingLib.Routing.Protocols.BGPLite.Routes where
+module RoutingLib.Routing.Protocols.BGPLite.PathWeights where
 
 ------------------------------------------------------------------------
 -- Types
@@ -31,14 +31,14 @@ module RoutingLib.Routing.Protocols.BGPLite.Routes where
 Level : Set
 Level = ℕ
 
-data Route : Set where
-  invalid : Route
-  valid   : (l : Level) → (cs : CommunitySet) → (p : Path) → Route
+data PathWeight : Set where
+  invalid : PathWeight
+  valid   : (l : Level) → (cs : CommunitySet) → (p : Path) → PathWeight
 
 ------------------------------------------------------------------------
--- Equality over routes
+-- Equality over path-weights
 
-_≟ᵣ_ : Decidable {A = Route} _≡_
+_≟ᵣ_ : Decidable {A = PathWeight} _≡_
 invalid      ≟ᵣ invalid      = yes refl
 invalid      ≟ᵣ valid l cs p = no λ()
 valid l cs p ≟ᵣ invalid      = no λ()
@@ -48,28 +48,28 @@ valid l cs p ≟ᵣ valid k ds q with l ≟ k | cs ≟ᶜˢ ds | p ≟ₚ q
 ... | yes _    | yes _     | no  p≉q  = no λ {refl → p≉q   refl}
 ... | yes refl | yes refl  | yes refl = yes refl
 
-≡ᵣ-isEquivalence : IsEquivalence {A = Route} _≡_
+≡ᵣ-isEquivalence : IsEquivalence {A = PathWeight} _≡_
 ≡ᵣ-isEquivalence = isEquivalence
 
-≡ᵣ-isDecEquivalence : IsDecEquivalence {A = Route} _≡_
+≡ᵣ-isDecEquivalence : IsDecEquivalence {A = PathWeight} _≡_
 ≡ᵣ-isDecEquivalence = record
   { isEquivalence = ≡ᵣ-isEquivalence
   ; _≟_           = _≟ᵣ_
   }
 
 ------------------------------------------------------------------------
--- A total ordering over routes
+-- A total ordering over path-weights
 
 infix 4 _≤ᵣ_ _≰ᵣ_
 
-data _≤ᵣ_ : Rel Route ℓ₀ where
+data _≤ᵣ_ : Rel PathWeight ℓ₀ where
   invalid : ∀ {r} → r ≤ᵣ invalid
   level<  : ∀ {k l cs ds p q} → k < l → valid k cs p ≤ᵣ valid l ds q
   length< : ∀ {k l cs ds p q} → k ≡ l → length p < length q → valid k cs p ≤ᵣ valid l ds q
   plex<   : ∀ {k l cs ds p q} → k ≡ l → length p ≡ length q → p <ₗₑₓ q → valid k cs p ≤ᵣ valid l ds q
   comm≤   : ∀ {k l cs ds p q} → k ≡ l → p ≈ₚ q → cs ≤ᶜˢ ds → valid k cs p ≤ᵣ valid l ds q
 
-_≰ᵣ_ : Rel Route ℓ₀
+_≰ᵣ_ : Rel PathWeight ℓ₀
 r ≰ᵣ s = ¬ (r ≤ᵣ s)
 
 ≤ᵣ-total : Total _≤ᵣ_

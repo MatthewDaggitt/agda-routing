@@ -38,7 +38,7 @@ RoutingVector₂ = SquareMatrix (List Assignment) n
 -- tgg: New definition!
 -- We need this, since the elements of Imp, Prot, and Exp are functions, not steps!
 RouteMapMatrix : Set a
-RouteMapMatrix = SquareMatrix (Route → Route) n
+RouteMapMatrix = SquareMatrix (PathWeight → PathWeight) n
 
 infix 10 _ᵀ
 _ᵀ : RouteMapMatrix → RouteMapMatrix

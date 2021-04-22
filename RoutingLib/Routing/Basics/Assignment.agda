@@ -1,8 +1,8 @@
 --------------------------------------------------------------------------------
 -- Agda routing library
 --
--- This module contains the basic definitions about the assignment of a route
--- to a node.
+-- This module contains the basic definitions about the assignment of a
+-- path-weight to a node.
 --------------------------------------------------------------------------------
 
 open import Data.Fin.Base as Fin using (Fin)
@@ -38,7 +38,7 @@ open import RoutingLib.Routing.Basics.Network algebra n
 -- Definition
 
 Assignment : Set a
-Assignment = Node × Route
+Assignment = Node × PathWeight
 
 --------------------------------------------------------------------------------
 -- Functions
@@ -46,7 +46,7 @@ Assignment = Node × Route
 node : Assignment → Node
 node = proj₁
 
-value : Assignment → Route
+value : Assignment → PathWeight
 value = proj₂
 
 --------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ _↝[_]_ : Assignment → AdjacencyMatrix → Assignment → Set ℓ
 -- Threatens relation
 
 -- In order to define a free network, we first define the threatens relation.
--- Route x threatens y if there exists some extension of x that is
+-- PathWeight x threatens y if there exists some extension of x that is
 -- preferred over y.
 
 infix 7 _⊴[_]_

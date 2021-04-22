@@ -45,7 +45,7 @@ open IsPathAlgebra isPathAlgebra
 private
   variable
     i j : Node
-    r : Route
+    r : PathWeight
     p : Pathᵛ n
 
 --------------------------------------------------------------------------------
@@ -53,7 +53,7 @@ private
 -- valid path. The certify function effectively discards any part of the path
 -- that is malformed or contains nodes not in the current network.
 
-pathᶜ : Route → Maybe (Pathᵛ n)
+pathᶜ : PathWeight → Maybe (Pathᵛ n)
 pathᶜ r = map certify (path r)
 
 --------------------------------------------------------------------------------

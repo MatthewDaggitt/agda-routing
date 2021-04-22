@@ -1,14 +1,14 @@
 --------------------------------------------------------------------------------
 -- Agda routing library
 --
--- This module defines the notion of a value of a route being consistent with
--- the current network. This means that if you traversed the path along which
+-- This module defines the notion of a value of a path-weight being consistent
+-- with the current network. This means that if you traversed the path along which
 -- it claims it was generated along you would arrive at the same value. For
--- example a route may be inconsistent with the current network topology if a
--- link on it's path has since failed or its weight has changed.
+-- example a path-weight may be inconsistent with the current network topology
+-- if a link on it's path has since failed or its weight has changed.
 --
--- Using this notion it is possible to construct a new algebra using only the
--- set of consistent routes.
+-- Using this notion it is possible to construct a new algebra using only
+-- consistent path-weights.
 --------------------------------------------------------------------------------
 
 open import Algebra.Core  using (Op₂)
@@ -69,13 +69,13 @@ private
 --------------------------------------------------------------------------------
 -- Definition
 --------------------------------------------------------------------------------
--- A route is consistent if it is equal to the weight of the path along which
--- it was generated.
+-- A path-weight is consistent if it is equal to the weight of the path along
+-- which it was generated.
 
-𝑪 : Route → Set ℓ
+𝑪 : PathWeight → Set ℓ
 𝑪 r = weight A (path r) ≈ r
 
-𝑰 : Route → Set ℓ
+𝑰 : PathWeight → Set ℓ
 𝑰 r = ¬ 𝑪 r
 
 --------------------------------------------------------------------------------
@@ -156,28 +156,28 @@ recomputeᶜ {x} = recompute (weight A (path x) ≟ x)
 --------------------------------------------------------------------------------
 -- The consistent routing algebra
 --------------------------------------------------------------------------------
--- The subset of routes consistent with the current network topology form a
--- finite routing algebra
+-- The subset of path-weights consistent with the current network topology form
+-- a finite routing algebra
 
--- A consistent route is simply a route paired with a proof that it is
--- consistent.
+-- A consistent path-weight is simply a path-weight paired with a proof that it
+-- iscconsistent.
 
-record CRoute : Set (a ⊔ ℓ) where
+record CPathWeight : Set (a ⊔ ℓ) where
   constructor _,_
   field
-    route       : Route
-    .consistent : 𝑪 route
+    pathWeight  : PathWeight
+    .consistent : 𝑪 pathWeight
 
-projᵣ : CRoute → Route
+projᵣ : CPathWeight → PathWeight
 projᵣ (x , _) = x
 
--- CRoute = Σ Route 𝑪
+-- CPathWeight = Σ PathWeight 𝑪
 
-toCRoute : ∀ {r} → 𝑪 r → CRoute
-toCRoute {r} rᶜ = r , rᶜ
+toCPathWeight : ∀ {r} → 𝑪 r → CPathWeight
+toCPathWeight {r} rᶜ = r , rᶜ
 
-fromCRoute : CRoute → Route
-fromCRoute (r , _ ) = r
+fromCPathWeight : CPathWeight → PathWeight
+fromCPathWeight (r , _ ) = r
 
 -- The sets of edge functions for the consistent routing algebra are a little
 -- harder to define. The edges are labelled with the arcs, that are then
@@ -193,40 +193,40 @@ fromCRoute (r , _ ) = r
 CStep : ∀ {m} → Fin m → Fin m → Set
 CStep i j = Maybe (Fin n × Fin n) × (i ≡ j ⊎ i ≢ j)
 
--- The trivial route is simply taken from the original algebra
+-- The trivial path-weight is simply taken from the original algebra
 
-C0# : CRoute
+C0# : CPathWeight
 C0# = 0# , 0ᶜ
 
--- The invalid route is simply taken from the original algebra
+-- The invalid path-weight is simply taken from the original algebra
 
-C∞# : CRoute
+C∞# : CPathWeight
 C∞# = ∞# , ∞ᶜ
 
--- Equality over consistent routes is equality on the route
+-- Equality over consistent path-weights is equality on the path-weight
 
 infix 4 _≈ᶜ_ _≉ᶜ_ _≟ᶜ_
 
-_≈ᶜ_ : Rel CRoute _
+_≈ᶜ_ : Rel CPathWeight _
 _≈ᶜ_ = _≈_ on projᵣ
 
-_≉ᶜ_ : Rel CRoute _
+_≉ᶜ_ : Rel CPathWeight _
 r ≉ᶜ s = ¬ (r ≈ᶜ s)
 
--- Again the choice operator is simply lifted to consistent routes
+-- Again the choice operator is simply lifted to consistent path-weights
 
 infix 7 _⊕ᶜ_
 
-_⊕ᶜ_ : Op₂ CRoute
+_⊕ᶜ_ : Op₂ CPathWeight
 (r , rᶜ) ⊕ᶜ (s , sᶜ) = r ⊕ s , ⊕-pres-𝑪 rᶜ sᶜ
 
 -- Extension works a little differently. The arc containing `nothing` is the
--- invalid arc. For the arc (k , l), extending the route is performed by
+-- invalid arc. For the arc (k , l), extending the path-weight is performed by
 -- applying the original edge weight A k l in the network topology.
 
 infix 6 _▷ᶜ_
 
-_▷ᶜ_ : ∀ {n} {i j : Fin n} → CStep i j → CRoute → CRoute
+_▷ᶜ_ : ∀ {n} {i j : Fin n} → CStep i j → CPathWeight → CPathWeight
 (nothing       , _) ▷ᶜ (r , rᶜ) = C∞#
 (valid (k , l) , _) ▷ᶜ (r , rᶜ) = A k l ▷ r , ▷-pres-𝑪 k l rᶜ
 -- As mentioned the invalid arc weight is simply `nothing`
@@ -245,10 +245,10 @@ _ ≟ᶜ _ = _ ≟ _
 ≈ᶜ-isDecEquivalence = On.isDecEquivalence projᵣ ≈-isDecEquivalence
 
 Sᶜ : Setoid _ _
-Sᶜ = On.setoid {B = CRoute} S projᵣ
+Sᶜ = On.setoid {B = CPathWeight} S projᵣ
 
 DSᶜ : DecSetoid _ _
-DSᶜ = On.decSetoid {B = CRoute} DS projᵣ
+DSᶜ = On.decSetoid {B = CPathWeight} DS projᵣ
 
 ⊕ᶜ-cong : Congruent₂ _⊕ᶜ_
 ⊕ᶜ-cong = ⊕-cong
@@ -264,8 +264,8 @@ f∞ᶜ-reject _ _ _ = ≈-refl
 
 algebraᶜ : RawRoutingAlgebra (a ⊔ ℓ) 0ℓ ℓ
 algebraᶜ = record
-  { Step               = CStep
-  ; Route              = CRoute
+  { PathWeight         = CPathWeight
+  ; Step               = CStep
   ; _≈_                = _≈ᶜ_
   ; _⊕_                = _⊕ᶜ_
   ; _▷_                = _▷ᶜ_
@@ -311,9 +311,9 @@ isRoutingAlgebraᶜ = record
   }
 
 ------------------------------------------------------------------------------
--- There's a surjection between paths and consistent routes
+-- There's a surjection between paths and consistent path-weights
 
-fromPath : Path n → CRoute
+fromPath : Path n → CPathWeight
 fromPath p = weight A p , weightᶜ p
 
 fromPath-surjective : Surjective (_≈ₚ_ {n = n}) _≈ᶜ_ fromPath
@@ -350,14 +350,14 @@ Aᶜ : AdjacencyMatrix algebraᶜ n
 Aᶜ i j = just (i , j) , toSum (i Fin.≟ j)
 
 nonFreeCycleᶜ : ∀ C → IsNonFreeCycle algebraᶜ Aᶜ C → IsNonFreeCycle algebra A C
-nonFreeCycleᶜ (m , C) (routesᶜ , nonFreeᶜ) = routes , nonFree
+nonFreeCycleᶜ (m , C) (pathWeightsᶜ , nonFreeᶜ) = pathWeights , nonFree
   where
-  routes : Vector Route (suc m)
-  routes = map fromCRoute routesᶜ
+  pathWeights : Vector PathWeight (suc m)
+  pathWeights = map fromCPathWeight pathWeightsᶜ
   
-  nonFree : ∀ i → (C (i -ₘ 1) , routes (i -ₘ 1)) ⊴[ A ] (C i , routes i)
+  nonFree : ∀ i → (C (i -ₘ 1) , pathWeights (i -ₘ 1)) ⊴[ A ] (C i , pathWeights i)
   nonFree i with nonFreeᶜ i
-  ... | (z , Xᵢ↝z , z≤y) = fromCRoute z , Xᵢ↝z , z≤y
+  ... | (z , Xᵢ↝z , z≤y) = fromCPathWeight z , Xᵢ↝z , z≤y
 
 freeᶜ : IsFreeAdjacencyMatrix algebra A → IsFreeAdjacencyMatrix algebraᶜ Aᶜ
 freeᶜ cf C C-nonFree = cf C (nonFreeCycleᶜ C C-nonFree)

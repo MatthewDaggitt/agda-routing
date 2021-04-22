@@ -19,6 +19,8 @@ open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
 import Relation.Binary.Construct.NonStrictToStrict as NonStrictToStrict
 import Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
 
+open import RoutingLib.Routing.Basics.Node
+
 --------------------------------------------------------------------------------
 -- Raw routing algebras --
 --------------------------------------------------------------------------------
@@ -40,30 +42,30 @@ record RawRoutingAlgebra a b ℓ : Set (suc (a ⊔ b ⊔ ℓ)) where
 
   field
     -- The type of the routes
-    Route            : Set a
+    PathWeight       : Set a
     -- The type of edge labels for each arc (i , j)
-    Step             : ∀ {n} → Fin n → Fin n → Set b
+    Step             : ∀ {n} → Node n → Node n → Set b
 
-    -- Equality between routes
-    _≈_              : Rel Route ℓ
-    -- Operation for choosing between routes
-    _⊕_              : Op₂ Route
-    -- Operation for extending a route along an edge
-    _▷_              : ∀ {n} {i j : Fin n} → Step i j → Route → Route
-    -- The trivial route
-    0#               : Route
-    -- The invalid route
-    ∞#               : Route
+    -- Equality between path-weights
+    _≈_              : Rel PathWeight ℓ
+    -- Operation for choosing between path-weights
+    _⊕_              : Op₂ PathWeight
+    -- Operation for calculating a new path-weight along an edge
+    _▷_              : ∀ {n} {i j : Node n} → Step i j → PathWeight → PathWeight
+    -- The trivial path weight
+    0#               : PathWeight
+    -- The invalid path weight
+    ∞#               : PathWeight
     -- The invalid edge weight
-    f∞               : ∀ {n} (i j : Fin n) → Step i j
+    f∞               : ∀ {n} (i j : Node n) → Step i j
 
-    -- The _≈_ relation really is an equality relation
+    -- The _≈_ relation is an equality relation
     ≈-isDecEquivalence : IsDecEquivalence _≈_
     ⊕-cong             : Congruent₂ _≈_ _⊕_
-    ▷-cong             : ∀ {n} {i j : Fin n} (f : Step i j) → Congruent₁ _≈_ (f ▷_)
+    ▷-cong             : ∀ {n} {i j : Node n} (f : Step i j) → Congruent₁ _≈_ (f ▷_)
 
-    -- The invalid edge weight really does reject routes
-    f∞-reject          : ∀ {n} (i j : Fin n) x → f∞ i j ▷ x ≈ ∞#
+    -- The invalid edge weight really does reject path-weights
+    f∞-reject          : ∀ {n} (i j : Node n) x → f∞ i j ▷ x ≈ ∞#
 
 
   -- Publicly export equality proofs
@@ -88,13 +90,13 @@ record RawRoutingAlgebra a b ℓ : Set (suc (a ⊔ b ⊔ ℓ)) where
 
   infix 4 _≉_ _≤₊?_ _<₊?_ _≮₊_ _≰₊_
   
-  _≉_ : Rel Route ℓ
+  _≉_ : Rel PathWeight ℓ
   x ≉ y = ¬ (x ≈ y)
 
-  _≮₊_ : Rel Route ℓ
+  _≮₊_ : Rel PathWeight ℓ
   x ≮₊ y = ¬ (x <₊ y)
 
-  _≰₊_ : Rel Route ℓ
+  _≰₊_ : Rel PathWeight ℓ
   x ≰₊ y = ¬ (x ≤₊ y)
 
   _≤₊?_ : Decidable _≤₊_

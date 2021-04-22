@@ -20,7 +20,7 @@ module RoutingLib.Routing.Protocols.BGPLite where
 --------------------------------------------------------------------------------
 -- Core definition
 
-open import RoutingLib.Routing.Protocols.BGPLite.Routes public
+open import RoutingLib.Routing.Protocols.BGPLite.PathWeights public
 open import RoutingLib.Routing.Protocols.BGPLite.Communities public
 open import RoutingLib.Routing.Protocols.BGPLite.Policies public
 open import RoutingLib.Routing.Protocols.BGPLite.Core public

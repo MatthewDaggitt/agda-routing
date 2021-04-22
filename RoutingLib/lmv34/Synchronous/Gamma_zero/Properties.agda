@@ -40,7 +40,7 @@ open Gamma_zero_Algebra algebra n
   { isMagma = ⊕ₘ-isMagma
   }
 
-⨁-cong : ∀ {k} → {f g : Fin k → Route} →
+⨁-cong : ∀ {k} → {f g : Fin k → PathWeight} →
          (∀ {i} → f i ≈ g i) → ⨁ f ≈ ⨁ g
 ⨁-cong {zero} f=g = ≈-refl
 ⨁-cong {suc k} f=g = ⊕-cong f=g (⨁-cong {k} f=g)

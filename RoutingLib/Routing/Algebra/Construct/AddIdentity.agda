@@ -31,10 +31,10 @@ infix 4 _≈ⁱ_
 infix 7 _⊕ⁱ_
 infix 6 _▷ⁱ_
 
-Routeⁱ : Set a
-Routeⁱ = Pointed Route 
+PathWeightⁱ : Set a
+PathWeightⁱ = Pointed PathWeight
 
-_≈ⁱ_ : Rel Routeⁱ (a ⊔ ℓ)
+_≈ⁱ_ : Rel PathWeightⁱ (a ⊔ ℓ)
 _≈ⁱ_ = _≈∙_ _≈_
 
 ≈ⁱ-refl : Reflexive _≈ⁱ_
@@ -46,19 +46,19 @@ _≈ⁱ_ = _≈∙_ _≈_
 ≈ⁱ-trans : Transitive _≈ⁱ_
 ≈ⁱ-trans = ≈∙-trans _≈_ ≈-trans 
 
-_⊕ⁱ_ : Op₂ Routeⁱ
+_⊕ⁱ_ : Op₂ PathWeightⁱ
 _⊕ⁱ_ = _⊕∙_ _⊕_   
 
-_▷ⁱ_ : ∀ {n} {i j : Fin n} → Step i j → Routeⁱ → Routeⁱ
+_▷ⁱ_ : ∀ {n} {i j : Fin n} → Step i j → PathWeightⁱ → PathWeightⁱ
 _▷ⁱ_ {_} {i} {j} f identity    = identity
 _▷ⁱ_ {_} {i} {j} f [ x ] with (f ▷ x) ≟ ∞#
 ... | yes _ = identity
 ... | no _  = [ f ▷ x ] 
 
-0#ⁱ : Routeⁱ
+0#ⁱ : PathWeightⁱ
 0#ⁱ = [ 0# ] 
 
-∞#ⁱ : Routeⁱ
+∞#ⁱ : PathWeightⁱ
 ∞#ⁱ = identity
 
 f∞ⁱ : ∀ {n} (i j : Fin n) → Step i j
@@ -86,7 +86,7 @@ _≟ⁱ_ = ≈∙-dec _ _≟_
 ...| no ¬p | yes p = contradiction (≈-trans (▷-cong f ([≈]-injective _ x≈y)) p) ¬p 
 ...| no ¬p | no ¬p₁ = [ (▷-cong f ([≈]-injective _ x≈y)) ] 
 
-f∞ⁱ-reject : ∀ {n} (i j : Fin n) (x : Routeⁱ) → f∞ⁱ i j ▷ⁱ x ≈ⁱ ∞#ⁱ
+f∞ⁱ-reject : ∀ {n} (i j : Fin n) (x : PathWeightⁱ) → f∞ⁱ i j ▷ⁱ x ≈ⁱ ∞#ⁱ
 f∞ⁱ-reject i j identity         = ∙≈∙
 f∞ⁱ-reject i j ([ x ]) with  f∞ i j ▷ x ≟ ∞#
 ... | yes f∞▷x≈∞      = ∙≈∙  -- 
@@ -94,7 +94,7 @@ f∞ⁱ-reject i j ([ x ]) with  f∞ i j ▷ x ≟ ∞#
 
 Add-Identity : RawRoutingAlgebra a b (a ⊔ ℓ)
 Add-Identity = record
-  { Route              = Routeⁱ
+  { PathWeight         = PathWeightⁱ
   ; Step               = Step
   ; _≈_                = _≈ⁱ_
   ; _⊕_                = _⊕ⁱ_

@@ -96,11 +96,11 @@ infix 5 ⨁ₛ
 
 -- Function application to sets
 infix 13 _[_]
-_[_] : (Route → Route) → RoutingSet → RoutingSet
+_[_] : (PathWeight → PathWeight) → RoutingSet → RoutingSet
 f [ X ] = (map₂ f X) †
 
 -- Lookup of destinations
-lookup-d : RoutingSet → Fin n → Route
+lookup-d : RoutingSet → Node → PathWeight
 lookup-d []            j = ∞#
 lookup-d ((d , s) ∷ S) j with d ≟F j
 ... | yes _ = s

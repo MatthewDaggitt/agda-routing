@@ -2,10 +2,10 @@
 -- Agda routing library
 --
 -- This module combines two routing algebras into a third composite routing
--- algebra via a lexicographic product. The routes are combined as pairs of the
--- old routes, with choice being implemented as the lexicographic product of the
--- two old choice operators, and extension being implemented pointwise using the
--- two old extension operators.
+-- algebra via a lexicographic product. The path-weights are combined as pairs
+-- of the old path-weights, with choice being implemented as the lexicographic
+-- product of the two old choice operators, and extension being implemented
+-- pointwise using the two old extension operators.
 --
 -- See RoutingLib.Protocols.ShortestWidestPaths for an example of how this may
 -- be used.
@@ -46,25 +46,25 @@ infix 7 _⊕_
 infix 6 _▷_
 infix 4 _≈_
 
-Route : Set _
-Route = A.Route × B.Route
+PathWeight : Set _
+PathWeight = A.PathWeight × B.PathWeight
 
 Step : ∀ {n} (i j : Fin n) → Set _
 Step i j = A.Step i j × B.Step i j
 
-_≈_ : Rel Route _
+_≈_ : Rel PathWeight _
 _≈_ = Pointwise A._≈_ B._≈_
 
-_⊕_ : Op₂ Route
+_⊕_ : Op₂ PathWeight
 _⊕_ = Lex._⊕_
 
-_▷_ : ∀ {n} {i j : Fin n} → Step i j → Route → Route
+_▷_ : ∀ {n} {i j : Fin n} → Step i j → PathWeight → PathWeight
 (f , g) ▷ (a , b) = f A.▷ a , g B.▷ b
 
-0# : Route
+0# : PathWeight
 0# = A.0# , B.0#
 
-∞# : Route
+∞# : PathWeight
 ∞# = A.∞# , B.∞#
 
 f∞ : ∀ {n} (i j : Fin n) → Step i j
@@ -78,7 +78,7 @@ f∞-reject i j (a , b) = A.f∞-reject i j a , B.f∞-reject i j b
 
 Lex : RawRoutingAlgebra _ _ _
 Lex = record
-  { Route              = Route
+  { PathWeight         = PathWeight
   ; Step               = Step
   ; _≈_                = _≈_
   ; _⊕_                = _⊕_

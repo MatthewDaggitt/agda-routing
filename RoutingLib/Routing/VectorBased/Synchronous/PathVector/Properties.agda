@@ -203,30 +203,30 @@ toCMatrix-cong : ∀ {X Y} (Xᶜ : 𝑪ₘ X) (Yᶜ : 𝑪ₘ Y) → X ≈ₘ Y 
                  toCMatrix Xᶜ ≈ᶜₘ toCMatrix Yᶜ
 toCMatrix-cong _ _ X≈Y i j = X≈Y i j
 
-I≈toCI : ∀ i j → toCRoute (Iᶜ i j) ≈ᶜ Ic i j
+I≈toCI : ∀ i j → toCPathWeight (Iᶜ i j) ≈ᶜ Ic i j
 I≈toCI i j with j ≟𝔽 i
 ... | yes _ = ≈-refl
 ... | no  _ = ≈-refl
 
-foldrᶜ-lemma : ∀ {e xs} {ys : List CRoute} → 𝑪 e →
+foldrᶜ-lemma : ∀ {e xs} {ys : List CPathWeight} → 𝑪 e →
                  Pointwise (λ x y → x ≈ projᵣ y) xs ys →
                  𝑪 (foldr _⊕_ e xs)
 foldrᶜ-lemma eᶜ []            = eᶜ
 foldrᶜ-lemma eᶜ (_∷_ {y = y , yᶜ} x≈y xs≈ys) =
   ⊕-pres-𝑪 (𝑪-cong (≈-sym x≈y) (recomputeᶜ yᶜ)) (foldrᶜ-lemma eᶜ xs≈ys)
 
-foldr-toCRoute-commute : ∀ {e f} (eᶜ : 𝑪 e) → toCRoute eᶜ ≈ᶜ f →
-                      ∀ {xs ys} (foldrᶜ : 𝑪 (foldr _⊕_ e xs)) →
-                      Pointwise (λ x y → x ≈ projᵣ y) xs ys →
-                      toCRoute foldrᶜ ≈ᶜ foldr _⊕ᶜ_ f ys
-foldr-toCRoute-commute eᶜ e≈f foldrᶜ []            = e≈f
-foldr-toCRoute-commute eᶜ e≈f foldrᶜ (x≈y ∷ xs≈ys) =
-  ⊕-cong x≈y (foldr-toCRoute-commute eᶜ e≈f (foldrᶜ-lemma eᶜ xs≈ys) xs≈ys)
+foldr-toCPathWeight-commute : ∀ {e f} (eᶜ : 𝑪 e) → toCPathWeight eᶜ ≈ᶜ f →
+                              ∀ {xs ys} (foldrᶜ : 𝑪 (foldr _⊕_ e xs)) →
+                              Pointwise (λ x y → x ≈ projᵣ y) xs ys →
+                              toCPathWeight foldrᶜ ≈ᶜ foldr _⊕ᶜ_ f ys
+foldr-toCPathWeight-commute eᶜ e≈f foldrᶜ []            = e≈f
+foldr-toCPathWeight-commute eᶜ e≈f foldrᶜ (x≈y ∷ xs≈ys) =
+  ⊕-cong x≈y (foldr-toCPathWeight-commute eᶜ e≈f (foldrᶜ-lemma eᶜ xs≈ys) xs≈ys)
 
 F-toCMatrix-commute : ∀ {X} (Xᶜ : 𝑪ₘ X) (FXᶜ : 𝑪ₘ (F X)) →
                       toCMatrix FXᶜ ≈ᶜₘ Fᶜ (toCMatrix Xᶜ)
 F-toCMatrix-commute {X} Xᶜ FXᶜ i j =
-  foldr-toCRoute-commute (Iᶜ i j) (I≈toCI i j) (FXᶜ i j)
+  foldr-toCPathWeight-commute (Iᶜ i j) (I≈toCI i j) (FXᶜ i j)
     (Pointwise.tabulate⁺ {g = λ k → A i k ▷ X k j , ▷-pres-𝑪 i k (Xᶜ k j)} (λ k → ≈-refl))
 
 F-toCMatrix-commute′ : ∀ {X} (Xᶜ : 𝑪ₘ X) → toCMatrix (F-pres-𝑪ₘ Xᶜ) ≈ᶜₘ Fᶜ (toCMatrix Xᶜ)

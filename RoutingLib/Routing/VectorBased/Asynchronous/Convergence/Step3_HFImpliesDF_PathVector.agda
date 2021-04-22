@@ -45,29 +45,29 @@ open import RoutingLib.Routing.VectorBased.Synchronous algebraᶜ Aᶜ
 
 private
   variable
-    w x y z : Route
+    w x y z : PathWeight
     i j : Fin n
 
 ------------------------------------------------------------------------
 -- Definitions
 ------------------------------------------------------------------------
 
--- Height of inconsistent routes
-hⁱ : Route → ℕ
+-- Height of inconsistent path-weights
+hⁱ : PathWeight → ℕ
 hⁱ x with 𝑪? x
 ... | yes _ = 1
 ... | no  _ = 1 + (suc n ∸ size x)
 
--- Distance between inconsistent routes
-rⁱ : Route → Route → ℕ
+-- Distance between inconsistent path-weights
+rⁱ : PathWeight → PathWeight → ℕ
 rⁱ x y = hⁱ x ⊔ hⁱ y
 
--- Distance between consistent routes
+-- Distance between consistent path-weights
 rᶜ : Node → ∀ {x y} → 𝑪 x → 𝑪 y → ℕ
-rᶜ i xᶜ yᶜ = DV.r i (toCRoute xᶜ) (toCRoute yᶜ)
+rᶜ i xᶜ yᶜ = DV.r i (toCPathWeight xᶜ) (toCPathWeight yᶜ)
 
--- Distance between routes
-r : Node → Route → Route → ℕ
+-- Distance between path-weights
+r : Node → PathWeight → PathWeight → ℕ
 r i x y with x ≟ y | 𝑪? x | 𝑪? y
 ... | yes _ | _      | _      = zero
 ... | no  _ | yes xᶜ | yes yᶜ = rᶜ i xᶜ yᶜ
@@ -174,17 +174,17 @@ module _ (i : Node) where
   rᶜ-cong : (wᶜ : 𝑪 w) (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) (zᶜ : 𝑪 z) →
              w ≈ y → x ≈ z → rᶜ i wᶜ xᶜ ≡ rᶜ i yᶜ zᶜ
   rᶜ-cong wᶜ xᶜ yᶜ zᶜ w≈y x≈z = DV.cong i
-    {x = toCRoute wᶜ} {y = toCRoute yᶜ}
-    {u = toCRoute xᶜ} {v = toCRoute zᶜ} w≈y x≈z
+    {x = toCPathWeight wᶜ} {y = toCPathWeight yᶜ}
+    {u = toCPathWeight xᶜ} {v = toCPathWeight zᶜ} w≈y x≈z
 
   x≈y⇒rᶜ≡0 : ∀ (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → x ≈ y → rᶜ i xᶜ yᶜ ≡ 0
-  x≈y⇒rᶜ≡0 xᶜ yᶜ x≈y = DV.≈⇒0 i {toCRoute xᶜ} {toCRoute yᶜ} x≈y
+  x≈y⇒rᶜ≡0 xᶜ yᶜ x≈y = DV.≈⇒0 i {toCPathWeight xᶜ} {toCPathWeight yᶜ} x≈y
 
   rᶜ≡0⇒x≈y : ∀ (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → rᶜ i xᶜ yᶜ ≡ 0 → x ≈ y
-  rᶜ≡0⇒x≈y xᶜ yᶜ d≡0 = DV.0⇒≈ i {toCRoute xᶜ} {toCRoute yᶜ} d≡0
+  rᶜ≡0⇒x≈y xᶜ yᶜ d≡0 = DV.0⇒≈ i {toCPathWeight xᶜ} {toCPathWeight yᶜ} d≡0
 
   rᶜ<Hᶜ : ∀ (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → rᶜ i xᶜ yᶜ < Hᶜ
-  rᶜ<Hᶜ xᶜ yᶜ = s≤s (DV.r≤rₘₐₓ i (toCRoute xᶜ) (toCRoute yᶜ))
+  rᶜ<Hᶜ xᶜ yᶜ = s≤s (DV.r≤rₘₐₓ i (toCPathWeight xᶜ) (toCPathWeight yᶜ))
 
   rᶜ<Hᶜ+x : ∀ (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) z → rᶜ i xᶜ yᶜ < Hᶜ + z
   rᶜ<Hᶜ+x xᶜ yᶜ z = <-transˡ (rᶜ<Hᶜ xᶜ yᶜ) (m≤m+n Hᶜ z)

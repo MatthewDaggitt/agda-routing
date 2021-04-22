@@ -22,7 +22,7 @@ open import RoutingLib.Routing.Algebra
 
 Aˢʰᵒʳᵗᵉˢᵗ : RawRoutingAlgebra 0ℓ 0ℓ 0ℓ
 Aˢʰᵒʳᵗᵉˢᵗ = record
-  { Route              = ℕ∞
+  { PathWeight         = ℕ∞
   ; Step               = λ _ _ → ℕ∞
   ; _≈_                = _≡_
   ; _⊕_                = _⊓_

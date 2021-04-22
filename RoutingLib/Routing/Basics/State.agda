@@ -46,7 +46,7 @@ open import RoutingLib.Routing.Basics.Node n
 -- Routing tables store a node's routing decisions
 
 RoutingTable : Set a
-RoutingTable = Vector Route n
+RoutingTable = Vector PathWeight n
 
 -- Properties
 open VectorDecEquality DS public
@@ -73,7 +73,7 @@ Decℝ𝕋ₛⁱ = triviallyIndexDecSetoid Node DS
 -- Routing matrices store the routing decisions of the entire network
 
 RoutingMatrix : Set a
-RoutingMatrix = SquareMatrix Route n
+RoutingMatrix = SquareMatrix PathWeight n
 
 -- Standard equality
 open MatrixDecEquality DS public
@@ -88,7 +88,7 @@ Decℝ𝕄ₛ : DecSetoid a ℓ
 Decℝ𝕄ₛ = Dec𝕄ₛ n n
 
 Decℝ𝕄ₛⁱ : IndexedDecSetoid Node a ℓ
-Decℝ𝕄ₛⁱ = triviallyIndexDecSetoid (Fin n) Decℝ𝕋ₛ
+Decℝ𝕄ₛⁱ = triviallyIndexDecSetoid Node Decℝ𝕋ₛ
 
 -- Equality over only a subset of routing tables
 open SubsetEquality ℝ𝕄ₛⁱ public

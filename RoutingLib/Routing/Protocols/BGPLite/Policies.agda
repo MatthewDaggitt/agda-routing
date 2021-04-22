@@ -2,8 +2,9 @@
 -- Agda routing library
 --
 -- A simple conditional policy language inspired by that of BGP. Policy
--- decisions can depend on any part of the route, and hence decisions can be
--- made on its level, its communities and the path along which it was generated.
+-- decisions can depend on any part of the path-weight, and hence decisions can
+-- be made on its level, its communities and the path along which it was
+-- generated.
 --------------------------------------------------------------------------------
 
 module RoutingLib.Routing.Protocols.BGPLite.Policies where
@@ -24,7 +25,7 @@ open import RoutingLib.Routing.Basics.Path.Uncertified as Path
   using (Path; []; _∷_; length; deflate)
 open import RoutingLib.Routing.Basics.Path.Uncertified.Properties
 
-open import RoutingLib.Routing.Protocols.BGPLite.Routes
+open import RoutingLib.Routing.Protocols.BGPLite.PathWeights
 open import RoutingLib.Routing.Protocols.BGPLite.Communities
 
 --------------------------------------------------------------------------------
@@ -38,7 +39,7 @@ data Condition : Set where
   inComm    : (c : Community) → Condition
   isLevel   : (l : Level)     → Condition
 
-evaluate : Condition → Route → Bool
+evaluate : Condition → PathWeight → Bool
 evaluate (s and t)   r              = evaluate s r ∧ evaluate t r
 evaluate (s or t)    r              = evaluate s r ∨ evaluate t r
 evaluate (not s)     r              = 𝔹.not (evaluate s r)
@@ -61,7 +62,7 @@ data Policy : Set₁ where
   addComm  : (c : Community) → Policy
   delComm  : (c : Community) → Policy
 
-apply : Policy → Route → Route
+apply : Policy → PathWeight → PathWeight
 apply _                   invalid        = invalid
 apply (raise x)           (valid l cs p) = valid (x + l) cs p
 apply (addComm c)         (valid l cs p) = valid l (add c cs) p

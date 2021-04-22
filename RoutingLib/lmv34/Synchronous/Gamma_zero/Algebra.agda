@@ -23,7 +23,7 @@ _⊕ₘ_ : Op₂ RoutingMatrix
 
 -- Big choice operator
 infix 5 ⨁
-⨁ : ∀ {k} → (Fin k → Route) → Route
+⨁ : ∀ {k} → (Fin k → PathWeight) → PathWeight
 ⨁ iter = foldr _⊕_ ∞# (tabulate iter)
 
 -- Matrix application

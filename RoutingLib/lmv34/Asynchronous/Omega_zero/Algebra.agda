@@ -33,7 +33,7 @@ infix 5 [_,_]_
 ... | no  _ = Y i
 
 -- Asynchronous (generalised) adjancency matrix application
-_❪_❫ : AdjacencyMatrix → (Fin n → Fin n → Fin n → Route) → RoutingMatrix
+_❪_❫ : AdjacencyMatrix → (Fin n → Fin n → Fin n → PathWeight) → RoutingMatrix
 (A ❪ f ❫) i j = ⨁ (λ k → (A i k) ▷ (f i k j))
 
 -- Asynchronous (generalised) version of the Γ₀ operator

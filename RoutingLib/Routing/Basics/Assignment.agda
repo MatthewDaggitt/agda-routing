@@ -133,8 +133,8 @@ _↝[_]_ : Assignment → AdjacencyMatrix → Assignment → Set ℓ
 -- preferred over y.
 
 infix 7 _⊴[_]_
-_⊴[_]_ : Assignment → AdjacencyMatrix → Assignment → Set (a ⊔ ℓ)
-a ⊴[ A ] (i , y) = ∃ λ c → a ↝[ A ] (i , c) × c ≤₊ y
+_⊴[_]_ : Assignment → AdjacencyMatrix → Assignment → Set ℓ
+(j , y) ⊴[ A ] (i , x) = (A i j ▷ y ≤₊ x) × (y ≉ ∞#)
 
 --------------------------------------------------------------------------------
 -- Properties of the type

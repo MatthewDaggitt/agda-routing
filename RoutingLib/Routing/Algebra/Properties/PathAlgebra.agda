@@ -41,7 +41,7 @@ open PathDistributivity isPathAlgebra
 
 incr⇒strIncr : IsIncreasing algebra → IsStrictlyIncreasing algebra
 incr⇒strIncr incr {i = i} {k} f {x} x≉∞ with f ▷ x ≟ ∞#
-... | yes fx≈∞ = ≈-sym (≈-trans (⊕-congʳ fx≈∞) (⊕-identityˡ x)) , x≉∞ ∘ (λ x≈fx → ≈-trans x≈fx fx≈∞)
+... | yes fx≈∞ = incr f x , x≉∞ ∘ (λ x≈fx → ≈-trans x≈fx fx≈∞)
 ... | no  fx≉∞ with path x | inspect path x
 ...   | invalid | [ p[x]≡∅ ] = contradiction (path[r]≈∅⇒r≈∞ p[x]≡∅) x≉∞
 ...   | valid p | [ p[x]≡p ] = incr f x , λ x≈fx → p≉i∷p (just-injective (begin

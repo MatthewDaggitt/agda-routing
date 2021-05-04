@@ -186,12 +186,13 @@ fromCPathWeight (r , _ ) = r
 -- arc indexes (i.e. i and j from CStep i j) are discarded, and only the
 -- contents of the arc (Fin n × Fin n) are used. The type has to be extended
 -- to Maybe (Fin n × Fin n) to ensure that the algebra has an invalid edge f∞.
--- Finally to ensure that i and j are still inferable by Agda, it is is
--- necessary to append the no-op type (i ≡ j ⊎ i ≢ j). Basically it's all
--- an ugly hack but it seems to work.
+-- Finally to ensure that i and j are still inferable by Agda, it is made
+-- into a record. Basically it's all an ugly hack but it seems to work.
 
-CStep : ∀ {m} → Fin m → Fin m → Set
-CStep i j = Maybe (Fin n × Fin n) × (i ≡ j ⊎ i ≢ j)
+record CStep {m} (i j : Fin m) : Set where
+  constructor step
+  field
+    step : Maybe (Fin n × Fin n)
 
 -- The trivial path-weight is simply taken from the original algebra
 
@@ -227,12 +228,12 @@ _⊕ᶜ_ : Op₂ CPathWeight
 infix 6 _▷ᶜ_
 
 _▷ᶜ_ : ∀ {n} {i j : Fin n} → CStep i j → CPathWeight → CPathWeight
-(nothing       , _) ▷ᶜ (r , rᶜ) = C∞#
-(valid (k , l) , _) ▷ᶜ (r , rᶜ) = A k l ▷ r , ▷-pres-𝑪 k l rᶜ
+(step nothing)         ▷ᶜ (r , rᶜ) = C∞#
+(step (valid (k , l))) ▷ᶜ (r , rᶜ) = A k l ▷ r , ▷-pres-𝑪 k l rᶜ
 -- As mentioned the invalid arc weight is simply `nothing`
 
 f∞ᶜ : ∀ {n} (i j : Fin n) → CStep i j
-f∞ᶜ i j = nothing , toSum (i Fin.≟ j)
+f∞ᶜ i j = step nothing
 
 -- As expected, equality obeys all the required properties
 
@@ -254,8 +255,8 @@ DSᶜ = On.decSetoid {B = CPathWeight} DS projᵣ
 ⊕ᶜ-cong = ⊕-cong
 
 ▷ᶜ-cong : ∀ {n} {i j : Fin n} (f : CStep i j) {r s} → r ≈ᶜ s → f ▷ᶜ r ≈ᶜ f ▷ᶜ s
-▷ᶜ-cong (nothing       , _) = λ _ → ≈-refl
-▷ᶜ-cong (valid (k , l) , _) = ▷-cong (A k l)
+▷ᶜ-cong (step nothing)         = λ _ → ≈-refl
+▷ᶜ-cong (step (valid (k , l))) = ▷-cong (A k l)
 
 f∞ᶜ-reject : ∀ {n} (i j : Fin n) → ∀ x → (f∞ᶜ i j) ▷ᶜ x ≈ᶜ C∞#
 f∞ᶜ-reject _ _ _ = ≈-refl
@@ -297,8 +298,8 @@ algebraᶜ = record
 ⊕ᶜ-identityʳ _ = ⊕-identityʳ _
 
 ▷ᶜ-fixedPoint : ∀ {n} {i j : Fin n} (f : CStep i j) → f ▷ᶜ C∞# ≈ᶜ C∞#
-▷ᶜ-fixedPoint (nothing       , _) = ≈-refl
-▷ᶜ-fixedPoint (valid (k , l) , _) = ▷-fixedPoint (A k l)
+▷ᶜ-fixedPoint (step nothing)         = ≈-refl
+▷ᶜ-fixedPoint (step (valid (k , l))) = ▷-fixedPoint (A k l)
 
 isRoutingAlgebraᶜ : IsRoutingAlgebra algebraᶜ
 isRoutingAlgebraᶜ = record
@@ -332,12 +333,12 @@ fromPath-surjection = record
 -- finite).
 
 isIncreasingᶜ : IsIncreasing algebra → IsIncreasing algebraᶜ
-isIncreasingᶜ incr (valid (k , l) , _) (r , _) = incr (A k l) r
-isIncreasingᶜ incr (nothing       , _) (r , _) = ≈-sym (⊕-identityˡ r)
+isIncreasingᶜ incr (step (valid (k , l))) (r , _) = incr (A k l) r
+isIncreasingᶜ incr (step nothing)         (r , _) = ≈-sym (⊕-identityˡ r)
 
 isStrictlyIncreasingᶜ : IsStrictlyIncreasing algebra → IsStrictlyIncreasing algebraᶜ
-isStrictlyIncreasingᶜ sIncr (valid (k , l) , _)     = sIncr (A k l)
-isStrictlyIncreasingᶜ sIncr (nothing       , _) r≉∞ = ≈-sym (⊕-identityˡ _) , r≉∞
+isStrictlyIncreasingᶜ sIncr (step (valid (k , l)))     = sIncr (A k l)
+isStrictlyIncreasingᶜ sIncr (step nothing)         r≉∞ = ≈-sym (⊕-identityˡ _) , r≉∞
 
 isFiniteᶜ : IsFinite algebraᶜ
 isFiniteᶜ = via-dec-surjection (finiteₗ n) DSᶜ fromPath-surjection
@@ -347,17 +348,10 @@ isFiniteᶜ = via-dec-surjection (finiteₗ n) DSᶜ fromPath-surjection
 -- be built and freeness of the topology is conserved.
 
 Aᶜ : AdjacencyMatrix algebraᶜ n
-Aᶜ i j = just (i , j) , toSum (i Fin.≟ j)
+Aᶜ i j = step (just (i , j))
 
 nonFreeCycleᶜ : ∀ C → IsNonFreeCycle algebraᶜ Aᶜ C → IsNonFreeCycle algebra A C
-nonFreeCycleᶜ (m , C) (pathWeightsᶜ , nonFreeᶜ) = pathWeights , nonFree
-  where
-  pathWeights : Vector PathWeight (suc m)
-  pathWeights = map fromCPathWeight pathWeightsᶜ
-  
-  nonFree : ∀ i → (C (i -ₘ 1) , pathWeights (i -ₘ 1)) ⊴[ A ] (C i , pathWeights i)
-  nonFree i with nonFreeᶜ i
-  ... | (z , Xᵢ↝z , z≤y) = fromCPathWeight z , Xᵢ↝z , z≤y
+nonFreeCycleᶜ (m , C) (pathWeightsᶜ , nonFreeᶜ) = map fromCPathWeight pathWeightsᶜ , nonFreeᶜ
 
 freeᶜ : IsFreeAdjacencyMatrix algebra A → IsFreeAdjacencyMatrix algebraᶜ Aᶜ
 freeᶜ cf C C-nonFree = cf C (nonFreeCycleᶜ C C-nonFree)

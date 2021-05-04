@@ -36,10 +36,11 @@ open import RoutingLib.Routing.Basics.Network.Participants algebra
 --------------------------------------------------------------------------------
 -- Definitions
 
--- A cycle (v₁ , v₂ , ... , vₘ , v₁) is a non-empty finite set of nodes such
--- that the last node equals the first node.
+-- A cycle ((v₁ , v₂) , (v₂ , v₃) , ... , (vₘ₋₁ , vₘ)) is a path whose source
+-- equals it's destination, i.e. v₁ = vₘ.
 
--- Note that we don't expicitly store the redundant last node.
+-- Note that for conveniece, we don't explicitly store the redundant nodes and
+-- represent this as a vector (v₁ , v₂ , ... , vₘ).
 
 Cycle : Set
 Cycle = ∃ λ m → Vector Node (suc m)
@@ -69,7 +70,7 @@ TopologyIsFree : Network → Epoch × Participants → Set (a ⊔ ℓ)
 TopologyIsFree N (e , p) = IsFreeAdjacencyMatrix (Aₜ N e p)
 
 AllLinksEqual : AdjacencyMatrix → Cycle → Set (a ⊔ ℓ)
-AllLinksEqual A (m , C) = ∃ λ x → x ≉ ∞# × ∀ i → A (C i) (C (i -ₘ 1)) ▷ x ≈ x
+AllLinksEqual A (m , C) = ∃ λ x → ∀ i → (C (i -ₘ 1) , x) ↝[ A ] (C i , x)
 
 --------------------------------------------------------------------------------
 -- Properties
@@ -92,20 +93,20 @@ Cyclic? A (⟦ _ ∣ X ⟧) = all? (λ i → X (i -ₘ 1) ⊴? (X i))
 
   equalLinks⇒nonFree : (A : AdjacencyMatrix) (C : Cycle) →
                        AllLinksEqual A C → IsNonFreeCycle A C
-  equalLinks⇒nonFree A (_ , C) (x , x≉∞ , A▷x≈x) =
+  equalLinks⇒nonFree A (_ , C) (x , x↝x) =
     (λ _ → x) ,
-    (λ i → x , (A▷x≈x i , x≉∞) , ≤₊-refl)
-  
+    (λ i → (≤₊-reflexive (proj₁ (x↝x i))) , proj₂ (x↝x i))
+    
   incr∧nonFree⇒equalLinks : IsIncreasing algebra →
                             (A : AdjacencyMatrix) (C : Cycle) →
                             IsNonFreeCycle A C → AllLinksEqual A C
-  incr∧nonFree⇒equalLinks incr A (m , C) (X , Cᵢ₋₁⊴Cᵢ) = x , x≉∞ , A▷x≈x
+  incr∧nonFree⇒equalLinks incr A (m , C) (X , Cᵢ₋₁⊴Cᵢ) = x , x↝x
     where
     x : PathWeight
     x = X (0F -ₘ 1)
 
     x≉∞ : x ≉ ∞#
-    x≉∞ = proj₂ (proj₁ (proj₂ (Cᵢ₋₁⊴Cᵢ 0F)))
+    x≉∞ = proj₂ (Cᵢ₋₁⊴Cᵢ 0F)
 
     X₋₁≤X₀ : x ≤₊ X 0F
     X₋₁≤X₀ = incr∧⊴⇒≤₊ incr A (C 0F , _) (Cᵢ₋₁⊴Cᵢ 0F)
@@ -138,6 +139,9 @@ Cyclic? A (⟦ _ ∣ X ⟧) = all? (λ i → X (i -ₘ 1) ⊴? (X i))
       X i                                ≈⟨ Xᵢ≈x i ⟩
       x                                  ∎) 
 
+    x↝x : ∀ i → (C (i -ₘ 1) , x) ↝[ A ] (C i , x)
+    x↝x i = A▷x≈x i , x≉∞
+    
   --------------------------------------------------------------------------------
   -- Relationship between strictly increasing algebras and cycle-free topologies
 
@@ -147,8 +151,9 @@ Cyclic? A (⟦ _ ∣ X ⟧) = all? (λ i → X (i -ₘ 1) ⊴? (X i))
   strIncr⇒¬equalLinks : IsStrictlyIncreasing algebra →
                         (A : AdjacencyMatrix) (C : Cycle) →
                         ¬ (AllLinksEqual A C)
-  strIncr⇒¬equalLinks strIncr A (_ , C) (x , x≉∞ , A▷x≈x) =
-    <₊-irrefl (≈-sym (A▷x≈x 0F)) (strIncr _ x≉∞)
+  strIncr⇒¬equalLinks strIncr A (_ , C) (x , x↝x) =
+    let (A▷x≈x , x≉∞) = x↝x 0F in
+    <₊-irrefl (≈-sym A▷x≈x) (strIncr _ x≉∞)
 
   strIncr⇒freeAdjacencyMatrix : IsStrictlyIncreasing algebra →
                                 (A : AdjacencyMatrix) → IsFreeAdjacencyMatrix A

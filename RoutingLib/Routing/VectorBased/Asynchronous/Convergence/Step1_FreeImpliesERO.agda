@@ -196,6 +196,9 @@ module MakeCycle (x<ᶠy : x <ᶠ y) (↝∈x<ᶠy : ↝∈ x<ᶠy) where
 ... | yes ↝∈x<ᶠy = cf cycle (weights , nonFree x≈y)
   where open MakeCycle x<ᶠy ↝∈x<ᶠy
 
+<ᶠ-trans : Transitive _<ᶠ_
+<ᶠ-trans = TransClosure.trans
+
 <ᶠ-respʳ-≈ : _<ᶠ_ Respectsʳ _≈ₐ_
 <ᶠ-respʳ-≈ = TransClosure.R⁺-respʳ-≈ (Union.respʳ _<ₐₚ_ _↝[ A ]_ <ₐₚ-respʳ-≈ₐ (↝-respʳ-≈ₐ {A}))
 
@@ -209,32 +212,23 @@ module MakeCycle (x<ᶠy : x <ᶠ y) (↝∈x<ᶠy : ↝∈ x<ᶠy) where
 <ᶠ-dec fin = TransClosure.R⁺? {S = 𝔸ₛ} (Finite⇒Finiteₛ (Assignment.finite fin)) 
   (Union.resp₂ <ₐₚ-resp-≈ₐ ↝-resp-≈ₐ)
   (Union.decidable _<ₐₚ?_ _↝[ A ]?_)
-  
-<ᶠ-min : ∀ {x y} → x <ᶠ y → (node x , 0#) <ᶠ y
-<ᶠ-min {i , x} x<y with x ≟ 0#
-... | yes x≈0 = <ᶠ-respˡ-≈ (refl , x≈0) x<y
-... | no  x≉0 = TransClosure.trans [ inj₁ ((refl , ≤₊-minimum x) , (λ { (refl , x≈0) → x≉0 (≈-sym x≈0) })) ] x<y
-  
+
 -- And importantly `x` is strictly less than `Aᵢⱼ(x)` even though the algebra
 -- is not necessarily strictly increasing.
 ↝⇒<ᶠ : ∀ {x y} → x ↝[ A ] y → x <ᶠ y
 ↝⇒<ᶠ x↝y = [ inj₂ x↝y ]
 
-<₊∧<ᶠ⇒<ᶠ : Trans _<ₐₚ_ _<ᶠ_ _<ᶠ_
-<₊∧<ᶠ⇒<ᶠ x<₊y y<ᶠz = inj₁ x<₊y ∷ y<ᶠz
-
-↝∧<ᶠ⇒<ᶠ : Trans _↝[ A ]_ _<ᶠ_ _<ᶠ_
-↝∧<ᶠ⇒<ᶠ x↝y = TransClosure.trans (↝⇒<ᶠ x↝y)
+<ₐₚ⇒<ᶠ : ∀ {a b} → a <ₐₚ b → a <ᶠ b
+<ₐₚ⇒<ᶠ a<b = [ inj₁ a<b ]
 
 <ᶠ-extensionRespectingOrder : IsFinite algebra → .(IsFreeAdjacencyMatrix A) → ExtensionRespectingOrder _ _
 <ᶠ-extensionRespectingOrder fin cf = record
   { _<ᵣ_        = _<ᶠ_
-  ; ↝⇒<ᵣ        = ↝⇒<ᶠ
-  ; <₊∧<ᵣ⇒<ᵣ    = <₊∧<ᶠ⇒<ᶠ
-  ; ↝∧<ᵣ⇒<ᵣ     = ↝∧<ᶠ⇒<ᶠ
   ; <ᵣ-irrefl   = <ᶠ-irrefl cf
+  ; <ᵣ-trans    = <ᶠ-trans
+  ; ↝⇒<ᵣ        = ↝⇒<ᶠ
+  ; <ₐₚ⇒<ᵣ      = <ₐₚ⇒<ᶠ
   ; _<ᵣ?_       = <ᶠ-dec fin
   ; <ᵣ-respʳ-≈ₐ = <ᶠ-respʳ-≈
   ; <ᵣ-respˡ-≈ₐ = <ᶠ-respˡ-≈
-  ; <ᵣ-min      = <ᶠ-min
   }

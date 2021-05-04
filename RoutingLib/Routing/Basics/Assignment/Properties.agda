@@ -171,27 +171,28 @@ strIncr∧↝⇒<₊ strIncr A (Aᵢⱼx≈y , x≉∞) = <₊-respʳ-≈ Aᵢ�
 -- Properties of _⊴_
 
 -- If x is extended by y then x threatens y
-↝⇒⊴ : _↝[ A ]_ ⇒ _⊴[ A ]_
-↝⇒⊴ {y = (i , y)} x↝y = y , x↝y , ≤₊-refl
+↝⇒⊴ : ∀ A → _↝[ A ]_ ⇒ _⊴[ A ]_
+↝⇒⊴ A (Aᵢⱼy≈x , y≉∞) = ≤₊-reflexive Aᵢⱼy≈x , y≉∞
 
 -- If x threatens y and y is preferred to z then x threatens z.
 ⊴∧≤ₐₚ⇒⊴ : ∀ A → Trans _⊴[ A ]_ _≤ₐₚ_ _⊴[ A ]_
-⊴∧≤ₐₚ⇒⊴ A (u , x↝∞ , Aᵢⱼx≤u) (refl , y≤z) = u , x↝∞ , ≤₊-trans Aᵢⱼx≤u y≤z
+⊴∧≤ₐₚ⇒⊴ A (Aᵢⱼy≤x , y≉∞) (refl , x≤z) = ≤₊-trans Aᵢⱼy≤x x≤z , y≉∞
 
 -- If x extends y and y is preferred to z then x threatens z
 ↝∧≤ₐₚ⇒⊴ : ∀ A → Trans _↝[ A ]_ _≤ₐₚ_ _⊴[ A ]_
-↝∧≤ₐₚ⇒⊴ _ x↝y (refl , y≤z) = _ , x↝y , y≤z
+↝∧≤ₐₚ⇒⊴ A y↝x x≤z = ⊴∧≤ₐₚ⇒⊴ A (↝⇒⊴ A y↝x) x≤z
 
 x⊴y⇒A▷x≤₊y : ∀ A {i j x y} → (i , x) ⊴[ A ] (j , y) → A j i ▷ x ≤₊ y
-x⊴y⇒A▷x≤₊y A (z , x↝z , z≤y) = ≤₊-respˡ-≈ (≈-sym (proj₁ x↝z)) z≤y
+x⊴y⇒A▷x≤₊y A (x↝z , z≤y) = x↝z
 
 -- If the algebra is increasing then x threatens y implies x <₊ y
 incr∧⊴⇒≤₊ : IsIncreasing algebra → ∀ A {x} y → x ⊴[ A ] y → value x ≤₊ value y
-incr∧⊴⇒≤₊ incr A _ (z , x↝z , z≤y) = ≤₊-trans (incr∧↝⇒≤₊ incr A x↝z) z≤y
+incr∧⊴⇒≤₊ incr A _ (A▷y≤x , _) = ≤₊-trans (incr _ _) A▷y≤x
 
 -- If the algebra is strictly increasing then x threatens y implies x <₊ y
 strIncr∧⊴⇒<₊ : IsStrictlyIncreasing algebra → ∀ A {x y} → x ⊴[ A ] y → value x <₊ value y
-strIncr∧⊴⇒<₊ strIncr A (z , x↝z , z≤y) = <-≤₊-trans (strIncr∧↝⇒<₊ strIncr A x↝z) z≤y
+strIncr∧⊴⇒<₊ strIncr A (A▷y≤x , y≉∞) = <-≤₊-trans (strIncr _ y≉∞) A▷y≤x
+
 {-
 -- If the algebra is finite then the "threatens" relation is decidable
 ⊴-dec : IsFinite algebra → Decidable _⊴_

@@ -29,7 +29,6 @@ strIncr⇒incr strIncr f x with x ≟ ∞#
   ∞#            ≈⟨ ≈-sym x≈∞ ⟩
   x             ∎)
 
-
 --------------------------------------------------------------------------------
 -- kᵗʰ-level distributivity properties
 {-

@@ -33,16 +33,16 @@ module _ {P : Pred A p} (P? : Decidable P) (P-resp-≈ : P Respects _≈_)
          (P⊆Q : P ⊆ᵤ Q)
          where
 
-  filter-⊂ : ∀ {v xs} → v ∈ xs → v ∈ᵤ Q → .(v ∉ᵤ P) → filter P? xs ⊂ filter Q? xs
-  filter-⊂ {v} {x ∷ xs} (here v≈x) v∈Q v∉P with P? x | Q? x
+  filter-⊂ : ∀ {v xs} → v ∈ xs → .(v ∉ᵤ P) → v ∈ᵤ Q → filter P? xs ⊂ filter Q? xs
+  filter-⊂ {v} {x ∷ xs} (here v≈x) v∉P v∈Q with P? x | Q? x
   ... | yes x∈P | _       = ⊥-elim (v∉P (P-resp-≈ (sym v≈x) x∈P))
   ... | no  _   | no  x∉Q = contradiction (Q-resp-≈ v≈x v∈Q) x∉Q
   ... | no  _   | yes _   = x ∷ʳₛ′ filter⁺ P? Q? (λ a≈b → Q-resp-≈ a≈b ∘ P⊆Q) (⊆-refl {xs})
-  filter-⊂ {v} {x ∷ xs} (there v∈xs) v∈Q v∉P with P? x | Q? x
+  filter-⊂ {v} {x ∷ xs} (there v∈xs) v∉P v∈Q with P? x | Q? x
   ... | yes x∈P | no  x∉Q = contradiction (P⊆Q x∈P) x∉Q
-  ... | yes x∈P | yes x∈Q = refl ∷ₛ filter-⊂ v∈xs v∈Q v∉P
+  ... | yes x∈P | yes x∈Q = refl ∷ₛ filter-⊂ v∈xs v∉P v∈Q
   ... | no  x∉P | yes x∈Q = x ∷ʳₛ′ filter⁺ P? Q? (λ a≈b → Q-resp-≈ a≈b ∘ P⊆Q) (⊆-refl {xs})
-  ... | no  x∉P | no  x∉Q = filter-⊂ v∈xs v∈Q v∉P
+  ... | no  x∉P | no  x∉Q = filter-⊂ v∈xs v∉P v∈Q
 
 length-mono-< : ∀ {xs ys} → xs ⊂ ys → length xs < length ys
 length-mono-< {xs} {ys} ([]           , ¬[]≋[]) = contradiction [] ¬[]≋[] 

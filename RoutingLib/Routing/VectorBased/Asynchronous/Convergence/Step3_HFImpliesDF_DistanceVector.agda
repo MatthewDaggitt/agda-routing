@@ -50,7 +50,7 @@ open IsRoutingAlgebra isRoutingAlgebra
 open import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra isRoutingAlgebra
 open import RoutingLib.Routing.Basics.Assignment algebra n
 
-open HeightFunction heightFunction renaming (h to h′)
+open HeightFunction heightFunction
 open CoreVectorBasedRouting algebra A
 open CoreVectorBasedRoutingProperties isRoutingAlgebra A
 
@@ -60,23 +60,17 @@ open CoreVectorBasedRoutingProperties isRoutingAlgebra A
 
 module _ (i : Node) where
 
-  h : PathWeight → ℕ
-  h x = h′ (i , x)
-
-  H : ℕ
-  H = h 0#
-  
   r : PathWeight → PathWeight → ℕ
   r x y with x ≟ y
-  ... | yes _ = zero
-  ... | no  _ = h x ⊔ h y
+  ... | yes _ = 0
+  ... | no  _ = 1 + (h (i , x) ⊔ h (i , y))
   
   r-cong : r Preserves₂ _≈_ ⟶ _≈_ ⟶ _≡_
   r-cong {x} {y} {u} {v} x≈y u≈v with x ≟ u | y ≟ v
   ... | yes _   | yes _   = refl
   ... | yes x≈u | no  y≉v = contradiction (≈-trans (≈-trans (≈-sym x≈y) x≈u) u≈v) y≉v
   ... | no  x≉u | yes y≈v = contradiction (≈-trans (≈-trans x≈y y≈v) (≈-sym u≈v)) x≉u
-  ... | no  _   | no  _   = cong₂ _⊔_ (h-cong (refl , x≈y)) (h-cong (refl , u≈v))
+  ... | no  _   | no  _   = cong suc (cong₂ _⊔_ (h-cong (refl , x≈y)) (h-cong (refl , u≈v)))
 
   x≈y⇒r≡0 : ∀ {x y} → x ≈ y → r x y ≡ 0
   x≈y⇒r≡0 {x} {y} x≈y with x ≟ y
@@ -86,33 +80,33 @@ module _ (i : Node) where
   r≡0⇒x≈y : ∀ {x y} → r x y ≡ 0 → x ≈ y
   r≡0⇒x≈y {x} {y} r≡0 with x ≟ y
   ... | yes x≈y = x≈y
-  ... | no  _   = contradiction (sym r≡0) (<⇒≢ (m≤n⇒m≤n⊔o (h y) (1≤h (i , x))))
+  ... | no  _   = contradiction r≡0 1+n≢0
 
-  r≤H : ∀ x y → r x y ≤ H
-  r≤H x y with x ≟ y
+  r≤1+H : ∀ x y → r x y ≤ suc H
+  r≤1+H x y with x ≟ y
   ... | yes _ = z≤n
-  ... | no  _ = n≤m×o≤m⇒n⊔o≤m (h≤h[0] i x) (h≤h[0] i y)
+  ... | no  _ = s≤s (n≤m×o≤m⇒n⊔o≤m (h≤H (i , x)) (h≤H (i , y)))
 
   r-bounded : Bounded r
-  r-bounded = H , r≤H
+  r-bounded = suc H , r≤1+H
 
   r-sym : ∀ x y → r x y ≡ r y x
   r-sym x y with x ≟ y | y ≟ x
   ... | yes _   | yes _   = refl
   ... | no  x≉y | yes y≈x = contradiction (≈-sym y≈x) x≉y
   ... | yes x≈y | no  y≉x = contradiction (≈-sym x≈y) y≉x
-  ... | no  _   | no  _   = ⊔-comm (h x) (h y)
+  ... | no  _   | no  _   = cong suc (⊔-comm (h (i , x)) (h (i , y)))
 
   r-maxTriIneq : MaxTriangleInequality r
   r-maxTriIneq x y z with x ≟ y | y ≟ z | x ≟ z
   ... | _       | _       | yes _  = z≤n
   ... | yes x≈y | yes y≈z | no x≉z = contradiction (≈-trans x≈y y≈z) x≉z
-  ... | yes x≈y | no  _   | no _   = ≤-reflexive (cong (_⊔ h z) (h-cong (refl , x≈y)))
-  ... | no  _   | yes y≈z | no _   = ≤-reflexive (trans (cong (h x ⊔_) (h-cong (refl , ≈-sym y≈z))) (sym (⊔-identityʳ _)))
-  ... | no  _   | no  _   | no _   = ⊔-mono-≤ (m≤m⊔n (h x) (h y)) (m≤n⊔m (h y) (h z))
+  ... | yes x≈y | no  _   | no _   = s≤s (≤-reflexive (cong (_⊔ h (i , z)) (h-cong (refl , x≈y))))
+  ... | no  _   | yes y≈z | no _   = s≤s (≤-reflexive (cong (h (i , x) ⊔_) (h-cong (refl , ≈-sym y≈z))))
+  ... | no  _   | no  _   | no _   = s≤s (⊔-mono-≤ (m≤m⊔n (h (i , x)) (h (i , y))) (m≤n⊔m (h (i , y)) (h (i , z))))
 
-  r[x,y]≡hx⊔hy : ∀ {x y} → x ≉ y → r x y ≡ h x ⊔ h y
-  r[x,y]≡hx⊔hy {x} {y} x≉y with x ≟ y
+  r[x,y]≡1+hx⊔hy : ∀ {x y} → x ≉ y → r x y ≡ 1 + (h (i , x) ⊔ h (i , y))
+  r[x,y]≡1+hx⊔hy {x} {y} x≉y with x ≟ y
   ... | yes x≈y = contradiction x≈y x≉y
   ... | no  _   = refl
 
@@ -138,18 +132,20 @@ module _ (i : Node) where
 
 h[FXᵢⱼ]⊔h[FYᵢⱼ]<v : ∀ X Y {i j v} → F X i j <₊ F Y i j →
                     (∀ k → r k (X k j) (Y k j) ≤ v) →
-                    h i (F X i j) ⊔ h i (F Y i j) < v
+                    1 + (h (i , F X i j) ⊔ h (i , F Y i j)) < v
 h[FXᵢⱼ]⊔h[FYᵢⱼ]<v X Y {i} {j} {v} FXᵢⱼ<FYᵢⱼ@(FXᵢⱼ≤FYᵢⱼ , FXᵢⱼ≉FYᵢⱼ) d≤v with FXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
 ... | inj₂ FXᵢⱼ≈Iᵢⱼ = contradiction FXᵢⱼ≈Iᵢⱼ (FXᵢⱼ<FYᵢⱼ⇒FXᵢⱼ≉Iᵢⱼ X Y FXᵢⱼ<FYᵢⱼ)
 ... | inj₁ (k , FXᵢⱼ≈AᵢₖXₖⱼ) = begin-strict
-  h i (F X i j) ⊔ h i (F Y i j) ≡⟨ m≥n⇒m⊔n≡m (h-resp-≤ ((refl , FXᵢⱼ≤FYᵢⱼ) , λ {(refl , eq) → FXᵢⱼ≉FYᵢⱼ eq})) ⟩
-  h i (F X i j)                 <⟨ h-resp-↝ (≈-sym FXᵢⱼ≈AᵢₖXₖⱼ , Xₖⱼ≉∞) ⟩
-  h k (X k j)                   ≤⟨ m≤m⊔n (h k (X k j)) (h k (Y k j)) ⟩
-  h k (X k j) ⊔ h k (Y k j)     ≡⟨ sym (r[x,y]≡hx⊔hy k Xₖⱼ≉Yₖⱼ) ⟩
-  r k (X k j) (Y k j)           ≤⟨ d≤v k ⟩
-  v                             ∎
-  where    
-
+  1 + (h (i , F X i j) ⊔ h (i , F Y i j)) ≡⟨ cong suc (m≥n⇒m⊔n≡m (<⇒≤ (h-resp-< FXᵢⱼ<ₐₚFYᵢⱼ))) ⟩
+  1 + (h (i , F X i j))                   <⟨  s≤s (h-resp-↝ (≈-sym FXᵢⱼ≈AᵢₖXₖⱼ , Xₖⱼ≉∞)) ⟩
+  1 + (h (k , X k j))                     ≤⟨  s≤s (m≤m⊔n (h (k , X k j)) (h (k , Y k j))) ⟩
+  1 + (h (k , X k j) ⊔ h (k , Y k j))     ≡˘⟨ r[x,y]≡1+hx⊔hy k Xₖⱼ≉Yₖⱼ ⟩
+  r k (X k j) (Y k j)                     ≤⟨  d≤v k ⟩
+  v                                       ∎
+  where
+  FXᵢⱼ<ₐₚFYᵢⱼ : (i , F X i j) <ₐₚ (i , F Y i j)
+  FXᵢⱼ<ₐₚFYᵢⱼ = (refl , FXᵢⱼ≤FYᵢⱼ) , λ {(refl , eq) → FXᵢⱼ≉FYᵢⱼ eq}
+  
   FYᵢⱼ≰AᵢₖXₖⱼ : F Y i j ≰₊ A i k ▷ X k j
   FYᵢⱼ≰AᵢₖXₖⱼ FYᵢⱼ≤AᵢₖXₖⱼ = FXᵢⱼ≉FYᵢⱼ (≤₊-antisym FXᵢⱼ≤FYᵢⱼ (begin 
     F Y i j       ≤⟨ FYᵢⱼ≤AᵢₖXₖⱼ ⟩
@@ -182,9 +178,9 @@ r[FXᵢⱼ,FYᵢⱼ]<v X Y i j {v} 0<v r≤v with F X i j ≟ F Y i j
 ... | no  FXᵢⱼ≉FYᵢⱼ with ≤₊-total (F X i j) (F Y i j)
 ...   | inj₁ FXᵢⱼ≤FYᵢⱼ = h[FXᵢⱼ]⊔h[FYᵢⱼ]<v X Y (FXᵢⱼ≤FYᵢⱼ , FXᵢⱼ≉FYᵢⱼ) r≤v
 ...   | inj₂ FYᵢⱼ≤FXᵢⱼ = begin-strict
-  h i (F X i j) ⊔ h i (F Y i j) ≡⟨ ⊔-comm (h i (F X i j)) (h i (F Y i j)) ⟩
-  h i (F Y i j) ⊔ h i (F X i j) <⟨ h[FXᵢⱼ]⊔h[FYᵢⱼ]<v Y X (FYᵢⱼ≤FXᵢⱼ , FXᵢⱼ≉FYᵢⱼ ∘ ≈-sym) (λ k → subst (_≤ v) (r-sym k (X k j) (Y k j)) (r≤v k)) ⟩
-  v                         ∎
+  1 + (h (i , F X i j) ⊔ h (i , F Y i j)) ≡⟨ cong suc (⊔-comm (h (i , F X i j)) (h (i , F Y i j))) ⟩
+  1 + (h (i , F Y i j) ⊔ h (i , F X i j)) <⟨ h[FXᵢⱼ]⊔h[FYᵢⱼ]<v Y X (FYᵢⱼ≤FXᵢⱼ , FXᵢⱼ≉FYᵢⱼ ∘ ≈-sym) (λ k → subst (_≤ v) (r-sym k (X k j) (Y k j)) (r≤v k)) ⟩
+  v                                   ∎
   where open ≤-Reasoning
 
 r-strContrOrbits : ∀ {X v} → 0 < v →

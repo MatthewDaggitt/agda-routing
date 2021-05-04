@@ -4,7 +4,7 @@
 
 open import Data.Nat using (ℕ; _≤_; _<_)
 open import Data.Nat.Properties using (≤-totalOrder)
-open import Data.Product using (_,_; proj₁; proj₂)
+open import Data.Product using (∃; _,_; proj₁; proj₂)
 open import Data.Fin using (Fin)
 open import Data.Sum using (inj₂)
 open import Function.Base using (_∘_)
@@ -54,16 +54,14 @@ open import RoutingLib.Routing.VectorBased.Synchronous algebra A
 record ExtensionRespectingOrder ℓ₂ : Set (a ⊔ ℓ ⊔ suc ℓ₂) where
   field
     _<ᵣ_         : Rel Assignment ℓ₂
-    ↝⇒<ᵣ         : _↝[ A ]_ ⇒ _<ᵣ_
-    <₊∧<ᵣ⇒<ᵣ     : Trans _<ₐₚ_ _<ᵣ_ _<ᵣ_
-    ↝∧<ᵣ⇒<ᵣ      : Trans _↝[ A ]_  _<ᵣ_ _<ᵣ_
     .<ᵣ-irrefl   : Irreflexive _≈ₐ_ _<ᵣ_
+    <ᵣ-trans     : Transitive _<ᵣ_
+    ↝⇒<ᵣ         : _↝[ A ]_ ⇒ _<ᵣ_
+    <ₐₚ⇒<ᵣ       : _<ₐₚ_ ⇒ _<ᵣ_
     _<ᵣ?_        : Decidable _<ᵣ_
     <ᵣ-respʳ-≈ₐ  : _<ᵣ_ Respectsʳ _≈ₐ_
     <ᵣ-respˡ-≈ₐ  : _<ᵣ_ Respectsˡ _≈ₐ_
-    <ᵣ-min       : ∀ {x y} → x <ᵣ y → (node x , 0#) <ᵣ y
-
-
+    
   <ᵣ-resp₂-≈ₐ : ∀ {w x y z} → w ≈ₐ x → y ≈ₐ z → w <ᵣ y → x <ᵣ z
   <ᵣ-resp₂-≈ₐ w≈y y≈z = <ᵣ-respʳ-≈ₐ y≈z ∘ <ᵣ-respˡ-≈ₐ w≈y
 
@@ -73,11 +71,16 @@ record ExtensionRespectingOrder ℓ₂ : Set (a ⊔ ℓ ⊔ suc ℓ₂) where
 record HeightFunction : Set (a ⊔ ℓ) where
   field
     h         : Assignment → ℕ
-    1≤h       : ∀ x → 1 ≤ h x
-    h≤h[0]    : ∀ i x → h (i , x) ≤ h (i , 0#)
+    h-bounded : ∃ λ H → ∀ a → h a ≤ H
     h-resp-↝  : ∀ {x y} → x ↝[ A ] y → h y < h x
-    h-resp-≤  : ∀ {x y} → x <ₐₚ y → h y ≤ h x
+    h-resp-<  : ∀ {x y} → x <ₐₚ y → h y < h x
     h-cong    : ∀ {x y} → x ≈ₐ  y → h x ≡ h y
+
+  H : ℕ
+  H = proj₁ h-bounded
+
+  h≤H : ∀ a → h a ≤ H
+  h≤H = proj₂ h-bounded
   
 ------------------------------------------------------------------------
 -- Route level distance function

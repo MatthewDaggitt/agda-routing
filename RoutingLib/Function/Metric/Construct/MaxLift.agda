@@ -50,7 +50,7 @@ x≈y⇒d≡0 : (∀ {i} {xᵢ yᵢ : Sᵢ i} → xᵢ ≈ᵢ yᵢ → dᵢ i x�
 x≈y⇒d≡0 x≈y⇒dᵢ≡0 x≈y = max-constant refl (λ i → x≈y⇒dᵢ≡0 (x≈y i))
 
 maxTriIneq : (∀ {i} → MaxTriangleInequality (dᵢ i)) → MaxTriangleInequality d
-maxTriIneq dᵢ-ineq x y z with max[t]∈t 0 λ i → dᵢ i (x i) (z i)
+maxTriIneq dᵢ-ineq x y z with max[t]∈t 0 (λ i → dᵢ i (x i) (z i))
 ... | inj₁ dxz≡0 = subst (_≤ d x y ⊔ d y z) (P.sym dxz≡0) z≤n
 ... | inj₂ (j , dxz≡dⱼxⱼzⱼ) = begin
   d x z                           ≡⟨ dxz≡dⱼxⱼzⱼ ⟩

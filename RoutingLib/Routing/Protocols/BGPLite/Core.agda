@@ -34,15 +34,16 @@ private
 --------------------------------------------------------------------------------
 -- Definition of the underlying routing problem (i.e. routing algebra)
 
+open import RoutingLib.Routing.Protocols.BGPLite.LocalPref
 open import RoutingLib.Routing.Protocols.BGPLite.Policies
 open import RoutingLib.Routing.Protocols.BGPLite.Communities
 open import RoutingLib.Routing.Protocols.BGPLite.PathWeights
 
-data Step (i j : Fin n) : Set₁ where
-  step : Policy → Step i j
+data Extension (i j : Fin n) : Set₁ where
+  ext : Policy → Extension i j
 
 0# : PathWeight
-0# = valid 0 ∅ []
+0# = valid 2⁸-1 ∅ []
 
 ∞# : PathWeight
 ∞# = invalid
@@ -51,9 +52,9 @@ infix 5 _⊕_
 _⊕_ : Op₂ PathWeight
 x@invalid        ⊕ y            = y
 x                ⊕ y@invalid    = x
-x@(valid l cs p) ⊕ y@(valid m ds q) with compare l m
-... | tri< x<y _ _  = x
-... | tri> _ _ y<x  = y
+x@(valid l cs p) ⊕ y@(valid m ds q) with <ˡᵖ-compare l m
+... | tri< x<y _ _  = y
+... | tri> _ _ y<x  = x
 ... | tri≈ _ x=y _  with compare (length p) (length q)
 ...   | tri< |p|<|q| _ _  = x
 ...   | tri> _ _ |q|<|p|  = y
@@ -62,17 +63,17 @@ x@(valid l cs p) ⊕ y@(valid m ds q) with compare l m
 ...     | no  q≤p = y
 
 infix 5 _▷_
-_▷_ : Step i j → PathWeight → PathWeight
+_▷_ : Extension i j → PathWeight → PathWeight
 _▷_ {_} {_} {_} _          invalid       = invalid
-_▷_ {_} {i} {j} (step pol) (valid x c p) with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p
+_▷_ {_} {i} {j} (ext pol) (valid x c p) with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p
 ... | no  _    | _       = invalid
 ... | yes _    | yes _   = invalid
 ... | yes ij⇿p | no  i∈p = apply pol (valid x c ((toℕ i , toℕ j) ∷ p))
 
-f∞ : ∀ (i j : Fin n) → Step i j
-f∞ i j = step reject
+f∞ : ∀ (i j : Fin n) → Extension i j
+f∞ i j = ext reject
 
-▷-cong : ∀ (f : Step i j) {r s} → r ≡ s → f ▷ r ≡ f ▷ s
+▷-cong : ∀ (f : Extension i j) {r s} → r ≡ s → f ▷ r ≡ f ▷ s
 ▷-cong f refl = refl
 
 ⊕-cong : Congruent₂ _≡_ _⊕_
@@ -88,7 +89,7 @@ f∞-reject i j (valid l cs p) with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ?
 A : RawRoutingAlgebra _ _ _
 A = record
   { PathWeight         = PathWeight
-  ; Step               = Step
+  ; Step               = Extension
   ; _≈_                = _≡_
   ; _⊕_                = _⊕_
   ; _▷_                = _▷_

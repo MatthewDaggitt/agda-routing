@@ -33,28 +33,28 @@ abstract
   Community : Set
   Community = Fin 32
 
-  CommunitySet : Set
-  CommunitySet = Subset 32
+  Communities : Set
+  Communities = Subset 32
 
 --------------------------------------------------------------------------------
 -- Special sets
 
-  ∅ : CommunitySet
+  ∅ : Communities
   ∅ = ⊥
 
 --------------------------------------------------------------------------------
 -- Operations over community sets
 
-  add : Community → CommunitySet → CommunitySet
+  add : Community → Communities → Communities
   add c cs = cs [ c ]≔ true
 
-  remove : Community → CommunitySet → CommunitySet
+  remove : Community → Communities → Communities
   remove c cs = cs [ c ]≔ false
 
 --------------------------------------------------------------------------------
 -- Set membership
 
-  _∈?_ : Community → CommunitySet → Bool
+  _∈?_ : Community → Communities → Bool
   c ∈? cs = ⌊ c ∈ₛ? cs ⌋
 
   ∈-resp-≈ᶜˢ : ∀ c {cs ds} → cs ≡ ds → c ∈? cs ≡ c ∈? ds
@@ -67,7 +67,7 @@ abstract
   <-minimum {false} f≢f = contradiction refl f≢f
   <-minimum {true}  _   = f<t
   
-  _≤ᶜˢ_ : Rel CommunitySet ℓ₀
+  _≤ᶜˢ_ : Rel Communities ℓ₀
   _≤ᶜˢ_ = Lex _<_
 
   ≤ᶜˢ-minimum : Minimum _≤ᶜˢ_ ∅

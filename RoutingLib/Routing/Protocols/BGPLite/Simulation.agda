@@ -37,6 +37,7 @@ open import RoutingLib.Routing.Protocols.BGPLite.Core
 open import RoutingLib.Routing.Protocols.BGPLite.Policies
 open import RoutingLib.Routing.Protocols.BGPLite.PathWeights
 open import RoutingLib.Routing.Protocols.BGPLite.Communities
+open import RoutingLib.Routing.Protocols.BGPLite.LocalPref
 
 open ≡-Reasoning
 
@@ -63,7 +64,7 @@ open Min ≤ᵣ-totalOrder public
 Aₐₗₜ : RawRoutingAlgebra _ _ _
 Aₐₗₜ = record
   { PathWeight         = PathWeight
-  ; Step               = Step
+  ; Step               = Extension
   ; _≈_                = _≡_
   ; _⊕_                = _⊕ₐₗₜ_
   ; _▷_                = _▷_
@@ -90,12 +91,12 @@ open Min ≤ᵣ-totalOrder
   ; ⊓-identityˡ to ⊕ₐₗₜ-identityˡ
   )
 
-▷-fixedPoint : ∀ (f : Step i j) → f ▷ invalid ≡ invalid
-▷-fixedPoint (step _) = refl
+▷-fixedPoint : ∀ (f : Extension i j) → f ▷ invalid ≡ invalid
+▷-fixedPoint (ext _) = refl
 
-▷-result : ∀ (f : Step i j) l cs p → f ▷ (valid l cs p) ≡ invalid ⊎
-           ∃₂ λ k ds → ∃ λ m → l ≤ k × f ▷ (valid l cs p) ≡ valid k ds (Path.inflate ((toℕ i , toℕ j) ∷ p) m) 
-▷-result {n} {i} {j} (step pol) l cs p with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p
+▷-result : ∀ (f : Extension i j) l cs p → f ▷ (valid l cs p) ≡ invalid ⊎
+           ∃₂ λ k ds → ∃ λ m → l ≥ˡᵖ k × f ▷ (valid l cs p) ≡ valid k ds (Path.inflate ((toℕ i , toℕ j) ∷ p) m) 
+▷-result {n} {i} {j} (ext pol) l cs p with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p
 ... | no  _    | _       = inj₁ refl
 ... | yes _    | yes _   = inj₁ refl
 ... | yes ij⇿p | no  i∈p = apply-result pol l cs ((toℕ i , toℕ j) ∷ p)
@@ -137,20 +138,20 @@ path[r]≈∅⇒r≈∞ : path r ≡ invalid → r ≡ invalid
 path[r]≈∅⇒r≈∞ {invalid}      refl = refl
 path[r]≈∅⇒r≈∞ {valid l cs p} ()
 
-path-reject : ∀ (f : Step i j) → path r ≡ valid p →
+path-reject : ∀ (f : Extension i j) → path r ≡ valid p →
               (¬ (toℕ i , toℕ j) ⇿ p) ⊎ (toℕ i ∈ₚ p) → f ▷ r ≡ invalid
-path-reject {_} {i} {j} {invalid}      (step pol) pᵣ≈p inv = refl
-path-reject {_} {i} {j} {valid l cs p} (step pol) refl inv with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p
+path-reject {_} {i} {j} {invalid}      (ext pol) pᵣ≈p inv = refl
+path-reject {_} {i} {j} {valid l cs p} (ext pol) refl inv with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p
 ... | no  _    | _       = refl
 ... | yes _    | yes _   = refl
 ... | yes ij⇿p | no  i∉p with inv
 ...   | inj₁ ¬ij⇿d[p] = contradiction (⇿-deflate⁺ ij⇿p) ¬ij⇿d[p]
 ...   | inj₂ i∈d[p]   = contradiction (∈-deflate⁻ i∈d[p]) i∉p
 
-path-accept : ∀ (f : Step i j) → path r ≡ valid p → f ▷ r ≢ invalid →
+path-accept : ∀ (f : Extension i j) → path r ≡ valid p → f ▷ r ≢ invalid →
               path (f ▷ r) ≡ valid ((toℕ i , toℕ j) ∷ p)
-path-accept {_} {i} {j} {invalid}      {_} (step pol) pᵣ≈q f▷r≉0 = contradiction refl f▷r≉0
-path-accept {_} {i} {j} {valid l cs p} {q} (step pol) eq f▷r≉0 with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p
+path-accept {_} {i} {j} {invalid}      {_} (ext pol) pᵣ≈q f▷r≉0 = contradiction refl f▷r≉0
+path-accept {_} {i} {j} {valid l cs p} {q} (ext pol) eq f▷r≉0 with (toℕ i , toℕ j) ⇿? p | toℕ i ∈ₚ? p
 ... | no ¬e⇿p | _       = contradiction refl f▷r≉0
 ... | yes _   | yes i∈p = contradiction refl f▷r≉0
 ... | yes e⇿p | no  i∉p with apply-result pol l cs ((toℕ i , toℕ j) ∷ p)
@@ -181,11 +182,11 @@ open import RoutingLib.Routing.Algebra.Simulation
 open import RoutingLib.Routing.Algebra.Comparable Aₐₗₜ
 
 private
-  ≢invalid : ∀ {k cs p} (f : Step i j) v →
+  ≢invalid : ∀ {k cs p} (f : Extension i j) v →
              valid k cs p ≡ f ▷ v → f ▷ v ≢ invalid
   ≢invalid f v ᵥ≡fv fv≡ᵢ = contradiction (trans ᵥ≡fv fv≡ᵢ) λ()
   
-x≡fv⇒p≢[] : ∀ {k cs p} (f : Step i j) v → valid k cs p ≡ f ▷ v → p ≢ []
+x≡fv⇒p≢[] : ∀ {k cs p} (f : Extension i j) v → valid k cs p ≡ f ▷ v → p ≢ []
 x≡fv⇒p≢[] {n} {i} {j} {k} {cs} {p} f v@(valid l ds q) ≡f▷v p≡[] = contradiction (begin
   valid []                            ≡⟨ sym (cong (valid ∘ deflate) p≡[]) ⟩
   valid (deflate p)                   ≡⟨⟩
@@ -193,7 +194,7 @@ x≡fv⇒p≢[] {n} {i} {j} {k} {cs} {p} f v@(valid l ds q) ≡f▷v p≡[] = co
   path (f ▷ valid l ds q)             ≡⟨ path-accept f refl (≢invalid f v ≡f▷v) ⟩
   valid ((toℕ i , toℕ j) ∷ deflate q) ∎) λ()
 
-x≡fv∧y≈gw⇒p≢q : ∀ {k l cs ds p q} {n} {i j m : Fin n} (f : Step i j) (g : Step i m) v w →
+x≡fv∧y≈gw⇒p≢q : ∀ {k l cs ds p q} {n} {i j m : Fin n} (f : Extension i j) (g : Extension i m) v w →
                 valid k cs p ≡ f ▷ v → valid l ds q ≡ g ▷ w →
                 j ≢ m → p ≢ q
 x≡fv∧y≈gw⇒p≢q {p = p} {q} {n} {i} {j} {m} f g v@(valid k₂ cs₂ p₂) w@(valid l₂ ds₂ q₂) ≡f▷v ≡g▷w j≢m p≡q =
@@ -219,7 +220,7 @@ x≡fv∧y≈gw⇒p≢q {p = p} {q} {n} {i} {j} {m} f g v@(valid k₂ cs₂ p₂
 ⊕ₐₗₜ-sim-⊕ {invalid}      {invalid}      x≎y = refl
 ⊕ₐₗₜ-sim-⊕ {invalid}      {valid k ds q} x≎y = refl
 ⊕ₐₗₜ-sim-⊕ {valid l cs p} {invalid}      x≎y = refl
-⊕ₐₗₜ-sim-⊕ {valid l cs p} {valid k ds q} x≎y with <-cmp l k
+⊕ₐₗₜ-sim-⊕ {valid l cs p} {valid k ds q} x≎y with <ˡᵖ-compare l k
 ... | tri< _ _    _ = refl
 ... | tri> _ _    _ = refl
 ... | tri≈ _ refl _ with <-cmp (length p) (length q)

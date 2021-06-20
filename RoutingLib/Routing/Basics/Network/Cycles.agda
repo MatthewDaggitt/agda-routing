@@ -2,7 +2,7 @@
 open import Data.Fin.Base using (Fin; zero; suc; _<_; inject₁; lower₁; toℕ; fromℕ)
 open import Data.Fin.Properties as Fin using (all?; toℕ-inject₁)
 open import Data.Fin.Patterns
-open import Data.Fin.Induction using (<-wellFounded; Acc; acc)
+open import Data.Fin.Induction using (<-weakInduction; >-weakInduction)
 open import Data.Nat.Base using (ℕ; suc; s≤s; NonZero)
 open import Data.Nat.Properties as ℕ using (≤-reflexive)
 open import Data.Product using (∃; _×_; _,_; proj₁; proj₂)
@@ -16,7 +16,6 @@ open import Relation.Unary using (Pred; Universal)
 open import Relation.Binary.PropositionalEquality using (refl)
 
 open import RoutingLib.Data.Fin using (_+ₘ_; _-ₘ_)
-open import RoutingLib.Data.Fin.Induction
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Schedule using (Epoch)
 
 open import RoutingLib.Routing.Algebra

@@ -3,11 +3,11 @@ open import Data.Bool using (Bool)
 import Data.Fin.Properties as Fin
 open import Data.Nat using (ℕ; zero; suc; _^_; _∸_)
 open import Data.Nat.Properties as Nat
+import Data.Fin.Induction as Fin
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
 open import Level
 
-import RoutingLib.Data.Fin.Induction as Fin
 
 module RoutingLib.Routing.Protocols.BGPLite.LocalPref where
 

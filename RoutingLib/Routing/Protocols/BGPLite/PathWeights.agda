@@ -8,6 +8,7 @@
 
 open import Data.Nat
 open import Data.Nat.Properties hiding (≡-isDecEquivalence)
+open import Data.Fin using (_>_)
 import Data.Fin.Properties as Fin
 open import Data.Product using (_,_)
 open import Data.Sum using (inj₁; inj₂)
@@ -17,8 +18,6 @@ open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Pred)
-
-open import RoutingLib.Data.Fin.Induction using (_>_)
 
 open import RoutingLib.Routing.Basics.Path.Uncertified
 open import RoutingLib.Routing.Basics.Path.Uncertified.Properties

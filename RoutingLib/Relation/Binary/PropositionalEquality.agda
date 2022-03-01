@@ -9,13 +9,15 @@ private
   variable
     a : Level
     A : Set a
-    
+
+-- stdlib v2.0
 isPartialOrder : IsPartialOrder {A = A} _≡_ _≡_
 isPartialOrder = record
   { isPreorder = isPreorder
   ; antisym    = λ eq _ → eq
   }
 
+-- stdlib v2.0
 poset : Set a → Poset _ _ _
 poset A = record
   { Carrier        = A

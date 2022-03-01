@@ -115,7 +115,7 @@ module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.S
   p[iₘᵢₙ]∈𝓕ₜ₊ₙ : Allᵥ (𝓕 (t + n)) (path (σ (t + n) X iₘᵢₙ j))
   p[iₘᵢₙ]∈𝓕ₜ₊ₙ with path (σ (t + n) X iₘᵢₙ j) | inspect path (σ (t + n) X iₘᵢₙ j)
   ... | invalid                     | _ = invalid
-  ... | valid []                    | _ = valid []
+  ... | trivial                     | _ = trivial
   ... | valid ((_ , _) ∷ p ∣ _ ∣ _) | [ p[σᵗ⁺ⁿ]≡iₘk∷p ]
     with alignPathExtension (σ (t + n-1) X) iₘᵢₙ j kₘᵢₙ (lemma₄ p[σᵗ⁺ⁿ]≡iₘk∷p)
   ...   | refl , refl , p[σᵗ⁺ⁿ⁻¹Xₖⱼ]≈p with 𝓒ₜ⊆𝓒ₜ₊ₛ t n kₘᵢₙ∈𝓒ₜ

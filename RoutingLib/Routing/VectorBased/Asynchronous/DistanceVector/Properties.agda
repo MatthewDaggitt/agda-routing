@@ -1,16 +1,4 @@
 
-open import RoutingLib.Routing.Algebra
-open import RoutingLib.Routing.Basics.Network as Routing using (Network)
-
-module RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Properties
-  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
-  (isRoutingAlgebra : IsRoutingAlgebra algebra)
-  {n} (N : Network algebra n)
-  where
-
-open RawRoutingAlgebra algebra
-open IsRoutingAlgebra isRoutingAlgebra
-
 open import Data.List using (tabulate)
 open import Data.List.Relation.Binary.Pointwise using (tabulate⁺; foldr⁺)
 import Data.List.Relation.Unary.All.Properties as All
@@ -24,8 +12,19 @@ open import Relation.Unary using (_∈_)
 
 open import RoutingLib.Data.List.Properties
 
+open import RoutingLib.Routing.Algebra
+open import RoutingLib.Routing.Basics.Network as Routing using (Network)
+
+module RoutingLib.Routing.VectorBased.Asynchronous.DistanceVector.Properties
+  {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
+  (isRoutingAlgebra : IsRoutingAlgebra algebra)
+  {n} (N : Network algebra n)
+  where
+
+open RawRoutingAlgebra algebra
+open IsRoutingAlgebra isRoutingAlgebra
+
 open import RoutingLib.Routing.VectorBased.Asynchronous algebra N
- as CoreProperties
 open import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra isRoutingAlgebra
 open import RoutingLib.Routing.Basics.Network.Participants algebra hiding (Aₜ)
 
@@ -55,5 +54,8 @@ F′-pres-Aₚ {e} {p} {X} _ = F′[X]∈Aₚ e p X
 ------------------------------------------------------------------------
 -- States in which the inactive nodes are actually inactive
 
-X*∈Aₚ : ∀ e p {X*} → F′ e p X* ≈ₘ X* → X* ∈ Accordant p
-X*∈Aₚ e p {X*} FX*≈X* {i} i∉p = ≈ₜ-trans (≈ₘ-sym FX*≈X* i) (F′[X]∈Aₚ e p X* i∉p)
+X*∈Aₚ : ∀ {e p X*} → F′ e p X* ≈ₘ X* → X* ∈ Accordant p
+X*∈Aₚ {e} {p} {X*} FX*≈X* {i} i∉p = ≈ₜ-trans (≈ₘ-sym FX*≈X* i) (F′[X]∈Aₚ e p X* i∉p)
+
+open import RoutingLib.Iteration.Asynchronous.Dynamic.Properties F∥ public
+  using (xy∈Aₚ∧x≈ₚy⇒x≈y)

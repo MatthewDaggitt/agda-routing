@@ -128,9 +128,9 @@ abstract
       where
       inner : ∀ {x} → x ∈ Accordant p → x ∈ᵢ X → Acc _<_ (d x (F′ x)) →
                 ∃ (λ x* → F′ x* ≈ x* × x* ∈ᵢ X × x* ∈ Accordant p)
-      inner {x} x∈Aₚ x∈X (acc x-acc) with F′ x ≟[ p ] x | F-pres-Aₚ x∈X x∈Aₚ
-      ... | yes fx≈ₚx | Fx∈Aₚ = x , inactiveEq p Fx∈Aₚ x∈Aₚ fx≈ₚx , x∈X , x∈Aₚ
-      ... | no  fx≉ₚx | Fx∈Aₚ = inner Fx∈Aₚ (F-pres-X x∈X) (x-acc _ (F-strContrOnOrbits x∈X x∈Aₚ fx≉ₚx))
+      inner {x} x∈Aₚ x∈X (acc x-acc) with F′ x ≟ x | F-pres-Aₚ x∈X x∈Aₚ
+      ... | yes fx≈x | Fx∈Aₚ = x , fx≈x , x∈X , x∈Aₚ
+      ... | no  fx≉x | Fx∈Aₚ = inner Fx∈Aₚ (F-pres-X x∈X) (x-acc _ (F-strContrOnOrbits x∈X x∈Aₚ fx≉x))
 
   x* : S
   x* = proj₁ fixedPoint
@@ -210,16 +210,16 @@ B-finish = k* , x* , x*∈X , λ k*≤k → x*∈B[k] k*≤k , x∈B[k]⇒x*≈x
 F-mono-B  : ∀ {k x} → x ∈ᵢ X → x ∈ Accordant p → x ∈ᵢ B k → F′ x ∈ᵢ B (suc k)
 F-mono-B {k} {x} x∈X x∈Aₚ x∈B i with i ∈? p
 ... | no  i∉p = F-pres-Aₚ x∈X x∈Aₚ i∉p
-... | yes i∈p with x ≟[ p ] x*
-...   | yes x≈ₚx* = lift (begin
-  dᵢ (x* i) (F′ x  i)  ≡⟨ dᵢ-cong ≈ᵢ-refl (F-cong e p (xy∈Aₚ∧x≈ₚy⇒x≈y I∥ x∈Aₚ x*∈Aₚ x≈ₚx*) i∈p) ⟩
+... | yes i∈p with x ≟ x*
+...   | yes x≈x* = lift (begin
+  dᵢ (x* i) (F′ x  i)  ≡⟨ dᵢ-cong ≈ᵢ-refl (F-cong e p x≈x* i∈p) ⟩
   dᵢ (x* i) (F′ x* i)  ≡⟨ dᵢ-cong ≈ᵢ-refl (Fx*≈ₚx* i∈p) ⟩
   dᵢ (x* i) (x* i)     ≡⟨ x≈y⇒dᵢ≡0 ≈ᵢ-refl ⟩
   0                    ≤⟨ z≤n ⟩
   r[ suc k ]           ∎)
-...   | no  x≉ₚx* = lift (v<r[k]⇒v≤r[1+k] (begin-strict
+...   | no  x≉x* = lift (v<r[k]⇒v≤r[1+k] (begin-strict
   dᵢ (x* i) (F′ x i)   ≤⟨ dᵢ≤d x* (F′ x) i∈p ⟩
-  d x* (F′ x)          <⟨ F-strContrOnFP x∈X x∈Aₚ Fx*≈x* x≉ₚx* ⟩
+  d x* (F′ x)          <⟨ F-strContrOnFP x∈X x∈Aₚ Fx*≈x* x≉x* ⟩
   d x* x               ≤⟨ ∈B⇒d≤r x∈B ⟩
   r[ k ]               ∎))
 

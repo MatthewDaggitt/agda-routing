@@ -45,6 +45,8 @@ open MaybePointwise public using () renaming (nothing to invalid; just to valid)
 open MaybeAll public using () renaming (nothing to invalid; just to valid)
 open MaybeAny public using () renaming (just to valid)
 
+pattern trivial = valid []
+
 ----------------------------------------------------------------------------
 -- Linkage
 

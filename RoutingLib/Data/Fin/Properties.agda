@@ -1,3 +1,6 @@
+
+module RoutingLib.Data.Fin.Properties where
+
 open import Data.Fin renaming (zero to fzero; suc to fsuc)
 open import Data.Fin.Properties
 open import Data.Product using (_,_)
@@ -11,12 +14,8 @@ open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; subst; cong; isEquivalence; sym; trans; subst₂; module ≡-Reasoning)
 import Function.Bijection as Bijection
 
-
-module RoutingLib.Data.Fin.Properties where
-
 𝔽ₛ : ℕ → Setoid _ _
 𝔽ₛ = ≡-setoid
-
 
 private
   variable

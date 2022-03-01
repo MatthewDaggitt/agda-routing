@@ -68,11 +68,11 @@ j∈𝓕₁ s = FXᵢᵢ≈FYᵢᵢ (σ s X) X refl
 𝓒-cong k∈Fₛ refl = k∈Fₛ
 
 j∈𝓒₁ : j ∈ᵤ 𝓒 1
-j∈𝓒₁ = j∈𝓕₁ , Allᵥ-resp-≈ₚ (valid []) (≈ₚ-sym (begin
+j∈𝓒₁ = j∈𝓕₁ , Allᵥ-resp-≈ₚ trivial (≈ₚ-sym (begin
   path (F X j j) ≈⟨ path-cong (FXᵢᵢ≈Iᵢᵢ X j) ⟩
   path (I j j)   ≡⟨ cong path (Iᵢᵢ≡0# j) ⟩
   path 0#        ≈⟨ p[0]≈[] ⟩
-  valid []       ∎))
+  trivial        ∎))
   where open EqReasoning (ℙₛ n)
 
 𝓒ₜ⊆𝓒ₜ₊ₛ : ∀ t s → 𝓒 t ⊆ᵤ 𝓒 (t + s)
@@ -84,8 +84,8 @@ j∈𝓒₁ = j∈𝓕₁ , Allᵥ-resp-≈ₚ (valid []) (≈ₚ-sym (begin
 𝓒ₜ⊆𝓒ₛ₊ₜ t s rewrite +-comm s t = 𝓒ₜ⊆𝓒ₜ₊ₛ t s
 
 𝓒-path : ∀ t {i p} → path (σ t X i j) ≈ₚ p → i ∈ᵤ 𝓒 t → Allᵥ (𝓒 t) p
-𝓒-path t {i} {invalid}  _ _ = invalid
-𝓒-path t {i} {valid []} _ _ = valid []
+𝓒-path t {i} {invalid} _ _ = invalid
+𝓒-path t {i} {trivial} _ _ = trivial
 𝓒-path t {i} {valid ((_ , k) ∷ p ∣ _ ∣ _)} p[σᵗXᵢⱼ]≈ik∷p i∈𝓒ₜ@(i∈𝓕ₜ , ik∷p∈𝓕ₜ)
   with 𝓒-path t {k} {valid p} | 𝓕-alignment t i∈𝓕ₜ p[σᵗXᵢⱼ]≈ik∷p
 ... | rec | refl , _ , p[σᵗXₖⱼ]≈p with Allᵥ-resp-≈ₚ ik∷p∈𝓕ₜ p[σᵗXᵢⱼ]≈ik∷p
@@ -141,8 +141,8 @@ Aligned? t (i , k) = σ t X i j ≟ A i k ▷ σ t X k j
 
 𝓡-path : ∀ {t i p} → path (σ (suc t) X i j) ≈ₚ p →
         i ∈ᵤ 𝓡 (suc t) → Allᵥ (𝓡 (suc t)) p
-𝓡-path {_} {i} {invalid}  _ _ = invalid
-𝓡-path {_} {i} {valid []} _ _ = valid []
+𝓡-path {_} {i} {invalid} _ _ = invalid
+𝓡-path {_} {i} {trivial} _ _ = trivial
 𝓡-path {t} {i} {valid ((_ , k) ∷ p ∣ _ ∣ _)} p[σᵗXᵢⱼ]≈vk∷p i∈R₁₊ₜ
   with 𝓡-path {t} {k} {valid p} | Allₑ-resp-≈ₚ i∈R₁₊ₜ p[σᵗXᵢⱼ]≈vk∷p
 ... | rec | valid (σᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ ∷ pʳ) with 𝓡-alignment t i∈R₁₊ₜ p[σᵗXᵢⱼ]≈vk∷p
@@ -153,36 +153,35 @@ Aligned? t (i , k) = σ t X i j ≟ A i k ▷ σ t X k j
 𝓡-∅ : ∀ t i → path (σ t X i j) ≈ₚ invalid → i ∈ᵤ 𝓡 t
 𝓡-∅ _ _ p≡∅ = Allₑ-resp-≈ₚ invalid (≈ₚ-sym p≡∅)
 
-𝓡-[] : ∀ t i → path (σ t X i j) ≈ₚ valid [] → i ∈ᵤ 𝓡 t
-𝓡-[] _ _ p≡[] = Allₑ-resp-≈ₚ (valid []) (≈ₚ-sym p≡[])
+𝓡-[] : ∀ t i → path (σ t X i j) ≈ₚ trivial → i ∈ᵤ 𝓡 t
+𝓡-[] _ _ p≡[] = Allₑ-resp-≈ₚ trivial (≈ₚ-sym p≡[])
 
 ¬𝓡-length : ∀ t i → i ∉ᵤ 𝓡 t → 1 ≤ size (σ t X i j)
 ¬𝓡-length t i i∉Rₜ with path (σ t X i j)
 ... | invalid               = contradiction invalid i∉Rₜ
-... | valid []              = contradiction (valid []) i∉Rₜ
+... | trivial               = contradiction trivial i∉Rₜ
 ... | valid (e ∷ p ∣ _ ∣ _) = s≤s z≤n
 
 ¬𝓡-retraction : ∀ t i → i ∉ᵤ 𝓡 (suc t) → ∃₂ λ k p → ∃₂ λ k∉p e↔p →
                 path (σ (suc t) X i j) ≈ₚ valid ((i , k) ∷ p ∣ k∉p ∣ e↔p) ×
                 σ (suc t) X i j ≈ A i k ▷ σ t X k j ×
                 path (σ t X k j) ≈ₚ valid p
-¬𝓡-retraction t i i∉R₁₊ₜ with path (σ (suc t) X i j) | inspect path (σ (suc t) X i j)
-... | invalid  | _ = contradiction invalid i∉R₁₊ₜ
-... | valid [] | _ = contradiction (valid []) i∉R₁₊ₜ
-... | valid ((_ , k) ∷ p ∣ k∉p ∣ e↔p) | [ p[σ¹⁺ᵗ]≡ik∷p ]
+¬𝓡-retraction t i i∉R₁₊ₜ with path (σ (suc t) X i j) in p[σ¹⁺ᵗ]≡ik∷p
+... | invalid  = contradiction invalid i∉R₁₊ₜ
+... | valid [] = contradiction trivial i∉R₁₊ₜ
+... | valid ((_ , k) ∷ p ∣ k∉p ∣ e↔p)
   with p[FXᵢⱼ]⇒FXᵢⱼ≈AᵢₖXₖⱼ (σ t X) i j (≈ₚ-reflexive p[σ¹⁺ᵗ]≡ik∷p)
 ...   | refl , σ¹⁺ᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ , p[σᵗXₖⱼ]≈p =
   k , p , k∉p , e↔p , ≈ₚ-refl , σ¹⁺ᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ , p[σᵗXₖⱼ]≈p
 
 𝓒ₜ⊆𝓡ₜ : ∀ t {i p} → path (σ t X i j) ≈ₚ p → i ∈ᵤ 𝓒 t → i ∈ᵤ 𝓡 t
-𝓒ₜ⊆𝓡ₜ t {i} {invalid}  p[σᵗXᵢⱼ]≈∅  _ = 𝓡-∅ t i p[σᵗXᵢⱼ]≈∅
-𝓒ₜ⊆𝓡ₜ t {i} {valid []} p[σᵗXᵢⱼ]≈[] _ = 𝓡-[] t i p[σᵗXᵢⱼ]≈[]
+𝓒ₜ⊆𝓡ₜ t {i} {invalid} p[σᵗXᵢⱼ]≈∅  _ = 𝓡-∅ t i p[σᵗXᵢⱼ]≈∅
+𝓒ₜ⊆𝓡ₜ t {i} {trivial} p[σᵗXᵢⱼ]≈[] _ = 𝓡-[] t i p[σᵗXᵢⱼ]≈[]
 𝓒ₜ⊆𝓡ₜ t {i} {valid ((_ , k) ∷ p ∣ _ ∣ _)} p[σᵗXᵢⱼ]≈ik∷p (i∈Sₜ , ik∷p∈Fₜ)
   with 𝓒ₜ⊆𝓡ₜ t {k} {valid p} | 𝓕-alignment t i∈Sₜ p[σᵗXᵢⱼ]≈ik∷p
 ... | rec | refl , σᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ , p[σᵗXₖⱼ]≈p with 𝓒-path t p[σᵗXᵢⱼ]≈ik∷p (i∈Sₜ , ik∷p∈Fₜ)
-...   | valid ([ _ , k∈Fₜ ]∷ p∈Fₜ) with rec p[σᵗXₖⱼ]≈p k∈Fₜ
-...     | k∈Rₜ with Allₑ-resp-≈ₚ k∈Rₜ p[σᵗXₖⱼ]≈p
-...       | valid pˡ = Allₑ-resp-≈ₚ (valid (σᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ ∷ pˡ)) (≈ₚ-sym p[σᵗXᵢⱼ]≈ik∷p)
+...   | valid ([ _ , k∈Fₜ ]∷ p∈Fₜ) with Allₑ-resp-≈ₚ (rec p[σᵗXₖⱼ]≈p k∈Fₜ) p[σᵗXₖⱼ]≈p
+...     | valid pˡ = Allₑ-resp-≈ₚ (valid (σᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ ∷ pˡ)) (≈ₚ-sym p[σᵗXᵢⱼ]≈ik∷p)
 
 ¬𝓡⊆¬𝓒 : ∀ {t i} → i ∉ᵤ 𝓡 t → i ∉ᵤ 𝓒 t
 ¬𝓡⊆¬𝓒 {t} {i} i∉Rₜ i∈Fₜ = i∉Rₜ (𝓒ₜ⊆𝓡ₜ t ≈ₚ-refl i∈Fₜ)

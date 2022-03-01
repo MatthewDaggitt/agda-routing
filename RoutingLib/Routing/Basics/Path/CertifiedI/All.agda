@@ -22,6 +22,8 @@ data Allₑ {a} (P : Pred (Edge n) a) : Path n → Set a where
   invalid : Allₑ P invalid
   valid   : ∀ {p} → NEP.Allₑ P p → Allₑ P (valid p)
 
+pattern trivial = valid []
+
 ----------------------------------------------------------------------------
 -- Operations
 

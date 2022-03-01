@@ -174,8 +174,8 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
     field
       path           : PathWeight → Path n
       path-cong      : path Preserves _≈_ ⟶ _≈ₚ_
-      r≈0⇒path[r]≈[] : ∀ {r} → r ≈ 0# → path r ≈ₚ valid []
-      r≈∞⇒path[r]≈∅  : ∀ {r} → r ≈ ∞#  → path r ≈ₚ invalid
+      r≈0⇒path[r]≈[] : ∀ {r} → r ≈ 0# → path r ≈ₚ trivial
+      r≈∞⇒path[r]≈∅  : ∀ {r} → r ≈ ∞# → path r ≈ₚ invalid
       path[r]≈∅⇒r≈∞  : ∀ {r} → path r ≈ₚ invalid → r ≈ ∞#
       path-reject    : ∀ {i j : Node n} {r p} (f : Step i j) → path r ≈ₚ valid p →
                        (¬ (i , j) ⇿ᵛ p) ⊎ i ∈ᵥₚ p → f ▷ r ≈ ∞#
@@ -189,7 +189,7 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
 
     weight : (∀ i j → Step i j) → Path n → PathWeight
     weight A invalid                       = ∞#
-    weight A (valid [])                    = 0#
+    weight A trivial                       = 0#
     weight A (valid ((i , j) ∷ p ∣ _ ∣ _)) = A i j ▷ weight A (valid p)
 
 

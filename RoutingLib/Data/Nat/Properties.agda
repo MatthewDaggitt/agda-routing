@@ -156,3 +156,6 @@ n∸[1+m]<n m (s≤s z≤n) = s≤s (m∸n≤m _ m)
 m<n⇒n∸m≡1+o : ∀ {m n} → m < n → ∃ λ o → n ∸ m ≡ suc o
 m<n⇒n∸m≡1+o {zero}  {suc n} (s≤s m<n) = n , refl
 m<n⇒n∸m≡1+o {suc m} {suc n} (s≤s m<n) = m<n⇒n∸m≡1+o m<n
+
+>-nonZero⁻¹ : ∀ n → .{{NonZero n}} → n > 0
+>-nonZero⁻¹ (suc n) = s≤s z≤n

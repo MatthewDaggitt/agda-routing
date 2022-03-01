@@ -107,3 +107,4 @@ module Notation (X : RoutingMatrix) (j : Node) where
     suc (length (path (σ t X l j)))  ≡⟨⟩
     suc (lengthₙ t l)                ∎
     where open ≡-Reasoning
+

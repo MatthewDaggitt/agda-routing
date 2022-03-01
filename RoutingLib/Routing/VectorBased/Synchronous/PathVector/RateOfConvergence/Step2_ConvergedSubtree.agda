@@ -127,7 +127,6 @@ abstract
 -- Any "real" route ending in a node outside of the fixed set is worse
 -- than that ending with the minimal edge.
 
-
 ∈𝓡-invalid : ∀ s {i k} →
                 path (σ (t + s) X k j) ≈ₚ invalid →
                 eₘᵢₙ ≤[ t + s ] (i , k)

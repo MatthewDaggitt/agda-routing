@@ -120,8 +120,8 @@ record LocalAMCO {ℓ₁} (X : IPred Sᵢ ℓ₁)
   field
     dᵢ-isQuasiSemiMetric : ∀ i → IsQuasiSemiMetric {A = Sᵢ i} _≈ᵢ_ dᵢ
     dᵢ-bounded           : ∃ λ dₘₐₓ → ∀ {i} x y → dᵢ {i} x y ≤ dₘₐₓ
-    F-strContrOnOrbits   : ∀ {x} → x ∈ᵢ X → x ∈ Accordant p → F′ x ≉[ p ] x → d (F′ x) (F′ (F′ x)) < d x (F′ x)
-    F-strContrOnFP       : ∀ {x} → x ∈ᵢ X → x ∈ Accordant p → ∀ {x*} → F′ x* ≈ x* → x ≉[ p ] x* → d x* (F′ x) < d x* x
+    F-strContrOnOrbits   : ∀ {x} → x ∈ᵢ X → x ∈ Accordant p → F′ x ≉ x → d (F′ x) (F′ (F′ x)) < d x (F′ x)
+    F-strContrOnFP       : ∀ {x} → x ∈ᵢ X → x ∈ Accordant p → ∀ {x*} → F′ x* ≈ x* → x ≉ x* → d x* (F′ x) < d x* x
     F-pres-Aₚ            : ∀ {x} → x ∈ᵢ X → x ∈ Accordant p → F′ x ∈ Accordant p
 
   module _ {i} where

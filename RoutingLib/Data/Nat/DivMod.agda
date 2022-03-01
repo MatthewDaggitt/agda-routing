@@ -19,13 +19,15 @@ open ≡-Reasoning
 ------------------------------------------------------------------------
 -- _%_
 
--- Check if needed
+-- stdlib v2.0 (m%n<n)
 m%[1+n]≤n : ∀ m n → m % suc n ≤ n
 m%[1+n]≤n m n = a[modₕ]n<n 0 m n
 
 [m∸m%n]%n≡0 : ∀ m n → (m ∸ m % suc n) % suc n ≡ 0
 [m∸m%n]%n≡0 m n = modₕ-minus 0 m n
 
+
+-- Switch to _%_ in v2.0
 %≡0⇒mod≡0 : ∀ m {n} → m % suc n ≡ zero → m mod suc n ≡ zero
 %≡0⇒mod≡0 m eq = fromℕ<-cong _ _ eq (m%n<n m _) (s≤s z≤n)
 

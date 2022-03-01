@@ -122,7 +122,7 @@ module _ (n : ℕ) where
 
 |p|<n : ∀ {n} (p : Path (suc n)) → length p <ℕ suc n
 |p|<n invalid                     = s≤s z≤n
-|p|<n (valid [])                  = s≤s z≤n
+|p|<n trivial                     = s≤s z≤n
 |p|<n (valid (e ∷ p ∣ e⇿p ∣ e∉p)) = |pᵛ|<n (nonEmpty e p e⇿p e∉p)
 
 |p|≤n : ∀ {n} (p : Path n) → length p ≤ℕ n

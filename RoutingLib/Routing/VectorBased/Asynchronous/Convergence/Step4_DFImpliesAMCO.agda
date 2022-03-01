@@ -111,8 +111,8 @@ module _ {e : Epoch} {p : Participants} .(free : TopologyIsFree alg N (e , p)) w
   D≡0⇒X≈ₛY : ∀ {X Y} → D X Y ≡ 0 → X ≈ₘ[ p ] Y
   D≡0⇒X≈ₛY D≡0 {i} i∈p = Conditionₜ.≡0⇒x≈y i (d≡0⇒x≈y i) i∈p (MaxLiftₘ.d≡0⇒dᵢ≡0 D≡0 _)
 
-  Y≉ₚX⇒0<DXY : ∀ {X Y} → Y ≉ₘ[ p ] X → 0 < D X Y
-  Y≉ₚX⇒0<DXY Y≉X = n≢0⇒n>0 (Y≉X ∘ ≈ₛ-sym ∘ D≡0⇒X≈ₛY)
+  Y≉ₚX⇒0<DXY : ∀ {X Y} → X ∈ᵘ Accordant p → Y ∈ᵘ Accordant p → Y ≉ₘ X → 0 < D X Y
+  Y≉ₚX⇒0<DXY {X} {Y} X∈Aₚ Y∈Aₚ Y≉X = n≢0⇒n>0 (Y≉X ∘ ≈ₘ-sym ∘ xy∈Aₚ∧x≈ₚy⇒x≈y X∈Aₚ Y∈Aₚ ∘ D≡0⇒X≈ₛY)
 
   d≤D : ∀ X Y i → (i ∈ p ⊎ X i ≈ₜ Y i) → d i (X i) (Y i) ≤ D X Y
   d≤D X Y i cond  = subst (_≤ D X Y) (Conditionₜ.dᶜ≡d⁺ i i (X i) (Y i) (map₂ (x≈y⇒d≡0 i) cond)) (MaxLiftₘ.dᵢ≤d X Y i)
@@ -132,31 +132,32 @@ module _ {e : Epoch} {p : Participants} .(free : TopologyIsFree alg N (e , p)) w
 -- These two lemmas are a mess as can't pattern match on `i ∈? p` directly
 -- as it unfolds the adjacency matrix
 
-  d[FXᵢ,F²Xᵢ]<D[X,FX] : ∀ {X} → X ∈ᵘ Accordant p → F X ≉ₘ[ p ] X →
+  d[FXᵢ,F²Xᵢ]<D[X,FX] : ∀ {X} → X ∈ᵘ Accordant p → 0 < D X (F X) →
                         ∀ i → dᵢ i (F X i) (F² X i) < D X (F X)
-  d[FXᵢ,F²Xᵢ]<D[X,FX] {X} wfX FX≉X i with Y≉ₚX⇒0<DXY FX≉X
-  ... | 0<DXY with max[t]<x 0<DXY (r-strContrOrbits 0<DXY (r≤D-wf wfX (F′[X]∈Aₚ e p X)) i)
+  d[FXᵢ,F²Xᵢ]<D[X,FX] {X} wfX 0<DFXX i
+    with max[t]<x 0<DFXX (r-strContrOrbits 0<DFXX (r≤D-wf wfX (F′[X]∈Aₚ e p X)) i)
   ...   | d[FXᵢ,F²Xᵢ]<D[X,FX] = Dec.[
         (λ i∈p → subst (_< D X (F X)) (sym (Condition.accept (d i) (_∈? p) i∈p)) d[FXᵢ,F²Xᵢ]<D[X,FX]) ,
-        (λ i∉p → subst (_< D X (F X)) (sym (Condition.reject (d i) (_∈? p) i∉p)) 0<DXY)
+        (λ i∉p → subst (_< D X (F X)) (sym (Condition.reject (d i) (_∈? p) i∉p)) 0<DFXX)
       ] (i ∈? p)
 
-  dᵢ[X*ᵢ,FXᵢ]<D[X*,X] : ∀ {X*} → F X* ≈ₘ X* → ∀ {X} → X ∈ᵘ Accordant p → X ≉ₘ[ p ] X* →
+  dᵢ[X*ᵢ,FXᵢ]<D[X*,X] : ∀ {X*} → F X* ≈ₘ X* → ∀ {X} → X ∈ᵘ Accordant p → 0 < D X* X →
                         ∀ i → dᵢ i (X* i) (F X i) < D X* X
-  dᵢ[X*ᵢ,FXᵢ]<D[X*,X] {X*} FX*≈X* {X} wfX X≉X* i with Y≉ₚX⇒0<DXY X≉X*
-  ... | 0<DXY with max[t]<x 0<DXY (r-strContrFP FX*≈X* 0<DXY (r≤D-wf (X*∈Aₚ e p FX*≈X*) wfX) i)
+  dᵢ[X*ᵢ,FXᵢ]<D[X*,X] {X*} FX*≈X* {X} wfX 0<DXX* i
+    with max[t]<x 0<DXX* (r-strContrFP FX*≈X* 0<DXX* (r≤D-wf (X*∈Aₚ FX*≈X*) wfX) i)
   ...   | d[FXᵢ,F²Xᵢ]<D[X,FX] = Dec.[
         (λ i∈p → subst (_< D X* X) (sym (Condition.accept (d i) (_∈? p) i∈p)) d[FXᵢ,F²Xᵢ]<D[X,FX]) ,
-        (λ i∉p → subst (_< D X* X) (sym (Condition.reject (d i) (_∈? p) i∉p)) 0<DXY)
+        (λ i∉p → subst (_< D X* X) (sym (Condition.reject (d i) (_∈? p) i∉p)) 0<DXX*)
       ] (i ∈? p)
 
-  Fₜ-strContrOnOrbits : ∀ {X} → X ∈ᵘ Accordant p → F X ≉ₘ[ p ] X →
-                        D (F X) (F² X) < D X (F X)
-  Fₜ-strContrOnOrbits {X} wfX FX≉X = max[t]<x (Y≉ₚX⇒0<DXY FX≉X) (d[FXᵢ,F²Xᵢ]<D[X,FX] wfX FX≉X)
+  Fₜ-strContrOnOrbits : ∀ {X} → X ∈ᵘ Accordant p → F X ≉ₘ X →  D (F X) (F² X) < D X (F X)
+  Fₜ-strContrOnOrbits {X} wfX FX≉X = max[t]<x 0<DFXX (d[FXᵢ,F²Xᵢ]<D[X,FX] wfX 0<DFXX)
+    where 0<DFXX = Y≉ₚX⇒0<DXY wfX (F′[X]∈Aₚ e p _) FX≉X
 
-  Fₜ-strContrOnFP : ∀ {X} → X ∈ᵘ Accordant p → ∀ {X*} → F X* ≈ₘ X* → X ≉ₘ[ p ] X* →
+  Fₜ-strContrOnFP : ∀ {X} → X ∈ᵘ Accordant p → ∀ {X*} → F X* ≈ₘ X* → X ≉ₘ X* →
                     D X* (F X) < D X* X
-  Fₜ-strContrOnFP {X} wfX {X*} FX*≈X* X≉X* = max[t]<x (Y≉ₚX⇒0<DXY X≉X*) (dᵢ[X*ᵢ,FXᵢ]<D[X*,X] FX*≈X* wfX X≉X*)
+  Fₜ-strContrOnFP {X} wfX {X*} FX*≈X* X≉X* = max[t]<x 0<DXX* (dᵢ[X*ᵢ,FXᵢ]<D[X*,X] FX*≈X* wfX 0<DXX*)
+    where 0<DXX* = Y≉ₚX⇒0<DXY (X*∈Aₚ FX*≈X*) wfX X≉X*
 
   localAMCO : LocalAMCO F∥ Uᵢ e p 
   localAMCO = record

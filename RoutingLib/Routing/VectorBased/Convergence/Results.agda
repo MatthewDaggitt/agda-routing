@@ -18,7 +18,7 @@ open import RoutingLib.Routing.Algebra.Properties.PathAlgebra
 open import RoutingLib.Routing.Algebra.Simulation using (_Simulates_)
 import RoutingLib.Routing.VectorBased.Convergence.Simulation as Simulation
 import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Proof as Convergence
-open import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step5_Proof
+open import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step6_Proof
 
 module RoutingLib.Routing.VectorBased.Convergence.Results where
 
@@ -100,4 +100,4 @@ incrPaths⇒syncConvergesIn-n² : IsRoutingAlgebra A →
                                IsIncreasing A →
                                SynchronouslyConvergesIn A (λ n → n ^ 2)
 incrPaths⇒syncConvergesIn-n² routingAlg pathAlg incr n@{suc _} =
-  n²-convergence routingAlg (certifiedPathAlgebra pathAlg n) incr
+  increasing⇒n²-convergence routingAlg (certifiedPathAlgebra pathAlg n) incr

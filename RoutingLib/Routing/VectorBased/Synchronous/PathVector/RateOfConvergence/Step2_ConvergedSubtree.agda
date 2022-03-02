@@ -1,8 +1,9 @@
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (Subset; _∈_; _∉_; _∪_; Nonempty)
 open import Data.Fin.Subset.Properties using (_∈?_)
-open import Data.Nat using (ℕ; zero; suc; _+_)
+open import Data.Nat using (ℕ; NonZero; zero; suc; _+_)
 open import Data.Nat.Properties using (+-comm)
+open import Data.Unit using ()
 open import Data.Product using (_,_; proj₁; proj₂)
 open import Data.List using (List)
 open import Data.List.Relation.Unary.All using (lookup)
@@ -34,12 +35,9 @@ module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.S
   (A : AdjacencyMatrix algebra (suc n-1))
   (X : RoutingMatrix   algebra (suc n-1))
   (j : Fin (suc n-1))
-  (t-1 : ℕ)
-  {C : Subset (suc n-1)}
-  (j∈C : j ∈ C)
-  (C-nonFull : Nonfull C)
   (open Step1_NodeSets isRoutingAlgebra isPathAlgebra A X j)
-  (C⊆𝓒ₜ : ∀ {i} → i ∈ C → i ∈ᵤ 𝓒 (suc t-1))
+  (t : ℕ)
+  (converged : ProvablyConvergedSubset t)
   where
 
 open Prelude isRoutingAlgebra isPathAlgebra A
@@ -47,18 +45,13 @@ open Notation X j
 
 open Extrema ≤₊-totalOrder
 open POR ≤₊-poset
+open ProvablyConvergedSubset converged
 
-private
-
-  t : ℕ
-  t = suc t-1
-
-  e↷C⇒w[t+s]≡w[t] : ∀ {e} → e ↷ C → ∀ s → weightₑ (t + s) e ≈ weightₑ t e
-  e↷C⇒w[t+s]≡w[t] (_ , k∈C) s = ▷-cong (A _ _) (proj₁ (C⊆𝓒ₜ k∈C) s)
 
 ------------------------------------------------------------------------------
 -- Finding the fixed minimal edge entering the fixed set
 
+private
 -- At least one edge entering the fixed set exists
 
   eₐ : Edge
@@ -108,6 +101,9 @@ abstract
     weightₑ t       eₘᵢₙ  ≤⟨ lookup (f[argmin]≤f[xs] eₐ (cutset C)) (↷⇒∈cutset e↷C) ⟩
     weightₑ t       e     ≈⟨ ≈-sym (e↷C⇒w[t+s]≡w[t] e↷C s) ⟩
     weightₑ (t + s) e     ∎
+    where
+      e↷C⇒w[t+s]≡w[t] : ∀ {e} → e ↷ C → ∀ s → weightₑ (t + s) e ≈ weightₑ t e
+      e↷C⇒w[t+s]≡w[t] (_ , k∈C) s = ▷-cong (A _ _) (proj₁ (C⊆𝓒ₜ k∈C) s)
 
 
 
@@ -136,22 +132,22 @@ abstract
   A i    k    ▷ ∞#                 ≈⟨ ≈-sym (▷-cong (A i k) (path[r]≈∅⇒r≈∞ p[σᵗ⁺ˢXₖⱼ]≈∅)) ⟩
   A i    k    ▷ σ (t + s) X k j    ∎
 
-∈𝓡-trivial : ∀ s {i k} → k ∉ C →
-                path (σ (t + s) X k j) ≈ₚ valid [] →
-                eₘᵢₙ ≤[ t + s ] (i , k)
+∈𝓡-trivial : ∀ s {i k} → .{{NonZero (t + s)}} → k ∉ C → 
+             path (σ (t + s) X k j) ≈ₚ trivial →
+             eₘᵢₙ ≤[ t + s ] (i , k)
 ∈𝓡-trivial s {i} {k} k∉C p[σᵗ⁺ˢXₖⱼ]≈[]
-  with p[FXᵢⱼ]≈[]⇒i≡j (σ (t-1 + s) X) k j p[σᵗ⁺ˢXₖⱼ]≈[]
-... | refl = contradiction j∈C k∉C
+  rewrite p[σᵗXᵢⱼ]≈[]⇒i≡j X (t + s) k j p[σᵗ⁺ˢXₖⱼ]≈[] = contradiction j∈C k∉C
 
-∈𝓡 : ∀ s i {k p} → path (σ (t + s) X k j) ≈ₚ p →
+∈𝓡 : ∀ s i {k p} → .{{NonZero (t + s)}} →
+     path (σ (t + s) X k j) ≈ₚ p →
      k ∈ᵤ 𝓡 (t + s) → k ∉ C → 
      eₘᵢₙ ≤[ t + s ] (i , k)
-∈𝓡 s i {_} {invalid}  p[σᵗ⁺ˢXₖⱼ]≈∅  _      _   = ∈𝓡-invalid s p[σᵗ⁺ˢXₖⱼ]≈∅
-∈𝓡 s i {_} {valid []} p[σᵗ⁺ˢXₖⱼ]≈[] k∈Rₛ₊ₜ k∉C = ∈𝓡-trivial s k∉C p[σᵗ⁺ˢXₖⱼ]≈[]
+∈𝓡 s i {_} {invalid} p[σᵗ⁺ˢXₖⱼ]≈∅  _      _   = ∈𝓡-invalid s p[σᵗ⁺ˢXₖⱼ]≈∅
+∈𝓡 s i {_} {trivial} p[σᵗ⁺ˢXₖⱼ]≈[] k∈Rₛ₊ₜ k∉C = ∈𝓡-trivial s k∉C p[σᵗ⁺ˢXₖⱼ]≈[]
 ∈𝓡 s i {_} {valid ((m , l) ∷ p ∣ _ ∣ _)} p[σᵗ⁺ˢXₖⱼ]≈kl∷p k∈Rₛ₊ₜ k∉C 
-  with ∈𝓡 s m {_} {valid p} | 𝓡-path {t-1 + s} p[σᵗ⁺ˢXₖⱼ]≈kl∷p k∈Rₛ₊ₜ
+  with ∈𝓡 s m {_} {valid p} | 𝓡-path (t + s) p[σᵗ⁺ˢXₖⱼ]≈kl∷p k∈Rₛ₊ₜ
 ... | rec | valid ([ _ , l∈Rₛ₊ₜ ]∷ _)
-    with 𝓡-alignment (t-1 + s) k∈Rₛ₊ₜ p[σᵗ⁺ˢXₖⱼ]≈kl∷p
+    with 𝓡-alignment (t + s) k∈Rₛ₊ₜ p[σᵗ⁺ˢXₖⱼ]≈kl∷p
 ...   | refl , σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ , p[σᵗ⁺ˢXₗⱼ]≈p with l ∈? C
 ...     | no  l∉C = safe-extension σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ (rec p[σᵗ⁺ˢXₗⱼ]≈p l∈Rₛ₊ₜ l∉C )
 ...     | yes l∈C = safe-extension σᵗ⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢXₗⱼ (eₘᵢₙ-isMinₜ₊ₛ (k∉C , l∈C) s)

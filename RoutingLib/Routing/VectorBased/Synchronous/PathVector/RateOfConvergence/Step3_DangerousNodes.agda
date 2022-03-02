@@ -1,4 +1,4 @@
-open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; _+_; _<_; _≤_)
+open import Data.Nat using (ℕ; NonZero; zero; suc; z≤n; s≤s; _+_; _<_; _≤_)
 open import Data.Nat.Properties using (+-suc; module ≤-Reasoning)
 open import Data.Empty using (⊥)
 open import Data.Fin using (Fin)
@@ -25,6 +25,7 @@ open import RoutingLib.Data.Fin.Subset using (Nonfull)
 open import RoutingLib.Data.List using (allFinPairs)
 open import RoutingLib.Data.List.Membership.Propositional.Properties using (∈-allFinPairs⁺)
 import RoutingLib.Function.Reasoning as FunctionalReasoning
+open import RoutingLib.Data.Nat.Properties
 
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Prelude using (RoutingMatrix; AdjacencyMatrix)
@@ -40,24 +41,17 @@ module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.S
   (A : AdjacencyMatrix algebra (suc n-1))
   (X : RoutingMatrix   algebra (suc n-1))
   (j : Fin (suc n-1))
-  (t-1 : ℕ)
-  {C : Subset (suc n-1)}
-  (j∈C : j ∈ C)
-  (C-nonFull : Nonfull C)
   (open Step1_NodeSets isRoutingAlgebra isPathAlgebra A X j)
-  (C⊆𝓒ₜ : ∀ {i} → i ∈ C → i ∈ᵤ 𝓒 (suc t-1))
+  (t : ℕ)
+  (converged : ProvablyConvergedSubset t)
   where
 
 open Prelude isRoutingAlgebra isPathAlgebra A
 open Notation X j
+open ProvablyConvergedSubset converged
 
 ----------------------------------------------------------------------------
 -- Inductive proof
-
-private
-
-  t : ℕ
-  t = suc t-1
 
 ¬𝓡⇒∉C : ∀ {s k} → k ∉ᵤ 𝓡 (t + s) → k ∉ C
 ¬𝓡⇒∉C {s} {k} k∉𝓡ₜ₊ₛ k∈C = begin⟨ k∈C ⟩
@@ -71,7 +65,7 @@ private
 --------------------------------------------------------------------------
 -- Compute the minimum cut edge (iₘᵢₙ , kₘᵢₙ) of C
 
-open Step2_ConvergedSubtree isRoutingAlgebra isPathAlgebra isIncreasing A X j t-1 j∈C C-nonFull C⊆𝓒ₜ
+open Step2_ConvergedSubtree isRoutingAlgebra isPathAlgebra isIncreasing A X j t converged
 
 -------------------------------------------------------------------------
 -- The only time that the source node of the minimal edge out of the fixed
@@ -102,8 +96,8 @@ module _ where
       A iₘᵢₙ kₘᵢₙ ▷ σ (t + s)     X kₘᵢₙ j ∎
       where open POR ≤₊-poset
 
-    Dangerous-predNot𝓡 : ∀ {i k l s} → k ∉ C →
-                            σ (t + suc s) X k j ≈ A k l ▷ (σ (t + s) X l j) →
+    Dangerous-predNot𝓡 : ∀ {i k l s} → .{{NonZero (t + s)}} → k ∉ C →
+                            σ (t + suc s) X k j ≈ A k l ▷ σ (t + s) X l j →
                             (i , k) ∈ᵤ Dangerous (suc s) → l ∉ᵤ 𝓡 (t + s)
     Dangerous-predNot𝓡 {i} {k} {l} {s} k∉C σᵗ⁺¹⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ ik∈D₁₊ₛ l∈Rₜ₊ₛ with l ∈? C
     ... | no  l∉C = <₊⇒≱₊ ik∈D₁₊ₛ (safe-extension σᵗ⁺¹⁺ˢₖⱼ≈Aₖₗσᵗ⁺ˢₗⱼ (∈𝓡 s k ≈ₚ-refl l∈Rₜ₊ₛ l∉C))
@@ -122,7 +116,7 @@ abstract
   𝓓? : ∀ s → Decidable (𝓓 s)
   𝓓? s k = (∁? (𝓡? (t + s)) k) ×-dec (any? λ v → Dangerous? s (v , k))
 
-  𝓓-retraction : ∀ {s k} → k ∈ᵤ 𝓓 (suc s) →
+  𝓓-retraction : ∀ {s k} → .{{NonZero (t + s)}} → k ∈ᵤ 𝓓 (suc s) →
                              ∃ λ l → l ∈ᵤ 𝓓 s
                               × lengthₙ (suc t + s) k ≡ suc (lengthₙ(t + s) l)
   𝓓-retraction {s} {k} (k∉Rₜ₊₁₊ₛ , (i , k∈Dₜ₊₁₊ₛ))
@@ -141,9 +135,9 @@ abstract
             (k , Dangerous-retraction σᵗ⁺¹⁺ˢXₖⱼ≈Aₖₗσᵗ⁺ˢ k∈Dₜ₊₁₊ₛ)
 
 
-𝓓-length : ∀ s {i} → i ∈ᵤ 𝓓 s → s < lengthₙ (t + s) i
+𝓓-length : ∀ s {i} → .{{NonZero t}} → i ∈ᵤ 𝓓 s → s < lengthₙ (t + s) i
 𝓓-length zero    {i} (k∉Rₜ₊ₛ , _) = ¬𝓡-length (t + zero) i k∉Rₜ₊ₛ
-𝓓-length (suc s) {i} ik∈Dₛ with 𝓓-retraction ik∈Dₛ
+𝓓-length (suc s) {i} {{t≢0}} ik∈Dₛ with 𝓓-retraction {{+-presˡ-nonZero t s}} ik∈Dₛ
 ... | (l , l∈Jₛ , |i|≡1+|l|) = begin-strict
   suc s                    <⟨ s≤s (𝓓-length s l∈Jₛ) ⟩
   suc (lengthₙ (t + s) l)  ≡˘⟨ |i|≡1+|l| ⟩

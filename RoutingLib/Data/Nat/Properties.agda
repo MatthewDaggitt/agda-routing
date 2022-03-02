@@ -159,3 +159,6 @@ m<n⇒n∸m≡1+o {suc m} {suc n} (s≤s m<n) = m<n⇒n∸m≡1+o m<n
 
 >-nonZero⁻¹ : ∀ n → .{{NonZero n}} → n > 0
 >-nonZero⁻¹ (suc n) = s≤s z≤n
+
++-presˡ-nonZero : ∀ m n → .{{NonZero m}} → NonZero (m + n)
++-presˡ-nonZero (suc m) n = _

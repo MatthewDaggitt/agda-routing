@@ -12,7 +12,7 @@ import Data.List.Relation.Unary.All.Properties as All
 open import Data.List.Properties
 open import Data.List.Relation.Binary.Pointwise as Pointwise
   using (Pointwise; []; _∷_)
-open import Data.Nat using (_<_)
+open import Data.Nat using (NonZero; suc; _<_)
 open import Data.Nat.Induction using (Acc; acc; <-wellFounded)
 open import Data.Nat.Properties
   using (≤-reflexive; <-trans; module ≤-Reasoning)
@@ -92,6 +92,9 @@ abstract
     valid []              ∎) λ {(valid ())}
     where open SetoidReasoning (ℙₛ n)
 
+  p[σᵗXᵢⱼ]≈[]⇒i≡j : ∀ X t → .{{NonZero t}} → ∀ i j → path (σ t X i j) ≈ₚ valid [] → i ≡ j
+  p[σᵗXᵢⱼ]≈[]⇒i≡j X (suc t) = p[FXᵢⱼ]≈[]⇒i≡j (σ t X)
+  
   alignPathExtension : ∀ (X : RoutingMatrix) i j k {u v p e⇿p i∉p} →
             path (A i k ▷ X k j) ≈ₚ valid ((u , v) ∷ p ∣ e⇿p ∣ i∉p) →
             i ≡ u × k ≡ v × path (X k j) ≈ₚ valid p

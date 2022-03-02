@@ -1,4 +1,4 @@
-open import Data.Nat using (ℕ; suc; z≤n; s≤s; _+_; _∸_; _<_; _≤_)
+open import Data.Nat using (ℕ; NonZero; suc; z≤n; s≤s; _+_; _∸_; _<_; _≤_)
 open import Data.Fin using (Fin)
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Prelude using (AdjacencyMatrix; RoutingMatrix)
@@ -13,6 +13,8 @@ module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.S
   (j : Fin (suc n-1))
   where
 
+open import Data.Fin.Subset using (Subset; _∈_)
+open import Data.Unit using ()
 open import Data.Nat.Properties using (+-comm; +-assoc)
 open import Data.Product using (_,_; _×_; ∃; ∃₂)
 open import Relation.Nullary using (¬_; yes; no)
@@ -24,6 +26,7 @@ open import Relation.Binary.PropositionalEquality
   using (_≡_; cong; subst; refl; sym; trans; inspect; [_])
 import Relation.Binary.Reasoning.Setoid as EqReasoning
 
+open import RoutingLib.Data.Fin.Subset using (Nonfull)
 open import RoutingLib.Routing.Basics.Path.CertifiedI.All
 open import RoutingLib.Routing.Basics.Path.CertifiedI.Properties
 
@@ -31,6 +34,12 @@ import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.P
 
 open Prelude isRoutingAlgebra isPathAlgebra A
 
+private
+  variable
+    p : Path n
+    i : Node
+    t : ℕ
+    
 ------------------------------------------------------------------------------
 -- Fixed nodes -- nodes that don't change their value after time t
 
@@ -48,11 +57,11 @@ j∈𝓕₁ s = FXᵢᵢ≈FYᵢᵢ (σ s X) X refl
   σ (t + s) X i j        ∎
   where open EqReasoning S
 
-𝓕-alignment : ∀ t {i} → i ∈ᵤ 𝓕 t → ∀ {k l p e⇿p i∉p} →
-                    path (σ t X i j) ≈ₚ valid ((l , k) ∷ p ∣ e⇿p ∣ i∉p) →
-                    i ≡ l × σ t X i j ≈ A i k ▷ σ t X k j ×
-                    path (σ t X k j) ≈ₚ valid p
-𝓕-alignment t {i} i∈Sₜ p[σXᵢⱼ]≈uv∷p
+𝓕-alignment : ∀ t → i ∈ᵤ 𝓕 t → ∀ {k l p e⇿p i∉p} →
+               path (σ t X i j) ≈ₚ valid ((l , k) ∷ p ∣ e⇿p ∣ i∉p) →
+               i ≡ l × σ t X i j ≈ A i k ▷ σ t X k j ×
+               path (σ t X k j) ≈ₚ valid p
+𝓕-alignment {i} t i∈Sₜ p[σXᵢⱼ]≈uv∷p
   with ≈-reflexive (cong (λ t → σ t X i j) (+-comm 1 t))
 ... | σ¹⁺ᵗ≈σᵗ⁺¹ with p[FXᵢⱼ]⇒FXᵢⱼ≈AᵢₖXₖⱼ (σ t X) i j (≈ₚ-trans (path-cong (≈-trans σ¹⁺ᵗ≈σᵗ⁺¹ (i∈Sₜ 1))) p[σXᵢⱼ]≈uv∷p)
 ...   | i≡l , σ¹⁺ᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ , p[σᵗXₖⱼ]≈p = i≡l , ≈-trans (≈-sym (i∈Sₜ 1)) (≈-trans (≈-sym σ¹⁺ᵗ≈σᵗ⁺¹) σ¹⁺ᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ) , p[σᵗXₖⱼ]≈p
@@ -119,36 +128,35 @@ Aligned? t (i , k) = σ t X i j ≟ A i k ▷ σ t X k j
 𝓡? : ∀ t → Decidable (𝓡 t)
 𝓡? t i = allₑ? (Aligned? t) (path (σ t X i j))
 
-𝓡-cong : ∀ {s t k} → k ∈ᵤ 𝓡 s → s ≡ t → k ∈ᵤ 𝓡 t
+𝓡-cong : ∀ {s t} → i ∈ᵤ 𝓡 s → s ≡ t → i ∈ᵤ 𝓡 t
 𝓡-cong k∈Rₛ refl = k∈Rₛ
 
-¬𝓡-cong : ∀ {s t k} → k ∉ᵤ 𝓡 s → s ≡ t → k ∉ᵤ 𝓡 t
+¬𝓡-cong : ∀ {s t} → i ∉ᵤ 𝓡 s → s ≡ t → i ∉ᵤ 𝓡 t
 ¬𝓡-cong k∉Rₛ refl = k∉Rₛ
 
-𝓡-alignment : ∀ t {i} → i ∈ᵤ 𝓡 (suc t) → ∀ {k l p e⇿p i∉p} →
-                 path (σ (suc t) X i j) ≈ₚ valid ((l , k) ∷ p ∣ e⇿p ∣ i∉p) →
-                 i ≡ l × σ (suc t) X i j ≈ A i k ▷ σ (suc t) X k j ×
-                 path (σ (suc t) X k j) ≈ₚ valid p
-𝓡-alignment t {i} i∈R₁₊ₜ {k} p[σ¹⁺ᵗXᵢⱼ]≈uv∷p
+𝓡-alignment : ∀ t {i} .{{_ : NonZero t}} → i ∈ᵤ 𝓡 t → ∀ {k l p e⇿p i∉p} →
+                 path (σ t X i j) ≈ₚ valid ((l , k) ∷ p ∣ e⇿p ∣ i∉p) →
+                 i ≡ l × σ t X i j ≈ A i k ▷ σ t X k j ×
+                 path (σ t X k j) ≈ₚ valid p
+𝓡-alignment t@(suc t-1) {i} i∈R₁₊ₜ {k} p[σ¹⁺ᵗXᵢⱼ]≈uv∷p
   with Allₑ-resp-≈ₚ i∈R₁₊ₜ p[σ¹⁺ᵗXᵢⱼ]≈uv∷p
 ... | valid (σ¹⁺ᵗXᵢⱼ≈Aᵢₖσ¹⁺ᵗXₖⱼ ∷ _)
-    with p[FXᵢⱼ]⇒FXᵢⱼ≈AᵢₖXₖⱼ (σ t X) i j p[σ¹⁺ᵗXᵢⱼ]≈uv∷p
+    with p[FXᵢⱼ]⇒FXᵢⱼ≈AᵢₖXₖⱼ (σ t-1 X) i j p[σ¹⁺ᵗXᵢⱼ]≈uv∷p
 ...   | refl , _ , _
-      with alignPathExtension (σ (suc t) X) i j k
+      with alignPathExtension (σ t X) i j k
         (≈ₚ-trans (path-cong (≈-sym σ¹⁺ᵗXᵢⱼ≈Aᵢₖσ¹⁺ᵗXₖⱼ)) p[σ¹⁺ᵗXᵢⱼ]≈uv∷p)
 ...     | _ , _ , p[σ¹⁺ᵗXₖⱼ]≈p = refl , σ¹⁺ᵗXᵢⱼ≈Aᵢₖσ¹⁺ᵗXₖⱼ , p[σ¹⁺ᵗXₖⱼ]≈p
 
 
-𝓡-path : ∀ {t i p} → path (σ (suc t) X i j) ≈ₚ p →
-        i ∈ᵤ 𝓡 (suc t) → Allᵥ (𝓡 (suc t)) p
-𝓡-path {_} {i} {invalid} _ _ = invalid
-𝓡-path {_} {i} {trivial} _ _ = trivial
-𝓡-path {t} {i} {valid ((_ , k) ∷ p ∣ _ ∣ _)} p[σᵗXᵢⱼ]≈vk∷p i∈R₁₊ₜ
-  with 𝓡-path {t} {k} {valid p} | Allₑ-resp-≈ₚ i∈R₁₊ₜ p[σᵗXᵢⱼ]≈vk∷p
-... | rec | valid (σᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ ∷ pʳ) with 𝓡-alignment t i∈R₁₊ₜ p[σᵗXᵢⱼ]≈vk∷p
-...   | refl , _ , p[σ¹⁺ᵗXₖⱼ]≈p with Allₑ-resp-≈ₚ (valid pʳ) (≈ₚ-sym p[σ¹⁺ᵗXₖⱼ]≈p)
-...     | k∈R₁₊ₜ with rec p[σ¹⁺ᵗXₖⱼ]≈p k∈R₁₊ₜ
-...       | valid allpʳ = valid ([ i∈R₁₊ₜ , k∈R₁₊ₜ ]∷ allpʳ)
+𝓡-path : ∀ t → .{{_ : NonZero t}} → path (σ t X i j) ≈ₚ p → i ∈ᵤ 𝓡 t → Allᵥ (𝓡 t) p
+𝓡-path {i} {invalid} t _ _ = invalid
+𝓡-path {i} {trivial} t _ _ = trivial
+𝓡-path {i} {valid ((_ , k) ∷ p ∣ _ ∣ _)} t p[σᵗXᵢⱼ]≈vk∷p i∈Rₜ
+  with 𝓡-path {k} {valid p} t | Allₑ-resp-≈ₚ i∈Rₜ p[σᵗXᵢⱼ]≈vk∷p
+... | rec | valid (σᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ ∷ pʳ) with 𝓡-alignment t i∈Rₜ p[σᵗXᵢⱼ]≈vk∷p
+...   | refl , _ , p[σᵗXₖⱼ]≈p with Allₑ-resp-≈ₚ (valid pʳ) (≈ₚ-sym p[σᵗXₖⱼ]≈p)
+...     | k∈Rₜ with rec p[σᵗXₖⱼ]≈p k∈Rₜ
+...       | valid allpʳ = valid ([ i∈Rₜ , k∈Rₜ ]∷ allpʳ)
 
 𝓡-∅ : ∀ t i → path (σ t X i j) ≈ₚ invalid → i ∈ᵤ 𝓡 t
 𝓡-∅ _ _ p≡∅ = Allₑ-resp-≈ₚ invalid (≈ₚ-sym p≡∅)
@@ -174,14 +182,23 @@ Aligned? t (i , k) = σ t X i j ≟ A i k ▷ σ t X k j
 ...   | refl , σ¹⁺ᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ , p[σᵗXₖⱼ]≈p =
   k , p , k∉p , e↔p , ≈ₚ-refl , σ¹⁺ᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ , p[σᵗXₖⱼ]≈p
 
-𝓒ₜ⊆𝓡ₜ : ∀ t {i p} → path (σ t X i j) ≈ₚ p → i ∈ᵤ 𝓒 t → i ∈ᵤ 𝓡 t
-𝓒ₜ⊆𝓡ₜ t {i} {invalid} p[σᵗXᵢⱼ]≈∅  _ = 𝓡-∅ t i p[σᵗXᵢⱼ]≈∅
-𝓒ₜ⊆𝓡ₜ t {i} {trivial} p[σᵗXᵢⱼ]≈[] _ = 𝓡-[] t i p[σᵗXᵢⱼ]≈[]
-𝓒ₜ⊆𝓡ₜ t {i} {valid ((_ , k) ∷ p ∣ _ ∣ _)} p[σᵗXᵢⱼ]≈ik∷p (i∈Sₜ , ik∷p∈Fₜ)
-  with 𝓒ₜ⊆𝓡ₜ t {k} {valid p} | 𝓕-alignment t i∈Sₜ p[σᵗXᵢⱼ]≈ik∷p
+𝓒ₜ⊆𝓡ₜ : ∀ t → path (σ t X i j) ≈ₚ p → i ∈ᵤ 𝓒 t → i ∈ᵤ 𝓡 t
+𝓒ₜ⊆𝓡ₜ {i} {invalid} t p[σᵗXᵢⱼ]≈∅  _ = 𝓡-∅ t i p[σᵗXᵢⱼ]≈∅
+𝓒ₜ⊆𝓡ₜ {i} {trivial} t p[σᵗXᵢⱼ]≈[] _ = 𝓡-[] t i p[σᵗXᵢⱼ]≈[]
+𝓒ₜ⊆𝓡ₜ {i} {valid ((_ , k) ∷ p ∣ _ ∣ _)} t p[σᵗXᵢⱼ]≈ik∷p (i∈Sₜ , ik∷p∈Fₜ)
+  with 𝓒ₜ⊆𝓡ₜ {k} {valid p} t | 𝓕-alignment t i∈Sₜ p[σᵗXᵢⱼ]≈ik∷p
 ... | rec | refl , σᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ , p[σᵗXₖⱼ]≈p with 𝓒-path t p[σᵗXᵢⱼ]≈ik∷p (i∈Sₜ , ik∷p∈Fₜ)
 ...   | valid ([ _ , k∈Fₜ ]∷ p∈Fₜ) with Allₑ-resp-≈ₚ (rec p[σᵗXₖⱼ]≈p k∈Fₜ) p[σᵗXₖⱼ]≈p
 ...     | valid pˡ = Allₑ-resp-≈ₚ (valid (σᵗXᵢⱼ≈AᵢₖσᵗXₖⱼ ∷ pˡ)) (≈ₚ-sym p[σᵗXᵢⱼ]≈ik∷p)
 
-¬𝓡⊆¬𝓒 : ∀ {t i} → i ∉ᵤ 𝓡 t → i ∉ᵤ 𝓒 t
-¬𝓡⊆¬𝓒 {t} {i} i∉Rₜ i∈Fₜ = i∉Rₜ (𝓒ₜ⊆𝓡ₜ t ≈ₚ-refl i∈Fₜ)
+¬𝓡⊆¬𝓒 : i ∉ᵤ 𝓡 t → i ∉ᵤ 𝓒 t
+¬𝓡⊆¬𝓒 {t = t} i∉Rₜ i∈Fₜ = i∉Rₜ (𝓒ₜ⊆𝓡ₜ t ≈ₚ-refl i∈Fₜ)
+
+
+
+record ProvablyConvergedSubset (t : 𝕋) : Set ℓ where
+  field
+    C         : Subset (suc n-1)
+    j∈C       : j ∈ C
+    C-nonFull : Nonfull C
+    C⊆𝓒ₜ      : ∀ {i} → i ∈ C → i ∈ᵤ 𝓒 t

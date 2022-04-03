@@ -124,7 +124,7 @@ increasing+distrib⇒n-convergence isIncreasing distrib X Xᶜ t i j = proj₁ (
   ∈𝓚 s i = σ-pres-𝑪ₘ (proj₁ Xᶜ) s i j ,
            σ-pres-⇨[]⇨ X (λ k l → proj₁ (proj₂ Xᶜ k l)) s i j ,
            σ-pres-p[X]ᵢᵢ≈[] X (λ {k} {l} → proj₂ (proj₂ Xᶜ k l)) s
-   
+
   P : ℕ → Pred (Fin n) _
   P zero    i = ⊥ᵤ
   P (suc t) i = i ∈ᵤ 𝓒 t × i ∈ᵤ 𝓖 t

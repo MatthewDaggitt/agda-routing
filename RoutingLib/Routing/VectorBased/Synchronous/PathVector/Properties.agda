@@ -12,7 +12,7 @@ import Data.List.Relation.Unary.All.Properties as All
 open import Data.List.Properties
 open import Data.List.Relation.Binary.Pointwise as Pointwise
   using (Pointwise; []; _∷_)
-open import Data.Nat using (NonZero; suc; _<_)
+open import Data.Nat using (NonZero; zero; suc; _<_)
 open import Data.Nat.Induction using (Acc; acc; <-wellFounded)
 open import Data.Nat.Properties
   using (≤-reflexive; <-trans; module ≤-Reasoning)
@@ -31,7 +31,7 @@ open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Basics.Network using (AdjacencyMatrix)
 open import RoutingLib.Routing.Basics.Path.CertifiedI
 open import RoutingLib.Routing.Basics.Path.CertifiedI.Properties
-  using (∉ₚ-resp-≈ₚ; ≈ₚ-trans; ≈ₚ-sym; ≈ₚ-reflexive; ℙₛ; _∉ᵥₚ?_; _⇿ᵥ?_)
+  using (∉ₚ-resp-≈ₚ; ≈ₚ-trans; ≈ₚ-sym; ≈ₚ-reflexive; ℙₛ; _∉ᵥₚ?_; _⇿ᵥ?_; ⇨[]⇨-resp-≈ₚ)
 import RoutingLib.Routing.VectorBased.Synchronous as VectorBased
 
 module RoutingLib.Routing.VectorBased.Synchronous.PathVector.Properties
@@ -71,60 +71,76 @@ abstract
   ... | yes refl = ∉ₚ-resp-≈ₚ (≈ₚ-sym p[0]≈[]) (valid notThere)
   ... | no  j≢i  = ∉ₚ-resp-≈ₚ (≈ₚ-sym p[∞]≈∅) invalid
 
-  p[FXᵢᵢ]≈[] : ∀ X i → path (F X i i) ≈ₚ valid []
+  p[FXᵢᵢ]≈[] : ∀ X i → path (F X i i) ≈ₚ trivial
   p[FXᵢᵢ]≈[] X i = ≈ₚ-trans (path-cong (FXᵢᵢ≈Iᵢᵢ X i)) (p[Iᵢᵢ]≈[] i)
 
-  p[FXᵢⱼ]≈[]⇒i≡j : ∀ X i j → path (F X i j) ≈ₚ valid [] → i ≡ j
+  i≡j⇨p[FXᵢⱼ]≈[] : ∀ X {i j} → i ≡ j → path (F X i j) ≈ₚ trivial
+  i≡j⇨p[FXᵢⱼ]≈[] X {i} refl = p[FXᵢᵢ]≈[] X i
+  
+  p[FXᵢⱼ]≈[]⇒i≡j : ∀ X i j → path (F X i j) ≈ₚ trivial → i ≡ j
   p[FXᵢⱼ]≈[]⇒i≡j X i j p[FXᵢⱼ]≈[] with FXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
   ... | inj₂ FXᵢⱼ≈Iᵢⱼ          = p[Iᵢⱼ]≈[]⇒i≡j (≈ₚ-trans (path-cong (≈-sym FXᵢⱼ≈Iᵢⱼ)) p[FXᵢⱼ]≈[])
-  ... | inj₁ (k , FXᵢⱼ≈AᵢₖXₖⱼ) with A i k ▷ X k j ≟ ∞#
-  ...   | yes AᵢₖXₖⱼ≈∞ = contradiction
-    (≈ₚ-trans (≈ₚ-trans (≈ₚ-sym (r≈∞⇒path[r]≈∅ AᵢₖXₖⱼ≈∞)) (path-cong (≈-sym FXᵢⱼ≈AᵢₖXₖⱼ))) p[FXᵢⱼ]≈[]) λ()
-  ...   | no  AᵢₖXₖⱼ≉∞ with path (X k j) | inspect path (X k j)
-  ...       | invalid | [ p[Xₖⱼ]≡∅ ] = contradiction (p[r]≡∅⇒f▷r≈∞ (A i k) p[Xₖⱼ]≡∅) AᵢₖXₖⱼ≉∞
-  ...       | valid q | [ p[Xₖⱼ]≡q ] with ≈ₚ-reflexive p[Xₖⱼ]≡q | (i , k) ⇿ᵥ? q | i ∉ᵥₚ? q
-  ...         | pᵣ≈q | no ¬ik⇿q | _       = contradiction (path-reject (A i k) pᵣ≈q (inj₁ ¬ik⇿q)) AᵢₖXₖⱼ≉∞
-  ...         | pᵣ≈q | _        | no  i∈q = contradiction (path-reject (A i k) pᵣ≈q (inj₂ i∈q))   AᵢₖXₖⱼ≉∞
-  ...         | pᵣ≈q | yes ik⇿q | yes i∉q = contradiction (begin
-    valid (_ ∷ q ∣ _ ∣ _) ≈⟨ ≈ₚ-sym (path-accept (A i k) pᵣ≈q AᵢₖXₖⱼ≉∞ ik⇿q i∉q) ⟩
-    path (A i k ▷ X k j)  ≈⟨ ≈ₚ-sym (path-cong FXᵢⱼ≈AᵢₖXₖⱼ) ⟩
-    path (F X i j)        ≈⟨ p[FXᵢⱼ]≈[] ⟩
-    valid []              ∎) λ {(valid ())}
-    where open SetoidReasoning (ℙₛ n)
+  ... | inj₁ (k , FXᵢⱼ≈AᵢₖXₖⱼ) = contradiction
+    (≈ₚ-trans (≈ₚ-sym (path-cong FXᵢⱼ≈AᵢₖXₖⱼ)) p[FXᵢⱼ]≈[])
+    (p[f▷x]≉[] (A i k) (X k j))
 
-  p[σᵗXᵢⱼ]≈[]⇒i≡j : ∀ X t → .{{NonZero t}} → ∀ i j → path (σ t X i j) ≈ₚ valid [] → i ≡ j
+  p[σᵗXᵢⱼ]≈[]⇒i≡j : ∀ X t → .{{NonZero t}} → ∀ i j → path (σ t X i j) ≈ₚ trivial → i ≡ j
   p[σᵗXᵢⱼ]≈[]⇒i≡j X (suc t) = p[FXᵢⱼ]≈[]⇒i≡j (σ t X)
   
-  alignPathExtension : ∀ (X : RoutingMatrix) i j k {u v p e⇿p i∉p} →
-            path (A i k ▷ X k j) ≈ₚ valid ((u , v) ∷ p ∣ e⇿p ∣ i∉p) →
-            i ≡ u × k ≡ v × path (X k j) ≈ₚ valid p
-  alignPathExtension X i j k p[AᵢₖXₖⱼ]≈uv∷p with A i k ▷ X k j ≟ ∞#
-  ...     | yes AᵢₖXₖⱼ≈∞ = contradiction (
-    ≈ₚ-trans (≈ₚ-sym p[AᵢₖXₖⱼ]≈uv∷p) (
-      ≈ₚ-trans (path-cong AᵢₖXₖⱼ≈∞) p[∞]≈∅)) λ()
-  ...     | no  AᵢₖXₖⱼ≉∞ with path (X k j) | inspect path (X k j)
-  ...       | invalid | [ p[Xₖⱼ]≡∅ ] = contradiction (p[r]≡∅⇒f▷r≈∞ (A i k) p[Xₖⱼ]≡∅) AᵢₖXₖⱼ≉∞
-  ...       | valid q | [ p[Xₖⱼ]≡q ] with ≈ₚ-reflexive p[Xₖⱼ]≡q | (i , k) ⇿ᵥ? q | i ∉ᵥₚ? q
-  ...         | pᵣ≈q | no ¬ik⇿q | _       = contradiction (path-reject (A i k) pᵣ≈q (inj₁ ¬ik⇿q)) AᵢₖXₖⱼ≉∞
-  ...         | pᵣ≈q | _        | no  i∈q = contradiction (path-reject (A i k) pᵣ≈q (inj₂ i∈q))   AᵢₖXₖⱼ≉∞
-  ...         | pᵣ≈q | yes ik⇿q | yes i∉q with
-    ≈ₚ-trans (≈ₚ-sym p[AᵢₖXₖⱼ]≈uv∷p)
-      (path-accept (A i k) pᵣ≈q AᵢₖXₖⱼ≉∞ ik⇿q i∉q)
-  ...           | valid (refl ∷ p≈q) = refl , refl , ≈ₚ-sym (valid p≈q)
-
+  p[σᵗXᵢⱼ]≈[]⇒σᵗXᵢⱼ≈0# : ∀ t .{{_ : NonZero t}} → ∀ X i j → path (σ t X i j) ≈ₚ trivial → σ t X i j ≈ 0#
+  p[σᵗXᵢⱼ]≈[]⇒σᵗXᵢⱼ≈0# t@(suc _) X i j p≈[] rewrite p[σᵗXᵢⱼ]≈[]⇒i≡j X t i j p≈[] = σᵗXᵢᵢ≈0# t X j
+  
   p[FXᵢⱼ]⇒FXᵢⱼ≈AᵢₖXₖⱼ : ∀ X i j {k l p e⇿p i∉p} →
-              path (F X i j) ≈ₚ valid ((l , k) ∷ p ∣ e⇿p ∣ i∉p) →
-              i ≡ l × F X i j ≈ A i k ▷ X k j × path (X k j) ≈ₚ valid p
+                        path (F X i j) ≈ₚ valid ((l , k) ∷ p ∣ e⇿p ∣ i∉p) →
+                        i ≡ l × F X i j ≈ A i k ▷ X k j × path (X k j) ≈ₚ valid p
   p[FXᵢⱼ]⇒FXᵢⱼ≈AᵢₖXₖⱼ X i j p[FXᵢⱼ]≈uv∷p with i ≟𝔽 j
   ... | yes refl = contradiction (≈ₚ-trans (≈ₚ-sym p[FXᵢⱼ]≈uv∷p) (p[FXᵢᵢ]≈[] X j)) λ{(valid ())}
   ... | no  i≢j with FXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
   ...   | inj₂ FXᵢⱼ≈Iᵢⱼ           = contradiction (
     ≈ₚ-trans (≈ₚ-sym p[FXᵢⱼ]≈uv∷p) (
       ≈ₚ-trans (path-cong FXᵢⱼ≈Iᵢⱼ) (p[Iᵢⱼ]≈∅ (i≢j ∘ sym)))) λ()
-  ...   | inj₁ (m , FXᵢⱼ≈AᵢₘXₘⱼ) with alignPathExtension X i j m
+  ...   | inj₁ (m , FXᵢⱼ≈AᵢₘXₘⱼ) with ▷-alignment (A i m) (X m j)
     (≈ₚ-trans (≈ₚ-sym (path-cong FXᵢⱼ≈AᵢₘXₘⱼ)) p[FXᵢⱼ]≈uv∷p)
   ...     | refl , refl , p[Xₖⱼ]≈p = refl , FXᵢⱼ≈AᵢₘXₘⱼ , p[Xₖⱼ]≈p
 
+------------------------------------------------------------------------------
+-- Path end-points
+
+  p[σᵗXᵢⱼ]≈∅⇒i⇨[p[σᵗXᵢⱼ]]⇨j : ∀ X t i j → path (σ t X i j) ≈ₚ invalid →
+                               i ⇨[ path (σ t X i j) ]⇨ j 
+  p[σᵗXᵢⱼ]≈∅⇒i⇨[p[σᵗXᵢⱼ]]⇨j X t i j p≈∅ = ⇨[]⇨-resp-≈ₚ (≈ₚ-sym p≈∅) invalid
+  
+  p[σᵗXᵢⱼ]≈[]⇒i⇨[p[σᵗXᵢⱼ]]⇨j : ∀ X t .{{_ : NonZero t}} i j → path (σ t X i j) ≈ₚ trivial →
+                               i ⇨[ path (σ t X i j) ]⇨ j 
+  p[σᵗXᵢⱼ]≈[]⇒i⇨[p[σᵗXᵢⱼ]]⇨j X t i j p≈[] = ⇨[]⇨-resp-≈ₚ (≈ₚ-sym p≈[]) (subst (i ⇨[ trivial ]⇨_) i≡j (valid ⇨[]⇨))
+    where
+    i≡j : i ≡ j
+    i≡j = p[σᵗXᵢⱼ]≈[]⇒i≡j X t i j p≈[]
+
+  i⇨p[Iᵢⱼ]⇨j : ∀ i j → i ⇨[ path (I i j) ]⇨ j
+  i⇨p[Iᵢⱼ]⇨j i j with j ≟𝔽 i
+  ... | yes refl = ⇨[0]⇨ i
+  ... | no  _    = ⇨[∞]⇨ i j
+
+  F-pres-⇨[]⇨ : ∀ X →
+                (∀ i j → i ⇨[ path (X i j) ]⇨ j) →
+                (∀ i j → i ⇨[ path (F X i j) ]⇨ j)
+  F-pres-⇨[]⇨ X i⇨X⇨j i j with FXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i j
+  ... | inj₂ FXᵢⱼ≈Iᵢⱼ          = ⇨[]⇨-resp-≈ₚ (path-cong (≈-sym FXᵢⱼ≈Iᵢⱼ))    (i⇨p[Iᵢⱼ]⇨j i j)
+  ... | inj₁ (k , FXᵢⱼ≈AᵢₖXₖⱼ) = ⇨[]⇨-resp-≈ₚ (path-cong (≈-sym FXᵢⱼ≈AᵢₖXₖⱼ)) (▷-pres-⇨[]⇨ (A i k) (X k j) (i⇨X⇨j k j))
+
+  σ-pres-⇨[]⇨ : ∀ X →
+                (∀ i j → i ⇨[ path (X i j) ]⇨ j) →
+                ∀ t i j → i ⇨[ path (σ t X i j) ]⇨ j
+  σ-pres-⇨[]⇨ X i⇨X⇨j zero    = i⇨X⇨j
+  σ-pres-⇨[]⇨ X i⇨X⇨j (suc t) = F-pres-⇨[]⇨ (σ t X) (σ-pres-⇨[]⇨ X i⇨X⇨j t)
+
+  σ-pres-p[X]ᵢᵢ≈[] : ∀ X →
+                     (∀ {i j} → i ≡ j → path (X i j) ≈ₚ trivial) →
+                     ∀ t {i j} → i ≡ j → path (σ t X i j) ≈ₚ trivial
+  σ-pres-p[X]ᵢᵢ≈[] X i≡j⇨p[Xᵢⱼ]≈[] zero    = i≡j⇨p[Xᵢⱼ]≈[]
+  σ-pres-p[X]ᵢᵢ≈[] X i≡j⇨p[Xᵢⱼ]≈[] (suc t) = i≡j⇨p[FXᵢⱼ]≈[] (σ t X)
+  
 ------------------------------------------------------------------------------
 -- Consistency
 
@@ -187,8 +203,17 @@ abstract
   ... | no  FXⁱ with 𝑰ₘ-witness FXⁱ
   ...   | i , j , FXᵢⱼⁱ with FXᵢⱼⁱ⇒Xₖⱼⁱ≉FXₖⱼ X _ _ FXᵢⱼⁱ
   ...     | k , Xₖⱼ≉FXₖⱼ , _ = contradiction (≈-sym (FX≈X k j)) Xₖⱼ≉FXₖⱼ
+  
+  p[σᵗXᵢⱼ]≈[]⇒σᵗXᵢⱼᶜ : ∀ t .{{_ : NonZero t}} → ∀ X i j → path (σ t X i j) ≈ₚ trivial → 𝑪 (σ t X i j)
+  p[σᵗXᵢⱼ]≈[]⇒σᵗXᵢⱼᶜ t X i j p≈[] = 𝑪-cong (≈-sym (p[σᵗXᵢⱼ]≈[]⇒σᵗXᵢⱼ≈0# t X i j p≈[])) 0ᶜ
+    
+  p[σᵗXᵢⱼ]≈∅⇒σᵗXᵢⱼᶜ : ∀ t X i j → path (σ t X i j) ≈ₚ invalid → 𝑪 (σ t X i j)
+  p[σᵗXᵢⱼ]≈∅⇒σᵗXᵢⱼᶜ t X i j p≈∅ = 𝑪-cong (≈-sym (path[r]≈∅⇒r≈∞ p≈∅)) ∞ᶜ
 
-
+  σ-pres-𝑪ₘ : ∀ {X} → 𝑪ₘ X → ∀ t → 𝑪ₘ (σ t X)
+  σ-pres-𝑪ₘ Xᶜ zero    = Xᶜ
+  σ-pres-𝑪ₘ Xᶜ (suc t) = F-pres-𝑪ₘ (σ-pres-𝑪ₘ Xᶜ t)
+  
 ------------------------------------------------------------------------------
 -- Consistent algebra properties
 
@@ -234,3 +259,9 @@ F-toCMatrix-commute {X} Xᶜ FXᶜ i j =
 
 F-toCMatrix-commute′ : ∀ {X} (Xᶜ : 𝑪ₘ X) → toCMatrix (F-pres-𝑪ₘ Xᶜ) ≈ᶜₘ Fᶜ (toCMatrix Xᶜ)
 F-toCMatrix-commute′ Xᶜ = F-toCMatrix-commute Xᶜ (F-pres-𝑪ₘ Xᶜ)
+
+------------------------------------------------------------------------------
+-- Souped up consistency
+
+𝑪ₘ′ : RoutingMatrix → Set _
+𝑪ₘ′ X = 𝑪ₘ X × ∀ i j → i ⇨[ path (X i j) ]⇨ j × (i ≡ j → path (X i j) ≈ₚ trivial)

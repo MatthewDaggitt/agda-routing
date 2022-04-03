@@ -19,22 +19,29 @@ import RoutingLib.Routing.Basics.Path.Certified.Properties as CertifiedPropertie
 
 module RoutingLib.Routing.Basics.Path.CertifiedI.Properties where
 
+private
+  variable
+    n : ℕ
+    i j : Fin n
+    p q : Path n
+
 open CertifiedProperties public
   using ()
   renaming
-  ( _⇿?_        to _⇿ᵥ?_
-  ; _∉ₚ?_       to _∉ᵥₚ?_
-  ; ⇿-resp-≈ₚ   to ⇿ᵥ-resp-≈ᵥₚ
-  ; ∉ₚ-resp-≈ₚ  to ∉ᵥₚ-resp-≈ᵥₚ
-  ; p≉i∷p       to p≉ᵛi∷p
-  ; ≈ₚ-refl     to ≈ₚᵛ-refl
-  ; ≈ₚ-sym      to ≈ₚᵛ-sym
-  ; ≈ₚ-trans    to ≈ₚᵛ-trans
-  ; _≟ₚ_        to _≟ₚᵛ_
-  ; ℙₛ          to ℙᵛₛ
-  ; length-cong to lengthᵛ-cong
-  ; |p|<n       to |pᵛ|<n
-  ; |p|≤n       to |pᵛ|≤n
+  ( _⇿?_         to _⇿ᵥ?_
+  ; _∉ₚ?_        to _∉ᵥₚ?_
+  ; ⇿-resp-≈ₚ    to ⇿ᵥ-resp-≈ᵥₚ
+  ; ∉ₚ-resp-≈ₚ   to ∉ᵥₚ-resp-≈ᵥₚ
+  ; p≉i∷p        to p≉ᵛi∷p
+  ; ≈ₚ-refl      to ≈ₚᵛ-refl
+  ; ≈ₚ-sym       to ≈ₚᵛ-sym
+  ; ≈ₚ-trans     to ≈ₚᵛ-trans
+  ; _≟ₚ_         to _≟ₚᵛ_
+  ; ℙₛ           to ℙᵛₛ
+  ; length-cong  to lengthᵛ-cong
+  ; |p|<n        to |pᵛ|<n
+  ; |p|≤n        to |pᵛ|≤n
+  ; ⇨[]⇨-resp-≈ₚ to ⇨[]⇨-resp-≈ᵥₚ
   )
 
 ----------------------------------------------------------------------------
@@ -42,54 +49,46 @@ open CertifiedProperties public
 
 infix 4 _⇿?_
 
-_⇿?_ : ∀ {n} → Decidable (_⇿_ {n})
+_⇿?_ : Decidable {A = Edge n} _⇿_
 e ⇿? p = Any.dec (e ⇿ᵥ?_) p
 
-⇿-resp-≈ₚ : ∀ {n} {e : Edge n} → (e ⇿_) Respects _≈ₚ_
+⇿-resp-≈ₚ : ∀ {e : Edge n} → (e ⇿_) Respects _≈ₚ_
 ⇿-resp-≈ₚ invalid     e⇿p         = e⇿p
 ⇿-resp-≈ₚ (valid p≈q) (valid e⇿p) = valid (⇿ᵥ-resp-≈ᵥₚ p≈q e⇿p)
 
 ----------------------------------------------------------------------------
 -- Membership
 
-_∉ₚ?_ : ∀ {n} → Decidable (_∉ₚ_ {n})
+_∉ₚ?_ : Decidable {A = Fin n} _∉ₚ_
 k ∉ₚ? p = All.dec (k ∉ᵥₚ?_) p
 
-∉ₚ-resp-≈ₚ : ∀ {n} {k : Fin n} → (k ∉ₚ_) Respects _≈ₚ_
+∉ₚ-resp-≈ₚ : (i ∉ₚ_) Respects _≈ₚ_
 ∉ₚ-resp-≈ₚ invalid     invalid     = invalid
-∉ₚ-resp-≈ₚ (valid p≈q) (valid k∉p) = valid (∉ᵥₚ-resp-≈ᵥₚ p≈q k∉p)
-
-{-
-∈-resp-≈ₚ : ∀ {k : Fin n} → (k ∈_) Respects _≈ₚ_
-∈-resp-≈ₚ x≈y k∈x k∉y = k∈x (∉-resp-≈ₚ {!≈ₚ-sym ?!} k∉y)
--}
+∉ₚ-resp-≈ₚ (valid p≈q) (valid i∉p) = valid (∉ᵥₚ-resp-≈ᵥₚ p≈q i∉p)
 
 ----------------------------------------------------------------------------
 -- Equality
 
-module _ {n : ℕ} where
+valid-injective : ∀ {p q : Pathᵛ n} → valid p ≈ₚ valid q → p ≈ᵥₚ q
+valid-injective (valid p≈q) = p≈q
 
-  valid-injective : ∀ {p q : Pathᵛ n} → valid p ≈ₚ valid q → p ≈ᵥₚ q
-  valid-injective (valid p≈q) = p≈q
+p≉i∷p : ∀ {e} {p : Pathᵛ n} {e⇿p e∉p} → valid p ≉ₚ valid (e ∷ p ∣ e⇿p ∣ e∉p)
+p≉i∷p (valid v) = p≉ᵛi∷p v
 
+≈ₚ-refl : Reflexive (_≈ₚ_ {n})
+≈ₚ-refl = Pointwise.refl ≈ₚᵛ-refl
 
-  p≉i∷p : ∀ {e} {p : Pathᵛ n} {e⇿p e∉p} → valid p ≉ₚ valid (e ∷ p ∣ e⇿p ∣ e∉p)
-  p≉i∷p (valid v) = p≉ᵛi∷p v
+≈ₚ-reflexive : _≡_ ⇒ (_≈ₚ_ {n})
+≈ₚ-reflexive refl = ≈ₚ-refl
 
-  ≈ₚ-refl : Reflexive (_≈ₚ_ {n})
-  ≈ₚ-refl = Pointwise.refl ≈ₚᵛ-refl
+≈ₚ-sym : Symmetric (_≈ₚ_ {n})
+≈ₚ-sym = Pointwise.sym ≈ₚᵛ-sym
 
-  ≈ₚ-reflexive : _≡_ ⇒ (_≈ₚ_ {n})
-  ≈ₚ-reflexive refl = ≈ₚ-refl
+≈ₚ-trans : Transitive (_≈ₚ_ {n})
+≈ₚ-trans = Pointwise.trans ≈ₚᵛ-trans
 
-  ≈ₚ-sym : Symmetric (_≈ₚ_ {n})
-  ≈ₚ-sym = Pointwise.sym ≈ₚᵛ-sym
-
-  ≈ₚ-trans : Transitive (_≈ₚ_ {n})
-  ≈ₚ-trans = Pointwise.trans ≈ₚᵛ-trans
-
-  _≟ₚ_ : Decidable (_≈ₚ_ {n})
-  _≟ₚ_ = Pointwise.dec _≟ₚᵛ_
+_≟ₚ_ : Decidable (_≈ₚ_ {n})
+_≟ₚ_ = Pointwise.dec _≟ₚᵛ_
 
 module _ (n : ℕ) where
 
@@ -116,19 +115,25 @@ module _ (n : ℕ) where
     { isDecEquivalence = ≈ₚ-isDecEquivalence
     }
 
+----------------------------------------------------------------------------
+-- _⇨[_]⇨_
+
+⇨[]⇨-resp-≈ₚ : p ≈ₚ q → i ⇨[ p ]⇨ j → i ⇨[ q ]⇨ j
+⇨[]⇨-resp-≈ₚ (valid p≈q) (valid x) = valid ( ⇨[]⇨-resp-≈ᵥₚ p≈q x)
+⇨[]⇨-resp-≈ₚ invalid     invalid   = invalid
 
 ----------------------------------------------------------------------------
 -- Length
 
-|p|<n : ∀ {n} (p : Path (suc n)) → length p <ℕ suc n
+|p|<n : ∀ (p : Path (suc n)) → length p <ℕ suc n
 |p|<n invalid                     = s≤s z≤n
 |p|<n trivial                     = s≤s z≤n
 |p|<n (valid (e ∷ p ∣ e⇿p ∣ e∉p)) = |pᵛ|<n (nonEmpty e p e⇿p e∉p)
 
-|p|≤n : ∀ {n} (p : Path n) → length p ≤ℕ n
+|p|≤n : ∀ (p : Path n) → length p ≤ℕ n
 |p|≤n invalid   = z≤n
 |p|≤n (valid p) = |pᵛ|≤n p
 
-length-cong : ∀ {n} {p q : Path n} → p ≈ₚ q → length p ≡ length q
+length-cong : p ≈ₚ q → length p ≡ length q
 length-cong invalid     = refl
 length-cong (valid p≈q) = lengthᵛ-cong p≈q

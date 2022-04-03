@@ -81,11 +81,6 @@ module _ (isRoutingAlgebra : IsRoutingAlgebra algebra) where
   open import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra isRoutingAlgebra
   open import Relation.Binary.Reasoning.PartialOrder ≤₊-poset
   open import RoutingLib.Routing.Algebra.Consequences isRoutingAlgebra
-{-
-Cyclic? : Decidable Cyclic
-Cyclic? A (⟦ _ ∣ X ⟧) = all? (λ i → X (i -ₘ 1) ⊴? (X i))
-  where open AdjacencyMatrixRelations algebra A
--}
 
 --------------------------------------------------------------------------------
 -- Relationship between increasing algebras and cycle-free topologies

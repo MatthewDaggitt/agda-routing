@@ -5,8 +5,8 @@ open import Data.Fin.Properties using (¬∀⟶∃¬)
 open import Data.Fin.Subset
 open import Data.Fin.Subset.Properties
 open import Data.Bool using (_≟_)
-open import Data.Product using (∃; _,_; proj₂)
-open import Data.Sum using ([_,_]′)
+open import Data.Product using (∃; _,_; _×_; proj₂)
+open import Data.Sum using ([_,_]′; inj₁; inj₂)
 open import Data.Vec using ([]; _∷_; here; there; count)
 open import Function using (_∘_)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; cong; subst; sym; module ≡-Reasoning)
@@ -58,6 +58,10 @@ p∩∁p≡⊥ []            = refl
 p∩∁p≡⊥ (outside ∷ p) = cong (outside ∷_) (p∩∁p≡⊥ p)
 p∩∁p≡⊥ (inside  ∷ p) = cong (outside ∷_) (p∩∁p≡⊥ p)
 
+∁⊤≡⊥ : ∀ {n} → ∁ ⊤ ≡ ⊥ {n}
+∁⊤≡⊥ {zero}  = refl
+∁⊤≡⊥ {suc n} = cong (_ ∷_) ∁⊤≡⊥
+
 ------------------------------------------------------------------------
 -- Membership
 
@@ -69,6 +73,9 @@ p∩∁p≡⊥ (inside  ∷ p) = cong (outside ∷_) (p∩∁p≡⊥ p)
 
 x∉p∪q⁺ :  x ∉ p → x ∉ q → x ∉ p ∪ q
 x∉p∪q⁺ x∉p x∉q = [ x∉p , x∉q ]′ ∘ x∈p∪q⁻ _ _
+
+x∉p∪q⁻ :  ∀ x (p q : Subset n) → x ∉ p ∪ q → x ∉ p × x ∉ q
+x∉p∪q⁻ _ _ _ x∉p∪q = x∉p∪q ∘ x∈p∪q⁺ ∘ inj₁ , x∉p∪q ∘ x∈p∪q⁺ ∘ inj₂
 
 ∣p∪⁅i⁆∣≡1+∣p∣ : ∀ {i : Fin n} → i ∉ p → ∣ p ∪ ⁅ i ⁆ ∣ ≡ suc ∣ p ∣
 ∣p∪⁅i⁆∣≡1+∣p∣ {_} {outside ∷ p} {zero}  i∉p = cong (suc ∘ ∣_∣) (∪-identityʳ p)

@@ -16,7 +16,7 @@ open import Relation.Nullary using (yes; no; ¬_)
 open import Relation.Binary using (DecTotalOrder; StrictTotalOrder; Maximum; Minimum)
 import Relation.Binary.Construct.Converse as Converse
 import Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
-import Relation.Binary.Reasoning.Setoid as EqReasoning
+import Relation.Binary.Reasoning.Setoid as SetoidReasoning
 
 open import RoutingLib.Relation.Binary
 import RoutingLib.Relation.Binary.Construct.NonStrictToStrict as NSTS
@@ -34,6 +34,7 @@ open IsRoutingAlgebra isRoutingAlgebra
 
 open import Algebra.Definitions _≈_
 open import Algebra.Structures _≈_
+open SetoidReasoning S
 
 ------------------------------------------------------------------------------
 -- _⊕_
@@ -99,6 +100,13 @@ open import Algebra.Structures _≈_
 
 <₊-maximum : StrictMaximum _≈_ _<₊_ ∞#
 <₊-maximum = NSTS.<-max _≈_ _≤₊_ ≤₊-maximum
+
+distrib⇒▷-mono-≤ : IsDistributive algebra →
+                   ∀ {n} {i j : Fin n} (f : Step i j) {x y} → x ≤₊ y → f ▷ x ≤₊ f ▷ y
+distrib⇒▷-mono-≤ distrib f {x} {y} x≤y = begin
+  f ▷ x             ≈⟨ ▷-cong f x≤y ⟩
+  f ▷ (y ⊕ x)       ≈⟨ distrib f y x ⟩
+  (f ▷ y) ⊕ (f ▷ x) ∎
 
 open DecTotalOrder ≤₊-decTotalOrder public
   using ()

@@ -3,7 +3,7 @@ open import Data.Nat using (ℕ; suc; z≤n; s≤s; _<_)
 open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Basics.Network using (AdjacencyMatrix)
 
-module RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Prelude
+module RoutingLib.Routing.VectorBased.Synchronous.PathVector.Convergence.Prelude
   {a b ℓ n-1} {algebra : RawRoutingAlgebra a b ℓ}
   (isRoutingAlgebra : IsRoutingAlgebra algebra)
   (isPathAlgebra : IsCertifiedPathAlgebra algebra (suc n-1))

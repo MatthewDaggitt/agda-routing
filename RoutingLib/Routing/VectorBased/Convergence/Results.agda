@@ -5,7 +5,7 @@
 -- routing protocols.
 --------------------------------------------------------------------------------
 
-open import Data.Nat using (zero; suc; s≤s; z≤n; _^_)
+open import Data.Nat using (ℕ; zero; suc; s≤s; z≤n; _^_)
 open import Level using (Level)
 
 open import RoutingLib.Iteration.Asynchronous.Dynamic.Convergence
@@ -16,9 +16,10 @@ open import RoutingLib.Routing.Algebra
 open import RoutingLib.Routing.Algebra.Certification
 open import RoutingLib.Routing.Algebra.Properties.PathAlgebra
 open import RoutingLib.Routing.Algebra.Simulation using (_Simulates_)
-import RoutingLib.Routing.VectorBased.Convergence.Simulation as Simulation
 import RoutingLib.Routing.VectorBased.Asynchronous.Convergence.Proof as Convergence
-open import RoutingLib.Routing.VectorBased.Synchronous.PathVector.RateOfConvergence.Step6_Proof
+import RoutingLib.Routing.VectorBased.Convergence.Simulation as Simulation
+import RoutingLib.Routing.VectorBased.Synchronous.PathVector.Properties as PathVectorProperties
+open import RoutingLib.Routing.VectorBased.Synchronous.PathVector.Convergence.Step6_Proof
 
 module RoutingLib.Routing.VectorBased.Convergence.Results where
 
@@ -73,31 +74,40 @@ finite+strictlyIncr⇒convergent routingAlg finite strIncr N = completeConvergen
 --------------------------------------------------------------------------------
 -- Path vector protocols
 
--- For any path algebra the asynchronous iteration δ is always guaranteed
--- to converge over any free network.
+module _ (isRoutingAlgebra : IsRoutingAlgebra A)
+         (isPathAlgebra : IsPathAlgebra A)
+         where
 
-paths⇒convergentOverFreeNetworks : IsRoutingAlgebra A →
-                                   IsPathAlgebra A →  
-                                   PartiallyConvergent A (TopologyIsFree A)
-paths⇒convergentOverFreeNetworks = Convergence.paths⇒convergentOverFreeNetworks
+  private
+    isCertifiedPathAlgebra = certifiedPathAlgebra isPathAlgebra
+    module _ {n : ℕ} where
+      open PathVectorProperties isRoutingAlgebra (isCertifiedPathAlgebra n) public
+        renaming (𝑪ₘ′ to Consistent)
+    
+  -- For any path algebra the asynchronous iteration δ is always guaranteed
+  -- to converge over any free network.
+  paths⇒convergentOverFreeNetworks : PartiallyConvergent A (TopologyIsFree A)
+  paths⇒convergentOverFreeNetworks =
+    Convergence.paths⇒convergentOverFreeNetworks isRoutingAlgebra isPathAlgebra
 
--- If the path algebra is increasing (or equivalently strictly increasing) then
--- the asynchronous iteration δ is guaranteed to converge over any network.
+  -- If the path algebra is increasing (or equivalently strictly increasing) then
+  -- the asynchronous iteration δ is guaranteed to converge over any network.
+  incrPaths⇒convergent : IsIncreasing A → Convergent A
+  incrPaths⇒convergent incr N = completeConvergence
+    (paths⇒convergentOverFreeNetworks N) _
+    (strIncr⇒alwaysFree _ isRoutingAlgebra (incr⇒strIncr isRoutingAlgebra isPathAlgebra incr) N)
 
-incrPaths⇒convergent : IsRoutingAlgebra A →
-                       IsPathAlgebra A →
-                       IsIncreasing A →
-                       Convergent A
-incrPaths⇒convergent routingAlg pathAlg incr N = completeConvergence
-  (paths⇒convergentOverFreeNetworks routingAlg pathAlg N) _
-  (strIncr⇒alwaysFree _ routingAlg (incr⇒strIncr routingAlg pathAlg incr) N)
+  -- If the path algebra is increasing then the synchronous iteration σ
+  -- is guaranteed to converge in n² steps over any adjacency matrix.
+  incrPaths⇒syncConvergesIn-n² : IsIncreasing A → SynchronouslyConvergesIn A (λ n → n ^ 2)
+  incrPaths⇒syncConvergesIn-n² incr n@{suc _} =
+    λ A → increasing⇒n²-convergence isRoutingAlgebra (isCertifiedPathAlgebra n) A incr
 
--- If the path algebra is increasing then the synchronous iteration σ
--- is guaranteed to converge in n² steps over any adjacency matrix.
-
-incrPaths⇒syncConvergesIn-n² : IsRoutingAlgebra A →
-                               IsPathAlgebra A →
-                               IsIncreasing A →
-                               SynchronouslyConvergesIn A (λ n → n ^ 2)
-incrPaths⇒syncConvergesIn-n² routingAlg pathAlg incr n@{suc _} =
-  increasing⇒n²-convergence routingAlg (certifiedPathAlgebra pathAlg n) incr
+  -- If the path algebra is increasing *and* distributive then the synchronous iteration
+  -- σ is guaranteed to converge in n steps over any adjacency matrix when starting from
+  -- a state that is consistent with the adjacency matrix.
+  incrPaths+distrib⇒syncConvergesIn-n-whenConsistent : IsIncreasing A →
+                                                       IsDistributive A →
+                                                       PartiallySynchronouslyConvergesIn A (λ n → n) Consistent
+  incrPaths+distrib⇒syncConvergesIn-n-whenConsistent incr distrib n@{suc _} =
+    λ A → increasing+distrib⇒n-convergence isRoutingAlgebra (isCertifiedPathAlgebra n) A incr distrib

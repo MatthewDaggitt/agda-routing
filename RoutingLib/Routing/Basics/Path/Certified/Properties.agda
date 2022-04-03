@@ -312,3 +312,10 @@ length-cong (_ ∷ p≈ₚq) = cong suc (length-cong p≈ₚq)
 |p|≤n : ∀ {n} (p : Path n) → length p ≤ℕ n
 |p|≤n []                  = z≤n
 |p|≤n (e ∷ p ∣ e⇿p ∣ e∉p) = <⇒≤ (|p|<n (nonEmpty _ _ e⇿p e∉p))
+
+----------------------------------------------------------------------------
+-- _⇨[_]⇨_
+
+⇨[]⇨-resp-≈ₚ : ∀ {n i j} {p q : Path n} → p ≈ₚ q → i ⇨[ p ]⇨ j → i ⇨[ q ]⇨ j
+⇨[]⇨-resp-≈ₚ [] ⇨[]⇨ = ⇨[]⇨
+⇨[]⇨-resp-≈ₚ (refl ∷ p≈q) (⇨∷⇨ x) = ⇨∷⇨ (⇨[]⇨-resp-≈ₚ p≈q x)

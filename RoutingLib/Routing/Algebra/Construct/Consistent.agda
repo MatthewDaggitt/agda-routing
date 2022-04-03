@@ -25,11 +25,13 @@ open import Data.Vec.Functional using (Vector; map)
 open import Function
 open import Level using (_⊔_) renaming (zero to 0ℓ)
 open import Relation.Binary as B hiding (Decidable)
-open import Relation.Binary.PropositionalEquality using (inspect; [_]; _≡_; _≢_; refl; sym; trans)
+open import Relation.Binary.PropositionalEquality
+  using (inspect; [_]; _≡_; _≢_; refl; sym; trans; cong; module ≡-Reasoning)
 import Relation.Binary.Construct.On as On
 open import Relation.Unary as U hiding (Decidable; U)
 open import Relation.Nullary using (¬_; yes; no; recompute)
 open import Relation.Nullary.Negation using (contradiction)
+import Relation.Binary.Reasoning.Setoid as SetoidReasoning
 
 open import RoutingLib.Relation.Nullary.Decidable using (toSum)
 open import RoutingLib.Relation.Nullary.Finite.List.Setoid.Properties
@@ -58,8 +60,6 @@ open IsCertifiedPathAlgebra isPathAlgebra
 open import RoutingLib.Routing.Algebra.Properties.CertifiedPathAlgebra isRoutingAlgebra isPathAlgebra
 open import RoutingLib.Routing.Algebra.Properties.RoutingAlgebra isRoutingAlgebra
 open import RoutingLib.Routing.Basics.Assignment algebra n
-
-open import Relation.Binary.Reasoning.Setoid S
 
 private
   variable
@@ -105,18 +105,15 @@ private
 ... | inj₂ r⊕s≈s = 𝑪-cong (≈-sym r⊕s≈s) sᶜ
 
 ▷-pres-𝑪 : ∀ i j {r} → 𝑪 r → 𝑪 (A i j ▷ r)
-▷-pres-𝑪 i j {r} rᶜ with A i j ▷ r ≟ ∞#
-... | yes Aᵢⱼ▷r≈∞ = 𝑪-cong (≈-sym Aᵢⱼ▷r≈∞) ∞ᶜ
-... | no  Aᵢⱼ▷r≉∞ with path r | inspect path r
-...   | invalid | [ pᵣ≡∅ ] = contradiction (p[r]≡∅⇒f▷r≈∞ (A i j) pᵣ≡∅) Aᵢⱼ▷r≉∞
-...   | valid q | [ pᵣ≡q ] with ≈ₚ-reflexive pᵣ≡q | (i , j) ⇿ᵥ? q | i ∉ᵥₚ? q
-...     | pᵣ≈q | no ¬ij⇿q | _       = 𝑪-cong (≈-sym (path-reject (A i j) pᵣ≈q (inj₁ ¬ij⇿q))) ∞ᶜ -- pᵣ≈q
-...     | pᵣ≈q | _        | no  i∈q = 𝑪-cong (≈-sym (path-reject (A i j) pᵣ≈q (inj₂ i∈q))) ∞ᶜ -- pᵣ≈q
-...     | pᵣ≈q | yes ij⇿q | yes i∉q = begin
-  weight A (path (A i j ▷ r))                   ≈⟨ weight-cong {_} {path (A i j ▷ r)} (path-accept (A i j) pᵣ≈q Aᵢⱼ▷r≉∞ ij⇿q i∉q) ⟩
-  weight A (valid ((i , j) ∷ q ∣ ij⇿q ∣ i∉q))   ≡⟨⟩
-  A i j ▷ weight A (valid q)                    ≈⟨ ▷-cong (A i j) rᶜ ⟩
-  A i j ▷ r                                     ∎
+▷-pres-𝑪 i j {r} rᶜ with p[f▷x]≈∅⊎↜ (A i j) r
+... | inj₁ p[fx]≈∅ = 𝑪-cong (≈-sym (path[r]≈∅⇒r≈∞ p[fx]≈∅)) ∞ᶜ
+... | inj₂ (q , p[x]≈q , ij⇿q , i∉q , p[fx]≈ij∷q) = begin
+  weight A (path (A i j ▷ r))                  ≈⟨ weight-cong p[fx]≈ij∷q ⟩
+  weight A (valid ((i , j) ∷ q ∣ ij⇿q ∣ i∉q))  ≡⟨⟩
+  A i j ▷ weight A (valid q)                   ≈⟨ ▷-cong (A i j) (weight-cong (≈ₚ-sym p[x]≈q)) ⟩
+  A i j ▷ weight A (path r)                    ≈⟨ ▷-cong (A i j) rᶜ ⟩ 
+  A i j ▷ r                                    ∎
+  where open SetoidReasoning S
 
 ▷-forces-𝑰 : ∀ {r} → 𝑰 (A i j ▷ r) → 𝑰 r
 ▷-forces-𝑰 f▷rⁱ rᶜ = f▷rⁱ (▷-pres-𝑪 _ _ rᶜ)
@@ -124,28 +121,17 @@ private
 weightᶜ : ∀ p → 𝑪 (weight A p)
 weightᶜ invalid                            = ∞ᶜ
 weightᶜ (valid [])                         = 0ᶜ
-weightᶜ (valid ((i , j) ∷ p ∣ e⇿p ∣ e∉p)) with A i j ▷ weight A (valid p) ≟ ∞# | weightᶜ (valid p)
-... | yes Aᵢⱼ▷wₚ≈∞ | _     = 𝑪-cong (≈-sym Aᵢⱼ▷wₚ≈∞) ∞ᶜ
-... | no  Aᵢⱼ▷wₚ≉∞ | w[p]ᶜ with path (weight A (valid p)) | inspect path (weight A (valid p))
-...   | invalid | [ p[wₚ]≡∅ ] = 𝑪-cong (≈-sym (p[r]≡∅⇒f▷r≈∞ (A i j) p[wₚ]≡∅)) ∞ᶜ
-...   | valid q | [ p[wₚ]≡q ] with ≈ₚ-reflexive p[wₚ]≡q | (i , j) ⇿ᵥ? q | i ∉ᵥₚ? q
-...     | p[wₚ]≈q | no ¬ij⇿q | _       = 𝑪-cong (≈-sym (path-reject (A i j) p[wₚ]≈q (inj₁ ¬ij⇿q))) ∞ᶜ
-...     | p[wₚ]≈q | _        | no  i∈q = 𝑪-cong (≈-sym (path-reject (A i j) p[wₚ]≈q (inj₂ i∈q))) ∞ᶜ
-...     | p[wₚ]≈q | yes ij⇿q | yes i∉q = begin
-  weight A (path (A i j ▷ weight A (valid p)))  ≈⟨ weight-cong (path-accept (A i j) p[wₚ]≈q Aᵢⱼ▷wₚ≉∞ ij⇿q i∉q) ⟩
-  weight A (valid ((i , j) ∷ q ∣ ij⇿q ∣ i∉q))   ≡⟨⟩
-  A i j ▷ weight A (valid q)                    ≈⟨ ▷-cong (A i j) w[p]ᶜ ⟩
-  A i j ▷ weight A (valid p)                    ∎
+weightᶜ (valid ((i , j) ∷ p ∣ e⇿p ∣ e∉p))  = ▷-pres-𝑪 i j (weightᶜ (valid p))
 
 sizeⁱ-incr : ∀ {r} → 𝑰 (f ▷ r) → suc (size r) ≡ size (f ▷ r)
-sizeⁱ-incr {i} {j} {f} {r} f▷rⁱ with f ▷ r ≟ ∞#
-... | yes f▷r≈∞ = contradiction (𝑪-cong (≈-sym f▷r≈∞) ∞ᶜ) f▷rⁱ
-... | no  f▷r≉∞ with path r | inspect path r
-...   | invalid | [ pᵣ≡∅ ] = contradiction (p[r]≡∅⇒f▷r≈∞ f pᵣ≡∅) f▷r≉∞
-...   | valid q | [ pᵣ≡q ] with ≈ₚ-reflexive pᵣ≡q | (i , j) ⇿ᵥ? q | i ∉ᵥₚ? q
-...     | pᵣ≈q | no ¬ij⇿q | _       = contradiction (path-reject f pᵣ≈q (inj₁ ¬ij⇿q)) f▷r≉∞
-...     | pᵣ≈q | _        | no  i∈q = contradiction (path-reject f pᵣ≈q (inj₂ i∈q)) f▷r≉∞
-...     | pᵣ≈q | yes ij⇿q | yes i∉q = sym (length-cong (path-accept f pᵣ≈q f▷r≉∞ ij⇿q i∉q))
+sizeⁱ-incr {i} {j} {f} {r} f▷rⁱ with p[f▷x]≈∅⊎↜ f r
+... | inj₁ p[fx]≈∅ = contradiction (𝑪-cong (≈-sym (path[r]≈∅⇒r≈∞ p[fx]≈∅)) ∞ᶜ) f▷rⁱ
+... | inj₂ (q , p[x]≈q , ij⇿q , i∉q , p[fx]≈ij∷q) = begin
+  suc (length (path r))                     ≡⟨ cong suc (length-cong p[x]≈q) ⟩
+  suc (length (valid q))                    ≡⟨⟩
+  length (valid ((i , j) ∷ q ∣ ij⇿q ∣ i∉q)) ≡˘⟨ length-cong p[fx]≈ij∷q ⟩
+  length (path (f ▷ r))                     ∎
+  where open ≡-Reasoning
 
 sizeⁱ-incr′ : ∀ {r s} → 𝑰 s → s ≈ f ▷ r → suc (size r) ≡ size s
 sizeⁱ-incr′ sⁱ s≈f▷r = trans (sizeⁱ-incr (𝑰-cong s≈f▷r sⁱ)) (size-cong (≈-sym s≈f▷r))

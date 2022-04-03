@@ -7,6 +7,7 @@
 --------------------------------------------------------------------------------
 
 import Data.Fin.Properties as Fin
+open import Data.Nat.Base using (NonZero; suc)
 open import Data.List using (tabulate)
 open import Data.List.Membership.Setoid.Properties
   using (foldr-selective; ∈-tabulate⁻; ∈-tabulate⁺)
@@ -62,7 +63,7 @@ FXᵢⱼ≤Aᵢₖ▷Xₖⱼ X i j k = foldr≤ᵣxs ⊕-semilattice (I i j) (�
 -- After an iteration, the diagonal of the RMatrix is always the identity
 FXᵢᵢ≈Iᵢᵢ : ∀ X i → F X i i ≈ I i i
 FXᵢᵢ≈Iᵢᵢ X i with FXᵢⱼ≈Aᵢₖ▷Xₖⱼ⊎Iᵢⱼ X i i
-... | inj₂ FXᵢᵢ≈Iᵢᵢ           = FXᵢᵢ≈Iᵢᵢ
+... | inj₂ FXᵢᵢ≈Iᵢᵢ          = FXᵢᵢ≈Iᵢᵢ
 ... | inj₁ (k , FXᵢᵢ≈AᵢₖXₖⱼ) = begin-equality
   F X i i         ≈⟨ foldr≤ₗe ⊕-semilattice (I i i) (tabulate (λ k → A i k ▷ X k i)) ⟩
   F X i i ⊕ I i i ≈⟨ ⊕-zeroʳ-Iᵢᵢ i (F X i i) ⟩
@@ -81,3 +82,7 @@ FXᵢⱼ<FYᵢⱼ⇒FXᵢⱼ≉Iᵢⱼ X Y {i} {j} FXᵢⱼ<FYᵢⱼ@(FXᵢⱼ�
   F Y i j ≤⟨ ≤₊-maximum (F Y i j) ⟩
   ∞#      ≡⟨ sym (Iᵢⱼ≡∞ (i≢j ∘ sym)) ⟩
   I i j   ∎)
+
+-- After a non-zero number of iterations, the diagonal is always the trivial route
+σᵗXᵢᵢ≈0# : ∀ t .{{_ : NonZero t}} X i → σ t X i i ≈ 0#
+σᵗXᵢᵢ≈0# (suc t) X i = ≈-trans (FXᵢᵢ≈Iᵢᵢ (σ t X) i) (≈-reflexive (Iᵢᵢ≡0# i))

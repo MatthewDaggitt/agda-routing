@@ -8,14 +8,10 @@ open import Relation.Nullary using (yes; no)
 
 open import RoutingLib.Routing.Basics.Path.Certified
 
-module RoutingLib.Routing.Basics.Path.Certified.All {n : ℕ} where
+module RoutingLib.Routing.Basics.Path.Certified.AllEdges {n : ℕ} where
 
 ----------------------------------------------------------------------------
 -- Datatypes
-
-data Allᵥ {p} (P : Pred (Vertex n) p) : Path n → Set p where
-  []      : Allᵥ P []
-  [_,_]∷_ : ∀ {i j p ij⇿p i∉p} → P i → P j → Allᵥ P p → Allᵥ P ((i , j) ∷ p ∣ ij⇿p ∣ i∉p)
 
 data Allₑ {a} (P : Pred (Edge n) a) : Path n → Set a where
   []  : Allₑ P []
@@ -24,16 +20,10 @@ data Allₑ {a} (P : Pred (Edge n) a) : Path n → Set a where
 ----------------------------------------------------------------------------
 -- Operations
 
-module _ {a b} {P : Pred (Vertex n) a} {Q : Pred (Vertex n) b} where
-
-  mapᵥ : P ⊆ Q → Allᵥ P ⊆ Allᵥ Q
-  mapᵥ P⊆Q []                = []
-  mapᵥ P⊆Q ([ Pi , Pj ]∷ Pp) = [ (P⊆Q Pi) , (P⊆Q Pj) ]∷ (mapᵥ P⊆Q Pp)
-
 module _ {a} {P : Pred (Edge n) a} where
 
   allₑ? : Decidable P → Decidable (Allₑ P)
-  allₑ? P? []                   = yes []
+  allₑ? P? [] = yes []
   allₑ? P? (e ∷ p ∣ e⇿p ∣ e∉p) with P? e | allₑ? P? p
   ... | no ¬pe | _      = no λ {(pe ∷ _) → ¬pe pe}
   ... | yes _  | no ¬pp = no λ {(_ ∷ pp) → ¬pp pp}
@@ -41,12 +31,6 @@ module _ {a} {P : Pred (Edge n) a} where
 
 ----------------------------------------------------------------------------
 -- Properties
-
-module _ {a} {P : Pred (Vertex n) a} where
-
-  Allᵥ-resp-≈ₚ : ∀ {p q} → Allᵥ P p → p ≈ₚ q → Allᵥ P q
-  Allᵥ-resp-≈ₚ []                []           = []
-  Allᵥ-resp-≈ₚ ([ Pi , Pj ]∷ Pp) (refl ∷ p≈q) = [ Pi , Pj ]∷ Allᵥ-resp-≈ₚ Pp p≈q
 
 module _ {a} {P : Pred (Edge n) a} where
 

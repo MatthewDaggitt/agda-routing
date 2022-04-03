@@ -19,3 +19,32 @@ open import RoutingLib.Routing.Algebra
 
 --------------------------------------------------------------------------------
 -- Algebra
+
+Aʷⁱᵈᵉˢᵗ : RawRoutingAlgebra 0ℓ 0ℓ 0ℓ
+Aʷⁱᵈᵉˢᵗ = record
+  { PathWeight         = ℕ∞
+  ; Step               = λ _ _ → ℕ∞
+  ; _≈_                = _≡_
+  ; _⊕_                = _⊔_
+  ; _▷_                = _⊓_
+  ; 0#                 = ∞
+  ; ∞#                 = N 0
+  ; f∞                 = λ _ _ → N 0
+  ; ≈-isDecEquivalence = ≡-isDecEquivalence
+  ; ⊕-cong             = cong₂ _⊔_
+  ; ▷-cong             = λ f → cong (f ⊓_)
+  ; f∞-reject          = λ _ _ _ → ⊓-zeroˡ _
+  }
+
+isRoutingAlgebra : IsRoutingAlgebra Aʷⁱᵈᵉˢᵗ
+isRoutingAlgebra = record
+  { ⊕-sel        = ⊔-sel
+  ; ⊕-comm       = ⊔-comm
+  ; ⊕-assoc      = ⊔-assoc
+  ; ⊕-zeroʳ      = ⊔-zeroʳ
+  ; ⊕-identityʳ  = ⊔-identityʳ
+  ; ▷-fixedPoint = ⊓-zeroʳ
+  }
+
+isDistributive : IsDistributive Aʷⁱᵈᵉˢᵗ
+isDistributive = ⊓-distribˡ-⊔

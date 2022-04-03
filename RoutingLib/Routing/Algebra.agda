@@ -193,7 +193,6 @@ module _ {a b ℓ} (algebra : RawRoutingAlgebra a b ℓ) where
     weight A (valid ((i , j) ∷ p ∣ _ ∣ _)) = A i j ▷ weight A (valid p)
 
 
-
 module PathDistributivity
   {a b ℓ} {algebra : RawRoutingAlgebra a b ℓ}
   (isPathAlgebra : IsPathAlgebra algebra)

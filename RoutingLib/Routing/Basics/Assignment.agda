@@ -20,6 +20,7 @@ open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Relation.Nullary.Negation using (¬?; ¬-reflects)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary as U using (Pred; _∈_; ∁)
+open import Relation.Binary.Construct.Closure.Transitive using (TransClosure)
 import Relation.Binary.Construct.NonStrictToStrict as NonStrictToStrict
 
 open import RoutingLib.Relation.Nullary.Finite.List.Setoid
@@ -122,6 +123,7 @@ _<ₐₜ?_ = NonStrictToStrict.<-decidable _ _ _≟ₐ_ _≤ₐₜ?_
 -- Assigment x can be directly extended to form y
 
 infix 7 _↝[_]_
+
 _↝[_]_ : Assignment → AdjacencyMatrix → Assignment → Set ℓ
 (j , y) ↝[ A ] (i , x) = (A i j ▷ y ≈ x) × (y ≉ ∞#)
 

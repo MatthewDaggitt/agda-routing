@@ -10,7 +10,7 @@ open import Data.Nat using (zero; suc; ℕ; _*_; _+_)
 open import Data.Nat.Properties using (*-comm; *-distribˡ-+)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Unary using (Pred; Decidable)
-open import Relation.Nullary.Negation using (¬?; contradiction)
+open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary using (Setoid; DecSetoid; Rel; Reflexive; Symmetric; Transitive; _⇒_)
 open import Relation.Binary.PropositionalEquality as PropositionalEq using (_≡_; refl; cong)
 import Relation.Binary.Reasoning.Setoid as EqReasoning

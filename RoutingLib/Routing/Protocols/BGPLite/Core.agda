@@ -11,7 +11,7 @@ open import Algebra
 open import Data.Nat using (ℕ; _≟_)
 open import Data.Nat.Properties using () renaming (<-cmp to compare)
 open import Data.Product using (_,_; _×_; proj₁; proj₂)
-open import Data.Fin using (Fin; toℕ; fromℕ≤)
+open import Data.Fin using (Fin; toℕ)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary

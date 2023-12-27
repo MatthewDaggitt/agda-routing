@@ -22,6 +22,7 @@ open import Data.Nat using (suc)
 open import Data.Product using (Σ; _×_; _,_; proj₁; map₂)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Vec.Functional using (Vector; map)
+open import Function.Consequences.Setoid
 open import Function
 open import Level using (_⊔_) renaming (zero to 0ℓ)
 open import Relation.Binary as B hiding (Decidable)
@@ -234,6 +235,8 @@ _ ≟ᶜ _ = _ ≟ _
 Sᶜ : Setoid _ _
 Sᶜ = On.setoid {B = CPathWeight} S projᵣ
 
+open Setoid Sᶜ using () renaming (trans to ≈ᶜ-trans)
+
 DSᶜ : DecSetoid _ _
 DSᶜ = On.decSetoid {B = CPathWeight} DS projᵣ
 
@@ -303,14 +306,14 @@ isRoutingAlgebraᶜ = record
 fromPath : Path n → CPathWeight
 fromPath p = weight A p , weightᶜ p
 
-fromPath-surjective : Surjective (_≈ₚ_ {n = n}) _≈ᶜ_ fromPath
+fromPath-surjective : StrictlySurjective _≈ᶜ_ fromPath
 fromPath-surjective (y , yᶜ) = path y , recomputeᶜ yᶜ
 
 fromPath-surjection : Surjection (ℙₛ n) Sᶜ
 fromPath-surjection = record
-  { f          = fromPath
+  { to         = fromPath
   ; cong       = weight-cong
-  ; surjective = fromPath-surjective
+  ; surjective = strictlySurjective⇒surjective (ℙₛ n) Sᶜ {f = fromPath} weight-cong fromPath-surjective
   }
 
 ------------------------------------------------------------------------------

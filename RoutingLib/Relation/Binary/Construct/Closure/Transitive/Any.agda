@@ -12,7 +12,7 @@ open import Relation.Binary.PropositionalEquality as P using (_≢_; _≡_; subs
 open import Relation.Binary.Construct.Closure.Transitive
 open import Relation.Nullary using (¬_; Dec; yes; no)
 import Relation.Nullary.Decidable as Dec
-open import Relation.Nullary.Product
+open import Relation.Nullary
 open import Relation.Unary as U using (Pred)
 
 open import RoutingLib.Data.Fin.Subset
@@ -33,12 +33,12 @@ private
 ------------------------------------------------------------------------
 -- Definitions
 
-data AnyEdge (P : ∀ {x y : A} → R x y → Set p) : (∀ {x y} → R⁺ x y → Set p) where
+data AnyEdge (P : ∀ {x y : A} → R x y → Set p) : ∀ {x y} → R⁺ x y → Set (a ⊔ p ⊔ r) where
   here₁  : {Rxy : R x y}                 → P Rxy → AnyEdge P [ Rxy ]
   here₂  : {Rxy : R x y} {R⁺yz : R⁺ y z} → P Rxy → AnyEdge P (Rxy ∷ R⁺yz)
   there  : {Rxy : R x y} {R⁺yz : R⁺ y z} → AnyEdge P R⁺yz → AnyEdge P (Rxy ∷ R⁺yz)
 
-AnyNode : (P : A → Set p) → (∀ {x y} → R⁺ x y → Set p)
+AnyNode : (P : A → Set p) → (∀ {x y} → R⁺ x y → Set (a ⊔ p ⊔ r))
 AnyNode P = AnyEdge (λ {x} _ → P x)
 
 ------------------------------------------------------------------------

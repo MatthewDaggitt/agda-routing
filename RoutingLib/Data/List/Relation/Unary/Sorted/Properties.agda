@@ -2,9 +2,9 @@ open import Relation.Binary using (TotalOrder)
 open import Data.Maybe using (nothing; just)
 open import Data.Maybe.Relation.Binary.Connected hiding (refl)
 open import Data.Nat as ℕ using (ℕ; z≤n; s≤s; suc; ≤-pred) renaming (_<_ to _<ℕ_; _≤_ to _≤ℕ_)
-open import Data.Nat.Properties as ℕ using (≤+≢⇒<; ≤⇒≯; <⇒≢; suc-injective; module ≤-Reasoning; <-cmp)
+open import Data.Nat.Properties as ℕ using (≤⇒≯; suc-injective; module ≤-Reasoning; <-cmp)
 open import Data.Fin as Fin using (Fin; Fin′; zero; suc; cast; pred; toℕ) renaming (_≤_ to _≤𝔽_; _<_ to _<𝔽_)
-open import Data.Fin.Properties as Fin using (toℕ-cast; toℕ-injective)
+open import Data.Fin.Properties as Fin using (toℕ-cast; toℕ-injective; <⇒≢)
 open import Data.Fin.Patterns
 open import Data.Fin.Induction
 open import Data.List as List hiding (tail)
@@ -75,8 +75,8 @@ private
     v                            ∎
     where open PosetReasoning poset
   ...   | no  j≰πᵢ with i Fin.≟ zero
-  ...     | yes ≡-refl = let (u , v , u≢v , gu≡gv) = Fin.pigeonhole Fin.≤-refl g in
-    contradiction gu≡gv (g-unique u≢v)
+  ...     | yes ≡-refl = let (u , v , u<v , gu≡gv) = Fin.pigeonhole Fin.≤-refl g in
+    contradiction gu≡gv (g-unique (<⇒≢ u<v))
     where
     j<∣xs∣ : toℕ j ℕ.< length xs
     j<∣xs∣ = P.subst (toℕ j ℕ.<_) (≡-sym (xs↭ys⇒|xs|≡|ys| xs↭ys)) (Fin.toℕ<n j)
@@ -95,7 +95,7 @@ private
       ∘ lower-injective _ _ (q x) (q y)
     
   ...     | no  i≢0 = ↗↭↗⇒≤ xs↭ys xs↗ ys↗
-    (rec (pred i) (ℕ.≤-reflexive (Fin.suc-pred i≢0)))
+    (rec {pred i} (ℕ.≤-reflexive (Fin.suc-pred i≢0)))
     (ℕ.≤-trans (Fin.≤-pred i) i≤j)
     eq
     (trans (lookup-mono-≤ xs↗ (Fin.≤-pred i)) leq)
@@ -108,5 +108,5 @@ private
     
 ↗↭↗⇒≋ : ∀ {xs ys} → Sorted xs → Sorted ys → xs ↭ ys → xs ≋ ys
 ↗↭↗⇒≋ {xs} {ys} xs↗ ys↗ xs↭ys = Pointwise.lookup⁻ (xs↭ys⇒|xs|≡|ys| xs↭ys) (λ {i} {j} i≡j → antisym
-  (↗↭↗⇒≤ (↭-sym xs↭ys) ys↗ xs↗ (<-wellFounded j) (ℕ.≤-reflexive (≡-sym i≡j)) (λ k j<k k≤i → contradiction (ℕ.<-transˡ j<k k≤i) (ℕ.<-irrefl (≡-sym i≡j))) refl)
-  (↗↭↗⇒≤ xs↭ys         xs↗ ys↗ (<-wellFounded i) (ℕ.≤-reflexive i≡j)         (λ k i<k k≤j → contradiction (ℕ.<-transˡ i<k k≤j) (ℕ.<-irrefl i≡j)) refl))
+  (↗↭↗⇒≤ (↭-sym xs↭ys) ys↗ xs↗ (<-wellFounded j) (ℕ.≤-reflexive (≡-sym i≡j)) (λ k j<k k≤i → contradiction (ℕ.<-≤-trans j<k k≤i) (ℕ.<-irrefl (≡-sym i≡j))) refl)
+  (↗↭↗⇒≤ xs↭ys         xs↗ ys↗ (<-wellFounded i) (ℕ.≤-reflexive i≡j)         (λ k i<k k≤j → contradiction (ℕ.<-≤-trans i<k k≤j) (ℕ.<-irrefl i≡j)) refl))

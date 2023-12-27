@@ -187,7 +187,7 @@ module _ (i : Node) where
   rᶜ<Hᶜ xᶜ yᶜ = s≤s (DV.r≤rₘₐₓ i (toCPathWeight xᶜ) (toCPathWeight yᶜ))
 
   rᶜ<Hᶜ+x : ∀ (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) z → rᶜ i xᶜ yᶜ < Hᶜ + z
-  rᶜ<Hᶜ+x xᶜ yᶜ z = <-transˡ (rᶜ<Hᶜ xᶜ yᶜ) (m≤m+n Hᶜ z)
+  rᶜ<Hᶜ+x xᶜ yᶜ z = <-≤-trans (rᶜ<Hᶜ xᶜ yᶜ) (m≤m+n Hᶜ z)
 
   Hᶜ<Hᶜ+rⁱ : ∀ x y → Hᶜ < Hᶜ + rⁱ x y
   Hᶜ<Hᶜ+rⁱ x y = begin
@@ -268,7 +268,7 @@ module _ (i : Node) where
   ... | yes _  | no  _  | _       = Hᶜ<Hᶜ+rⁱ x y
 
   rᶜ<r : ∀ (wᶜ : 𝑪 w) (xᶜ : 𝑪 x) → y ≉ z → 𝑰 y ⊎ 𝑰 z  → rᶜ i wᶜ xᶜ < r i y z
-  rᶜ<r wᶜ xᶜ y≉z yⁱ⊎zⁱ = <-transʳ (<⇒≤ (rᶜ<Hᶜ wᶜ xᶜ)) (H<r y≉z yⁱ⊎zⁱ)
+  rᶜ<r wᶜ xᶜ y≉z yⁱ⊎zⁱ = ≤-<-trans (<⇒≤ (rᶜ<Hᶜ wᶜ xᶜ)) (H<r y≉z yⁱ⊎zⁱ)
 
   rᶜ≤r : x ≉ y → (xᶜ : 𝑪 x) (yᶜ : 𝑪 y) → rᶜ i xᶜ yᶜ ≤ r i x y
   rᶜ≤r {x} {y} x≉y xᶜ yᶜ with x ≟ y
@@ -298,7 +298,7 @@ r-force-rⁱ : ∀ (X Y : RoutingMatrix) {i j} →
               (∀ u v → r u (X u v) (Y u v) ≤ Hᶜ + rⁱ (X i j) (Y i j)) →
               (∀ {u v} → X u v ≉ Y u v → 𝑰 (X u v) ⊎ 𝑰 (Y u v) →
                rⁱ (X u v) (Y u v) ≤ rⁱ (X i j) (Y i j))
-r-force-rⁱ X Y {i} {j} r≤Hᶜ+rⁱXₗYₗ {u} {v} Xᵤᵥ≉Yᵤᵥ Xᵤᵥⁱ⊎Yᵤᵥⁱ = +-cancelˡ-≤ Hᶜ (begin
+r-force-rⁱ X Y {i} {j} r≤Hᶜ+rⁱXₗYₗ {u} {v} Xᵤᵥ≉Yᵤᵥ Xᵤᵥⁱ⊎Yᵤᵥⁱ = +-cancelˡ-≤ Hᶜ _ _ (begin
   Hᶜ + rⁱ (X u v) (Y u v) ≡⟨ H+rⁱ≡r u ≈-refl ≈-refl Xᵤᵥ≉Yᵤᵥ Xᵤᵥⁱ⊎Yᵤᵥⁱ ⟩
   r u (X u v) (Y u v)     ≤⟨ r≤Hᶜ+rⁱXₗYₗ u v ⟩
   Hᶜ + rⁱ (X i j) (Y i j) ∎)

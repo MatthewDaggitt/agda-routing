@@ -19,7 +19,6 @@ open import Relation.Binary.Construct.NonStrictToStrict
   using (<-isStrictTotalOrder₂) renaming (_<_ to _<ₗₑₓ_)
 open import Relation.Binary.PropositionalEquality using (_≡_)
 open import Relation.Nullary using (Dec; yes; no; ¬_; does; proof)
-open import Relation.Nullary.Negation using (¬?; ¬-reflects)
 open import Relation.Unary using (Pred; Decidable; ∁)
 open import Data.Product as Prod using (_×_; _,_)
 

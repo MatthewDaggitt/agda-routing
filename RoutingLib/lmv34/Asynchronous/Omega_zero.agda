@@ -31,9 +31,9 @@ module _ (ψ : Schedule n) where
   Ω₀' X {zero}  _         = X
   Ω₀' X {suc t} (acc rec) = [ Γ₀' X[β[t+1]] , X[t] ] α (suc t)
     where X[t] : RoutingMatrix
-          X[t] = Ω₀' X (rec t ≤-refl)
+          X[t] = Ω₀' X (rec ≤-refl)
           X[β[t+1]] : Fin n → RoutingMatrix
-          X[β[t+1]] i q j = Ω₀' X (rec (β (suc t) i q) (s≤s (β-causality t i q))) q j
+          X[β[t+1]] i q j = Ω₀' X (rec (s≤s (β-causality t i q))) q j
 
 Ω₀ : Schedule n → Γ₀-State → 𝕋 → Γ₀-State
 Ω₀ ψ X t = Ω₀' ψ X (<-wellFounded t)

@@ -31,9 +31,9 @@ module _ (ψ : Schedule n) where
   Ω₁' V {zero}  _         = V
   Ω₁' V {suc t} (acc rec) = [ Γ₁' V[β[t+1]] , V[t] ] α (suc t)
     where V[t] : RoutingVector
-          V[t] = Ω₁' V (rec t ≤-refl)
+          V[t] = Ω₁' V (rec ≤-refl)
           V[β[t+1]] : Fin n → RoutingVector
-          V[β[t+1]] i q = Ω₁' V (rec (β (suc t) i q) (s≤s (β-causality t i q))) q
+          V[β[t+1]] i q = Ω₁' V (rec (s≤s (β-causality t i q))) q
 
 Ω₁ : Schedule n → Γ₁-State → 𝕋 → Γ₁-State
 Ω₁ ψ V t = Ω₁' ψ V (<-wellFounded t)

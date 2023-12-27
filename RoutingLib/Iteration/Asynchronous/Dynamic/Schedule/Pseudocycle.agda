@@ -101,7 +101,7 @@ extendExpiry : ∀ {a s e z i} → SubEpoch [ a , s ] → SubEpoch [ e , z ] →
                MessagesTo i ExpireIn [ s , e ] →
                MessagesTo i ExpireIn [ a , z ]
 extendExpiry η[a,s]@(mkₛₑ a≤s _) η[e,z]@(mkₛₑ e≤z _) (mkₑ η[s,e] expiryᵢ) =
-  mkₑ ((η[a,s] ++ₛₑ η[s,e]) ++ₛₑ η[e,z]) (λ z<t → ≤-trans a≤s ∘ expiryᵢ (<-transʳ e≤z z<t))
+  mkₑ ((η[a,s] ++ₛₑ η[s,e]) ++ₛₑ η[e,z]) (λ z<t → ≤-trans a≤s ∘ expiryᵢ (≤-<-trans e≤z z<t))
 
 --------------------------------------------------------------------------------
 -- Pseudocycle

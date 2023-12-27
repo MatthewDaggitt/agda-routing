@@ -16,7 +16,7 @@ open import Data.Fin.Subset using (Subset; _∈_; _∉_; ⊤)
 open import Data.Fin.Subset.Properties using (_∈?_; ∈⊤; ∉⊥)
 open import Data.Nat using (zero; suc; s≤s; _<_; _≤_; _∸_)
 open import Data.Nat.Induction using (<-wellFounded)
-open import Data.Nat.Properties using (≤-refl; ≤-trans; ≤-step)
+open import Data.Nat.Properties using (≤-refl; ≤-trans; m≤n⇒m≤1+n)
 open import Data.Product using (_,_)
 open import Function.Base using (_∘_; _∘₂_)
 open import Induction.WellFounded using (Acc; acc)
@@ -136,15 +136,15 @@ LemmaA₄' F G V i = begin
   ([ Γ₂,ᵢ O[t] , I[t] ] αˢʸⁿᶜ (suc t)) ,
   ([ Γ₂,ₒ V[t] , O[t] ] αˢʸⁿᶜ (suc t))   ≈⟨ ↭-reflexive ∘ [,]-⊤ᵢ , ↭-reflexive ∘₂ [,]-⊤ᵢⱼ  , ↭-reflexive ∘₂ [,]-⊤ᵢⱼ ⟩
   (Γ₂,ᵥ I[t]) , (Γ₂,ᵢ O[t]) , (Γ₂,ₒ V[t]) ≡⟨⟩
-  Γ₂ (V[t] , I[t] , O[t])                ≈⟨ Γ₂-cong (Ω₂'ˢʸⁿᶜ=Γ₂ S (rec t ≤-refl)) ⟩
+  Γ₂ (V[t] , I[t] , O[t])                ≈⟨ Γ₂-cong (Ω₂'ˢʸⁿᶜ=Γ₂ S (rec ≤-refl)) ⟩
   (Γ₂ ^ (suc t)) S                       ∎
   where open EqReasoning 𝕊ₛ
         V[t] : RoutingVector
-        V[t] = getV (Ω₂' ψ₃ˢʸⁿᶜ S (rec t ≤-refl))
+        V[t] = getV (Ω₂' ψ₃ˢʸⁿᶜ S (rec ≤-refl))
         I[t] : RoutingVector₂
-        I[t] = getI (Ω₂' ψ₃ˢʸⁿᶜ S (rec t ≤-refl))
+        I[t] = getI (Ω₂' ψ₃ˢʸⁿᶜ S (rec ≤-refl))
         O[t] : RoutingVector₂
-        O[t] = getO (Ω₂' ψ₃ˢʸⁿᶜ S (rec t ≤-refl))
+        O[t] = getO (Ω₂' ψ₃ˢʸⁿᶜ S (rec ≤-refl))
 
 Ω₂ˢʸⁿᶜ=Γ₂ : ∀ S t → Ω₂ ψ₃ˢʸⁿᶜ S t ≈ₛ (Γ₂ ^ t) S
 Ω₂ˢʸⁿᶜ=Γ₂ S t = Ω₂'ˢʸⁿᶜ=Γ₂ S (<-wellFounded t)
@@ -188,7 +188,7 @@ module _ {n} (ψ : Schedule n) where
 
 follow-cycle-decreasing : ∀ {n} (ψ : Schedule₃ n) t i j → follow-cycle ψ t i j ≤ t
 follow-cycle-decreasing ψ zero i j = ≤-refl
-follow-cycle-decreasing ψ (suc t) i j = ≤-step (follow-cycle-causality ψ t i j)
+follow-cycle-decreasing ψ (suc t) i j = m≤n⇒m≤1+n (follow-cycle-causality ψ t i j)
 
 follow-cycle-strictly-decreasing : ∀ {n} (ψ : Schedule₃ n) t i j → 1 ≤ t → follow-cycle ψ t i j < t
 follow-cycle-strictly-decreasing ψ (suc t) i j 1≤t = s≤s (follow-cycle-causality ψ t i j)
@@ -210,32 +210,32 @@ module _ ((ψᵥ , ψᵢ , ψₒ) : Schedule₃ n)  where
 
   -- Useful shortcuts for recursively calling accessible arguments.
   pred : ∀ {t} → Acc _<_ (suc t) → Acc _<_ t
-  pred {t} (acc rec) = rec t ≤-refl
+  pred {t} (acc rec) = rec ≤-refl
 
   acc[tᵢ] : ∀ {t} i → Acc _<_ (suc t) → Acc _<_ (tᵢ ψ (suc t) i)
-  acc[tᵢ] {t} i (acc rec) = rec (tᵢ ψ (suc t) i) (s≤s (tᵢ≤t ψ t i))
+  acc[tᵢ] {t} i (acc rec) = rec (s≤s (tᵢ≤t ψ t i))
 
   acc[tₒ] : ∀ {t} q i → Acc _<_ (suc t) → Acc _<_ (tₒ ψ (suc t) q i)
-  acc[tₒ] {t} q i (acc rec) = rec (tₒ ψ (suc t) q i) (s≤s (tₒ≤t ψ t q i))
+  acc[tₒ] {t} q i (acc rec) = rec (s≤s (tₒ≤t ψ t q i))
 
   acc[tᵥ] : ∀ {t} i q → Acc _<_ (suc t) → Acc _<_ (tᵥ ψ (suc t) i q)
-  acc[tᵥ] {t} i q (acc rec) = rec (tᵥ ψ (suc t) i q) (s≤s (tᵥ≤t ψ t i q))
+  acc[tᵥ] {t} i q (acc rec) = rec (s≤s (tᵥ≤t ψ t i q))
 
   acc[βᵥ] : ∀ {t} i → Acc _<_ (suc t) → Acc _<_ (βᵥ (suc t) i i)
-  acc[βᵥ] {t} i (acc rec) = rec (βᵥ (suc t) i i) (s≤s (βᵥ-causality t i i))
+  acc[βᵥ] {t} i (acc rec) = rec (s≤s (βᵥ-causality t i i))
 
   acc[βᵢ] : ∀ {t} i q → Acc _<_ (suc t) → Acc _<_ (βᵢ (suc t) i q)
-  acc[βᵢ] {t} i q (acc rec) = rec (βᵢ (suc t) i q) (s≤s (βᵢ-causality t i q))
+  acc[βᵢ] {t} i q (acc rec) = rec (s≤s (βᵢ-causality t i q))
 
   acc[βₒ] : ∀ {t} q → Acc _<_ (suc t) → Acc _<_ (βₒ (suc t) q q)
-  acc[βₒ] {t} q (acc rec) = rec (βₒ (suc t) q q) (s≤s (βₒ-causality t q q))
+  acc[βₒ] {t} q (acc rec) = rec (s≤s (βₒ-causality t q q))
 
   acc[β'] : ∀ {t} i q → Acc _<_ (suc t) → Acc _<_ (β' (suc t) i q)
-  acc[β'] {t} i q (acc rec) = rec (β' (suc t) i q) (s≤s (β'-causality t i q))
+  acc[β'] {t} i q (acc rec) = rec (s≤s (β'-causality t i q))
 
   acc[ϕ] : ∀ {t} i q (ψ : Schedule n) → Acc _<_ t → Acc _<_ (ϕ ψ t i q)
   acc[ϕ] {zero} i q ψ (acc rec) = acc rec
-  acc[ϕ] {suc t} i q ψ (acc rec) = rec (ϕ ψ (suc t) i q) (s≤s (ϕ-causality ψ t i q))
+  acc[ϕ] {suc t} i q ψ (acc rec) = rec (s≤s (ϕ-causality ψ t i q))
 
   postulate
     Ω₂'-iter-cong : ∀ {t t'} {accₜ : Acc _<_ t} {accₜ' : Acc _<_ t'} →
@@ -249,7 +249,7 @@ module _ ((ψᵥ , ψᵢ , ψₒ) : Schedule₃ n)  where
   V[t+1]-step {t} (acc rec) =
     [,]-reasoning {Γ₂,ᵥ I[βᵥ]} {V[t]} {[ Γ₂,ᵥ I[tᵢ] , V[t] ] αᵥ (suc t)} V[t+1]-active V[t+1]-inactive
     where V[t] : RoutingVector
-          V[t] = getV (Ω₂' ψ S₀ (rec t ≤-refl))
+          V[t] = getV (Ω₂' ψ S₀ (rec ≤-refl))
           I[βᵥ] : RoutingVector₂
           I[βᵥ] i q = getI (Ω₂' ψ S₀ (acc[βᵥ] i (acc rec))) i q
           I[tᵢ] : RoutingVector₂
@@ -275,13 +275,13 @@ module _ ((ψᵥ , ψᵢ , ψₒ) : Schedule₃ n)  where
     where I[t+1] : RoutingVector₂
           I[t+1] = getI (Ω₂' ψ S₀ (acc rec))
           I[t] : RoutingVector₂
-          I[t] = getI (Ω₂' ψ S₀ (rec t ≤-refl))
+          I[t] = getI (Ω₂' ψ S₀ (rec ≤-refl))
           O[β[t+1]] : RoutingVector₂
           O[β[t+1]] q i = getO (Ω₂' ψ S₀ (acc[βᵢ] i q (acc rec))) q i
           O[ϕ[t+1]] : RoutingVector₂
           O[ϕ[t+1]] q i = getO (Ω₂' ψ S₀ (acc[ϕ] i q ψᵢ (acc rec))) q i
           O[ϕ[t]] : RoutingVector₂
-          O[ϕ[t]] q i = getO (Ω₂' ψ S₀ (acc[ϕ] i q ψᵢ (rec t ≤-refl))) q i
+          O[ϕ[t]] q i = getO (Ω₂' ψ S₀ (acc[ϕ] i q ψᵢ (rec ≤-refl))) q i
 
           O[ϕ[t+1]]=O[β[t+1]] : ∀ i q → i ∈ αᵢ (suc t) → O[β[t+1]] q i ↭ O[ϕ[t+1]] q i
           O[ϕ[t+1]]=O[β[t+1]] i q i∈α = ↭-sym (getO=O' (Ω₂'-iter-cong (ϕ-active ψᵢ t i q i∈α)) q i)
@@ -293,7 +293,7 @@ module _ ((ψᵥ , ψᵢ , ψₒ) : Schedule₃ n)  where
           O[ϕ[t+1]]=O[ϕ[t]] i q i∉α = getO=O' (Ω₂'-iter-cong (ϕ-inactive ψᵢ t i q i∉α)) q i
           
           ∉⇒I[t]=O[ϕ] : ∀ i q → i ∉ αᵢ (suc t) → I[t] i q ↭ (Γ₂,ᵢ O[ϕ[t+1]]) i q
-          ∉⇒I[t]=O[ϕ] i q i∉αᵢ = ↭-trans (I[t]-step {t} (rec t ≤-refl) i q) ([]-cong (↭-sym (O[ϕ[t+1]]=O[ϕ[t]] i q i∉αᵢ)))
+          ∉⇒I[t]=O[ϕ] i q i∉αᵢ = ↭-trans (I[t]-step {t} (rec ≤-refl) i q) ([]-cong (↭-sym (O[ϕ[t+1]]=O[ϕ[t]] i q i∉αᵢ)))
 
   O[t]-step : ∀ {t} (acc[t] : Acc _<_ t) →
                  let O[t] = getO (Ω₂' ψ S₀ acc[t])
@@ -304,13 +304,13 @@ module _ ((ψᵥ , ψᵢ , ψₒ) : Schedule₃ n)  where
     where O[t+1] : RoutingVector₂
           O[t+1] = getO (Ω₂' ψ S₀ (acc rec))
           O[t] : RoutingVector₂
-          O[t] = getO (Ω₂' ψ S₀ (rec t ≤-refl))
+          O[t] = getO (Ω₂' ψ S₀ (rec ≤-refl))
           V[β[t+1]] : RoutingVector
           V[β[t+1]] q = getV (Ω₂' ψ S₀ (acc[βₒ] q (acc rec))) q 
           V[ϕ[t+1]] : RoutingVector
           V[ϕ[t+1]] q = getV (Ω₂' ψ S₀ (acc[ϕ] q q ψₒ (acc rec))) q
           V[ϕ[t]] : RoutingVector
-          V[ϕ[t]] q = getV (Ω₂' ψ S₀ (acc[ϕ] q q ψₒ (rec t ≤-refl))) q
+          V[ϕ[t]] q = getV (Ω₂' ψ S₀ (acc[ϕ] q q ψₒ (rec ≤-refl))) q
 
           ∈⇒V[β[t+1]]=V[ϕ[t+1]] : ∀ i → i ∈ αₒ (suc t) → V[β[t+1]] i ↭ V[ϕ[t+1]] i
           ∈⇒V[β[t+1]]=V[ϕ[t+1]] i i∈α = getV=V' (Ω₂'-iter-cong (sym (ϕ-active ψₒ t i i i∈α))) i
@@ -322,7 +322,7 @@ module _ ((ψᵥ , ψᵢ , ψₒ) : Schedule₃ n)  where
           ∉⇒V[ϕ[t+1]]=V[ϕ[t]] i i∉α = getV=V' (Ω₂'-iter-cong (ϕ-inactive ψₒ t i i i∉α)) i
 
           O[t+1]-inactive : ∀ i q → i ∉ αₒ (suc t) → O[t] i q ↭ (Γ₂,ₒ V[ϕ[t+1]]) i q 
-          O[t+1]-inactive i q i∉α = ↭-trans (O[t]-step (rec t ≤-refl) i q) ([]-cong (↭-sym (∉⇒V[ϕ[t+1]]=V[ϕ[t]] i i∉α)))
+          O[t+1]-inactive i q i∉α = ↭-trans (O[t]-step (rec ≤-refl) i q) ([]-cong (↭-sym (∉⇒V[ϕ[t+1]]=V[ϕ[t]] i i∉α)))
 
   lem₂ : ∀ {t} (acc[t+1] : Acc _<_ (suc t)) →
          let I[tᵢ] = λ i q → getI (Ω₂' ψ S₀ (acc[tᵢ] i acc[t+1])) i q
@@ -404,10 +404,10 @@ module _ ((ψᵥ , ψᵢ , ψₒ) : Schedule₃ n)  where
             V₁[tᵥ] i q = Ω₁' (r₂ ψ) (Τ₂ S₀) (acc[tᵥ] i q (acc rec)) q
 
             V₂[tᵥ]=V₁[tᵥ] : V₂[tᵥ] ≈ᵥ,₂ V₁[tᵥ]
-            V₂[tᵥ]=V₁[tᵥ] i q = Ω₂'=Ω₁' (rec (tᵥ ψ (suc t) i q) (s≤s (tᵥ≤t ψ t i q))) q
+            V₂[tᵥ]=V₁[tᵥ] i q = Ω₂'=Ω₁' (rec (s≤s (tᵥ≤t ψ t i q))) q
 
             V₂[t]=V₁[t] : V₂[t] ≈ᵥ V₁[t]
-            V₂[t]=V₁[t] = Ω₂'=Ω₁' (rec t ≤-refl)
+            V₂[t]=V₁[t] = Ω₂'=Ω₁' (rec ≤-refl)
 
 Ω₂=Ω₁ : ∀ ψ t → Τ₂ (Ω₂ ψ S₀ t) ≈ᵥ Ω₁ (r₂ ψ) (Τ₂ S₀) t
 Ω₂=Ω₁ ψ t = Ω₂'=Ω₁' ψ (<-wellFounded t)

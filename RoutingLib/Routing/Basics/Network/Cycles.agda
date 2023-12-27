@@ -11,7 +11,7 @@ open import Function using (flip)
 open import Level using (0ℓ; _⊔_)
 open import Relation.Binary hiding (Universal)
 open import Relation.Nullary using (¬_; yes; no)
-open import Relation.Nullary.Negation using (¬?; contradiction)
+open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Pred; Universal)
 open import Relation.Binary.PropositionalEquality using (refl)
 

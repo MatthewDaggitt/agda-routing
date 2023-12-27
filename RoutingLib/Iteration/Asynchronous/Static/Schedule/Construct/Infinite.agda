@@ -46,7 +46,7 @@ module _ {a ℓ} (I∥ : AsyncIterable a ℓ n) where
   ψ∞-isInfAsynchronous' : ∀ x₀ {t} (accₜ : Acc _<_ t) → asyncIter' I∥ ψ∞ x₀ accₜ ≈ x₀
   ψ∞-isInfAsynchronous' x₀ {zero} accₜ = ≈-refl
   ψ∞-isInfAsynchronous' x₀ {suc t} (acc rec) i with i ∈? α∞ (suc t)
-  ... | no  i∉α = ψ∞-isInfAsynchronous' x₀ (rec t ≤-refl) i
+  ... | no  i∉α = ψ∞-isInfAsynchronous' x₀ (rec ≤-refl) i
   ... | yes i∈α = contradiction i∈α ∉⊥
 
   ψ∞-isInfAsynchronous : ∀ x₀ t → asyncIter I∥ ψ∞ x₀ t ≈ x₀

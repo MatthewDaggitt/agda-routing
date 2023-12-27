@@ -19,7 +19,7 @@ open import Relation.Binary.PropositionalEquality as P using (_≢_; _≡_; subs
 open import Relation.Binary.Construct.Closure.Transitive
 open import Relation.Nullary using (¬_; Dec; yes; no)
 import Relation.Nullary.Decidable as Dec
-open import Relation.Nullary.Product
+open import Relation.Nullary
 open import Relation.Unary as U using (Pred)
 
 open import RoutingLib.Data.Fin.Subset
@@ -38,17 +38,17 @@ length [ x∼y ]      = zero
 length (x∼y ∷ R⁺yz) = suc (length R⁺yz)
 
 data R⁺ᶠ : (P : Subset n) (x y : A) → Set (a ⊔ ℓ ⊔ r) where
-  nil  : ∀ {p x y} → f x ∈ p → R x y → R⁺ᶠ p x y
-  cons : ∀ {p x y z} → f x ∈ p → R x y → R⁺ᶠ (p - f x) y z → R⁺ᶠ p x z
+  nil  : ∀ {p x y} → to x ∈ p → R x y → R⁺ᶠ p x y
+  cons : ∀ {p x y z} → to x ∈ p → R x y → R⁺ᶠ (p - to x) y z → R⁺ᶠ p x z
 
 R⁺ᶠ⇒R⁺ : ∀ {p x y} → R⁺ᶠ p x y → R⁺ x y
 R⁺ᶠ⇒R⁺ (nil  _ Rxy)      = [ Rxy ]
 R⁺ᶠ⇒R⁺ (cons _ Rxy R⁺yz) = Rxy ∷ R⁺ᶠ⇒R⁺ R⁺yz
 
-_∈⁺_ : A → ∀ {x y} → R⁺ x y → Set ℓ
+_∈⁺_ : A → ∀ {x y} → R⁺ x y → Set (a ⊔ ℓ ⊔ r)
 v ∈⁺ Rxy = AnyNode (v ≈_) Rxy
 
-_∈⁺ᶠ_ : ∀ {p} → A → ∀ {x y} → R⁺ᶠ p x y → Set ℓ
+_∈⁺ᶠ_ : ∀ {p} → A → ∀ {x y} → R⁺ᶠ p x y → Set _
 v ∈⁺ᶠ R⁺ᶠxy = v ∈⁺ R⁺ᶠ⇒R⁺ R⁺ᶠxy
 
 R⁺ᶠ⇒R⁺-cancel-∈ : ∀ {p v x y} {R⁺ᶠxy : R⁺ᶠ p x y} → v ∈⁺ (R⁺ᶠ⇒R⁺ R⁺ᶠxy) → v ∈⁺ᶠ R⁺ᶠxy
@@ -56,11 +56,11 @@ R⁺ᶠ⇒R⁺-cancel-∈ {R⁺ᶠxy = nil  _ _}   v∈R⁺xy         = v∈R⁺
 R⁺ᶠ⇒R⁺-cancel-∈ {R⁺ᶠxy = cons _ _ _} (here₂ v≈x)    = here₂ v≈x
 R⁺ᶠ⇒R⁺-cancel-∈ {R⁺ᶠxy = cons _ _ _} (there v∈R⁺xy) = there (R⁺ᶠ⇒R⁺-cancel-∈ v∈R⁺xy)
 
-v∉Rxy⇒fx≉fv : ∀ {v x y} {R⁺xy : R⁺ x y} → ¬ (v ∈⁺ R⁺xy) → f x ≢ f v
+v∉Rxy⇒fx≉fv : ∀ {v x y} {R⁺xy : R⁺ x y} → ¬ (v ∈⁺ R⁺xy) → to x ≢ to v
 v∉Rxy⇒fx≉fv {R⁺xy = [ Rxy ]}    v∉R⁺xy fv≡fx = v∉R⁺xy (here₁ (sym (injective fv≡fx)))
 v∉Rxy⇒fx≉fv {R⁺xy = Rxy ∷ R⁺yz} v∉R⁺xy fv≡fx = v∉R⁺xy (here₂ (sym (injective fv≡fx)))
 
-v∉∷⇒v∉ : ∀ {p v x y z} (fx∈p : f x ∈ p) {Rxy : R x y} {R⁺ᶠyz : R⁺ᶠ _ y z} → ¬ (v ∈⁺ᶠ cons fx∈p Rxy R⁺ᶠyz) → ¬ (v ∈⁺ᶠ R⁺ᶠyz)
+v∉∷⇒v∉ : ∀ {p v x y z} (fx∈p : to x ∈ p) {Rxy : R x y} {R⁺ᶠyz : R⁺ᶠ _ y z} → ¬ (v ∈⁺ᶠ cons fx∈p Rxy R⁺ᶠyz) → ¬ (v ∈⁺ᶠ R⁺ᶠyz)
 v∉∷⇒v∉ fx∈p ¬∈ v = ¬∈ (there v)
 
 transfer : ∀ {p q x y} → p ≡ q → R⁺ᶠ p x y → R⁺ᶠ q x y
@@ -69,10 +69,10 @@ transfer P.refl r = r
 ∈-transfer⁻ : ∀ {p q v x y} (p≡q : p ≡ q) (R⁺xy : R⁺ᶠ p x y) → v ∈⁺ᶠ transfer p≡q R⁺xy → v ∈⁺ᶠ R⁺xy
 ∈-transfer⁻ P.refl r ∈ = ∈
 
-contract : ∀ {p v x y} {R⁺ᶠxy : R⁺ᶠ p x y} → ¬ (v ∈⁺ᶠ R⁺ᶠxy) → R⁺ᶠ (p - f v) x y
+contract : ∀ {p v x y} {R⁺ᶠxy : R⁺ᶠ p x y} → ¬ (v ∈⁺ᶠ R⁺ᶠxy) → R⁺ᶠ (p - to v) x y
 contract {R⁺ᶠxy = nil  fx∈p Rxy}       v∉R = nil  (x∈p∧x≢y⇒x∈p-y fx∈p (v∉Rxy⇒fx≉fv v∉R)) Rxy
 contract {x = x} {y} {R⁺ᶠxy = cons {y = z} fx∈p Rxy R⁺ᶠyz} v∉R = cons (x∈p∧x≢y⇒x∈p-y fx∈p (v∉Rxy⇒fx≉fv v∉R)) Rxy
-  (transfer (p─x─y≡p─y─x _ (f x) (f _)) (contract (v∉∷⇒v∉ fx∈p v∉R)) )
+  (transfer (p─x─y≡p─y─x _ (to x) (to _)) (contract (v∉∷⇒v∉ fx∈p v∉R)) )
 
 ∈-contract⁻ : ∀ {p w v x y} {R⁺ᶠxy : R⁺ᶠ p x y} (v∉R⁺xy : ¬ (v ∈⁺ᶠ R⁺ᶠxy)) →
               w ∈⁺ᶠ contract v∉R⁺xy → w ∈⁺ᶠ R⁺ᶠxy
@@ -104,11 +104,11 @@ R⁺ᶠ-respʳ-≈ {p} x≈w (nil  fx∈p Rxy)      rewrite cong x≈w = nil  fx
 R⁺ᶠ-respʳ-≈ {p} x≈w (cons fx∈p Rxy R⁺yz) rewrite cong x≈w = cons fx∈p (respˡ x≈w Rxy) R⁺yz
 
 R⁺ᶠ? : Decidable R → ∀ {P : Subset n} → Acc _<_ ∣ P ∣ → ∀ x y → Dec (R⁺ᶠ P x y)
-R⁺ᶠ? R? {P} (acc rec) x y with f x ∈? P
+R⁺ᶠ? R? {P} (acc rec) x y with to x ∈? P
 ... | no fx∉p  = no λ {(nil fx∈p _) → fx∉p fx∈p; (cons fx∈p _ _) → fx∉p fx∈p}
 ... | yes fx∈p with R? x y
 ...   | yes Rxy = yes (nil fx∈p Rxy)
-...   | no ¬Rxy with any? (λ z → R? x z ×-dec R⁺ᶠ? R? (rec ∣ P - f x ∣ (x∈p⇒∣p-x∣<∣p∣ fx∈p)) z y)
+...   | no ¬Rxy with any? (λ z → R? x z ×-dec R⁺ᶠ? R? (rec (x∈p⇒∣p-x∣<∣p∣ fx∈p)) z y)
   (λ w≈z → Prod.map (respʳ w≈z) (R⁺ᶠ-respʳ-≈ w≈z))
 ...     | no not               = no λ {(nil _ Rxy) → ¬Rxy Rxy; (cons {y = z} _ Rxz R⁺zy) → not (z , Rxz , R⁺zy)}
 ...     | yes (z , Rxz , R⁺zy) = yes (cons fx∈p Rxz R⁺zy)
@@ -118,8 +118,8 @@ mutual
   R⁺⇒R⁺ᶠ : ∀ {x y} (R⁺xy : R⁺ x y) → Acc _<_ (length R⁺xy) → R⁺ᶠ (⊤ {n}) x y
   R⁺⇒R⁺ᶠ {x} [ Rxy ]      _ = nil  ∈⊤ Rxy
   R⁺⇒R⁺ᶠ {x} (Rxy ∷ R⁺yz) (acc rec) with x ∈⁺? R⁺yz
-  ... | yes x∈R⁺yz = R⁺⇒R⁺ᶠ (truncate x∈R⁺yz) (rec _ (s≤s (truncate-length x∈R⁺yz)))
-  ... | no  x∉R⁺yz = cons ∈⊤ Rxy (contract (x∉R⁺yz ∘ R⁺⇒R⁺ᶠ-pres-∈⁺ᶠ (rec _ ≤-refl)))
+  ... | yes x∈R⁺yz = R⁺⇒R⁺ᶠ (truncate x∈R⁺yz) (rec (s≤s (truncate-length x∈R⁺yz)))
+  ... | no  x∉R⁺yz = cons ∈⊤ Rxy (contract (x∉R⁺yz ∘ R⁺⇒R⁺ᶠ-pres-∈⁺ᶠ (rec ≤-refl)))
 
   R⁺⇒R⁺ᶠ-pres-∈⁺ᶠ : ∀ {v x y} {R⁺xy : R⁺ x y} (rec : Acc _<_ (length R⁺xy)) → v ∈⁺ᶠ (R⁺⇒R⁺ᶠ R⁺xy rec) → v ∈⁺ R⁺xy
   R⁺⇒R⁺ᶠ-pres-∈⁺ᶠ {_}     {R⁺xy = [ Rxy ]}    _         v∈R⁺xy = v∈R⁺xy

@@ -10,8 +10,6 @@ open import Relation.Binary.PropositionalEquality using (sym; _≗_)
 
 open import Data.Rational
 open import Data.Rational.Properties
-open import RoutingLib.Data.Nat.Properties using (a≤b*a)
--- open ≤-Reasoning
 
 module RoutingLib.Function.BachmannLandau where
 

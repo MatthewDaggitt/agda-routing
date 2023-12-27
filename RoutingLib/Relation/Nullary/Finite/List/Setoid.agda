@@ -13,7 +13,7 @@ import Data.List.Relation.Unary.Unique.Propositional.Properties as Uniqueₚ
 open import Data.Product using (_,_; proj₁; proj₂)
 open import Data.Product.Relation.Binary.Pointwise.NonDependent
 open import Data.Sum as Sum using (inj₁; inj₂)
-open import Data.Sum.Relation.Binary.Pointwise
+open import Data.Sum.Relation.Binary.Pointwise hiding (map)
 open import Level
 open import Relation.Nullary
 import Relation.Nullary.Decidable as Dec

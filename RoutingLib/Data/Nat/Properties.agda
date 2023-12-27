@@ -5,7 +5,7 @@ open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (∃; _,_; _×_; proj₁; map₂)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
-import Relation.Binary.Construct.Flip as Flip
+import Relation.Binary.Construct.Flip.Ord as Flip
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Nullary using (yes; no)
 
@@ -156,9 +156,6 @@ n∸[1+m]<n m (s≤s z≤n) = s≤s (m∸n≤m _ m)
 m<n⇒n∸m≡1+o : ∀ {m n} → m < n → ∃ λ o → n ∸ m ≡ suc o
 m<n⇒n∸m≡1+o {zero}  {suc n} (s≤s m<n) = n , refl
 m<n⇒n∸m≡1+o {suc m} {suc n} (s≤s m<n) = m<n⇒n∸m≡1+o m<n
-
->-nonZero⁻¹ : ∀ n → .{{NonZero n}} → n > 0
->-nonZero⁻¹ (suc n) = s≤s z≤n
 
 +-presˡ-nonZero : ∀ m n → .{{NonZero m}} → NonZero (m + n)
 +-presˡ-nonZero (suc m) n = _

@@ -17,7 +17,7 @@ open import Function using (_∘_; Injective)
 open import Function.Base using (id)
 open import Relation.Binary using (DecSetoid; Setoid; Rel)
 open import Relation.Binary.PropositionalEquality as P using (_≡_; cong)
-open import Relation.Nullary using (yes; no)
+open import Relation.Nullary using (yes; no; ¬?)
 open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Data.List
@@ -36,7 +36,7 @@ module _ (DS : DecSetoid a ℓ) where
 
   deduplicate⁺ : ∀ xs → Unique S (deduplicate _≟_ xs)
   deduplicate⁺ []       = []
-  deduplicate⁺ (x ∷ xs) = all-filter _ (deduplicate _ xs) ∷ (filter⁺ S _ (deduplicate⁺ xs))
+  deduplicate⁺ (x ∷ xs) = all-filter (¬? ∘ (x ≟_)) (deduplicate _≟_ xs) ∷ (filter⁺ S (¬? ∘ (x ≟_)) (deduplicate⁺ xs))
 
 module _ (S : Setoid a ℓ) where
   open Setoid S

@@ -55,10 +55,10 @@ module _ {ℓ₅} {Q  : Pred (Epoch × Subset n) ℓ₅}
       with i ∈? ρ s (suc t) | i ∈? ρ s t | i ∈? α s (suc t)
     ... | no  _      | _     | _     = toᵢ-⊥
     ... | yes _      | no  _ | _     = toᵢ-fromᵢ (x₀ i)
-    ... | yes _      | yes _ | no  _ = asyncIter-eq s x₀ (tAcc _ ≤-refl) i
+    ... | yes _      | yes _ | no  _ = asyncIter-eq s x₀ (tAcc ≤-refl) i
     ... | yes i∈ρ₁₊ₜ | yes _ | yes _ = J.≈ᵢ-trans (toᵢ-F _)
       (J.F-cong (η s (suc t)) (ρ s (suc t))
-        (λ j → asyncIter-eq s x₀ (tAcc (β s (suc t) i j) _) j) i∈ρ₁₊ₜ)
+        (λ j → asyncIter-eq s x₀ (tAcc {β s (suc t) i j} _) j) i∈ρ₁₊ₜ)
 
   module _ {e : Epoch} {p : Subset n} .(ep∈Q : (e , p) ∈ Q) where
     open LocalFixedPoint (y*-localFP ep∈Q) 

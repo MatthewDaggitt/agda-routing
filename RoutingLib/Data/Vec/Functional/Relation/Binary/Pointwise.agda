@@ -9,7 +9,7 @@ open import Data.Vec.Functional.Relation.Binary.Pointwise.Properties
 open import Data.Nat using (ℕ; zero; suc)
 open import Relation.Binary as B
   using (Setoid; DecSetoid; IsEquivalence; IsDecEquivalence; REL; Rel)
-open import Relation.Binary.Indexed.Homogeneous hiding (REL; Rel)
+open import Relation.Binary.Indexed.Homogeneous
 open import Relation.Binary.PropositionalEquality
   using (_≡_) renaming (refl to ≡-refl)
 open import Function using (_∘_)

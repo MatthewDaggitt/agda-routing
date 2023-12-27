@@ -1,7 +1,8 @@
-open import Data.Nat hiding (_≤?_; _≟_; compare)
+open import Data.Nat hiding (_≤?_; _≟_; compare; _⊔_)
 open import Data.Vec
 open import Data.Vec.Properties using (≡-dec)
 open import Data.Sum
+open import Level using (_⊔_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; cong; isEquivalence)
@@ -10,7 +11,7 @@ open import Relation.Nullary.Negation using (contradiction)
 
 module RoutingLib.Data.Vec.Relation.Binary.Lex {a ℓ} {A : Set a} (_<_ : Rel A ℓ) where
 
-  data Lex : ∀ {n} → Rel (Vec A n) ℓ where
+  data Lex : ∀ {n} → Rel (Vec A n) (a ⊔ ℓ) where
     base : Lex [] []
     here : ∀ {n x y} {xs ys : Vec A n} → x < y → Lex (x ∷ xs) (y ∷ ys)
     next : ∀ {n x} {xs ys : Vec A n} → Lex xs ys → Lex (x ∷ xs) (x ∷ ys)
@@ -60,7 +61,7 @@ module RoutingLib.Data.Vec.Relation.Binary.Lex {a ℓ} {A : Set a} (_<_ : Rel A 
     ; (next xs≤ys) → xs≰ys xs≤ys
     }
 
-  ≤-minimum : Decidable _≡_ → ∀ {⊥} → (∀ {x} → x ≢ ⊥ → ⊥ < x) → ∀ {n} → Minimum (Lex {n}) (replicate ⊥)
+  ≤-minimum : Decidable _≡_ → ∀ {⊥} → (∀ {x} → x ≢ ⊥ → ⊥ < x) → ∀ {n} → Minimum Lex (replicate n ⊥)
   ≤-minimum dec {⊥} bot []       = base
   ≤-minimum dec {⊥} bot (x ∷ xs) with dec x ⊥
   ... | yes refl = next (≤-minimum dec bot xs)

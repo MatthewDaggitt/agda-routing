@@ -2,16 +2,16 @@ open import Level using () renaming (zero to 0ℓ)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Data.Nat using (ℕ; zero; suc; z≤n; s≤s; ≤-pred) renaming (_≟_ to _≟ℕ_; _≤?_ to _≤ℕ?_; _≤_ to _≤ℕ_; _<_ to _<ℕ_)
-open import Data.Nat.Properties using (<-trans; ≰⇒>; <⇒≢; <⇒≯; ≤-refl; ≤-trans; 1+n≰n; _<?_; ≰⇒≥; <⇒≤)
+open import Data.Nat.Properties using (<-trans; ≰⇒>; <⇒≯; ≤-refl; ≤-trans; 1+n≰n; _<?_; ≰⇒≥; <⇒≤)
 open import Data.Fin using (Fin; _<_; _≤?_) renaming (zero to fzero; suc to fsuc)
-open import Data.Fin.Properties using (<-cmp; ≤-antisym; ≤-total; pigeonhole) renaming (_≟_ to _≟𝔽_)
+open import Data.Fin.Properties using (<⇒≢; <-cmp; ≤-antisym; ≤-total; pigeonhole) renaming (_≟_ to _≟𝔽_)
 open import Data.Sum using (inj₁; inj₂)
 open import Data.Product using (_,_; _×_; proj₁; proj₂)
 open import Data.Product.Properties using (≡-dec)
 open import Function using (_∘_)
 open import Relation.Binary hiding (NonEmpty)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; trans; subst; cong; cong₂; setoid)
-open import Relation.Nullary.Negation using (¬?)
+open import Relation.Nullary using (¬?)
 
 open import RoutingLib.Data.Nat.Properties using (<⇒≤suc)
 import RoutingLib.Relation.Binary.Construct.NonStrictToStrict.DecTotalOrder as ToStrict
@@ -307,7 +307,7 @@ length-cong (_ ∷ p≈ₚq) = cong suc (length-cong p≈ₚq)
 |p|<n {n} q@(nonEmpty e p e⇿p e∉p) with suc (length p) <? n
 ... | yes |q|<n = |q|<n
 ... | no  |q|≮n with pigeonhole (≰⇒> |q|≮n) (lookupᵥ q)
-...   | i , j , i≢j , pᵢ≡pⱼ = contradiction pᵢ≡pⱼ (lookup! q i j i≢j)
+...   | i , j , i<j , pᵢ≡pⱼ = contradiction pᵢ≡pⱼ (lookup! q i j (<⇒≢ i<j))
 
 |p|≤n : ∀ {n} (p : Path n) → length p ≤ℕ n
 |p|≤n []                  = z≤n

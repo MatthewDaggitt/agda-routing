@@ -24,9 +24,9 @@ open Setoid S renaming (Carrier to A)
 open Finite finite
 
 _≟_ : Decidable _≈_
-x ≟ y = map′ injective cong (f x Fin.≟ f y)
+x ≟ y = map′ injective cong (to x Fin.≟ to y)
 
 any? : ∀ {p} {P : Pred A p} → U.Decidable P → P Respects _≈_ → Dec (∃ λ x → P x)
 any? P? resp with Fin.any? (λ i → P? (f⁻¹ i))
 ... | yes (i , x) = yes (f⁻¹ i , x)
-... | no  ¬∃Pgi   = no λ {(x , Px) → ¬∃Pgi (f x , resp (sym (f⁻¹∘f x)) Px)}
+... | no  ¬∃Pgi   = no λ {(x , Px) → ¬∃Pgi (to x , resp (sym (f⁻¹∘f x)) Px)}

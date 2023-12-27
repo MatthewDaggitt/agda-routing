@@ -15,7 +15,6 @@ open import Function using (_∘_; flip)
 open import Data.Product.Properties using (≡-dec)
 open import Relation.Binary hiding (NonEmpty)
 open import Relation.Binary.PropositionalEquality
-open import Relation.Nullary.Negation using (¬?)
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 

@@ -4,7 +4,7 @@ import Data.Maybe.Relation.Unary.All as All
 open import Data.Nat using (ℕ; suc; z≤n; s≤s) renaming (_≟_ to _≟ℕ_; _≤?_ to _≤ℕ?_; _≤_ to _≤ℕ_; _<_ to _<ℕ_)
 open import Data.Nat.Properties using (<-trans; ≤-trans; m≢1+m+n; <⇒≢; <⇒≯; ≤-refl; m+n≮n; suc-injective; <-cmp)
 open import Data.Fin using (Fin; _<_; _≤?_; suc; zero)
-open import Data.Fin.Properties using (cmp; ≤-antisym; ≤-total; _<?_)
+open import Data.Fin.Properties using (≤-antisym; ≤-total; _<?_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (_,_; _×_)
 open import Level using () renaming (zero to 0ℓ)

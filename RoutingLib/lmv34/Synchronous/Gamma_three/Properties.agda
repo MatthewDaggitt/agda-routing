@@ -11,8 +11,8 @@ open import Data.List.Relation.Binary.Pointwise using (Pointwise; []; _∷_)
 open import Data.Nat using (zero; suc; ℕ; _*_; _+_)
 open import Function using (_∘_)
 open import Level using (_⊔_)
-open import Relation.Nullary using (yes; no; ¬_)
-open import Relation.Nullary.Negation using (contradiction; contraposition; ¬?)
+open import Relation.Nullary using (yes; no; ¬_; ¬?)
+open import Relation.Nullary.Negation using (contradiction; contraposition)
 open import Relation.Unary using (Pred; Decidable; _⇒_)
 open import Relation.Binary using (Setoid; DecSetoid; Rel; Reflexive; Symmetric; Transitive; _Respects_)
 open import Relation.Binary.PropositionalEquality as PropositionalEq using (_≡_; refl; cong)
@@ -56,7 +56,7 @@ open Gamma_two_Properties isRAlg A Imp Prot Exp A=Imp∘Prot∘Exp
 open Gamma_three isRAlg Imp Prot Exp
 open Gamma_three_Algebra isRAlg n
 
-open Membership Dec𝔸ₛ using (_∈?_; _∈_; _∉_)
+open Membership Dec𝔸ₛ using (_∈?_; _∈_; _∉_; _∉?_)
 open PermutationProperties 𝔸ₛ using (filter⁺; ++⁺; ++-identityˡ; ++-identityʳ; ++-assoc)
 open PermutationProperties′ 𝔸ₛ using (∉-resp-↭)
 
@@ -88,14 +88,14 @@ infix 4 _⇔_
 _⇔_ : ∀ {a ℓ₁ ℓ₂} {A : Set a} → Pred A ℓ₁ → Pred A ℓ₂ → Pred A _
 P ⇔ Q = λ x → (P x → Q x) × (Q x → P x)
 
-filter-lemma : ∀ {p} {P P' : Pred Assignment p} {P? : Decidable P} {P?' : Decidable P'}
+filter-lemma : ∀ {p} {P P' : Pred Assignment p} (P? : Decidable P) (P?' : Decidable P')
                xs → (∀ x → (P ⇔ P') x) → filter P? xs ↭ filter P?' xs
-filter-lemma [] P=P' = ↭-refl
-filter-lemma {P? = P?} {P?' = P?'} (x ∷ xs) P=P' with P? x | P?' x
-... | yes _  | yes _    = ↭-prep x (filter-lemma xs P=P')
+filter-lemma _ _ [] P=P' = ↭-refl
+filter-lemma P? P?' (x ∷ xs) P=P' with P? x | P?' x
+... | yes _  | yes _    = ↭-prep x (filter-lemma P? P?' xs P=P')
 ... | yes Px | no ¬P'x  = contradiction ((π₁ (P=P' x)) Px) ¬P'x
 ... | no ¬Px | yes P'x  = contradiction ((π₂ (P=P' x)) P'x) ¬Px
-... | no _   | no _     = filter-lemma xs P=P'
+... | no _   | no _     = filter-lemma P? P?' xs P=P'
 
 minus-respects-≈ₐ : ∀ {xs} → (_∉ xs) Respects _≈ₐ_
 minus-respects-≈ₐ {(x ∷ xs)} {y} {y'} y=y' Py with y' ∈? (x ∷ xs)
@@ -104,14 +104,14 @@ minus-respects-≈ₐ {(x ∷ xs)} {y} {y'} y=y' Py with y' ∈? (x ∷ xs)
 ... | no ¬Py' = ¬Py'
 
 minus-congₗ : LeftCongruent _↭_ _-_
-minus-congₗ {A} B=B' = filter-lemma A (λ x → ∉-resp-↭ B=B' , ∉-resp-↭ (↭-sym B=B'))
+minus-congₗ {x = A} B=B' = filter-lemma (_∉? _) (_∉? _) A (λ x → ∉-resp-↭ B=B' , ∉-resp-↭ (↭-sym B=B'))
 
 minus-congᵣ : RightCongruent _↭_ _-_
-minus-congᵣ A=A' = filter⁺ (λ x → ¬? (x ∈? _)) minus-respects-≈ₐ A=A'
+minus-congᵣ {x = A} A=A' = filter⁺ (λ x → ¬? (x ∈? A)) minus-respects-≈ₐ A=A'
 
 minus-cong : Congruent₂ _↭_ _-_
 minus-cong {A} {A'} {B} {B'} A=A' B=B' = begin
-  A - B ↭⟨ minus-congᵣ A=A' ⟩
+  A - B ↭⟨ minus-congᵣ {B} A=A' ⟩
   A' - B ↭⟨ minus-congₗ {A'} B=B' ⟩
   A' - B' ∎
   where open PermutationReasoning
@@ -190,7 +190,7 @@ postulate
     -- f only acts on the second projection of the elements in X and Y (leaving the first unchanged), and
     -- X and Y have unique destinations (no two (d, s) and (d, s') with s≠s').
 postulate
-  map-distrib : ∀ {f} {X} {Y} → map₂ f (X - Y) ↭ (map₂ f X) - (map₂ f Y)
+  map-distrib : ∀ {f} X Y → map₂ f (X - Y) ↭ (map₂ f X) - (map₂ f Y)
 
 ∈-†-lemma₁ : ∀ {X d v} → (d , v) ∈ X → ¬(v ≈ ∞#) → (d , v) ∈ X †
 ∈-†-lemma₁ {(d' , v') ∷ X} (here (d=d' , v=v')) v≠∞ with v' ≟ ∞#
@@ -206,34 +206,34 @@ postulate
 ∈-†-lemma₂ {(d' , v') ∷ X} {d} {v} (here dv=dv') | no _ = here dv=dv'
 ∈-†-lemma₂ {(d' , v') ∷ X} {d} {v} (there dv∈X†) | no _ = there (∈-†-lemma₂ dv∈X†)
 
-†-distrib : ∀ {X Y} → (X - Y) † ↭ (X †) - (Y †)
-†-distrib {[]} {Y} = ↭-refl
-†-distrib {(d , v) ∷ X} {Y} with (d , v) ∈? Y
+†-distrib : ∀ X Y → (X - Y) † ↭ (X †) - (Y †)
+†-distrib [] Y = ↭-refl
+†-distrib ((d , v) ∷ X) Y with (d , v) ∈? Y
 ... | yes dv∈Y = prf
   where prf : (X - Y) † ↭ (((d , v) ∷ X) †) - (Y †)
         prf with v ≟ ∞#
-        ... | yes _  = †-distrib {X} {Y}
+        ... | yes _  = †-distrib X Y
         ... | no v≠∞ = prf'
           where prf' : (X - Y) † ↭ ((d , v) ∷ (X †)) - (Y †)
                 prf' with (d , v) ∈? Y †
-                ... | yes _    = †-distrib {X} {Y}
+                ... | yes _    = †-distrib X Y
                 ... | no dv∉Y† = contradiction (∈-†-lemma₁ dv∈Y v≠∞) dv∉Y†
 ... | no dv∉Y  = prf
   where prf : ((d , v) ∷ (X - Y)) † ↭ ((d , v) ∷ X) † - Y †
         prf with v ≟ ∞#
-        ... | yes _ = †-distrib {X} {Y}
+        ... | yes _ = †-distrib X Y
         ... | no _  = prf'
           where prf' : (d , v) ∷ ((X - Y) †) ↭ ((d , v) ∷ (X †)) - Y †
                 prf' with (d , v) ∈? Y †
                 ... | yes dv∈Y† = contradiction dv∈Y† (contraposition ∈-†-lemma₂ dv∉Y)
-                ... | no _      = prep ((refl , ≈-refl)) (†-distrib {X} {Y})
+                ... | no _      = prep ((refl , ≈-refl)) (†-distrib X Y)
 
 -- Lemma A.6
 f-minus-distrib : ∀ f X Y  → f [ X - Y ] ↭ f [ X ] - f [ Y ] 
 f-minus-distrib f X Y = begin
                  f [ X - Y ]                     ≡⟨⟩
-                 (map₂ f (X - Y)) †              ↭⟨ †-cong (map-distrib {X = X}) ⟩
-                 ((map₂ f X) - (map₂ f Y)) †     ↭⟨ †-distrib {X = (map₂ f X)} ⟩
+                 (map₂ f (X - Y)) †              ↭⟨ †-cong (map-distrib X Y) ⟩
+                 ((map₂ f X) - (map₂ f Y)) †     ↭⟨ †-distrib (map₂ f X) (map₂ f Y) ⟩
                  ((map₂ f X) †) - ((map₂ f Y) †) ≡⟨⟩
                  f [ X ] - f [ Y ] 
                  ∎

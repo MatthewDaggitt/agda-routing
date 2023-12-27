@@ -46,27 +46,27 @@ module _ ((ψᵥ , ψᵢ , ψₒ , ψₓ) : Schedule₄ n) where
     , [ π₂ (Γ₃,ₓ Vᵇᵈ⁽̂ᵗ⁺̂¹⁾ Oᵇ⁽ᵗ⁺¹⁾)    , Δᵗ ] αₓ (suc t)
     )
     where Vᵗ : RoutingVector
-          Vᵗ = getV (Ω₃' S (rec t ≤-refl))
+          Vᵗ = getV (Ω₃' S (rec ≤-refl))
           Vᵇᵒ⁽ᵗ⁺̂¹⁾ : RoutingVector
-          Vᵇᵒ⁽ᵗ⁺̂¹⁾ i = (getV (Ω₃' S (rec (βₒ (suc t) i i) (s≤s (βₒ-causality t i i))))) i
+          Vᵇᵒ⁽ᵗ⁺̂¹⁾ i = (getV (Ω₃' S (rec (s≤s (βₒ-causality t i i))))) i
           Vᵇᵈ⁽̂ᵗ⁺̂¹⁾ : RoutingVector
-          Vᵇᵈ⁽̂ᵗ⁺̂¹⁾ i = (getV (Ω₃' S (rec (βₓ (suc t) i i) (s≤s (βₓ-causality t i i))))) i
+          Vᵇᵈ⁽̂ᵗ⁺̂¹⁾ i = (getV (Ω₃' S (rec (s≤s (βₓ-causality t i i))))) i
           Iᵗ : RoutingVector₂
-          Iᵗ = getI (Ω₃' S (rec t ≤-refl))
+          Iᵗ = getI (Ω₃' S (rec ≤-refl))
           Iᵇ⁽ᵗ⁺¹⁾ : RoutingVector₂
-          Iᵇ⁽ᵗ⁺¹⁾ i j = (getI (Ω₃' S (rec (βᵥ (suc t) i i) (s≤s (βᵥ-causality t i i))))) i j
+          Iᵇ⁽ᵗ⁺¹⁾ i j = (getI (Ω₃' S (rec (s≤s (βᵥ-causality t i i))))) i j
           Oᵗ : RoutingVector₂
-          Oᵗ = getO (Ω₃' S (rec t ≤-refl))
+          Oᵗ = getO (Ω₃' S (rec ≤-refl))
           Oᵇ⁽ᵗ⁺¹⁾ : RoutingVector₂
-          Oᵇ⁽ᵗ⁺¹⁾ i j = (getO (Ω₃' S (rec (βₓ (suc t) i i) (s≤s (βₓ-causality t i i))))) i j
+          Oᵇ⁽ᵗ⁺¹⁾ i j = (getO (Ω₃' S (rec (s≤s (βₓ-causality t i i))))) i j
           ∇ᵗ : RoutingVector₂
-          ∇ᵗ = get∇ (Ω₃' S (rec t ≤-refl))
+          ∇ᵗ = get∇ (Ω₃' S (rec ≤-refl))
           Δᵗ : RoutingVector₂
-          Δᵗ = getΔ (Ω₃' S (rec t ≤-refl))
+          Δᵗ = getΔ (Ω₃' S (rec ≤-refl))
           ∇ᵇ⁽ᵗ⁺¹⁾ : RoutingVector₂
-          ∇ᵇ⁽ᵗ⁺¹⁾ i j = (get∇ (Ω₃' S (rec (βₓ (suc t) j i) (s≤s (βₓ-causality t j i))))) i j
+          ∇ᵇ⁽ᵗ⁺¹⁾ i j = (get∇ (Ω₃' S (rec (s≤s (βₓ-causality t j i))))) i j
           Δᵇ⁽ᵗ⁺¹⁾ : RoutingVector₂
-          Δᵇ⁽ᵗ⁺¹⁾ i j = (getΔ (Ω₃' S (rec (βₓ (suc t) j i) (s≤s (βₓ-causality t j i))))) i j
+          Δᵇ⁽ᵗ⁺¹⁾ i j = (getΔ (Ω₃' S (rec (s≤s (βₓ-causality t j i))))) i j
 
 Ω₃ : Schedule₄ n → Γ₃-State → 𝕋 → Γ₃-State
 Ω₃ ψ S t = Ω₃' ψ S (<-wellFounded t)

@@ -10,7 +10,7 @@
 module RoutingLib.Routing.Protocols.BGPLite.Policies where
 
 open import Data.Bool as 𝔹 using (Bool; true; false; _∧_; _∨_; if_then_else_)
-open import Data.Fin.Base using (fromℕ≤; toℕ)
+open import Data.Fin.Base using (toℕ)
 open import Data.Nat using (ℕ; _≟_; _+_; _<ᵇ_; _≤ᵇ_; _∸_; _≤_; zero; suc; s≤s)
 open import Data.Nat.Properties
 open import Data.Product using (∃; ∃₂; _×_; _,_)

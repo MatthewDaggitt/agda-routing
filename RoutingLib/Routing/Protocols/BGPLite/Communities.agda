@@ -16,7 +16,6 @@ open import Data.Vec using (_[_]≔_; toList)
 open import Data.List.Relation.Binary.Lex.Strict using (Lex-≤)
 open import Function using (_on_)
 open import Relation.Binary
-open import Relation.Binary.Lattice using (Minimum)
 open import Relation.Binary.PropositionalEquality
 open import Relation.Nullary.Decidable using (⌊_⌋)
 open import Relation.Nullary.Negation

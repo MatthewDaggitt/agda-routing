@@ -92,10 +92,10 @@ _<ᶠ_ = TransClosure (_<ₐₚ_ ∪ _↝[ A ]_)
 
 -- Predicates stating whether a path contains any extensions
 
-↝∈_ : x <ᶠ y → Set
+↝∈_ : x <ᶠ y → Set _
 ↝∈_ = AnyEdge IsInj₂
 
-↝∉_ : x <ᶠ y → Set
+↝∉_ : x <ᶠ y → Set _
 ↝∉ x = ¬ (↝∈ x)
 
 -- It's decidable if a path contains any extensions

@@ -22,7 +22,7 @@ open import Data.Unit using (tt)
 open import Function using (_∘_)
 open import Relation.Binary as B using (Setoid; Rel; _Preserves_⟶_; Reflexive)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
-open import Relation.Binary.Indexed.Homogeneous hiding (Rel)
+open import Relation.Binary.Indexed.Homogeneous
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Unary using (Universal; Pred; _∈_; U)
 open import Relation.Unary.Properties using (U-Universal)
@@ -142,9 +142,9 @@ module _ {a ℓ n} (I : AsyncIterable a ℓ n) (𝓢 : Schedule n) where
   asyncIter' x₀ {suc t} (acc rec) i with i ∈? ρ (suc t) | i ∈? ρ t | i ∈? α (suc t)
   ... | no _  | _     | _     = ⊥  i
   ... | yes _ | no  _ | _     = x₀ i
-  ... | yes _ | yes _ | no  _ = asyncIter' x₀ (rec t ≤-refl) i
+  ... | yes _ | yes _ | no  _ = asyncIter' x₀ (rec ≤-refl) i
   ... | yes _ | yes _ | yes _ = F (η (suc t)) (ρ (suc t))
-    (λ j → asyncIter' x₀ (rec (β (suc t) i j) (s≤s (β-causality t i j))) j) i
+    (λ j → asyncIter' x₀ (rec (s≤s (β-causality t i j))) j) i
 
   asyncIter : S → 𝕋 → S
   asyncIter x₀ t = asyncIter' x₀ (<-wellFounded t)

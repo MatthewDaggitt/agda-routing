@@ -1,7 +1,7 @@
 
 open import Data.Nat using (ℕ; zero; suc; _⊔_; _⊓_; _+_; _≟_)
 open import Data.Nat.Properties using (≤-refl)
-open import Data.Fin using (Fin; toℕ; fromℕ; inject₁; lower₁; compare; equal; zero; suc; fromℕ≤)
+open import Data.Fin using (Fin; toℕ; fromℕ; inject₁; lower₁; compare; equal; zero; suc)
 open import Relation.Unary using (Pred)
 open import Relation.Nullary using (yes; no)
 open import Data.Product using (∃; _×_; _,_)

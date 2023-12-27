@@ -82,8 +82,8 @@ module _ (ψ : Schedule n) where
   Ω₀'-asyncIter' : ∀ X {t} (accₜ : Acc _<_ t) → Ω₀' ψ X accₜ ≈ₘ (asyncIter' Γ₀∥) ψ X accₜ
   Ω₀'-asyncIter' X {zero}  _         = ≈ₘ-refl
   Ω₀'-asyncIter' X {suc t} (acc rec) i with i ∈? α (suc t)
-  ... | no  _ = Ω₀'-asyncIter' X (rec t ≤-refl) i
-  ... | yes _ = Γ₀'-cong (λ i q j → Ω₀'-asyncIter' X (rec (β (suc t) i q) (s≤s (β-causality t i q))) q j) i
+  ... | no  _ = Ω₀'-asyncIter' X (rec ≤-refl) i
+  ... | yes _ = Γ₀'-cong (λ i q j → Ω₀'-asyncIter' X (rec (s≤s (β-causality t i q))) q j) i
   
 Ω₀-asyncIter : ∀ ψ X t → Ω₀ ψ X t ≈ₘ (asyncIter Γ₀∥) ψ X t
 Ω₀-asyncIter ψ X t = Ω₀'-asyncIter' ψ X (<-wellFounded t)
@@ -97,11 +97,11 @@ module _ (ψ : Schedule n) where
   Ω₀' ψˢʸⁿᶜ X (acc rec)            ≡⟨⟩
   [ Γ₀ X[t] , X[t] ] αˢʸⁿᶜ (suc t) ≡⟨⟩
   [ Γ₀ X[t] , X[t] ] ⊤             ≈⟨ [,]-⊤ ⟩
-  Γ₀ X[t]                          ≈⟨ Γ₀-cong (Ω₀ˢʸⁿᶜ=Γ₀' X (rec t ≤-refl)) ⟩
+  Γ₀ X[t]                          ≈⟨ Γ₀-cong (Ω₀ˢʸⁿᶜ=Γ₀' X (rec ≤-refl)) ⟩
   (Γ₀ ^ (suc t)) X                 ∎
   where open EqReasoning ℝ𝕄ₛ
         X[t] : RoutingMatrix
-        X[t] = Ω₀' ψˢʸⁿᶜ X (rec t ≤-refl)
+        X[t] = Ω₀' ψˢʸⁿᶜ X (rec ≤-refl)
 
 Ω₀ˢʸⁿᶜ=Γ₀ : ∀ X t → Ω₀ ψˢʸⁿᶜ X t ≈ₘ (Γ₀ ^ t) X
 Ω₀ˢʸⁿᶜ=Γ₀ X t = Ω₀ˢʸⁿᶜ=Γ₀' X (<-wellFounded t)

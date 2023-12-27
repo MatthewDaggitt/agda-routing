@@ -6,6 +6,7 @@
 
 open import Algebra.Bundles
 open import Algebra.Consequences.Propositional using (sel⇒idem)
+open import Algebra.Lattice.Bundles
 open import Data.Product using (proj₁; _,_)
 open import Data.Fin using (Fin; zero; suc)
 open import Data.Nat using (zero; suc)
@@ -14,7 +15,7 @@ open import Function using (_∘_)
 open import Level using (lift)
 open import Relation.Nullary using (yes; no; ¬_)
 open import Relation.Binary using (DecTotalOrder; StrictTotalOrder; Maximum; Minimum)
-import Relation.Binary.Construct.Converse as Converse
+import Relation.Binary.Construct.Flip.EqAndOrd as Converse
 import Relation.Binary.Construct.NaturalOrder.Right as RightNaturalOrder
 import Relation.Binary.Reasoning.Setoid as SetoidReasoning
 
@@ -34,6 +35,7 @@ open IsRoutingAlgebra isRoutingAlgebra
 
 open import Algebra.Definitions _≈_
 open import Algebra.Structures _≈_
+open import Algebra.Lattice.Structures _≈_
 open SetoidReasoning S
 
 ------------------------------------------------------------------------------

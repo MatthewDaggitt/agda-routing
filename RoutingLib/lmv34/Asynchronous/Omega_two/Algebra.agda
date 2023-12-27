@@ -15,7 +15,7 @@ module RoutingLib.lmv34.Asynchronous.Omega_two.Algebra
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset.Properties using (_∈?_)
 open import Data.Nat using (ℕ; zero; suc; _≤_)
-open import Data.Nat.Properties using (≤-refl; ≤-step; ≤-trans)
+open import Data.Nat.Properties using (≤-refl; m≤n⇒m≤1+n; ≤-trans)
 open import Data.Product using (_×_; _,_)
 open import Relation.Binary using (DecSetoid)
 open import Relation.Nullary using (yes; no)
@@ -99,11 +99,11 @@ module _ {n} (ψ : Schedule n) where
   ... | no  _ = ≤-refl
   ϕ-causality (suc t) i j with i ∈? α (suc (suc t))
   ... | yes _ = β-causality (suc t) i j
-  ... | no  _ = ≤-step (ϕ-causality t i j)
+  ... | no  _ = m≤n⇒m≤1+n (ϕ-causality t i j)
 
   ϕ-decreasing : ∀ t i j → ϕ t i j ≤ t
   ϕ-decreasing zero    i j = ≤-refl
-  ϕ-decreasing (suc t) i j = ≤-step (ϕ-causality t i j)
+  ϕ-decreasing (suc t) i j = m≤n⇒m≤1+n (ϕ-causality t i j)
 
 --------------------------------------------------------------------------------
 -- Follow-cycle function

@@ -25,7 +25,7 @@ module RoutingLib.Relation.Binary.Construct.NonStrictToStrict.PartialOrder
     renaming
     ( irrefl     to <-irrefl
     ; trans      to <-trans
-    ; asymmetric to <-asym
+    ; asym       to <-asym
     ; isStrictPartialOrder to <-isStrictPartialOrder
     )
 

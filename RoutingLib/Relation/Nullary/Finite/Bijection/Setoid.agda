@@ -38,13 +38,13 @@ record Finite (S : Setoid a ℓ) : Set (a ⊔ suc ℓ) where
   open Setoid S renaming (Carrier to A)
   
   f⁻¹ : Fin n → A
-  f⁻¹ i = proj₁ (surjective i)
+  f⁻¹ i = proj₁ (strictlySurjective i)
 
-  f∘f⁻¹ : ∀ x → f (f⁻¹ x) ≡ x
-  f∘f⁻¹ i = proj₂ (surjective i)
+  f∘f⁻¹ : ∀ x → to (f⁻¹ x) ≡ x
+  f∘f⁻¹ i = proj₂ (strictlySurjective i)
 
-  f⁻¹∘f : ∀ x → f⁻¹ (f x) ≈ x
-  f⁻¹∘f x = injective (f∘f⁻¹ (f x))
+  f⁻¹∘f : ∀ x → f⁻¹ (to x) ≈ x
+  f⁻¹∘f x = injective (f∘f⁻¹ (to x))
 
 
 Countable : (S : Setoid a ℓ) → Set _

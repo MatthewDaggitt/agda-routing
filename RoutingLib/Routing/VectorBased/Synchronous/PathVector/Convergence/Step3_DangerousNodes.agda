@@ -1,5 +1,5 @@
 open import Data.Nat using (ℕ; NonZero; zero; suc; z≤n; s≤s; _+_; _<_; _≤_)
-open import Data.Nat.Properties using (<⇒≱; +-suc; m≤m+n; <-transˡ; module ≤-Reasoning)
+open import Data.Nat.Properties using (<⇒≱; +-suc; m≤m+n; <-≤-trans; module ≤-Reasoning)
 open import Data.Empty using (⊥)
 open import Data.Fin using (Fin)
 open import Data.Fin.Properties using (any?)
@@ -9,9 +9,8 @@ open import Data.Product using (_,_; _×_; ∃; ∃₂; proj₁; proj₂)
 open import Data.List.Membership.Propositional.Properties using (∈-filter⁺)
 open import Data.List.Relation.Unary.All using (lookup)
 open import Function using (_∘_)
-open import Relation.Nullary using (Dec; ¬_; yes; no)
+open import Relation.Nullary using (Dec; ¬_; yes; no; _×-dec_)
 open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Nullary.Product using (_×-dec_)
 open import Relation.Unary
   using (Empty; Decidable) renaming (_∈_ to _∈ᵤ_; _∉_ to _∉ᵤ_; _⊆_ to _⊆ᵤ_)
 open import Relation.Unary.Properties using (∁?; _∩?_)
@@ -216,7 +215,7 @@ abstract
 𝓓ₙ₋₁₊ₛ-empty : ∀ s → .{{NonZero t}} → Empty (𝓓 (n-1 + s))
 𝓓ₙ₋₁₊ₛ-empty s k k∈𝓓ₙ₋₁ = contradiction
   (𝓓-length (n-1 + s) k∈𝓓ₙ₋₁)
-  (<⇒≱ (<-transˡ (lengthₑ<n (t + (n-1 + s)) (iₘᵢₙ , k)) (m≤m+n n s)))
+  (<⇒≱ (<-≤-trans (lengthₑ<n (t + (n-1 + s)) (iₘᵢₙ , k)) (m≤m+n n s)))
 
 eₘᵢₙ≤ₜ₊ₙ₋₁₊ₛe : .{{_ : NonZero t}} → ∀ s k → eₘᵢₙ ≤[ t + (n-1 + s) ] (iₘᵢₙ , k)
 eₘᵢₙ≤ₜ₊ₙ₋₁₊ₛe s k with 𝓡? (t + (n-1 + s)) k | k ∈? C

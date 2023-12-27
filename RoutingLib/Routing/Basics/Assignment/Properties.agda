@@ -15,16 +15,11 @@ import Data.Product.Relation.Binary.Lex.NonStrict as LexProduct
 open import Function.Base using (_∘_)
 open import Level using (_⊔_)
 open import Relation.Binary
-open import Relation.Binary.PropositionalEquality
+open import Relation.Binary.PropositionalEquality as ≡
   using (_≡_; _≢_; refl; sym; trans)
-open import Relation.Nullary using (¬_; Dec; yes; no)
-open import Relation.Nullary.Negation using (¬?; ¬-reflects)
-open import Relation.Nullary.Negation using (contradiction)
-open import Relation.Nullary.Product using (_×-dec_)
+open import Relation.Nullary using (¬_; Dec; yes; no; ¬?; contradiction; _×-dec_)
 open import Relation.Unary as U using (Pred; _∈_; ∁)
 import Relation.Binary.Construct.NonStrictToStrict as NonStrictToStrict
-
-import RoutingLib.Relation.Binary.PropositionalEquality as ≡
 
 open import RoutingLib.Routing.Algebra
 

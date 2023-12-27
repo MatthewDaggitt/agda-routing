@@ -113,11 +113,11 @@ Lemma-Γ₀'=Γ₁' {A} {Y} i = begin
 Ω₁'ˢʸⁿᶜ=Γ₁ V {suc t} (acc rec) = begin
   Ω₁' ψˢʸⁿᶜ V (acc rec)            ≡⟨⟩
   [ Γ₁ V[t] , V[t] ] αˢʸⁿᶜ (suc t) ≈⟨ ↭-reflexive ∘ [,]-⊤ᵢ ⟩
-  Γ₁ V[t]                          ≈⟨ Γ₁-cong (Ω₁'ˢʸⁿᶜ=Γ₁ V (rec t ≤-refl)) ⟩
+  Γ₁ V[t]                          ≈⟨ Γ₁-cong (Ω₁'ˢʸⁿᶜ=Γ₁ V (rec ≤-refl)) ⟩
   (Γ₁ ^ (suc t)) V                 ∎
   where open EqReasoning 𝕍ₛ
         V[t] : RoutingVector
-        V[t] = Ω₁' ψˢʸⁿᶜ V (rec t ≤-refl)
+        V[t] = Ω₁' ψˢʸⁿᶜ V (rec ≤-refl)
 
 Ω₁ˢʸⁿᶜ=Γ₁ : ∀ V t → Ω₁ ψˢʸⁿᶜ V t ≈ᵥ (Γ₁ ^ t) V
 Ω₁ˢʸⁿᶜ=Γ₁ V t = Ω₁'ˢʸⁿᶜ=Γ₁ V (<-wellFounded t)
@@ -139,19 +139,19 @@ module _ (ψ : Schedule n) where
     Ω₀' (r₁ ψ) (Τ₁ V) (acc rec)               ∎
     where open EqReasoning ℝ𝕄ₛ
           V[t] : RoutingVector
-          V[t] = Ω₁' ψ V (rec t ≤-refl)
+          V[t] = Ω₁' ψ V (rec ≤-refl)
           V[β[t+1]] : Fin n → RoutingVector
-          V[β[t+1]] i q = Ω₁' ψ V (rec (β (suc t) i q) (s≤s (β-causality t i q))) q
+          V[β[t+1]] i q = Ω₁' ψ V (rec (s≤s (β-causality t i q))) q
           X[β[t+1]] : Fin n → RoutingMatrix
-          X[β[t+1]] i q j = Ω₀' (r₁ ψ) (Τ₁ V) (rec (β (suc t) i q) (s≤s (β-causality t i q))) q j
+          X[β[t+1]] i q j = Ω₀' (r₁ ψ) (Τ₁ V) (rec (s≤s (β-causality t i q))) q j
           X[t] : RoutingMatrix
-          X[t] = Ω₀' (r₁ ψ) (Τ₁ V) (rec t ≤-refl)
+          X[t] = Ω₀' (r₁ ψ) (Τ₁ V) (rec ≤-refl)
 
           ─V[β[t+1]]=X[β[t+1]] : ∀ i → (─' V[β[t+1]]) i ≈ₘ X[β[t+1]] i
-          ─V[β[t+1]]=X[β[t+1]] i q j = Ω₁'=Ω₀' V (rec (β (suc t) i q) (s≤s (β-causality t i q))) q j
+          ─V[β[t+1]]=X[β[t+1]] i q j = Ω₁'=Ω₀' V (rec (s≤s (β-causality t i q))) q j
 
           ─V[t]=X[t] : ─ V[t] ≈ₘ X[t]
-          ─V[t]=X[t] = Ω₁'=Ω₀' V (rec t ≤-refl)
+          ─V[t]=X[t] = Ω₁'=Ω₀' V (rec ≤-refl)
 
 Ω₁=Ω₀ : ∀ ψ V t → Τ₁ (Ω₁ ψ V t) ≈ₘ Ω₀ (r₁ ψ) (Τ₁ V) t
 Ω₁=Ω₀ ψ V t = Ω₁'=Ω₀' ψ V (<-wellFounded t)

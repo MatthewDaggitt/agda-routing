@@ -16,8 +16,7 @@ open import Level using (_⊔_)
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; sym; trans)
-open import Relation.Nullary using (¬_; Dec; yes; no)
-open import Relation.Nullary.Negation using (¬?; ¬-reflects)
+open import Relation.Nullary using (¬_; Dec; yes; no; ¬?)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary as U using (Pred; _∈_; ∁)
 open import Relation.Binary.Construct.Closure.Transitive using (TransClosure)

@@ -37,7 +37,7 @@ module _ (S : Setoid a ℓ₁) (T : Setoid b ℓ₂) where
   cartesianProduct⁺ _∈xs _∈ys x = ∈-cartesianProduct⁺ S T ((proj₁ x) ∈xs) ((proj₂ x) ∈ys)
 
   map⁺ : ∀ {f xs} → Complete S xs → IsSurjection _≈₁_ _≈₂_ f → Complete T (map f xs)
-  map⁺ _∈xs surj y with IsSurjection.surjective surj y
+  map⁺ _∈xs surj y with IsSurjection.strictlySurjective surj y
   ... | (x , fx≈y) = ∈-resp-≈ T fx≈y (∈-map⁺ S T (IsSurjection.cong surj) (x ∈xs))
 
 module _ (S : Setoid a ℓ₁) (T : Setoid b ℓ₂) where
@@ -56,7 +56,7 @@ module _ (S? : DecSetoid a ℓ₁) where
 module _ (S : Setoid a ℓ₁) where
   open Setoid S
   
-  lookup-surjective : ∀ {xs} → Complete S xs → Surjective {A = Fin (length xs)} _≡_ _≈_ (lookup xs)
+  lookup-surjective : ∀ {xs} → Complete S xs → StrictlySurjective _≈_ (lookup xs)
   lookup-surjective _∈xs y = index (y ∈xs) , sym (lookup-index (y ∈xs))
 
 allFin⁺ : ∀ n → Complete (Fin.≡-setoid n) (allFin n)

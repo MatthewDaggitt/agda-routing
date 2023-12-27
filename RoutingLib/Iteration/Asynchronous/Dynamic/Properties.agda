@@ -43,9 +43,9 @@ module _  (ψ : Schedule n) where
   asyncIter-cong x₀ {suc t} (acc rec₁) (acc rec₂) refl i with i ∈? ρ (suc t) | i ∈? ρ t | i ∈? α (suc t)
   ... | no _       | _     | _     = ≈ᵢ-refl
   ... | yes _      | no  _ | _     = ≈ᵢ-refl
-  ... | yes _      | yes _ | no  _ = asyncIter-cong x₀ (rec₁ t _) _ refl i
+  ... | yes _      | yes _ | no  _ = asyncIter-cong x₀ (rec₁ {t} _) _ refl i
   ... | yes i∈ρ₁₊ₜ | yes _ | yes _ = F-cong (η (suc t)) (ρ (suc t))
-    (λ j → asyncIter-cong x₀ (rec₁ (β (suc t) i j) _) _ refl j) i∈ρ₁₊ₜ
+    (λ j → asyncIter-cong x₀ (rec₁ {β (suc t) i j} _) _ refl j) i∈ρ₁₊ₜ
 
   -- If a node is inactive at time t then it has the blank state
   asyncIter-inactive : ∀ x₀ {t} (rec : Acc _<_ t) {i} →

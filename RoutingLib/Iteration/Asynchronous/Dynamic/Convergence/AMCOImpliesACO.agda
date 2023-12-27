@@ -130,7 +130,7 @@ abstract
                 ∃ (λ x* → F′ x* ≈ x* × x* ∈ᵢ X × x* ∈ Accordant p)
       inner {x} x∈Aₚ x∈X (acc x-acc) with F′ x ≟ x | F-pres-Aₚ x∈X x∈Aₚ
       ... | yes fx≈x | Fx∈Aₚ = x , fx≈x , x∈X , x∈Aₚ
-      ... | no  fx≉x | Fx∈Aₚ = inner Fx∈Aₚ (F-pres-X x∈X) (x-acc _ (F-strContrOnOrbits x∈X x∈Aₚ fx≉x))
+      ... | no  fx≉x | Fx∈Aₚ = inner Fx∈Aₚ (F-pres-X x∈X) (x-acc (F-strContrOnOrbits x∈X x∈Aₚ fx≉x))
 
   x* : S
   x* = proj₁ fixedPoint

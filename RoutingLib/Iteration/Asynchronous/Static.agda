@@ -13,7 +13,7 @@ open import Level using (_⊔_; 0ℓ) renaming (suc to lsuc)
 open import Data.Fin using (Fin)
 open import Data.Fin.Subset using (Subset) renaming (_∉_ to _∉ₛ_)
 open import Data.Fin.Subset.Properties using (_∈?_)
-open import Data.Fin.Properties using (all?) renaming (setoid to 𝔽ₛ)
+open import Data.Fin.Properties using (all?)
 open import Data.Nat using (ℕ; _≤_; _+_; s≤s; _<_; zero; suc)
 open import Data.Nat.Properties using (≤-refl)
 open import Data.Nat.Induction using (Acc; acc; <-wellFounded)
@@ -21,7 +21,7 @@ open import Data.Product using (∃; _×_; _,_)
 open import Data.Unit using (tt)
 open import Relation.Binary as B using (Setoid; Rel; _Preserves_⟶_; Reflexive)
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
-open import Relation.Binary.Indexed.Homogeneous hiding (Rel)
+open import Relation.Binary.Indexed.Homogeneous
 open import Relation.Nullary using (¬_; yes; no)
 open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Unary using (Pred; _∈_; U)
@@ -116,8 +116,8 @@ module _ {a ℓ n} (I∥ : AsyncIterable a ℓ n) (ψ : Schedule n) where
   asyncIter' : S → ∀ {t} → Acc _<_ t → S
   asyncIter' x₀ {zero} _ i = x₀ i
   asyncIter' x₀ {suc t} (acc rec) i with i ∈? α (suc t)
-  ... | no  _ = asyncIter' x₀ (rec t ≤-refl) i
-  ... | yes _ = F (λ j → asyncIter' x₀ (rec (β (suc t) i j) (s≤s (β-causality t i j))) j) i
+  ... | no  _ = asyncIter' x₀ (rec ≤-refl) i
+  ... | yes _ = F (λ j → asyncIter' x₀ (rec (s≤s (β-causality t i j))) j) i
 
   asyncIter : S → 𝕋 → S
   asyncIter x₀ t = asyncIter' x₀ (<-wellFounded t)

@@ -4,8 +4,6 @@ open import Data.Fin.Subset using (Subset; _∈_; ∁)
 open import Data.Fin.Subset.Properties using (x∉p⇒x∈∁p; _∈?_)
 open import Data.Product using (∃; _,_; proj₁; proj₂)
 open import Data.Product.Properties using (,-injectiveˡ)
-open import Function.Equality using (_⟨$⟩_)
-open import Function.Bijection using (Bijection)
 open import Level using (_⊔_)
 import Relation.Binary as B
 open import Relation.Binary.Indexed.Homogeneous

@@ -4,9 +4,7 @@ module RoutingLib.Relation.Unary where
 
 open import Data.Fin using (Fin)
 open import Data.Product using (∃; _,_; _×_)
-open import Function.Equality using (_⟨$⟩_)
-open import Function.Injection using (_↣_; Injection)
-open import Function.Bijection using (_⤖_)
+open import Function
 open import Level using (Level)
 open import Relation.Unary
 open import Relation.Binary using (Setoid)

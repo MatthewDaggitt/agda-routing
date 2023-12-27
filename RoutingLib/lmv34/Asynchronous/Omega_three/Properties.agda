@@ -56,19 +56,19 @@ open DecSetoid Γ₃-State-decSetoid using () renaming
   (Γ₃,ᵢ I[t] (∇[t] , Δ[t])) ,
   (Γ₃,ₒ V[t]) ,
   (Γ₃,ₓ V[t] O[t])                                      ≡⟨⟩
-  Γ₃ (V[t] , I[t] , O[t] , ∇[t] , Δ[t])                 ≈⟨ Γ₃-cong (Ω₃'ˢʸⁿᶜ=Γ₃ S (rec t ≤-refl)) ⟩
+  Γ₃ (V[t] , I[t] , O[t] , ∇[t] , Δ[t])                 ≈⟨ Γ₃-cong (Ω₃'ˢʸⁿᶜ=Γ₃ S (rec ≤-refl)) ⟩
   (Γ₃ ^ (suc t)) S                                      ∎
   where open EqReasoning 𝕊ₛ
         V[t] : RoutingVector
-        V[t] = getV (Ω₃' ψ₄ˢʸⁿᶜ S (rec t ≤-refl))
+        V[t] = getV (Ω₃' ψ₄ˢʸⁿᶜ S (rec ≤-refl))
         I[t] : RoutingVector₂
-        I[t] = getI (Ω₃' ψ₄ˢʸⁿᶜ S (rec t ≤-refl))
+        I[t] = getI (Ω₃' ψ₄ˢʸⁿᶜ S (rec ≤-refl))
         O[t] : RoutingVector₂
-        O[t] = getO (Ω₃' ψ₄ˢʸⁿᶜ S (rec t ≤-refl))
+        O[t] = getO (Ω₃' ψ₄ˢʸⁿᶜ S (rec ≤-refl))
         ∇[t] : RoutingVector₂
-        ∇[t] = get∇ (Ω₃' ψ₄ˢʸⁿᶜ S (rec t ≤-refl))
+        ∇[t] = get∇ (Ω₃' ψ₄ˢʸⁿᶜ S (rec ≤-refl))
         Δ[t] : RoutingVector₂
-        Δ[t] = getΔ (Ω₃' ψ₄ˢʸⁿᶜ S (rec t ≤-refl))
+        Δ[t] = getΔ (Ω₃' ψ₄ˢʸⁿᶜ S (rec ≤-refl))
 
 Ω₃ˢʸⁿᶜ=Γ₃ : ∀ S t → Ω₃ ψ₄ˢʸⁿᶜ S t ≈ₛ (Γ₃ ^ t) S
 Ω₃ˢʸⁿᶜ=Γ₃ S t = Ω₃'ˢʸⁿᶜ=Γ₃ S (<-wellFounded t)

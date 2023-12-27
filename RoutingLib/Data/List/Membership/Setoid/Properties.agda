@@ -51,10 +51,6 @@ module _ (S : Setoid c ℓ) where
   index-cong (there x∈xs) (here y≈z)   (z≉xs ∷ xs!) x≈y = contradiction (∈-resp-≈ S (trans x≈y y≈z) x∈xs) (All¬⇒¬Any z≉xs)
   index-cong (there x∈xs) (there y∈xs) (_ ∷ xs!)    x≈y = cong suc (index-cong x∈xs y∈xs xs! x≈y)
 
-  index-injective : ∀ {xs} → Unique S xs → ∀ {x y} {x∈xs : x ∈ xs} {y∈xs : y ∈ xs} → index x∈xs ≡ index y∈xs → x ≈ y
-  index-injective (_ ∷ _)   {x∈xs = here  x≈y}  {here  z≈y}  eq = trans x≈y (sym z≈y)
-  index-injective (x ∷ xs!) {x∈xs = there x∈xs} {there y∈xs} eq = index-injective xs! {x∈xs = x∈xs} {y∈xs} (suc-injective eq)
-
   index-lookup : ∀ {xs} → Unique S xs → {i : Fin (length xs)} (xsᵢ∈xs : lookup xs i ∈ xs) → index xsᵢ∈xs ≡ i
   index-lookup (_    ∷ xs!) {zero}  (here px)      = refl
   index-lookup (x∉xs ∷ xs!) {suc i} (here  xsᵢ≈x)  = contradiction (∈-resp-≈ S xsᵢ≈x (∈-lookup S _ i)) (All¬⇒¬Any x∉xs)

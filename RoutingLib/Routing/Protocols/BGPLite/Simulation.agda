@@ -14,7 +14,7 @@ open import Data.Maybe using (just; nothing; Is-just)
 open import Data.Maybe.Properties using (just-injective)
 open import Data.Nat using (ℕ; _≤_)
 open import Data.Nat.Base using (_^_)
-open import Data.Nat.Properties using (≤-refl; <-cmp; <-transˡ)
+open import Data.Nat.Properties using (≤-refl; <-cmp; <-≤-trans)
 open import Data.List.Properties using (∷-injectiveˡ)
 open import Data.Fin using (Fin; toℕ)
 open import Data.Fin.Properties using (toℕ-injective)
@@ -109,7 +109,7 @@ isIncreasing {_} {i} {j} f (valid l cs p) with ▷-result f l cs p
 ...   | inj₂ v≤f▷v = refl
 ...   | inj₁ f▷v≤v = contradiction
   (subst (_≤ᵣ _) f▷v≡r f▷v≤v)
-  (≤ᵣ-reject l≤k (<-transˡ ≤-refl (inflate-length _ m)))
+  (≤ᵣ-reject l≤k (<-≤-trans ≤-refl (inflate-length _ m)))
 
 isRoutingAlgebra : IsRoutingAlgebra Aₐₗₜ
 isRoutingAlgebra = record

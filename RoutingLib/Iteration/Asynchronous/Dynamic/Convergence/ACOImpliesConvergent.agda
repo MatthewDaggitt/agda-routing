@@ -141,7 +141,7 @@ module _ (ψ : Schedule n)
   expiry⇒wellFormed : ∀ {s e i} → MessagesTo i ExpireIn [ s , e ] →
                       MessagesToNode i AccordantAtTime e
   expiry⇒wellFormed {s} {e} {i} (mkₑ (mkₛₑ s≤e ηₛ≡ηₑ) expᵢ) {t} e<t (mkₛₑ _ ηₑ≡ηₜ) {j} {accβ} j∉ρₜ
-    with trans ηₛ≡ηₑ ηₑ≡ηₜ | β-decreasing i j (<-transʳ z≤n e<t) 
+    with trans ηₛ≡ηₑ ηₑ≡ηₜ | β-decreasing i j (≤-<-trans z≤n e<t) 
   ... | ηₛ≡ηₜ | βt≤t = begin⟨ expᵢ e<t j , βt≤t ⟩
     ∴ β t i j ∈ₜ [ s , t ] $⟨ η-inRangeₑ ηₛ≡ηₜ ⟩
     ∴ η (β t i j) ≡ η t    $⟨ (λ prf → j∉ρₜ ∘ ∈ρ-subst prf) ⟩
@@ -184,7 +184,7 @@ module _ (ψ : Schedule n)
                         MessagesToNode i AccordantAtTime s →
                         MessagesToNode i AccordantAtTime e
   accordant-stability {s} {e} {i} η[s,e]@(mkₛₑ s≤e _) m∈A e<t η[e,t] =
-    m∈A (<-transʳ s≤e e<t) (η[s,e] ++ₛₑ η[e,t])
+    m∈A (≤-<-trans s≤e e<t) (η[s,e] ++ₛₑ η[e,t])
 
   state-stability : ∀ {k s e i} → SubEpoch [ s , e ] →
                     ComputationAtNode i InBox k AtTime s →
@@ -200,7 +200,7 @@ module _ (ψ : Schedule n)
   ...   | ηₛ≡ηₑ , ηₑ≡η₁₊ₑ , cₛ∈C , cₑ∈C with i ∈? ρ (suc e) | i ∈? ρ e | i ∈? α (suc e)
   ...     | no  i∉ρ₁₊ₑ | _       | _     = B-null c₁₊ₑ∈C i∉ρ₁₊ₑ
   ...     | yes i∈ρ₁₊ₑ | no i∉ρₑ | _     = contradiction (∈ρ-subst (sym ηₑ≡η₁₊ₑ) i∈ρ₁₊ₑ) i∉ρₑ
-  ...     | yes _      | yes _   | no  _ = begin⟨ state-stability (mkₛₑ s≤e ηₛ≡ηₑ) (s∈Bₖ , m∈Bₖ , m∈A) cₑ∈C (rec e ≤-refl) ⟩
+  ...     | yes _      | yes _   | no  _ = begin⟨ state-stability (mkₛₑ s≤e ηₛ≡ηₑ) (s∈Bₖ , m∈Bₖ , m∈A) cₑ∈C (rec ≤-refl) ⟩
     ∴ δ' x {e} _ i ∈ B cₑ∈C   (suc k) i  $⟨ δ'∈-resp-Bₜᵢ e cₑ∈C c₁₊ₑ∈C ηₑ≡η₁₊ₑ ⟩
     ∴ δ' x {e} _ i ∈ B c₁₊ₑ∈C (suc k) i  ∎
   ...     | yes i∈ρ₁₊ₑ | yes _   | yes _ = begin⟨ (λ j → m∈Bₖ (s≤s z≤n) cₛ∈C (s≤s s≤e) η[s,1+e]) ⟩
@@ -212,7 +212,7 @@ module _ (ψ : Schedule n)
                       MessagesToNode i InBox k AtTime s →
                       MessagesToNode i InBox k AtTime e
   message-stability η[s,e]@(mkₛₑ s≤e ηₛ≡ηₑ) m∈b cₑ∈C e<t η[e,t] {j} {recβ} =
-    δ'∈-resp-Bₜᵢ (β _ _ _) cₛ∈C cₑ∈C ηₛ≡ηₑ (m∈b cₛ∈C (<-transʳ s≤e e<t) (η[s,e] ++ₛₑ η[e,t]))
+    δ'∈-resp-Bₜᵢ (β _ _ _) cₛ∈C cₑ∈C ηₛ≡ηₑ (m∈b cₛ∈C (≤-<-trans s≤e e<t) (η[s,e] ++ₛₑ η[e,t]))
     where cₛ∈C = η-pres-∈C ηₛ≡ηₑ cₑ∈C
 
 --------------------------------------------------------------------------
@@ -242,7 +242,7 @@ module _ (ψ : Schedule n)
                      MessagesToNode i InBox k AtTime e
   advance-messages {s} {e} {k} {i} (mkₑ (mkₛₑ _ ηₛ≡ηₑ) expiryᵢ) c∈Bₖ cₑ∈C e<t (mkₛₑ _ ηₑ≡ηₜ) {j} {recβ}
     with expiryᵢ e<t j
-  ... | s≤β with η-inRange (trans ηₛ≡ηₑ ηₑ≡ηₜ) (s≤β , (β-decreasing i j (<-transʳ z≤n e<t)))
+  ... | s≤β with η-inRange (trans ηₛ≡ηₑ ηₑ≡ηₜ) (s≤β , (β-decreasing i j (≤-<-trans z≤n e<t)))
   ...   | (ηₛ≡ηβ , ηβ≡ηₜ) with trans ηβ≡ηₜ (sym ηₑ≡ηₜ)
   ...     | ηβ≡ηₑ with η-pres-∈C ηβ≡ηₑ cₑ∈C
   ...       | β∈C with j ∈? ρ s

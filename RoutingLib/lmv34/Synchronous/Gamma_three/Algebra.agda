@@ -2,7 +2,6 @@ open import Algebra.Core using (Op₂)
 open import Data.List using (List; []; _∷_; _++_; all; filter)
 open import Data.Nat using (ℕ)
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
-open import Relation.Nullary.Negation using (¬?)
 
 import Data.List.Membership.DecSetoid as Membership′
 

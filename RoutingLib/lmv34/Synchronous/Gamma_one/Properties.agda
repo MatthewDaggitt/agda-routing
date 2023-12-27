@@ -22,8 +22,8 @@ import Data.List.Relation.Unary.Sorted.TotalOrder.Properties as SortedProperties
 open import Data.Sum using (inj₁; inj₂)
 open import Function.Base using (id)
 open import Level using (Level; 0ℓ; _⊔_)
-open import Relation.Nullary using (¬_; yes; no; does; proof; _because_; ofʸ; ofⁿ)
-open import Relation.Nullary.Negation using (¬?; contradiction; contraposition)
+open import Relation.Nullary using (¬_; ¬?; yes; no; does; proof; _because_; ofʸ; ofⁿ)
+open import Relation.Nullary.Negation using (contradiction; contraposition)
 open import Relation.Unary using (Pred; Decidable; ∁)
 open import Function using (_∘_)
 open import Relation.Binary as B 
@@ -168,8 +168,8 @@ isValid-f {d} {v} {f} = contraposition (x=∞⇒fx=∞ {v} {f})
 isInvalid-f : ∀ {d v} {f : PathWeight → PathWeight} → IsInvalid (d , v) → IsInvalid (d , f v)
 isInvalid-f {d} {v} {f} v=∞ = x=∞⇒fx=∞ {v} {f} v=∞
 
-invalid-valid : ∀ {p} → IsInvalid p → ¬ (IsValid p)
-invalid-valid p=∞ = λ p≠∞ → contradiction p=∞ p≠∞
+invalid-valid : ∀ p → IsInvalid p → ¬ (IsValid p)
+invalid-valid p p=∞ = contradiction p=∞
 
 valid-invalid : ∀ {p} → ¬ (IsValid p) → IsInvalid p
 valid-invalid {d , v} ¬valid with v ≟ ∞#
@@ -227,10 +227,10 @@ invalid-pair d = ≈-refl
 †-idem xs = ↭-reflexive (filter-idem IsValid? xs)
 
 †-cons-valid : ∀ x xs → IsValid x → (x ∷ xs) † ≡ x ∷ (xs †)
-†-cons-valid x xs valid = filter-accept IsValid? valid
+†-cons-valid x xs valid = filter-accept IsValid? {xs = xs} valid
 
 †-cons-invalid : ∀ x xs → IsInvalid x → (x ∷ xs) † ≡ xs †
-†-cons-invalid x xs invalid = filter-reject IsValid? (invalid-valid {x} invalid)
+†-cons-invalid x xs invalid = filter-reject IsValid? {xs = xs} (invalid-valid x invalid)
 
 map-†-lemma : ∀ f xs → (map₂ f xs) † ≡ (map₂ f (xs †)) †
 map-†-lemma f []             = refl
@@ -253,10 +253,10 @@ con-<-† {v} {x ∷ xs} xs↗ (just v<x) with IsInvalid? x
 †-distrib-sort : ∀ xs → sort (xs †) ≋ (sort xs) †
 †-distrib-sort xs = sort-filter-≋ IsValid? valid-cong xs
 
-†-distrib-mergeSorted-⊕ : ∀ {x y xs ys} → x ≈ₐ y →
+†-distrib-mergeSorted-⊕ : ∀ {x y} xs ys → x ≈ₐ y →
                           mergeSorted (xs †) (ys †) ↭ (mergeSorted xs ys) † →
                           mergeSorted ((x ∷ xs) †) ((y ∷ ys) †) ↭ (x ⊕ₐ y ∷ mergeSorted xs ys) †
-†-distrib-mergeSorted-⊕ {x} {y} {xs} {ys} x≈y rec with IsInvalid? x | IsInvalid? y
+†-distrib-mergeSorted-⊕ {x} {y} xs ys x≈y rec with IsInvalid? x | IsInvalid? y
 ... | yes xⁱ | no  yᵛ = contradiction (invalid-cong x≈y xⁱ) yᵛ
 ... | no  xᵛ | yes yⁱ = contradiction yⁱ (valid-cong x≈y xᵛ)
 ... | yes xⁱ | yes yⁱ = begin
@@ -279,7 +279,7 @@ con-<-† {v} {x ∷ xs} xs↗ (just v<x) with IsInvalid? x
   | †-distrib-mergeSorted xs↗         (tail↗ ys↗)
   | †-distrib-mergeSorted (tail↗ xs↗) ys↗
   | †-distrib-mergeSorted (tail↗ xs↗) (tail↗ ys↗)
-... | tri≈ _ x≈y _ | _ | _ | rec₃ = †-distrib-mergeSorted-⊕ x≈y rec₃
+... | tri≈ _ x≈y _ | _ | _ | rec₃ = †-distrib-mergeSorted-⊕ xs ys x≈y rec₃
 ... | tri< x<y _ _ | _ | rec₂ | _ = prf
   where prf : mergeSorted ((x ∷ xs) †) ((y ∷ ys) †) ↭ (x ∷ (mergeSorted xs (y ∷ ys))) †
         prf with IsInvalid? x
@@ -356,7 +356,7 @@ LemmaA₂ f g = begin
   where open PermutationReasoning
 
 tabulate-∞ : (tabulate (_, ∞#)) † ≡ []
-tabulate-∞ = filter-none IsValid? (All.tabulate⁺ λ d → invalid-valid {d , ∞#} (invalid-pair d))
+tabulate-∞ = filter-none IsValid? (All.tabulate⁺ λ d → invalid-valid (d , ∞#) (invalid-pair d))
 
 LemmaA₂-iter : ∀ {k} (f : Fin k → Fin n → PathWeight) →
                ⨁ₛ (λ q → ((tabulate λ d → (d , f q d)) †)) ↭ (tabulate λ d → (d , (⨁ λ q → f q d))) †

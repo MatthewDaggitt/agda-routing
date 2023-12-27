@@ -12,7 +12,6 @@ open import Relation.Nullary.Negation using (contradiction)
 open import Relation.Binary using (Setoid)
 open import Relation.Binary.PropositionalEquality
   using (_≡_; _≢_; refl; subst; cong; isEquivalence; sym; trans; subst₂; module ≡-Reasoning)
-import Function.Bijection as Bijection
 
 𝔽ₛ : ℕ → Setoid _ _
 𝔽ₛ = ≡-setoid
@@ -50,7 +49,7 @@ fromℕ<-cancel-< i<n j<n = subst₂ _<ℕ_ (toℕ-fromℕ< i<n) (toℕ-fromℕ<
 
 fromℕ<-irrelevant : ∀ {n i j} (i<n : i <ℕ n) (j<n : j <ℕ n) →
                     i ≡ j → fromℕ< i<n ≡ fromℕ< j<n
-fromℕ<-irrelevant i<n j<n refl = cong fromℕ< (ℕₚ.<-irrelevant i<n j<n)
+fromℕ<-irrelevant i<n j<n refl rewrite ℕₚ.<-irrelevant i<n j<n = refl
 
 ------------------------------------------------------------------------
 -- fromℕ<″
@@ -99,7 +98,7 @@ i≰j⇒i≢0 i≰j = i<j⇒j≢0 (≰⇒> i≰j)
 
 ≤-pred : ∀ {n} (i : Fin n) → pred i ≤ i
 ≤-pred fzero    = z≤n
-≤-pred (fsuc i) = ℕₚ.≤-step (ℕₚ.≤-reflexive (toℕ-inject₁ i))
+≤-pred (fsuc i) = ℕₚ.m≤n⇒m≤1+n (ℕₚ.≤-reflexive (toℕ-inject₁ i))
 
 cast-injective : ∀ {m n} (m≡n : m ≡ n) {i j : Fin m} → cast m≡n i ≡ cast m≡n j → i ≡ j
 cast-injective {suc m} {suc n} m≡n {fzero}  {fzero} eq  = refl

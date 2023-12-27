@@ -81,7 +81,7 @@ module _ {a ℓ} (I∥ : AsyncIterable a ℓ n) where
   ψˢʸⁿᶜ-isSynchronous' x₀ {zero}  _         i = ≈ᵢ-refl
   ψˢʸⁿᶜ-isSynchronous' x₀ {suc t} (acc rec) i with i ∈? αˢʸⁿᶜ (suc t)
   ... | no i∉α  = contradiction ∈⊤ i∉α
-  ... | yes i∈α = F-cong (λ j → ψˢʸⁿᶜ-isSynchronous' x₀ (rec t ≤-refl) j) i
+  ... | yes i∈α = F-cong (λ j → ψˢʸⁿᶜ-isSynchronous' x₀ (rec ≤-refl) j) i
 
   ψˢʸⁿᶜ-isSynchronous : ∀ x₀ t → asyncIter I∥ ψˢʸⁿᶜ x₀ t ≈ (F ^ t) x₀
   ψˢʸⁿᶜ-isSynchronous x₀ t = ψˢʸⁿᶜ-isSynchronous' x₀ (<-wellFounded t)

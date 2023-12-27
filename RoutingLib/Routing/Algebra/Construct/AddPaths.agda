@@ -50,8 +50,8 @@ _≈ₓ_ = (Pointwise _≈_ _≡_)
 _⊕ₗₑₓ_ : Op₂ (PathWeight × EPath)
 _⊕ₗₑₓ_  = lex
 
-≈ₓ-refl : Reflexive (Pointwise {A₂ = EPath} _≈_ _≡_)
-≈ₓ-refl = Pointwise.×-refl {_∼₁_ = _≈_} {_≡_} ≈-refl refl
+≈ₓ-refl : Reflexive (Pointwise {B = EPath} _≈_ _≡_)
+≈ₓ-refl = Pointwise.×-refl {R = _≈_} {S = _≡_} ≈-refl refl
 
 ≈ₓ-cong : Congruent₂ _≈ₓ_ _⊕ₗₑₓ_
 ≈ₓ-cong = Lex.cong
@@ -73,13 +73,13 @@ _≈⁺_ : Rel PathWeight⁺ _
 _≈⁺_ = PointedEq _≈ₓ_ 
 
 ≈⁺-refl : Reflexive _≈⁺_
-≈⁺-refl = ≈∙-refl _≈ₓ_ ( Pointwise.×-refl {_∼₁_ = _≈_} {_∼₂_ = _≡_} ≈-refl  refl ) 
+≈⁺-refl = ≈∙-refl _≈ₓ_ ( Pointwise.×-refl {R = _≈_} {S = _≡_} ≈-refl  refl ) 
 
 ≈⁺-sym : Symmetric _≈⁺_
-≈⁺-sym = ≈∙-sym _≈ₓ_ ( Pointwise.×-symmetric {_∼₁_ = _≈_} {_∼₂_ = _≡_} ≈-sym sym ) 
+≈⁺-sym = ≈∙-sym _≈ₓ_ ( Pointwise.×-symmetric {R = _≈_} {S = _≡_} ≈-sym sym ) 
 
 ≈⁺-trans : Transitive _≈⁺_
-≈⁺-trans = ≈∙-trans _≈ₓ_ ( Pointwise.×-transitive {_∼₁_ = _≈_} {_∼₂_ = _≡_} ≈-trans trans ) 
+≈⁺-trans = ≈∙-trans _≈ₓ_ ( Pointwise.×-transitive {R = _≈_} {S = _≡_} ≈-trans trans ) 
 
 _≉⁺_ : Rel PathWeight⁺ _
 x ≉⁺ y = ¬ (x ≈⁺ y)

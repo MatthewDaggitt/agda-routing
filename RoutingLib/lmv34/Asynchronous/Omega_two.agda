@@ -43,17 +43,17 @@ module _ ((ψᵥ , ψᵢ , ψₒ) : Schedule₃ n) where
     , [ Γ₂,ₒ Vᵇ⁽ᵗ⁺̂¹⁾ , Oᵗ ] αₒ (suc t)
     )
     where Vᵗ : RoutingVector
-          Vᵗ = getV (Ω₂' S (rec t ≤-refl))
+          Vᵗ = getV (Ω₂' S (rec ≤-refl))
           Vᵇ⁽ᵗ⁺̂¹⁾ : RoutingVector
-          Vᵇ⁽ᵗ⁺̂¹⁾ i = (getV (Ω₂' S (rec (βₒ (suc t) i i) (s≤s (βₒ-causality t i i))))) i
+          Vᵇ⁽ᵗ⁺̂¹⁾ i = (getV (Ω₂' S (rec (s≤s (βₒ-causality t i i))))) i
           Iᵗ : RoutingVector₂
-          Iᵗ = getI (Ω₂' S (rec t ≤-refl))
+          Iᵗ = getI (Ω₂' S (rec ≤-refl))
           Iᵇ⁽ᵗ⁺¹⁾ : RoutingVector₂
-          Iᵇ⁽ᵗ⁺¹⁾ i j = (getI (Ω₂' S (rec (βᵥ (suc t) i i) (s≤s (βᵥ-causality t i i))))) i j
+          Iᵇ⁽ᵗ⁺¹⁾ i j = (getI (Ω₂' S (rec (s≤s (βᵥ-causality t i i))))) i j
           Oᵗ : RoutingVector₂
-          Oᵗ = getO (Ω₂' S (rec t ≤-refl))
+          Oᵗ = getO (Ω₂' S (rec ≤-refl))
           Oᵇ⁽ᵗ⁺¹⁾ : RoutingVector₂
-          Oᵇ⁽ᵗ⁺¹⁾ i j = (getO (Ω₂' S (rec (βᵢ (suc t) j i) (s≤s (βᵢ-causality t j i))))) i j
+          Oᵇ⁽ᵗ⁺¹⁾ i j = (getO (Ω₂' S (rec (s≤s (βᵢ-causality t j i))))) i j
 
 Ω₂ : Schedule₃ n → Γ₂-State → 𝕋 → Γ₂-State
 Ω₂ ψ S t = Ω₂' ψ S (<-wellFounded t)

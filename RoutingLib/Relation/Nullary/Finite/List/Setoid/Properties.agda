@@ -3,9 +3,7 @@ open import Relation.Binary
 
 open import RoutingLib.Relation.Nullary.Finite.List.Setoid
 
-module RoutingLib.Relation.Nullary.Finite.List.Setoid.Properties 
-  
-  where
+module RoutingLib.Relation.Nullary.Finite.List.Setoid.Properties where
 
 open import Data.Fin hiding (_≟_)
 open import Data.List
@@ -20,17 +18,17 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Function
 open import Level
 open import Relation.Nullary
-import Relation.Nullary.Decidable as Dec
-open import Relation.Binary.PropositionalEquality using (_≡_; setoid; cong)
+open import Relation.Binary.PropositionalEquality as P using (_≡_; setoid; cong)
 open import Data.Product.Relation.Binary.Pointwise.NonDependent using (_×ₛ_)
 open import Data.Sum.Relation.Binary.Pointwise using (_⊎ₛ_; inj₁; inj₂)
+open import Function.Consequences
+open import Function.Structures.Biased
 
 open import RoutingLib.Data.List
 open import RoutingLib.Data.List.Properties
 open import RoutingLib.Data.List.Membership.Setoid.Properties
 import RoutingLib.Data.List.Relation.Unary.Unique.Setoid.Properties as Unique
 import RoutingLib.Data.List.Relation.Unary.Complete.Setoid.Properties as Complete
-import RoutingLib.Function.Properties.Bijection as Bijection
 import RoutingLib.Relation.Nullary.Finite.Bijection.Setoid as Bijection
 
 private
@@ -44,19 +42,13 @@ module _ where
   Finite⇒Finiteₛ {S = S} finite = record
     { n         = length xs
     ; bijection = record
-      { f         = index ∘ complete
+      { to        = index ∘ complete
       ; cong      = index-cong S (complete _) (complete _) unique
-      ; bijective = index-injective S unique , λ i → lookup xs i , index-lookup S unique (complete _)
+      ; bijective = index-injective S (complete _) (complete _) ,
+                    strictlySurjective⇒surjective P.trans (index-cong S (complete _) (complete _) unique) (λ i → lookup xs i , index-lookup S unique (complete _))
       }
-    } where open Finite finite
-{-
-  Finiteₛ⇒Finite : Bijection.Finite S → Finite S
-  Finiteₛ⇒Finite {S = S} finite = record
-    { xs       = tabulate f⁻¹
-    ; complete = λ x → ∈-resp-≈ S (f⁻¹∘f x) (∈-tabulate⁺ S (f x))
-    ; unique   = Unique.tabulate⁺ S λ v≈u → {!!}
-    } where open Bijection.Finite finite
--}
+    } where open Finite finite; open Setoid S
+
 module _ (finite : Finite S) (T? : DecSetoid b ℓ₂) where
 
   open DecSetoid T? using (_≟_) renaming (setoid to T)
@@ -64,7 +56,7 @@ module _ (finite : Finite S) (T? : DecSetoid b ℓ₂) where
   
   via-dec-surjection : Surjection S T → Finite T
   via-dec-surjection surj = record
-    { xs       = deduplicate _≟_ (map f xs)
+    { xs       = deduplicate _≟_ (map to xs)
     ; complete = Complete.deduplicate⁺ T? (Complete.map⁺ S T complete isSurjection)
-    ; unique   = Unique.deduplicate⁺ T? (map f xs)
+    ; unique   = Unique.deduplicate⁺ T? (map to xs)
     } where open Surjection surj

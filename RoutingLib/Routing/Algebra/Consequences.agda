@@ -1,7 +1,7 @@
 open import Data.Product using (_×_; ∃; ∃₂; _,_; proj₁; proj₂)
 open import Relation.Binary.PropositionalEquality using (refl)
 open import Relation.Nullary using (¬_; does; Dec; yes; no)
-open import Relation.Nullary.Negation using (¬?; contradiction)
+open import Relation.Nullary.Negation using (contradiction)
 
 open import RoutingLib.Routing.Algebra
 

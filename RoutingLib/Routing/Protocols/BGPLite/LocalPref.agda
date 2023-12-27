@@ -69,4 +69,4 @@ suc l - suc x = inject₁ l - x
 l-x≤l : ∀ l x → l - x ≤ l
 l-x≤l l       zero    = ≤ˡᵖ-refl
 l-x≤l zero    (suc x) = ≤ˡᵖ-refl
-l-x≤l (suc l) (suc x) = Nat.≤-step (≤-trans (l-x≤l (inject₁ l) x) (≤-reflexive (Fin.toℕ-inject₁ l)))
+l-x≤l (suc l) (suc x) = Nat.m≤n⇒m≤1+n (≤-trans (l-x≤l (inject₁ l) x) (≤-reflexive (Fin.toℕ-inject₁ l)))

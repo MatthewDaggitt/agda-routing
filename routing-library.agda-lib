@@ -1,4 +1,4 @@
 name: routing-library
-depend: standard-library-1.7
+depend: standard-library-2.0
 include: ./
 flags: --safe

@@ -4,7 +4,7 @@ module RoutingLib.Data.Maybe.Relation.Binary.Connected.Left where
 open import Level
 open import Data.Product
 open import Data.Maybe.Base using (Maybe; just; nothing)
-open import Function.Equivalence using (_⇔_; equivalence)
+open import Function
 open import Relation.Binary hiding (_⇔_)
 open import Relation.Binary.PropositionalEquality as P using (_≡_)
 open import Relation.Nullary
@@ -36,7 +36,7 @@ drop-just : Connectedˡ R x (just y) → R x y
 drop-just = C.drop-just
 
 just-equivalence : R x y ⇔ Connectedˡ R x (just y)
-just-equivalence = equivalence just drop-just
+just-equivalence = mk⇔ just drop-just
 
 ------------------------------------------------------------------------
 -- Relational properties
